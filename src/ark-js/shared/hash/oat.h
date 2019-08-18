@@ -18,8 +18,7 @@
 #ifndef ARK_OAT_H
 #define ARK_OAT_H
 
-#include "hash.h"
-#include "ark-js/shared/common.h"
+#include <ark-js/shared/hash/hash.h>
 
 ARK_BEGIN_DECL
 

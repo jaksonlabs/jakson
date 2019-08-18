@@ -151,7 +151,7 @@ static bool collection_iter_read_next_column_group(struct collection_iter_state 
         assert(header->marker == MARKER_SYMBOL_COLUMN_GROUP);
         state->current_column_group.num_columns = header->num_columns;
         state->current_column_group.num_objects = header->num_objects;
-        state->current_column_group.object_ids = ARK_MEMFILE_READ_TYPE_LIST(memfile, object_id_t, header->num_objects);
+        state->current_column_group.object_ids = ARK_MEMFILE_READ_TYPE_LIST(memfile, global_id_t, header->num_objects);
         state->current_column_group.column_offs = ARK_MEMFILE_READ_TYPE_LIST(memfile, offset_t, header->num_columns);
         state->current_column_group.current_column.idx = 0;
 
@@ -574,7 +574,7 @@ bool archive_collection_next_column_group(archive_column_group_iter_t *group_ite
         }
 }
 
-const object_id_t *archive_column_group_get_object_ids(u32 *num_objects, archive_column_group_iter_t *iter)
+const global_id_t *archive_column_group_get_object_ids(u32 *num_objects, archive_column_group_iter_t *iter)
 {
         if (num_objects && iter) {
                 *num_objects = iter->state.current_column_group.num_objects;
@@ -725,7 +725,7 @@ const struct archive_object *archive_column_entry_object_iter_next_object(struct
         }
 }
 
-bool archive_object_get_object_id(object_id_t *id, const struct archive_object *object)
+bool archive_object_get_object_id(global_id_t *id, const struct archive_object *object)
 {
         error_if_null(id)
         error_if_null(object)
@@ -741,7 +741,7 @@ bool archive_object_get_prop_iter(struct prop_iter *iter, const struct archive_o
         return false;
 }
 
-bool archive_value_vector_get_object_id(object_id_t *id, const struct archive_value_vector *iter)
+bool archive_value_vector_get_object_id(global_id_t *id, const struct archive_value_vector *iter)
 {
         error_if_null(id)
         error_if_null(iter)

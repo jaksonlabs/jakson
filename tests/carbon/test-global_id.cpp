@@ -3,18 +3,18 @@
 
 #include <ark-js/carbon/carbon.h>
 
-TEST(ObjectIdTest, CreateId) {
-    object_id_t id;
-    bool result = object_id_create(&id);
+TEST(GlobalIdTest, CreateId) {
+    global_id_t id;
+    bool result = global_id_create(&id);
     EXPECT_TRUE(result);
     EXPECT_NE(id, 0);
 }
 
-TEST(ObjectIdTest, CreateUniqueIds) {
-    std::set<object_id_t> haystack;
+TEST(GlobalIdTest, CreateUniqueIds) {
+    std::set<global_id_t> haystack;
     for (size_t i = 0; i < 1000000; i++) {
-        object_id_t id;
-        bool result = object_id_create(&id);
+        global_id_t id;
+        bool result = global_id_create(&id);
         if (!result) {
             printf("NO CAPACITY LEFT %zu\n", i);
         } else {

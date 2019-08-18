@@ -234,9 +234,9 @@ size_t vec_length(const struct vector *vec);
 
 #define vec_new_and_get(vec, type)                                                                                     \
 ({                                                                                                                     \
-    type template;                                                                                                     \
+    type obj;                                                                                                          \
     size_t vectorLength = vec_length(vec);                                                                             \
-    vec_push(vec, &template, 1);                                                                                       \
+    vec_push(vec, &obj, 1);                                                                                            \
     vec_get(vec, vectorLength, type);                                                                                  \
 })
 

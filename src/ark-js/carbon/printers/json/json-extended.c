@@ -20,6 +20,7 @@
 #include <libs/libb64/libb64.h>
 #include <ark-js/carbon/carbon.h>
 #include <ark-js/carbon/printers/json/json-extended.h>
+#include <ark-js/carbon/carbon-commit.h>
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -62,7 +63,7 @@ static void meta_begin(struct printer *self, struct string *builder)
 
 static void meta_data(struct printer *self, struct string *builder,
                       int key_type, const void *key,
-                      u64 key_length, u64 rev)
+                      u64 key_length, u64 commit_hash)
 {
         unused(self)
 
@@ -97,8 +98,14 @@ static void meta_data(struct printer *self, struct string *builder,
                         break;
                 default: error_print(ARK_ERR_INTERNALERR);
         }
-        string_add(builder, "}, \"rev\": ");
-        string_add_u64(builder, rev);
+        string_add(builder, "}, \"commit\": ");
+        if (commit_hash) {
+                string_add(builder, "\"");
+                carbon_commit_hash_append_to_str(builder, commit_hash);
+                string_add(builder, "\"");
+        } else {
+                string_add(builder, "null");
+        }
 }
 
 static void meta_end(struct printer *self, struct string *builder)

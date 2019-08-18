@@ -11,7 +11,7 @@ set(
         ${LIBS}
 )
 
-add_executable(test-object-ids test-oid.cpp)
+add_executable(test-object-ids test-global_id.cpp)
 target_link_libraries(test-object-ids PUBLIC gtest ${TEST_LIBS} PRIVATE ark-sources)
 
 add_executable(test-archive-ops test-archive-ops.cpp)

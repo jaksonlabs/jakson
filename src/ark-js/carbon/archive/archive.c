@@ -17,7 +17,7 @@
 
 #include <inttypes.h>
 
-#include <ark-js/carbon/oid/oid.h>
+#include <ark-js/shared/stdx/global_id.h>
 #include <ark-js/carbon/encode/encode_async.h>
 #include <ark-js/carbon/coding/pack.h>
 #include <ark-js/carbon/archive/archive-strid-iter.h>
@@ -297,8 +297,8 @@ static bool run_string_id_baking(struct err *err, struct memblock **stream)
 {
         struct archive archive;
         char tmp_file_name[512];
-        object_id_t rand_part;
-        object_id_create(&rand_part);
+        global_id_t rand_part;
+        global_id_create(&rand_part);
         sprintf(tmp_file_name, "/tmp/ark-carbon-temp-%"
                                PRIu64
                                ".carbon", rand_part);
@@ -1081,12 +1081,12 @@ static bool write_object_array_props(struct memfile *memfile, struct err *err,
                         memfile_write(memfile, &column_group_header, sizeof(struct column_group_header));
 
                         for (size_t i = 0; i < column_group_header.num_objects; i++) {
-                                object_id_t oid;
-                                if (!object_id_create(&oid)) {
+                                global_id_t oid;
+                                if (!global_id_create(&oid)) {
                                         error(err, ARK_ERR_THREADOOOBJIDS);
                                         return false;
                                 }
-                                memfile_write(memfile, &oid, sizeof(object_id_t));
+                                memfile_write(memfile, &oid, sizeof(global_id_t));
                         }
 
                         offset_t continue_write = memfile_tell(memfile);
@@ -1340,8 +1340,8 @@ static bool __serialize(offset_t *offset, struct err *err, struct memfile *memfi
         offset_t object_end_offset = memfile_tell(memfile);
         memfile_seek(memfile, header_offset);
 
-        object_id_t oid;
-        if (!object_id_create(&oid)) {
+        global_id_t oid;
+        if (!global_id_create(&oid)) {
                 error(err, ARK_ERR_THREADOOOBJIDS);
                 return false;
         }
@@ -1658,8 +1658,8 @@ static bool print_object_array_from_memfile(FILE *file, struct err *err, struct 
                         column_group_header->marker,
                         column_group_header->num_columns,
                         column_group_header->num_objects);
-                const object_id_t
-                        *oids = ARK_MEMFILE_READ_TYPE_LIST(memfile, object_id_t, column_group_header->num_objects);
+                const global_id_t
+                        *oids = ARK_MEMFILE_READ_TYPE_LIST(memfile, global_id_t, column_group_header->num_objects);
                 for (size_t k = 0; k < column_group_header->num_objects; k++) {
                         fprintf(file, "%"PRIu64"%s", oids[k], k + 1 < column_group_header->num_objects ? ", " : "");
                 }

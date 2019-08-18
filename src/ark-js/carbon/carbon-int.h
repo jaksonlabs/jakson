@@ -115,7 +115,7 @@ offset_t carbon_int_column_get_payload_off(struct carbon_column_it *it);
 
 offset_t carbon_int_payload_after_header(struct carbon *doc);
 
-u64 carbon_int_header_get_rev(struct carbon *doc);
+u64 carbon_int_header_get_commit_hash(struct carbon *doc);
 
 void carbon_int_history_push(struct vector ofType(offset_t) *vec, offset_t off);
 

@@ -27,7 +27,7 @@ bool encoded_doc_collection_create(struct encoded_doc_list *collection, struct e
         unused(archive);
 
         vec_create(&collection->flat_object_collection, NULL, sizeof(struct encoded_doc), 5000000);
-        hashtable_create(&collection->index, err, sizeof(object_id_t), sizeof(u32), 5000000);
+        hashtable_create(&collection->index, err, sizeof(global_id_t), sizeof(u32), 5000000);
         error_init(&collection->err);
         collection->archive = archive;
 
@@ -47,7 +47,7 @@ bool encoded_doc_collection_drop(struct encoded_doc_list *collection)
         return true;
 }
 
-static struct encoded_doc *doc_create(struct err *err, object_id_t object_id, struct encoded_doc_list *collection)
+static struct encoded_doc *doc_create(struct err *err, global_id_t object_id, struct encoded_doc_list *collection)
 {
         if (collection) {
                 u32 doc_position = collection->flat_object_collection.num_elems;
@@ -68,7 +68,7 @@ static struct encoded_doc *doc_create(struct err *err, object_id_t object_id, st
 }
 
 struct encoded_doc *encoded_doc_collection_get_or_append(struct encoded_doc_list *collection,
-                                                         object_id_t id)
+                                                         global_id_t id)
 {
         error_if_null(collection);
         const u32 *doc_pos = hashtable_get_value(&collection->index, &id);
@@ -455,7 +455,7 @@ DECLARE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, field_u32_t, FIELD_NULL)
 #include <inttypes.h>
 #include <ark-js/carbon/archive/archive-query.h>
 
-bool encoded_doc_array_push_object(struct encoded_doc *doc, field_sid_t key, object_id_t id)
+bool encoded_doc_array_push_object(struct encoded_doc *doc, field_sid_t key, global_id_t id)
 {
         unused(doc);
         unused(key);
@@ -472,7 +472,7 @@ bool encoded_doc_array_push_object(struct encoded_doc *doc, field_sid_t key, obj
         return true;
 }
 
-bool encoded_doc_array_push_object_decoded(struct encoded_doc *doc, const char *key, object_id_t id)
+bool encoded_doc_array_push_object_decoded(struct encoded_doc *doc, const char *key, global_id_t id)
 {
         unused(doc);
         unused(key);
@@ -760,7 +760,7 @@ static bool doc_print_pretty(FILE *file, struct encoded_doc *doc, unsigned level
                                 break;
                         case FIELD_OBJECT: {
                                 for (u32 k = 0; k < prop->values.num_elems; k++) {
-                                        object_id_t nested_oid = (vec_get(&prop->values, k,
+                                        global_id_t nested_oid = (vec_get(&prop->values, k,
                                                                           union encoded_doc_value))->object;
                                         struct encoded_doc
                                                 *nested_doc = encoded_doc_collection_get_or_append(doc->context,

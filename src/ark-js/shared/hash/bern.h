@@ -18,19 +18,31 @@
 #ifndef ARK_BERNSTEIN_H
 #define ARK_BERNSTEIN_H
 
-#include "hash.h"
+#include <ark-js/shared/hash/hash.h>
 
 ARK_BEGIN_DECL
 
 #define ARK_HASH_BERNSTEIN(key_size, key)        ARK_HASH_BERNSTEIN_WTYPE(key_size, key, hash32_t)
 #define ARK_HASH8_BERNSTEIN(key_size, key)       ARK_HASH_BERNSTEIN_WTYPE(key_size, key, hash8_t)
 #define ARK_HASH16_BERNSTEIN(key_size, key)      ARK_HASH_BERNSTEIN_WTYPE(key_size, key, hash16_t)
+#define ARK_HASH64_BERNSTEIN(key_size, key)        ARK_HASH_BERNSTEIN_WTYPE(key_size, key, hash64_t)
 
 #define ARK_HASH_BERNSTEIN_WTYPE(key_size, key, hash_type)                                                             \
 ({                                                                                                                     \
     assert ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
     hash_type hash = 0;                                                                                                \
+    for (size_t i = 0; i < key_size; i++) {                                                                            \
+        hash ^= 33 * hash + ((unsigned char* )key)[i];                                                                 \
+    }                                                                                                                  \
+    hash;                                                                                                              \
+})
+
+#define ARK_HASH64_BERNSTEIN_WSEED(key_size, key, seed)                                                                \
+({                                                                                                                     \
+    assert ((key != NULL) && (key_size > 0));                                                                          \
+                                                                                                                       \
+    hash64_t hash = seed;                                                                                              \
     for (size_t i = 0; i < key_size; i++) {                                                                            \
         hash ^= 33 * hash + ((unsigned char* )key)[i];                                                                 \
     }                                                                                                                  \

@@ -22,7 +22,7 @@
 #include <ark-js/carbon/carbon-dot.h>
 #include <ark-js/carbon/carbon-find.h>
 #include <ark-js/carbon/carbon-key.h>
-#include <ark-js/carbon/carbon-revision.h>
+#include <ark-js/carbon/carbon-commit.h>
 #include <ark-js/carbon/carbon-object-it.h>
 
 static bool internal_pack_array(struct carbon_array_it *it);
@@ -31,7 +31,7 @@ static bool internal_pack_object(struct carbon_object_it *it);
 
 static bool internal_pack_column(struct carbon_column_it *it);
 
-static bool internal_revision_inc(struct carbon *doc);
+static bool internal_commit_update(struct carbon *doc);
 
 static bool carbon_header_rev_inc(struct carbon *doc);
 
@@ -41,7 +41,7 @@ bool carbon_revise_try_begin(struct carbon_revise *context, struct carbon *revis
 {
         error_if_null(context)
         error_if_null(doc)
-        if (!doc->versioning.revision_lock) {
+        if (!doc->versioning.commit_lock) {
                 return carbon_revise_begin(context, revised_doc, doc);
         } else {
                 return false;
@@ -55,7 +55,7 @@ bool carbon_revise_begin(struct carbon_revise *context, struct carbon *revised_d
 
         if (likely(original->versioning.is_latest)) {
                 spin_acquire(&original->versioning.write_lock);
-                original->versioning.revision_lock = true;
+                original->versioning.commit_lock = true;
                 context->original = original;
                 context->revised_doc = revised_doc;
                 error_init(&context->err);
@@ -101,14 +101,14 @@ static void key_string_set(struct carbon *doc, const char *key)
         memfile_restore_position(&doc->memfile);
 }
 
-bool carbon_revise_key_generate(object_id_t *out, struct carbon_revise *context)
+bool carbon_revise_key_generate(global_id_t *out, struct carbon_revise *context)
 {
         error_if_null(context);
         enum carbon_key_type key_type;
         carbon_key_get_type(&key_type, context->revised_doc);
         if (key_type == CARBON_KEY_AUTOKEY) {
-                object_id_t oid;
-                object_id_create(&oid);
+                global_id_t oid;
+                global_id_create(&oid);
                 key_unsigned_set(context->revised_doc, oid);
                 ark_optional_set(out, oid);
                 return true;
@@ -272,10 +272,10 @@ bool carbon_revise_shrink(struct carbon_revise *context)
 const struct carbon *carbon_revise_end(struct carbon_revise *context)
 {
         if (likely(context != NULL)) {
-                internal_revision_inc(context->revised_doc);
+                internal_commit_update(context->revised_doc);
 
                 context->original->versioning.is_latest = false;
-                context->original->versioning.revision_lock = false;
+                context->original->versioning.commit_lock = false;
 
                 spin_release(&context->original->versioning.write_lock);
 
@@ -292,7 +292,7 @@ bool carbon_revise_abort(struct carbon_revise *context)
 
         carbon_drop(context->revised_doc);
         context->original->versioning.is_latest = true;
-        context->original->versioning.revision_lock = false;
+        context->original->versioning.commit_lock = false;
         spin_release(&context->original->versioning.write_lock);
 
         return true;
@@ -539,7 +539,7 @@ static bool internal_pack_column(struct carbon_column_it *it)
         }
 }
 
-static bool internal_revision_inc(struct carbon *doc)
+static bool internal_commit_update(struct carbon *doc)
 {
         assert(doc);
         return carbon_header_rev_inc(doc);
@@ -554,7 +554,9 @@ static bool carbon_header_rev_inc(struct carbon *doc)
         memfile_seek(&doc->memfile, 0);
         carbon_key_read(NULL, &key_type, &doc->memfile);
         if (carbon_has_key(key_type)) {
-                carbon_revision_inc(&doc->memfile);
+                u64 raw_data_len = 0;
+                const void *raw_data = carbon_raw_data(&raw_data_len, doc);
+                carbon_commit_hash_update(&doc->memfile, raw_data, raw_data_len);
         }
         memfile_restore_position(&doc->memfile);
 

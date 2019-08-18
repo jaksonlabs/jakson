@@ -35,8 +35,8 @@ static void iterate_objects(struct archive *archive, const field_sid_t *keys, u3
 
         u32 vector_length;
         struct archive_object object;
-        object_id_t parent_object_id;
-        object_id_t object_id;
+        global_id_t parent_object_id;
+        global_id_t object_id;
         struct prop_iter prop_iter;
         struct err err;
 
@@ -152,7 +152,7 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                           int mask, void *capture,
                           bool is_root_object, field_sid_t parent_key, u32 parent_key_array_idx)
 {
-        object_id_t this_object_oid;
+        global_id_t this_object_oid;
         struct archive_value_vector value_iter;
         enum field_type type;
         bool is_array;
@@ -367,7 +367,7 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                         u32 num_column_group_objs;
                                         archive_column_iter_t column_iter;
                                         field_sid_t group_key = keys[current_group_idx];
-                                        const object_id_t *column_group_object_ids =
+                                        const global_id_t *column_group_object_ids =
                                                 archive_column_group_get_object_ids(&num_column_group_objs,
                                                                                     &group_iter);
                                         bool *skip_objects = ark_malloc(num_column_group_objs * sizeof(bool));
@@ -442,8 +442,8 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                                                                 &column_iter);
                                                                 archive_column_entry_iter_t entry_iter;
 
-                                                                object_id_t *entry_object_containments =
-                                                                        ark_malloc(num_positions * sizeof(object_id_t));
+                                                                global_id_t *entry_object_containments =
+                                                                        ark_malloc(num_positions * sizeof(global_id_t));
                                                                 for (u32 m = 0; m < num_positions; m++) {
                                                                         entry_object_containments[m] =
                                                                                 column_group_object_ids[entry_positions[m]];
@@ -466,7 +466,7 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                                                 while (archive_column_next_entry(&entry_iter,
                                                                                                  &column_iter)) {
 
-                                                                        object_id_t current_nested_object_id =
+                                                                        global_id_t current_nested_object_id =
                                                                                 entry_object_containments[current_entry_idx];
                                                                         u32 entry_length;
 
@@ -555,7 +555,7 @@ static void iterate_props(struct archive *archive, struct prop_iter *prop_iter,
                                                                                                         archive_column_entry_object_iter_next_object(
                                                                                                                 &iter))
                                                                                                != NULL) {
-                                                                                                object_id_t id;
+                                                                                                global_id_t id;
                                                                                                 archive_object_get_object_id(
                                                                                                         &id,
                                                                                                         archive_object);

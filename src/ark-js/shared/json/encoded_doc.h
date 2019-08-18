@@ -20,7 +20,7 @@
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/stdx/hash_table.h>
-#include <ark-js/carbon/oid/oid.h>
+#include <ark-js/shared/stdx/global_id.h>
 #include <ark-js/shared/types.h>
 #include <ark-js/carbon/archive/archive.h>
 
@@ -38,7 +38,7 @@ union encoded_doc_value {
     field_number_t number;
     field_boolean_t boolean;
     field_sid_t string;
-    object_id_t object;
+    global_id_t object;
     u32 null;
 };
 
@@ -80,7 +80,7 @@ struct encoded_doc_prop_array {
 
 struct encoded_doc {
     struct encoded_doc_list *context;
-    object_id_t object_id;
+    global_id_t object_id;
     struct vector ofType(struct encoded_doc_prop) props;
     struct vector ofType(struct encoded_doc_prop_array) props_arrays;
     struct hashtable ofMapping(field_sid_t, u32) prop_array_index; /* maps key to index in prop arrays */
@@ -100,7 +100,7 @@ bool encoded_doc_collection_create(struct encoded_doc_list *collection, struct e
 bool encoded_doc_collection_drop(struct encoded_doc_list *collection);
 
 struct encoded_doc *encoded_doc_collection_get_or_append(struct encoded_doc_list *collection,
-                                                         object_id_t id);
+                                                         global_id_t id);
 
 bool encoded_doc_collection_print(FILE *file, struct encoded_doc_list *collection);
 
@@ -288,9 +288,9 @@ DEFINE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(string, field_sid_t)
 
 DEFINE_ARK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, field_u32_t)
 
-bool encoded_doc_array_push_object(struct encoded_doc *doc, field_sid_t key, object_id_t id);
+bool encoded_doc_array_push_object(struct encoded_doc *doc, field_sid_t key, global_id_t id);
 
-bool encoded_doc_array_push_object_decoded(struct encoded_doc *doc, const char *key, object_id_t id);
+bool encoded_doc_array_push_object_decoded(struct encoded_doc *doc, const char *key, global_id_t id);
 
 bool encoded_doc_print(FILE *file, struct encoded_doc *doc);
 

@@ -18,8 +18,8 @@
 #ifndef ARK_ELF_H
 #define ARK_ELF_H
 
-#include "hash.h"
-#include "ark-js/shared/common.h"
+#include <ark-js/shared/hash/hash.h>
+#include <ark-js/shared/common.h>
 
 ARK_BEGIN_DECL
 

@@ -289,7 +289,7 @@ print_basic_fixed_types(struct archive_value_vector *value_iter, u32 idx)
 static void
 iterate_properties(struct prop_iter *prop_iter)
 {
-    object_id_t                oid;
+    global_id_t                oid;
     struct archive_value_vector     value_iter;
     enum field_type               type;
     bool                              is_array;
@@ -349,7 +349,7 @@ iterate_properties(struct prop_iter *prop_iter)
             while (archive_collection_next_column_group(&group_iter, &collection_iter)) {
 
                 u32 num_objs;
-                const object_id_t *ids = archive_column_group_get_object_ids(&num_objs, &group_iter);
+                const global_id_t *ids = archive_column_group_get_object_ids(&num_objs, &group_iter);
 
                 printf("\t\t{ column groups object ids:");
                 for (u32 i = 0; i < num_objs; i++) {
@@ -479,7 +479,7 @@ iterate_properties(struct prop_iter *prop_iter)
                             archive_column_entry_get_objects(&iter, &entry_iter);
                             printf("\t\t{ << objects >>: [");
                             while ((archive_object = archive_column_entry_object_iter_next_object(&iter)) != NULL) {
-                                object_id_t id;
+                                global_id_t id;
                                 archive_object_get_object_id(&id, archive_object);
                                 printf("{ oid: %" PRIu64 " } \n", id);
 

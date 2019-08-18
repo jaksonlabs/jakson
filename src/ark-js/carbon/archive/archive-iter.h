@@ -56,7 +56,7 @@ enum prop_iter_state {
 };
 
 struct archive_object {
-    object_id_t object_id;                  /* unique object id */
+    global_id_t object_id;                  /* unique object id */
     offset_t offset;                        /* this objects header offset */
     struct archive_prop_offs prop_offsets;  /* per-property type offset in the record table byte stream */
     offset_t next_obj_off;                  /* offset to next object in list, or NULL if no such exists */
@@ -89,7 +89,7 @@ struct collection_iter_state {
     struct {
         u32 num_columns;
         u32 num_objects;
-        const object_id_t *object_ids;
+        const global_id_t *object_ids;
         const offset_t *column_offs;
         struct {
             u32 idx;
@@ -115,7 +115,7 @@ struct archive_value_vector {
     offset_t data_off;                      /* offset in memfile where type-dependent data begins */
     u32 value_max_idx;                      /* maximum index of a value callable by 'at' functions */
     struct err err;                         /* error information */
-    object_id_t object_id;                  /* current object id */
+    global_id_t object_id;                  /* current object id */
     const field_sid_t *keys;
     union {
         struct {
@@ -264,7 +264,7 @@ const field_sid_t *archive_collection_iter_get_keys(u32 *num_keys, archive_colle
 bool archive_collection_next_column_group(archive_column_group_iter_t *group_iter,
                                           archive_collection_iter_t *iter);
 
-const object_id_t *archive_column_group_get_object_ids(u32 *num_objects, archive_column_group_iter_t *iter);
+const global_id_t *archive_column_group_get_object_ids(u32 *num_objects, archive_column_group_iter_t *iter);
 
 bool archive_column_group_next_column(archive_column_iter_t *column_iter,
                                       archive_column_group_iter_t *iter);
@@ -309,11 +309,11 @@ bool archive_column_entry_get_objects(struct column_object_iter *iter, archive_c
 
 const struct archive_object *archive_column_entry_object_iter_next_object(struct column_object_iter *iter);
 
-bool archive_object_get_object_id(object_id_t *id, const struct archive_object *object);
+bool archive_object_get_object_id(global_id_t *id, const struct archive_object *object);
 
 bool archive_object_get_prop_iter(struct prop_iter *iter, const struct archive_object *object);
 
-bool archive_value_vector_get_object_id(object_id_t *id, const struct archive_value_vector *iter);
+bool archive_value_vector_get_object_id(global_id_t *id, const struct archive_value_vector *iter);
 
 const field_sid_t *archive_value_vector_get_keys(u32 *num_keys, struct archive_value_vector *iter);
 

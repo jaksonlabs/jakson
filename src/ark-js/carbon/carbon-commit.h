@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 Marcus Pinnecke
+ * Copyright 2019 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -15,37 +15,33 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef ARK_OID_H
-#define ARK_OID_H
+#ifndef CARBON_COMMIT_HASH_H
+#define CARBON_COMMIT_HASH_H
 
 #include <ark-js/shared/common.h>
-#include <ark-js/shared/types.h>
+#include <ark-js/shared/error.h>
+#include <ark-js/shared/mem/file.h>
+#include <ark-js/shared/stdx/string.h>
 
 ARK_BEGIN_DECL
 
-typedef u64 object_id_t;
+bool carbon_commit_hash_create(struct memfile *file);
 
-bool object_id_create(object_id_t *out);
+bool carbon_commit_hash_skip(struct memfile *file);
 
-bool object_id_get_global_wallclocktime(uint_fast8_t *out, object_id_t id);
+bool carbon_commit_hash_read(u64 *commit_hash, struct memfile *file);
 
-bool object_id_get_global_build_path_bit(uint_fast8_t *out, object_id_t id);
+bool carbon_commit_hash_peek(u64 *commit_hash, struct memfile *file);
 
-bool object_id_get_global_build_time_bit(uint_fast8_t *out, object_id_t id);
+bool carbon_commit_hash_update(struct memfile *file, const char *base, u64 len);
 
-bool object_id_get_process_id(uint_fast8_t *out, object_id_t id);
+bool carbon_commit_hash_compute(u64 *commit_hash, const void *base, u64 len);
 
-bool object_id_get_process_magic(uint_fast8_t *out, object_id_t id);
+const char *carbon_commit_hash_to_str(struct string *dst, u64 commit_hash);
 
-bool object_id_get_process_counter(uint_fast16_t *out, object_id_t id);
+bool carbon_commit_hash_append_to_str(struct string *dst, u64 commit_hash);
 
-bool object_id_get_thread_id(uint_fast8_t *out, object_id_t id);
-
-bool object_id_get_thread_magic(uint_fast8_t *out, object_id_t id);
-
-bool object_id_get_thread_counter(uint_fast32_t *out, object_id_t id);
-
-bool object_id_get_call_random(uint_fast8_t *out, object_id_t id);
+u64 carbon_commit_hash_from_str(const char *commit_str, struct err *err);
 
 ARK_END_DECL
 
