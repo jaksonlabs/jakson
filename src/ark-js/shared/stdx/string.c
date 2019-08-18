@@ -131,6 +131,13 @@ bool string_add_i64(struct string *builder, i64 value)
         return string_add(builder, buffer);
 }
 
+bool string_add_u64_as_hex(struct string *builder, u64 value)
+{
+        char buffer[17];
+        sprintf(buffer, "%016"PRIx64, value);
+        return string_add(builder, buffer);
+}
+
 bool string_add_float(struct string *builder, float value)
 {
         char buffer[2046];
@@ -143,6 +150,20 @@ bool string_clear(struct string *builder)
         error_if_null(builder)
         ark_zero_memory(builder->data, builder->cap);
         builder->end = 0;
+        return true;
+}
+
+bool string_ensure_capacity(struct string *builder, u64 cap)
+{
+        error_if_null(builder)
+        /* resize if needed */
+        if (unlikely(cap > builder->cap)) {
+                size_t new_cap = cap * 1.7f;
+                builder->data = realloc(builder->data, new_cap);
+                error_if_and_return(!builder->data, &builder->err, ARK_ERR_REALLOCERR, false);
+                ark_zero_memory(builder->data + builder->cap, (new_cap - builder->cap));
+                builder->cap = new_cap;
+        }
         return true;
 }
 

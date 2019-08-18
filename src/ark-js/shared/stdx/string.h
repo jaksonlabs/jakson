@@ -58,9 +58,13 @@ bool string_add_i32(struct string *builder, i32 value);
 
 bool string_add_i64(struct string *builder, i64 value);
 
+bool string_add_u64_as_hex(struct string *builder, u64 value);
+
 bool string_add_float(struct string *builder, float value);
 
 bool string_clear(struct string *builder);
+
+bool string_ensure_capacity(struct string *builder, u64 cap);
 
 size_t string_len(struct string *builder);
 

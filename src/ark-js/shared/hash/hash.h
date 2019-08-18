@@ -18,15 +18,15 @@
 #ifndef ARK_HASH_H
 #define ARK_HASH_H
 
-#include <assert.h>
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/types.h>
 
 ARK_BEGIN_DECL
 
+typedef u8 hash8_t;
 typedef u16 hash16_t;
 typedef u32 hash32_t;
-typedef u8 hash8_t;
+typedef u64 hash64_t;
 
 ARK_END_DECL
 

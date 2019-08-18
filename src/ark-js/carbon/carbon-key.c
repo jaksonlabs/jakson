@@ -27,9 +27,9 @@ static void write_nokey(struct memfile *file)
 static void write_autokey(struct memfile *file)
 {
         u8 marker = CARBON_MARKER_KEY_AUTOKEY;
-        object_id_t key = 0;
+        global_id_t key = 0;
         memfile_write(file, &marker, sizeof(u8));
-        memfile_write(file, &key, sizeof(object_id_t));
+        memfile_write(file, &key, sizeof(global_id_t));
 }
 
 static void write_ukey(struct memfile *file)
@@ -194,8 +194,8 @@ const void *carbon_key_read(u64 *len, enum carbon_key_type *out, struct memfile 
                         ark_optional_set(len, 0)
                         return NULL;
                 case CARBON_KEY_AUTOKEY:
-                        ark_optional_set(len, sizeof(object_id_t))
-                        return ARK_MEMFILE_READ_TYPE(file, object_id_t);
+                        ark_optional_set(len, sizeof(global_id_t))
+                        return ARK_MEMFILE_READ_TYPE(file, global_id_t);
                 case CARBON_KEY_UKEY:
                         ark_optional_set(len, sizeof(u64))
                         return ARK_MEMFILE_READ_TYPE(file, u64);

@@ -22,7 +22,7 @@
 #include <ark-js/shared/error.h>
 #include <ark-js/shared/mem/block.h>
 #include <ark-js/shared/mem/file.h>
-#include <ark-js/carbon/oid/oid.h>
+#include <ark-js/shared/stdx/global_id.h>
 #include <ark-js/shared/stdx/string.h>
 #include <ark-js/shared/async/spin.h>
 #include <ark-js/shared/stdx/vec.h>
@@ -46,7 +46,7 @@
 #include <ark-js/shared/json/json.h>
 #include <ark-js/shared/mem/block.h>
 #include <ark-js/shared/mem/file.h>
-#include <ark-js/carbon/oid/oid.h>
+#include <ark-js/shared/stdx/global_id.h>
 #include <ark-js/shared/stdx/sort.h>
 #include <ark-js/shared/async/parallel.h>
 #include <ark-js/shared/stdx/slicelist.h>
@@ -82,7 +82,7 @@ struct carbon {
 
     struct {
         struct spinlock write_lock;
-        bool revision_lock;
+        bool commit_lock;
         bool is_latest;
     } versioning;
 
@@ -236,7 +236,7 @@ bool carbon_key_is_unsigned_type(enum carbon_key_type type);
 bool carbon_key_is_signed_type(enum carbon_key_type type);
 bool carbon_key_is_string_type(enum carbon_key_type type);
 bool carbon_clone(struct carbon *clone, struct carbon *doc);
-bool carbon_revision(u64 *rev, struct carbon *doc);
+bool carbon_commit_hash(u64 *commit_hash, struct carbon *doc);
 bool carbon_to_str(struct string *dst, enum carbon_printer_impl printer, struct carbon *doc);
 const char *carbon_to_json_extended(struct string *dst, struct carbon *doc);
 const char *carbon_to_json_compact(struct string *dst, struct carbon *doc);

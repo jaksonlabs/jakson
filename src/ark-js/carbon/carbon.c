@@ -31,7 +31,7 @@
 #include <ark-js/carbon/carbon-revise.h>
 #include <ark-js/carbon/carbon-string.h>
 #include <ark-js/carbon/carbon-key.h>
-#include <ark-js/carbon/carbon-revision.h>
+#include <ark-js/carbon/carbon-commit.h>
 #include <ark-js/carbon/printers/json-printers.h>
 
 #define MIN_DOC_CAPACITY 17 /* minimum number of bytes required to store header and empty document array */
@@ -113,7 +113,7 @@ bool carbon_create_empty_ex(struct carbon *doc, enum carbon_key_type key_type, u
 
         spin_init(&doc->versioning.write_lock);
 
-        doc->versioning.revision_lock = false;
+        doc->versioning.commit_lock = false;
         doc->versioning.is_latest = true;
 
         carbon_header_init(doc, key_type);
@@ -278,16 +278,16 @@ bool carbon_clone(struct carbon *clone, struct carbon *doc)
         ark_check_success(error_init(&clone->err));
 
         spin_init(&clone->versioning.write_lock);
-        clone->versioning.revision_lock = false;
+        clone->versioning.commit_lock = false;
         clone->versioning.is_latest = true;
 
         return true;
 }
 
-bool carbon_revision(u64 *rev, struct carbon *doc)
+bool carbon_commit_hash(u64 *commit_hash, struct carbon *doc)
 {
         error_if_null(doc);
-        *rev = carbon_int_header_get_rev(doc);
+        *commit_hash = carbon_int_header_get_commit_hash(doc);
         return true;
 }
 
@@ -308,7 +308,7 @@ bool carbon_to_str(struct string *dst, enum carbon_printer_impl printer, struct 
         ark_zero_memory(&p, sizeof(struct printer));
         string_create(&b);
 
-        carbon_revision(&rev, doc);
+        carbon_commit_hash(&rev, doc);
 
         carbon_printer_by_type(&p, printer);
 
@@ -430,6 +430,6 @@ static void carbon_header_init(struct carbon *doc, enum carbon_key_type key_type
         carbon_key_create(&doc->memfile, key_type, &doc->err);
 
         if (key_type != CARBON_KEY_NOKEY) {
-                carbon_revision_create(&doc->memfile);
+                carbon_commit_hash_create(&doc->memfile);
         }
 }

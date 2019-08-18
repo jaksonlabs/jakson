@@ -18,13 +18,14 @@
 #ifndef ARK_FNV_H
 #define ARK_FNV_H
 
-#include "hash.h"
+#include <ark-js/shared/hash/hash.h>
 
 ARK_BEGIN_DECL
 
-#define ARK_HASH_FNV(key_size, key)              ARK_HASH_FNV_WTYPE(key_size, key, hash32_t)
-#define ARK_HASH16_FNV(key_size, key)            ARK_HASH_FNV_WTYPE(key_size, key, hash16_t)
 #define ARK_HASH8_FNV(key_size, key)             ARK_HASH_FNV_WTYPE(key_size, key, hash8_t)
+#define ARK_HASH16_FNV(key_size, key)            ARK_HASH_FNV_WTYPE(key_size, key, hash16_t)
+#define ARK_HASH_FNV(key_size, key)              ARK_HASH_FNV_WTYPE(key_size, key, hash32_t)
+#define ARK_HASH64_FNV(key_size, key)              ARK_HASH_FNV_WTYPE(key_size, key, hash64_t)
 
 #define ARK_HASH_FNV_WTYPE(key_size, key, hash_type)                                                                   \
 ({                                                                                                                     \

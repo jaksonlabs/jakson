@@ -2,7 +2,7 @@
 
 
 ```
-<primary-key> (rev-number) [[] <values>... []]...
+<primary-key> [commit-hash] [[] <values>... []]...
 ```
 
 <span class="caption">Figure FO-1: Carbon File Record Format</span>
@@ -20,10 +20,14 @@ See more about identity of Carbon records in the Section about [Identification](
 ## Revision Managment
 
 ```
-(rev-number)
+[commit-hash]
 ```
 
-> The `rev-number` field for a carbon `record` which has no primary key (i.e., `nokey` is set), is omitted. In any case of revison, the revision number of a `record` without primary key is `0`. See more in section about record [identification](identification.md).
+> The `commit-hash` field for a carbon `record` which has no primary key (i.e., `nokey` is set), is omitted. In any case of revison, the commit hash of a `record` without primary key is `0`. See more in section about record [identification](identification.md).
+
+The `commit-hash` field requires 64bit.
+
+The initial commit hash for an new `record` having some primary key type, is a (almost global) unique randomly generated number. 
 
 ## Values
 

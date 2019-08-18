@@ -20,7 +20,7 @@
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/error.h>
-#include <ark-js/carbon/oid/oid.h>
+#include <ark-js/shared/stdx/global_id.h>
 #include <ark-js/carbon/carbon.h>
 
 ARK_BEGIN_DECL
@@ -42,7 +42,9 @@ bool carbon_revise_try_begin(struct carbon_revise *context, struct carbon *revis
 
 bool carbon_revise_begin(struct carbon_revise *context, struct carbon *revised_doc, struct carbon *original);
 
-bool carbon_revise_key_generate(object_id_t *out, struct carbon_revise *context);
+const struct carbon *carbon_revise_end(struct carbon_revise *context);
+
+bool carbon_revise_key_generate(global_id_t *out, struct carbon_revise *context);
 
 bool carbon_revise_key_set_unsigned(struct carbon_revise *context, u64 key_value);
 
@@ -65,8 +67,6 @@ bool carbon_revise_remove_one(const char *dot_path, struct carbon *rev_doc, stru
 bool carbon_revise_pack(struct carbon_revise *context);
 
 bool carbon_revise_shrink(struct carbon_revise *context);
-
-const struct carbon *carbon_revise_end(struct carbon_revise *context);
 
 bool carbon_revise_abort(struct carbon_revise *context);
 

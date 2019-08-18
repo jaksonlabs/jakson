@@ -21,7 +21,7 @@
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/types.h>
 #include <ark-js/shared/stdx/string.h>
-#include <ark-js/carbon/oid/oid.h>
+#include <ark-js/shared/stdx/global_id.h>
 
 ARK_BEGIN_DECL
 
@@ -42,7 +42,7 @@ struct printer {
     /* type is of enum carbon_key_type */
     void (*meta_data)(struct printer *self, struct string *builder,
                       int key_type, const void *key, u64 key_length,
-                      u64 rev);
+                      u64 commit_hash);
     void (*meta_end)(struct printer *self, struct string *builder);
     void (*doc_begin)(struct printer *self, struct string *builder);
     void (*doc_end)(struct printer *self, struct string *builder);

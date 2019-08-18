@@ -18,8 +18,7 @@
 #ifndef ARK_JENKINS_H
 #define ARK_JENKINS_H
 
-#include "hash.h"
-#include "ark-js/shared/common.h"
+#include <ark-js/shared/hash/hash.h>
 
 ARK_BEGIN_DECL
 
@@ -52,7 +51,7 @@ ARK_BEGIN_DECL
         a += (k[0] + ((unsigned)k[1] << 8) + ((unsigned)k[2] << 16) + ((unsigned)k[3] << 24));                         \
         b += (k[4] + ((unsigned)k[5] << 8) + ((unsigned)k[6] << 16) + ((unsigned)k[7] << 24));                         \
         c += (k[8] + ((unsigned)k[9] << 8) + ((unsigned)k[10] << 16) + ((unsigned)k[11] << 24));                       \
-        JENKINS_MIX(a, b, c);                                                                                          \
+        ARK_JENKINS_MIX(a, b, c);                                                                                      \
         k += 12;                                                                                                       \
         key_size -= 12;                                                                                                \
     }                                                                                                                  \
@@ -72,7 +71,7 @@ ARK_BEGIN_DECL
         case 2: a += ((unsigned)k[1] << 8); break;                                                                     \
         case 1: a += k[0]; break;                                                                                      \
     }                                                                                                                  \
-    JENKINS_MIX(a, b, c);                                                                                              \
+    ARK_JENKINS_MIX(a, b, c);                                                                                          \
     c;                                                                                                                 \
 })
 

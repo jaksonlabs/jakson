@@ -18,15 +18,15 @@
 #ifndef ARK_BERNSTEIN2_H
 #define ARK_BERNSTEIN2_H
 
-#include "hash/hash.h"
+#include <ark-js/shared/hash/hash.h>
 
 ARK_BEGIN_DECL
 
-#define ARK_HASH_BERNSTEIN2(key_size, key)                                                                          \
+#define ARK_HASH_BERNSTEIN2(key_size, key)                                                                             \
 ({                                                                                                                     \
     assert ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
-    hash32_t hash = 0;                                                                                            \
+    hash32_t hash = 0;                                                                                                 \
     for (size_t i = 0; i < key_size; i++) {                                                                            \
         hash ^= 33 * hash ^ ((unsigned char* )key)[i];                                                                 \
     }                                                                                                                  \

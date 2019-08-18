@@ -36,58 +36,58 @@ enum visit_policy {
 typedef const struct vector ofType(struct path_entry) *path_stack_t;
 
 #define DEFINE_VISIT_BASIC_TYPE_PAIRS(name, built_in_type)                                                             \
-void (*visit_##name##_pairs) (struct archive *archive, path_stack_t path, object_id_t id,                              \
+void (*visit_##name##_pairs) (struct archive *archive, path_stack_t path, global_id_t id,                              \
                               const field_sid_t *keys, const built_in_type *values, u32 num_pairs,                     \
                               void *capture);
 
 #define DEFINE_VISIT_ARRAY_TYPE_PAIRS(name, built_in_type)                                                             \
 enum visit_policy (*visit_enter_##name##_array_pairs)(struct archive *archive, path_stack_t path,                      \
-                                                        object_id_t id, const field_sid_t *keys,                       \
+                                                        global_id_t id, const field_sid_t *keys,                       \
                                                         u32 num_pairs,                                                 \
                                                         void *capture);                                                \
                                                                                                                        \
-void (*visit_enter_##name##_array_pair)(struct archive *archive, path_stack_t path, object_id_t id,                    \
+void (*visit_enter_##name##_array_pair)(struct archive *archive, path_stack_t path, global_id_t id,                    \
                                         field_sid_t key, u32 entry_idx, u32 num_elems,                                 \
                                         void *capture);                                                                \
                                                                                                                        \
-void (*visit_##name##_array_pair) (struct archive *archive, path_stack_t path, object_id_t id,                         \
+void (*visit_##name##_array_pair) (struct archive *archive, path_stack_t path, global_id_t id,                         \
                                    field_sid_t key, u32 entry_idx, u32 max_entries,                                    \
                                    const built_in_type *array, u32 array_length, void *capture);                       \
                                                                                                                        \
-void (*visit_leave_##name##_array_pair)(struct archive *archive, path_stack_t path, object_id_t id,                    \
+void (*visit_leave_##name##_array_pair)(struct archive *archive, path_stack_t path, global_id_t id,                    \
                                         u32 pair_idx, u32 num_pairs, void *capture);                                   \
                                                                                                                        \
-void (*visit_leave_##name##_array_pairs)(struct archive *archive, path_stack_t path, object_id_t id,                   \
+void (*visit_leave_##name##_array_pairs)(struct archive *archive, path_stack_t path, global_id_t id,                   \
                                          void *capture);
 
 #define DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(name, built_in_type)                                                     \
     void (*visit_object_array_object_property_##name)(struct archive *archive, path_stack_t path,                      \
-                                               object_id_t parent_id,                                                  \
+                                               global_id_t parent_id,                                                  \
                                                field_sid_t key,                                                        \
-                                               object_id_t nested_object_id,                                           \
+                                               global_id_t nested_object_id,                                           \
                                                field_sid_t nested_key,                                                 \
                                                const built_in_type *nested_values,                                     \
                                                u32 num_nested_values, void *capture);
 
 struct archive_visitor {
-    void (*visit_root_object)(struct archive *archive, object_id_t id, void *capture);
+    void (*visit_root_object)(struct archive *archive, global_id_t id, void *capture);
 
     void (*before_visit_starts)(struct archive *archive, void *capture);
 
     void (*after_visit_ends)(struct archive *archive, void *capture);
 
-    enum visit_policy (*before_object_visit)(struct archive *archive, path_stack_t path, object_id_t parent_id,
-                                             object_id_t value_id, u32 object_idx, u32 num_objects, field_sid_t key,
+    enum visit_policy (*before_object_visit)(struct archive *archive, path_stack_t path, global_id_t parent_id,
+                                             global_id_t value_id, u32 object_idx, u32 num_objects, field_sid_t key,
                                              void *capture);
 
-    void (*after_object_visit)(struct archive *archive, path_stack_t path, object_id_t id, u32 object_idx,
+    void (*after_object_visit)(struct archive *archive, path_stack_t path, global_id_t id, u32 object_idx,
                                u32 num_objects, void *capture);
 
-    void (*first_prop_type_group)(struct archive *archive, path_stack_t path, object_id_t id,
+    void (*first_prop_type_group)(struct archive *archive, path_stack_t path, global_id_t id,
                                   const field_sid_t *keys, enum field_type type, bool is_array, u32 num_pairs,
                                   void *capture);
 
-    void (*next_prop_type_group)(struct archive *archive, path_stack_t path, object_id_t id,
+    void (*next_prop_type_group)(struct archive *archive, path_stack_t path, global_id_t id,
                                  const field_sid_t *keys, enum field_type type, bool is_array, u32 num_pairs,
                                  void *capture);
 
@@ -113,7 +113,7 @@ struct archive_visitor {
 
     DEFINE_VISIT_BASIC_TYPE_PAIRS(boolean, field_boolean_t);
 
-    void (*visit_null_pairs)(struct archive *archive, path_stack_t path, object_id_t id, const field_sid_t *keys,
+    void (*visit_null_pairs)(struct archive *archive, path_stack_t path, global_id_t id, const field_sid_t *keys,
                              u32 num_pairs, void *capture);
 
     DEFINE_VISIT_ARRAY_TYPE_PAIRS(int8, field_i8_t);
@@ -138,30 +138,30 @@ struct archive_visitor {
 
     DEFINE_VISIT_ARRAY_TYPE_PAIRS(boolean, field_boolean_t);
 
-    enum visit_policy (*visit_enter_null_array_pairs)(struct archive *archive, path_stack_t path, object_id_t id,
+    enum visit_policy (*visit_enter_null_array_pairs)(struct archive *archive, path_stack_t path, global_id_t id,
                                                       const field_sid_t *keys, u32 num_pairs, void *capture);
 
-    void (*visit_enter_null_array_pair)(struct archive *archive, path_stack_t path, object_id_t id, field_sid_t key,
+    void (*visit_enter_null_array_pair)(struct archive *archive, path_stack_t path, global_id_t id, field_sid_t key,
                                         u32 entry_idx, u32 num_elems, void *capture);
 
-    void (*visit_null_array_pair)(struct archive *archive, path_stack_t path, object_id_t id, field_sid_t key,
+    void (*visit_null_array_pair)(struct archive *archive, path_stack_t path, global_id_t id, field_sid_t key,
                                   u32 entry_idx, u32 max_entries, field_u32_t num_nulls, void *capture);
 
-    void (*visit_leave_null_array_pair)(struct archive *archive, path_stack_t path, object_id_t id, u32 pair_idx,
+    void (*visit_leave_null_array_pair)(struct archive *archive, path_stack_t path, global_id_t id, u32 pair_idx,
                                         u32 num_pairs, void *capture);
 
-    void (*visit_leave_null_array_pairs)(struct archive *archive, path_stack_t path, object_id_t id, void *capture);
+    void (*visit_leave_null_array_pairs)(struct archive *archive, path_stack_t path, global_id_t id, void *capture);
 
     enum visit_policy (*before_visit_object_array)(struct archive *archive, path_stack_t path,
-                                                   object_id_t parent_id, field_sid_t key, void *capture);
+                                                   global_id_t parent_id, field_sid_t key, void *capture);
 
     void (*before_visit_object_array_objects)(bool *skip_group_object_ids, struct archive *archive,
-                                              path_stack_t path, object_id_t parent_id, field_sid_t key,
-                                              const object_id_t *group_object_ids,
+                                              path_stack_t path, global_id_t parent_id, field_sid_t key,
+                                              const global_id_t *group_object_ids,
                                               u32 num_group_object_ids, void *capture);
 
     enum visit_policy (*before_visit_object_array_object_property)(struct archive *archive, path_stack_t path,
-                                                                   object_id_t parent_id, field_sid_t key,
+                                                                   global_id_t parent_id, field_sid_t key,
                                                                    field_sid_t nested_key,
                                                                    enum field_type nested_value_type,
                                                                    void *capture);
@@ -191,15 +191,15 @@ struct archive_visitor {
     DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(nulls, field_u32_t);
 
     enum visit_policy (*before_object_array_object_property_object)(struct archive *archive, path_stack_t path,
-                                                                    object_id_t parent_id, field_sid_t key,
-                                                                    object_id_t nested_object_id,
+                                                                    global_id_t parent_id, field_sid_t key,
+                                                                    global_id_t nested_object_id,
                                                                     field_sid_t nested_key,
                                                                     u32 nested_value_object_id, void *capture);
 
-    void (*visit_object_property)(struct archive *archive, path_stack_t path, object_id_t parent_id,
+    void (*visit_object_property)(struct archive *archive, path_stack_t path, global_id_t parent_id,
                                   field_sid_t key, enum field_type type, bool is_array_type, void *capture);
 
-    void (*visit_object_array_prop)(struct archive *archive, path_stack_t path, object_id_t parent_id,
+    void (*visit_object_array_prop)(struct archive *archive, path_stack_t path, global_id_t parent_id,
                                     field_sid_t key, enum field_type type, void *capture);
 
     bool (*get_column_entry_count)(struct archive *archive, path_stack_t path, field_sid_t key,
