@@ -18,7 +18,7 @@
 #ifndef ARK_ROT_H
 #define ARK_ROT_H
 
-#include "hash.h"
+#include <ark-js/shared/hash/hash.h>
 
 ARK_BEGIN_DECL
 

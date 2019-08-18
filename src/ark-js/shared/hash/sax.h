@@ -18,7 +18,7 @@
 #ifndef ARK_SAX_H
 #define ARK_SAX_H
 
-#include "hash.h"
+#include <ark-js/shared/hash/hash.h>
 
 ARK_BEGIN_DECL
 

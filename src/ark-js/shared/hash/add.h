@@ -18,7 +18,7 @@
 #ifndef ARK_ADDITIVE_H
 #define ARK_ADDITIVE_H
 
-#include "hash.h"
+#include <ark-js/shared/hash/hash.h>
 
 ARK_BEGIN_DECL
 

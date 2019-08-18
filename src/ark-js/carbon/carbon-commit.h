@@ -21,6 +21,7 @@
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/error.h>
 #include <ark-js/shared/mem/file.h>
+#include <ark-js/shared/stdx/string.h>
 
 ARK_BEGIN_DECL
 
@@ -32,7 +33,15 @@ bool carbon_commit_hash_read(u64 *commit_hash, struct memfile *file);
 
 bool carbon_commit_hash_peek(u64 *commit_hash, struct memfile *file);
 
-bool carbon_commit_hash_update(struct memfile *file);
+bool carbon_commit_hash_update(struct memfile *file, const char *base, u64 len);
+
+bool carbon_commit_hash_compute(u64 *commit_hash, const void *base, u64 len);
+
+const char *carbon_commit_hash_to_str(struct string *dst, u64 commit_hash);
+
+bool carbon_commit_hash_append_to_str(struct string *dst, u64 commit_hash);
+
+u64 carbon_commit_hash_from_str(const char *commit_str, struct err *err);
 
 ARK_END_DECL
 

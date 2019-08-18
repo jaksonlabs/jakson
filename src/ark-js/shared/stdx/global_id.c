@@ -15,7 +15,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <ark-js/carbon/oid/oid.h>
+#include <ark-js/shared/stdx/global_id.h>
 #include <ark-js/shared/utils/time.h>
 #include <ark-js/shared/error.h>
 #include <ark-js/shared/hash/bern.h>
@@ -31,15 +31,14 @@ _Thread_local u32 thread_local_counter;
 _Thread_local u32 thread_local_counter_limit;
 
 /**
- * Object identifier that acts as the primary key for any object stored in a CARBON record.
  * Below is the best effort to create a world-unique, fast and scalable to compute identifier.
  *
- * An 64bit object identifier is constructed using process-local, thread-local and
+ * An 64bit global identifier is constructed using process-local, thread-local and
  * call-local state-dependent and state-independent components. Additionally, a global time
  * component is added to minimize the risk of producing two equal identifier across multiple
  * machines.
  */
-union object_id {
+union global_id {
     struct {
         /* global */
         u64 global_wallclock
@@ -73,7 +72,7 @@ union object_id {
     u64 value;
 };
 
-bool object_id_create(object_id_t *out)
+bool global_id_create(global_id_t *out)
 {
         assert(out);
 
@@ -110,8 +109,17 @@ bool object_id_create(object_id_t *out)
         bool capacity_left = (thread_local_counter != thread_local_counter_limit);
         error_print_if(!capacity_left, ARK_ERR_THREADOOOBJIDS)
         if (likely(capacity_left)) {
-                union object_id internal =
-                        {.global_wallclock  = time_now_wallclock(), .global_build_date = global_build_date_bit, .global_build_path = global_build_path_bit, .process_id        = process_local_id, .process_magic     = process_magic, .process_counter   = process_counter++, .thread_id         = (u64) thread_local_id, .thread_magic      = thread_local_magic, .thread_counter    = thread_local_counter++, .call_random       = rand()};
+                union global_id internal =
+                        {.global_wallclock  = time_now_wallclock(),
+                         .global_build_date = global_build_date_bit,
+                         .global_build_path = global_build_path_bit,
+                         .process_id        = process_local_id,
+                         .process_magic     = process_magic,
+                         .process_counter   = process_counter++,
+                         .thread_id         = (u64) thread_local_id,
+                         .thread_magic      = thread_local_magic,
+                         .thread_counter    = thread_local_counter++,
+                         .call_random       = rand()};
                 *out = internal.value;
         } else {
                 *out = 0;
@@ -119,73 +127,73 @@ bool object_id_create(object_id_t *out)
         return capacity_left;
 }
 
-bool object_id_get_global_wallclocktime(uint_fast8_t *out, object_id_t id)
+bool global_id_get_global_wallclocktime(uint_fast8_t *out, global_id_t id)
 {
         error_if_null(out);
-        *out = ((union object_id *) &id)->global_wallclock;
+        *out = ((union global_id *) &id)->global_wallclock;
         return true;
 }
 
-bool object_id_get_global_build_path_bit(uint_fast8_t *out, object_id_t id)
+bool global_id_get_global_build_path_bit(uint_fast8_t *out, global_id_t id)
 {
         error_if_null(out);
-        *out = ((union object_id *) &id)->global_build_path;
+        *out = ((union global_id *) &id)->global_build_path;
         return true;
 }
 
-bool object_id_get_global_build_time_bit(uint_fast8_t *out, object_id_t id)
+bool global_id_get_global_build_time_bit(uint_fast8_t *out, global_id_t id)
 {
         error_if_null(out);
-        *out = ((union object_id *) &id)->global_build_date;
+        *out = ((union global_id *) &id)->global_build_date;
         return true;
 }
 
-bool object_id_get_process_id(uint_fast8_t *out, object_id_t id)
+bool global_id_get_process_id(uint_fast8_t *out, global_id_t id)
 {
         error_if_null(out);
-        *out = ((union object_id *) &id)->process_id;
+        *out = ((union global_id *) &id)->process_id;
         return true;
 }
 
-bool object_id_get_process_magic(uint_fast8_t *out, object_id_t id)
+bool global_id_get_process_magic(uint_fast8_t *out, global_id_t id)
 {
         error_if_null(out);
-        *out = ((union object_id *) &id)->process_magic;
+        *out = ((union global_id *) &id)->process_magic;
         return true;
 }
 
-bool object_id_get_process_counter(uint_fast16_t *out, object_id_t id)
+bool global_id_get_process_counter(uint_fast16_t *out, global_id_t id)
 {
         error_if_null(out);
-        *out = ((union object_id *) &id)->process_counter;
+        *out = ((union global_id *) &id)->process_counter;
         return true;
 }
 
-bool object_id_get_thread_id(uint_fast8_t *out, object_id_t id)
+bool global_id_get_thread_id(uint_fast8_t *out, global_id_t id)
 {
         error_if_null(out);
-        *out = ((union object_id *) &id)->thread_id;
+        *out = ((union global_id *) &id)->thread_id;
         return true;
 }
 
-bool object_id_get_thread_magic(uint_fast8_t *out, object_id_t id)
+bool global_id_get_thread_magic(uint_fast8_t *out, global_id_t id)
 {
         error_if_null(out);
-        *out = ((union object_id *) &id)->thread_magic;
+        *out = ((union global_id *) &id)->thread_magic;
         return true;
 }
 
-bool object_id_get_thread_counter(uint_fast32_t *out, object_id_t id)
+bool global_id_get_thread_counter(uint_fast32_t *out, global_id_t id)
 {
         error_if_null(out);
-        *out = ((union object_id *) &id)->thread_counter;
+        *out = ((union global_id *) &id)->thread_counter;
         return true;
 }
 
-bool object_id_get_call_random(uint_fast8_t *out, object_id_t id)
+bool global_id_get_call_random(uint_fast8_t *out, global_id_t id)
 {
         error_if_null(out);
-        *out = ((union object_id *) &id)->call_random;
+        *out = ((union global_id *) &id)->call_random;
         return true;
 }
 

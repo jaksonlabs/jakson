@@ -22,7 +22,7 @@
 #include <ark-js/shared/error.h>
 #include <ark-js/shared/mem/block.h>
 #include <ark-js/shared/mem/file.h>
-#include <ark-js/carbon/oid/oid.h>
+#include <ark-js/shared/stdx/global_id.h>
 #include <ark-js/shared/stdx/string.h>
 #include <ark-js/shared/async/spin.h>
 #include <ark-js/shared/stdx/vec.h>
@@ -46,7 +46,7 @@
 #include <ark-js/shared/json/json.h>
 #include <ark-js/shared/mem/block.h>
 #include <ark-js/shared/mem/file.h>
-#include <ark-js/carbon/oid/oid.h>
+#include <ark-js/shared/stdx/global_id.h>
 #include <ark-js/shared/stdx/sort.h>
 #include <ark-js/shared/async/parallel.h>
 #include <ark-js/shared/stdx/slicelist.h>

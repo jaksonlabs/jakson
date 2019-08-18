@@ -15,37 +15,37 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef ARK_OID_H
-#define ARK_OID_H
+#ifndef ARK_GLOBAL_ID_H
+#define ARK_GLOBAL_ID_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/types.h>
 
 ARK_BEGIN_DECL
 
-typedef u64 object_id_t;
+typedef u64 global_id_t;
 
-bool object_id_create(object_id_t *out);
+bool global_id_create(global_id_t *out);
 
-bool object_id_get_global_wallclocktime(uint_fast8_t *out, object_id_t id);
+bool global_id_get_global_wallclocktime(uint_fast8_t *out, global_id_t id);
 
-bool object_id_get_global_build_path_bit(uint_fast8_t *out, object_id_t id);
+bool global_id_get_global_build_path_bit(uint_fast8_t *out, global_id_t id);
 
-bool object_id_get_global_build_time_bit(uint_fast8_t *out, object_id_t id);
+bool global_id_get_global_build_time_bit(uint_fast8_t *out, global_id_t id);
 
-bool object_id_get_process_id(uint_fast8_t *out, object_id_t id);
+bool global_id_get_process_id(uint_fast8_t *out, global_id_t id);
 
-bool object_id_get_process_magic(uint_fast8_t *out, object_id_t id);
+bool global_id_get_process_magic(uint_fast8_t *out, global_id_t id);
 
-bool object_id_get_process_counter(uint_fast16_t *out, object_id_t id);
+bool global_id_get_process_counter(uint_fast16_t *out, global_id_t id);
 
-bool object_id_get_thread_id(uint_fast8_t *out, object_id_t id);
+bool global_id_get_thread_id(uint_fast8_t *out, global_id_t id);
 
-bool object_id_get_thread_magic(uint_fast8_t *out, object_id_t id);
+bool global_id_get_thread_magic(uint_fast8_t *out, global_id_t id);
 
-bool object_id_get_thread_counter(uint_fast32_t *out, object_id_t id);
+bool global_id_get_thread_counter(uint_fast32_t *out, global_id_t id);
 
-bool object_id_get_call_random(uint_fast8_t *out, object_id_t id);
+bool global_id_get_call_random(uint_fast8_t *out, global_id_t id);
 
 ARK_END_DECL
 

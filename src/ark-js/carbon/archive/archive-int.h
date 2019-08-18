@@ -21,7 +21,7 @@
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/mem/file.h>
 #include <ark-js/shared/types.h>
-#include <ark-js/carbon/oid/oid.h>
+#include <ark-js/shared/stdx/global_id.h>
 #include <ark-js/carbon/coding/pack.h>
 
 ARK_BEGIN_DECL
@@ -42,7 +42,7 @@ struct __attribute__((packed)) record_header {
 
 struct __attribute__((packed)) object_header {
     char marker;
-    object_id_t oid;
+    global_id_t oid;
     u32 flags;
 };
 

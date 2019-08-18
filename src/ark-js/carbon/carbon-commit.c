@@ -16,13 +16,18 @@
  */
 
 #include <ark-js/carbon/carbon-commit.h>
-#include <ark-js/shared/stdx/varuint.h>
+#include <ark-js/shared/stdx/global_id.h>
+#include <ark-js/shared/hash/bern.h>
+#include <ark-js/shared/hash/jenkins.h>
+#include <ark-js/shared/hash/fnv.h>
 
 bool carbon_commit_hash_create(struct memfile *file)
 {
         error_if_null(file)
 
         u64 init_rev = 0;
+        global_id_create(&init_rev);
+
         memfile_ensure_space(file, sizeof(u64));
         memfile_write(file, &init_rev, sizeof(u64));
 
@@ -52,13 +57,64 @@ bool carbon_commit_hash_peek(u64 *commit_hash, struct memfile *file)
         return true;
 }
 
-bool carbon_commit_hash_update(struct memfile *file)
+bool carbon_commit_hash_update(struct memfile *file, const char *base, u64 len)
 {
-        ark_declare_and_init(u64, rev)
-
-        carbon_commit_hash_peek(&rev, file);
-        rev++;
-        memfile_write(file, &rev, sizeof(u64));
-
+        error_if_null(file)
+        error_if_null(base)
+        error_if_null(len)
+        u64 commit_hash;
+        carbon_commit_hash_compute(&commit_hash, base, len);
+        memfile_write(file, &commit_hash, sizeof(u64));
         return true;
+}
+
+bool carbon_commit_hash_compute(u64 *commit_hash, const void *base, u64 len)
+{
+        error_if_null(commit_hash)
+        error_if_null(base)
+        error_if_null(len)
+        *commit_hash = ARK_HASH64_FNV(len, base);
+        return true;
+}
+
+const char *carbon_commit_hash_to_str(struct string *dst, u64 commit_hash)
+{
+        if (dst) {
+                string_clear(dst);
+                string_add_u64_as_hex(dst, commit_hash);
+                return string_cstr(dst);
+        } else {
+                return NULL;
+        }
+}
+
+bool carbon_commit_hash_append_to_str(struct string *dst, u64 commit_hash)
+{
+        error_if_null(dst)
+        string_add_u64_as_hex(dst, commit_hash);
+        return true;
+}
+
+u64 carbon_commit_hash_from_str(const char *commit_str, struct err *err)
+{
+        if (commit_str && strlen(commit_str) == 16) {
+                char *illegal_char;
+                errno = 0;
+                u64 ret = strtoull(commit_str, &illegal_char, 16);
+                if (ret == 0 && commit_str == illegal_char) {
+                        ark_optional(err, error(err, ARK_ERR_NONUMBER))
+                        return 0;
+                } else if (ret == ULLONG_MAX && errno) {
+                        ark_optional(err, error(err, ARK_ERR_BUFFERTOOTINY))
+                        return 0;
+                } else if (*illegal_char) {
+                        ark_optional(err, error(err, ARK_ERR_TAILINGJUNK))
+                        return 0;
+                } else {
+                        return ret;
+                }
+        } else {
+                error(err, ARK_ERR_ILLEGALARG)
+                return 0;
+        }
 }

@@ -18,7 +18,7 @@
 #ifndef ARK_XOR_H
 #define ARK_XOR_H
 
-#include "hash.h"
+#include <ark-js/shared/hash/hash.h>
 
 ARK_BEGIN_DECL
 

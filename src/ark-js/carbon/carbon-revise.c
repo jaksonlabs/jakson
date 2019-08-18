@@ -101,14 +101,14 @@ static void key_string_set(struct carbon *doc, const char *key)
         memfile_restore_position(&doc->memfile);
 }
 
-bool carbon_revise_key_generate(object_id_t *out, struct carbon_revise *context)
+bool carbon_revise_key_generate(global_id_t *out, struct carbon_revise *context)
 {
         error_if_null(context);
         enum carbon_key_type key_type;
         carbon_key_get_type(&key_type, context->revised_doc);
         if (key_type == CARBON_KEY_AUTOKEY) {
-                object_id_t oid;
-                object_id_create(&oid);
+                global_id_t oid;
+                global_id_create(&oid);
                 key_unsigned_set(context->revised_doc, oid);
                 ark_optional_set(out, oid);
                 return true;
@@ -554,7 +554,9 @@ static bool carbon_header_rev_inc(struct carbon *doc)
         memfile_seek(&doc->memfile, 0);
         carbon_key_read(NULL, &key_type, &doc->memfile);
         if (carbon_has_key(key_type)) {
-                carbon_commit_hash_update(&doc->memfile);
+                u64 raw_data_len = 0;
+                const void *raw_data = carbon_raw_data(&raw_data_len, doc);
+                carbon_commit_hash_update(&doc->memfile, raw_data, raw_data_len);
         }
         memfile_restore_position(&doc->memfile);
 
