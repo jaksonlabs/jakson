@@ -62,6 +62,42 @@ bool json_tokenizer_init(struct json_tokenizer *tokenizer, const char *input)
         return true;
 }
 
+static void parse_string_token(struct json_tokenizer *tokenizer, char c, char delimiter, char delimiter2, char delimiter3, bool include_start, bool include_end)
+{
+        bool escapeQuote = false;
+        tokenizer->token.type = LITERAL_STRING;
+        if (!include_start) {
+                tokenizer->token.string++;
+        }
+        tokenizer->token.column++;
+        char last_1_c = '\0', last_2_c = '\0', last_3_c = '\0', last_4_c = '\0';
+        c = *(++tokenizer->cursor);
+        while ((escapeQuote || (c != delimiter && c != delimiter2 && c != delimiter3)) && c != '\r' && c != '\n') {
+                next_char:
+                tokenizer->token.length++;
+                last_4_c = last_3_c;
+                last_3_c = last_2_c;
+                last_2_c = last_1_c;
+                last_1_c = c;
+                c = *(++tokenizer->cursor);
+                if (unlikely(c == '\\' && last_1_c == '\\')) {
+                        goto next_char;
+                }
+                escapeQuote = c == '"' && last_1_c == '\\'
+                              && ((last_2_c == '\\' && last_3_c == '\\' && last_4_c != '\\')
+                                  || (last_2_c != '\\' && last_3_c == '\\')
+                                  || (last_2_c != '\\' && last_3_c != '\\'));
+        }
+
+        if (include_end) {
+                tokenizer->token.length++;
+        } else {
+                tokenizer->cursor++;
+        }
+
+        tokenizer->cursor += (c == '\r' || c == '\n') ? 1 : 0;
+}
+
 const struct json_token *json_tokenizer_next(struct json_tokenizer *tokenizer)
 {
         if (likely(*tokenizer->cursor != '\0')) {
@@ -90,31 +126,13 @@ const struct json_token *json_tokenizer_next(struct json_tokenizer *tokenizer)
                         tokenizer->token.column++;
                         tokenizer->token.length = 1;
                         tokenizer->cursor++;
+                } else if (c != '"' && (isalpha(c) || c == '_') &&
+                        (strlen(tokenizer->cursor) >= 4 && (strncmp(tokenizer->cursor, "null", 4) != 0 &&
+                        strncmp(tokenizer->cursor, "true", 4) != 0)) &&
+                        (strlen(tokenizer->cursor) >= 5 && strncmp(tokenizer->cursor, "false", 5) != 0)) {
+                        parse_string_token(tokenizer, c, ' ', ':', ',', true, true);
                 } else if (c == '"') {
-                        bool escapeQuote = false;
-                        tokenizer->token.type = LITERAL_STRING;
-                        tokenizer->token.string++;
-                        tokenizer->token.column++;
-                        char last_1_c = '\0', last_2_c = '\0', last_3_c = '\0', last_4_c = '\0';
-                        c = *(++tokenizer->cursor);
-                        while ((escapeQuote || c != '"') && c != '\r' && c != '\n') {
-                                next_char:
-                                tokenizer->token.length++;
-                                last_4_c = last_3_c;
-                                last_3_c = last_2_c;
-                                last_2_c = last_1_c;
-                                last_1_c = c;
-                                c = *(++tokenizer->cursor);
-                                if (unlikely(c == '\\' && last_1_c == '\\')) {
-                                        goto next_char;
-                                }
-                                escapeQuote = c == '"' && last_1_c == '\\'
-                                              && ((last_2_c == '\\' && last_3_c == '\\' && last_4_c != '\\')
-                                                  || (last_2_c != '\\' && last_3_c == '\\')
-                                                  || (last_2_c != '\\' && last_3_c != '\\'));
-                        }
-                        tokenizer->cursor++;
-                        tokenizer->cursor += (c == '\r' || c == '\n') ? 1 : 0;
+                        parse_string_token(tokenizer, c, '"', '"', '"', false, false);
                 } else if (c == 't' || c == 'f' || c == 'n') {
                         const unsigned lenTrueNull = 4;
                         const unsigned lenFalse = 5;

@@ -61,6 +61,9 @@ TEST(CarbonTest, CreateCarbonRevisionNumberingNoKey) {
         carbon_commit_hash(&commit_mod, &rev_doc);
         ASSERT_EQ(commit_new, 0);
         ASSERT_EQ(commit_mod, 0);
+        
+        carbon_drop(&doc);
+        carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CreateCarbonRevisionNumberingWithKey) {
