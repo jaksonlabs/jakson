@@ -15,13 +15,29 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+// ---------------------------------------------------------------------------------------------------------------------
+//  includes
+// ---------------------------------------------------------------------------------------------------------------------
+
 #include <ark-js/shared/utils/hexdump.h>
 #include <ark-js/carbon/carbon-path-index.h>
 #include <ark-js/carbon/carbon-key.h>
 #include "carbon-int.h"
 #include "carbon-string.h"
 
+// ---------------------------------------------------------------------------------------------------------------------
+//  config
+// ---------------------------------------------------------------------------------------------------------------------
+
 #define PATH_INDEX_CAPACITY 1024
+
+#define PATH_MARKER_PROP_NODE 'P'
+#define PATH_MARKER_ARRAY_NODE 'a'
+#define PATH_MARKER_COLUMN_NODE 'A'
+
+// ---------------------------------------------------------------------------------------------------------------------
+//  types
+// ---------------------------------------------------------------------------------------------------------------------
 
 struct path_index_node
 {
@@ -42,11 +58,25 @@ struct path_index_node
     struct vector ofType(struct path_index_node) sub_entries;
 };
 
-static void build_index_from_object(struct path_index_node *parent, struct carbon_object_it *elem_it);
+// ---------------------------------------------------------------------------------------------------------------------
+//  helper prototypes
+// ---------------------------------------------------------------------------------------------------------------------
 
-static void build_index_from_array(struct path_index_node *parent, struct carbon_array_it *elem_it);
+static void array_to_str(struct string *str, struct carbon_path_index *index, bool is_root);
 
-static void flat_node(struct memfile *file, struct path_index_node *node);
+static void prop_to_str(struct string *str, struct carbon_path_index *index);
+
+static void column_to_str(struct string *str, struct carbon_path_index *index);
+
+static void object_build_index(struct path_index_node *parent, struct carbon_object_it *elem_it);
+
+static void array_build_index(struct path_index_node *parent, struct carbon_array_it *elem_it);
+
+static void node_flat(struct memfile *file, struct path_index_node *node);
+
+// ---------------------------------------------------------------------------------------------------------------------
+//  helper
+// ---------------------------------------------------------------------------------------------------------------------
 
 static void path_index_node_init(struct path_index_node *node)
 {
@@ -201,19 +231,19 @@ static void record_ref_create(struct memfile *memfile, struct carbon *doc)
         memfile_write(memfile, &commit_hash, sizeof(u64));
 }
 
-static void traverse_array(struct path_index_node *parent, struct carbon_array_it *it)
+static void array_traverse(struct path_index_node *parent, struct carbon_array_it *it)
 {
         u64 sub_elem_pos = 0;
         while (carbon_array_it_next(it)) {
                 offset_t sub_elem_off = carbon_array_it_tell(it);
                 struct path_index_node *elem_node = path_index_node_add_array_elem(parent, sub_elem_pos, sub_elem_off);
-                build_index_from_array(elem_node, it);
+                array_build_index(elem_node, it);
 
                 sub_elem_pos++;
         }
 }
 
-static void traverse_column(struct path_index_node *parent, struct carbon_column_it *it)
+static void column_traverse(struct path_index_node *parent, struct carbon_column_it *it)
 {
         enum carbon_field_type column_type, entry_type;
         u32 nvalues;
@@ -234,7 +264,7 @@ static void traverse_column(struct path_index_node *parent, struct carbon_column
         }
 }
 
-static void traverse_object(struct path_index_node *parent, struct carbon_object_it *it)
+static void object_traverse(struct path_index_node *parent, struct carbon_object_it *it)
 {
         while (carbon_object_it_next(it)) {
                 u64 prop_name_len = 0;
@@ -243,11 +273,11 @@ static void traverse_object(struct path_index_node *parent, struct carbon_object
                 const char *prop_name = carbon_object_it_prop_name(&prop_name_len, it);
                 struct path_index_node *elem_node = path_index_node_add_key_elem(parent, key_off,
                                                                                  prop_name, prop_name_len, value_off);
-                build_index_from_object(elem_node, it);
+                object_build_index(elem_node, it);
         }
 }
 
-static void build_index_from_object(struct path_index_node *parent, struct carbon_object_it *elem_it)
+static void object_build_index(struct path_index_node *parent, struct carbon_object_it *elem_it)
 {
         enum carbon_field_type field_type;
         carbon_object_it_prop_type(&field_type, elem_it);
@@ -282,17 +312,17 @@ static void build_index_from_object(struct path_index_node *parent, struct carbo
                 case CARBON_FIELD_TYPE_COLUMN_I32:
                 case CARBON_FIELD_TYPE_COLUMN_I64: {
                         struct carbon_column_it *it = carbon_object_it_column_value(elem_it);
-                        traverse_column(parent, it);
+                        column_traverse(parent, it);
 
                 } break;
                 case CARBON_FIELD_TYPE_ARRAY: {
                         struct carbon_array_it *it = carbon_object_it_array_value(elem_it);
-                        traverse_array(parent, it);
+                        array_traverse(parent, it);
                         carbon_array_it_drop(it);
                 } break;
                 case CARBON_FIELD_TYPE_OBJECT: {
                         struct carbon_object_it *it = carbon_object_it_object_value(elem_it);
-                        traverse_object(parent, it);
+                        object_traverse(parent, it);
                         carbon_object_it_drop(it);
                 } break;
                 default:
@@ -300,7 +330,7 @@ static void build_index_from_object(struct path_index_node *parent, struct carbo
         }
 }
 
-static void build_index_from_array(struct path_index_node *parent, struct carbon_array_it *elem_it)
+static void array_build_index(struct path_index_node *parent, struct carbon_array_it *elem_it)
 {
         enum carbon_field_type field_type;
         carbon_array_it_field_type(&field_type, elem_it);
@@ -335,17 +365,17 @@ static void build_index_from_array(struct path_index_node *parent, struct carbon
                 case CARBON_FIELD_TYPE_COLUMN_I32:
                 case CARBON_FIELD_TYPE_COLUMN_I64: {
                         struct carbon_column_it *it = carbon_array_it_column_value(elem_it);
-                        traverse_column(parent, it);
+                        column_traverse(parent, it);
 
                 } break;
                 case CARBON_FIELD_TYPE_ARRAY: {
                         struct carbon_array_it *it = carbon_array_it_array_value(elem_it);
-                        traverse_array(parent, it);
+                        array_traverse(parent, it);
                         carbon_array_it_drop(it);
                 } break;
                 case CARBON_FIELD_TYPE_OBJECT: {
                         struct carbon_object_it *it = carbon_array_it_object_value(elem_it);
-                        traverse_object(parent, it);
+                        object_traverse(parent, it);
                         carbon_object_it_drop(it);
                 } break;
                 default:
@@ -353,11 +383,7 @@ static void build_index_from_array(struct path_index_node *parent, struct carbon
         }
 }
 
-#define PATH_MARKER_PROP_NODE 'P'
-#define PATH_MARKER_ARRAY_NODE 'a'
-#define PATH_MARKER_COLUMN_NODE 'A'
-
-static void write_field_ref(struct memfile *file, struct path_index_node *node)
+static void field_ref_write(struct memfile *file, struct path_index_node *node)
 {
         memfile_write_byte(file, node->field_type);
         if (node->field_type != CARBON_FIELD_TYPE_NULL && node->field_type != CARBON_FIELD_TYPE_TRUE &&
@@ -368,7 +394,7 @@ static void write_field_ref(struct memfile *file, struct path_index_node *node)
         }
 }
 
-static void flat_container_contents(struct memfile *file, struct path_index_node *node)
+static void container_contents_flat(struct memfile *file, struct path_index_node *node)
 {
         assert(node->sub_entries.num_elems > 0);
 
@@ -383,7 +409,7 @@ static void flat_container_contents(struct memfile *file, struct path_index_node
         for (u32 i = 0; i < node->sub_entries.num_elems; i++) {
                 offset_t node_off = memfile_tell(file);
                 struct path_index_node *sub = vec_get(&node->sub_entries, i, struct path_index_node);
-                flat_node(file, sub);
+                node_flat(file, sub);
                 memfile_save_position(file);
                 memfile_seek(file, position_off_latest);
                 signed_offset_t shift = memfile_update_varuint(file, node_off);
@@ -393,7 +419,7 @@ static void flat_container_contents(struct memfile *file, struct path_index_node
         }
 }
 
-static void flat_container_field(struct memfile *file, struct path_index_node *node)
+static void container_field_flat(struct memfile *file, struct path_index_node *node)
 {
         switch (node->field_type) {
                 case CARBON_FIELD_TYPE_NULL:
@@ -428,37 +454,31 @@ static void flat_container_field(struct memfile *file, struct path_index_node *n
                 case CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
                         /* each of these field types allows for further path traversals, and therefore at least one
                          * subsequent path element must exist */
-                        flat_container_contents(file, node);
+                        container_contents_flat(file, node);
                         break;
                 default:
                 error(&file->err, ARK_ERR_INTERNALERR);
         }
 }
 
-static void flat_prop(struct memfile *file, struct path_index_node *node)
+static void prop_flat(struct memfile *file, struct path_index_node *node)
 {
         memfile_write_byte(file, PATH_MARKER_PROP_NODE);
-        write_field_ref(file, node);
+        field_ref_write(file, node);
         memfile_write_varuint(NULL, file, node->entry.key.offset);
-        flat_container_field(file, node);
+        container_field_flat(file, node);
 }
 
-static void flat_array(struct memfile *file, struct path_index_node *node)
+static void array_flat(struct memfile *file, struct path_index_node *node)
 {
         memfile_write_byte(file, PATH_MARKER_ARRAY_NODE);
-        write_field_ref(file, node);
+        field_ref_write(file, node);
         if (unlikely(node->type == PATH_ROOT)) {
-                flat_container_contents(file, node);
+                container_contents_flat(file, node);
         } else {
-                flat_container_field(file, node);
+                container_field_flat(file, node);
         }
 }
-
-static void array_to_str(struct string *str, struct carbon_path_index *index, bool is_root);
-
-static void prop_to_str(struct string *str, struct carbon_path_index *index);
-
-static void column_to_str(struct string *str, struct carbon_path_index *index);
 
 static void node_to_str(struct string *str, struct carbon_path_index *index)
 {
@@ -599,24 +619,24 @@ static void array_to_str(struct string *str, struct carbon_path_index *index, bo
         }
 }
 
-static void flat_column(struct memfile *file, struct path_index_node *node)
+static void column_flat(struct memfile *file, struct path_index_node *node)
 {
         memfile_write_byte(file, PATH_MARKER_COLUMN_NODE);
-        write_field_ref(file, node);
+        field_ref_write(file, node);
         assert(node->sub_entries.num_elems == 0);
 }
 
-static void flat_node(struct memfile *file, struct path_index_node *node)
+static void node_flat(struct memfile *file, struct path_index_node *node)
 {
         switch (node->type) {
                 case PATH_INDEX_PROP_KEY:
-                        flat_prop(file, node);
+                        prop_flat(file, node);
                         break;
                 case PATH_INDEX_ARRAY_INDEX:
-                        flat_array(file, node);
+                        array_flat(file, node);
                         break;
                 case PATH_INDEX_COLUMN_INDEX:
-                        flat_column(file, node);
+                        column_flat(file, node);
                         break;
                 default:
                         error(&file->err, ARK_ERR_INTERNALERR);
@@ -624,12 +644,12 @@ static void flat_node(struct memfile *file, struct path_index_node *node)
         }
 }
 
-static void flat_index(struct memfile *file, struct path_index_node *root_array)
+static void index_flat(struct memfile *file, struct path_index_node *root_array)
 {
-        flat_array(file, root_array);
+        array_flat(file, root_array);
 }
 
-static void build_index(struct memfile *file, struct carbon *doc)
+static void index_build(struct memfile *file, struct carbon *doc)
 {
         struct path_index_node root_array;
 
@@ -644,7 +664,7 @@ static void build_index(struct memfile *file, struct carbon *doc)
         while (carbon_array_it_next(&it)) {
                 offset_t entry_offset = carbon_array_it_tell(&it);
                 struct path_index_node *node = path_index_node_add_array_elem(&root_array, array_pos, entry_offset);
-                build_index_from_array(node, &it);
+                array_build_index(node, &it);
                 array_pos++;
         }
         carbon_iterator_close(&it);
@@ -652,11 +672,51 @@ static void build_index(struct memfile *file, struct carbon *doc)
         /* for debug */
         path_index_node_print_level(stdout, &root_array, 0); // TODO: Debug remove
 
-        flat_index(file, &root_array);
+        index_flat(file, &root_array);
         memfile_shrink(file);
 
         /* cleanup */
         path_index_node_drop(&root_array);
+}
+
+static void record_ref_to_str(struct string *str, struct carbon_path_index *index)
+{
+        u8 key_type = memfile_read_byte(&index->memfile);
+        string_add(str, "[key-type: ");
+        string_add_char(str, key_type);
+        string_add_char(str, ']');
+
+        switch (key_type) {
+                case CARBON_KEY_NOKEY:
+                        /* nothing to do */
+                        break;
+                case CARBON_KEY_AUTOKEY:
+                case CARBON_KEY_UKEY: {
+                        u64 key = memfile_read_u64(&index->memfile);
+                        string_add(str, "[key: ");
+                        string_add_u64(str, key);
+                        string_add_char(str, ']');
+                } break;
+                case CARBON_KEY_IKEY: {
+                        i64 key = memfile_read_i64(&index->memfile);
+                        string_add(str, "[key: ");
+                        string_add_i64(str, key);
+                        string_add_char(str, ']');
+                } break;
+                case CARBON_KEY_SKEY: {
+                        u64 key_len;
+                        const char *key = carbon_string_read(&key_len, &index->memfile);
+                        string_add(str, "(key: ");
+                        string_add_nchar(str, key, key_len);
+                        string_add_char(str, ')');
+                } break;
+                default:
+                error(&index->err, ARK_ERR_INTERNALERR);
+        }
+        u64 commit_hash = memfile_read_u64(&index->memfile);
+        string_add(str, "[commit-hash: ");
+        string_add_u64(str, commit_hash);
+        string_add_char(str, ']');
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -671,7 +731,7 @@ bool carbon_path_index_create(struct carbon_path_index *index, struct carbon *do
         memfile_open(&index->memfile, index->memblock, READ_WRITE);
         error_init(&index->err);
         record_ref_create(&index->memfile, doc);
-        build_index(&index->memfile, doc);
+        index_build(&index->memfile, doc);
         return true;
 }
 
@@ -981,46 +1041,6 @@ bool carbon_path_index_to_carbon(struct carbon *doc, struct carbon_path_index *i
         unused(doc)
         unused(index)
         return false;
-}
-
-static void record_ref_to_str(struct string *str, struct carbon_path_index *index)
-{
-        u8 key_type = memfile_read_byte(&index->memfile);
-        string_add(str, "[key-type: ");
-        string_add_char(str, key_type);
-        string_add_char(str, ']');
-
-        switch (key_type) {
-                case CARBON_KEY_NOKEY:
-                        /* nothing to do */
-                        break;
-                case CARBON_KEY_AUTOKEY:
-                case CARBON_KEY_UKEY: {
-                        u64 key = memfile_read_u64(&index->memfile);
-                        string_add(str, "[key: ");
-                        string_add_u64(str, key);
-                        string_add_char(str, ']');
-                } break;
-                case CARBON_KEY_IKEY: {
-                        i64 key = memfile_read_i64(&index->memfile);
-                        string_add(str, "[key: ");
-                        string_add_i64(str, key);
-                        string_add_char(str, ']');
-                } break;
-                case CARBON_KEY_SKEY: {
-                        u64 key_len;
-                        const char *key = carbon_string_read(&key_len, &index->memfile);
-                        string_add(str, "(key: ");
-                        string_add_nchar(str, key, key_len);
-                        string_add_char(str, ')');
-                } break;
-                default:
-                        error(&index->err, ARK_ERR_INTERNALERR);
-        }
-        u64 commit_hash = memfile_read_u64(&index->memfile);
-        string_add(str, "[commit-hash: ");
-        string_add_u64(str, commit_hash);
-        string_add_char(str, ']');
 }
 
 const char *carbon_path_index_to_str(struct string *str, struct carbon_path_index *index)
