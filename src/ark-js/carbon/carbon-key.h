@@ -39,6 +39,8 @@ bool carbon_key_write_string(struct memfile *file, const char *key);
 
 bool carbon_key_update_string(struct memfile *file, const char *key);
 
+bool carbon_key_update_string_wnchar(struct memfile *file, const char *key, size_t length);
+
 const void *carbon_key_read(u64 *len, enum carbon_key_type *out, struct memfile *file);
 
 ARK_END_DECL

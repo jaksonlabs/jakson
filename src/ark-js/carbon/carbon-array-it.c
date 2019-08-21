@@ -139,6 +139,7 @@ bool carbon_array_it_create(struct carbon_array_it *it, struct memfile *memfile,
         it->payload_start = payload_start;
         it->mod_size = 0;
         it->array_end_reached = false;
+        it->field_offset = 0;
 
         error_init(&it->err);
         spin_init(&it->lock);
@@ -179,6 +180,7 @@ bool carbon_array_it_clone(struct carbon_array_it *dst, struct carbon_array_it *
         dst->array_end_reached = src->array_end_reached;
         vec_cpy(&dst->history, &src->history);
         carbon_int_field_access_clone(&dst->field_access, &src->field_access);
+        dst->field_offset = src->field_offset;
         return true;
 }
 
@@ -314,7 +316,7 @@ bool carbon_array_it_prev(struct carbon_array_it *it)
         }
 }
 
-offset_t carbon_array_it_tell(struct carbon_array_it *it)
+offset_t carbon_array_it_memfilepos(struct carbon_array_it *it)
 {
         if (likely(it != NULL)) {
                 return memfile_tell(&it->memfile);
@@ -322,6 +324,11 @@ offset_t carbon_array_it_tell(struct carbon_array_it *it)
                 error(&it->err, ARK_ERR_NULLPTR);
                 return 0;
         }
+}
+
+offset_t carbon_array_it_tell(struct carbon_array_it *it)
+{
+        return it ? it->field_offset : 0;
 }
 
 bool carbon_int_array_it_offset(offset_t *off, struct carbon_array_it *it)

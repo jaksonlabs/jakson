@@ -127,6 +127,7 @@ ARK_BEGIN_DECL
 #define ARK_ERR_NONUMBER 93                 /** not a number */
 #define ARK_ERR_BUFFERTOOTINY 94            /** buffer capacity exceeded */
 #define ARK_ERR_TAILINGJUNK 95              /** tailing junk was detected in a stream */
+#define ARK_ERR_NOTINDEXED 96               /** not indexed */
 
 static const char *const _err_str[] =
         {"No error", "Null pointer detected", "Function not implemented", "Index is out of bounds",
@@ -174,7 +175,7 @@ static const char *const _err_str[] =
          "parsing error key name or array index expected", "parsing error: unknown token",
          "dot-notated path could not be parsed", "Illegal state", "Unsupported data type", "Operation failed",
          "Cleanup operation failed; potentially a memory leak occurred", "dot-notated path could not be compiled",
-         "not a number", "buffer capacity exceeded", "tailing junk was detected in a stream"};
+         "not a number", "buffer capacity exceeded", "tailing junk was detected in a stream", "not indexed"};
 
 #define ARK_ERRSTR_ILLEGAL_CODE "illegal error code"
 

@@ -27,6 +27,7 @@
 #include <ark-js/carbon/carbon-key.h>
 #include <ark-js/carbon/carbon-commit.h>
 #include <ark-js/shared/json/json.h>
+#include "carbon-object-it.h"
 
 static void marker_insert(struct memfile *memfile, u8 marker);
 
@@ -123,8 +124,8 @@ bool carbon_int_insert_column(struct memfile *memfile_in, struct err *err_in, en
         u32 num_elements = 0;
         u32 cap_elements = capactity;
 
-        memfile_write_varuint(memfile_in, num_elements);
-        memfile_write_varuint(memfile_in, cap_elements);
+        memfile_write_varuint(NULL, memfile_in, num_elements);
+        memfile_write_varuint(NULL, memfile_in, cap_elements);
 
         offset_t payload_begin = memfile_tell(memfile_in);
 
@@ -234,7 +235,7 @@ bool carbon_int_object_it_refresh(bool *is_empty_slot, bool *is_object_end, stru
         error_if_null(it);
         if (object_it_is_slot_occupied(is_empty_slot, is_object_end, it)) {
                 carbon_int_object_it_prop_key_access(it);
-                carbon_int_field_data_access(&it->memfile, &it->err, &it->field_access);
+                carbon_int_field_data_access(&it->memfile, &it->err, &it->field.value.data);
                 return true;
         } else {
                 return false;
@@ -246,32 +247,20 @@ bool carbon_int_object_it_prop_key_access(struct carbon_object_it *it)
         error_if_null(it)
         //memfile_skip(&it->memfile, sizeof(media_type_t));
 
-        it->key_len = memfile_read_varuint(NULL, &it->memfile);
-        it->key = memfile_peek(&it->memfile, it->key_len);
-        memfile_skip(&it->memfile, it->key_len);
-        it->value_off = memfile_tell(&it->memfile);
-        it->field_access.it_field_type = *ARK_MEMFILE_PEEK(&it->memfile, u8);
+        it->field.key.offset = memfile_tell(&it->memfile);
+        it->field.key.name_len = memfile_read_varuint(NULL, &it->memfile);
+        it->field.key.name = memfile_peek(&it->memfile, it->field.key.name_len);
+        memfile_skip(&it->memfile, it->field.key.name_len);
+        it->field.value.offset = memfile_tell(&it->memfile);
+        it->field.value.data.it_field_type = *ARK_MEMFILE_PEEK(&it->memfile, u8);
 
-        return true;
-}
-
-bool carbon_int_object_it_prop_key_skip(struct carbon_object_it *it)
-{
-        error_if_null(it)
-        memfile_skip(&it->memfile, sizeof(media_type_t));
-
-        it->key_len = memfile_read_varuint(NULL, &it->memfile);
-        memfile_skip(&it->memfile, it->key_len);
-
-        it->value_off = memfile_tell(&it->memfile);
-        it->field_access.it_field_type = *ARK_MEMFILE_READ_TYPE(&it->memfile, u8);
         return true;
 }
 
 bool carbon_int_object_it_prop_value_skip(struct carbon_object_it *it)
 {
         error_if_null(it)
-        memfile_seek(&it->memfile, it->value_off);
+        memfile_seek(&it->memfile, it->field.value.offset);
         return carbon_field_skip(&it->memfile);
 }
 
@@ -279,8 +268,8 @@ bool carbon_int_object_it_prop_skip(struct carbon_object_it *it)
 {
         error_if_null(it)
 
-        it->key_len = memfile_read_varuint(NULL, &it->memfile);
-        memfile_skip(&it->memfile, it->key_len);
+        it->field.key.name_len = memfile_read_varuint(NULL, &it->memfile);
+        memfile_skip(&it->memfile, it->field.key.name_len);
 
         return carbon_field_skip(&it->memfile);
 }
@@ -315,6 +304,7 @@ bool carbon_int_array_it_field_type_read(struct carbon_array_it *it)
         error_if_null(it)
         error_if(memfile_remain_size(&it->memfile) < 1, &it->err, ARK_ERR_ILLEGALOP);
         memfile_save_position(&it->memfile);
+        it->field_offset = memfile_tell(&it->memfile);
         u8 media_type = *memfile_read(&it->memfile, 1);
         error_if(media_type == 0, &it->err, ARK_ERR_NOTFOUND)
         error_if(media_type == CARBON_MARKER_ARRAY_END, &it->err, ARK_ERR_OUTOFBOUNDS)
@@ -906,7 +896,7 @@ bool carbon_int_field_remove(struct memfile *memfile, struct err *err, enum carb
                         offset_t begin_off = memfile_tell(memfile);
                         carbon_array_it_create(&it, memfile, err, begin_off - sizeof(u8));
                         carbon_array_it_fast_forward(&it);
-                        offset_t end_off = carbon_array_it_tell(&it);
+                        offset_t end_off = carbon_array_it_memfilepos(&it);
                         carbon_array_it_drop(&it);
 
                         assert(begin_off < end_off);
@@ -928,7 +918,7 @@ bool carbon_int_field_remove(struct memfile *memfile, struct err *err, enum carb
                         offset_t begin_off = memfile_tell(memfile);
                         carbon_column_it_create(&it, memfile, err, begin_off - sizeof(u8));
                         carbon_column_it_fast_forward(&it);
-                        offset_t end_off = carbon_column_it_tell(&it);
+                        offset_t end_off = carbon_column_it_memfilepos(&it);
 
                         assert(begin_off < end_off);
                         rm_nbytes += (end_off - begin_off);
@@ -940,7 +930,7 @@ bool carbon_int_field_remove(struct memfile *memfile, struct err *err, enum carb
                         offset_t begin_off = memfile_tell(memfile);
                         carbon_object_it_create(&it, memfile, err, begin_off - sizeof(u8));
                         carbon_object_it_fast_forward(&it);
-                        offset_t end_off = carbon_object_it_tell(&it);
+                        offset_t end_off = carbon_object_it_memfile_pos(&it);
                         carbon_object_it_drop(&it);
 
                         assert(begin_off < end_off);
@@ -1185,7 +1175,7 @@ static void int_insert_prop_object(struct carbon_insert *oins, struct json_objec
                                                                                                              CARBON_COLUMN_TYPE_BOOLEAN, cap_nbytes);
                                                 for (u32 k = 0; k < prop->value.value.value.array->elements.elements.num_elems; k++) {
                                                         struct json_element *array_elem = vec_get(
-                                                                &prop->value.value.value.array->elements.elements, i,
+                                                                &prop->value.value.value.array->elements.elements, k,
                                                                 struct json_element);
                                                         if (array_elem->value.value_type == JSON_VALUE_TRUE) {
                                                                 carbon_insert_true(array_ins);
@@ -1485,7 +1475,7 @@ static bool array_it_is_slot_occupied(bool *is_empty_slot, bool *is_array_end, s
 
 static bool object_it_is_slot_occupied(bool *is_empty_slot, bool *is_object_end, struct carbon_object_it *it)
 {
-        carbon_int_field_auto_close(&it->field_access);
+        carbon_int_field_auto_close(&it->field.value.data);
         return is_slot_occupied(is_empty_slot, is_object_end, &it->memfile, CARBON_MARKER_OBJECT_END);
 }
 

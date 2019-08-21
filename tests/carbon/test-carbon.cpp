@@ -14,6 +14,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <ark-js/carbon/carbon-commit.h>
+#include <ark-js/carbon/carbon-path-index.h>
 
 TEST(CarbonTest, CreateCarbon) {
         struct carbon doc;
@@ -4196,7 +4197,7 @@ TEST(CarbonTest, CarbonKeyTypeUnsignedKey)
         // -------------------------------------------------------------------------------------------------------------
 
         enum carbon_key_type key_type;
-        carbon_key_get_type(&key_type, &doc);
+        carbon_key_type(&key_type, &doc);
         ASSERT_EQ(key_type, CARBON_KEY_UKEY);
 
         carbon_drop(&doc);
@@ -4291,7 +4292,7 @@ TEST(CarbonTest, CarbonKeyTypeSignedKey)
         // -------------------------------------------------------------------------------------------------------------
 
         enum carbon_key_type key_type;
-        carbon_key_get_type(&key_type, &doc);
+        carbon_key_type(&key_type, &doc);
         ASSERT_EQ(key_type, CARBON_KEY_IKEY);
 
         carbon_drop(&doc);
@@ -8660,6 +8661,63 @@ TEST(CarbonTest, CarbonFindPrintExamples)
         carbon_find_close(&find);
 
         string_drop(&result);
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, ParseBooleanArray) {
+        struct carbon doc;
+        struct err err;
+        struct carbon_find find;
+        enum carbon_field_type type;
+        const char *json = "[{\"col\": [true, null, false]}]";
+
+        carbon_from_json(&doc, json, CARBON_KEY_NOKEY, NULL, &err);
+
+        ASSERT_TRUE(carbon_find_open(&find, "0.col", &doc));
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        carbon_find_result_type(&type, &find);
+        ASSERT_EQ(type, CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
+        carbon_find_close(&find);
+
+        ASSERT_TRUE(carbon_find_open(&find, "0.col.0", &doc));
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        carbon_find_result_type(&type, &find);
+        ASSERT_EQ(type, CARBON_FIELD_TYPE_TRUE);
+        carbon_find_close(&find);
+
+        ASSERT_TRUE(carbon_find_open(&find, "0.col.1", &doc));
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        carbon_find_result_type(&type, &find);
+        ASSERT_EQ(type, CARBON_FIELD_TYPE_NULL);
+        carbon_find_close(&find);
+
+        ASSERT_TRUE(carbon_find_open(&find, "0.col.2", &doc));
+        ASSERT_TRUE(carbon_find_has_result(&find));
+        carbon_find_result_type(&type, &find);
+        ASSERT_EQ(type, CARBON_FIELD_TYPE_FALSE);
+        carbon_find_close(&find);
+
+        carbon_drop(&doc);
+}
+
+TEST(CarbonTest, PathIndex) {
+        struct carbon_path_index index;
+        struct carbon doc;
+        struct err err;
+
+        //const char *json = "[{\"key\": \"value\", \"x\": {\"y\": [{\"z\": 23}, {\"z\": null}]}, \"a\": [1,2,3], \"b\": [\"a\", 4,5] }, true, false, null, [1,null,2], [true, null, false], {\"col\": [true, null, false]}]";
+
+        int fd = open("./assets/ms-academic-graph.json", O_RDONLY);
+        ASSERT_NE(fd, -1);
+        int json_in_len = lseek(fd, 0, SEEK_END);
+        const char *json = (const char *) mmap(0, json_in_len, PROT_READ, MAP_PRIVATE, fd, 0);
+
+        carbon_from_json(&doc, json, CARBON_KEY_NOKEY, NULL, &err);
+        carbon_path_index_create(&index, &doc);
+        carbon_path_index_print(stdout, &index);
+        carbon_hexdump_print(stdout, &doc);
+        carbon_path_index_hexdump(stdout, &index);
+        ASSERT_TRUE(carbon_path_index_indexes_doc(&index, &doc));
         carbon_drop(&doc);
 }
 

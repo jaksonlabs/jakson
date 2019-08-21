@@ -21,6 +21,7 @@
 #include <ark-js/carbon/carbon-insert.h>
 #include <ark-js/carbon/carbon-string.h>
 #include <ark-js/carbon/carbon-prop.h>
+#include "carbon-object-it.h"
 
 bool carbon_object_it_create(struct carbon_object_it *it, struct memfile *memfile, struct err *err,
                              offset_t payload_start)
@@ -29,7 +30,7 @@ bool carbon_object_it_create(struct carbon_object_it *it, struct memfile *memfil
         error_if_null(memfile);
         error_if_null(err);
 
-        it->payload_start = payload_start;
+        it->object_contents_off = payload_start;
         it->mod_size = 0;
         it->object_end_reached = false;
 
@@ -47,9 +48,9 @@ bool carbon_object_it_create(struct carbon_object_it *it, struct memfile *memfil
         error_if_with_details(marker != CARBON_MARKER_OBJECT_BEGIN, err, ARK_ERR_ILLEGALOP,
                               "object begin marker ('{') not found");
 
-        it->payload_start += sizeof(u8);
+        it->object_contents_off += sizeof(u8);
 
-        carbon_int_field_access_create(&it->field_access);
+        carbon_int_field_access_create(&it->field.value.data);
 
         carbon_object_it_rewind(it);
 
@@ -60,7 +61,7 @@ bool carbon_object_it_copy(struct carbon_object_it *dst, struct carbon_object_it
 {
         error_if_null(dst);
         error_if_null(src);
-        carbon_object_it_create(dst, &src->memfile, &src->err, src->payload_start - sizeof(u8));
+        carbon_object_it_create(dst, &src->memfile, &src->err, src->object_contents_off - sizeof(u8));
         return true;
 }
 
@@ -69,23 +70,24 @@ bool carbon_object_it_clone(struct carbon_object_it *dst, struct carbon_object_i
         error_if_null(dst);
         error_if_null(src);
         memfile_clone(&dst->memfile, &src->memfile);
-        dst->payload_start = src->payload_start;
+        dst->object_contents_off = src->object_contents_off;
         spin_init(&dst->lock);
         error_cpy(&dst->err, &src->err);
         dst->mod_size = src->mod_size;
         dst->object_end_reached = src->object_end_reached;
         vec_cpy(&dst->history, &src->history);
-        dst->key_len = src->key_len;
-        dst->key = src->key;
-        dst->value_off = src->value_off;
-        carbon_int_field_access_clone(&dst->field_access, &src->field_access);
+        dst->field.key.name_len = src->field.key.name_len;
+        dst->field.key.name = src->field.key.name;
+        dst->field.key.offset = src->field.key.offset;
+        dst->field.value.offset = src->field.value.offset;
+        carbon_int_field_access_clone(&dst->field.value.data, &src->field.value.data);
         return true;
 }
 
 bool carbon_object_it_drop(struct carbon_object_it *it)
 {
-        carbon_int_field_auto_close(&it->field_access);
-        carbon_int_field_access_drop(&it->field_access);
+        carbon_int_field_auto_close(&it->field.value.data);
+        carbon_int_field_access_drop(&it->field.value.data);
         vec_drop(&it->history);
         return true;
 }
@@ -93,9 +95,9 @@ bool carbon_object_it_drop(struct carbon_object_it *it)
 bool carbon_object_it_rewind(struct carbon_object_it *it)
 {
         error_if_null(it);
-        error_if(it->payload_start >= memfile_size(&it->memfile), &it->err, ARK_ERR_OUTOFBOUNDS);
+        error_if(it->object_contents_off >= memfile_size(&it->memfile), &it->err, ARK_ERR_OUTOFBOUNDS);
         carbon_int_history_clear(&it->history);
-        return memfile_seek(&it->memfile, it->payload_start);
+        return memfile_seek(&it->memfile, it->object_contents_off);
 }
 
 bool carbon_object_it_next(struct carbon_object_it *it)
@@ -103,7 +105,7 @@ bool carbon_object_it_next(struct carbon_object_it *it)
         error_if_null(it);
         bool is_empty_slot;
         offset_t last_off = memfile_tell(&it->memfile);
-        carbon_int_field_access_drop(&it->field_access);
+        carbon_int_field_access_drop(&it->field.value.data);
         if (carbon_int_object_it_next(&is_empty_slot, &it->object_end_reached, it)) {
                 carbon_int_history_push(&it->history, last_off);
                 return true;
@@ -122,18 +124,45 @@ bool carbon_object_it_next(struct carbon_object_it *it)
         }
 }
 
-offset_t carbon_object_it_tell(struct carbon_object_it *it)
+bool carbon_object_it_has_next(struct carbon_object_it *it)
+{
+        bool has_next = carbon_object_it_next(it);
+        carbon_object_it_prev(it);
+        return has_next;
+}
+
+bool carbon_object_it_prev(struct carbon_object_it *it)
+{
+        error_if_null(it);
+        if (carbon_int_history_has(&it->history)) {
+                offset_t prev_off = carbon_int_history_pop(&it->history);
+                memfile_seek(&it->memfile, prev_off);
+                return carbon_int_object_it_refresh(NULL, NULL, it);
+        } else {
+                return false;
+        }
+}
+
+offset_t carbon_object_it_memfile_pos(struct carbon_object_it *it)
 {
         error_if_null(it)
         return memfile_tell(&it->memfile);
+}
+
+bool carbon_object_it_tell(offset_t *key_off, offset_t *value_off, struct carbon_object_it *it)
+{
+        error_if_null(it)
+        ark_optional_set(key_off, it->field.key.offset);
+        ark_optional_set(value_off, it->field.value.offset);
+        return true;
 }
 
 const char *carbon_object_it_prop_name(u64 *key_len, struct carbon_object_it *it)
 {
         error_if_null(it)
         error_if_null(key_len)
-        *key_len = it->key_len;
-        return it->key;
+        *key_len = it->field.key.name_len;
+        return it->field.key.name;
 }
 
 static i64 prop_remove(struct carbon_object_it *it, enum carbon_field_type type)
@@ -165,87 +194,87 @@ bool carbon_object_it_remove(struct carbon_object_it *it)
 
 bool carbon_object_it_prop_type(enum carbon_field_type *type, struct carbon_object_it *it)
 {
-        return carbon_int_field_access_field_type(type, &it->field_access);
+        return carbon_int_field_access_field_type(type, &it->field.value.data);
 }
 
 bool carbon_object_it_u8_value(u8 *value, struct carbon_object_it *it)
 {
-        return carbon_int_field_access_u8_value(value, &it->field_access, &it->err);
+        return carbon_int_field_access_u8_value(value, &it->field.value.data, &it->err);
 }
 
 bool carbon_object_it_u16_value(u16 *value, struct carbon_object_it *it)
 {
-        return carbon_int_field_access_u16_value(value, &it->field_access, &it->err);
+        return carbon_int_field_access_u16_value(value, &it->field.value.data, &it->err);
 }
 
 bool carbon_object_it_u32_value(u32 *value, struct carbon_object_it *it)
 {
-        return carbon_int_field_access_u32_value(value, &it->field_access, &it->err);
+        return carbon_int_field_access_u32_value(value, &it->field.value.data, &it->err);
 }
 
 bool carbon_object_it_u64_value(u64 *value, struct carbon_object_it *it)
 {
-        return carbon_int_field_access_u64_value(value, &it->field_access, &it->err);
+        return carbon_int_field_access_u64_value(value, &it->field.value.data, &it->err);
 }
 
 bool carbon_object_it_i8_value(i8 *value, struct carbon_object_it *it)
 {
-        return carbon_int_field_access_i8_value(value, &it->field_access, &it->err);
+        return carbon_int_field_access_i8_value(value, &it->field.value.data, &it->err);
 }
 
 bool carbon_object_it_i16_value(i16 *value, struct carbon_object_it *it)
 {
-        return carbon_int_field_access_i16_value(value, &it->field_access, &it->err);
+        return carbon_int_field_access_i16_value(value, &it->field.value.data, &it->err);
 }
 
 bool carbon_object_it_i32_value(i32 *value, struct carbon_object_it *it)
 {
-        return carbon_int_field_access_i32_value(value, &it->field_access, &it->err);
+        return carbon_int_field_access_i32_value(value, &it->field.value.data, &it->err);
 }
 
 bool carbon_object_it_i64_value(i64 *value, struct carbon_object_it *it)
 {
-        return carbon_int_field_access_i64_value(value, &it->field_access, &it->err);
+        return carbon_int_field_access_i64_value(value, &it->field.value.data, &it->err);
 }
 
 bool carbon_object_it_float_value(bool *is_null_in, float *value, struct carbon_object_it *it)
 {
-        return carbon_int_field_access_float_value(is_null_in, value, &it->field_access, &it->err);
+        return carbon_int_field_access_float_value(is_null_in, value, &it->field.value.data, &it->err);
 }
 
 bool carbon_object_it_signed_value(bool *is_null_in, i64 *value, struct carbon_object_it *it)
 {
-        return carbon_int_field_access_signed_value(is_null_in, value, &it->field_access, &it->err);
+        return carbon_int_field_access_signed_value(is_null_in, value, &it->field.value.data, &it->err);
 }
 
 bool carbon_object_it_unsigned_value(bool *is_null_in, u64 *value, struct carbon_object_it *it)
 {
-        return carbon_int_field_access_unsigned_value(is_null_in, value, &it->field_access, &it->err);
+        return carbon_int_field_access_unsigned_value(is_null_in, value, &it->field.value.data, &it->err);
 }
 
 const char *carbon_object_it_string_value(u64 *strlen, struct carbon_object_it *it)
 {
-        return carbon_int_field_access_string_value(strlen, &it->field_access, &it->err);
+        return carbon_int_field_access_string_value(strlen, &it->field.value.data, &it->err);
 }
 
 bool carbon_object_it_binary_value(struct carbon_binary *out, struct carbon_object_it *it)
 {
-        return carbon_int_field_access_binary_value(out, &it->field_access, &it->err);
+        return carbon_int_field_access_binary_value(out, &it->field.value.data, &it->err);
 }
 
 struct carbon_array_it *carbon_object_it_array_value(struct carbon_object_it *it_in)
 {
-        return carbon_int_field_access_array_value(&it_in->field_access, &it_in->err);
+        return carbon_int_field_access_array_value(&it_in->field.value.data, &it_in->err);
 }
 
 struct carbon_object_it *carbon_object_it_object_value(struct carbon_object_it *it_in)
 {
-        return carbon_int_field_access_object_value(&it_in->field_access, &it_in->err);
+        return carbon_int_field_access_object_value(&it_in->field.value.data, &it_in->err);
 }
 
 struct carbon_column_it *carbon_object_it_column_value(struct carbon_object_it *it_in)
 {
-        return carbon_int_field_access_column_value(&it_in->field_access, &it_in->err);
+        return carbon_int_field_access_column_value(&it_in->field.value.data, &it_in->err);
 }
 
 bool carbon_object_it_insert_begin(struct carbon_insert *inserter, struct carbon_object_it *it)

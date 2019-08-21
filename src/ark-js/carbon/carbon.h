@@ -124,17 +124,24 @@ enum carbon_printer_impl {
     JSON_COMPACT
 };
 
+
+#define CARBON_MARKER_KEY_NOKEY '?'
+#define CARBON_MARKER_KEY_AUTOKEY '*'
+#define CARBON_MARKER_KEY_UKEY '+'
+#define CARBON_MARKER_KEY_IKEY '-'
+#define CARBON_MARKER_KEY_SKEY '!'
+
 enum carbon_key_type {
-    /* no key, no revision number */
-            CARBON_KEY_NOKEY,
-    /* auto-generated 64bit integer key */
-            CARBON_KEY_AUTOKEY,
-    /* user-defined 64bit unsigned integer key */
-            CARBON_KEY_UKEY,
-    /* user-defined 64bit signed integer key */
-            CARBON_KEY_IKEY,
-    /* user-defined n-char string key */
-            CARBON_KEY_SKEY
+        /* no key, no revision number */
+        CARBON_KEY_NOKEY = CARBON_MARKER_KEY_NOKEY,
+        /* auto-generated 64bit unsigned integer key */
+        CARBON_KEY_AUTOKEY = CARBON_MARKER_KEY_AUTOKEY,
+        /* user-defined 64bit unsigned integer key */
+        CARBON_KEY_UKEY = CARBON_MARKER_KEY_UKEY,
+        /* user-defined 64bit signed integer key */
+        CARBON_KEY_IKEY = CARBON_MARKER_KEY_IKEY,
+        /* user-defined n-char string key */
+        CARBON_KEY_SKEY = CARBON_MARKER_KEY_SKEY
 };
 
 #define CARBON_NIL_STR "_nil"
@@ -171,12 +178,6 @@ enum carbon_key_type {
 #define CARBON_MARKER_COLUMN_I64 '8'
 #define CARBON_MARKER_COLUMN_FLOAT 'R'
 #define CARBON_MARKER_COLUMN_BOOLEAN 'B'
-
-#define CARBON_MARKER_KEY_NOKEY '?'
-#define CARBON_MARKER_KEY_AUTOKEY '*'
-#define CARBON_MARKER_KEY_UKEY '+'
-#define CARBON_MARKER_KEY_IKEY '-'
-#define CARBON_MARKER_KEY_SKEY '!'
 
 ARK_DEFINE_ERROR_GETTER(carbon);
 
@@ -226,7 +227,7 @@ bool carbon_from_json(struct carbon *doc, const char *json, enum carbon_key_type
 bool carbon_drop(struct carbon *doc);
 const void *carbon_raw_data(u64 *len, struct carbon *doc);
 bool carbon_is_up_to_date(struct carbon *doc);
-bool carbon_key_get_type(enum carbon_key_type *out, struct carbon *doc);
+bool carbon_key_type(enum carbon_key_type *out, struct carbon *doc);
 const void *carbon_key_raw_value(u64 *key_len, enum carbon_key_type *type, struct carbon *doc);
 bool carbon_key_signed_value(i64 *key, struct carbon *doc);
 bool carbon_key_unsigned_value(u64 *key, struct carbon *doc);

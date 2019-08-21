@@ -57,11 +57,15 @@ bool carbon_column_it_insert(struct carbon_insert *inserter, struct carbon_colum
 
 bool carbon_column_it_fast_forward(struct carbon_column_it *it);
 
-offset_t carbon_column_it_tell(struct carbon_column_it *it);
+offset_t carbon_column_it_memfilepos(struct carbon_column_it *it);
+
+offset_t carbon_column_it_tell(struct carbon_column_it *it, u32 elem_idx);
 
 const void *carbon_column_it_values(enum carbon_field_type *type, u32 *nvalues, struct carbon_column_it *it);
 
 bool carbon_column_it_values_info(enum carbon_field_type *type, u32 *nvalues, struct carbon_column_it *it);
+
+bool carbon_column_it_value_is_null(struct carbon_column_it *it, u32 pos);
 
 const u8 *carbon_column_it_boolean_values(u32 *nvalues, struct carbon_column_it *it);
 

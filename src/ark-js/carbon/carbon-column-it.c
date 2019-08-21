@@ -100,12 +100,30 @@ bool carbon_column_it_fast_forward(struct carbon_column_it *it)
         return true;
 }
 
-offset_t carbon_column_it_tell(struct carbon_column_it *it)
+offset_t carbon_column_it_memfilepos(struct carbon_column_it *it)
 {
         if (likely(it != NULL)) {
                 return memfile_tell(&it->memfile);
         } else {
                 error(&it->err, ARK_ERR_NULLPTR);
+                return 0;
+        }
+}
+
+offset_t carbon_column_it_tell(struct carbon_column_it *it, u32 elem_idx)
+{
+        if (it) {
+                memfile_save_position(&it->memfile);
+                memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
+                u32 num_elements = (u32) memfile_read_varuint(NULL, &it->memfile);
+                memfile_read_varuint(NULL, &it->memfile);
+                offset_t payload_start = memfile_tell(&it->memfile);
+                error_if(elem_idx >= num_elements, &it->err, ARK_ERR_OUTOFBOUNDS);
+                offset_t ret = payload_start + elem_idx * carbon_int_get_type_value_size(it->type);
+                memfile_restore_position(&it->memfile);
+                return ret;
+        } else {
+                error_print(ARK_ERR_NULLPTR);
                 return 0;
         }
 }
@@ -123,6 +141,40 @@ bool carbon_column_it_values_info(enum carbon_field_type *type, u32 *nvalues, st
         ark_optional_set(type, it->type);
 
         return true;
+}
+
+bool carbon_column_it_value_is_null(struct carbon_column_it *it, u32 pos)
+{
+        error_if_null(it);
+        enum carbon_field_type type;
+        u32 nvalues = 0;
+        carbon_column_it_values_info(&type, &nvalues, it);
+        error_if(pos >= nvalues, &it->err, ARK_ERR_OUTOFBOUNDS);
+        switch (type) {
+                case CARBON_FIELD_TYPE_COLUMN_U8:
+                        return is_null_u8(carbon_column_it_u8_values(NULL, it)[pos]);
+                case CARBON_FIELD_TYPE_COLUMN_U16:
+                        return is_null_u16(carbon_column_it_u16_values(NULL, it)[pos]);
+                case CARBON_FIELD_TYPE_COLUMN_U32:
+                        return is_null_u32(carbon_column_it_u32_values(NULL, it)[pos]);
+                case CARBON_FIELD_TYPE_COLUMN_U64:
+                        return is_null_u64(carbon_column_it_u64_values(NULL, it)[pos]);
+                case CARBON_FIELD_TYPE_COLUMN_I8:
+                        return is_null_i8(carbon_column_it_i8_values(NULL, it)[pos]);
+                case CARBON_FIELD_TYPE_COLUMN_I16:
+                        return is_null_i16(carbon_column_it_i16_values(NULL, it)[pos]);
+                case CARBON_FIELD_TYPE_COLUMN_I32:
+                        return is_null_i32(carbon_column_it_i32_values(NULL, it)[pos]);
+                case CARBON_FIELD_TYPE_COLUMN_I64:
+                        return is_null_i64(carbon_column_it_i64_values(NULL, it)[pos]);
+                case CARBON_FIELD_TYPE_COLUMN_FLOAT:
+                        return is_null_float(carbon_column_it_float_values(NULL, it)[pos]);
+                case CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
+                        return is_null_boolean(carbon_column_it_boolean_values(NULL, it)[pos]);
+                default:
+                        error(&it->err, ARK_ERR_UNSUPPCONTAINER)
+                        return false;
+        }
 }
 
 const void *carbon_column_it_values(enum carbon_field_type *type, u32 *nvalues, struct carbon_column_it *it)
@@ -217,10 +269,11 @@ bool carbon_column_it_remove(struct carbon_column_it *it, u32 pos)
         u32 num_elems = memfile_peek_varuint(NULL, &it->memfile);
         assert(num_elems > 0);
         num_elems--;
-        memfile_update_varuint(&it->memfile, num_elems);
+        signed_offset_t shift = memfile_update_varuint(&it->memfile, num_elems);
         it->column_num_elements = num_elems;
 
         memfile_restore_position(&it->memfile);
+        memfile_seek_from_here(&it->memfile, shift);
 
         return true;
 }
@@ -400,7 +453,7 @@ static bool rewrite_column_to_array(struct carbon_column_it *it)
         }
 
         carbon_array_it_insert_end(&array_ins);
-        assert(array_marker_begin < carbon_array_it_tell(&array_it));
+        assert(array_marker_begin < carbon_array_it_memfilepos(&array_it));
         carbon_array_it_drop(&array_it);
 
         memfile_restore_position(&it->memfile);

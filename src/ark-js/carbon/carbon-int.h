@@ -95,8 +95,6 @@ bool carbon_int_object_it_refresh(bool *is_empty_slot, bool *is_object_end, stru
 
 bool carbon_int_object_it_prop_key_access(struct carbon_object_it *it);
 
-bool carbon_int_object_it_prop_key_skip(struct carbon_object_it *it);
-
 bool carbon_int_object_it_prop_value_skip(struct carbon_object_it *it);
 
 bool carbon_int_object_it_prop_skip(struct carbon_object_it *it);

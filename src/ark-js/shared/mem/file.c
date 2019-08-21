@@ -63,6 +63,13 @@ bool memfile_seek(struct memfile *file, offset_t pos)
         return true;
 }
 
+bool memfile_seek_from_here(struct memfile *file, signed_offset_t where)
+{
+        offset_t now = memfile_tell(file);
+        offset_t then = now + where;
+        return memfile_seek(file, then);
+}
+
 bool memfile_rewind(struct memfile *file)
 {
         error_if_null(file)
@@ -145,6 +152,26 @@ const char *memfile_read(struct memfile *file, offset_t nbytes)
         return result;
 }
 
+u8 memfile_read_byte(struct memfile *file)
+{
+        return *ARK_MEMFILE_READ_TYPE(file, u8);
+}
+
+u8 memfile_peek_byte(struct memfile *file)
+{
+        return *ARK_MEMFILE_PEEK(file, u8);
+}
+
+u64 memfile_read_u64(struct memfile *file)
+{
+        return *ARK_MEMFILE_READ_TYPE(file, u64);
+}
+
+i64 memfile_read_i64(struct memfile *file)
+{
+        return *ARK_MEMFILE_READ_TYPE(file, i64);
+}
+
 bool memfile_skip(struct memfile *file, signed_offset_t nbytes)
 {
         offset_t required_size = file->pos + nbytes;
@@ -176,6 +203,11 @@ const char *memfile_peek(struct memfile *file, offset_t nbytes)
                 const char *result = memblock_raw_data(file->memblock) + file->pos;
                 return result;
         }
+}
+
+bool memfile_write_byte(struct memfile *file, u8 data)
+{
+        return memfile_write(file, &data, sizeof(u8));
 }
 
 bool memfile_write(struct memfile *file, const void *data, offset_t nbytes)
@@ -328,7 +360,7 @@ bool memfile_restore_position(struct memfile *file)
         }
 }
 
-bool memfile_ensure_space(struct memfile *memfile, u64 nbytes)
+signed_offset_t memfile_ensure_space(struct memfile *memfile, u64 nbytes)
 {
         error_if_null(memfile)
 
@@ -342,18 +374,20 @@ bool memfile_ensure_space(struct memfile *memfile, u64 nbytes)
 
         memfile_save_position(memfile);
         offset_t current_off = memfile_tell(memfile);
+        signed_offset_t shift = 0;
         for (u32 i = 0; i < nbytes; i++) {
                 char c = *memfile_read(memfile, 1);
                 if (unlikely(c != 0)) {
                         /* not enough space; enlarge container */
                         memfile_seek(memfile, current_off);
                         memfile_inplace_insert(memfile, nbytes - i);
+                        shift += nbytes - i;
                         break;
                 }
         }
         memfile_restore_position(memfile);
 
-        return true;
+        return shift;
 }
 
 u64 memfile_read_varuint(u8 *nbytes, struct memfile *memfile)
@@ -380,17 +414,18 @@ u64 memfile_peek_varuint(u8 *nbytes, struct memfile *memfile)
         return result;
 }
 
-u64 memfile_write_varuint(struct memfile *memfile, u64 value)
+u64 memfile_write_varuint(u64 *nbytes_moved, struct memfile *memfile, u64 value)
 {
         u8 required_blocks = varuint_required_blocks(value);
-        memfile_ensure_space(memfile, required_blocks);
+        signed_offset_t shift = memfile_ensure_space(memfile, required_blocks);
         varuint_t dst = (varuint_t) memfile_peek(memfile, sizeof(char));
         varuint_write(dst, value);
         memfile_skip(memfile, required_blocks);
+        ark_optional_set(nbytes_moved, shift);
         return required_blocks;
 }
 
-bool memfile_update_varuint(struct memfile *memfile, u64 value)
+signed_offset_t memfile_update_varuint(struct memfile *memfile, u64 value)
 {
         error_if_null(memfile);
 
@@ -411,7 +446,12 @@ bool memfile_update_varuint(struct memfile *memfile, u64 value)
         u8 required_blocks = varuint_write(dst, value);
         memfile_skip(memfile, required_blocks);
 
-        return true;
+        return bytes_used_then - bytes_used_now;
+}
+
+bool memfile_seek_to_start(struct memfile *file)
+{
+        return memfile_seek(file, 0);
 }
 
 bool memfile_seek_to_end(struct memfile *file)

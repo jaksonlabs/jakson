@@ -410,6 +410,38 @@ enum carbon_field_type carbon_field_type_for_column(enum carbon_column_type type
         }
 }
 
+enum carbon_field_type carbon_field_type_column_entry_to_regular_type(enum carbon_field_type type, bool is_null, bool is_true)
+{
+        if (is_null) {
+                return CARBON_FIELD_TYPE_NULL;
+        } else {
+                switch (type) {
+                        case CARBON_FIELD_TYPE_COLUMN_U8:
+                                return CARBON_FIELD_TYPE_NUMBER_U8;
+                        case CARBON_FIELD_TYPE_COLUMN_U16:
+                                return CARBON_FIELD_TYPE_NUMBER_U16;
+                        case CARBON_FIELD_TYPE_COLUMN_U32:
+                                return CARBON_FIELD_TYPE_NUMBER_U32;
+                        case CARBON_FIELD_TYPE_COLUMN_U64:
+                                return CARBON_FIELD_TYPE_NUMBER_U64;
+                        case CARBON_FIELD_TYPE_COLUMN_I8:
+                                return CARBON_FIELD_TYPE_NUMBER_I8;
+                        case CARBON_FIELD_TYPE_COLUMN_I16:
+                                return CARBON_FIELD_TYPE_NUMBER_I16;
+                        case CARBON_FIELD_TYPE_COLUMN_I32:
+                                return CARBON_FIELD_TYPE_NUMBER_I32;
+                        case CARBON_FIELD_TYPE_COLUMN_I64:
+                                return CARBON_FIELD_TYPE_NUMBER_I64;
+                        case CARBON_FIELD_TYPE_COLUMN_FLOAT:
+                                return CARBON_FIELD_TYPE_NUMBER_FLOAT;
+                        case CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
+                                return is_true ? CARBON_FIELD_TYPE_TRUE : CARBON_FIELD_TYPE_FALSE;
+                        default: error_print(ARK_ERR_INTERNALERR)
+                                return 0;
+                }
+        }
+}
+
 enum carbon_field_class carbon_field_type_get_class(enum carbon_field_type type, struct err *err)
 {
         switch (type) {

@@ -89,8 +89,8 @@ enum carbon_constant {
 };
 
 #define CARBON_FIELD_TYPE_NULL_STR "null"
-#define CARBON_FIELD_TYPE_TRUE_STR "boolean (true)"
-#define CARBON_FIELD_TYPE_FALSE_STR "boolean (false)"
+#define CARBON_FIELD_TYPE_TRUE_STR "boolean-true"
+#define CARBON_FIELD_TYPE_FALSE_STR "boolean-false"
 #define CARBON_FIELD_TYPE_OBJECT_STR "object"
 #define CARBON_FIELD_TYPE_ARRAY_STR "array"
 #define CARBON_FIELD_TYPE_COLUMN_U8_STR "column-u8"
@@ -105,15 +105,15 @@ enum carbon_constant {
 #define CARBON_FIELD_TYPE_COLUMN_BOOLEAN_STR "column-boolean"
 #define CARBON_FIELD_TYPE_STRING_STR "string"
 #define CARBON_FIELD_TYPE_BINARY_STR "binary"
-#define CARBON_FIELD_TYPE_NUMBER_U8_STR "number (u8)"
-#define CARBON_FIELD_TYPE_NUMBER_U16_STR "number (u16)"
-#define CARBON_FIELD_TYPE_NUMBER_U32_STR "number (u32)"
-#define CARBON_FIELD_TYPE_NUMBER_U64_STR "number (u64)"
-#define CARBON_FIELD_TYPE_NUMBER_I8_STR "number (i8)"
-#define CARBON_FIELD_TYPE_NUMBER_I16_STR "number (i16)"
-#define CARBON_FIELD_TYPE_NUMBER_I32_STR "number (i32)"
-#define CARBON_FIELD_TYPE_NUMBER_I64_STR "number (i64)"
-#define CARBON_FIELD_TYPE_NUMBER_FLOAT_STR "number (float)"
+#define CARBON_FIELD_TYPE_NUMBER_U8_STR "number-u8"
+#define CARBON_FIELD_TYPE_NUMBER_U16_STR "number-u16"
+#define CARBON_FIELD_TYPE_NUMBER_U32_STR "number-u32"
+#define CARBON_FIELD_TYPE_NUMBER_U64_STR "number-u64"
+#define CARBON_FIELD_TYPE_NUMBER_I8_STR "number-i8"
+#define CARBON_FIELD_TYPE_NUMBER_I16_STR "number-i16"
+#define CARBON_FIELD_TYPE_NUMBER_I32_STR "number-i32"
+#define CARBON_FIELD_TYPE_NUMBER_I64_STR "number-i64"
+#define CARBON_FIELD_TYPE_NUMBER_FLOAT_STR "number-float"
 
 ARK_BEGIN_DECL
 
@@ -178,6 +178,8 @@ bool carbon_field_skip_32(struct memfile *file);
 bool carbon_field_skip_64(struct memfile *file);
 
 enum carbon_field_type carbon_field_type_for_column(enum carbon_column_type type);
+
+enum carbon_field_type carbon_field_type_column_entry_to_regular_type(enum carbon_field_type type, bool is_null, bool is_true);
 
 ARK_END_DECL
 

@@ -20,19 +20,18 @@
 #include <ark-js/carbon/carbon-field.h>
 #include <ark-js/carbon/carbon-string.h>
 
-static void write_payload(struct memfile *file, const char *string)
+static void write_payload(struct memfile *file, const char *string, size_t str_len)
 {
-        size_t value_strlen = strlen(string);
-        memfile_write_varuint(file, value_strlen);
-        memfile_ensure_space(file, value_strlen);
-        memfile_write(file, string, value_strlen);
+        memfile_write_varuint(NULL, file, str_len);
+        memfile_ensure_space(file, str_len);
+        memfile_write(file, string, str_len);
 }
 
 bool carbon_string_nomarker_write(struct memfile *file, const char *string)
 {
         error_if_null(file)
         error_if_null(string)
-        write_payload(file, string);
+        write_payload(file, string, strlen(string));
 
         return true;
 }
@@ -74,6 +73,11 @@ bool carbon_string_write(struct memfile *file, const char *string)
 
 bool carbon_string_update(struct memfile *file, const char *string)
 {
+        return carbon_string_update_wnchar(file, string, strlen(string));
+}
+
+bool carbon_string_update_wnchar(struct memfile *file, const char *string, size_t str_len)
+{
         u8 marker = *ARK_MEMFILE_READ_TYPE(file, u8);
         if (likely(marker == CARBON_FIELD_TYPE_STRING)) {
                 offset_t payload_start = memfile_tell(file);
@@ -83,7 +87,7 @@ bool carbon_string_update(struct memfile *file, const char *string)
                 memfile_seek(file, payload_start);
                 memfile_inplace_remove(file, diff);
 
-                write_payload(file, string);
+                write_payload(file, string, str_len);
                 return true;
         } else {
                 error(&file->err, ARK_ERR_MARKERMAPPING)

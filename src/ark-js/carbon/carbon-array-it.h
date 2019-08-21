@@ -66,6 +66,7 @@ struct carbon_array_it {
 
     struct vector ofType(offset_t) history;
     struct field_access field_access;
+    offset_t field_offset;
 };
 
 ARK_DEFINE_ERROR_GETTER(carbon_array_it);
@@ -146,6 +147,8 @@ bool carbon_array_it_has_next(struct carbon_array_it *it);
 bool carbon_array_it_is_unit(struct carbon_array_it *it);
 
 bool carbon_array_it_prev(struct carbon_array_it *it);
+
+offset_t carbon_array_it_memfilepos(struct carbon_array_it *it);
 
 offset_t carbon_array_it_tell(struct carbon_array_it *it);
 

@@ -409,7 +409,7 @@ static void insert_binary(struct carbon_insert *inserter, const void *value, siz
                 /* write length of 'user_type' string with variable-length integer type */
                 u64 user_type_strlen = strlen(user_type);
 
-                memfile_write_varuint(&inserter->memfile, user_type_strlen);
+                memfile_write_varuint(NULL, &inserter->memfile, user_type_strlen);
 
                 /* write 'user_type' string */
                 memfile_ensure_space(&inserter->memfile, user_type_strlen);
@@ -426,7 +426,7 @@ static void insert_binary(struct carbon_insert *inserter, const void *value, siz
                 u64 mime_type_id = carbon_media_mime_type_by_ext(file_ext);
 
                 /* write mime type id */
-                memfile_write_varuint(&inserter->memfile, mime_type_id);
+                memfile_write_varuint(NULL, &inserter->memfile, mime_type_id);
 
                 /* write binary blob */
                 write_binary_blob(inserter, value, nbytes);
@@ -936,7 +936,7 @@ static void internal_create(struct carbon_insert *inserter, struct memfile *src,
 static void write_binary_blob(struct carbon_insert *inserter, const void *value, size_t nbytes)
 {
         /* write blob length */
-        memfile_write_varuint(&inserter->memfile, nbytes);
+        memfile_write_varuint(NULL, &inserter->memfile, nbytes);
 
         /* write blob */
         memfile_ensure_space(&inserter->memfile, nbytes);

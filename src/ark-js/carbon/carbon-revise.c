@@ -105,7 +105,7 @@ bool carbon_revise_key_generate(global_id_t *out, struct carbon_revise *context)
 {
         error_if_null(context);
         enum carbon_key_type key_type;
-        carbon_key_get_type(&key_type, context->revised_doc);
+        carbon_key_type(&key_type, context->revised_doc);
         if (key_type == CARBON_KEY_AUTOKEY) {
                 global_id_t oid;
                 global_id_create(&oid);
@@ -122,7 +122,7 @@ bool carbon_revise_key_set_unsigned(struct carbon_revise *context, u64 key_value
 {
         error_if_null(context);
         enum carbon_key_type key_type;
-        carbon_key_get_type(&key_type, context->revised_doc);
+        carbon_key_type(&key_type, context->revised_doc);
         if (key_type == CARBON_KEY_UKEY) {
                 key_unsigned_set(context->revised_doc, key_value);
                 return true;
@@ -136,7 +136,7 @@ bool carbon_revise_key_set_signed(struct carbon_revise *context, i64 key_value)
 {
         error_if_null(context);
         enum carbon_key_type key_type;
-        carbon_key_get_type(&key_type, context->revised_doc);
+        carbon_key_type(&key_type, context->revised_doc);
         if (key_type == CARBON_KEY_IKEY) {
                 key_signed_set(context->revised_doc, key_value);
                 return true;
@@ -150,7 +150,7 @@ bool carbon_revise_key_set_string(struct carbon_revise *context, const char *key
 {
         error_if_null(context);
         enum carbon_key_type key_type;
-        carbon_key_get_type(&key_type, context->revised_doc);
+        carbon_key_type(&key_type, context->revised_doc);
         if (key_type == CARBON_KEY_SKEY) {
                 key_string_set(context->revised_doc, key_value);
                 return true;
@@ -385,7 +385,7 @@ static bool internal_pack_array(struct carbon_array_it *it)
                                 case CARBON_FIELD_TYPE_OBJECT: {
                                         struct carbon_object_it nested_object_it;
                                         carbon_object_it_create(&nested_object_it, &it->memfile, &it->err,
-                                                                it->field_access.nested_object_it->payload_start -
+                                                                it->field_access.nested_object_it->object_contents_off -
                                                                 sizeof(u8));
                                         internal_pack_object(&nested_object_it);
                                         assert(*memfile_peek(&nested_object_it.memfile, sizeof(char)) ==
@@ -465,7 +465,7 @@ static bool internal_pack_object(struct carbon_object_it *it)
                                 case CARBON_FIELD_TYPE_ARRAY: {
                                         struct carbon_array_it nested_array_it;
                                         carbon_array_it_create(&nested_array_it, &it->memfile, &it->err,
-                                                               it->field_access.nested_array_it->payload_start -
+                                                               it->field.value.data.nested_array_it->payload_start -
                                                                sizeof(u8));
                                         internal_pack_array(&nested_array_it);
                                         assert(*memfile_peek(&nested_array_it.memfile, sizeof(char)) ==
@@ -485,15 +485,15 @@ static bool internal_pack_object(struct carbon_object_it *it)
                                 case CARBON_FIELD_TYPE_COLUMN_I64:
                                 case CARBON_FIELD_TYPE_COLUMN_FLOAT:
                                 case CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
-                                        carbon_column_it_rewind(it->field_access.nested_column_it);
-                                        internal_pack_column(it->field_access.nested_column_it);
+                                        carbon_column_it_rewind(it->field.value.data.nested_column_it);
+                                        internal_pack_column(it->field.value.data.nested_column_it);
                                         memfile_seek(&it->memfile,
-                                                     memfile_tell(&it->field_access.nested_column_it->memfile));
+                                                     memfile_tell(&it->field.value.data.nested_column_it->memfile));
                                         break;
                                 case CARBON_FIELD_TYPE_OBJECT: {
                                         struct carbon_object_it nested_object_it;
                                         carbon_object_it_create(&nested_object_it, &it->memfile, &it->err,
-                                                                it->field_access.nested_object_it->payload_start -
+                                                                it->field.value.data.nested_object_it->object_contents_off -
                                                                 sizeof(u8));
                                         internal_pack_object(&nested_object_it);
                                         assert(*memfile_peek(&nested_object_it.memfile, sizeof(char)) ==

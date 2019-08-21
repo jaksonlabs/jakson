@@ -34,6 +34,8 @@ bool carbon_string_remove(struct memfile *file);
 
 bool carbon_string_update(struct memfile *file, const char *string);
 
+bool carbon_string_update_wnchar(struct memfile *file, const char *string, size_t str_len);
+
 bool carbon_string_skip(struct memfile *file);
 
 bool carbon_string_nomarker_skip(struct memfile *file);

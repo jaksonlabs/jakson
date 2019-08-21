@@ -124,11 +124,16 @@ bool carbon_key_write_signed(struct memfile *file, i64 key)
 
 bool carbon_key_update_string(struct memfile *file, const char *key)
 {
+        return carbon_key_update_string_wnchar(file, key, strlen(key));
+}
+
+bool carbon_key_update_string_wnchar(struct memfile *file, const char *key, size_t length)
+{
         error_if_null(file)
         ark_declare_and_init(enum carbon_key_type, key_type)
         carbon_key_read_type(&key_type, file);
         if (carbon_key_is_string_type(key_type)) {
-                carbon_string_update(file, key);
+                carbon_string_update_wnchar(file, key, length);
                 return true;
         } else {
                 error(&file->err, ARK_ERR_TYPEMISMATCH)

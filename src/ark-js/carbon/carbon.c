@@ -183,7 +183,7 @@ bool carbon_is_up_to_date(struct carbon *doc)
         return doc->versioning.is_latest;
 }
 
-bool carbon_key_get_type(enum carbon_key_type *out, struct carbon *doc)
+bool carbon_key_type(enum carbon_key_type *out, struct carbon *doc)
 {
         error_if_null(out)
         error_if_null(doc)

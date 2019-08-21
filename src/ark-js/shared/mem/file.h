@@ -70,6 +70,8 @@ bool memfile_clone(struct memfile *dst, struct memfile *src);
 
 bool memfile_seek(struct memfile *file, offset_t pos);
 
+bool memfile_seek_from_here(struct memfile *file, signed_offset_t where);
+
 bool memfile_rewind(struct memfile *file);
 
 bool memfile_grow(struct memfile *file_in, size_t grow_by_bytes);
@@ -86,9 +88,19 @@ bool memfile_shrink(struct memfile *file);
 
 const char *memfile_read(struct memfile *file, offset_t nbytes);
 
+u8 memfile_read_byte(struct memfile *file);
+
+u8 memfile_peek_byte(struct memfile *file);
+
+u64 memfile_read_u64(struct memfile *file);
+
+i64 memfile_read_i64(struct memfile *file);
+
 bool memfile_skip(struct memfile *file, signed_offset_t nbytes);
 
 const char *memfile_peek(struct memfile *file, offset_t nbytes);
+
+bool memfile_write_byte(struct memfile *file, u8 data);
 
 bool memfile_write(struct memfile *file, const void *data, offset_t nbytes);
 
@@ -104,7 +116,7 @@ offset_t memfile_save_position(struct memfile *file);
 
 bool memfile_restore_position(struct memfile *file);
 
-bool memfile_ensure_space(struct memfile *memfile, u64 nbytes);
+signed_offset_t memfile_ensure_space(struct memfile *memfile, u64 nbytes);
 
 u64 memfile_read_varuint(u8 *nbytes, struct memfile *memfile);
 
@@ -112,9 +124,11 @@ bool memfile_skip_varuint(struct memfile *memfile);
 
 u64 memfile_peek_varuint(u8 *nbytes, struct memfile *memfile);
 
-u64 memfile_write_varuint(struct memfile *memfile, u64 value);
+u64 memfile_write_varuint(u64 *nbytes_moved, struct memfile *memfile, u64 value);
 
-bool memfile_update_varuint(struct memfile *memfile, u64 value);
+signed_offset_t memfile_update_varuint(struct memfile *memfile, u64 value);
+
+bool memfile_seek_to_start(struct memfile *file);
 
 bool memfile_seek_to_end(struct memfile *file);
 
