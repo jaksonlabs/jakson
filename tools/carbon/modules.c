@@ -10,9 +10,9 @@
 struct js_to_context
 {
     struct jak_string_dict dictionary;
-    struct jak_doc_bulk context;
-    struct jak_doc_entries *partition;
-    struct jak_column_doc *partitionMetaModel;
+    jak_doc_bulk context;
+    jak_doc_entries *partition;
+    jak_column_doc *partitionMetaModel;
     char *jsonContent;
 };
 
@@ -40,7 +40,7 @@ static int convertJs2Model(struct js_to_context *context, FILE *file, bool optim
 
     JAK_CONSOLE_WRITE(file, "  - Setup string dictionary%s", "");
 
-    encode_async_create(&context->dictionary, 1000, 1000, 1000, 8, NULL);
+    jak_encode_async_create(&context->dictionary, 1000, 1000, 1000, 8, NULL);
     JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
     JAK_CONSOLE_WRITE(file, "  - Parse JSON file%s", "");
@@ -64,34 +64,34 @@ static int convertJs2Model(struct js_to_context *context, FILE *file, bool optim
     }
 
     JAK_CONSOLE_WRITE(file, "  - Test document restrictions%s", "");
-    struct jak_error err;
+    jak_error err;
     status = json_test(&err, &jsonAst);
     if (!status) {
         JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
-        error_print_to_stderr(&err);
+        jak_error_print_to_stderr(&err);
         return false;
     } else {
         JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
     }
 
     JAK_CONSOLE_WRITE(file, "  - Create bulk insertion bulk%s", "");
-    doc_bulk_create(&context->context, &context->dictionary);
+    jak_doc_bulk_create(&context->context, &context->dictionary);
     JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
-    context->partition = doc_bulk_new_entries(&context->context);
+    context->partition = jak_doc_bulk_new_entries(&context->context);
 
     JAK_CONSOLE_WRITE(file, "  - Add file to new partition%s", "");
-    doc_bulk_add_json(context->partition, &jsonAst);
+    jak_doc_bulk_add_json(context->partition, &jsonAst);
     json_drop(&jsonAst);
     JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
     JAK_CONSOLE_WRITE(file, "  - Cleanup reserved memory%s", "");
-    doc_bulk_shrink(&context->context);
+    jak_doc_bulk_shrink(&context->context);
     JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
     JAK_CONSOLE_WRITE(file, "  - Finalize partition%s", "");
     context->partitionMetaModel =
-        doc_entries_columndoc(&context->context, context->partition, optimizeForReads);
+        jak_doc_entries_columndoc(&context->context, context->partition, optimizeForReads);
     JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
     return true;
@@ -101,9 +101,9 @@ static void cleanup(FILE *file, struct js_to_context *context)
 {
     JAK_CONSOLE_WRITE(file, "  - Perform cleanup operations%s", "");
     strdic_drop(&context->dictionary);
-    doc_bulk_Drop(&context->context);
-    doc_entries_drop(context->partition);
-    columndoc_free(context->partitionMetaModel);
+    jak_doc_bulk_drop(&context->context);
+    jak_doc_entries_drop(context->partition);
+    jak_columndoc_free(context->partitionMetaModel);
     free(context->jsonContent);
     free(context->partitionMetaModel);
     JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
@@ -129,7 +129,7 @@ static int testFileExists(FILE *file, const char *fileName, size_t fileNum, size
 fail:
     JAK_CONSOLE_WRITE_CONT(file, "[%s]", "ERROR");
     JAK_CONSOLE_WRITE_ENDL(file);
-    JAK_CONSOLE_WRITELN(file, "** ERROR ** file I/O error for file '%s'", fileName);
+    JAK_CONSOLE_WRITELN(file, "** ERROR ** file I/O JAK_ERROR for file '%s'", fileName);
     return false;
 
 success:
@@ -428,7 +428,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
         jsonContent[fsize] = 0;
 
         jak_archive archive;
-        struct jak_error err;
+        jak_error err;
 
         jak_archive_callback progress_tracker = { 0 };
         progress_tracker.begin_create_from_model = tracker_begin_create_from_model;
@@ -462,7 +462,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
         if (!jak_archive_from_json(&archive, pathCarbonFileOut, &err, jsonContent,
                                       compressor, dic_type, string_dic_async_nthreads, flagReadOptimized,
                                       flagBakeStringIdIndex, &progress_tracker)) {
-            error_print_and_abort(&err);
+            jak_error_print_and_abort(&err);
         } else {
             jak_archive_close(&archive);
         }
@@ -472,9 +472,9 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
 
 //        struct jak_memblock *carbonFile;
 //        JAK_CONSOLE_WRITE(file, "  - Convert partition into in-memory CARBON file%s", "");
-//        struct jak_error err;
+//        jak_error err;
 //        if (!jak_archive_from_model(&carbonFile, &err, cabContext.partitionMetaModel, pack, flagBakeStringIdIndex)) {
-//            error_print_and_abort(&err);
+//            jak_error_print_and_abort(&err);
 //        }
 //        JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 //
@@ -524,13 +524,13 @@ bool moduleViewCabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *m
             JAK_CONSOLE_WRITELN(file, "Input file '%s' cannot be found. STOP", carbonFilePath);
             return false;
         }
-        struct jak_error err;
+        jak_error err;
         FILE *inputFile = fopen(carbonFilePath, "r");
         struct jak_memblock *stream;
         jak_archive_load(&stream, inputFile);
         if (!jak_archive_print(stdout, &err, stream)) {
-            error_print_to_stderr(&err);
-            error_drop(&err);
+            jak_error_print_to_stderr(&err);
+            jak_error_drop(&err);
         }
         memblock_drop(stream);
         fclose(inputFile);
@@ -611,13 +611,13 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
         jak_archive archive;
         int status;
         if ((status = jak_archive_open(&archive, pathCarbonFileIn))) {
-            struct jak_encoded_doc_list collection;
+            jak_encoded_doc_list collection;
             jak_archive_converter(&collection, &archive);
-            encoded_doc_collection_print(stdout, &collection);
+            jak_encoded_doc_collection_print(stdout, &collection);
             printf("\n");
-            encoded_doc_collection_drop(&collection);
+            jak_encoded_doc_collection_drop(&collection);
         } else {
-            error_print(archive.err.code);
+            JAK_ERROR_PRINT(archive.err.code);
         }
 
         jak_archive_close(&archive);

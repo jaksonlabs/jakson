@@ -15,10 +15,10 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <jak_global_id.h>
+#include <jak_unique_id.h>
 #include <jak_time.h>
 #include <jak_error.h>
-#include <jak_hash_bern.h>
+#include <jak_hash.h>
 
 _Thread_local bool thread_local_init;
 
@@ -72,7 +72,7 @@ union global_id {
         jak_u64 value;
 };
 
-bool global_id_create(jak_global_id_t *out)
+bool jak_unique_id_create(jak_uid_t *out)
 {
         JAK_ASSERT(out);
 
@@ -107,7 +107,7 @@ bool global_id_create(jak_global_id_t *out)
         }
 
         bool capacity_left = (thread_local_counter != thread_local_counter_limit);
-        error_print_if(!capacity_left, JAK_ERR_THREADOOOBJIDS)
+        JAK_ERROR_PRINT_IF(!capacity_left, JAK_ERR_THREADOOOBJIDS)
         if (JAK_LIKELY(capacity_left)) {
                 union global_id internal =
                         {.global_wallclock  = time_now_wallclock(),
@@ -127,70 +127,70 @@ bool global_id_create(jak_global_id_t *out)
         return capacity_left;
 }
 
-bool global_id_get_global_wallclocktime(uint_fast8_t *out, jak_global_id_t id)
+bool jak_unique_id_get_global_wallclocktime(uint_fast8_t *out, jak_uid_t id)
 {
         JAK_ERROR_IF_NULL(out);
         *out = ((union global_id *) &id)->global_wallclock;
         return true;
 }
 
-bool global_id_get_global_build_path_bit(uint_fast8_t *out, jak_global_id_t id)
+bool jak_unique_id_get_global_build_path_bit(uint_fast8_t *out, jak_uid_t id)
 {
         JAK_ERROR_IF_NULL(out);
         *out = ((union global_id *) &id)->global_build_path;
         return true;
 }
 
-bool global_id_get_global_build_time_bit(uint_fast8_t *out, jak_global_id_t id)
+bool jak_unique_id_get_global_build_time_bit(uint_fast8_t *out, jak_uid_t id)
 {
         JAK_ERROR_IF_NULL(out);
         *out = ((union global_id *) &id)->global_build_date;
         return true;
 }
 
-bool global_id_get_process_id(uint_fast8_t *out, jak_global_id_t id)
+bool jak_unique_id_get_process_id(uint_fast8_t *out, jak_uid_t id)
 {
         JAK_ERROR_IF_NULL(out);
         *out = ((union global_id *) &id)->process_id;
         return true;
 }
 
-bool global_id_get_process_magic(uint_fast8_t *out, jak_global_id_t id)
+bool jak_unique_id_get_process_magic(uint_fast8_t *out, jak_uid_t id)
 {
         JAK_ERROR_IF_NULL(out);
         *out = ((union global_id *) &id)->process_magic;
         return true;
 }
 
-bool global_id_get_process_counter(uint_fast16_t *out, jak_global_id_t id)
+bool jak_unique_id_get_process_counter(uint_fast16_t *out, jak_uid_t id)
 {
         JAK_ERROR_IF_NULL(out);
         *out = ((union global_id *) &id)->process_counter;
         return true;
 }
 
-bool global_id_get_thread_id(uint_fast8_t *out, jak_global_id_t id)
+bool jak_unique_id_get_thread_id(uint_fast8_t *out, jak_uid_t id)
 {
         JAK_ERROR_IF_NULL(out);
         *out = ((union global_id *) &id)->thread_id;
         return true;
 }
 
-bool global_id_get_thread_magic(uint_fast8_t *out, jak_global_id_t id)
+bool jak_unique_id_get_thread_magic(uint_fast8_t *out, jak_uid_t id)
 {
         JAK_ERROR_IF_NULL(out);
         *out = ((union global_id *) &id)->thread_magic;
         return true;
 }
 
-bool global_id_get_thread_counter(uint_fast32_t *out, jak_global_id_t id)
+bool jak_unique_id_get_thread_counter(uint_fast32_t *out, jak_uid_t id)
 {
         JAK_ERROR_IF_NULL(out);
         *out = ((union global_id *) &id)->thread_counter;
         return true;
 }
 
-bool global_id_get_call_random(uint_fast8_t *out, jak_global_id_t id)
+bool jak_unique_id_get_call_random(uint_fast8_t *out, jak_uid_t id)
 {
         JAK_ERROR_IF_NULL(out);
         *out = ((union global_id *) &id)->call_random;

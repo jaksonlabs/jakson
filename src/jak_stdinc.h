@@ -159,10 +159,10 @@ JAK_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum jak_archiv
 
 #define JAK_NOT_IMPLEMENTED                                                                                            \
 {                                                                                                                      \
-    struct jak_error err;                                                                                                    \
-    error_init(&err);                                                                                                  \
-    error(&err, JAK_ERR_NOTIMPLEMENTED)                                                                                \
-    error_print_and_abort(&err);                                                                                       \
+    jak_error err;                                                                                                    \
+    jak_error_init(&err);                                                                                                  \
+    JAK_ERROR(&err, JAK_ERR_NOTIMPLEMENTED)                                                                                \
+    jak_error_print_and_abort(&err);                                                                                       \
     return false;                                                                                                      \
 };
 
@@ -170,7 +170,7 @@ JAK_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum jak_archiv
 #define JAK_check_tag(is, expected)                                                                                 \
 {                                                                                                                      \
     if (is != expected) {                                                                                              \
-        error_print(JAK_ERR_ERRINTERNAL)                                                                     \
+        JAK_ERROR_PRINT(JAK_ERR_ERRINTERNAL)                                                                     \
         return false;                                                                                                  \
     }                                                                                                                  \
 }
@@ -297,10 +297,10 @@ JAK_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum jak_archiv
 #define JAK_ERROR_IF_NULL(x)                                                                                               \
 {                                                                                                                      \
     if (!(x)) {                                                                                                        \
-        struct jak_error err;                                                                                                \
-        error_init(&err);                                                                                              \
-        error(&err, JAK_ERR_NULLPTR);                                                                                  \
-        error_print_to_stderr(&err);                                                                                   \
+        jak_error err;                                                                                                \
+        jak_error_init(&err);                                                                                              \
+        JAK_ERROR(&err, JAK_ERR_NULLPTR);                                                                                  \
+        jak_error_print_to_stderr(&err);                                                                                   \
         return false;                                                                                                  \
     }                                                                                                                  \
 }
@@ -339,7 +339,7 @@ JAK_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum jak_archiv
 #define JAK_are_bits_set(mask, bit)   (((bit) & mask ) == (bit))
 
 #define JAK_ERROR_IF_NOT_IMPLEMENTED(err, x, func)                                                                         \
-    JAK_optional(x->func == NULL, error(err, JAK_ERR_NOTIMPLEMENTED))
+    JAK_optional(x->func == NULL, JAK_ERROR(err, JAK_ERR_NOTIMPLEMENTED))
 
 #define JAK_optional(expr, stmt)                                                                                       \
     if (expr) { stmt; }

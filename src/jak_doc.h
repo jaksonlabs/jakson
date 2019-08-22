@@ -29,74 +29,54 @@
 
 JAK_BEGIN_DECL
 
-struct jak_doc_obj;
-
-struct jak_column_doc;
-
-struct jak_doc_entries {
-        struct jak_doc_obj *context;
+typedef struct jak_doc_entries {
+        jak_doc_obj *context;
         const char *key;
         jak_archive_field_e type;
         struct jak_vector ofType(<T>) values;
-};
+} jak_doc_entries;
 
-struct jak_doc_bulk {
+typedef struct jak_doc_bulk {
         struct jak_string_dict *dic;
         struct jak_vector ofType(char *) keys, values;
-        struct jak_vector ofType(struct jak_doc) models;
-};
+        struct jak_vector ofType(jak_doc) models;
+} jak_doc_bulk;
 
-struct jak_doc {
-        struct jak_doc_bulk *context;
-        struct jak_vector ofType(struct jak_doc_obj) obj_model;
+typedef struct jak_doc {
+        jak_doc_bulk *context;
+        struct jak_vector ofType(jak_doc_obj) obj_model;
         jak_archive_field_e type;
-};
+} jak_doc;
 
-struct jak_doc_obj {
-        struct jak_vector ofType(struct jak_doc_entries) entries;
-        struct jak_doc *doc;
-};
+typedef struct jak_doc_obj {
+        struct jak_vector ofType(jak_doc_entries) entries;
+        jak_doc *doc;
+} jak_doc_obj;
 
-bool doc_bulk_create(struct jak_doc_bulk *bulk, struct jak_string_dict *dic);
+bool jak_doc_bulk_create(jak_doc_bulk *bulk, struct jak_string_dict *dic);
+bool jak_doc_bulk_drop(jak_doc_bulk *bulk);
 
-bool doc_bulk_Drop(struct jak_doc_bulk *bulk);
+bool jak_doc_bulk_shrink(jak_doc_bulk *bulk);
+bool jak_doc_bulk_print(FILE *file, jak_doc_bulk *bulk);
 
-bool doc_bulk_shrink(struct jak_doc_bulk *bulk);
+jak_doc *jak_doc_bulk_new_doc(jak_doc_bulk *context, jak_archive_field_e type);
+jak_doc_obj *jak_doc_bulk_new_obj(jak_doc *model);
+bool jak_doc_bulk_get_dic_contents(struct jak_vector ofType (const char *) **strings, struct jak_vector ofType(jak_archive_field_sid_t) **string_ids, const jak_doc_bulk *context);
 
-bool doc_bulk_print(FILE *file, struct jak_doc_bulk *bulk);
+bool jak_doc_print(FILE *file, const jak_doc *doc);
+const struct jak_vector ofType(jak_doc_entries) *jak_doc_get_entries(const jak_doc_obj *model);
+void jak_doc_print_entries(FILE *file, const jak_doc_entries *entries);
+void jak_doc_drop(jak_doc_obj *model);
 
-struct jak_doc *doc_bulk_new_doc(struct jak_doc_bulk *context, jak_archive_field_e type);
+bool jak_doc_obj_add_key(jak_doc_entries **out, jak_doc_obj *obj, const char *key, jak_archive_field_e type);
+bool jak_doc_obj_push_primtive(jak_doc_entries *entry, const void *value);
+bool jak_doc_obj_push_object(jak_doc_obj **out, jak_doc_entries *entry);
 
-struct jak_doc_obj *doc_bulk_new_obj(struct jak_doc *model);
-
-bool doc_bulk_get_dic_contents(struct jak_vector ofType (const char *) **strings,
-                               struct jak_vector ofType(jak_archive_field_sid_t) **string_ids,
-                               const struct jak_doc_bulk *context);
-
-bool doc_print(FILE *file, const struct jak_doc *doc);
-
-const struct jak_vector ofType(struct jak_doc_entries) *doc_get_entries(const struct jak_doc_obj *model);
-
-void doc_print_entries(FILE *file, const struct jak_doc_entries *entries);
-
-void doc_drop(struct jak_doc_obj *model);
-
-bool doc_obj_add_key(struct jak_doc_entries **out, struct jak_doc_obj *obj, const char *key, jak_archive_field_e type);
-
-bool doc_obj_push_primtive(struct jak_doc_entries *entry, const void *value);
-
-bool doc_obj_push_object(struct jak_doc_obj **out, struct jak_doc_entries *entry);
-
-struct jak_doc_entries *doc_bulk_new_entries(struct jak_doc_bulk *dst);
-
-struct jak_doc_obj *doc_bulk_add_json(struct jak_doc_entries *partition, struct jak_json *json);
-
-struct jak_doc_obj *doc_entries_get_root(const struct jak_doc_entries *partition);
-
-struct jak_column_doc *doc_entries_columndoc(const struct jak_doc_bulk *bulk, const struct jak_doc_entries *partition,
-                                             bool read_optimized);
-
-bool doc_entries_drop(struct jak_doc_entries *partition);
+jak_doc_entries *jak_doc_bulk_new_entries(jak_doc_bulk *dst);
+jak_doc_obj *jak_doc_bulk_add_json(jak_doc_entries *partition, struct jak_json *json);
+jak_doc_obj *jak_doc_entries_get_root(const jak_doc_entries *partition);
+jak_column_doc *jak_doc_entries_columndoc(const jak_doc_bulk *bulk, const jak_doc_entries *partition, bool read_optimized);
+bool jak_doc_entries_drop(jak_doc_entries *partition);
 
 JAK_END_DECL
 

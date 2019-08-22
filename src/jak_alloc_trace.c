@@ -167,7 +167,7 @@ static inline void *alloc_register(size_t size)
                         return entry->new_ptr_func(size);
                 }
         }
-        print_error_and_die(JAK_ERR_MALLOCERR)
+        JAK_ERROR_PRINT_AND_DIE(JAK_ERR_MALLOCERR)
         return NULL;
 }
 

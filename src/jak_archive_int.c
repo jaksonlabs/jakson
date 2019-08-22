@@ -202,7 +202,7 @@ jak_int_marker_to_field_type(char symbol)
                 case JAK_MARKER_SYMBOL_PROP_OBJECT_ARRAY:
                         return JAK_FIELD_OBJECT;
                 default: {
-                        print_error_and_die(JAK_ERR_MARKERMAPPING);
+                        JAK_ERROR_PRINT_AND_DIE(JAK_ERR_MARKERMAPPING);
                 }
         }
 }

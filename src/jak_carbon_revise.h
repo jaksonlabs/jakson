@@ -24,7 +24,7 @@
 
 #include <jak_stdinc.h>
 #include <jak_error.h>
-#include <jak_global_id.h>
+#include <jak_unique_id.h>
 #include <jak_carbon.h>
 
 JAK_BEGIN_DECL
@@ -46,7 +46,7 @@ bool jak_carbon_revise_try_begin(jak_carbon_revise *context, jak_carbon *revised
 bool jak_carbon_revise_begin(jak_carbon_revise *context, jak_carbon *revised_doc, jak_carbon *original);
 const jak_carbon *jak_carbon_revise_end(jak_carbon_revise *context);
 
-bool jak_carbon_revise_key_generate(jak_global_id_t *out, jak_carbon_revise *context);
+bool jak_carbon_revise_key_generate(jak_uid_t *out, jak_carbon_revise *context);
 
 bool jak_carbon_revise_key_set_unsigned(jak_carbon_revise *context, jak_u64 key_value);
 bool jak_carbon_revise_key_set_signed(jak_carbon_revise *context, jak_i64 key_value);

@@ -24,7 +24,7 @@
 #include <jak_archive_converter.h>
 
 struct converter_capture {
-        struct jak_encoded_doc_list *collection;
+        jak_encoded_doc_list *collection;
 };
 
 #define IMPORT_BASIC_PAIR(name)                                                                                        \
@@ -34,15 +34,15 @@ struct converter_capture {
     JAK_ASSERT(capture);                                                                                                   \
                                                                                                                        \
     struct converter_capture *extra = (struct converter_capture *) capture;                                                                          \
-    struct jak_encoded_doc *doc = encoded_doc_collection_get_or_append(extra->collection, oid);                          \
+    jak_encoded_doc *doc = jak_encoded_doc_collection_get_or_append(extra->collection, oid);                          \
     for (jak_u32 i = 0; i < num_pairs; i++) {                                                                         \
-        encoded_doc_add_prop_##name(doc, keys[i], values[i]);                                                   \
+        jak_encoded_doc_add_prop_##name(doc, keys[i], values[i]);                                                   \
     }                                                                                                                  \
 }
 
 #define DECLARE_VISIT_BASIC_TYPE_PAIR(name, built_in_type)                                                             \
 static void                                                                                                            \
-visit_##name##_pairs (jak_archive *jak_archive, path_stack_t path_stack, jak_global_id_t oid,                      \
+visit_##name##_pairs (jak_archive *jak_archive, path_stack_t path_stack, jak_uid_t oid,                      \
                   const jak_archive_field_sid_t *keys, const built_in_type *values, jak_u32 num_pairs, void *capture)      \
 {                                                                                                                      \
     IMPORT_BASIC_PAIR(name)                                                                                            \
@@ -50,7 +50,7 @@ visit_##name##_pairs (jak_archive *jak_archive, path_stack_t path_stack, jak_glo
 
 #define DECLARE_VISIT_ARRAY_TYPE(name, built_in_type)                                                                  \
 static jak_visit_policy_e                                                                                         \
-visit_enter_##name##_array_pairs(jak_archive *jak_archive, path_stack_t path, jak_global_id_t id,                  \
+visit_enter_##name##_array_pairs(jak_archive *jak_archive, path_stack_t path, jak_uid_t id,                  \
                                  const jak_archive_field_sid_t *keys, jak_u32 num_pairs, void *capture)                    \
 {                                                                                                                      \
     JAK_UNUSED(jak_archive);                                                                                            \
@@ -63,17 +63,17 @@ visit_enter_##name##_array_pairs(jak_archive *jak_archive, path_stack_t path, ja
     JAK_ASSERT(capture);                                                                                                   \
                                                                                                                        \
     struct converter_capture *extra = (struct converter_capture *) capture;                                                                          \
-    struct jak_encoded_doc *doc = encoded_doc_collection_get_or_append(extra->collection, id);                           \
+    jak_encoded_doc *doc = jak_encoded_doc_collection_get_or_append(extra->collection, id);                           \
     for (jak_u32 i = 0; i < num_pairs; i++)                                                                           \
     {                                                                                                                  \
-        encoded_doc_add_prop_array_##name(doc, keys[i]);                                                        \
+        jak_encoded_doc_add_prop_array_##name(doc, keys[i]);                                                        \
     }                                                                                                                  \
                                                                                                                        \
     return JAK_VISIT_INCLUDE;                                                                              \
 }                                                                                                                      \
                                                                                                                        \
 static void                                                                                                            \
-visit_##name##_array_pair(jak_archive *jak_archive, path_stack_t path, jak_global_id_t id,                         \
+visit_##name##_array_pair(jak_archive *jak_archive, path_stack_t path, jak_uid_t id,                         \
                           const jak_archive_field_sid_t key, jak_u32 entry_idx, jak_u32 max_entries,                      \
                           const built_in_type *array, jak_u32 array_length, void *capture)                            \
 {                                                                                                                      \
@@ -88,18 +88,18 @@ visit_##name##_array_pair(jak_archive *jak_archive, path_stack_t path, jak_globa
     JAK_ASSERT(capture);                                                                                                   \
                                                                                                                        \
     struct converter_capture *extra = (struct converter_capture *) capture;                                                                          \
-    struct jak_encoded_doc *doc = encoded_doc_collection_get_or_append(extra->collection, id);                           \
-    encoded_doc_array_push_##name(doc, key, array, array_length);                                               \
+    jak_encoded_doc *doc = jak_encoded_doc_collection_get_or_append(extra->collection, id);                           \
+    jak_encoded_doc_array_push_##name(doc, key, array, array_length);                                               \
 }                                                                                                                      \
 
 
-static void visit_root_object(jak_archive *archive, jak_global_id_t id, void *capture)
+static void visit_root_object(jak_archive *archive, jak_uid_t id, void *capture)
 {
         JAK_UNUSED(archive);
         JAK_ASSERT(capture);
 
         struct converter_capture *extra = (struct converter_capture *) capture;
-        encoded_doc_collection_get_or_append(extra->collection, id);
+        jak_encoded_doc_collection_get_or_append(extra->collection, id);
 }
 
 DECLARE_VISIT_BASIC_TYPE_PAIR(int8, jak_archive_field_i8_t)
@@ -124,7 +124,7 @@ DECLARE_VISIT_BASIC_TYPE_PAIR(boolean, jak_archive_field_boolean_t)
 
 DECLARE_VISIT_BASIC_TYPE_PAIR(string, jak_archive_field_sid_t)
 
-static void visit_null_pairs(jak_archive *archive, path_stack_t path, jak_global_id_t oid,
+static void visit_null_pairs(jak_archive *archive, path_stack_t path, jak_uid_t oid,
                              const jak_archive_field_sid_t *keys,
                              jak_u32 num_pairs, void *capture)
 {
@@ -133,15 +133,15 @@ static void visit_null_pairs(jak_archive *archive, path_stack_t path, jak_global
         JAK_ASSERT(capture);
 
         struct converter_capture *extra = (struct converter_capture *) capture;
-        struct jak_encoded_doc *doc = encoded_doc_collection_get_or_append(extra->collection, oid);
+        jak_encoded_doc *doc = jak_encoded_doc_collection_get_or_append(extra->collection, oid);
         for (jak_u32 i = 0; i < num_pairs; i++) {
-                encoded_doc_add_prop_null(doc, keys[i]);
+                jak_encoded_doc_add_prop_null(doc, keys[i]);
         }
 }
 
 static jak_visit_policy_e
-before_object_visit(jak_archive *archive, path_stack_t path_stack, jak_global_id_t parent_id,
-                    jak_global_id_t value_id, jak_u32 object_idx, jak_u32 num_objects, jak_archive_field_sid_t key,
+before_object_visit(jak_archive *archive, path_stack_t path_stack, jak_uid_t parent_id,
+                    jak_uid_t value_id, jak_u32 object_idx, jak_u32 num_objects, jak_archive_field_sid_t key,
                     void *capture)
 {
         JAK_UNUSED(archive);
@@ -152,9 +152,9 @@ before_object_visit(jak_archive *archive, path_stack_t path_stack, jak_global_id
         JAK_UNUSED(capture);
 
         struct converter_capture *extra = (struct converter_capture *) capture;
-        struct jak_encoded_doc *parent_doc = encoded_doc_collection_get_or_append(extra->collection, parent_id);
-        struct jak_encoded_doc *child_doc = encoded_doc_collection_get_or_append(extra->collection, value_id);
-        encoded_doc_add_prop_object(parent_doc, key, child_doc);
+        jak_encoded_doc *parent_doc = jak_encoded_doc_collection_get_or_append(extra->collection, parent_id);
+        jak_encoded_doc *child_doc = jak_encoded_doc_collection_get_or_append(extra->collection, value_id);
+        jak_encoded_doc_add_prop_object(parent_doc, key, child_doc);
 
         return JAK_VISIT_INCLUDE;
 }
@@ -182,7 +182,7 @@ DECLARE_VISIT_ARRAY_TYPE(boolean, jak_archive_field_boolean_t)
 DECLARE_VISIT_ARRAY_TYPE(string, jak_archive_field_sid_t)
 
 static jak_visit_policy_e
-visit_enter_null_array_pairs(jak_archive *archive, path_stack_t path, jak_global_id_t id,
+visit_enter_null_array_pairs(jak_archive *archive, path_stack_t path, jak_uid_t id,
                              const jak_archive_field_sid_t *keys, jak_u32 num_pairs, void *capture)
 {
         JAK_UNUSED(archive);
@@ -195,15 +195,15 @@ visit_enter_null_array_pairs(jak_archive *archive, path_stack_t path, jak_global
         JAK_ASSERT(capture);
 
         struct converter_capture *extra = (struct converter_capture *) capture;
-        struct jak_encoded_doc *doc = encoded_doc_collection_get_or_append(extra->collection, id);
+        jak_encoded_doc *doc = jak_encoded_doc_collection_get_or_append(extra->collection, id);
         for (jak_u32 i = 0; i < num_pairs; i++) {
-                encoded_doc_add_prop_array_null(doc, keys[i]);
+                jak_encoded_doc_add_prop_array_null(doc, keys[i]);
         }
 
         return JAK_VISIT_INCLUDE;
 }
 
-static void visit_null_array_pair(jak_archive *archive, path_stack_t path, jak_global_id_t id,
+static void visit_null_array_pair(jak_archive *archive, path_stack_t path, jak_uid_t id,
                                   const jak_archive_field_sid_t key,
                                   jak_u32 entry_idx, jak_u32 max_entries, jak_u32 num_nulls, void *capture)
 {
@@ -219,14 +219,14 @@ static void visit_null_array_pair(jak_archive *archive, path_stack_t path, jak_g
         JAK_ASSERT(capture);
 
         struct converter_capture *extra = (struct converter_capture *) capture;
-        struct jak_encoded_doc *doc = encoded_doc_collection_get_or_append(extra->collection, id);
-        encoded_doc_array_push_null(doc, key, &num_nulls, 1);
+        jak_encoded_doc *doc = jak_encoded_doc_collection_get_or_append(extra->collection, id);
+        jak_encoded_doc_array_push_null(doc, key, &num_nulls, 1);
 }
 
 static void
 before_visit_object_array_objects(bool *skip_group_object_ids, jak_archive *archive, path_stack_t path,
-                                  jak_global_id_t parent_id, jak_archive_field_sid_t key,
-                                  const jak_global_id_t *group_object_ids, jak_u32 num_group_object_ids,
+                                  jak_uid_t parent_id, jak_archive_field_sid_t key,
+                                  const jak_uid_t *group_object_ids, jak_u32 num_group_object_ids,
                                   void *capture)
 {
         JAK_UNUSED(archive);
@@ -238,19 +238,19 @@ before_visit_object_array_objects(bool *skip_group_object_ids, jak_archive *arch
         JAK_UNUSED(num_group_object_ids);
 
         struct converter_capture *extra = (struct converter_capture *) capture;
-        struct jak_encoded_doc *doc = encoded_doc_collection_get_or_append(extra->collection, parent_id);
-        encoded_doc_add_prop_array_object(doc, key);
+        jak_encoded_doc *doc = jak_encoded_doc_collection_get_or_append(extra->collection, parent_id);
+        jak_encoded_doc_add_prop_array_object(doc, key);
         for (jak_u32 i = 0; i < num_group_object_ids; i++) {
-                encoded_doc_array_push_object(doc, key, group_object_ids[i]);
+                jak_encoded_doc_array_push_object(doc, key, group_object_ids[i]);
         }
 }
 
 #define DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(name, built_in_type)                                             \
 static void                                                                                                            \
 visit_object_array_object_property_##name(jak_archive *jak_archive, path_stack_t path,                                \
-                                           jak_global_id_t parent_id,                                               \
+                                           jak_uid_t parent_id,                                               \
                                            jak_archive_field_sid_t key,                                                     \
-                                           jak_global_id_t nested_object_id,                                        \
+                                           jak_uid_t nested_object_id,                                        \
                                            jak_archive_field_sid_t nested_key,                                              \
                                            const built_in_type *nested_values,                                         \
                                            jak_u32 num_nested_values, void *capture)                                  \
@@ -263,9 +263,9 @@ visit_object_array_object_property_##name(jak_archive *jak_archive, path_stack_t
     JAK_UNUSED(nested_values);                                                                                      \
                                                                                                                        \
     struct converter_capture *extra = (struct converter_capture *) capture;                                                                          \
-        struct jak_encoded_doc *doc = encoded_doc_collection_get_or_append(extra->collection, nested_object_id);             \
-        encoded_doc_add_prop_array_##name(doc, nested_key);                                                                                                   \
-        encoded_doc_array_push_##name(doc, nested_key, nested_values, num_nested_values);                           \
+        jak_encoded_doc *doc = jak_encoded_doc_collection_get_or_append(extra->collection, nested_object_id);             \
+        jak_encoded_doc_add_prop_array_##name(doc, nested_key);                                                                                                   \
+        jak_encoded_doc_array_push_##name(doc, nested_key, nested_values, num_nested_values);                           \
 }
 
 DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(int8, jak_archive_field_i8_t);
@@ -292,13 +292,13 @@ DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(boolean, jak_archive_field_boolean
 
 DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(null, jak_archive_field_u32_t);
 
-bool jak_archive_converter(struct jak_encoded_doc_list *collection, jak_archive *archive)
+bool jak_archive_converter(jak_encoded_doc_list *collection, jak_archive *archive)
 {
 
         JAK_ERROR_IF_NULL(collection);
         JAK_ERROR_IF_NULL(archive);
 
-        encoded_doc_collection_create(collection, &archive->err, archive);
+        jak_encoded_doc_collection_create(collection, &archive->err, archive);
 
         jak_archive_visitor visitor = {0};
         jak_archive_visitor_desc desc = {.visit_mask = JAK_ARCHIVE_ITER_MASK_ANY};

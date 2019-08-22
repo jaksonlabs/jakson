@@ -18,10 +18,7 @@
 #include <math.h>
 
 #include <jak_slicelist.h>
-#include <jak_hash_add.h>
-#include <jak_hash_xor.h>
-#include <jak_hash_rot.h>
-#include <jak_hash_sax.h>
+#include <jak_hash.h>
 
 #define JAK_SLICE_LIST_TAG "slice-list"
 
@@ -74,7 +71,7 @@ bool slice_list_create(slice_list_t *list, const jak_allocator *alloc, size_t sl
 
         jak_alloc_this_or_std(&list->alloc, alloc);
         spin_init(&list->lock);
-        error_init(&list->err);
+        jak_error_init(&list->err);
 
         vec_create(&list->slices, &list->alloc, sizeof(Slice), sliceCapacity);
         vec_create(&list->descriptors, &list->alloc, sizeof(SliceDescriptor), sliceCapacity);
@@ -204,7 +201,7 @@ bool slice_list_lookup(slice_handle_t *handle, slice_list_t *list, const char *n
                                                 case SLICE_LOOKUP_BESEARCH:
                                                         pairPosition = SLICE_BESEARCH(slice, keyHash, needle);
                                                         break;
-                                                default: error(&list->err, JAK_ERR_UNSUPFINDSTRAT)
+                                                default: JAK_ERROR(&list->err, JAK_ERR_UNSUPFINDSTRAT)
                                                         return false;
                                         }
 

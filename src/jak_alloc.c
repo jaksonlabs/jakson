@@ -39,7 +39,7 @@ bool jak_alloc_create_std(jak_allocator *alloc)
                 alloc->realloc = invoke_realloc;
                 alloc->free = invoke_free;
                 alloc->clone = invoke_clone;
-                error_init(&alloc->err);
+                jak_error_init(&alloc->err);
                 return true;
         } else {
                 return false;
@@ -88,7 +88,7 @@ static void *invoke_malloc(jak_allocator *self, size_t size)
 
         errno = 0;
         if ((result = malloc(size)) == NULL) {
-                print_error_and_die(JAK_ERR_MALLOCERR)
+                JAK_ERROR_PRINT_AND_DIE(JAK_ERR_MALLOCERR)
         } else {
                 return result;
         }
@@ -100,7 +100,7 @@ static void *invoke_realloc(jak_allocator *self, void *ptr, size_t size)
         void *result;
 
         if ((result = realloc(ptr, size)) == NULL) {
-                error_print(JAK_ERR_MALLOCERR)
+                JAK_ERROR_PRINT(JAK_ERR_MALLOCERR)
                 return ptr;
         } else {
                 return result;

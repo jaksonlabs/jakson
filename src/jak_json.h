@@ -80,12 +80,12 @@ struct jak_json_err {
 struct jak_json_tokenizer {
         const char *cursor;
         struct jak_json_token token;
-        struct jak_error err;
+        jak_error err;
 };
 
 struct jak_json_parser {
         struct jak_json_tokenizer tokenizer;
-        struct jak_error err;
+        jak_error err;
 };
 
 enum json_parent {
@@ -120,7 +120,7 @@ enum json_list_type {
 
 struct jak_json {
         struct jak_json_element *element;
-        struct jak_error err;
+        jak_error err;
 };
 
 struct jak_json_node_value {
@@ -210,7 +210,7 @@ bool json_parser_create(struct jak_json_parser *parser);
 bool json_parse(struct jak_json *json, struct jak_json_err *error_desc, struct jak_json_parser *parser,
                 const char *input);
 
-bool json_test(struct jak_error *err, struct jak_json *json);
+bool json_test(jak_error *err, struct jak_json *json);
 
 bool json_drop(struct jak_json *json);
 

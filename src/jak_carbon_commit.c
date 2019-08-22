@@ -20,17 +20,15 @@
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_carbon_commit.h>
-#include <jak_global_id.h>
-#include <jak_hash_bern.h>
-#include <jak_hash_jenkins.h>
-#include <jak_hash_fnv.h>
+#include <jak_unique_id.h>
+#include <jak_hash.h>
 
 bool jak_carbon_commit_hash_create(struct jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(file)
 
         jak_u64 init_rev = 0;
-        global_id_create(&init_rev);
+        jak_unique_id_create(&init_rev);
 
         memfile_ensure_space(file, sizeof(jak_u64));
         memfile_write(file, &init_rev, sizeof(jak_u64));
@@ -99,26 +97,26 @@ bool jak_carbon_commit_hash_append_to_str(struct jak_string *dst, jak_u64 commit
         return true;
 }
 
-jak_u64 jak_carbon_commit_hash_from_str(const char *commit_str, struct jak_error *err)
+jak_u64 jak_carbon_commit_hash_from_str(const char *commit_str, jak_error *err)
 {
         if (commit_str && strlen(commit_str) == 16) {
                 char *illegal_char;
                 errno = 0;
                 jak_u64 ret = strtoull(commit_str, &illegal_char, 16);
                 if (ret == 0 && commit_str == illegal_char) {
-                        JAK_optional(err, error(err, JAK_ERR_NONUMBER))
+                        JAK_optional(err, JAK_ERROR(err, JAK_ERR_NONUMBER))
                         return 0;
                 } else if (ret == ULLONG_MAX && errno) {
-                        JAK_optional(err, error(err, JAK_ERR_BUFFERTOOTINY))
+                        JAK_optional(err, JAK_ERROR(err, JAK_ERR_BUFFERTOOTINY))
                         return 0;
                 } else if (*illegal_char) {
-                        JAK_optional(err, error(err, JAK_ERR_TAILINGJUNK))
+                        JAK_optional(err, JAK_ERROR(err, JAK_ERR_TAILINGJUNK))
                         return 0;
                 } else {
                         return ret;
                 }
         } else {
-                error(err, JAK_ERR_ILLEGALARG)
+                JAK_ERROR(err, JAK_ERR_ILLEGALARG)
                 return 0;
         }
 }

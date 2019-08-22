@@ -28,11 +28,11 @@
 
 JAK_BEGIN_DECL
 
-struct hashset_bucket {
+typedef struct jak_jak_hashset_bucket {
         bool in_use_flag;  /* flag indicating if bucket is in use */
         jak_i32 displacement; /* difference between intended position during insert, and actual position in table */
-        jak_u64 key_idx;      /* position of key element in owning struct hashset structure */
-};
+        jak_u64 key_idx;      /* position of key element in owning jak_hashset structure */
+} jak_jak_hashset_bucket;
 
 /**
  * Hashset implementation specialized for key of fixed-length size, and where comparision
@@ -45,41 +45,30 @@ struct hashset_bucket {
  * Note: this implementation does not support string or pointer types. The structure is thread-safe by a spinlock
  * lock implementation.
  */
-struct hashset {
+typedef struct jak_hashset {
         struct jak_vector key_data;
-        struct jak_vector ofType(struct hashset_bucket) table;
+        struct jak_vector ofType(jak_jak_hashset_bucket) table;
         struct spinlock lock;
         jak_u32 size;
-        struct jak_error err;
-};
+        jak_error err;
+} jak_hashset;
 
-JAK_DEFINE_GET_ERROR_FUNCTION(hashset, struct hashset, set);
+JAK_DEFINE_GET_ERROR_FUNCTION(jak_hashset, jak_hashset, set);
 
-bool hashset_create(struct hashset *map, struct jak_error *err, size_t key_size, size_t capacity);
+bool jak_hashset_create(jak_hashset *map, jak_error *err, size_t key_size, size_t capacity);
+jak_hashset *jak_hashset_cpy(jak_hashset *src);
+bool jak_hashset_drop(jak_hashset *map);
 
-struct hashset *hashset_cpy(struct hashset *src);
-
-bool hashset_drop(struct hashset *map);
-
-struct jak_vector *hashset_keys(struct hashset *map);
-
-bool hashset_clear(struct hashset *map);
-
-bool hashset_avg_displace(float *displace, const struct hashset *map);
-
-bool hashset_lock(struct hashset *map);
-
-bool hashset_unlock(struct hashset *map);
-
-bool hashset_insert_or_update(struct hashset *map, const void *keys, uint_fast32_t num_pairs);
-
-bool hashset_remove_if_contained(struct hashset *map, const void *keys, size_t num_pairs);
-
-bool hashset_contains_key(struct hashset *map, const void *key);
-
-bool hashset_get_fload_factor(float *factor, struct hashset *map);
-
-bool hashset_rehash(struct hashset *map);
+struct jak_vector *jak_hashset_keys(jak_hashset *map);
+bool jak_hashset_clear(jak_hashset *map);
+bool jak_hashset_avg_displace(float *displace, const jak_hashset *map);
+bool jak_hashset_lock(jak_hashset *map);
+bool jak_hashset_unlock(jak_hashset *map);
+bool jak_hashset_insert_or_update(jak_hashset *map, const void *keys, uint_fast32_t num_pairs);
+bool jak_hashset_remove_if_contained(jak_hashset *map, const void *keys, size_t num_pairs);
+bool jak_hashset_contains_key(jak_hashset *map, const void *key);
+bool jak_hashset_get_load_factor(float *factor, jak_hashset *map);
+bool jak_hashset_rehash(jak_hashset *map);
 
 JAK_END_DECL
 

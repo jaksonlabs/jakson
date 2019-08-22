@@ -29,7 +29,7 @@
 
 JAK_BEGIN_DECL
 
-bool jak_carbon_key_create(struct jak_memfile *file, jak_carbon_key_e type, struct jak_error *err);
+bool jak_carbon_key_create(struct jak_memfile *file, jak_carbon_key_e type, jak_error *err);
 bool jak_carbon_key_skip(jak_carbon_key_e *out, struct jak_memfile *file);
 bool jak_carbon_key_read_type(jak_carbon_key_e *out, struct jak_memfile *file);
 bool jak_carbon_key_write_unsigned(struct jak_memfile *file, jak_u64 key);

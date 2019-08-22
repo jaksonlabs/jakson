@@ -107,7 +107,7 @@ typedef struct JAK_slice_list_t {
 
         jak_u32 appender_idx;
 
-        struct jak_error err;
+        jak_error err;
 } slice_list_t;
 
 typedef struct JAK_slice_handle_t {

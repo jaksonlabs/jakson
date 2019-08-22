@@ -33,7 +33,7 @@ typedef struct jak_string_pred {
         jak_i64 limit;
 } jak_string_pred;
 
-JAK_BUILT_IN(static bool) jak_string_pred_validate(struct jak_error *err, const jak_string_pred *pred)
+JAK_BUILT_IN(static bool) jak_string_pred_validate(jak_error *err, const jak_string_pred *pred)
 {
         JAK_ERROR_IF_NULL(pred);
         JAK_ERROR_IF_NOT_IMPLEMENTED(err, pred, func)

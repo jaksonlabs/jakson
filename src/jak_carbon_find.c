@@ -81,7 +81,7 @@ bool jak_carbon_find_create(jak_carbon_find *find, jak_carbon_dot_path *path, ja
         JAK_ERROR_IF_NULL(doc)
 
         JAK_zero_memory(find, sizeof(jak_carbon_find));
-        error_init(&find->err);
+        jak_error_init(&find->err);
         find->doc = doc;
 
         JAK_check_success(jak_carbon_path_evaluator_begin(&find->path_evaluater, path, doc));
@@ -97,7 +97,7 @@ bool jak_carbon_find_create(jak_carbon_find *find, jak_carbon_dot_path *path, ja
                         case JAK_CARBON_OBJECT:
                                 result_from_object(find, &find->path_evaluater.result.containers.object.it);
                                 break;
-                        default: error(&path->err, JAK_ERR_INTERNALERR);
+                        default: JAK_ERROR(&path->err, JAK_ERR_INTERNALERR);
                                 return false;
                 }
         }
@@ -111,7 +111,7 @@ bool jak_carbon_find_has_result(jak_carbon_find *find)
 }
 
 const char *
-jak_carbon_find_result_to_str(struct jak_string *dst_str, jak_jak_carbon_printer_impl_e print_type, jak_carbon_find *find)
+jak_carbon_find_result_to_str(struct jak_string *dst_str, jak_carbon_printer_impl_e print_type, jak_carbon_find *find)
 {
         JAK_ERROR_IF_NULL(dst_str)
         JAK_ERROR_IF_NULL(find)
@@ -224,7 +224,7 @@ jak_carbon_find_result_to_str(struct jak_string *dst_str, jak_jak_carbon_printer
                                 jak_carbon_printer_binary(&printer, dst_str, val);
                         }
                                 break;
-                        default: error(&find->err, JAK_ERR_INTERNALERR)
+                        default: JAK_ERROR(&find->err, JAK_ERR_INTERNALERR)
                                 return NULL;
                 }
 
@@ -254,7 +254,7 @@ bool jak_carbon_find_result_type(jak_carbon_field_type_e *type, jak_carbon_find 
 {
         JAK_ERROR_IF_NULL(type)
         JAK_ERROR_IF_NULL(find)
-        error_if(!jak_carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
+        JAK_ERROR_IF(!jak_carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
         *type = find->type;
         return true;
 }
@@ -262,24 +262,24 @@ bool jak_carbon_find_result_type(jak_carbon_field_type_e *type, jak_carbon_find 
 jak_carbon_array_it *jak_carbon_find_result_array(jak_carbon_find *find)
 {
         JAK_ERROR_IF_NULL(find)
-        error_if(!jak_carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
-        error_if(find->type != JAK_CARBON_FIELD_TYPE_ARRAY, &find->err, JAK_ERR_TYPEMISMATCH)
+        JAK_ERROR_IF(!jak_carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
+        JAK_ERROR_IF(find->type != JAK_CARBON_FIELD_TYPE_ARRAY, &find->err, JAK_ERR_TYPEMISMATCH)
         return find->value.array_it;
 }
 
 jak_carbon_object_it *jak_carbon_find_result_object(jak_carbon_find *find)
 {
         JAK_ERROR_IF_NULL(find)
-        error_if(!jak_carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
-        error_if(find->type != JAK_CARBON_FIELD_TYPE_OBJECT, &find->err, JAK_ERR_TYPEMISMATCH)
+        JAK_ERROR_IF(!jak_carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
+        JAK_ERROR_IF(find->type != JAK_CARBON_FIELD_TYPE_OBJECT, &find->err, JAK_ERR_TYPEMISMATCH)
         return find->value.object_it;
 }
 
 jak_carbon_column_it *jak_carbon_find_result_column(jak_carbon_find *find)
 {
         JAK_ERROR_IF_NULL(find)
-        error_if(!jak_carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
-        error_if(find->type != JAK_CARBON_FIELD_TYPE_COLUMN_U8 &&
+        JAK_ERROR_IF(!jak_carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
+        JAK_ERROR_IF(find->type != JAK_CARBON_FIELD_TYPE_COLUMN_U8 &&
                  find->type != JAK_CARBON_FIELD_TYPE_COLUMN_U16 &&
                  find->type != JAK_CARBON_FIELD_TYPE_COLUMN_U32 &&
                  find->type != JAK_CARBON_FIELD_TYPE_COLUMN_U64 &&
@@ -295,8 +295,8 @@ jak_carbon_column_it *jak_carbon_find_result_column(jak_carbon_find *find)
 bool jak_carbon_find_result_boolean(bool *out, jak_carbon_find *find)
 {
         JAK_ERROR_IF_NULL(find)
-        error_if(!jak_carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
-        error_if(!jak_carbon_field_type_is_boolean(find->type), &find->err, JAK_ERR_TYPEMISMATCH)
+        JAK_ERROR_IF(!jak_carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
+        JAK_ERROR_IF(!jak_carbon_field_type_is_boolean(find->type), &find->err, JAK_ERR_TYPEMISMATCH)
         *out = find->value.boolean;
         return true;
 }
@@ -304,8 +304,8 @@ bool jak_carbon_find_result_boolean(bool *out, jak_carbon_find *find)
 bool jak_carbon_find_result_unsigned(jak_u64 *out, jak_carbon_find *find)
 {
         JAK_ERROR_IF_NULL(find)
-        error_if(!jak_carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
-        error_if(!jak_carbon_field_type_is_unsigned(find->type), &find->err, JAK_ERR_TYPEMISMATCH)
+        JAK_ERROR_IF(!jak_carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
+        JAK_ERROR_IF(!jak_carbon_field_type_is_unsigned(find->type), &find->err, JAK_ERR_TYPEMISMATCH)
         *out = find->value.unsigned_number;
         return true;
 }
@@ -313,8 +313,8 @@ bool jak_carbon_find_result_unsigned(jak_u64 *out, jak_carbon_find *find)
 bool jak_carbon_find_result_signed(jak_i64 *out, jak_carbon_find *find)
 {
         JAK_ERROR_IF_NULL(find)
-        error_if(!jak_carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
-        error_if(!jak_carbon_field_type_is_signed(find->type), &find->err, JAK_ERR_TYPEMISMATCH)
+        JAK_ERROR_IF(!jak_carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
+        JAK_ERROR_IF(!jak_carbon_field_type_is_signed(find->type), &find->err, JAK_ERR_TYPEMISMATCH)
         *out = find->value.signed_number;
         return true;
 }
@@ -322,8 +322,8 @@ bool jak_carbon_find_result_signed(jak_i64 *out, jak_carbon_find *find)
 bool jak_carbon_find_result_float(float *out, jak_carbon_find *find)
 {
         JAK_ERROR_IF_NULL(find)
-        error_if(!jak_carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
-        error_if(!jak_carbon_field_type_is_floating(find->type), &find->err, JAK_ERR_TYPEMISMATCH)
+        JAK_ERROR_IF(!jak_carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
+        JAK_ERROR_IF(!jak_carbon_field_type_is_floating(find->type), &find->err, JAK_ERR_TYPEMISMATCH)
         *out = find->value.float_number;
         return true;
 }
@@ -332,8 +332,8 @@ const char *jak_carbon_find_result_string(jak_u64 *str_len, jak_carbon_find *fin
 {
         JAK_ERROR_IF_NULL(find)
         JAK_ERROR_IF_NULL(str_len)
-        error_if(!jak_carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
-        error_if(find->type != JAK_CARBON_FIELD_TYPE_STRING, &find->err, JAK_ERR_TYPEMISMATCH)
+        JAK_ERROR_IF(!jak_carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
+        JAK_ERROR_IF(find->type != JAK_CARBON_FIELD_TYPE_STRING, &find->err, JAK_ERR_TYPEMISMATCH)
         *str_len = find->value.string.len;
         return find->value.string.base;
 }
@@ -341,8 +341,8 @@ const char *jak_carbon_find_result_string(jak_u64 *str_len, jak_carbon_find *fin
 jak_carbon_binary *jak_carbon_find_result_binary(jak_carbon_find *find)
 {
         JAK_ERROR_IF_NULL(find)
-        error_if(!jak_carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
-        error_if(!jak_carbon_field_type_is_binary(find->type), &find->err, JAK_ERR_TYPEMISMATCH)
+        JAK_ERROR_IF(!jak_carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
+        JAK_ERROR_IF(!jak_carbon_field_type_is_binary(find->type), &find->err, JAK_ERR_TYPEMISMATCH)
         return &find->value.binary;
 }
 
@@ -402,7 +402,7 @@ static void result_from_array(jak_carbon_find *find, jak_carbon_array_it *it)
                 case JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM:
                         jak_carbon_array_it_binary_value(&find->value.binary, it);
                         break;
-                default: error(&find->err, JAK_ERR_INTERNALERR);
+                default: JAK_ERROR(&find->err, JAK_ERR_INTERNALERR);
                         break;
         }
 }
@@ -456,7 +456,7 @@ static void result_from_object(jak_carbon_find *find, jak_carbon_object_it *it)
                 case JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM:
                         jak_carbon_object_it_binary_value(&find->value.binary, it);
                         break;
-                default: error(&find->err, JAK_ERR_INTERNALERR);
+                default: JAK_ERROR(&find->err, JAK_ERR_INTERNALERR);
                         break;
         }
 }
@@ -478,7 +478,7 @@ result_from_column(jak_carbon_find *find, jak_u32 requested_idx, jak_carbon_colu
                         } else if (field_value == JAK_CARBON_BOOLEAN_COLUMN_FALSE) {
                                 find->type = JAK_CARBON_FIELD_TYPE_FALSE;
                         } else {
-                                error(&it->err, JAK_ERR_INTERNALERR);
+                                JAK_ERROR(&it->err, JAK_ERR_INTERNALERR);
                         }
                 }
                         break;
@@ -572,7 +572,7 @@ result_from_column(jak_carbon_find *find, jak_u32 requested_idx, jak_carbon_colu
                         }
                 }
                         break;
-                default: error(&it->err, JAK_ERR_UNSUPPORTEDTYPE)
+                default: JAK_ERROR(&it->err, JAK_ERR_UNSUPPORTEDTYPE)
                         return false;
         }
         return true;

@@ -37,7 +37,7 @@ struct jak_memfile {
         bool bit_mode;
         size_t current_read_bit, current_write_bit, bytes_completed;
         enum access_mode mode;
-        struct jak_error err;
+        jak_error err;
 };
 
 #define JAK_MEMFILE_PEEK(file, type)                                                                                   \

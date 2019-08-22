@@ -21,7 +21,7 @@
 
 #include <jak_archive_strid_it.h>
 
-bool jak_strid_iter_open(jak_strid_iter *it, struct jak_error *err, jak_archive *archive)
+bool jak_strid_iter_open(jak_strid_iter *it, jak_error *err, jak_archive *archive)
 {
         JAK_ERROR_IF_NULL(it)
         JAK_ERROR_IF_NULL(archive)
@@ -29,7 +29,7 @@ bool jak_strid_iter_open(jak_strid_iter *it, struct jak_error *err, jak_archive 
         memset(&it->vector, 0, sizeof(it->vector));
         it->disk_file = fopen(archive->disk_file_path, "r");
         if (!it->disk_file) {
-                JAK_optional(err, error(err, JAK_ERR_FOPEN_FAILED))
+                JAK_optional(err, JAK_ERROR(err, JAK_ERR_FOPEN_FAILED))
                 it->is_open = false;
                 return false;
         }
@@ -39,7 +39,7 @@ bool jak_strid_iter_open(jak_strid_iter *it, struct jak_error *err, jak_archive 
         return true;
 }
 
-bool jak_strid_iter_next(bool *success, jak_strid_info **info, struct jak_error *err, size_t *info_length,
+bool jak_strid_iter_next(bool *success, jak_strid_info **info, jak_error *err, size_t *info_length,
                          jak_strid_iter *it)
 {
         JAK_ERROR_IF_NULL(info)
@@ -53,11 +53,11 @@ bool jak_strid_iter_next(bool *success, jak_strid_info **info, struct jak_error 
                         fseek(it->disk_file, it->disk_offset, SEEK_SET);
                         int num_read = fread(&header, sizeof(jak_string_entry_header), 1, it->disk_file);
                         if (header.marker != '-') {
-                                error_print(JAK_ERR_INTERNALERR);
+                                JAK_ERROR_PRINT(JAK_ERR_INTERNALERR);
                                 return false;
                         }
                         if (num_read != 1) {
-                                JAK_optional(err, error(err, JAK_ERR_FREAD_FAILED))
+                                JAK_optional(err, JAK_ERROR(err, JAK_ERR_FREAD_FAILED))
                                 *success = false;
                                 return false;
                         } else {

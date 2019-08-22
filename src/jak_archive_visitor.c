@@ -40,10 +40,10 @@ static void iterate_objects(jak_archive *archive, const jak_archive_field_sid_t 
 
         jak_u32 vector_length;
         jak_archive_object object;
-        jak_global_id_t parent_object_id;
-        jak_global_id_t object_id;
+        jak_uid_t parent_object_id;
+        jak_uid_t object_id;
         jak_prop_iter prop_iter;
-        struct jak_error err;
+        jak_error err;
 
         jak_archive_value_vector_get_object_id(&parent_object_id, value_iter);
         jak_archive_value_vector_get_length(&vector_length, value_iter);
@@ -158,7 +158,7 @@ static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
                           int mask, void *capture,
                           bool is_root_object, jak_archive_field_sid_t parent_key, jak_u32 parent_key_array_idx)
 {
-        jak_global_id_t this_object_oid;
+        jak_uid_t this_object_oid;
         jak_archive_value_vector value_iter;
         enum jak_archive_field_type type;
         bool is_array;
@@ -374,7 +374,7 @@ static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
                                         jak_u32 num_column_group_objs;
                                         jak_independent_iter_state column_iter;
                                         jak_archive_field_sid_t group_key = keys[current_group_idx];
-                                        const jak_global_id_t *column_group_object_ids =
+                                        const jak_uid_t *column_group_object_ids =
                                                 jak_archive_column_group_get_object_ids(&num_column_group_objs,
                                                                                         &group_iter);
                                         bool *skip_objects = JAK_MALLOC(num_column_group_objs * sizeof(bool));
@@ -449,9 +449,9 @@ static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
                                                                                 &column_iter);
                                                                 jak_independent_iter_state entry_iter;
 
-                                                                jak_global_id_t *entry_object_containments =
+                                                                jak_uid_t *entry_object_containments =
                                                                         JAK_MALLOC(num_positions *
-                                                                                   sizeof(jak_global_id_t));
+                                                                                   sizeof(jak_uid_t));
                                                                 for (jak_u32 m = 0; m < num_positions; m++) {
                                                                         entry_object_containments[m] =
                                                                                 column_group_object_ids[entry_positions[m]];
@@ -474,7 +474,7 @@ static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
                                                                 while (jak_archive_column_next_entry(&entry_iter,
                                                                                                      &column_iter)) {
 
-                                                                        jak_global_id_t current_nested_object_id =
+                                                                        jak_uid_t current_nested_object_id =
                                                                                 entry_object_containments[current_entry_idx];
                                                                         jak_u32 entry_length;
 
@@ -563,7 +563,7 @@ static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
                                                                                                         jak_archive_column_entry_object_iter_next_object(
                                                                                                                 &iter))
                                                                                                != NULL) {
-                                                                                                jak_global_id_t id;
+                                                                                                jak_uid_t id;
                                                                                                 jak_archive_object_get_object_id(
                                                                                                         &id,
                                                                                                         archive_object);
@@ -598,7 +598,7 @@ static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
 
                                                                                                         vec_pop(path_stack);
 
-                                                                                                        struct jak_error err;
+                                                                                                        jak_error err;
                                                                                                         jak_prop_iter
                                                                                                                 nested_obj_prop_iter;
                                                                                                         jak_archive_prop_iter_from_object(

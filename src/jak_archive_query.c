@@ -30,7 +30,7 @@ struct jak_sid_to_offset_arg {
 };
 
 struct jak_sid_to_offset {
-        struct hashtable ofMapping(jak_archive_field_sid_t, struct jak_sid_to_offset_arg) mapping;
+        jak_hashtable ofMapping(jak_archive_field_sid_t, struct jak_sid_to_offset_arg) mapping;
         FILE *disk_file;
         size_t disk_file_size;
 
@@ -39,7 +39,7 @@ struct jak_sid_to_offset {
 #define OBJECT_GET_KEYS_TO_FIX_TYPE_GENERIC(num_pairs, obj, bit_flag_name, offset_name)                                \
 {                                                                                                                      \
     if (!obj) {                                                                                                        \
-        print_error_and_die(JAK_ERR_NULLPTR)                                                                 \
+        JAK_ERROR_PRINT_AND_DIE(JAK_ERR_NULLPTR)                                                                 \
     }                                                                                                                  \
                                                                                                                        \
     if (obj->flags.bits.bit_flag_name) {                                                                               \
@@ -62,7 +62,7 @@ bool jak_query_create(jak_archive_query *query, jak_archive *archive)
         JAK_ERROR_IF_NULL(archive)
         query->archive = archive;
         query->context = jak_archive_io_context_create(archive);
-        error_init(&query->err);
+        jak_error_init(&query->err);
         return query->context != NULL;
 }
 
@@ -80,11 +80,11 @@ bool jak_query_scan_strids(jak_strid_iter *it, jak_archive_query *query)
 }
 
 static bool
-index_string_id_to_offset_open_file(struct jak_sid_to_offset *index, struct jak_error *err, const char *file)
+index_string_id_to_offset_open_file(struct jak_sid_to_offset *index, jak_error *err, const char *file)
 {
         index->disk_file = fopen(file, "r");
         if (!index->disk_file) {
-                error(err, JAK_ERR_FOPEN_FAILED)
+                JAK_ERROR(err, JAK_ERR_FOPEN_FAILED)
                 return false;
         } else {
                 fseek(index->disk_file, 0, SEEK_END);
@@ -110,7 +110,7 @@ bool jak_query_create_index_string_id_to_offset(struct jak_sid_to_offset **index
         capacity = archive_info.num_embeddded_strings;
 
         struct jak_sid_to_offset *result = JAK_MALLOC(sizeof(struct jak_sid_to_offset));
-        hashtable_create(&result->mapping,
+        jak_hashtable_create(&result->mapping,
                          &query->err,
                          sizeof(jak_archive_field_sid_t),
                          sizeof(struct jak_sid_to_offset_arg),
@@ -126,14 +126,14 @@ bool jak_query_create_index_string_id_to_offset(struct jak_sid_to_offset **index
                 while (jak_strid_iter_next(&success, &info, &query->err, &vector_len, &strid_iter)) {
                         for (size_t i = 0; i < vector_len; i++) {
                                 struct jak_sid_to_offset_arg arg = {.offset = info[i].offset, .strlen = info[i].strlen};
-                                hashtable_insert_or_update(&result->mapping, &info[i].id, &arg, 1);
+                                jak_hashtable_insert_or_update(&result->mapping, &info[i].id, &arg, 1);
                         }
                 }
                 *index = result;
                 jak_strid_iter_close(&strid_iter);
                 return true;
         } else {
-                error(&query->err, JAK_ERR_SCAN_FAILED);
+                JAK_ERROR(&query->err, JAK_ERR_SCAN_FAILED);
                 return false;
         }
 
@@ -142,21 +142,21 @@ bool jak_query_create_index_string_id_to_offset(struct jak_sid_to_offset **index
 void jak_query_drop_index_string_id_to_offset(struct jak_sid_to_offset *index)
 {
         if (index) {
-                hashtable_drop(&index->mapping);
+                jak_hashtable_drop(&index->mapping);
                 fclose(index->disk_file);
                 free(index);
         }
 }
 
-bool jak_query_index_id_to_offset_serialize(FILE *file, struct jak_error *err, struct jak_sid_to_offset *index)
+bool jak_query_index_id_to_offset_serialize(FILE *file, jak_error *err, struct jak_sid_to_offset *index)
 {
         JAK_UNUSED(file);
         JAK_UNUSED(err);
         JAK_UNUSED(index);
-        return hashtable_serialize(file, &index->mapping);
+        return jak_hashtable_serialize(file, &index->mapping);
 }
 
-bool jak_query_index_id_to_offset_deserialize(struct jak_sid_to_offset **index, struct jak_error *err,
+bool jak_query_index_id_to_offset_deserialize(struct jak_sid_to_offset **index, jak_error *err,
                                               const char *file_path, jak_offset_t offset)
 {
         JAK_ERROR_IF_NULL(index)
@@ -166,7 +166,7 @@ bool jak_query_index_id_to_offset_deserialize(struct jak_sid_to_offset **index, 
 
         struct jak_sid_to_offset *result = JAK_MALLOC(sizeof(struct jak_sid_to_offset));
         if (!result) {
-                error(err, JAK_ERR_MALLOCERR);
+                JAK_ERROR(err, JAK_ERR_MALLOCERR);
                 return false;
         }
 
@@ -176,21 +176,21 @@ bool jak_query_index_id_to_offset_deserialize(struct jak_sid_to_offset **index, 
 
         FILE *index_reader_file = fopen(file_path, "r");
         if (!index_reader_file) {
-                error(err, JAK_ERR_FOPEN_FAILED)
+                JAK_ERROR(err, JAK_ERR_FOPEN_FAILED)
                 return false;
         } else {
                 fseek(index_reader_file, 0, SEEK_END);
                 jak_offset_t file_size = ftell(index_reader_file);
 
                 if (offset >= file_size) {
-                        error(err, JAK_ERR_INTERNALERR)
+                        JAK_ERROR(err, JAK_ERR_INTERNALERR)
                         return false;
                 }
 
                 fseek(index_reader_file, offset, SEEK_SET);
 
-                if (!hashtable_deserialize(&result->mapping, err, index_reader_file)) {
-                        error(err, JAK_ERR_HASTABLE_DESERIALERR);
+                if (!jak_hashtable_deserialize(&result->mapping, err, index_reader_file)) {
+                        JAK_ERROR(err, JAK_ERR_HASTABLE_DESERIALERR);
                         fclose(index_reader_file);
                         *index = NULL;
                         return false;
@@ -203,7 +203,7 @@ bool jak_query_index_id_to_offset_deserialize(struct jak_sid_to_offset **index, 
 }
 
 static char *fetch_string_from_file(bool *decode_success, FILE *disk_file, size_t offset, size_t string_len,
-                                    struct jak_error *err, jak_archive *archive)
+                                    jak_error *err, jak_archive *archive)
 {
         char *result = JAK_MALLOC(string_len + 1);
         memset(result, 0, string_len + 1);
@@ -246,7 +246,7 @@ static char *fetch_string_by_id_via_scan(jak_archive_query *query, jak_archive_f
                                                 if (result) {
                                                         free(result);
                                                 }
-                                                error(&query->err,
+                                                JAK_ERROR(&query->err,
                                                       !decode_result ? JAK_ERR_DECOMPRESSFAILED
                                                                      : JAK_ERR_ITERATORNOTCLOSED);
                                                 return NULL;
@@ -257,10 +257,10 @@ static char *fetch_string_by_id_via_scan(jak_archive_query *query, jak_archive_f
                         }
                 }
                 jak_strid_iter_close(&strid_iter);
-                error(&query->err, JAK_ERR_NOTFOUND);
+                JAK_ERROR(&query->err, JAK_ERR_NOTFOUND);
                 return NULL;
         } else {
-                error(&query->err, JAK_ERR_SCAN_FAILED);
+                JAK_ERROR(&query->err, JAK_ERR_SCAN_FAILED);
                 return NULL;
         }
 }
@@ -268,7 +268,7 @@ static char *fetch_string_by_id_via_scan(jak_archive_query *query, jak_archive_f
 static char *fetch_string_by_id_via_index(jak_archive_query *query, struct jak_sid_to_offset *index,
                                           jak_archive_field_sid_t id)
 {
-        const struct jak_sid_to_offset_arg *args = hashtable_get_value(&index->mapping, &id);
+        const struct jak_sid_to_offset_arg *args = jak_hashtable_get_value(&index->mapping, &id);
         if (args) {
                 if (args->offset < index->disk_file_size) {
                         bool decode_result;
@@ -281,16 +281,16 @@ static char *fetch_string_by_id_via_index(jak_archive_query *query, struct jak_s
                         if (decode_result) {
                                 return result;
                         } else {
-                                error(&query->err, JAK_ERR_DECOMPRESSFAILED);
+                                JAK_ERROR(&query->err, JAK_ERR_DECOMPRESSFAILED);
                                 return NULL;
                         }
 
                 } else {
-                        error(&query->err, JAK_ERR_INDEXCORRUPTED_OFFSET);
+                        JAK_ERROR(&query->err, JAK_ERR_INDEXCORRUPTED_OFFSET);
                         return NULL;
                 }
         } else {
-                error(&query->err, JAK_ERR_NOTFOUND);
+                JAK_ERROR(&query->err, JAK_ERR_NOTFOUND);
                 return NULL;
         }
 }
@@ -334,7 +334,7 @@ char **jak_query_fetch_strings_by_offset(jak_archive_query *query, jak_offset_t 
 
         char **result = JAK_MALLOC(num_offs * sizeof(char *));
         if (!result) {
-                error(&query->err, JAK_ERR_MALLOCERR);
+                JAK_ERROR(&query->err, JAK_ERR_MALLOCERR);
                 return NULL;
         }
         for (size_t i = 0; i < num_offs; i++) {
@@ -349,11 +349,11 @@ char **jak_query_fetch_strings_by_offset(jak_archive_query *query, jak_offset_t 
         }
 
         if (!result) {
-                error(jak_io_context_get_error(query->context), JAK_ERR_MALLOCERR);
+                JAK_ERROR(jak_io_context_get_error(query->context), JAK_ERR_MALLOCERR);
                 return NULL;
         } else {
                 if (!(file = jak_io_context_lock_and_access(query->context))) {
-                        error_cpy(&query->err, jak_io_context_get_error(query->context));
+                        jak_error_cpy(&query->err, jak_io_context_get_error(query->context));
                         goto cleanup_and_error;
                 }
 
@@ -412,30 +412,30 @@ jak_archive_field_sid_t *jak_query_find_ids(size_t *num_found, jak_archive_query
         }
 
         if (JAK_UNLIKELY(!num_found || !query || !pred)) {
-                error(&query->err, JAK_ERR_NULLPTR);
+                JAK_ERROR(&query->err, JAK_ERR_NULLPTR);
                 return NULL;
         }
 
         if (JAK_UNLIKELY((step_ids = JAK_MALLOC(str_cap * sizeof(jak_archive_field_sid_t))) == NULL)) {
-                error(&query->err, JAK_ERR_MALLOCERR);
+                JAK_ERROR(&query->err, JAK_ERR_MALLOCERR);
                 return NULL;
         }
 
         if (JAK_UNLIKELY((str_offs = JAK_MALLOC(str_cap * sizeof(jak_offset_t))) == NULL)) {
-                error(&query->err, JAK_ERR_MALLOCERR);
+                JAK_ERROR(&query->err, JAK_ERR_MALLOCERR);
                 goto cleanup_result_and_error;
                 return NULL;
         }
 
         if (JAK_UNLIKELY((str_lens = JAK_MALLOC(str_cap * sizeof(jak_u32))) == NULL)) {
-                error(&query->err, JAK_ERR_MALLOCERR);
+                JAK_ERROR(&query->err, JAK_ERR_MALLOCERR);
                 free(str_offs);
                 goto cleanup_result_and_error;
                 return NULL;
         }
 
         if (JAK_UNLIKELY((idxs_matching = JAK_MALLOC(str_cap * sizeof(size_t))) == NULL)) {
-                error(&query->err, JAK_ERR_MALLOCERR);
+                JAK_ERROR(&query->err, JAK_ERR_MALLOCERR);
                 free(str_offs);
                 free(str_lens);
                 goto cleanup_result_and_error;
@@ -450,7 +450,7 @@ jak_archive_field_sid_t *jak_query_find_ids(size_t *num_found, jak_archive_query
         }
 
         if (JAK_UNLIKELY((result_ids = JAK_MALLOC(result_cap * sizeof(jak_archive_field_sid_t))) == NULL)) {
-                error(&query->err, JAK_ERR_MALLOCERR);
+                JAK_ERROR(&query->err, JAK_ERR_MALLOCERR);
                 free(str_offs);
                 free(str_lens);
                 free(idxs_matching);
@@ -493,7 +493,7 @@ jak_archive_field_sid_t *jak_query_find_ids(size_t *num_found, jak_archive_query
                 if (JAK_UNLIKELY(
                         jak_string_pred_eval(pred, idxs_matching, &num_matching, strings, step_len, capture) ==
                         false)) {
-                        error(&query->err, JAK_ERR_PREDEVAL_FAILED);
+                        JAK_ERROR(&query->err, JAK_ERR_PREDEVAL_FAILED);
                         jak_strid_iter_close(&it);
                         goto cleanup_intermediate;
                 }
@@ -533,7 +533,7 @@ jak_archive_field_sid_t *jak_query_find_ids(size_t *num_found, jak_archive_query
         return result_ids;
 
         realloc_error:
-        error(&query->err, JAK_ERR_REALLOCERR);
+        JAK_ERROR(&query->err, JAK_ERR_REALLOCERR);
 
         cleanup_intermediate:
         free(str_offs);

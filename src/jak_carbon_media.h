@@ -687,7 +687,7 @@ static struct mime_type {
         {"application/dssc+xml",                                                      "xdssc"},
         {"application/vnd.fujixerox.docuworks",                                       "xdw"},
         {"application/xenc+xml",                                                      "xenc"},
-        {"application/patch-ops-error+xml",                                           "xer"},
+        {"application/patch-ops-JAK_ERROR+xml",                                           "xer"},
         {"application/vnd.adobe.xfdf",                                                "xfdf"},
         {"application/vnd.xfdl",                                                      "xfdl"},
         {"application/xhtml+xml",                                                     "xhtml"},

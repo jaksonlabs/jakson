@@ -19,117 +19,117 @@
 
 #include <jak_encoded_doc.h>
 
-bool encoded_doc_collection_create(struct jak_encoded_doc_list *collection, struct jak_error *err,
+bool jak_encoded_doc_collection_create(jak_encoded_doc_list *collection, jak_error *err,
                                    jak_archive *archive)
 {
         JAK_UNUSED(collection);
         JAK_UNUSED(err);
         JAK_UNUSED(archive);
 
-        vec_create(&collection->flat_object_collection, NULL, sizeof(struct jak_encoded_doc), 5000000);
-        hashtable_create(&collection->index, err, sizeof(jak_global_id_t), sizeof(jak_u32), 5000000);
-        error_init(&collection->err);
+        vec_create(&collection->flat_object_collection, NULL, sizeof(jak_encoded_doc), 5000000);
+        jak_hashtable_create(&collection->index, err, sizeof(jak_uid_t), sizeof(jak_u32), 5000000);
+        jak_error_init(&collection->err);
         collection->archive = archive;
 
         return true;
 }
 
-bool encoded_doc_collection_drop(struct jak_encoded_doc_list *collection)
+bool jak_encoded_doc_collection_drop(jak_encoded_doc_list *collection)
 {
         JAK_UNUSED(collection);
 
-        hashtable_drop(&collection->index);
+        jak_hashtable_drop(&collection->index);
         for (jak_u32 i = 0; i < collection->flat_object_collection.num_elems; i++) {
-                struct jak_encoded_doc *doc = vec_get(&collection->flat_object_collection, i, struct jak_encoded_doc);
-                encoded_doc_drop(doc);
+                jak_encoded_doc *doc = vec_get(&collection->flat_object_collection, i, jak_encoded_doc);
+                jak_encoded_doc_drop(doc);
         }
         vec_drop(&collection->flat_object_collection);
         return true;
 }
 
-static struct jak_encoded_doc *
-doc_create(struct jak_error *err, jak_global_id_t object_id, struct jak_encoded_doc_list *collection)
+static jak_encoded_doc *
+doc_create(jak_error *err, jak_uid_t object_id, jak_encoded_doc_list *collection)
 {
         if (collection) {
                 jak_u32 doc_position = collection->flat_object_collection.num_elems;
-                struct jak_encoded_doc
-                        *new_doc = vec_new_and_get(&collection->flat_object_collection, struct jak_encoded_doc);
+                jak_encoded_doc
+                        *new_doc = vec_new_and_get(&collection->flat_object_collection, jak_encoded_doc);
                 new_doc->context = collection;
                 new_doc->object_id = object_id;
-                vec_create(&new_doc->props, NULL, sizeof(struct jak_encoded_doc_prop), 20);
-                vec_create(&new_doc->props_arrays, NULL, sizeof(struct jak_encoded_doc_prop_array), 20);
-                hashtable_create(&new_doc->prop_array_index, err, sizeof(jak_archive_field_sid_t), sizeof(jak_u32), 20);
-                error_init(&new_doc->err);
-                hashtable_insert_or_update(&collection->index, &object_id, &doc_position, 1);
+                vec_create(&new_doc->props, NULL, sizeof(jak_encoded_doc_prop), 20);
+                vec_create(&new_doc->props_arrays, NULL, sizeof(jak_encoded_doc_prop_array), 20);
+                jak_hashtable_create(&new_doc->prop_array_index, err, sizeof(jak_archive_field_sid_t), sizeof(jak_u32), 20);
+                jak_error_init(&new_doc->err);
+                jak_hashtable_insert_or_update(&collection->index, &object_id, &doc_position, 1);
                 return new_doc;
         } else {
-                error(err, JAK_ERR_ILLEGALARG);
+                JAK_ERROR(err, JAK_ERR_ILLEGALARG);
                 return NULL;
         }
 }
 
-struct jak_encoded_doc *encoded_doc_collection_get_or_append(struct jak_encoded_doc_list *collection,
-                                                             jak_global_id_t id)
+jak_encoded_doc *jak_encoded_doc_collection_get_or_append(jak_encoded_doc_list *collection,
+                                                             jak_uid_t id)
 {
         JAK_ERROR_IF_NULL(collection);
-        const jak_u32 *doc_pos = hashtable_get_value(&collection->index, &id);
+        const jak_u32 *doc_pos = jak_hashtable_get_value(&collection->index, &id);
         if (doc_pos) {
-                struct jak_encoded_doc *result = vec_get(&collection->flat_object_collection, *doc_pos,
-                                                         struct jak_encoded_doc);
-                error_if(result == NULL, &collection->err, JAK_ERR_INTERNALERR);
+                jak_encoded_doc *result = vec_get(&collection->flat_object_collection, *doc_pos,
+                                                         jak_encoded_doc);
+                JAK_ERROR_IF(result == NULL, &collection->err, JAK_ERR_INTERNALERR);
                 return result;
         } else {
-                struct jak_encoded_doc *result = doc_create(&collection->err, id, collection);
+                jak_encoded_doc *result = doc_create(&collection->err, id, collection);
                 if (!result) {
-                        error(&collection->err, JAK_ERR_INTERNALERR);
+                        JAK_ERROR(&collection->err, JAK_ERR_INTERNALERR);
                 }
                 return result;
         }
 }
 
-bool encoded_doc_collection_print(FILE *file, struct jak_encoded_doc_list *collection)
+bool jak_encoded_doc_collection_print(FILE *file, jak_encoded_doc_list *collection)
 {
         JAK_UNUSED(file);
         JAK_UNUSED(collection);
 
         if (collection->flat_object_collection.num_elems > 0) {
-                struct jak_encoded_doc *root = vec_get(&collection->flat_object_collection, 0, struct jak_encoded_doc);
-                encoded_doc_print(file, root);
+                jak_encoded_doc *root = vec_get(&collection->flat_object_collection, 0, jak_encoded_doc);
+                jak_encoded_doc_print(file, root);
         }
 
         return false;
 }
 
-bool encoded_doc_drop(struct jak_encoded_doc *doc)
+bool jak_encoded_doc_drop(jak_encoded_doc *doc)
 {
         JAK_UNUSED(doc);
         for (jak_u32 i = 0; i < doc->props_arrays.num_elems; i++) {
-                struct jak_encoded_doc_prop_array *array = vec_get(&doc->props_arrays, i,
-                                                                   struct jak_encoded_doc_prop_array);
+                jak_encoded_doc_prop_array *array = vec_get(&doc->props_arrays, i,
+                                                                   jak_encoded_doc_prop_array);
                 vec_drop(&array->values);
         }
         for (jak_u32 i = 0; i < doc->props.num_elems; i++) {
-                struct jak_encoded_doc_prop *single = vec_get(&doc->props, i, struct jak_encoded_doc_prop);
-                if (single->header.value_type == VALUE_DECODED_STRING) {
+                jak_encoded_doc_prop *single = vec_get(&doc->props, i, jak_encoded_doc_prop);
+                if (single->header.value_type == JAK_VALUE_DECODED_STRING) {
                         free(single->value.string);
                 }
         }
         vec_drop(&doc->props);
         vec_drop(&doc->props_arrays);
-        hashtable_drop(&doc->prop_array_index);
+        jak_hashtable_drop(&doc->prop_array_index);
         return false;
 }
 
 #define DECLARE_JAK_ENCODED_DOC_ADD_PROP_BASIC(built_in_type, basic_type, value_name)                               \
 bool                                                                                                    \
-encoded_doc_add_prop_##value_name(struct jak_encoded_doc *doc, jak_archive_field_sid_t key, built_in_type value)       \
+jak_encoded_doc_add_prop_##value_name(jak_encoded_doc *doc, jak_archive_field_sid_t key, built_in_type value)       \
 {                                                                                                                      \
     JAK_ERROR_IF_NULL(doc)                                                                                      \
-    struct jak_encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct jak_encoded_doc_prop);                      \
+    jak_encoded_doc_prop *prop = vec_new_and_get(&doc->props, jak_encoded_doc_prop);                      \
     prop->header.context = doc;                                                                                        \
-    prop->header.key_type = STRING_ENCODED;                                        \
+    prop->header.key_type = JAK_STRING_ENCODED;                                        \
     prop->header.key.key_id = key;                                                                                     \
-    prop->header.value_type = VALUE_BUILTIN;                                              \
+    prop->header.value_type = JAK_VALUE_BUILTIN;                                              \
     prop->header.type = basic_type;                                                                                    \
     prop->value.builtin.value_name = value;                                                                            \
     return true;                                                                                                       \
@@ -137,14 +137,14 @@ encoded_doc_add_prop_##value_name(struct jak_encoded_doc *doc, jak_archive_field
 
 #define DECLARE_JAK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(built_in_type, basic_type, value_name)                       \
 bool                                                                                                    \
-encoded_doc_add_prop_##value_name##_decoded(struct jak_encoded_doc *doc, const char *key, built_in_type value)    \
+jak_encoded_doc_add_prop_##value_name##_decoded(jak_encoded_doc *doc, const char *key, built_in_type value)    \
 {                                                                                                                      \
     JAK_ERROR_IF_NULL(doc)                                                                                      \
-    struct jak_encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct jak_encoded_doc_prop);                      \
+    jak_encoded_doc_prop *prop = vec_new_and_get(&doc->props, jak_encoded_doc_prop);                      \
     prop->header.context = doc;                                                                                        \
-    prop->header.key_type = STRING_DECODED;                                        \
+    prop->header.key_type = JAK_STRING_DECODED;                                        \
     prop->header.key.key_str = strdup(key);                                                                            \
-    prop->header.value_type = VALUE_BUILTIN;                                              \
+    prop->header.value_type = JAK_VALUE_BUILTIN;                                              \
     prop->header.type = basic_type;                                                                                    \
     prop->value.builtin.value_name = value;                                                                            \
     return true;                                                                                                       \
@@ -194,37 +194,37 @@ DECLARE_JAK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(jak_archive_field_boolean_t, JAK_
 
 DECLARE_JAK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(jak_archive_field_sid_t, JAK_FIELD_STRING, string)
 
-bool encoded_doc_add_prop_string_decoded_string_value_decoded(struct jak_encoded_doc *doc, const char *key,
+bool jak_encoded_doc_add_prop_string_decoded_string_value_decoded(jak_encoded_doc *doc, const char *key,
                                                               const char *value)
 {
         JAK_ERROR_IF_NULL(doc)
-        struct jak_encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct jak_encoded_doc_prop);
+        jak_encoded_doc_prop *prop = vec_new_and_get(&doc->props, jak_encoded_doc_prop);
         prop->header.context = doc;
-        prop->header.key_type = STRING_DECODED;
+        prop->header.key_type = JAK_STRING_DECODED;
         prop->header.key.key_str = strdup(key);
         prop->header.type = JAK_FIELD_STRING;
         prop->value.string = strdup(value);
         return true;
 }
 
-bool encoded_doc_add_prop_null(struct jak_encoded_doc *doc, jak_archive_field_sid_t key)
+bool jak_encoded_doc_add_prop_null(jak_encoded_doc *doc, jak_archive_field_sid_t key)
 {
         JAK_ERROR_IF_NULL(doc)
-        struct jak_encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct jak_encoded_doc_prop);
+        jak_encoded_doc_prop *prop = vec_new_and_get(&doc->props, jak_encoded_doc_prop);
         prop->header.context = doc;
-        prop->header.key_type = STRING_ENCODED;
+        prop->header.key_type = JAK_STRING_ENCODED;
         prop->header.key.key_id = key;
         prop->header.type = JAK_FIELD_NULL;
         prop->value.builtin.null = 1;
         return true;
 }
 
-bool encoded_doc_add_prop_null_decoded(struct jak_encoded_doc *doc, const char *key)
+bool jak_encoded_doc_add_prop_null_decoded(jak_encoded_doc *doc, const char *key)
 {
         JAK_ERROR_IF_NULL(doc)
-        struct jak_encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct jak_encoded_doc_prop);
+        jak_encoded_doc_prop *prop = vec_new_and_get(&doc->props, jak_encoded_doc_prop);
         prop->header.context = doc;
-        prop->header.key_type = STRING_DECODED;
+        prop->header.key_type = JAK_STRING_DECODED;
         prop->header.key.key_str = strdup(key);
         prop->header.type = JAK_FIELD_NULL;
         prop->value.builtin.null = 1;
@@ -232,25 +232,25 @@ bool encoded_doc_add_prop_null_decoded(struct jak_encoded_doc *doc, const char *
 }
 
 bool
-encoded_doc_add_prop_object(struct jak_encoded_doc *doc, jak_archive_field_sid_t key, struct jak_encoded_doc *value)
+jak_encoded_doc_add_prop_object(jak_encoded_doc *doc, jak_archive_field_sid_t key, jak_encoded_doc *value)
 {
         JAK_ERROR_IF_NULL(doc)
-        struct jak_encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct jak_encoded_doc_prop);
+        jak_encoded_doc_prop *prop = vec_new_and_get(&doc->props, jak_encoded_doc_prop);
         prop->header.context = doc;
-        prop->header.key_type = STRING_ENCODED;
+        prop->header.key_type = JAK_STRING_ENCODED;
         prop->header.key.key_id = key;
         prop->header.type = JAK_FIELD_OBJECT;
         prop->value.builtin.object = value->object_id;
         return true;
 }
 
-bool encoded_doc_add_prop_object_decoded(struct jak_encoded_doc *doc, const char *key,
-                                         struct jak_encoded_doc *value)
+bool jak_encoded_doc_add_prop_object_decoded(jak_encoded_doc *doc, const char *key,
+                                         jak_encoded_doc *value)
 {
         JAK_ERROR_IF_NULL(doc)
-        struct jak_encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct jak_encoded_doc_prop);
+        jak_encoded_doc_prop *prop = vec_new_and_get(&doc->props, jak_encoded_doc_prop);
         prop->header.context = doc;
-        prop->header.key_type = STRING_DECODED;
+        prop->header.key_type = JAK_STRING_DECODED;
         prop->header.key.key_str = strdup(key);
         prop->header.type = JAK_FIELD_OBJECT;
         prop->value.builtin.object = value->object_id;
@@ -259,33 +259,33 @@ bool encoded_doc_add_prop_object_decoded(struct jak_encoded_doc *doc, const char
 
 #define DECALRE_JAK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(name, basic_type)                                               \
 bool                                                                                                    \
-encoded_doc_add_prop_array_##name(struct jak_encoded_doc *doc,                                                    \
+jak_encoded_doc_add_prop_array_##name(jak_encoded_doc *doc,                                                    \
                                        jak_archive_field_sid_t key)                                                         \
 {                                                                                                                      \
     JAK_ERROR_IF_NULL(doc)                                                                                      \
     jak_u32 new_array_pos = doc->props_arrays.num_elems;                                                              \
-    struct jak_encoded_doc_prop_array *array = vec_new_and_get(&doc->props_arrays, struct jak_encoded_doc_prop_array);  \
-    array->header.key_type = STRING_ENCODED;                                          \
+    jak_encoded_doc_prop_array *array = vec_new_and_get(&doc->props_arrays, jak_encoded_doc_prop_array);  \
+    array->header.key_type = JAK_STRING_ENCODED;                                          \
     array->header.key.key_id = key;                                                                                    \
     array->header.type = basic_type;                                                                                   \
     array->header.context = doc;                                                                                       \
-    vec_create(&array->values, NULL, sizeof(union encoded_doc_value), 10);                                   \
-    hashtable_insert_or_update(&doc->prop_array_index, &key, &new_array_pos, 1);                                \
+    vec_create(&array->values, NULL, sizeof(jak_encoded_doc_value_u), 10);                                   \
+    jak_hashtable_insert_or_update(&doc->prop_array_index, &key, &new_array_pos, 1);                                \
     return true;                                                                                                       \
 }
 
 #define DECALRE_JAK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(name, basic_type)                                       \
 bool                                                                                                    \
-encoded_doc_add_prop_array_##name##_decoded(struct jak_encoded_doc *doc,                                          \
+jak_encoded_doc_add_prop_array_##name##_decoded(jak_encoded_doc *doc,                                          \
                                        const char *key)                                                                \
 {                                                                                                                      \
     JAK_ERROR_IF_NULL(doc)                                                                                      \
-    struct jak_encoded_doc_prop_array *array = vec_new_and_get(&doc->props_arrays, struct jak_encoded_doc_prop_array);  \
-    array->header.key_type = STRING_DECODED;                                          \
+    jak_encoded_doc_prop_array *array = vec_new_and_get(&doc->props_arrays, jak_encoded_doc_prop_array);  \
+    array->header.key_type = JAK_STRING_DECODED;                                          \
     array->header.key.key_str = strdup(key);                                                                           \
     array->header.type = basic_type;                                                                                   \
     array->header.context = doc;                                                                                       \
-    vec_create(&array->values, NULL, sizeof(union encoded_doc_value), 10);                                   \
+    vec_create(&array->values, NULL, sizeof(jak_encoded_doc_value_u), 10);                                   \
     return true;                                                                                                       \
 }
 
@@ -343,18 +343,18 @@ DECALRE_JAK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(object, JAK_FIELD_OBJECT)
 
 #define DECLARE_JAK_ENCODED_DOC_ARRAY_PUSH_TYPE(name, built_in_type, basic_type)                                    \
 bool                                                                                                    \
-encoded_doc_array_push_##name(struct jak_encoded_doc *doc, jak_archive_field_sid_t key,                                \
+jak_encoded_doc_array_push_##name(jak_encoded_doc *doc, jak_archive_field_sid_t key,                                \
                                      const built_in_type *values, jak_u32 values_length)                              \
 {                                                                                                                      \
     JAK_ERROR_IF_NULL(doc)                                                                                      \
-    const jak_u32 *prop_pos = hashtable_get_value(&doc->prop_array_index, &key);                               \
-    error_if(prop_pos == NULL, &doc->err, JAK_ERR_NOTFOUND);                                                 \
-    struct jak_encoded_doc_prop_array *array = vec_get(&doc->props_arrays, *prop_pos,                          \
-                                                               struct jak_encoded_doc_prop_array);                       \
-    error_if(array == NULL, &doc->err, JAK_ERR_INTERNALERR);                                                 \
-    error_if(array->header.type != basic_type, &doc->err, JAK_ERR_TYPEMISMATCH);                             \
+    const jak_u32 *prop_pos = jak_hashtable_get_value(&doc->prop_array_index, &key);                               \
+    JAK_ERROR_IF(prop_pos == NULL, &doc->err, JAK_ERR_NOTFOUND);                                                 \
+    jak_encoded_doc_prop_array *array = vec_get(&doc->props_arrays, *prop_pos,                          \
+                                                               jak_encoded_doc_prop_array);                       \
+    JAK_ERROR_IF(array == NULL, &doc->err, JAK_ERR_INTERNALERR);                                                 \
+    JAK_ERROR_IF(array->header.type != basic_type, &doc->err, JAK_ERR_TYPEMISMATCH);                             \
     for (jak_u32 i = 0; i < values_length; i++) {                                                                     \
-        union encoded_doc_value *value = vec_new_and_get(&array->values, union encoded_doc_value);            \
+        jak_encoded_doc_value_u *value = vec_new_and_get(&array->values, jak_encoded_doc_value_u);            \
         value->name = values[i];                                                                                       \
     }                                                                                                                  \
                                                                                                                        \
@@ -365,27 +365,27 @@ encoded_doc_array_push_##name(struct jak_encoded_doc *doc, jak_archive_field_sid
 
 #define DECLARE_JAK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(name, built_in_type, basic_type)                            \
 bool                                                                                                    \
-encoded_doc_array_push_##name##_decoded(struct jak_encoded_doc *doc, const char *key,                             \
+jak_encoded_doc_array_push_##name##_decoded(jak_encoded_doc *doc, const char *key,                             \
                                      const built_in_type *values, jak_u32 values_length)                              \
 {                                                                                                                      \
     jak_u32 prop_pos = (jak_u32) -1;                                                                                 \
     for (jak_u32 i = 0; i < doc->props_arrays.num_elems; i++)                                                         \
     {                                                                                                                  \
-        struct jak_encoded_doc_prop_array *prop = vec_get(&doc->props_arrays, i, struct jak_encoded_doc_prop_array); \
-        if (prop->header.key_type == STRING_DECODED) {                                \
+        jak_encoded_doc_prop_array *prop = vec_get(&doc->props_arrays, i, jak_encoded_doc_prop_array); \
+        if (prop->header.key_type == JAK_STRING_DECODED) {                                \
             if (strcmp(prop->header.key.key_str, key) == 0) {                                                          \
                 prop_pos = i;                                                                                          \
                 break;                                                                                                 \
             }                                                                                                          \
         }                                                                                                              \
     }                                                                                                                  \
-    error_if(prop_pos == (jak_u32) -1, &doc->err, JAK_ERR_NOTFOUND);                                        \
-    struct jak_encoded_doc_prop_array *array = vec_get(&doc->props_arrays, prop_pos,                           \
-                                                                   struct jak_encoded_doc_prop_array);                   \
-    error_if(array == NULL, &doc->err, JAK_ERR_INTERNALERR);                                                 \
-    error_if(array->header.type != basic_type, &doc->err, JAK_ERR_TYPEMISMATCH);                             \
+    JAK_ERROR_IF(prop_pos == (jak_u32) -1, &doc->err, JAK_ERR_NOTFOUND);                                        \
+    jak_encoded_doc_prop_array *array = vec_get(&doc->props_arrays, prop_pos,                           \
+                                                                   jak_encoded_doc_prop_array);                   \
+    JAK_ERROR_IF(array == NULL, &doc->err, JAK_ERR_INTERNALERR);                                                 \
+    JAK_ERROR_IF(array->header.type != basic_type, &doc->err, JAK_ERR_TYPEMISMATCH);                             \
     for (jak_u32 i = 0; i < values_length; i++) {                                                                     \
-        union encoded_doc_value *value = vec_new_and_get(&array->values, union encoded_doc_value);            \
+        jak_encoded_doc_value_u *value = vec_new_and_get(&array->values, jak_encoded_doc_value_u);            \
         value->name = values[i];                                                                                       \
     }                                                                                                                  \
                                                                                                                        \
@@ -441,16 +441,16 @@ DECLARE_JAK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(string, jak_archive_field_sid_t,
 DECLARE_JAK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, jak_archive_field_u32_t, JAK_FIELD_NULL)
 //
 //bool
-//encoded_doc_array_push_null(struct jak_encoded_doc *doc, jak_archive_field_sid_t key, jak_u32 how_many)
+//jak_encoded_doc_array_push_null(jak_encoded_doc *doc, jak_archive_field_sid_t key, jak_u32 how_many)
 //{
 //    JAK_ERROR_IF_NULL(doc)
-//    const jak_u32 *prop_pos = hashtable_get_value(&doc->prop_array_index, &key);
-//    error_if(prop_pos == NULL, &doc->err, JAK_ERR_NOTFOUND);
-//    struct jak_encoded_doc_prop_array *array = vec_get(&doc->props_arrays, *prop_pos,
-//                                                               struct jak_encoded_doc_prop_array);
-//    error_if(array == NULL, &doc->err, JAK_ERR_INTERNALERR);
-//    error_if(array->header.type != JAK_FIELD_NULL, &doc->err, JAK_ERR_TYPEMISMATCH);
-//    union encoded_doc_value *value = vec_new_and_get(&array->values, union encoded_doc_value);
+//    const jak_u32 *prop_pos = jak_hashtable_get_value(&doc->prop_array_index, &key);
+//    JAK_ERROR_IF(prop_pos == NULL, &doc->err, JAK_ERR_NOTFOUND);
+//    jak_encoded_doc_prop_array *array = vec_get(&doc->props_arrays, *prop_pos,
+//                                                               jak_encoded_doc_prop_array);
+//    JAK_ERROR_IF(array == NULL, &doc->err, JAK_ERR_INTERNALERR);
+//    JAK_ERROR_IF(array->header.type != JAK_FIELD_NULL, &doc->err, JAK_ERR_TYPEMISMATCH);
+//    jak_encoded_doc_value_u *value = vec_new_and_get(&array->values, jak_encoded_doc_value_u);
 //    value->num_nulls = how_many;
 //    return true;
 //}
@@ -459,25 +459,25 @@ DECLARE_JAK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, jak_archive_field_u32_t, J
 #include <inttypes.h>
 #include <jak_archive_query.h>
 
-bool encoded_doc_array_push_object(struct jak_encoded_doc *doc, jak_archive_field_sid_t key, jak_global_id_t id)
+bool jak_encoded_doc_array_push_object(jak_encoded_doc *doc, jak_archive_field_sid_t key, jak_uid_t id)
 {
         JAK_UNUSED(doc);
         JAK_UNUSED(key);
         JAK_UNUSED(id);
 
         JAK_ERROR_IF_NULL(doc)
-        const jak_u32 *prop_pos = hashtable_get_value(&doc->prop_array_index, &key);
-        error_if(prop_pos == NULL, &doc->err, JAK_ERR_NOTFOUND);
-        struct jak_encoded_doc_prop_array *array = vec_get(&doc->props_arrays, *prop_pos,
-                                                           struct jak_encoded_doc_prop_array);
-        error_if(array == NULL, &doc->err, JAK_ERR_INTERNALERR);
-        error_if(array->header.type != JAK_FIELD_OBJECT, &doc->err, JAK_ERR_TYPEMISMATCH);
-        union encoded_doc_value *value = vec_new_and_get(&array->values, union encoded_doc_value);
+        const jak_u32 *prop_pos = jak_hashtable_get_value(&doc->prop_array_index, &key);
+        JAK_ERROR_IF(prop_pos == NULL, &doc->err, JAK_ERR_NOTFOUND);
+        jak_encoded_doc_prop_array *array = vec_get(&doc->props_arrays, *prop_pos,
+                                                           jak_encoded_doc_prop_array);
+        JAK_ERROR_IF(array == NULL, &doc->err, JAK_ERR_INTERNALERR);
+        JAK_ERROR_IF(array->header.type != JAK_FIELD_OBJECT, &doc->err, JAK_ERR_TYPEMISMATCH);
+        jak_encoded_doc_value_u *value = vec_new_and_get(&array->values, jak_encoded_doc_value_u);
         value->object = id;
         return true;
 }
 
-bool encoded_doc_array_push_object_decoded(struct jak_encoded_doc *doc, const char *key, jak_global_id_t id)
+bool jak_encoded_doc_array_push_object_decoded(jak_encoded_doc *doc, const char *key, jak_uid_t id)
 {
         JAK_UNUSED(doc);
         JAK_UNUSED(key);
@@ -486,26 +486,26 @@ bool encoded_doc_array_push_object_decoded(struct jak_encoded_doc *doc, const ch
         JAK_ERROR_IF_NULL(doc)
         jak_u32 prop_pos = (jak_u32) -1;
         for (jak_u32 i = 0; i < doc->props_arrays.num_elems; i++) {
-                struct jak_encoded_doc_prop_array *prop = vec_get(&doc->props_arrays, i,
-                                                                  struct jak_encoded_doc_prop_array);
-                if (prop->header.key_type == STRING_DECODED) {
+                jak_encoded_doc_prop_array *prop = vec_get(&doc->props_arrays, i,
+                                                                  jak_encoded_doc_prop_array);
+                if (prop->header.key_type == JAK_STRING_DECODED) {
                         if (strcmp(prop->header.key.key_str, key) == 0) {
                                 prop_pos = i;
                                 break;
                         }
                 }
         }
-        error_if(prop_pos == (jak_u32) -1, &doc->err, JAK_ERR_NOTFOUND);
-        struct jak_encoded_doc_prop_array *array = vec_get(&doc->props_arrays, prop_pos,
-                                                           struct jak_encoded_doc_prop_array);
-        error_if(array == NULL, &doc->err, JAK_ERR_INTERNALERR);
-        error_if(array->header.type != JAK_FIELD_OBJECT, &doc->err, JAK_ERR_TYPEMISMATCH);
-        union encoded_doc_value *value = vec_new_and_get(&array->values, union encoded_doc_value);
+        JAK_ERROR_IF(prop_pos == (jak_u32) -1, &doc->err, JAK_ERR_NOTFOUND);
+        jak_encoded_doc_prop_array *array = vec_get(&doc->props_arrays, prop_pos,
+                                                           jak_encoded_doc_prop_array);
+        JAK_ERROR_IF(array == NULL, &doc->err, JAK_ERR_INTERNALERR);
+        JAK_ERROR_IF(array->header.type != JAK_FIELD_OBJECT, &doc->err, JAK_ERR_TYPEMISMATCH);
+        jak_encoded_doc_value_u *value = vec_new_and_get(&array->values, jak_encoded_doc_value_u);
         value->object = id;
         return true;
 }
 
-static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned level)
+static bool doc_print_pretty(FILE *file, jak_encoded_doc *doc, unsigned level)
 {
         jak_archive_query query;
         jak_archive_query_run(&query, doc->context->archive);
@@ -513,9 +513,9 @@ static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned l
         fprintf(file, "{\n");
 
         for (jak_u32 i = 0; i < doc->props.num_elems; i++) {
-                struct jak_encoded_doc_prop *prop = vec_get(&doc->props, i, struct jak_encoded_doc_prop);
+                jak_encoded_doc_prop *prop = vec_get(&doc->props, i, jak_encoded_doc_prop);
                 char *key_str = NULL;
-                if (prop->header.key_type == STRING_ENCODED) {
+                if (prop->header.key_type == JAK_STRING_ENCODED) {
                         key_str = jak_query_fetch_string_by_id(&query, prop->header.key.key_id);
                 } else {
                         key_str = strdup(prop->header.key.key_str);
@@ -555,7 +555,7 @@ static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned l
                                 fprintf(file, "%.2f", ceilf(prop->value.builtin.number * 100) / 100);
                                 break;
                         case JAK_FIELD_STRING: {
-                                if (prop->header.value_type == VALUE_BUILTIN) {
+                                if (prop->header.value_type == JAK_VALUE_BUILTIN) {
                                         char *value_str = jak_query_fetch_string_by_id(&query,
                                                                                        prop->value.builtin.string);
                                         fprintf(file, "\"%s\"", value_str);
@@ -572,12 +572,12 @@ static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned l
                                 fprintf(file, "null");
                                 break;
                         case JAK_FIELD_OBJECT: {
-                                struct jak_encoded_doc *nested =
-                                        encoded_doc_collection_get_or_append(doc->context, prop->value.builtin.object);
+                                jak_encoded_doc *nested =
+                                        jak_encoded_doc_collection_get_or_append(doc->context, prop->value.builtin.object);
                                 doc_print_pretty(file, nested, level + 1);
                         }
                                 break;
-                        default: error(&doc->err, JAK_ERR_INTERNALERR);
+                        default: JAK_ERROR(&doc->err, JAK_ERR_INTERNALERR);
                                 return false;
                 }
                 free(key_str);
@@ -585,10 +585,10 @@ static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned l
         }
 
         for (jak_u32 i = 0; i < doc->props_arrays.num_elems; i++) {
-                struct jak_encoded_doc_prop_array *prop = vec_get(&doc->props_arrays, i,
-                                                                  struct jak_encoded_doc_prop_array);
+                jak_encoded_doc_prop_array *prop = vec_get(&doc->props_arrays, i,
+                                                                  jak_encoded_doc_prop_array);
                 char *key_str = NULL;
-                if (prop->header.key_type == STRING_ENCODED) {
+                if (prop->header.key_type == JAK_STRING_ENCODED) {
                         key_str = jak_query_fetch_string_by_id(&query, prop->header.key.key_id);
                 } else {
                         key_str = strdup(prop->header.key.key_str);
@@ -613,7 +613,7 @@ static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned l
                         case JAK_FIELD_INT8:
                                 for (jak_u32 k = 0; k < prop->values.num_elems; k++) {
                                         jak_archive_field_i8_t value = (vec_get(&prop->values, k,
-                                                                                union encoded_doc_value))->int8;
+                                                                                jak_encoded_doc_value_u))->int8;
                                         if (JAK_IS_NULL_INT8(value)) {
                                                 fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                         } else {
@@ -627,7 +627,7 @@ static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned l
                         case JAK_FIELD_INT16:
                                 for (jak_u32 k = 0; k < prop->values.num_elems; k++) {
                                         jak_archive_field_i16_t value = (vec_get(&prop->values, k,
-                                                                                 union encoded_doc_value))->int16;
+                                                                                 jak_encoded_doc_value_u))->int16;
                                         if (JAK_IS_NULL_INT16(value)) {
                                                 fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                         } else {
@@ -641,7 +641,7 @@ static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned l
                         case JAK_FIELD_INT32:
                                 for (jak_u32 k = 0; k < prop->values.num_elems; k++) {
                                         jak_archive_field_i32_t value = (vec_get(&prop->values, k,
-                                                                                 union encoded_doc_value))->int32;
+                                                                                 jak_encoded_doc_value_u))->int32;
                                         if (JAK_IS_NULL_INT32(value)) {
                                                 fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                         } else {
@@ -655,7 +655,7 @@ static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned l
                         case JAK_FIELD_INT64:
                                 for (jak_u32 k = 0; k < prop->values.num_elems; k++) {
                                         jak_archive_field_i64_t value = (vec_get(&prop->values, k,
-                                                                                 union encoded_doc_value))->int64;
+                                                                                 jak_encoded_doc_value_u))->int64;
                                         if (JAK_IS_NULL_INT64(value)) {
                                                 fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                         } else {
@@ -669,7 +669,7 @@ static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned l
                         case JAK_FIELD_UINT8:
                                 for (jak_u32 k = 0; k < prop->values.num_elems; k++) {
                                         jak_archive_field_u8_t value = (vec_get(&prop->values, k,
-                                                                                union encoded_doc_value))->uint8;
+                                                                                jak_encoded_doc_value_u))->uint8;
                                         if (JAK_IS_NULL_UINT8(value)) {
                                                 fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                         } else {
@@ -683,7 +683,7 @@ static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned l
                         case JAK_FIELD_UINT16:
                                 for (jak_u32 k = 0; k < prop->values.num_elems; k++) {
                                         jak_archive_field_u16_t value = (vec_get(&prop->values, k,
-                                                                                 union encoded_doc_value))->uint16;
+                                                                                 jak_encoded_doc_value_u))->uint16;
                                         if (JAK_IS_NULL_UINT16(value)) {
                                                 fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                         } else {
@@ -697,7 +697,7 @@ static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned l
                         case JAK_FIELD_UINT32:
                                 for (jak_u32 k = 0; k < prop->values.num_elems; k++) {
                                         jak_archive_field_u32_t value = (vec_get(&prop->values, k,
-                                                                                 union encoded_doc_value))->uint32;
+                                                                                 jak_encoded_doc_value_u))->uint32;
                                         if (JAK_IS_NULL_UINT32(value)) {
                                                 fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                         } else {
@@ -711,7 +711,7 @@ static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned l
                         case JAK_FIELD_UINT64:
                                 for (jak_u32 k = 0; k < prop->values.num_elems; k++) {
                                         jak_archive_field_u64_t value = (vec_get(&prop->values, k,
-                                                                                 union encoded_doc_value))->uint64;
+                                                                                 jak_encoded_doc_value_u))->uint64;
                                         if (JAK_IS_NULL_UINT64(value)) {
                                                 fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                         } else {
@@ -725,7 +725,7 @@ static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned l
                         case JAK_FIELD_FLOAT:
                                 for (jak_u32 k = 0; k < prop->values.num_elems; k++) {
                                         jak_archive_field_number_t value = (vec_get(&prop->values, k,
-                                                                                    union encoded_doc_value))->number;
+                                                                                    jak_encoded_doc_value_u))->number;
                                         if (JAK_IS_NULL_NUMBER(value)) {
                                                 fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                         } else {
@@ -739,7 +739,7 @@ static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned l
                         case JAK_FIELD_STRING: {
                                 for (jak_u32 k = 0; k < prop->values.num_elems; k++) {
                                         jak_archive_field_sid_t value = (vec_get(&prop->values, k,
-                                                                                 union encoded_doc_value))->string;
+                                                                                 jak_encoded_doc_value_u))->string;
                                         if (JAK_IS_NULL_STRING(value)) {
                                                 fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                         } else {
@@ -756,7 +756,7 @@ static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned l
                         case JAK_FIELD_BOOLEAN:
                                 for (jak_u32 k = 0; k < prop->values.num_elems; k++) {
                                         jak_archive_field_boolean_t
-                                                value = (vec_get(&prop->values, k, union encoded_doc_value))->boolean;
+                                                value = (vec_get(&prop->values, k, jak_encoded_doc_value_u))->boolean;
                                         if (JAK_IS_NULL_BOOLEAN(value)) {
                                                 fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                         } else {
@@ -774,10 +774,10 @@ static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned l
                                 break;
                         case JAK_FIELD_OBJECT: {
                                 for (jak_u32 k = 0; k < prop->values.num_elems; k++) {
-                                        jak_global_id_t nested_oid = (vec_get(&prop->values, k,
-                                                                              union encoded_doc_value))->object;
-                                        struct jak_encoded_doc
-                                                *nested_doc = encoded_doc_collection_get_or_append(doc->context,
+                                        jak_uid_t nested_oid = (vec_get(&prop->values, k,
+                                                                              jak_encoded_doc_value_u))->object;
+                                        jak_encoded_doc
+                                                *nested_doc = jak_encoded_doc_collection_get_or_append(doc->context,
                                                                                                    nested_oid);
                                         fprintf(file, "\n");
                                         for (unsigned k = 0; k < level + 1; k++) {
@@ -792,7 +792,7 @@ static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned l
                                 }
                         }
                                 break;
-                        default: error(&doc->err, JAK_ERR_INTERNALERR);
+                        default: JAK_ERROR(&doc->err, JAK_ERR_INTERNALERR);
                                 return false;
                 }
                 free(key_str);
@@ -813,7 +813,7 @@ static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned l
         return true;
 }
 
-bool encoded_doc_print(FILE *file, struct jak_encoded_doc *doc)
+bool jak_encoded_doc_print(FILE *file, jak_encoded_doc *doc)
 {
         return doc_print_pretty(file, doc, 1);
 }

@@ -24,7 +24,7 @@
 #include <jak_time.h>
 #include <jak_async.h>
 #include <jak_slicelist.h>
-#include <jak_hash_sax.h>
+#include <jak_hash.h>
 
 #define STRING_DIC_ASYNC_TAG "strdic_async"
 
@@ -131,7 +131,7 @@ static bool this_setup_carriers(struct jak_string_dict *self, size_t capacity, s
     (struct async_extra *) self->extra;                                                                                       \
 })
 
-int encode_async_create(struct jak_string_dict *dic, size_t capacity, size_t num_index_buckets,
+int jak_encode_async_create(struct jak_string_dict *dic, size_t capacity, size_t num_index_buckets,
                         size_t approx_num_unique_strs, size_t num_threads, const jak_allocator *alloc)
 {
         JAK_check_success(jak_alloc_this_or_std(&dic->alloc, alloc));
@@ -229,8 +229,8 @@ void *parallel_insert_function(void *args)
                                            vec_length(&this_args->strings),
                                            this_args->insert_num_threads);
 
-                /** internal error during thread-local string dictionary building process */
-                error_print_and_die_if(status != true, JAK_ERR_INTERNALERR);
+                /** internal JAK_ERROR during thread-local string dictionary building process */
+                JAK_ERROR_PRINT_AND_DIE_IF(status != true, JAK_ERR_INTERNALERR);
                 JAK_debug(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
         } else {
                 JAK_warn(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", this_args->carrier->id);
@@ -390,7 +390,7 @@ this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *c
 
         JAK_check_tag(self->tag, ASYNC);
         /** parameter 'num_threads' must be set to 0 for async dictionary */
-        error_print_and_die_if(__num_threads != 0, JAK_ERR_INTERNALERR);
+        JAK_ERROR_PRINT_AND_DIE_IF(__num_threads != 0, JAK_ERR_INTERNALERR);
 
         this_lock(self);
 
@@ -942,7 +942,7 @@ static void parallel_create_carrier(const void *restrict start, size_t width, si
         struct carrier *carrier = (struct carrier *) start;
         const struct create_carrier_arg *createArgs = (const struct create_carrier_arg *) args;
         while (len--) {
-                encode_sync_create(&carrier->local_dictionary,
+                jak_encode_sync_create(&carrier->local_dictionary,
                                    createArgs->local_capacity,
                                    createArgs->local_bucket_num,
                                    createArgs->local_bucket_cap,

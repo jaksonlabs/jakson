@@ -31,7 +31,7 @@ struct jak_string {
         char *data;
         size_t cap;
         size_t end;
-        struct jak_error err;
+        jak_error err;
 };
 
 JAK_DEFINE_GET_ERROR_FUNCTION(string, struct jak_string, builder);

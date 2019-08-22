@@ -35,7 +35,7 @@ bool coding_huffman_create(struct jak_huffman *dic)
         JAK_ERROR_IF_NULL(dic);
 
         vec_create(&dic->table, NULL, sizeof(struct pack_huffman_entry), UCHAR_MAX / 4);
-        error_init(&dic->err);
+        jak_error_init(&dic->err);
 
         return true;
 }
@@ -45,10 +45,10 @@ bool coding_huffman_cpy(struct jak_huffman *dst, struct jak_huffman *src)
         JAK_ERROR_IF_NULL(dst);
         JAK_ERROR_IF_NULL(src);
         if (!vec_cpy(&dst->table, &src->table)) {
-                error(&src->err, JAK_ERR_HARDCOPYFAILED);
+                JAK_ERROR(&src->err, JAK_ERR_HARDCOPYFAILED);
                 return false;
         } else {
-                return error_cpy(&dst->err, &src->err);
+                return jak_error_cpy(&dst->err, &src->err);
         }
 }
 
@@ -79,11 +79,11 @@ bool coding_huffman_build(struct jak_huffman *encoder, const string_vector_t *st
         return true;
 }
 
-bool coding_huffman_get_error(struct jak_error *err, const struct jak_huffman *dic)
+bool coding_huffman_get_error(jak_error *err, const struct jak_huffman *dic)
 {
         JAK_ERROR_IF_NULL(err)
         JAK_ERROR_IF_NULL(dic)
-        error_cpy(err, &dic->err);
+        jak_error_cpy(err, &dic->err);
         return true;
 }
 
@@ -152,7 +152,7 @@ static struct pack_huffman_entry *find_dic_entry(struct jak_huffman *dic, unsign
                         return entry;
                 }
         }
-        error(&dic->err, JAK_ERR_HUFFERR)
+        JAK_ERROR(&dic->err, JAK_ERR_HUFFERR)
         return NULL;
 }
 
@@ -441,7 +441,7 @@ static void huff_tree_create(struct jak_vector ofType(struct pack_huffman_entry)
                 } else if (smallest->next) {
                         handle = seek_to_begin(smallest->next);
                 } else {
-                        print_error_and_die(JAK_ERR_INTERNALERR);
+                        JAK_ERROR_PRINT_AND_DIE(JAK_ERR_INTERNALERR);
                 }
 
                 JAK_ASSERT (!handle->prev);

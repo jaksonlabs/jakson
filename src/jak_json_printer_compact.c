@@ -172,13 +172,13 @@ static void print_binary(jak_carbon_printer *self, struct jak_string *builder, c
         if (extra->buffer_size < required_buff_size) {
                 extra->buffer_size = required_buff_size * 1.7f;
                 extra->buffer = realloc(extra->buffer, extra->buffer_size);
-                error_print_if(!extra->buffer, JAK_ERR_REALLOCERR);
+                JAK_ERROR_PRINT_IF(!extra->buffer, JAK_ERR_REALLOCERR);
         }
         /* decrease buffer capacity if needed */
         if (extra->buffer_size * 0.3f > required_buff_size) {
                 extra->buffer_size = required_buff_size;
                 extra->buffer = realloc(extra->buffer, extra->buffer_size);
-                error_print_if(!extra->buffer, JAK_ERR_REALLOCERR);
+                JAK_ERROR_PRINT_IF(!extra->buffer, JAK_ERR_REALLOCERR);
         }
 
         JAK_ASSERT(extra->buffer_size >= required_buff_size);

@@ -58,7 +58,7 @@ typedef struct jak_carbon_array_it {
         struct jak_memfile memfile;
         jak_offset_t payload_start;
         struct spinlock lock;
-        struct jak_error err;
+        jak_error err;
 
         /* in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
         jak_i64 mod_size;
@@ -93,7 +93,7 @@ bool jak_carbon_array_it_update_in_place_null(jak_carbon_array_it *it);
  * that starts with the first (potentially empty) array entry. If there is some data before the array contents
  * (e.g., a header), <code>payload_start</code> must not include this data.
  */
-bool jak_carbon_array_it_create(jak_carbon_array_it *it, struct jak_memfile *memfile, struct jak_error *err, jak_offset_t payload_start);
+bool jak_carbon_array_it_create(jak_carbon_array_it *it, struct jak_memfile *memfile, jak_error *err, jak_offset_t payload_start);
 bool jak_carbon_array_it_copy(jak_carbon_array_it *dst, jak_carbon_array_it *src);
 bool jak_carbon_array_it_clone(jak_carbon_array_it *dst, jak_carbon_array_it *src);
 bool jak_carbon_array_it_readonly(jak_carbon_array_it *it);

@@ -42,7 +42,7 @@ bool jak_carbon_array_it_update_in_place_##type_name(jak_carbon_array_it *it, ja
                 memfile_restore_position(&it->memfile);                                                                \
                 return true;                                                                                           \
         } else {                                                                                                       \
-                error(&it->err, JAK_ERR_TYPEMISMATCH);                                                                 \
+                JAK_ERROR(&it->err, JAK_ERR_TYPEMISMATCH);                                                                 \
                 return false;                                                                                          \
         }                                                                                                              \
 }
@@ -83,7 +83,7 @@ static bool update_in_place_constant(jak_carbon_array_it *it, jak_carbon_constan
                         case JAK_CARBON_CONSTANT_NULL:
                                 value = JAK_CARBON_FIELD_TYPE_NULL;
                                 break;
-                        default: error(&it->err, JAK_ERR_INTERNALERR);
+                        default: JAK_ERROR(&it->err, JAK_ERR_INTERNALERR);
                                 break;
                 }
                 jak_offset_t datum = 0;
@@ -105,7 +105,7 @@ static bool update_in_place_constant(jak_carbon_array_it *it, jak_carbon_constan
                         case JAK_CARBON_CONSTANT_NULL:
                                 jak_carbon_insert_null(&ins);
                                 break;
-                        default: error(&it->err, JAK_ERR_INTERNALERR);
+                        default: JAK_ERROR(&it->err, JAK_ERR_INTERNALERR);
                                 break;
                 }
 
@@ -131,7 +131,7 @@ bool jak_carbon_array_it_update_in_place_null(jak_carbon_array_it *it)
         return update_in_place_constant(it, JAK_CARBON_CONSTANT_NULL);
 }
 
-bool jak_carbon_array_it_create(jak_carbon_array_it *it, struct jak_memfile *memfile, struct jak_error *err,
+bool jak_carbon_array_it_create(jak_carbon_array_it *it, struct jak_memfile *memfile, jak_error *err,
                             jak_offset_t payload_start)
 {
         JAK_ERROR_IF_NULL(it);
@@ -145,16 +145,16 @@ bool jak_carbon_array_it_create(jak_carbon_array_it *it, struct jak_memfile *mem
         it->array_end_reached = false;
         it->field_offset = 0;
 
-        error_init(&it->err);
+        jak_error_init(&it->err);
         spin_init(&it->lock);
         vec_create(&it->history, NULL, sizeof(jak_offset_t), 40);
         memfile_open(&it->memfile, memfile->memblock, memfile->mode);
         memfile_seek(&it->memfile, payload_start);
 
-        error_if(memfile_remain_size(&it->memfile) < sizeof(jak_u8), err, JAK_ERR_CORRUPTED);
+        JAK_ERROR_IF(memfile_remain_size(&it->memfile) < sizeof(jak_u8), err, JAK_ERR_CORRUPTED);
 
         jak_u8 marker = *memfile_read(&it->memfile, sizeof(jak_u8));
-        error_if_with_details(marker != JAK_CARBON_MARKER_ARRAY_BEGIN, err, JAK_ERR_ILLEGALOP,
+        JAK_ERROR_IF_WDETAILS(marker != JAK_CARBON_MARKER_ARRAY_BEGIN, err, JAK_ERR_ILLEGALOP,
                               "array begin marker ('[') not found");
 
         it->payload_start += sizeof(jak_u8);
@@ -179,7 +179,7 @@ bool jak_carbon_array_it_clone(jak_carbon_array_it *dst, jak_carbon_array_it *sr
         memfile_clone(&dst->memfile, &src->memfile);
         dst->payload_start = src->payload_start;
         spin_init(&dst->lock);
-        error_cpy(&dst->err, &src->err);
+        jak_error_cpy(&dst->err, &src->err);
         dst->mod_size = src->mod_size;
         dst->array_end_reached = src->array_end_reached;
         vec_cpy(&dst->history, &src->history);
@@ -247,7 +247,7 @@ bool jak_carbon_array_it_unlock(jak_carbon_array_it *it)
 bool jak_carbon_array_it_rewind(jak_carbon_array_it *it)
 {
         JAK_ERROR_IF_NULL(it);
-        error_if(it->payload_start >= memfile_size(&it->memfile), &it->err, JAK_ERR_OUTOFBOUNDS);
+        JAK_ERROR_IF(it->payload_start >= memfile_size(&it->memfile), &it->err, JAK_ERR_OUTOFBOUNDS);
         jak_carbon_int_history_clear(&it->history);
         return memfile_seek(&it->memfile, it->payload_start);
 }
@@ -296,7 +296,7 @@ bool jak_carbon_array_it_next(jak_carbon_array_it *it)
         } else {
                 /* skip remaining zeros until end of array is reached */
                 if (!it->array_end_reached) {
-                        error_if(!is_empty_slot, &it->err, JAK_ERR_CORRUPTED);
+                        JAK_ERROR_IF(!is_empty_slot, &it->err, JAK_ERR_CORRUPTED);
 
                         while (*memfile_peek(&it->memfile, 1) == 0) {
                                 memfile_skip(&it->memfile, 1);
@@ -325,7 +325,7 @@ jak_offset_t jak_carbon_array_it_memfilepos(jak_carbon_array_it *it)
         if (JAK_LIKELY(it != NULL)) {
                 return memfile_tell(&it->memfile);
         } else {
-                error(&it->err, JAK_ERR_NULLPTR);
+                JAK_ERROR(&it->err, JAK_ERR_NULLPTR);
                 return 0;
         }
 }
@@ -468,7 +468,7 @@ bool jak_carbon_array_it_remove(jak_carbon_array_it *it)
                         return false;
                 }
         } else {
-                error(&it->err, JAK_ERR_ILLEGALSTATE);
+                JAK_ERROR(&it->err, JAK_ERR_ILLEGALSTATE);
                 return false;
         }
 }

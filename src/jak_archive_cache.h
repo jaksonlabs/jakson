@@ -36,7 +36,7 @@ typedef struct jak_sid_cache_stats {
 
 bool jak_string_id_cache_create_lru(struct jak_string_cache **cache, jak_archive *archive);
 bool jak_string_id_cache_create_lru_ex(struct jak_string_cache **cache, jak_archive *archive, size_t capacity);
-bool jak_string_id_cache_get_error(struct jak_error *err, const struct jak_string_cache *cache);
+bool jak_string_id_cache_get_error(jak_error *err, const struct jak_string_cache *cache);
 bool jak_string_id_cache_get_size(size_t *size, const struct jak_string_cache *cache);
 char *jak_string_id_cache_get(struct jak_string_cache *cache, jak_archive_field_sid_t id);
 bool jak_string_id_cache_get_statistics(jak_sid_cache_stats *statistics, struct jak_string_cache *cache);

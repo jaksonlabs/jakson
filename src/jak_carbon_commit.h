@@ -37,7 +37,7 @@ bool jak_carbon_commit_hash_update(struct jak_memfile *file, const char *base, j
 bool jak_carbon_commit_hash_compute(jak_u64 *commit_hash, const void *base, jak_u64 len);
 const char *jak_carbon_commit_hash_to_str(struct jak_string *dst, jak_u64 commit_hash);
 bool jak_carbon_commit_hash_append_to_str(struct jak_string *dst, jak_u64 commit_hash);
-jak_u64 jak_carbon_commit_hash_from_str(const char *commit_str, struct jak_error *err);
+jak_u64 jak_carbon_commit_hash_from_str(const char *commit_str, jak_error *err);
 
 JAK_END_DECL
 

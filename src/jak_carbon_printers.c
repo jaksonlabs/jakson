@@ -33,7 +33,7 @@ bool jak_carbon_printer_by_type(jak_carbon_printer *printer, int impl)
                 case JAK_JSON_COMPACT:
                         json_compact_printer_create(printer);
                         break;
-                default: error_print(JAK_ERR_NOTFOUND)
+                default: JAK_ERROR_PRINT(JAK_ERR_NOTFOUND)
                         return false;
         }
         return true;
@@ -454,7 +454,7 @@ bool jak_carbon_printer_print_object(jak_carbon_object_it *it, jak_carbon_printe
                                 break;
                         default:
                                 jak_carbon_printer_object_end(printer, builder);
-                                error(&it->err, JAK_ERR_CORRUPTED);
+                                JAK_ERROR(&it->err, JAK_ERR_CORRUPTED);
                                 return false;
                 }
                 first_entry = false;
@@ -569,7 +569,7 @@ bool jak_carbon_printer_print_array(jak_carbon_array_it *it, jak_carbon_printer 
                                 break;
                         default:
                                 jak_carbon_printer_array_end(printer, builder);
-                                error(&it->err, JAK_ERR_CORRUPTED);
+                                JAK_ERROR(&it->err, JAK_ERR_CORRUPTED);
                                 return false;
                 }
                 first_entry = false;
@@ -664,7 +664,7 @@ bool jak_carbon_printer_print_column(jak_carbon_column_it *it, jak_carbon_printe
                                 break;
                         default:
                                 jak_carbon_printer_array_end(printer, builder);
-                                error(&it->err, JAK_ERR_CORRUPTED);
+                                JAK_ERROR(&it->err, JAK_ERR_CORRUPTED);
                                 return false;
                 }
                 if (i + 1 < nvalues) {

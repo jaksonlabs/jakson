@@ -98,7 +98,7 @@ bool pack_none_print_encoded_string(struct jak_packer *self, FILE *file, struct 
         return true;
 }
 
-bool pack_none_encode_string(struct jak_packer *self, struct jak_memfile *dst, struct jak_error *err,
+bool pack_none_encode_string(struct jak_packer *self, struct jak_memfile *dst, jak_error *err,
                              const char *string)
 {
         JAK_check_tag(self->tag, PACK_NONE);
@@ -112,7 +112,7 @@ bool pack_none_encode_string(struct jak_packer *self, struct jak_memfile *dst, s
         return true;
 
         error_handling:
-        error(err, JAK_ERR_IO)
+        JAK_ERROR(err, JAK_ERR_IO)
         return false;
 }
 

@@ -22,7 +22,7 @@
 #include <jak_time.h>
 #include <jak_bloom.h>
 #include <jak_slicelist.h>
-#include <jak_hash_bern.h>
+#include <jak_hash.h>
 
 #define HASHCODE_OF(key)      JAK_HASH_BERNSTEIN(strlen(key), key)
 
@@ -117,7 +117,7 @@ strhash_create_inmemory(struct jak_str_hash *jak_async_map_exec, const jak_alloc
         jak_async_map_exec->remove = this_remove;
         jak_async_map_exec->free = this_free;
         jak_async_map_exec->get_exact_safe = this_get_safe_exact;
-        error_init(&jak_async_map_exec->err);
+        jak_error_init(&jak_async_map_exec->err);
 
         strhash_reset_counters(jak_async_map_exec);
         JAK_check_success(this_create_extra(jak_async_map_exec, num_buckets, cap_buckets));
@@ -261,11 +261,11 @@ this_get_safe(struct jak_str_hash *self, jak_archive_field_sid_t **out, bool **f
         timestamp_t begin = time_now_wallclock();
         JAK_trace(SMART_MAP_TAG, "'get_safe' function invoked for %zu strings", num_keys)
 
-        jak_allocator hashtable_alloc;
+        jak_allocator jak_hashtable_alloc;
 #if defined(JAK_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
-        CHECK_SUCCESS(allocator_TRACE(&hashtable_alloc));
+        CHECK_SUCCESS(allocator_TRACE(&jak_hashtable_alloc));
 #else
-        JAK_check_success(jak_alloc_this_or_std(&hashtable_alloc, &self->allocator));
+        JAK_check_success(jak_alloc_this_or_std(&jak_hashtable_alloc, &self->allocator));
 #endif
 
         struct mem_extra *extra = this_get_exta(self);
@@ -317,11 +317,11 @@ this_get_safe_exact(struct jak_str_hash *self, jak_archive_field_sid_t *out, boo
 {
         JAK_ASSERT(self->tag == MEMORY_RESIDENT);
 
-        jak_allocator hashtable_alloc;
+        jak_allocator jak_hashtable_alloc;
 #if defined(JAK_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
-        CHECK_SUCCESS(allocator_TRACE(&hashtable_alloc));
+        CHECK_SUCCESS(allocator_TRACE(&jak_hashtable_alloc));
 #else
-        JAK_check_success(jak_alloc_this_or_std(&hashtable_alloc, &self->allocator));
+        JAK_check_success(jak_alloc_this_or_std(&jak_hashtable_alloc, &self->allocator));
 #endif
 
         struct mem_extra *extra = this_get_exta(self);
@@ -351,8 +351,8 @@ static int this_update_key_fast(struct jak_str_hash *self, const jak_archive_fie
         JAK_UNUSED(values);
         JAK_UNUSED(keys);
         JAK_UNUSED(num_keys);
-        error(&self->err, JAK_ERR_NOTIMPL);
-        error_print_to_stderr(&self->err);
+        JAK_ERROR(&self->err, JAK_ERR_NOTIMPL);
+        jak_error_print_to_stderr(&self->err);
         return false;
 }
 
@@ -416,7 +416,7 @@ static int this_create_extra(struct jak_str_hash *self, size_t num_buckets, size
                 JAK_check_success(bucket_create(data, num_buckets, cap_buckets, &self->allocator));
                 return true;
         } else {
-                error(&self->err, JAK_ERR_MALLOCERR);
+                JAK_ERROR(&self->err, JAK_ERR_MALLOCERR);
                 return false;
         }
 }

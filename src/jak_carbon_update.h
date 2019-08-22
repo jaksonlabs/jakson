@@ -38,7 +38,7 @@ typedef struct jak_carbon_update {
         jak_carbon_revise *context;
         jak_carbon_path_evaluator path_evaluater;
         const jak_carbon_dot_path *path;
-        struct jak_error err;
+        jak_error err;
         bool is_found;
 } jak_carbon_update;
 

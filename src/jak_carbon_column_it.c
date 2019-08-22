@@ -30,11 +30,11 @@
 ({                                                                                                                     \
         jak_carbon_field_type_e type;                                                                                    \
         const void *raw = jak_carbon_column_it_values(&type, nvalues, it);                                                  \
-        error_if(!(field_type_expr), &it->err, JAK_ERR_TYPEMISMATCH);                                                  \
+        JAK_ERROR_IF(!(field_type_expr), &it->err, JAK_ERR_TYPEMISMATCH);                                                  \
         (const builtin_type *) raw;                                                                                    \
 })
 
-bool jak_carbon_column_it_create(jak_carbon_column_it *it, struct jak_memfile *memfile, struct jak_error *err,
+bool jak_carbon_column_it_create(jak_carbon_column_it *it, struct jak_memfile *memfile, jak_error *err,
                              jak_offset_t column_start_offset)
 {
         JAK_ERROR_IF_NULL(it);
@@ -44,15 +44,15 @@ bool jak_carbon_column_it_create(jak_carbon_column_it *it, struct jak_memfile *m
         it->column_start_offset = column_start_offset;
         it->mod_size = 0;
 
-        error_init(&it->err);
+        jak_error_init(&it->err);
         spin_init(&it->lock);
         memfile_open(&it->memfile, memfile->memblock, memfile->mode);
         memfile_seek(&it->memfile, column_start_offset);
 
-        error_if(memfile_remain_size(&it->memfile) < sizeof(jak_u8) + sizeof(jak_media_type), err, JAK_ERR_CORRUPTED);
+        JAK_ERROR_IF(memfile_remain_size(&it->memfile) < sizeof(jak_u8) + sizeof(jak_media_type), err, JAK_ERR_CORRUPTED);
 
         jak_u8 marker = *memfile_read(&it->memfile, sizeof(jak_u8));
-        error_if_with_details(marker != JAK_CARBON_MARKER_COLUMN_U8 &&
+        JAK_ERROR_IF_WDETAILS(marker != JAK_CARBON_MARKER_COLUMN_U8 &&
                               marker != JAK_CARBON_MARKER_COLUMN_U16 &&
                               marker != JAK_CARBON_MARKER_COLUMN_U32 &&
                               marker != JAK_CARBON_MARKER_COLUMN_U64 &&
@@ -81,7 +81,7 @@ bool jak_carbon_column_it_clone(jak_carbon_column_it *dst, jak_carbon_column_it 
         memfile_clone(&dst->memfile, &src->memfile);
         dst->num_and_capacity_start_offset = src->num_and_capacity_start_offset;
         dst->column_start_offset = src->column_start_offset;
-        error_cpy(&dst->err, &src->err);
+        jak_error_cpy(&dst->err, &src->err);
         dst->type = src->type;
         dst->mod_size = src->mod_size;
         dst->column_capacity = src->column_capacity;
@@ -109,7 +109,7 @@ jak_offset_t jak_carbon_column_it_memfilepos(jak_carbon_column_it *it)
         if (JAK_LIKELY(it != NULL)) {
                 return memfile_tell(&it->memfile);
         } else {
-                error(&it->err, JAK_ERR_NULLPTR);
+                JAK_ERROR(&it->err, JAK_ERR_NULLPTR);
                 return 0;
         }
 }
@@ -122,12 +122,12 @@ jak_offset_t jak_carbon_column_it_tell(jak_carbon_column_it *it, jak_u32 elem_id
                 jak_u32 num_elements = (jak_u32) memfile_read_uintvar_stream(NULL, &it->memfile);
                 memfile_read_uintvar_stream(NULL, &it->memfile);
                 jak_offset_t payload_start = memfile_tell(&it->memfile);
-                error_if(elem_idx >= num_elements, &it->err, JAK_ERR_OUTOFBOUNDS);
+                JAK_ERROR_IF(elem_idx >= num_elements, &it->err, JAK_ERR_OUTOFBOUNDS);
                 jak_offset_t ret = payload_start + elem_idx * jak_carbon_int_get_type_value_size(it->type);
                 memfile_restore_position(&it->memfile);
                 return ret;
         } else {
-                error_print(JAK_ERR_NULLPTR);
+                JAK_ERROR_PRINT(JAK_ERR_NULLPTR);
                 return 0;
         }
 }
@@ -153,7 +153,7 @@ bool jak_carbon_column_it_value_is_null(jak_carbon_column_it *it, jak_u32 pos)
         jak_carbon_field_type_e type;
         jak_u32 nvalues = 0;
         jak_carbon_column_it_values_info(&type, &nvalues, it);
-        error_if(pos >= nvalues, &it->err, JAK_ERR_OUTOFBOUNDS);
+        JAK_ERROR_IF(pos >= nvalues, &it->err, JAK_ERR_OUTOFBOUNDS);
         switch (type) {
                 case JAK_CARBON_FIELD_TYPE_COLUMN_U8:
                         return is_null_u8(jak_carbon_column_it_u8_values(NULL, it)[pos]);
@@ -175,7 +175,7 @@ bool jak_carbon_column_it_value_is_null(jak_carbon_column_it *it, jak_u32 pos)
                         return is_null_float(jak_carbon_column_it_float_values(NULL, it)[pos]);
                 case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
                         return is_null_boolean(jak_carbon_column_it_boolean_values(NULL, it)[pos]);
-                default: error(&it->err, JAK_ERR_UNSUPPCONTAINER)
+                default: JAK_ERROR(&it->err, JAK_ERR_UNSUPPCONTAINER)
                         return false;
         }
 }
@@ -253,7 +253,7 @@ bool jak_carbon_column_it_remove(jak_carbon_column_it *it, jak_u32 pos)
 {
         JAK_ERROR_IF_NULL(it);
 
-        error_if(pos >= it->column_num_elements, &it->err, JAK_ERR_OUTOFBOUNDS);
+        JAK_ERROR_IF(pos >= it->column_num_elements, &it->err, JAK_ERR_OUTOFBOUNDS);
         memfile_save_position(&it->memfile);
 
         jak_offset_t payload_start = jak_carbon_int_column_get_payload_off(it);
@@ -284,7 +284,7 @@ bool jak_carbon_column_it_remove(jak_carbon_column_it *it, jak_u32 pos)
 bool jak_carbon_column_it_update_set_null(jak_carbon_column_it *it, jak_u32 pos)
 {
         JAK_ERROR_IF_NULL(it)
-        error_if(pos >= it->column_num_elements, &it->err, JAK_ERR_OUTOFBOUNDS)
+        JAK_ERROR_IF(pos >= it->column_num_elements, &it->err, JAK_ERR_OUTOFBOUNDS)
 
         memfile_save_position(&it->memfile);
 
@@ -360,11 +360,11 @@ bool jak_carbon_column_it_update_set_null(jak_carbon_column_it *it, jak_u32 pos)
                 case JAK_CARBON_FIELD_TYPE_BINARY:
                 case JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM:
                         memfile_restore_position(&it->memfile);
-                        error(&it->err, JAK_ERR_UNSUPPCONTAINER)
+                        JAK_ERROR(&it->err, JAK_ERR_UNSUPPCONTAINER)
                         return false;
                 default:
                         memfile_restore_position(&it->memfile);
-                        error(&it->err, JAK_ERR_INTERNALERR);
+                        JAK_ERROR(&it->err, JAK_ERR_INTERNALERR);
                         return false;
         }
 
@@ -451,7 +451,7 @@ static bool rewrite_column_to_array(jak_carbon_column_it *it)
                 case JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT:
                         push_array_element_wvalue(num_values, data, float, is_null_float, jak_carbon_insert_float);
                         break;
-                default: error(&it->err, JAK_ERR_UNSUPPORTEDTYPE);
+                default: JAK_ERROR(&it->err, JAK_ERR_UNSUPPORTEDTYPE);
                         return false;
         }
 
@@ -466,7 +466,7 @@ static bool rewrite_column_to_array(jak_carbon_column_it *it)
 bool jak_carbon_column_it_update_set_true(jak_carbon_column_it *it, jak_u32 pos)
 {
         JAK_ERROR_IF_NULL(it)
-        error_if(pos >= it->column_num_elements, &it->err, JAK_ERR_OUTOFBOUNDS)
+        JAK_ERROR_IF(pos >= it->column_num_elements, &it->err, JAK_ERR_OUTOFBOUNDS)
 
         memfile_save_position(&it->memfile);
 
@@ -545,11 +545,11 @@ bool jak_carbon_column_it_update_set_true(jak_carbon_column_it *it, jak_u32 pos)
                 case JAK_CARBON_FIELD_TYPE_BINARY:
                 case JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM:
                         memfile_restore_position(&it->memfile);
-                        error(&it->err, JAK_ERR_UNSUPPCONTAINER)
+                        JAK_ERROR(&it->err, JAK_ERR_UNSUPPCONTAINER)
                         return false;
                 default:
                         memfile_restore_position(&it->memfile);
-                        error(&it->err, JAK_ERR_INTERNALERR);
+                        JAK_ERROR(&it->err, JAK_ERR_INTERNALERR);
                         return false;
         }
 
@@ -562,7 +562,7 @@ bool jak_carbon_column_it_update_set_false(jak_carbon_column_it *it, jak_u32 pos
 {
         JAK_UNUSED(it)
         JAK_UNUSED(pos)
-        error_print(JAK_ERR_NOTIMPLEMENTED); // TODO: implement
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED); // TODO: implement
         return false;
 }
 
@@ -571,7 +571,7 @@ bool jak_carbon_column_it_update_set_u8(jak_carbon_column_it *it, jak_u32 pos, j
         JAK_UNUSED(it)
         JAK_UNUSED(pos)
         JAK_UNUSED(value)
-        error_print(JAK_ERR_NOTIMPLEMENTED); // TODO: implement
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED); // TODO: implement
         return false;
 }
 
@@ -580,7 +580,7 @@ bool jak_carbon_column_it_update_set_u16(jak_carbon_column_it *it, jak_u32 pos, 
         JAK_UNUSED(it)
         JAK_UNUSED(pos)
         JAK_UNUSED(value)
-        error_print(JAK_ERR_NOTIMPLEMENTED); // TODO: implement
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED); // TODO: implement
         return false;
 }
 
@@ -589,7 +589,7 @@ bool jak_carbon_column_it_update_set_u32(jak_carbon_column_it *it, jak_u32 pos, 
         JAK_UNUSED(it)
         JAK_UNUSED(pos)
         JAK_UNUSED(value)
-        error_print(JAK_ERR_NOTIMPLEMENTED); // TODO: implement
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED); // TODO: implement
         return false;
 }
 
@@ -598,7 +598,7 @@ bool jak_carbon_column_it_update_set_u64(jak_carbon_column_it *it, jak_u32 pos, 
         JAK_UNUSED(it)
         JAK_UNUSED(pos)
         JAK_UNUSED(value)
-        error_print(JAK_ERR_NOTIMPLEMENTED); // TODO: implement
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED); // TODO: implement
         return false;
 }
 
@@ -607,7 +607,7 @@ bool jak_carbon_column_it_update_set_i8(jak_carbon_column_it *it, jak_u32 pos, j
         JAK_UNUSED(it)
         JAK_UNUSED(pos)
         JAK_UNUSED(value)
-        error_print(JAK_ERR_NOTIMPLEMENTED); // TODO: implement
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED); // TODO: implement
         return false;
 }
 
@@ -616,7 +616,7 @@ bool jak_carbon_column_it_update_set_i16(jak_carbon_column_it *it, jak_u32 pos, 
         JAK_UNUSED(it)
         JAK_UNUSED(pos)
         JAK_UNUSED(value)
-        error_print(JAK_ERR_NOTIMPLEMENTED); // TODO: implement
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED); // TODO: implement
         return false;
 }
 
@@ -625,7 +625,7 @@ bool jak_carbon_column_it_update_set_i32(jak_carbon_column_it *it, jak_u32 pos, 
         JAK_UNUSED(it)
         JAK_UNUSED(pos)
         JAK_UNUSED(value)
-        error_print(JAK_ERR_NOTIMPLEMENTED); // TODO: implement
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED); // TODO: implement
         return false;
 }
 
@@ -634,7 +634,7 @@ bool jak_carbon_column_it_update_set_i64(jak_carbon_column_it *it, jak_u32 pos, 
         JAK_UNUSED(it)
         JAK_UNUSED(pos)
         JAK_UNUSED(value)
-        error_print(JAK_ERR_NOTIMPLEMENTED); // TODO: implement
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED); // TODO: implement
         return false;
 }
 
@@ -643,7 +643,7 @@ bool jak_carbon_column_it_update_set_float(jak_carbon_column_it *it, jak_u32 pos
         JAK_UNUSED(it)
         JAK_UNUSED(pos)
         JAK_UNUSED(value)
-        error_print(JAK_ERR_NOTIMPLEMENTED); // TODO: implement
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED); // TODO: implement
         return false;
 }
 
@@ -671,6 +671,6 @@ bool jak_carbon_column_it_rewind(jak_carbon_column_it *it)
 {
         JAK_ERROR_IF_NULL(it);
         jak_offset_t playload_start = jak_carbon_int_column_get_payload_off(it);
-        error_if(playload_start >= memfile_size(&it->memfile), &it->err, JAK_ERR_OUTOFBOUNDS);
+        JAK_ERROR_IF(playload_start >= memfile_size(&it->memfile), &it->err, JAK_ERR_OUTOFBOUNDS);
         return memfile_seek(&it->memfile, playload_start);
 }

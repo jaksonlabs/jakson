@@ -29,20 +29,20 @@
 
 JAK_BEGIN_DECL
 
-#define JAK_ERR_NOERR 0                    /** No error */
+#define JAK_ERR_NOERR 0                    /** No JAK_ERROR */
 #define JAK_ERR_NULLPTR 1                  /** Null pointer detected */
 #define JAK_ERR_NOTIMPL 2                  /** Function not implemented */
 #define JAK_ERR_OUTOFBOUNDS 3              /** Index is out of bounds */
 #define JAK_ERR_MALLOCERR 4                /** Memory allocation failed */
 #define JAK_ERR_ILLEGALARG 5               /** Illegal arguments */
-#define JAK_ERR_INTERNALERR 6              /** Internal error */
+#define JAK_ERR_INTERNALERR 6              /** Internal JAK_ERROR */
 #define JAK_ERR_ILLEGALIMPL 7              /** Illegal implementation */
 #define JAK_ERR_NOTFOUND 8                 /** Not found */
 #define JAK_ERR_NIL 9                      /** Element not in list */
 #define JAK_ERR_ARRAYOFARRAYS 10           /** Array index out of bounds */
 #define JAK_ERR_ARRAYOFMIXEDTYPES 11       /** Illegal JSON array: mixed types */
 #define JAK_ERR_FOPEN_FAILED 12            /** Reading from file failed */
-#define JAK_ERR_IO 13                      /** I/O error */
+#define JAK_ERR_IO 13                      /** I/O JAK_ERROR */
 #define JAK_ERR_FORMATVERERR 14            /** Unsupported archive format version */
 #define JAK_ERR_CORRUPTED 15               /** Format is corrupted */
 #define JAK_ERR_NOCARBONSTREAM 16          /** Stream is not a carbon archive */
@@ -57,7 +57,7 @@ JAK_BEGIN_DECL
 #define JAK_ERR_NOJSONNUMBERT 25           /** Unknown value type for number in JSON property */
 #define JAK_ERR_NOARCHIVEFILE 26           /** Stream is not a valid archive file */
 #define JAK_ERR_UNSUPFINDSTRAT 27          /** Unsupported strategy requested for key lookup */
-#define JAK_ERR_ERRINTERNAL 28             /** Internal error */
+#define JAK_ERR_ERRINTERNAL 28             /** Internal JAK_ERROR */
 #define JAK_ERR_HUFFERR 29                 /** No huffman code table entry found for character */
 #define JAK_ERR_MEMSTATE 30                /** Memory file was opened as read-only but requested a modification */
 #define JAK_ERR_JSONTYPE 31                /** Unable to import json file: unsupported type */
@@ -65,7 +65,7 @@ JAK_BEGIN_DECL
 #define JAK_ERR_READOUTOFBOUNDS 33         /** Read outside of memory range bounds */
 #define JAK_ERR_SLOTBROKEN 34              /** Slot management broken */
 #define JAK_ERR_THREADOOOBJIDS 35          /** Thread run out of object ids: start another one */
-#define JAK_ERR_JSONPARSEERR 36            /** JSON parsing error */
+#define JAK_ERR_JSONPARSEERR 36            /** JSON parsing JAK_ERROR */
 #define JAK_ERR_BULKCREATEFAILED 37        /** Document insertion bulk creation failed */
 #define JAK_ERR_FOPENWRITE 38              /** File cannot be opened for writing */
 #define JAK_ERR_WRITEARCHIVE 39            /** Archive cannot be serialized into file */
@@ -119,9 +119,9 @@ JAK_BEGIN_DECL
                                              * integer value requires a larger (or smaller) type than the fist value
                                              * added to the container. Use '*_insert_X' instead, where X is jak_u8, jak_u16,...
                                              * , jak_u32 resp. jak_i8, jak_i16,..., jak_i32. */
-#define JAK_ERR_PARSE_DOT_EXPECTED 84       /** parsing error: dot ('.') expected */
-#define JAK_ERR_PARSE_ENTRY_EXPECTED 85     /** parsing error: key name or array index expected */
-#define JAK_ERR_PARSE_UNKNOWN_TOKEN 86      /** parsing error: unknown token */
+#define JAK_ERR_PARSE_DOT_EXPECTED 84       /** parsing JAK_ERROR: dot ('.') expected */
+#define JAK_ERR_PARSE_ENTRY_EXPECTED 85     /** parsing JAK_ERROR: key name or array index expected */
+#define JAK_ERR_PARSE_UNKNOWN_TOKEN 86      /** parsing JAK_ERROR: unknown token */
 #define JAK_ERR_DOT_PATH_PARSERR 87         /** dot-notated path could not be parsed */
 #define JAK_ERR_ILLEGALSTATE 88             /** Illegal state */
 #define JAK_ERR_UNSUPPORTEDTYPE 89          /** Unsupported data type */
@@ -133,21 +133,21 @@ JAK_BEGIN_DECL
 #define JAK_ERR_TAILINGJUNK 95              /** tailing junk was detected in a stream */
 #define JAK_ERR_NOTINDEXED 96               /** not indexed */
 
-static const char *const _err_str[] =
-        {"No error", "Null pointer detected", "Function not implemented", "Index is out of bounds",
-         "Memory allocation failed", "Illegal arguments", "Internal error", "Illegal implementation", "Not found",
+static const char *const jak_global_err_str[] =
+        {"No JAK_ERROR", "Null pointer detected", "Function not implemented", "Index is out of bounds",
+         "Memory allocation failed", "Illegal arguments", "Internal JAK_ERROR", "Illegal implementation", "Not found",
          "Element not in list", "Array index out of bounds", "Illegal JSON array: mixed types",
-         "Reading from file failed", "I/O error", "Unsupported archive format version", "Format is corrupted",
+         "Reading from file failed", "I/O JAK_ERROR", "Unsupported archive format version", "Format is corrupted",
          "Stream is not a types archive", "Not in bit writing mode", "Function is not yet implemented",
          "Unsupported type found", "Unsupported pack strategy requested", "No string representation for type available",
          "Marker type cannot be mapped to value type", "Parsing stopped; unknown data type requested",
          "Unknown token during parsing JSON detected", "Unknown value type for number in JSON property",
-         "Stream is not a valid archive file", "Unsupported strategy requested for key lookup", "Internal error",
+         "Stream is not a valid archive file", "Unsupported strategy requested for key lookup", "Internal JAK_ERROR",
          "No huffman code table entry found for character",
          "Memory file was opened as read-only but requested a modification",
          "Unable to import json file: unsupported type", "Mode set to read-only but modification was requested",
          "Read outside of memory range bounds", "Slot management broken",
-         "Thread run out of object ids: start another one", "JSON parsing error",
+         "Thread run out of object ids: start another one", "JSON parsing JAK_ERROR",
          "Document insertion bulk creation failed", "File cannot be opened for writing",
          "Archive cannot be serialized into file", "Archive cannot be deserialized form file",
          "Unable to read from file", "Unable to perform full scan in archive file",
@@ -175,77 +175,77 @@ static const char *const _err_str[] =
          "the integer value. Since you push integers with this function into an column container that is bound "
          "to a specific type, any insertion function call will fail once the integer value requires a larger "
          "(or smaller) type than the fist value added to the container. Use '*_insert_X' instead, where X is "
-         "jak_u8, jak_u16,..., jak_u32 resp. jak_i8, jak_i16,..., jak_i32. ", "parsing error dot ('.') expected",
-         "parsing error key name or array index expected", "parsing error: unknown token",
+         "jak_u8, jak_u16,..., jak_u32 resp. jak_i8, jak_i16,..., jak_i32. ", "parsing JAK_ERROR dot ('.') expected",
+         "parsing JAK_ERROR key name or array index expected", "parsing JAK_ERROR: unknown token",
          "dot-notated path could not be parsed", "Illegal state", "Unsupported data type", "Operation failed",
          "Cleanup operation failed; potentially a memory leak occurred", "dot-notated path could not be compiled",
          "not a number", "buffer capacity exceeded", "tailing junk was detected in a stream", "not indexed"};
 
-#define JAK_ERRSTR_ILLEGAL_CODE "illegal error code"
+#define JAK_ERRSTR_ILLEGAL_CODE "illegal JAK_ERROR code"
 
-static const int _nerr_str = JAK_ARRAY_LENGTH(_err_str);
+static const int jak_global_nerr_str = JAK_ARRAY_LENGTH(jak_global_err_str);
 
-struct jak_error {
+typedef struct jak_error {
         int code;
         const char *file;
         jak_u32 line;
         char *details;
-};
+} jak_error;
 
-bool error_init(struct jak_error *err);
+bool jak_error_init(jak_error *err);
 
-bool error_cpy(struct jak_error *dst, const struct jak_error *src);
+bool jak_error_cpy(jak_error *dst, const jak_error *src);
 
-bool error_drop(struct jak_error *err);
+bool jak_error_drop(jak_error *err);
 
-bool error_set(struct jak_error *err, int code, const char *file, jak_u32 line);
+bool jak_error_set(jak_error *err, int code, const char *file, jak_u32 line);
 
-bool error_set_wdetails(struct jak_error *err, int code, const char *file, jak_u32 line, const char *details);
+bool jak_error_set_wdetails(jak_error *err, int code, const char *file, jak_u32 line, const char *details);
 
-bool error_set_no_abort(struct jak_error *err, int code, const char *file, jak_u32 line);
+bool jak_error_set_no_abort(jak_error *err, int code, const char *file, jak_u32 line);
 
-bool error_set_wdetails_no_abort(struct jak_error *err, int code, const char *file, jak_u32 line, const char *details);
+bool jak_error_set_wdetails_no_abort(jak_error *err, int code, const char *file, jak_u32 line, const char *details);
 
-bool error_str(const char **errstr, const char **file, jak_u32 *line, bool *details, const char **detailsstr,
-               const struct jak_error *err);
+bool jak_error_str(const char **errstr, const char **file, jak_u32 *line, bool *details, const char **detailsstr,
+               const jak_error *err);
 
-bool error_print_to_stderr(const struct jak_error *err);
+bool jak_error_print_to_stderr(const jak_error *err);
 
-bool error_print_and_abort(const struct jak_error *err);
+bool jak_error_print_and_abort(const jak_error *err);
 
-#define error_occurred(x)                   ((x)->err.code != JAK_ERR_NOERR)
+#define JAK_ERROR_OCCURED(x)                   ((x)->err.code != JAK_ERR_NOERR)
 
-#define success_else_return(expr, err, code, retval)                                                                   \
+#define JAK_SUCCESS_ELSE_RETURN(expr, err, code, retval)                                                                   \
 {                                                                                                                      \
         bool result = expr;                                                                                            \
-        error_if(!(result), err, code);                                                                                \
+        JAK_ERROR_IF(!(result), err, code);                                                                                \
         if (!(result)) { return retval; }                                                                              \
 }
 
-#define success_else_null(expr, err)           success_else_return(expr, err, JAK_ERR_FAILED, NULL)
-#define success_else_fail(expr, err)           success_else_return(expr, err, JAK_ERR_FAILED, false)
+#define JAK_SUCCESS_ELSE_NULL(expr, err)           JAK_SUCCESS_ELSE_RETURN(expr, err, JAK_ERR_FAILED, NULL)
+#define JAK_SUCCESS_ELSE_FAIL(expr, err)           JAK_SUCCESS_ELSE_RETURN(expr, err, JAK_ERR_FAILED, false)
 
 
-#define error(err, code)                     error_if (true, err, code)
-#define error_no_abort(err, code)            error_if (true, err, code)
-#define error_if(expr, err, code)            { if (expr) { error_set(err, code, __FILE__, __LINE__); } }
-#define error_if_and_return(expr, err, code, retval) \
-                                                    { if (expr) { error_set(err, code, __FILE__, __LINE__);            \
+#define JAK_ERROR(err, code)                     JAK_ERROR_IF (true, err, code)
+#define JAK_ERROR_NO_ABORT(err, code)            JAK_ERROR_IF (true, err, code)
+#define JAK_ERROR_IF(expr, err, code)            { if (expr) { jak_error_set(err, code, __FILE__, __LINE__); } }
+#define JAK_ERROR_IF_AND_RETURN(expr, err, code, retval) \
+                                                    { if (expr) { jak_error_set(err, code, __FILE__, __LINE__);            \
                                                                   return retval; } }
 
-#define error_if_with_details(expr, err, code, msg)            { if (expr) { error_with_details(err, code, msg); } }
-#define error_with_details(err, code, msg)                     error_set_wdetails(err, code, __FILE__, __LINE__, msg);
+#define JAK_ERROR_IF_WDETAILS(expr, err, code, msg)            { if (expr) { JAK_ERROR_WDETAILS(err, code, msg); } }
+#define JAK_ERROR_WDETAILS(err, code, msg)                     jak_error_set_wdetails(err, code, __FILE__, __LINE__, msg);
 
-#define error_print(code)                    error_print_if(true, code)
-#define print_error_and_die(code)            { error_print(code); abort(); }
-#define error_print_and_die_if(expr, code)   { if(expr) { print_error_and_die(code) } }
-#define error_print_if(expr, code)                                                                                     \
+#define JAK_ERROR_PRINT(code)                    JAK_ERROR_PRINT_IF(true, code)
+#define JAK_ERROR_PRINT_AND_DIE(code)            { JAK_ERROR_PRINT(code); abort(); }
+#define JAK_ERROR_PRINT_AND_DIE_IF(expr, code)   { if(expr) { JAK_ERROR_PRINT_AND_DIE(code) } }
+#define JAK_ERROR_PRINT_IF(expr, code)                                                                                     \
 {                                                                                                                      \
     if (expr) {                                                                                                        \
-        struct jak_error err;                                                                                                \
-        error_init(&err);                                                                                              \
-        error(&err, code);                                                                                             \
-        error_print_to_stderr(&err);                                                                                   \
+        jak_error err;                                                                                                \
+        jak_error_init(&err);                                                                                              \
+        JAK_ERROR(&err, code);                                                                                             \
+        jak_error_print_to_stderr(&err);                                                                                   \
     }                                                                                                                  \
 }
 
@@ -253,11 +253,11 @@ bool error_print_and_abort(const struct jak_error *err);
 
 #define JAK_DEFINE_GET_ERROR_FUNCTION(type_name, type, arg)                                                            \
 JAK_FUNC_UNUSED static bool                                                                                            \
-jak_##type_name##_get_error(struct jak_error *err, const type *arg)                                                                \
+jak_##type_name##_get_error(jak_error *err, const type *arg)                                                                \
 {                                                                                                                      \
     JAK_ERROR_IF_NULL(err)                                                                                                 \
     JAK_ERROR_IF_NULL(arg)                                                                                                 \
-    error_cpy(err, &arg->err);                                                                                         \
+    jak_error_cpy(err, &arg->err);                                                                                         \
     return true;                                                                                                       \
 }
 

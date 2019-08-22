@@ -39,7 +39,7 @@ JAK_BEGIN_DECL
  * occurs. Note that a keys name might have different data types inside objects embedded in arrays, and a key is not
  * guaranteed to occur in all objects embedded in the array.
  */
-struct jak_column_doc_column {
+typedef struct jak_column_doc_column {
         /** Key name */
         jak_archive_field_sid_t key_name;
         /** Particular key type */
@@ -49,21 +49,19 @@ struct jak_column_doc_column {
         /** Values stored in objects assigned to this key-type mapping. The i-th element in `values` (which hold the
          * i-th value) is associated to the i-th element in `arrayPosition` which holds the position of the object inside
          * the array from which this pair was taken. */
-        struct jak_vector ofType(Vector
-                                         ofType( < T >)) values;
-};
+        struct jak_vector ofType(Vector ofType( < T >)) values;
+} jak_column_doc_column;
 
-struct jak_column_doc_group {
+typedef struct jak_column_doc_group {
         /** Key name */
         jak_archive_field_sid_t key;
         /** Key columns as a decomposition of objects stored in that JSON-like array */
-        struct jak_vector ofType(struct jak_column_doc_column) columns;
+        struct jak_vector ofType(jak_column_doc_column) columns;
+} jak_column_doc_group;
 
-};
-
-struct jak_column_doc_obj {
+typedef struct jak_column_doc_obj {
         /** Parent document meta doc */
-        struct jak_column_doc *parent;
+        jak_column_doc *parent;
         /** Key in parent document meta doc that maps to this one, or "/" if this is the top-level meta doc */
         jak_archive_field_sid_t parent_key;
         /** Index inside the array of this doc in its parents property, or 0 if this is not an array type or top-level */
@@ -170,7 +168,7 @@ struct jak_column_doc_obj {
          * multiplicity of nulls for the associated key. */
         struct jak_vector ofType(jak_u16) null_array_prop_vals;
         /** Primitive objects associated to keys stored above (sorted by key) */
-        struct jak_vector ofType(struct jak_column_doc_obj) obj_prop_vals;
+        struct jak_vector ofType(jak_column_doc_obj) obj_prop_vals;
 
         /** Index of primitive boolean values associated to keys stored above (sorted by value) */
         struct jak_vector ofType(jak_u32) bool_val_idxs;
@@ -219,30 +217,26 @@ struct jak_column_doc_obj {
         struct jak_vector ofType(Vector) string_array_idxs;
 
         /** Array of objects associated to keys stored above (sorted by key) */
-        struct jak_vector ofType(struct jak_column_doc_group) obj_array_props;
+        struct jak_vector ofType(jak_column_doc_group) obj_array_props;
+} jak_column_doc_obj;
 
-};
-
-struct jak_column_doc {
-        const struct jak_doc *doc;
+typedef struct jak_column_doc {
+        const jak_doc *doc;
         struct jak_string_dict *dic;
-        struct jak_column_doc_obj columndoc;
-        const struct jak_doc_bulk *bulk;
+        jak_column_doc_obj columndoc;
+        const jak_doc_bulk *bulk;
         bool read_optimized;
-        struct jak_error err;
-};
+        jak_error err;
+} jak_column_doc;
 
-bool columndoc_create(struct jak_column_doc *columndoc, struct jak_error *err, const struct jak_doc *doc,
-                      const struct jak_doc_bulk *bulk, const struct jak_doc_entries *entries,
-                      struct jak_string_dict *dic);
+JAK_DEFINE_GET_ERROR_FUNCTION(columndoc, jak_column_doc, doc)
 
-JAK_DEFINE_GET_ERROR_FUNCTION(columndoc, struct jak_column_doc, doc)
+bool jak_columndoc_create(jak_column_doc *columndoc, jak_error *err, const jak_doc *doc,  const jak_doc_bulk *bulk, const jak_doc_entries *entries, struct jak_string_dict *dic);
+bool jak_columndoc_drop(jak_column_doc *doc);
 
-bool columndoc_free(struct jak_column_doc *doc);
+bool jak_columndoc_free(jak_column_doc *doc);
 
-bool columndoc_print(FILE *file, struct jak_column_doc *doc);
-
-bool columndoc_drop(struct jak_column_doc *doc);
+bool jak_columndoc_print(FILE *file, jak_column_doc *doc);
 
 JAK_END_DECL
 

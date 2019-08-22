@@ -49,7 +49,7 @@ typedef struct jak_carbon_dot_node {
 typedef struct jak_carbon_dot_path {
         jak_carbon_dot_node nodes[256];
         jak_u32 path_len;
-        struct jak_error err;
+        jak_error err;
 } jak_carbon_dot_path;
 
 typedef enum jak_carbon_path_status {

@@ -39,13 +39,13 @@ JAK_BEGIN_DECL
 typedef struct jak_carbon_path_index {
         struct jak_memblock *memblock;
         struct jak_memfile memfile;
-        struct jak_error err;
+        jak_error err;
 } jak_carbon_path_index;
 
 typedef struct jak_carbon_path_index_it {
         jak_carbon *doc;
         struct jak_memfile memfile;
-        struct jak_error err;
+        jak_error err;
 
         jak_carbon_container_e container_type;
         jak_u64 pos;

@@ -37,7 +37,7 @@ bool memblock_from_file(struct jak_memblock **block, FILE *file, size_t nbytes);
 
 bool memblock_drop(struct jak_memblock *block);
 
-bool memblock_get_error(struct jak_error *out, struct jak_memblock *block);
+bool memblock_get_error(jak_error *out, struct jak_memblock *block);
 
 bool memblock_size(jak_offset_t *size, const struct jak_memblock *block);
 

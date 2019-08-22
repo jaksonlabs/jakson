@@ -24,13 +24,13 @@
 #include <jak_archive_io.h>
 
 typedef struct jak_archive_io_context {
-        struct jak_error err;
+        jak_error err;
         FILE *file;
         struct spinlock lock;
         jak_offset_t last_pos;
 } jak_archive_io_context;
 
-bool jak_io_context_create(jak_archive_io_context **context, struct jak_error *err, const char *file_path)
+bool jak_io_context_create(jak_archive_io_context **context, jak_error *err, const char *file_path)
 {
         JAK_ERROR_IF_NULL(context);
         JAK_ERROR_IF_NULL(err);
@@ -39,17 +39,17 @@ bool jak_io_context_create(jak_archive_io_context **context, struct jak_error *e
         jak_archive_io_context *result = JAK_MALLOC(sizeof(jak_archive_io_context));
 
         if (!result) {
-                error(err, JAK_ERR_MALLOCERR);
+                JAK_ERROR(err, JAK_ERR_MALLOCERR);
                 return false;
         }
 
         spin_init(&result->lock);
-        error_init(&result->err);
+        jak_error_init(&result->err);
 
         result->file = fopen(file_path, "r");
 
         if (!result->file) {
-                error(err, JAK_ERR_FOPEN_FAILED);
+                JAK_ERROR(err, JAK_ERR_FOPEN_FAILED);
                 result->file = NULL;
                 return false;
         } else {
@@ -58,7 +58,7 @@ bool jak_io_context_create(jak_archive_io_context **context, struct jak_error *e
         }
 }
 
-struct jak_error *jak_io_context_get_error(jak_archive_io_context *context)
+jak_error *jak_io_context_get_error(jak_archive_io_context *context)
 {
         return context ? &context->err : NULL;
 }
@@ -70,7 +70,7 @@ FILE *jak_io_context_lock_and_access(jak_archive_io_context *context)
                 context->last_pos = ftell(context->file);
                 return context->file;
         } else {
-                error(&context->err, JAK_ERR_NULLPTR);
+                JAK_ERROR(&context->err, JAK_ERR_NULLPTR);
                 return NULL;
         }
 }
@@ -82,7 +82,7 @@ bool jak_io_context_unlock(jak_archive_io_context *context)
                 spin_release(&context->lock);
                 return true;
         } else {
-                error(&context->err, JAK_ERR_NULLPTR);
+                JAK_ERROR(&context->err, JAK_ERR_NULLPTR);
                 return false;
         }
 }

@@ -37,7 +37,7 @@ bool jak_carbon_path_evaluator_begin(jak_carbon_path_evaluator *eval, jak_carbon
 
         JAK_zero_memory(eval, sizeof(jak_carbon_path_evaluator));
         eval->doc = doc;
-        JAK_check_success(error_init(&eval->err));
+        JAK_check_success(jak_error_init(&eval->err));
         JAK_check_success(jak_carbon_iterator_open(&eval->root_it, eval->doc));
         eval->status = traverse_array(eval, path, 0, &eval->root_it, true);
         JAK_check_success(jak_carbon_iterator_close(&eval->root_it));
@@ -52,7 +52,7 @@ bool jak_carbon_path_evaluator_begin_mutable(jak_carbon_path_evaluator *eval, co
         JAK_ERROR_IF_NULL(context)
 
         eval->doc = context->revised_doc;
-        JAK_check_success(error_init(&eval->err));
+        JAK_check_success(jak_error_init(&eval->err));
         JAK_check_success(jak_carbon_revise_iterator_open(&eval->root_it, context));
         eval->status = traverse_array(eval, path, 0, &eval->root_it, true);
         JAK_check_success(jak_carbon_iterator_close(&eval->root_it));
@@ -85,7 +85,7 @@ bool jak_carbon_path_evaluator_end(jak_carbon_path_evaluator *state)
                         break;
                 case JAK_CARBON_COLUMN:
                         break;
-                default: error_print(JAK_ERR_NOTIMPLEMENTED);
+                default: JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED);
         }
         return true;
 }
@@ -299,7 +299,7 @@ static inline jak_carbon_path_status_e traverse_object(jak_carbon_path_evaluator
                                                                                        next_path_pos,
                                                                                        sub_it);
                                                         }
-                                                        default: error(&it->err, JAK_ERR_UNSUPPORTEDTYPE)
+                                                        default: JAK_ERROR(&it->err, JAK_ERR_UNSUPPORTEDTYPE)
                                                                 return JAK_CARBON_PATH_INTERNAL;
                                                 }
                                         }
@@ -453,7 +453,7 @@ static inline jak_carbon_path_status_e traverse_array(jak_carbon_path_evaluator 
                                                                                         jak_carbon_object_it_drop(sub_it);
                                                                                         return status;
                                                                                 }
-                                                                        default: error_print(JAK_ERR_INTERNALERR);
+                                                                        default: JAK_ERROR_PRINT(JAK_ERR_INTERNALERR);
                                                                                 return JAK_CARBON_PATH_INTERNAL;
                                                                 }
                                                         }
@@ -493,7 +493,7 @@ static inline jak_carbon_path_status_e traverse_array(jak_carbon_path_evaluator 
                                         }
                                 }
                                 break;
-                        default: error(&((jak_carbon_dot_path *) path)->err, JAK_ERR_INTERNALERR);
+                        default: JAK_ERROR(&((jak_carbon_dot_path *) path)->err, JAK_ERR_INTERNALERR);
                                 return JAK_CARBON_PATH_INTERNAL;
                 }
         }

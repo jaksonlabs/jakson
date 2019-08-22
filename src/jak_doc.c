@@ -25,46 +25,46 @@
 
 char VALUE_NULL = '\0';
 
-static void create_doc(struct jak_doc_obj *model, struct jak_doc *doc);
+static void create_doc(jak_doc_obj *model, jak_doc *doc);
 
-static void create_typed_vector(struct jak_doc_entries *entry);
+static void create_typed_vector(jak_doc_entries *entry);
 
-static void entries_drop(struct jak_doc_entries *entry);
+static void entries_drop(jak_doc_entries *entry);
 
 static bool print_value(FILE *file, jak_archive_field_e type, const struct jak_vector ofType(<T>) *values);
 
-static void print_object(FILE *file, const struct jak_doc_obj *model);
+static void print_object(FILE *file, const jak_doc_obj *model);
 
 static bool
-import_json_object(struct jak_doc_obj *target, struct jak_error *err, const struct jak_json_object_t *json_obj);
+import_json_object(jak_doc_obj *target, jak_error *err, const struct jak_json_object_t *json_obj);
 
-static void sort_columndoc_entries(struct jak_column_doc_obj *columndoc);
+static void sort_jak_columndoc_entries(jak_column_doc_obj *columndoc);
 
-bool doc_bulk_create(struct jak_doc_bulk *bulk, struct jak_string_dict *dic)
+bool jak_doc_bulk_create(jak_doc_bulk *bulk, struct jak_string_dict *dic)
 {
         JAK_ERROR_IF_NULL(bulk)
         JAK_ERROR_IF_NULL(dic)
         bulk->dic = dic;
         vec_create(&bulk->keys, NULL, sizeof(char *), 500);
         vec_create(&bulk->values, NULL, sizeof(char *), 1000);
-        vec_create(&bulk->models, NULL, sizeof(struct jak_doc), 50);
+        vec_create(&bulk->models, NULL, sizeof(jak_doc), 50);
         return true;
 }
 
-struct jak_doc_obj *doc_bulk_new_obj(struct jak_doc *model)
+jak_doc_obj *jak_doc_bulk_new_obj(jak_doc *model)
 {
         if (!model) {
                 return NULL;
         } else {
-                struct jak_doc_obj *retval = vec_new_and_get(&model->obj_model, struct jak_doc_obj);
+                jak_doc_obj *retval = vec_new_and_get(&model->obj_model, jak_doc_obj);
                 create_doc(retval, model);
                 return retval;
         }
 }
 
-bool doc_bulk_get_dic_contents(struct jak_vector ofType (const char *) **strings,
+bool jak_doc_bulk_get_dic_contents(struct jak_vector ofType (const char *) **strings,
                                struct jak_vector ofType(jak_archive_field_sid_t) **string_ids,
-                               const struct jak_doc_bulk *context)
+                               const jak_doc_bulk *context)
 {
         JAK_ERROR_IF_NULL(context)
 
@@ -83,25 +83,25 @@ bool doc_bulk_get_dic_contents(struct jak_vector ofType (const char *) **strings
         return status;
 }
 
-struct jak_doc *doc_bulk_new_doc(struct jak_doc_bulk *context, jak_archive_field_e type)
+jak_doc *jak_doc_bulk_new_doc(jak_doc_bulk *context, jak_archive_field_e type)
 {
         if (!context) {
                 return NULL;
         }
 
-        struct jak_doc template, *model;
+        jak_doc template, *model;
         size_t idx = vec_length(&context->models);
         vec_push(&context->models, &template, 1);
-        model = vec_get(&context->models, idx, struct jak_doc);
+        model = vec_get(&context->models, idx, jak_doc);
         model->context = context;
         model->type = type;
 
-        vec_create(&model->obj_model, NULL, sizeof(struct jak_doc_obj), 500);
+        vec_create(&model->obj_model, NULL, sizeof(jak_doc_obj), 500);
 
         return model;
 }
 
-bool doc_bulk_Drop(struct jak_doc_bulk *bulk)
+bool jak_doc_bulk_drop(jak_doc_bulk *bulk)
 {
         JAK_ERROR_IF_NULL(bulk)
         for (size_t i = 0; i < bulk->keys.num_elems; i++) {
@@ -113,10 +113,10 @@ bool doc_bulk_Drop(struct jak_doc_bulk *bulk)
                 free(string);
         }
         for (size_t i = 0; i < bulk->models.num_elems; i++) {
-                struct jak_doc *model = vec_get(&bulk->models, i, struct jak_doc);
+                jak_doc *model = vec_get(&bulk->models, i, jak_doc);
                 for (size_t j = 0; j < model->obj_model.num_elems; j++) {
-                        struct jak_doc_obj *doc = vec_get(&model->obj_model, j, struct jak_doc_obj);
-                        doc_drop(doc);
+                        jak_doc_obj *doc = vec_get(&model->obj_model, j, jak_doc_obj);
+                        jak_doc_drop(doc);
                 }
                 vec_drop(&model->obj_model);
         }
@@ -127,7 +127,7 @@ bool doc_bulk_Drop(struct jak_doc_bulk *bulk)
         return true;
 }
 
-bool doc_bulk_shrink(struct jak_doc_bulk *bulk)
+bool jak_doc_bulk_shrink(jak_doc_bulk *bulk)
 {
         JAK_ERROR_IF_NULL(bulk)
         vec_shrink(&bulk->keys);
@@ -135,7 +135,7 @@ bool doc_bulk_shrink(struct jak_doc_bulk *bulk)
         return true;
 }
 
-bool doc_bulk_print(FILE *file, struct jak_doc_bulk *bulk)
+bool jak_doc_bulk_print(FILE *file, jak_doc_bulk *bulk)
 {
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(bulk)
@@ -158,7 +158,7 @@ bool doc_bulk_print(FILE *file, struct jak_doc_bulk *bulk)
         return true;
 }
 
-bool doc_print(FILE *file, const struct jak_doc *doc)
+bool jak_doc_print(FILE *file, const jak_doc *doc)
 {
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(doc)
@@ -172,7 +172,7 @@ bool doc_print(FILE *file, const struct jak_doc *doc)
         }
 
         for (size_t num_entries = 0; num_entries < doc->obj_model.num_elems; num_entries++) {
-                struct jak_doc_obj *object = vec_get(&doc->obj_model, num_entries, struct jak_doc_obj);
+                jak_doc_obj *object = vec_get(&doc->obj_model, num_entries, jak_doc_obj);
                 print_object(file, object);
                 fprintf(file, "%s", num_entries + 1 < doc->obj_model.num_elems ? ", " : "");
         }
@@ -184,26 +184,26 @@ bool doc_print(FILE *file, const struct jak_doc *doc)
         return true;
 }
 
-const struct jak_vector ofType(struct jak_doc_entries) *doc_get_entries(const struct jak_doc_obj *model)
+const struct jak_vector ofType(jak_doc_entries) *jak_doc_get_entries(const jak_doc_obj *model)
 {
         return &model->entries;
 }
 
-void doc_print_entries(FILE *file, const struct jak_doc_entries *entries)
+void jak_doc_print_entries(FILE *file, const jak_doc_entries *entries)
 {
         fprintf(file, "{\"Key\": \"%s\"", entries->key);
 }
 
-void doc_drop(struct jak_doc_obj *model)
+void jak_doc_drop(jak_doc_obj *model)
 {
         for (size_t i = 0; i < model->entries.num_elems; i++) {
-                struct jak_doc_entries *entry = vec_get(&model->entries, i, struct jak_doc_entries);
+                jak_doc_entries *entry = vec_get(&model->entries, i, jak_doc_entries);
                 entries_drop(entry);
         }
         vec_drop(&model->entries);
 }
 
-bool doc_obj_add_key(struct jak_doc_entries **out, struct jak_doc_obj *obj, const char *key, jak_archive_field_e type)
+bool jak_doc_obj_add_key(jak_doc_entries **out, jak_doc_obj *obj, const char *key, jak_archive_field_e type)
 {
         JAK_ERROR_IF_NULL(out)
         JAK_ERROR_IF_NULL(obj)
@@ -212,7 +212,7 @@ bool doc_obj_add_key(struct jak_doc_entries **out, struct jak_doc_obj *obj, cons
         size_t entry_idx;
         char *key_dup = strdup(key);
 
-        struct jak_doc_entries entry_model = {.type = type, .key = key_dup, .context = obj};
+        jak_doc_entries entry_model = {.type = type, .key = key_dup, .context = obj};
 
         create_typed_vector(&entry_model);
         vec_push(&obj->doc->context->keys, &key_dup, 1);
@@ -220,12 +220,12 @@ bool doc_obj_add_key(struct jak_doc_entries **out, struct jak_doc_obj *obj, cons
         entry_idx = vec_length(&obj->entries);
         vec_push(&obj->entries, &entry_model, 1);
 
-        *out = vec_get(&obj->entries, entry_idx, struct jak_doc_entries);
+        *out = vec_get(&obj->entries, entry_idx, jak_doc_entries);
 
         return true;
 }
 
-bool doc_obj_push_primtive(struct jak_doc_entries *entry, const void *value)
+bool jak_doc_obj_push_primtive(jak_doc_entries *entry, const void *value)
 {
         JAK_ERROR_IF_NULL(entry)
         JAK_ERROR_IF_NULL((entry->type == JAK_FIELD_NULL) || (value != NULL))
@@ -247,26 +247,26 @@ bool doc_obj_push_primtive(struct jak_doc_entries *entry, const void *value)
         return true;
 }
 
-bool doc_obj_push_object(struct jak_doc_obj **out, struct jak_doc_entries *entry)
+bool jak_doc_obj_push_object(jak_doc_obj **out, jak_doc_entries *entry)
 {
         JAK_ERROR_IF_NULL(out);
         JAK_ERROR_IF_NULL(entry);
 
         JAK_ASSERT(entry->type == JAK_FIELD_OBJECT);
 
-        struct jak_doc_obj objectModel;
+        jak_doc_obj objectModel;
 
         create_doc(&objectModel, entry->context->doc);
         size_t length = vec_length(&entry->values);
         vec_push(&entry->values, &objectModel, 1);
 
-        *out = vec_get(&entry->values, length, struct jak_doc_obj);
+        *out = vec_get(&entry->values, length, jak_doc_obj);
 
         return true;
 }
 
 static jak_archive_field_e
-value_type_for_json_number(bool *success, struct jak_error *err, const struct jak_json_number *number)
+value_type_for_json_number(bool *success, jak_error *err, const struct jak_json_number *number)
 {
         *success = true;
         switch (number->value_type) {
@@ -296,62 +296,62 @@ value_type_for_json_number(bool *success, struct jak_error *err, const struct ja
                                 return JAK_FIELD_INT64;
                         }
                 }
-                default: error(err, JAK_ERR_NOJSONNUMBERT);
+                default: JAK_ERROR(err, JAK_ERR_NOJSONNUMBERT);
                         *success = false;
                         return JAK_FIELD_INT8;
         }
 }
 
 static void
-import_json_object_string_prop(struct jak_doc_obj *target, const char *key, const struct jak_json_string *string)
+import_json_object_string_prop(jak_doc_obj *target, const char *key, const struct jak_json_string *string)
 {
-        struct jak_doc_entries *entry;
-        doc_obj_add_key(&entry, target, key, JAK_FIELD_STRING);
-        doc_obj_push_primtive(entry, string->value);
+        jak_doc_entries *entry;
+        jak_doc_obj_add_key(&entry, target, key, JAK_FIELD_STRING);
+        jak_doc_obj_push_primtive(entry, string->value);
 }
 
-static bool import_json_object_number_prop(struct jak_doc_obj *target, struct jak_error *err, const char *key,
+static bool import_json_object_number_prop(jak_doc_obj *target, jak_error *err, const char *key,
                                            const struct jak_json_number *number)
 {
-        struct jak_doc_entries *entry;
+        jak_doc_entries *entry;
         bool success;
         jak_archive_field_e number_type = value_type_for_json_number(&success, err, number);
         if (!success) {
                 return false;
         }
-        doc_obj_add_key(&entry, target, key, number_type);
-        doc_obj_push_primtive(entry, &number->value);
+        jak_doc_obj_add_key(&entry, target, key, number_type);
+        jak_doc_obj_push_primtive(entry, &number->value);
         return true;
 }
 
-static void import_json_object_bool_prop(struct jak_doc_obj *target, const char *key, jak_archive_field_boolean_t value)
+static void import_json_object_bool_prop(jak_doc_obj *target, const char *key, jak_archive_field_boolean_t value)
 {
-        struct jak_doc_entries *entry;
-        doc_obj_add_key(&entry, target, key, JAK_FIELD_BOOLEAN);
-        doc_obj_push_primtive(entry, &value);
+        jak_doc_entries *entry;
+        jak_doc_obj_add_key(&entry, target, key, JAK_FIELD_BOOLEAN);
+        jak_doc_obj_push_primtive(entry, &value);
 }
 
-static void import_json_object_null_prop(struct jak_doc_obj *target, const char *key)
+static void import_json_object_null_prop(jak_doc_obj *target, const char *key)
 {
-        struct jak_doc_entries *entry;
-        doc_obj_add_key(&entry, target, key, JAK_FIELD_NULL);
-        doc_obj_push_primtive(entry, NULL);
+        jak_doc_entries *entry;
+        jak_doc_obj_add_key(&entry, target, key, JAK_FIELD_NULL);
+        jak_doc_obj_push_primtive(entry, NULL);
 }
 
-static bool import_json_object_object_prop(struct jak_doc_obj *target, struct jak_error *err, const char *key,
+static bool import_json_object_object_prop(jak_doc_obj *target, jak_error *err, const char *key,
                                            const struct jak_json_object_t *object)
 {
-        struct jak_doc_entries *entry;
-        struct jak_doc_obj *nested_object = NULL;
-        doc_obj_add_key(&entry, target, key, JAK_FIELD_OBJECT);
-        doc_obj_push_object(&nested_object, entry);
+        jak_doc_entries *entry;
+        jak_doc_obj *nested_object = NULL;
+        jak_doc_obj_add_key(&entry, target, key, JAK_FIELD_OBJECT);
+        jak_doc_obj_push_object(&nested_object, entry);
         return import_json_object(nested_object, err, object);
 }
 
-static bool import_json_object_array_prop(struct jak_doc_obj *target, struct jak_error *err, const char *key,
+static bool import_json_object_array_prop(jak_doc_obj *target, jak_error *err, const char *key,
                                           const struct jak_json_array *array)
 {
-        struct jak_doc_entries *entry;
+        jak_doc_entries *entry;
 
         if (!vec_is_empty(&array->elements.elements)) {
                 size_t num_elements = array->elements.elements.num_elems;
@@ -453,13 +453,13 @@ static bool import_json_object_array_prop(struct jak_doc_obj *target, struct jak
                         case JSON_VALUE_NULL:
                                 field_type = JAK_FIELD_NULL;
                                 break;
-                        case JSON_VALUE_ARRAY: error(err, JAK_ERR_ERRINTERNAL) /** array type is illegal here */
+                        case JSON_VALUE_ARRAY: JAK_ERROR(err, JAK_ERR_ERRINTERNAL) /** array type is illegal here */
                                 return false;
-                        default: error(err, JAK_ERR_NOTYPE)
+                        default: JAK_ERROR(err, JAK_ERR_NOTYPE)
                                 return false;
                 }
 
-                doc_obj_add_key(&entry, target, key, field_type);
+                jak_doc_obj_add_key(&entry, target, key, field_type);
 
                 for (size_t i = 0; i < num_elements; i++) {
                         const struct jak_json_element *element = vec_get(&array->elements.elements, i,
@@ -468,8 +468,8 @@ static bool import_json_object_array_prop(struct jak_doc_obj *target, struct jak
 
                         switch (field_type) {
                                 case JAK_FIELD_OBJECT: {
-                                        struct jak_doc_obj *nested_object = NULL;
-                                        doc_obj_push_object(&nested_object, entry);
+                                        jak_doc_obj *nested_object = NULL;
+                                        jak_doc_obj_push_object(&nested_object, entry);
                                         if (ast_node_data_type != JSON_VALUE_NULL) {
                                                 /** the object is null by definition, if no entries are contained */
                                                 if (!import_json_object(nested_object, err,
@@ -482,7 +482,7 @@ static bool import_json_object_array_prop(struct jak_doc_obj *target, struct jak
                                 case JAK_FIELD_STRING: {
                                         JAK_ASSERT(ast_node_data_type == array_data_type ||
                                                    ast_node_data_type == JSON_VALUE_NULL);
-                                        doc_obj_push_primtive(entry,
+                                        jak_doc_obj_push_primtive(entry,
                                                               ast_node_data_type == JSON_VALUE_NULL
                                                               ? JAK_NULL_ENCODED_STRING : element->value
                                                                       .value.string->value);
@@ -505,7 +505,7 @@ static bool import_json_object_array_prop(struct jak_doc_obj *target, struct jak
                                                                 ast_node_data_type == JSON_VALUE_NULL ? JAK_NULL_INT8
                                                                                                       : (jak_archive_field_i8_t) element
                                                                         ->value.value.number->value.signed_integer;
-                                                        doc_obj_push_primtive(entry, &value);
+                                                        jak_doc_obj_push_primtive(entry, &value);
                                                 }
                                                         break;
                                                 case JAK_FIELD_INT16: {
@@ -513,7 +513,7 @@ static bool import_json_object_array_prop(struct jak_doc_obj *target, struct jak
                                                                 ast_node_data_type == JSON_VALUE_NULL ? JAK_NULL_INT16
                                                                                                       : (jak_archive_field_i16_t) element
                                                                         ->value.value.number->value.signed_integer;
-                                                        doc_obj_push_primtive(entry, &value);
+                                                        jak_doc_obj_push_primtive(entry, &value);
                                                 }
                                                         break;
                                                 case JAK_FIELD_INT32: {
@@ -521,7 +521,7 @@ static bool import_json_object_array_prop(struct jak_doc_obj *target, struct jak
                                                                 ast_node_data_type == JSON_VALUE_NULL ? JAK_NULL_INT32
                                                                                                       : (jak_archive_field_i32_t) element
                                                                         ->value.value.number->value.signed_integer;
-                                                        doc_obj_push_primtive(entry, &value);
+                                                        jak_doc_obj_push_primtive(entry, &value);
                                                 }
                                                         break;
                                                 case JAK_FIELD_INT64: {
@@ -529,7 +529,7 @@ static bool import_json_object_array_prop(struct jak_doc_obj *target, struct jak
                                                                 ast_node_data_type == JSON_VALUE_NULL ? JAK_NULL_INT64
                                                                                                       : (jak_archive_field_i64_t) element
                                                                         ->value.value.number->value.signed_integer;
-                                                        doc_obj_push_primtive(entry, &value);
+                                                        jak_doc_obj_push_primtive(entry, &value);
                                                 }
                                                         break;
                                                 case JAK_FIELD_UINT8: {
@@ -537,7 +537,7 @@ static bool import_json_object_array_prop(struct jak_doc_obj *target, struct jak
                                                                 ast_node_data_type == JSON_VALUE_NULL ? JAK_NULL_UINT8
                                                                                                       : (jak_archive_field_u8_t) element
                                                                         ->value.value.number->value.unsigned_integer;
-                                                        doc_obj_push_primtive(entry, &value);
+                                                        jak_doc_obj_push_primtive(entry, &value);
                                                 }
                                                         break;
                                                 case JAK_FIELD_UINT16: {
@@ -545,7 +545,7 @@ static bool import_json_object_array_prop(struct jak_doc_obj *target, struct jak
                                                                 ast_node_data_type == JSON_VALUE_NULL ? JAK_NULL_UINT16
                                                                                                       : (jak_archive_field_u16_t) element
                                                                         ->value.value.number->value.unsigned_integer;
-                                                        doc_obj_push_primtive(entry, &value);
+                                                        jak_doc_obj_push_primtive(entry, &value);
                                                 }
                                                         break;
                                                 case JAK_FIELD_UINT32: {
@@ -553,7 +553,7 @@ static bool import_json_object_array_prop(struct jak_doc_obj *target, struct jak
                                                                 ast_node_data_type == JSON_VALUE_NULL ? JAK_NULL_UINT32
                                                                                                       : (jak_archive_field_u32_t) element
                                                                         ->value.value.number->value.unsigned_integer;
-                                                        doc_obj_push_primtive(entry, &value);
+                                                        jak_doc_obj_push_primtive(entry, &value);
                                                 }
                                                         break;
                                                 case JAK_FIELD_UINT64: {
@@ -561,7 +561,7 @@ static bool import_json_object_array_prop(struct jak_doc_obj *target, struct jak
                                                                 ast_node_data_type == JSON_VALUE_NULL ? JAK_NULL_UINT64
                                                                                                       : (jak_archive_field_u64_t) element
                                                                         ->value.value.number->value.unsigned_integer;
-                                                        doc_obj_push_primtive(entry, &value);
+                                                        jak_doc_obj_push_primtive(entry, &value);
                                                 }
                                                         break;
                                                 case JAK_FIELD_FLOAT: {
@@ -577,15 +577,15 @@ static bool import_json_object_array_prop(struct jak_doc_obj *target, struct jak
                                                                 } else if (element_number_type == JSON_NUMBER_SIGNED) {
                                                                         value = element->value.value.number->value.signed_integer;
                                                                 } else {
-                                                                        print_error_and_die(
+                                                                        JAK_ERROR_PRINT_AND_DIE(
                                                                                 JAK_ERR_INTERNALERR) /** type mismatch */
                                                                         return false;
                                                                 }
                                                         }
-                                                        doc_obj_push_primtive(entry, &value);
+                                                        jak_doc_obj_push_primtive(entry, &value);
                                                 }
                                                         break;
-                                                default: print_error_and_die(
+                                                default: JAK_ERROR_PRINT_AND_DIE(
                                                         JAK_ERR_INTERNALERR) /** not a number type  */
                                                         return false;
                                         }
@@ -597,18 +597,18 @@ static bool import_json_object_array_prop(struct jak_doc_obj *target, struct jak
                                                 jak_archive_field_boolean_t value =
                                                         ast_node_data_type == JSON_VALUE_TRUE ? JAK_BOOLEAN_TRUE
                                                                                               : JAK_BOOLEAN_FALSE;
-                                                doc_obj_push_primtive(entry, &value);
+                                                jak_doc_obj_push_primtive(entry, &value);
                                         } else {
                                                 JAK_ASSERT(ast_node_data_type == JSON_VALUE_NULL);
                                                 jak_archive_field_boolean_t value = JAK_NULL_BOOLEAN;
-                                                doc_obj_push_primtive(entry, &value);
+                                                jak_doc_obj_push_primtive(entry, &value);
                                         }
                                         break;
                                 case JAK_FIELD_NULL:
                                         JAK_ASSERT(ast_node_data_type == array_data_type);
-                                        doc_obj_push_primtive(entry, NULL);
+                                        jak_doc_obj_push_primtive(entry, NULL);
                                         break;
-                                default: error(err, JAK_ERR_NOTYPE)
+                                default: JAK_ERROR(err, JAK_ERR_NOTYPE)
                                         return false;
                         }
                 }
@@ -619,7 +619,7 @@ static bool import_json_object_array_prop(struct jak_doc_obj *target, struct jak
 }
 
 static bool
-import_json_object(struct jak_doc_obj *target, struct jak_error *err, const struct jak_json_object_t *json_obj)
+import_json_object(jak_doc_obj *target, jak_error *err, const struct jak_json_object_t *json_obj)
 {
         for (size_t i = 0; i < json_obj->value->members.num_elems; i++) {
                 struct jak_json_prop *member = vec_get(&json_obj->value->members, i, struct jak_json_prop);
@@ -663,7 +663,7 @@ import_json_object(struct jak_doc_obj *target, struct jak_error *err, const stru
                                         return false;
                                 }
                                 break;
-                        default: error(err, JAK_ERR_NOTYPE);
+                        default: JAK_ERROR(err, JAK_ERR_NOTYPE);
                                 return false;
                 }
         }
@@ -671,8 +671,8 @@ import_json_object(struct jak_doc_obj *target, struct jak_error *err, const stru
 }
 
 static bool
-import_json(struct jak_doc_obj *target, struct jak_error *err, const struct jak_json *json,
-            struct jak_doc_entries *partition)
+import_json(jak_doc_obj *target, jak_error *err, const struct jak_json *json,
+            jak_doc_entries *partition)
 {
         enum json_value_type value_type = json->element->value.value_type;
         switch (value_type) {
@@ -696,8 +696,8 @@ import_json(struct jak_doc_obj *target, struct jak_error *err, const struct jak_
                                                         const struct jak_json_element
                                                                 *element = vec_get(arrayContent, i,
                                                                                    struct jak_json_element);
-                                                        struct jak_doc_obj *nested;
-                                                        doc_obj_push_object(&nested, partition);
+                                                        jak_doc_obj *nested;
+                                                        jak_doc_obj_push_object(&nested, partition);
                                                         if (!import_json_object(nested, err,
                                                                                 element->value.value.object)) {
                                                                 return false;
@@ -710,7 +710,7 @@ import_json(struct jak_doc_obj *target, struct jak_error *err, const struct jak_
                                         case JSON_VALUE_TRUE:
                                         case JSON_VALUE_FALSE:
                                         case JSON_VALUE_NULL:
-                                        default: print_error_and_die(
+                                        default: JAK_ERROR_PRINT_AND_DIE(
                                                 JAK_ERR_INTERNALERR) /** Unsupported operation in arrays */
                                                 break;
                                 }
@@ -722,20 +722,20 @@ import_json(struct jak_doc_obj *target, struct jak_error *err, const struct jak_
                 case JSON_VALUE_TRUE:
                 case JSON_VALUE_FALSE:
                 case JSON_VALUE_NULL:
-                default: error(err, JAK_ERR_JSONTYPE);
+                default: JAK_ERROR(err, JAK_ERR_JSONTYPE);
                         return false;
         }
         return true;
 }
 
-struct jak_doc_obj *doc_bulk_add_json(struct jak_doc_entries *partition, struct jak_json *json)
+jak_doc_obj *jak_doc_bulk_add_json(jak_doc_entries *partition, struct jak_json *json)
 {
         if (!partition || !json) {
                 return NULL;
         }
 
-        struct jak_doc_obj *converted_json;
-        doc_obj_push_object(&converted_json, partition);
+        jak_doc_obj *converted_json;
+        jak_doc_obj_push_object(&converted_json, partition);
         if (!import_json(converted_json, &json->err, json, partition)) {
                 return NULL;
         }
@@ -743,21 +743,21 @@ struct jak_doc_obj *doc_bulk_add_json(struct jak_doc_entries *partition, struct 
         return converted_json;
 }
 
-struct jak_doc_obj *doc_entries_get_root(const struct jak_doc_entries *partition)
+jak_doc_obj *jak_doc_entries_get_root(const jak_doc_entries *partition)
 {
         return partition ? partition->context : NULL;
 }
 
-struct jak_doc_entries *doc_bulk_new_entries(struct jak_doc_bulk *dst)
+jak_doc_entries *jak_doc_bulk_new_entries(jak_doc_bulk *dst)
 {
-        struct jak_doc_entries *partition = NULL;
-        struct jak_doc *model = doc_bulk_new_doc(dst, JAK_FIELD_OBJECT);
-        struct jak_doc_obj *object = doc_bulk_new_obj(model);
-        doc_obj_add_key(&partition, object, "/", JAK_FIELD_OBJECT);
+        jak_doc_entries *partition = NULL;
+        jak_doc *model = jak_doc_bulk_new_doc(dst, JAK_FIELD_OBJECT);
+        jak_doc_obj *object = jak_doc_bulk_new_obj(model);
+        jak_doc_obj_add_key(&partition, object, "/", JAK_FIELD_OBJECT);
         return partition;
 }
 
-#define DEFINE_JAK_TYPE_LQ_FUNC(type)                                                                               \
+#define JAK_DEFINE_TYPE_LQ_FUNC(type)                                                                               \
 static bool compare_##type##_leq(const void *lhs, const void *rhs)                                                \
 {                                                                                                                      \
     jak_archive_##type a = *(jak_archive_##type *) lhs;                                                                                            \
@@ -765,25 +765,25 @@ static bool compare_##type##_leq(const void *lhs, const void *rhs)              
     return (a <= b);                                                                                                   \
 }
 
-DEFINE_JAK_TYPE_LQ_FUNC(field_boolean_t)
+JAK_DEFINE_TYPE_LQ_FUNC(field_boolean_t)
 
-DEFINE_JAK_TYPE_LQ_FUNC(field_number_t)
+JAK_DEFINE_TYPE_LQ_FUNC(field_number_t)
 
-DEFINE_JAK_TYPE_LQ_FUNC(field_i8_t)
+JAK_DEFINE_TYPE_LQ_FUNC(field_i8_t)
 
-DEFINE_JAK_TYPE_LQ_FUNC(field_i16_t)
+JAK_DEFINE_TYPE_LQ_FUNC(field_i16_t)
 
-DEFINE_JAK_TYPE_LQ_FUNC(field_i32_t)
+JAK_DEFINE_TYPE_LQ_FUNC(field_i32_t)
 
-DEFINE_JAK_TYPE_LQ_FUNC(field_i64_t)
+JAK_DEFINE_TYPE_LQ_FUNC(field_i64_t)
 
-DEFINE_JAK_TYPE_LQ_FUNC(field_u8_t)
+JAK_DEFINE_TYPE_LQ_FUNC(field_u8_t)
 
-DEFINE_JAK_TYPE_LQ_FUNC(field_u16_t)
+JAK_DEFINE_TYPE_LQ_FUNC(field_u16_t)
 
-DEFINE_JAK_TYPE_LQ_FUNC(field_u32_t)
+JAK_DEFINE_TYPE_LQ_FUNC(field_u32_t)
 
-DEFINE_JAK_TYPE_LQ_FUNC(field_u64_t)
+JAK_DEFINE_TYPE_LQ_FUNC(field_u64_t)
 
 static bool compare_encoded_string_less_eq_func(const void *lhs, const void *rhs, void *args)
 {
@@ -798,18 +798,18 @@ static bool compare_encoded_string_less_eq_func(const void *lhs, const void *rhs
         return lq;
 }
 
-static void sort_nested_primitive_object(struct jak_column_doc_obj *columndoc)
+static void sort_nested_primitive_object(jak_column_doc_obj *columndoc)
 {
         if (columndoc->parent->read_optimized) {
                 for (size_t i = 0; i < columndoc->obj_prop_vals.num_elems; i++) {
-                        struct jak_column_doc_obj *nestedModel = vec_get(&columndoc->obj_prop_vals, i,
-                                                                         struct jak_column_doc_obj);
-                        sort_columndoc_entries(nestedModel);
+                        jak_column_doc_obj *nestedModel = vec_get(&columndoc->obj_prop_vals, i,
+                                                                         jak_column_doc_obj);
+                        sort_jak_columndoc_entries(nestedModel);
                 }
         }
 }
 
-#define DEFINE_JAK_ARRAY_TYPE_LQ_FUNC(type)                                                                         \
+#define JAK_DEFINE_ARRAY_TYPE_LQ_FUNC(type)                                                                         \
 static bool compare_##type##_array_leq(const void *lhs, const void *rhs)                                           \
 {                                                                                                                      \
     struct jak_vector ofType(jak_archive_##type) *a = (struct jak_vector *) lhs;                                                               \
@@ -825,25 +825,25 @@ static bool compare_##type##_array_leq(const void *lhs, const void *rhs)        
     return true;                                                                                                       \
 }
 
-DEFINE_JAK_ARRAY_TYPE_LQ_FUNC(field_boolean_t)
+JAK_DEFINE_ARRAY_TYPE_LQ_FUNC(field_boolean_t)
 
-DEFINE_JAK_ARRAY_TYPE_LQ_FUNC(field_i8_t)
+JAK_DEFINE_ARRAY_TYPE_LQ_FUNC(field_i8_t)
 
-DEFINE_JAK_ARRAY_TYPE_LQ_FUNC(field_i16_t)
+JAK_DEFINE_ARRAY_TYPE_LQ_FUNC(field_i16_t)
 
-DEFINE_JAK_ARRAY_TYPE_LQ_FUNC(field_i32_t)
+JAK_DEFINE_ARRAY_TYPE_LQ_FUNC(field_i32_t)
 
-DEFINE_JAK_ARRAY_TYPE_LQ_FUNC(field_i64_t)
+JAK_DEFINE_ARRAY_TYPE_LQ_FUNC(field_i64_t)
 
-DEFINE_JAK_ARRAY_TYPE_LQ_FUNC(field_u8_t)
+JAK_DEFINE_ARRAY_TYPE_LQ_FUNC(field_u8_t)
 
-DEFINE_JAK_ARRAY_TYPE_LQ_FUNC(field_u16_t)
+JAK_DEFINE_ARRAY_TYPE_LQ_FUNC(field_u16_t)
 
-DEFINE_JAK_ARRAY_TYPE_LQ_FUNC(field_u32_t)
+JAK_DEFINE_ARRAY_TYPE_LQ_FUNC(field_u32_t)
 
-DEFINE_JAK_ARRAY_TYPE_LQ_FUNC(field_u64_t)
+JAK_DEFINE_ARRAY_TYPE_LQ_FUNC(field_u64_t)
 
-DEFINE_JAK_ARRAY_TYPE_LQ_FUNC(field_number_t)
+JAK_DEFINE_ARRAY_TYPE_LQ_FUNC(field_number_t)
 
 static bool compare_encoded_string_array_less_eq_func(const void *lhs, const void *rhs, void *args)
 {
@@ -866,15 +866,15 @@ static bool compare_encoded_string_array_less_eq_func(const void *lhs, const voi
         return true;
 }
 
-static void sorted_nested_array_objects(struct jak_column_doc_obj *columndoc)
+static void sorted_nested_array_objects(jak_column_doc_obj *columndoc)
 {
         if (columndoc->parent->read_optimized) {
                 for (size_t i = 0; i < columndoc->obj_array_props.num_elems; i++) {
-                        struct jak_column_doc_group
-                                *array_columns = vec_get(&columndoc->obj_array_props, i, struct jak_column_doc_group);
+                        jak_column_doc_group
+                                *array_columns = vec_get(&columndoc->obj_array_props, i, jak_column_doc_group);
                         for (size_t j = 0; j < array_columns->columns.num_elems; j++) {
-                                struct jak_column_doc_column
-                                        *column = vec_get(&array_columns->columns, j, struct jak_column_doc_column);
+                                jak_column_doc_column
+                                        *column = vec_get(&array_columns->columns, j, jak_column_doc_column);
                                 struct jak_vector ofType(jak_u32) *array_indices = &column->array_positions;
                                 struct jak_vector ofType(
                                         struct jak_vector ofType(<T>)) *values_for_indicies = &column->values;
@@ -885,9 +885,9 @@ static void sorted_nested_array_objects(struct jak_column_doc_obj *columndoc)
                                                 *values_for_index = vec_get(values_for_indicies, k, struct jak_vector);
                                         if (column->type == JAK_FIELD_OBJECT) {
                                                 for (size_t l = 0; l < values_for_index->num_elems; l++) {
-                                                        struct jak_column_doc_obj *nested_object =
-                                                                vec_get(values_for_index, l, struct jak_column_doc_obj);
-                                                        sort_columndoc_entries(nested_object);
+                                                        jak_column_doc_obj *nested_object =
+                                                                vec_get(values_for_index, l, jak_column_doc_obj);
+                                                        sort_jak_columndoc_entries(nested_object);
                                                 }
                                         }
                                 }
@@ -1000,7 +1000,7 @@ static void sort_meta_model_string_values(struct jak_vector ofType(jak_archive_f
     }                                                                                                                  \
 }
 
-static void sort_columndoc_strings_arrays(struct jak_vector ofType(jak_archive_field_sid_t) *key_vector,
+static void sort_jak_columndoc_strings_arrays(struct jak_vector ofType(jak_archive_field_sid_t) *key_vector,
                                           struct jak_vector ofType(jak_archive_field_sid_t) *value_array_vector,
                                           struct jak_string_dict *dic)
 {
@@ -1042,8 +1042,8 @@ static void sort_columndoc_strings_arrays(struct jak_vector ofType(jak_archive_f
 static bool compare_object_array_key_columns_less_eq_func(const void *lhs, const void *rhs, void *args)
 {
         struct jak_string_dict *dic = (struct jak_string_dict *) args;
-        struct jak_column_doc_group *a = (struct jak_column_doc_group *) lhs;
-        struct jak_column_doc_group *b = (struct jak_column_doc_group *) rhs;
+        jak_column_doc_group *a = (jak_column_doc_group *) lhs;
+        jak_column_doc_group *b = (jak_column_doc_group *) rhs;
         char **a_column_name = strdic_extract(dic, &a->key, 1);
         char **b_column_name = strdic_extract(dic, &b->key, 1);
         bool column_name_leq = strcmp(*a_column_name, *b_column_name) <= 0;
@@ -1055,8 +1055,8 @@ static bool compare_object_array_key_columns_less_eq_func(const void *lhs, const
 static bool compare_object_array_key_column_less_eq_func(const void *lhs, const void *rhs, void *args)
 {
         struct jak_string_dict *dic = (struct jak_string_dict *) args;
-        struct jak_column_doc_column *a = (struct jak_column_doc_column *) lhs;
-        struct jak_column_doc_column *b = (struct jak_column_doc_column *) rhs;
+        jak_column_doc_column *a = (jak_column_doc_column *) lhs;
+        jak_column_doc_column *b = (jak_column_doc_column *) rhs;
         char **a_column_name = strdic_extract(dic, &a->key_name, 1);
         char **b_column_name = strdic_extract(dic, &b->key_name, 1);
         int cmpResult = strcmp(*a_column_name, *b_column_name);
@@ -1132,12 +1132,12 @@ static bool compare_column_less_eq_func(const void *lhs, const void *rhs, void *
                 case JAK_FIELD_OBJECT:
                         return true;
                         break;
-                default: print_error_and_die(JAK_ERR_NOTYPE)
+                default: JAK_ERROR_PRINT_AND_DIE(JAK_ERR_NOTYPE)
                         return false;
         }
 }
 
-static void sort_columndoc_column(struct jak_column_doc_column *column, struct jak_string_dict *dic)
+static void sort_jak_columndoc_column(jak_column_doc_column *column, struct jak_string_dict *dic)
 {
         /** Sort column by its value, and re-arrange the array position list according this new order */
         struct jak_vector ofType(jak_u32) array_position_cpy;
@@ -1175,9 +1175,9 @@ static void sort_columndoc_column(struct jak_column_doc_column *column, struct j
         vec_drop(&values_cpy);
 }
 
-static void sort_columndoc_column_arrays(struct jak_column_doc_obj *columndoc)
+static void sort_jak_columndoc_column_arrays(jak_column_doc_obj *columndoc)
 {
-        struct jak_vector ofType(struct jak_column_doc_group) cpy;
+        struct jak_vector ofType(jak_column_doc_group) cpy;
         vec_cpy(&cpy, &columndoc->obj_array_props);
         size_t *indices = JAK_MALLOC(cpy.num_elems * sizeof(size_t));
         for (size_t i = 0; i < cpy.num_elems; i++) {
@@ -1185,21 +1185,21 @@ static void sort_columndoc_column_arrays(struct jak_column_doc_obj *columndoc)
         }
         sort_qsort_indicies_wargs(indices,
                                   cpy.base,
-                                  sizeof(struct jak_column_doc_group),
+                                  sizeof(jak_column_doc_group),
                                   compare_object_array_key_columns_less_eq_func,
                                   cpy.num_elems,
                                   cpy.allocator,
                                   columndoc->parent->dic);
         for (size_t i = 0; i < cpy.num_elems; i++) {
-                vec_set(&columndoc->obj_array_props, i, vec_get(&cpy, indices[i], struct jak_column_doc_group));
+                vec_set(&columndoc->obj_array_props, i, vec_get(&cpy, indices[i], jak_column_doc_group));
         }
         free(indices);
 
         for (size_t i = 0; i < cpy.num_elems; i++) {
-                struct jak_column_doc_group *key_columns = vec_get(&columndoc->obj_array_props, i,
-                                                                   struct jak_column_doc_group);
+                jak_column_doc_group *key_columns = vec_get(&columndoc->obj_array_props, i,
+                                                                   jak_column_doc_group);
                 size_t *columnIndices = JAK_MALLOC(key_columns->columns.num_elems * sizeof(size_t));
-                struct jak_vector ofType(struct jak_column_doc_column) columnCpy;
+                struct jak_vector ofType(jak_column_doc_column) columnCpy;
                 vec_cpy(&columnCpy, &key_columns->columns);
                 for (size_t i = 0; i < key_columns->columns.num_elems; i++) {
                         columnIndices[i] = i;
@@ -1208,7 +1208,7 @@ static void sort_columndoc_column_arrays(struct jak_column_doc_obj *columndoc)
                 /** First, sort by column name; Then, sort by columns with same name by type */
                 sort_qsort_indicies_wargs(columnIndices,
                                           columnCpy.base,
-                                          sizeof(struct jak_column_doc_column),
+                                          sizeof(jak_column_doc_column),
                                           compare_object_array_key_column_less_eq_func,
                                           key_columns->columns.num_elems,
                                           key_columns->columns.allocator,
@@ -1216,10 +1216,10 @@ static void sort_columndoc_column_arrays(struct jak_column_doc_obj *columndoc)
                 for (size_t i = 0; i < key_columns->columns.num_elems; i++) {
                         vec_set(&key_columns->columns,
                                 i,
-                                vec_get(&columnCpy, columnIndices[i], struct jak_column_doc_column));
-                        struct jak_column_doc_column *column = vec_get(&key_columns->columns, i,
-                                                                       struct jak_column_doc_column);
-                        sort_columndoc_column(column, columndoc->parent->dic);
+                                vec_get(&columnCpy, columnIndices[i], jak_column_doc_column));
+                        jak_column_doc_column *column = vec_get(&key_columns->columns, i,
+                                                                       jak_column_doc_column);
+                        sort_jak_columndoc_column(column, columndoc->parent->dic);
                 }
 
                 vec_drop(&columnCpy);
@@ -1228,7 +1228,7 @@ static void sort_columndoc_column_arrays(struct jak_column_doc_obj *columndoc)
         vec_drop(&cpy);
 }
 
-static void sort_columndoc_values(struct jak_column_doc_obj *columndoc)
+static void sort_jak_columndoc_values(jak_column_doc_obj *columndoc)
 {
         if (columndoc->parent->read_optimized) {
                 SORT_META_MODEL_VALUES(columndoc->bool_prop_keys,
@@ -1305,24 +1305,24 @@ static void sort_columndoc_values(struct jak_column_doc_obj *columndoc)
                 SORT_META_MODEL_ARRAYS(columndoc->float_array_prop_keys,
                                        columndoc->float_array_prop_vals,
                                        compare_field_number_t_array_leq);
-                sort_columndoc_strings_arrays(&columndoc->string_array_prop_keys,
+                sort_jak_columndoc_strings_arrays(&columndoc->string_array_prop_keys,
                                               &columndoc->string_array_prop_vals,
                                               columndoc->parent->dic);
 
-                sort_columndoc_column_arrays(columndoc);
+                sort_jak_columndoc_column_arrays(columndoc);
         }
 }
 
-static void sort_columndoc_entries(struct jak_column_doc_obj *columndoc)
+static void sort_jak_columndoc_entries(jak_column_doc_obj *columndoc)
 {
         if (columndoc->parent->read_optimized) {
-                sort_columndoc_values(columndoc);
+                sort_jak_columndoc_values(columndoc);
                 sort_nested_primitive_object(columndoc);
                 sorted_nested_array_objects(columndoc);
         }
 }
 
-struct jak_column_doc *doc_entries_columndoc(const struct jak_doc_bulk *bulk, const struct jak_doc_entries *partition,
+jak_column_doc *jak_doc_entries_columndoc(const jak_doc_bulk *bulk, const jak_doc_entries *partition,
                                              bool read_optimized)
 {
         if (!bulk || !partition) {
@@ -1336,38 +1336,38 @@ struct jak_column_doc *doc_entries_columndoc(const struct jak_doc_bulk *bulk, co
         strdic_insert(bulk->dic, NULL, valueStrings, vec_length(&bulk->values), 0);
 
         // Step 2: for each document doc, create a meta doc, and construct a binary compressed document
-        const struct jak_doc *models = vec_all(&bulk->models, struct jak_doc);
+        const jak_doc *models = vec_all(&bulk->models, jak_doc);
         JAK_ASSERT (bulk->models.num_elems == 1);
 
-        const struct jak_doc *model = models;
+        const jak_doc *model = models;
 
-        struct jak_column_doc *columndoc = JAK_MALLOC(sizeof(struct jak_column_doc));
+        jak_column_doc *columndoc = JAK_MALLOC(sizeof(jak_column_doc));
         columndoc->read_optimized = read_optimized;
-        struct jak_error err;
-        if (!columndoc_create(columndoc, &err, model, bulk, partition, bulk->dic)) {
-                error_print_and_abort(&err);
+        jak_error err;
+        if (!jak_columndoc_create(columndoc, &err, model, bulk, partition, bulk->dic)) {
+                jak_error_print_and_abort(&err);
         }
 
         if (columndoc->read_optimized) {
-                sort_columndoc_entries(&columndoc->columndoc);
+                sort_jak_columndoc_entries(&columndoc->columndoc);
         }
 
         return columndoc;
 }
 
-bool doc_entries_drop(struct jak_doc_entries *partition)
+bool jak_doc_entries_drop(jak_doc_entries *partition)
 {
         JAK_UNUSED(partition);
         return true;
 }
 
-static void create_doc(struct jak_doc_obj *model, struct jak_doc *doc)
+static void create_doc(jak_doc_obj *model, jak_doc *doc)
 {
-        vec_create(&model->entries, NULL, sizeof(struct jak_doc_entries), 50);
+        vec_create(&model->entries, NULL, sizeof(jak_doc_entries), 50);
         model->doc = doc;
 }
 
-static void create_typed_vector(struct jak_doc_entries *entry)
+static void create_typed_vector(jak_doc_entries *entry)
 {
         size_t size;
         switch (entry->type) {
@@ -1408,20 +1408,20 @@ static void create_typed_vector(struct jak_doc_entries *entry)
                         size = sizeof(field_string_t);
                         break;
                 case JAK_FIELD_OBJECT:
-                        size = sizeof(struct jak_doc_obj);
+                        size = sizeof(jak_doc_obj);
                         break;
-                default: print_error_and_die(JAK_ERR_INTERNALERR) /** unknown type */
+                default: JAK_ERROR_PRINT_AND_DIE(JAK_ERR_INTERNALERR) /** unknown type */
                         return;
         }
         vec_create(&entry->values, NULL, size, 50);
 }
 
-static void entries_drop(struct jak_doc_entries *entry)
+static void entries_drop(jak_doc_entries *entry)
 {
         if (entry->type == JAK_FIELD_OBJECT) {
                 for (size_t i = 0; i < entry->values.num_elems; i++) {
-                        struct jak_doc_obj *model = vec_get(&entry->values, i, struct jak_doc_obj);
-                        doc_drop(model);
+                        jak_doc_obj *model = vec_get(&entry->values, i, jak_doc_obj);
+                        jak_doc_drop(model);
                 }
         }
         vec_drop(&entry->values);
@@ -1568,7 +1568,7 @@ static bool print_value(FILE *file, jak_archive_field_e type, const struct jak_v
                         break;
                 case JAK_FIELD_OBJECT: {
                         for (size_t i = 0; i < num_values; i++) {
-                                struct jak_doc_obj *obj = vec_get(values, i, struct jak_doc_obj);
+                                jak_doc_obj *obj = vec_get(values, i, jak_doc_obj);
                                 if (!JAK_NULL_OBJECT_MODEL(obj)) {
                                         print_object(file, obj);
                                 } else {
@@ -1586,11 +1586,11 @@ static bool print_value(FILE *file, jak_archive_field_e type, const struct jak_v
         return true;
 }
 
-static void print_object(FILE *file, const struct jak_doc_obj *model)
+static void print_object(FILE *file, const jak_doc_obj *model)
 {
         fprintf(file, "{");
         for (size_t i = 0; i < model->entries.num_elems; i++) {
-                struct jak_doc_entries *entry = vec_get(&model->entries, i, struct jak_doc_entries);
+                jak_doc_entries *entry = vec_get(&model->entries, i, jak_doc_entries);
                 fprintf(file, "\"%s\": ", entry->key);
                 print_value(file, entry->type, &entry->values);
                 fprintf(file, "%s", i + 1 < model->entries.num_elems ? ", " : "");

@@ -36,7 +36,7 @@ JAK_BEGIN_DECL
 typedef struct jak_carbon_find {
         jak_carbon *doc;
         jak_carbon_field_type_e type;
-        struct jak_error err;
+        jak_error err;
         jak_carbon_path_evaluator path_evaluater;
 
         bool value_is_nulled;
@@ -67,7 +67,7 @@ bool jak_carbon_find_create(jak_carbon_find *find, jak_carbon_dot_path *path, ja
 bool jak_carbon_find_drop(jak_carbon_find *find);
 
 bool jak_carbon_find_has_result(jak_carbon_find *find);
-const char *jak_carbon_find_result_to_str(struct jak_string *dst_str, jak_jak_carbon_printer_impl_e print_type, jak_carbon_find *find);
+const char *jak_carbon_find_result_to_str(struct jak_string *dst_str, jak_carbon_printer_impl_e print_type, jak_carbon_find *find);
 const char *jak_carbon_find_result_to_json_compact(struct jak_string *dst_str, jak_carbon_find *find);
 char *jak_carbon_find_result_to_json_compact_dup(jak_carbon_find *find);
 

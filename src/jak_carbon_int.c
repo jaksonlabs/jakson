@@ -76,7 +76,7 @@ bool jak_carbon_int_insert_array(struct jak_memfile *memfile, size_t nbytes)
         return true;
 }
 
-bool jak_carbon_int_insert_column(struct jak_memfile *memfile_in, struct jak_error *err_in, jak_carbon_column_type_e type,
+bool jak_carbon_int_insert_column(struct jak_memfile *memfile_in, jak_error *err_in, jak_carbon_column_type_e type,
                               size_t capactity)
 {
         JAK_ERROR_IF_NULL(memfile_in);
@@ -116,7 +116,7 @@ bool jak_carbon_int_insert_column(struct jak_memfile *memfile_in, struct jak_err
                         column_type = JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT;
                         break;
                 default:
-                        error_with_details(err_in, JAK_ERR_BADTYPE, "carbon column supports fixed-length types only")
+                        JAK_ERROR_WDETAILS(err_in, JAK_ERR_BADTYPE, "carbon column supports fixed-length types only")
         }
 
         memfile_ensure_space(memfile_in, sizeof(jak_u8));
@@ -169,7 +169,7 @@ size_t jak_carbon_int_get_type_size_encoded(jak_carbon_field_type_e type)
                 case JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT:
                         type_size += sizeof(float);
                         break;
-                default: error_print(JAK_ERR_INTERNALERR);
+                default: JAK_ERROR_PRINT(JAK_ERR_INTERNALERR);
                         return 0;
         }
         return type_size;
@@ -206,7 +206,7 @@ size_t jak_carbon_int_get_type_value_size(jak_carbon_field_type_e type)
                 case JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT:
                 case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT:
                         return sizeof(float);
-                default: error_print(JAK_ERR_INTERNALERR);
+                default: JAK_ERROR_PRINT(JAK_ERR_INTERNALERR);
                         return 0;
         }
 }
@@ -303,18 +303,18 @@ bool jak_carbon_int_array_it_refresh(bool *is_empty_slot, bool *is_array_end, ja
 bool jak_carbon_int_array_it_field_type_read(jak_carbon_array_it *it)
 {
         JAK_ERROR_IF_NULL(it)
-        error_if(memfile_remain_size(&it->memfile) < 1, &it->err, JAK_ERR_ILLEGALOP);
+        JAK_ERROR_IF(memfile_remain_size(&it->memfile) < 1, &it->err, JAK_ERR_ILLEGALOP);
         memfile_save_position(&it->memfile);
         it->field_offset = memfile_tell(&it->memfile);
         jak_u8 media_type = *memfile_read(&it->memfile, 1);
-        error_if(media_type == 0, &it->err, JAK_ERR_NOTFOUND)
-        error_if(media_type == JAK_CARBON_MARKER_ARRAY_END, &it->err, JAK_ERR_OUTOFBOUNDS)
+        JAK_ERROR_IF(media_type == 0, &it->err, JAK_ERR_NOTFOUND)
+        JAK_ERROR_IF(media_type == JAK_CARBON_MARKER_ARRAY_END, &it->err, JAK_ERR_OUTOFBOUNDS)
         it->field_access.it_field_type = media_type;
         memfile_restore_position(&it->memfile);
         return true;
 }
 
-bool jak_carbon_int_field_data_access(struct jak_memfile *file, struct jak_error *err, jak_field_access *field_access)
+bool jak_carbon_int_field_data_access(struct jak_memfile *file, jak_error *err, jak_field_access *field_access)
 {
         memfile_save_position(file);
         memfile_skip(file, sizeof(jak_media_type));
@@ -393,7 +393,7 @@ bool jak_carbon_int_field_data_access(struct jak_memfile *file, struct jak_error
                         jak_carbon_object_it_create(field_access->nested_object_it, file, err,
                                                 memfile_tell(file) - sizeof(jak_u8));
                         break;
-                default: error(err, JAK_ERR_CORRUPTED)
+                default: JAK_ERROR(err, JAK_ERR_CORRUPTED)
                         return false;
         }
 
@@ -607,83 +607,83 @@ bool jak_carbon_int_field_access_field_type(jak_carbon_field_type_e *type, jak_f
         return true;
 }
 
-bool jak_carbon_int_field_access_u8_value(jak_u8 *value, jak_field_access *field, struct jak_error *err)
+bool jak_carbon_int_field_access_u8_value(jak_u8 *value, jak_field_access *field, jak_error *err)
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
-        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_U8, err, JAK_ERR_TYPEMISMATCH);
+        JAK_ERROR_IF(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_U8, err, JAK_ERR_TYPEMISMATCH);
         *value = *(jak_u8 *) field->it_field_data;
         return true;
 }
 
-bool jak_carbon_int_field_access_u16_value(jak_u16 *value, jak_field_access *field, struct jak_error *err)
+bool jak_carbon_int_field_access_u16_value(jak_u16 *value, jak_field_access *field, jak_error *err)
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
-        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_U16, err, JAK_ERR_TYPEMISMATCH);
+        JAK_ERROR_IF(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_U16, err, JAK_ERR_TYPEMISMATCH);
         *value = *(jak_u16 *) field->it_field_data;
         return true;
 }
 
-bool jak_carbon_int_field_access_u32_value(jak_u32 *value, jak_field_access *field, struct jak_error *err)
+bool jak_carbon_int_field_access_u32_value(jak_u32 *value, jak_field_access *field, jak_error *err)
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
-        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_U32, err, JAK_ERR_TYPEMISMATCH);
+        JAK_ERROR_IF(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_U32, err, JAK_ERR_TYPEMISMATCH);
         *value = *(jak_u32 *) field->it_field_data;
         return true;
 }
 
-bool jak_carbon_int_field_access_u64_value(jak_u64 *value, jak_field_access *field, struct jak_error *err)
+bool jak_carbon_int_field_access_u64_value(jak_u64 *value, jak_field_access *field, jak_error *err)
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
-        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_U64, err, JAK_ERR_TYPEMISMATCH);
+        JAK_ERROR_IF(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_U64, err, JAK_ERR_TYPEMISMATCH);
         *value = *(jak_u64 *) field->it_field_data;
         return true;
 }
 
-bool jak_carbon_int_field_access_i8_value(jak_i8 *value, jak_field_access *field, struct jak_error *err)
+bool jak_carbon_int_field_access_i8_value(jak_i8 *value, jak_field_access *field, jak_error *err)
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
-        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_I8, err, JAK_ERR_TYPEMISMATCH);
+        JAK_ERROR_IF(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_I8, err, JAK_ERR_TYPEMISMATCH);
         *value = *(jak_i8 *) field->it_field_data;
         return true;
 }
 
-bool jak_carbon_int_field_access_i16_value(jak_i16 *value, jak_field_access *field, struct jak_error *err)
+bool jak_carbon_int_field_access_i16_value(jak_i16 *value, jak_field_access *field, jak_error *err)
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
-        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_I16, err, JAK_ERR_TYPEMISMATCH);
+        JAK_ERROR_IF(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_I16, err, JAK_ERR_TYPEMISMATCH);
         *value = *(jak_i16 *) field->it_field_data;
         return true;
 }
 
-bool jak_carbon_int_field_access_i32_value(jak_i32 *value, jak_field_access *field, struct jak_error *err)
+bool jak_carbon_int_field_access_i32_value(jak_i32 *value, jak_field_access *field, jak_error *err)
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
-        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_I32, err, JAK_ERR_TYPEMISMATCH);
+        JAK_ERROR_IF(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_I32, err, JAK_ERR_TYPEMISMATCH);
         *value = *(jak_i32 *) field->it_field_data;
         return true;
 }
 
-bool jak_carbon_int_field_access_i64_value(jak_i64 *value, jak_field_access *field, struct jak_error *err)
+bool jak_carbon_int_field_access_i64_value(jak_i64 *value, jak_field_access *field, jak_error *err)
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
-        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_I64, err, JAK_ERR_TYPEMISMATCH);
+        JAK_ERROR_IF(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_I64, err, JAK_ERR_TYPEMISMATCH);
         *value = *(jak_i64 *) field->it_field_data;
         return true;
 }
 
 bool
-jak_carbon_int_field_access_float_value(bool *is_null_in, float *value, jak_field_access *field, struct jak_error *err)
+jak_carbon_int_field_access_float_value(bool *is_null_in, float *value, jak_field_access *field, jak_error *err)
 {
         JAK_ERROR_IF_NULL(field)
-        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT, err, JAK_ERR_TYPEMISMATCH);
+        JAK_ERROR_IF(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT, err, JAK_ERR_TYPEMISMATCH);
         float read_value = *(float *) field->it_field_data;
         JAK_optional_set(value, read_value);
         JAK_optional_set(is_null_in, is_null_float(read_value));
@@ -692,7 +692,7 @@ jak_carbon_int_field_access_float_value(bool *is_null_in, float *value, jak_fiel
 }
 
 bool jak_carbon_int_field_access_signed_value(bool *is_null_in, jak_i64 *value, jak_field_access *field,
-                                          struct jak_error *err)
+                                          jak_error *err)
 {
         JAK_ERROR_IF_NULL(field)
         switch (field->it_field_type) {
@@ -724,14 +724,14 @@ bool jak_carbon_int_field_access_signed_value(bool *is_null_in, jak_i64 *value, 
                         JAK_optional_set(is_null_in, is_null_i64(read_value));
                 }
                         break;
-                default: error(err, JAK_ERR_TYPEMISMATCH);
+                default: JAK_ERROR(err, JAK_ERR_TYPEMISMATCH);
                         return false;
         }
         return true;
 }
 
 bool jak_carbon_int_field_access_unsigned_value(bool *is_null_in, jak_u64 *value, jak_field_access *field,
-                                            struct jak_error *err)
+                                            jak_error *err)
 {
         JAK_ERROR_IF_NULL(field)
         switch (field->it_field_type) {
@@ -763,27 +763,27 @@ bool jak_carbon_int_field_access_unsigned_value(bool *is_null_in, jak_u64 *value
                         JAK_optional_set(is_null_in, is_null_u64(read_value));
                 }
                         break;
-                default: error(err, JAK_ERR_TYPEMISMATCH);
+                default: JAK_ERROR(err, JAK_ERR_TYPEMISMATCH);
                         return false;
         }
         return true;
 }
 
-const char *jak_carbon_int_field_access_string_value(jak_u64 *strlen, jak_field_access *field, struct jak_error *err)
+const char *jak_carbon_int_field_access_string_value(jak_u64 *strlen, jak_field_access *field, jak_error *err)
 {
         JAK_ERROR_IF_NULL(strlen);
-        error_if_and_return(field == NULL, err, JAK_ERR_NULLPTR, NULL);
-        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_STRING, err, JAK_ERR_TYPEMISMATCH);
+        JAK_ERROR_IF_AND_RETURN(field == NULL, err, JAK_ERR_NULLPTR, NULL);
+        JAK_ERROR_IF(field->it_field_type != JAK_CARBON_FIELD_TYPE_STRING, err, JAK_ERR_TYPEMISMATCH);
         *strlen = field->it_field_len;
         return field->it_field_data;
 }
 
 bool
-jak_carbon_int_field_access_binary_value(jak_carbon_binary *out, jak_field_access *field, struct jak_error *err)
+jak_carbon_int_field_access_binary_value(jak_carbon_binary *out, jak_field_access *field, jak_error *err)
 {
         JAK_ERROR_IF_NULL(out)
         JAK_ERROR_IF_NULL(field)
-        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_BINARY &&
+        JAK_ERROR_IF(field->it_field_type != JAK_CARBON_FIELD_TYPE_BINARY &&
                  field->it_field_type != JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM,
                  err, JAK_ERR_TYPEMISMATCH);
         out->blob = field->it_field_data;
@@ -793,26 +793,26 @@ jak_carbon_int_field_access_binary_value(jak_carbon_binary *out, jak_field_acces
         return true;
 }
 
-jak_carbon_array_it *jak_carbon_int_field_access_array_value(jak_field_access *field, struct jak_error *err)
+jak_carbon_array_it *jak_carbon_int_field_access_array_value(jak_field_access *field, jak_error *err)
 {
-        error_print_if(!field, JAK_ERR_NULLPTR);
-        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_ARRAY, err, JAK_ERR_TYPEMISMATCH);
+        JAK_ERROR_PRINT_IF(!field, JAK_ERR_NULLPTR);
+        JAK_ERROR_IF(field->it_field_type != JAK_CARBON_FIELD_TYPE_ARRAY, err, JAK_ERR_TYPEMISMATCH);
         field->nested_array_it_accessed = true;
         return field->nested_array_it;
 }
 
-jak_carbon_object_it *jak_carbon_int_field_access_object_value(jak_field_access *field, struct jak_error *err)
+jak_carbon_object_it *jak_carbon_int_field_access_object_value(jak_field_access *field, jak_error *err)
 {
-        error_print_if(!field, JAK_ERR_NULLPTR);
-        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_OBJECT, err, JAK_ERR_TYPEMISMATCH);
+        JAK_ERROR_PRINT_IF(!field, JAK_ERR_NULLPTR);
+        JAK_ERROR_IF(field->it_field_type != JAK_CARBON_FIELD_TYPE_OBJECT, err, JAK_ERR_TYPEMISMATCH);
         field->nested_object_it_accessed = true;
         return field->nested_object_it;
 }
 
-jak_carbon_column_it *jak_carbon_int_field_access_column_value(jak_field_access *field, struct jak_error *err)
+jak_carbon_column_it *jak_carbon_int_field_access_column_value(jak_field_access *field, jak_error *err)
 {
-        error_print_if(!field, JAK_ERR_NULLPTR);
-        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_COLUMN_U8 &&
+        JAK_ERROR_PRINT_IF(!field, JAK_ERR_NULLPTR);
+        JAK_ERROR_IF(field->it_field_type != JAK_CARBON_FIELD_TYPE_COLUMN_U8 &&
                  field->it_field_type != JAK_CARBON_FIELD_TYPE_COLUMN_U16 &&
                  field->it_field_type != JAK_CARBON_FIELD_TYPE_COLUMN_U32 &&
                  field->it_field_type != JAK_CARBON_FIELD_TYPE_COLUMN_U64 &&
@@ -825,7 +825,7 @@ jak_carbon_column_it *jak_carbon_int_field_access_column_value(jak_field_access 
         return field->nested_column_it;
 }
 
-bool jak_carbon_int_field_remove(struct jak_memfile *memfile, struct jak_error *err, jak_carbon_field_type_e type)
+bool jak_carbon_int_field_remove(struct jak_memfile *memfile, jak_error *err, jak_carbon_field_type_e type)
 {
         JAK_ASSERT((jak_carbon_field_type_e) *memfile_peek(memfile, sizeof(jak_u8)) == type);
         jak_offset_t start_off = memfile_tell(memfile);
@@ -942,7 +942,7 @@ bool jak_carbon_int_field_remove(struct jak_memfile *memfile, struct jak_error *
                         rm_nbytes += (end_off - begin_off);
                 }
                         break;
-                default: error(err, JAK_ERR_INTERNALERR)
+                default: JAK_ERROR(err, JAK_ERR_INTERNALERR)
                         return false;
         }
         memfile_seek(memfile, start_off);
@@ -980,7 +980,7 @@ static void int_insert_array_number(jak_carbon_insert *array_ins, struct jak_jso
                 case JSON_NUMBER_SIGNED:
                         jak_carbon_insert_signed(array_ins, number->value.signed_integer);
                         break;
-                default: error_print(JAK_ERR_UNSUPPORTEDTYPE)
+                default: JAK_ERROR_PRINT(JAK_ERR_UNSUPPORTEDTYPE)
         }
 }
 
@@ -1031,7 +1031,7 @@ static void int_insert_array_elements(jak_carbon_insert *array_ins, struct jak_j
                         case JSON_VALUE_NULL:
                                 int_insert_array_null(array_ins);
                                 break;
-                        default: error_print(JAK_ERR_UNSUPPORTEDTYPE)
+                        default: JAK_ERROR_PRINT(JAK_ERR_UNSUPPORTEDTYPE)
                                 break;
                 }
         }
@@ -1211,13 +1211,13 @@ static void int_insert_prop_object(jak_carbon_insert *oins, struct jak_json_obje
                                                         } else if (array_elem->value.value_type == JSON_VALUE_NULL) {
                                                                 jak_carbon_insert_null(array_ins);
                                                         } else {
-                                                                error_print(JAK_ERR_UNSUPPORTEDTYPE);
+                                                                JAK_ERROR_PRINT(JAK_ERR_UNSUPPORTEDTYPE);
                                                         }
                                                 }
                                                 jak_carbon_insert_prop_column_end(&state);
                                         }
                                                 break;
-                                        default: error_print(JAK_ERR_UNSUPPORTEDTYPE)
+                                        default: JAK_ERROR_PRINT(JAK_ERR_UNSUPPORTEDTYPE)
                                                 break;
                                 }
                         }
@@ -1239,7 +1239,7 @@ static void int_insert_prop_object(jak_carbon_insert *oins, struct jak_json_obje
                                                 jak_carbon_insert_prop_signed(oins, prop->key.value,
                                                                           prop->value.value.value.number->value.signed_integer);
                                                 break;
-                                        default: error_print(JAK_ERR_UNSUPPORTEDTYPE);
+                                        default: JAK_ERROR_PRINT(JAK_ERR_UNSUPPORTEDTYPE);
                                                 break;
                                 }
                                 break;
@@ -1252,7 +1252,7 @@ static void int_insert_prop_object(jak_carbon_insert *oins, struct jak_json_obje
                         case JSON_VALUE_NULL:
                                 jak_carbon_insert_prop_null(oins, prop->key.value);
                                 break;
-                        default: error_print(JAK_ERR_UNSUPPORTEDTYPE)
+                        default: JAK_ERROR_PRINT(JAK_ERR_UNSUPPORTEDTYPE)
                                 break;
                 }
         }
@@ -1414,7 +1414,7 @@ static void int_carbon_from_json_elem(jak_carbon_insert *ins, const struct jak_j
                                                         } else if (array_elem->value.value_type == JSON_VALUE_NULL) {
                                                                 jak_carbon_insert_null(ins);
                                                         } else {
-                                                                error_print(JAK_ERR_UNSUPPORTEDTYPE);
+                                                                JAK_ERROR_PRINT(JAK_ERR_UNSUPPORTEDTYPE);
                                                         }
                                                 }
                                         } else {
@@ -1436,14 +1436,14 @@ static void int_carbon_from_json_elem(jak_carbon_insert *ins, const struct jak_j
                                                         } else if (array_elem->value.value_type == JSON_VALUE_NULL) {
                                                                 jak_carbon_insert_null(array_ins);
                                                         } else {
-                                                                error_print(JAK_ERR_UNSUPPORTEDTYPE);
+                                                                JAK_ERROR_PRINT(JAK_ERR_UNSUPPORTEDTYPE);
                                                         }
                                                 }
                                                 jak_carbon_insert_column_end(&state);
                                         }
                                 }
                                         break;
-                                default: error_print(JAK_ERR_UNSUPPORTEDTYPE)
+                                default: JAK_ERROR_PRINT(JAK_ERR_UNSUPPORTEDTYPE)
                                         break;
                         }
                 }
@@ -1462,7 +1462,7 @@ static void int_carbon_from_json_elem(jak_carbon_insert *ins, const struct jak_j
                                 case JSON_NUMBER_SIGNED:
                                         jak_carbon_insert_signed(ins, elem->value.value.number->value.signed_integer);
                                         break;
-                                default: error_print(JAK_ERR_UNSUPPORTEDTYPE)
+                                default: JAK_ERROR_PRINT(JAK_ERR_UNSUPPORTEDTYPE)
                                         break;
                         }
                         break;
@@ -1475,7 +1475,7 @@ static void int_carbon_from_json_elem(jak_carbon_insert *ins, const struct jak_j
                 case JSON_VALUE_NULL:
                         jak_carbon_insert_null(ins);
                         break;
-                default: error_print(JAK_ERR_UNSUPPORTEDTYPE)
+                default: JAK_ERROR_PRINT(JAK_ERR_UNSUPPORTEDTYPE)
                         break;
         }
 }

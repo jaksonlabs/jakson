@@ -75,7 +75,7 @@ bool vec_create(struct jak_vector *out, const jak_allocator *alloc, size_t elem_
         out->cap_elems = cap_elems;
         out->elem_size = elem_size;
         out->grow_factor = 1.7f;
-        error_init(&out->err);
+        jak_error_init(&out->err);
         return true;
 }
 
@@ -96,14 +96,14 @@ bool vec_serialize(FILE *file, struct jak_vector *vec)
                 {.marker = JAK_MARKER_SYMBOL_VECTOR_HEADER, .elem_size = vec->elem_size, .num_elems = vec
                         ->num_elems, .cap_elems = vec->cap_elems, .grow_factor = vec->grow_factor};
         int nwrite = fwrite(&header, sizeof(struct vector_serialize_header), 1, file);
-        error_if(nwrite != 1, &vec->err, JAK_ERR_FWRITE_FAILED);
+        JAK_ERROR_IF(nwrite != 1, &vec->err, JAK_ERR_FWRITE_FAILED);
         nwrite = fwrite(vec->base, vec->elem_size, vec->num_elems, file);
-        error_if(nwrite != (int) vec->num_elems, &vec->err, JAK_ERR_FWRITE_FAILED);
+        JAK_ERROR_IF(nwrite != (int) vec->num_elems, &vec->err, JAK_ERR_FWRITE_FAILED);
 
         return true;
 }
 
-bool vec_deserialize(struct jak_vector *vec, struct jak_error *err, FILE *file)
+bool vec_deserialize(struct jak_vector *vec, jak_error *err, FILE *file)
 {
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(err)
@@ -130,7 +130,7 @@ bool vec_deserialize(struct jak_vector *vec, struct jak_error *err, FILE *file)
         vec->cap_elems = header.cap_elems;
         vec->elem_size = header.elem_size;
         vec->grow_factor = header.grow_factor;
-        error_init(&vec->err);
+        jak_error_init(&vec->err);
 
         if (fread(vec->base, header.elem_size, vec->num_elems, file) != vec->num_elems) {
                 err_code = JAK_ERR_FREAD_FAILED;
@@ -141,7 +141,7 @@ bool vec_deserialize(struct jak_vector *vec, struct jak_error *err, FILE *file)
 
         error_handling:
         fseek(file, start, SEEK_SET);
-        error(err, err_code);
+        JAK_ERROR(err, err_code);
         return false;
 }
 
@@ -157,7 +157,7 @@ bool vec_memadvice(struct jak_vector *vec, int madviseAdvice)
 bool vec_set_grow_factor(struct jak_vector *vec, float factor)
 {
         JAK_ERROR_IF_NULL(vec);
-        error_print_if(factor <= 1.01f, JAK_ERR_ILLEGALARG)
+        JAK_ERROR_PRINT_IF(factor <= 1.01f, JAK_ERR_ILLEGALARG)
         vec->grow_factor = factor;
         return true;
 }
@@ -336,10 +336,10 @@ bool vec_cpy_to(struct jak_vector *dst, struct jak_vector *src)
                 dst->grow_factor = src->grow_factor;
                 dst->base = handle;
                 memcpy(dst->base, src->base, src->cap_elems * src->elem_size);
-                error_cpy(&dst->err, &src->err);
+                jak_error_cpy(&dst->err, &src->err);
                 return true;
         } else {
-                error(&src->err, JAK_ERR_HARDCOPYFAILED)
+                JAK_ERROR(&src->err, JAK_ERR_HARDCOPYFAILED)
                 return false;
         }
 }

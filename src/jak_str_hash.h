@@ -183,7 +183,7 @@ struct jak_str_hash {
         /**
          *  Error information
          */
-        struct jak_error err;
+        jak_error err;
 
 };
 
@@ -193,7 +193,7 @@ JAK_DEFINE_GET_ERROR_FUNCTION(strhash, struct jak_str_hash, table);
  * Frees resources bound to <code>jak_async_map_exec</code> via the allocator specified by the call to <code>string_id_map_create</code>.
  *
  * @param jak_async_map_exec a non-null pointer to the jak_async_map_exec
- * @return <code>true</code> in case of success, otherwise a value indiciating the error.
+ * @return <code>true</code> in case of success, otherwise a value indiciating the JAK_ERROR.
  */
 inline static int strhash_drop(struct jak_str_hash *jak_async_map_exec)
 {
@@ -207,7 +207,7 @@ inline static int strhash_drop(struct jak_str_hash *jak_async_map_exec)
  * Resets statistics counters
  *
  * @param jak_async_map_exec a non-null pointer to the jak_async_map_exec
- * @return <code>true</code> in case of success, otherwise a value indicating the error.
+ * @return <code>true</code> in case of success, otherwise a value indicating the JAK_ERROR.
  */
 inline static bool strhash_reset_counters(struct jak_str_hash *jak_async_map_exec)
 {
@@ -220,7 +220,7 @@ inline static bool strhash_reset_counters(struct jak_str_hash *jak_async_map_exe
  * Returns statistics counters
  * @param out non-null pointer to destination counter
  * @param jak_async_map_exec non-null pointer to the jak_async_map_exec
- * @return <code>true</code> in case of success, otherwise a value indicating the error.
+ * @return <code>true</code> in case of success, otherwise a value indicating the JAK_ERROR.
  */
 inline static int strhash_get_counters(struct jak_str_hash_counters *out, const struct jak_str_hash *jak_async_map_exec)
 {
@@ -232,14 +232,14 @@ inline static int strhash_get_counters(struct jak_str_hash_counters *out, const 
 
 /**
  * Put <code>num_pair</code> objects into this jak_async_map_exec maybe updating old objects with the same key. If it is
- * guaranteed that the key is not yet inserted into this table, use <code>string_hashtable_put_blind</code>
+ * guaranteed that the key is not yet inserted into this table, use <code>string_jak_hashtable_put_blind</code>
  * instead.
  *
  * @param jak_async_map_exec a non-null pointer to the jak_async_map_exec
  * @param keys a non-null constant pointer to a list of at least <code>num_pairs</code> length of constant strings
  * @param values a non-null constant pointer to a list of at least <code>num_pairs</code> length of 64bit values
  * @param num_pairs the number of pairs that are read via <code>keys</code> and <code>values</code>
- * @return <code>true</code> in case of success, otherwise a value indicating the error.
+ * @return <code>true</code> in case of success, otherwise a value indicating the JAK_ERROR.
  */
 inline static int
 strhash_put_safe(struct jak_str_hash *jak_async_map_exec, char *const *keys, const jak_archive_field_sid_t *values,
@@ -259,14 +259,14 @@ strhash_put_safe(struct jak_str_hash *jak_async_map_exec, char *const *keys, con
  * In case this guarantee is broken, the behavior is undefined. Depending on the implementation, this specialized
  * <code>put</code> function may have a better performance.
  *
- * If a check for existence is required, use <code>string_hashtable_put_test</code>
+ * If a check for existence is required, use <code>string_jak_hashtable_put_test</code>
  * instead.
  *
  * @param jak_async_map_exec a non-null pointer to the jak_async_map_exec
  * @param keys a non-null constant pointer to a list of at least <code>num_pairs</code> length of constant strings
  * @param values a non-null constant pointer to a list of at least <code>num_pairs</code> length of 64bit values
  * @param num_pairs the number of pairs that are read via <code>keys</code> and <code>values</code>
- * @return <code>true</code> in case of success, otherwise a value indiciating the error.
+ * @return <code>true</code> in case of success, otherwise a value indiciating the JAK_ERROR.
  */
 inline static int
 strhash_put_bulk_fast(struct jak_str_hash *jak_async_map_exec, char *const *keys, const jak_archive_field_sid_t *values,
@@ -332,7 +332,7 @@ strhash_put_exact_fast(struct jak_str_hash *jak_async_map_exec, const char *key,
  * @param jak_async_map_exec a non-null pointer to the jak_async_map_exec
  * @param keys a non-null pointer to a list of at least <code>num_keys</code> strings
  * @param num_keys the number of keys
- * @return <code>true</code> in case of success, otherwise a value indicating the error.
+ * @return <code>true</code> in case of success, otherwise a value indicating the JAK_ERROR.
  */
 inline static int strhash_get_bulk_safe(jak_archive_field_sid_t **out, bool **found_mask, size_t *num_not_found,
                                         struct jak_str_hash *jak_async_map_exec, char *const *keys, size_t nkeys)
@@ -383,7 +383,7 @@ strhash_get_bulk_safe_exact(jak_archive_field_sid_t *out, bool *found, struct ja
  * @param jak_async_map_exec a non-null pointer to the jak_async_map_exec
  * @param keys a non-null pointer to a list of at least <code>num_keys</code> strings
  * @param num_keys the number of keys
- * @return <code>true</code> in case of success, otherwise a value indicating the error.
+ * @return <code>true</code> in case of success, otherwise a value indicating the JAK_ERROR.
  */
 inline static int
 strhash_get_bulk_fast(jak_archive_field_sid_t **out, struct jak_str_hash *jak_async_map_exec, char *const *keys,
@@ -401,8 +401,8 @@ strhash_get_bulk_fast(jak_archive_field_sid_t **out, struct jak_str_hash *jak_as
  * Update keys for a given list of values. It must be guaranteed that the mapping between a key and its value is
  * bidirectional, and that all values exists.
  *
- * If you want to update a value given its key, use <code>string_hashtable_put_test</code> or
- * <code>string_hashtable_put_blind</code> instead.
+ * If you want to update a value given its key, use <code>string_jak_hashtable_put_test</code> or
+ * <code>string_jak_hashtable_put_blind</code> instead.
  *
  * @param out A non-null pointer to an unallocated memory address. The jak_async_map_exec will allocate <code>num_keys</code>
  *            times <code>sizeof(jak_archive_field_sid_t)</code> bytes memory to store the result. There are <code>num_keys</code>
@@ -410,7 +410,7 @@ strhash_get_bulk_fast(jak_archive_field_sid_t **out, struct jak_str_hash *jak_as
  * @param jak_async_map_exec a non-null pointer to the jak_async_map_exec
  * @param keys a non-null pointer to a list of at least <code>num_keys</code> strings
  * @param num_keys the number of keys
- * @return <code>true</code> in case of success, otherwise a value indicating the error.
+ * @return <code>true</code> in case of success, otherwise a value indicating the JAK_ERROR.
  */
 inline static int
 strhash_update_fast(struct jak_str_hash *jak_async_map_exec, const jak_archive_field_sid_t *values, char *const *keys,
@@ -445,7 +445,7 @@ inline static int strhash_remove(struct jak_str_hash *jak_async_map_exec, char *
  * by the call to <code>string_id_map_create</code>
  *
  * @param values A non-null pointer (potentially resulting from a call to <code>string_id_map_get</code>)
- * @return <code>true</code> in case of success, otherwise a value indiciating the error.
+ * @return <code>true</code> in case of success, otherwise a value indiciating the JAK_ERROR.
  */
 inline static int strhash_free(void *ptr, struct jak_str_hash *jak_async_map_exec)
 {
@@ -460,7 +460,7 @@ inline static int strhash_free(void *ptr, struct jak_str_hash *jak_async_map_exe
  * Resets the counter <code>counters</code> by setting all members to zero.
  *
  * @param counters non-null pointer to counter object
- * @return true if everything went normal, otherwise an value indicating the error
+ * @return true if everything went normal, otherwise an value indicating the JAK_ERROR
  */
 inline static int strhash_counters_init(struct jak_str_hash_counters *counters)
 {
@@ -474,7 +474,7 @@ inline static int strhash_counters_init(struct jak_str_hash_counters *counters)
  *
  * @param dstLhs non-null pointer to counter (will contain the result)
  * @param rhs non-null pointer to counter
- * @return true if everything went normal, otherwise an value indicating the error
+ * @return true if everything went normal, otherwise an value indicating the JAK_ERROR
  */
 inline static int strhash_counters_add(struct jak_str_hash_counters *dst_lhs, const struct jak_str_hash_counters *rhs)
 {

@@ -115,7 +115,7 @@ static const char *next_token(struct dot_token *token, const char *str)
 bool jak_carbon_dot_path_create(jak_carbon_dot_path *path)
 {
         JAK_ERROR_IF_NULL(path)
-        error_init(&path->err);
+        jak_error_init(&path->err);
         path->path_len = 0;
         JAK_zero_memory(&path->nodes, JAK_ARRAY_LENGTH(path->nodes) * sizeof(jak_carbon_dot_node));
         return true;
@@ -163,7 +163,7 @@ bool jak_carbon_dot_path_from_string(jak_carbon_dot_path *path, const char *path
                         case TOKEN_UNKNOWN:
                                 status = JAK_ERR_PARSE_UNKNOWN_TOKEN;
                                 goto cleanup_and_error;
-                        default: error(&path->err, JAK_ERR_INTERNALERR);
+                        default: JAK_ERROR(&path->err, JAK_ERR_INTERNALERR);
                                 break;
                 }
                 path_string = next_token(&token, path_string);
@@ -173,7 +173,7 @@ bool jak_carbon_dot_path_from_string(jak_carbon_dot_path *path, const char *path
 
         cleanup_and_error:
         jak_carbon_dot_path_drop(path);
-        error_no_abort(&path->err, status);
+        JAK_ERROR_NO_ABORT(&path->err, status);
         return false;
 }
 
@@ -199,7 +199,7 @@ bool jak_carbon_dot_path_add_nkey(jak_carbon_dot_path *dst, const char *key, siz
                 JAK_ASSERT(!strings_is_enquoted(node->identifier.string));
                 return true;
         } else {
-                error(&dst->err, JAK_ERR_OUTOFBOUNDS)
+                JAK_ERROR(&dst->err, JAK_ERR_OUTOFBOUNDS)
                 return false;
         }
 }
@@ -213,7 +213,7 @@ bool jak_carbon_dot_path_add_idx(jak_carbon_dot_path *dst, jak_u32 idx)
                 node->identifier.idx = idx;
                 return true;
         } else {
-                error(&dst->err, JAK_ERR_OUTOFBOUNDS)
+                JAK_ERROR(&dst->err, JAK_ERR_OUTOFBOUNDS)
                 return false;
         }
 }
@@ -239,7 +239,7 @@ bool jak_carbon_dot_path_type_at(carbon_dot_node_e *type_out, jak_u32 pos, const
         if (JAK_LIKELY(pos < JAK_ARRAY_LENGTH(path->nodes))) {
                 *type_out = path->nodes[pos].type;
         } else {
-                error(&((jak_carbon_dot_path *) path)->err, JAK_ERR_OUTOFBOUNDS)
+                JAK_ERROR(&((jak_carbon_dot_path *) path)->err, JAK_ERR_OUTOFBOUNDS)
                 return false;
         }
         return true;
@@ -249,9 +249,9 @@ bool jak_carbon_dot_path_idx_at(jak_u32 *idx, jak_u32 pos, const jak_carbon_dot_
 {
         JAK_ERROR_IF_NULL(idx)
         JAK_ERROR_IF_NULL(path)
-        error_if_and_return(pos >= JAK_ARRAY_LENGTH(path->nodes), &((jak_carbon_dot_path *) path)->err,
+        JAK_ERROR_IF_AND_RETURN(pos >= JAK_ARRAY_LENGTH(path->nodes), &((jak_carbon_dot_path *) path)->err,
                             JAK_ERR_OUTOFBOUNDS, NULL);
-        error_if_and_return(path->nodes[pos].type != JAK_DOT_NODE_ARRAY_IDX, &((jak_carbon_dot_path *) path)->err,
+        JAK_ERROR_IF_AND_RETURN(path->nodes[pos].type != JAK_DOT_NODE_ARRAY_IDX, &((jak_carbon_dot_path *) path)->err,
                             JAK_ERR_TYPEMISMATCH, NULL);
 
         *idx = path->nodes[pos].identifier.idx;
@@ -261,9 +261,9 @@ bool jak_carbon_dot_path_idx_at(jak_u32 *idx, jak_u32 pos, const jak_carbon_dot_
 const char *jak_carbon_dot_path_key_at(jak_u32 pos, const jak_carbon_dot_path *path)
 {
         JAK_ERROR_IF_NULL(path)
-        error_if_and_return(pos >= JAK_ARRAY_LENGTH(path->nodes), &((jak_carbon_dot_path *) path)->err,
+        JAK_ERROR_IF_AND_RETURN(pos >= JAK_ARRAY_LENGTH(path->nodes), &((jak_carbon_dot_path *) path)->err,
                             JAK_ERR_OUTOFBOUNDS, NULL);
-        error_if_and_return(path->nodes[pos].type != JAK_DOT_NODE_KEY_NAME, &((jak_carbon_dot_path *) path)->err,
+        JAK_ERROR_IF_AND_RETURN(path->nodes[pos].type != JAK_DOT_NODE_KEY_NAME, &((jak_carbon_dot_path *) path)->err,
                             JAK_ERR_TYPEMISMATCH, NULL);
 
         return path->nodes[pos].identifier.string;

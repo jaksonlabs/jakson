@@ -21,20 +21,20 @@ struct jak_memblock {
         jak_offset_t blockLength;
         jak_offset_t last_byte;
         void *base;
-        struct jak_error err;
+        jak_error err;
 };
 
 bool memblock_create(struct jak_memblock **block, size_t size)
 {
         JAK_ERROR_IF_NULL(block)
-        error_print_if(size == 0, JAK_ERR_ILLEGALARG)
+        JAK_ERROR_PRINT_IF(size == 0, JAK_ERR_ILLEGALARG)
         struct jak_memblock *result = JAK_MALLOC(sizeof(struct jak_memblock));
         JAK_zero_memory(result, sizeof(struct jak_memblock));
         JAK_ERROR_IF_NULL(result)
         result->blockLength = size;
         result->last_byte = 0;
         result->base = JAK_MALLOC(size);
-        error_init(&result->err);
+        jak_error_init(&result->err);
         *block = result;
         return true;
 }
@@ -61,11 +61,11 @@ bool memblock_drop(struct jak_memblock *block)
         return true;
 }
 
-bool memblock_get_error(struct jak_error *out, struct jak_memblock *block)
+bool memblock_get_error(jak_error *out, struct jak_memblock *block)
 {
         JAK_ERROR_IF_NULL(block);
         JAK_ERROR_IF_NULL(out);
-        return error_cpy(out, &block->err);
+        return jak_error_cpy(out, &block->err);
 }
 
 bool memblock_size(jak_offset_t *size, const struct jak_memblock *block)
@@ -94,7 +94,7 @@ const char *memblock_raw_data(const struct jak_memblock *block)
 bool memblock_resize(struct jak_memblock *block, size_t size)
 {
         JAK_ERROR_IF_NULL(block)
-        error_print_if(size == 0, JAK_ERR_ILLEGALARG)
+        JAK_ERROR_PRINT_IF(size == 0, JAK_ERR_ILLEGALARG)
         block->base = realloc(block->base, size);
         if (size > block->blockLength) {
                 JAK_zero_memory(block->base + block->blockLength, (size - block->blockLength));
@@ -145,7 +145,7 @@ bool memblock_move_right(struct jak_memblock *block, jak_offset_t where, size_t 
 bool memblock_move_left(struct jak_memblock *block, jak_offset_t where, size_t nbytes)
 {
         JAK_ERROR_IF_NULL(block)
-        error_if(where + nbytes >= block->blockLength, &block->err, JAK_ERR_OUTOFBOUNDS)
+        JAK_ERROR_IF(where + nbytes >= block->blockLength, &block->err, JAK_ERR_OUTOFBOUNDS)
         size_t remainder = block->blockLength - where - nbytes;
         if (remainder > 0) {
                 memmove(block->base + where, block->base + where + nbytes, remainder);
@@ -161,14 +161,14 @@ bool memblock_move_left(struct jak_memblock *block, jak_offset_t where, size_t n
 bool memblock_move_ex(struct jak_memblock *block, jak_offset_t where, size_t nbytes, bool zero_out)
 {
         JAK_ERROR_IF_NULL(block)
-        error_if(where >= block->blockLength, &block->err, JAK_ERR_OUTOFBOUNDS);
-        error_if(nbytes == 0, &block->err, JAK_ERR_ILLEGALARG);
+        JAK_ERROR_IF(where >= block->blockLength, &block->err, JAK_ERR_OUTOFBOUNDS);
+        JAK_ERROR_IF(nbytes == 0, &block->err, JAK_ERR_ILLEGALARG);
 
         /* resize (if needed) */
         if (block->last_byte + nbytes > block->blockLength) {
                 size_t new_length = (block->last_byte + nbytes);
                 block->base = realloc(block->base, new_length);
-                error_if(!block->base, &block->err, JAK_ERR_REALLOCERR);
+                JAK_ERROR_IF(!block->base, &block->err, JAK_ERR_REALLOCERR);
                 if (zero_out) {
                         JAK_zero_memory(block->base + block->blockLength, (new_length - block->blockLength));
                 }
@@ -194,7 +194,7 @@ void *memblock_move_contents_and_drop(struct jak_memblock *block)
 bool memfile_update_last_byte(struct jak_memblock *block, size_t where)
 {
         JAK_ERROR_IF_NULL(block);
-        error_if(where >= block->blockLength, &block->err, JAK_ERR_ILLEGALSTATE);
+        JAK_ERROR_IF(where >= block->blockLength, &block->err, JAK_ERR_ILLEGALSTATE);
         block->last_byte = JAK_max(block->last_byte, where);
         return true;
 }

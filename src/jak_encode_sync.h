@@ -26,8 +26,7 @@
 
 JAK_BEGIN_DECL
 
-int encode_sync_create(struct jak_string_dict *dic, size_t capacity, size_t num_indx_buckets,
-                       size_t num_index_bucket_cap, size_t num_threads, const jak_allocator *alloc);
+int jak_encode_sync_create(struct jak_string_dict *dic, size_t capacity, size_t num_indx_buckets, size_t num_index_bucket_cap, size_t num_threads, const jak_allocator *alloc);
 
 JAK_END_DECL
 

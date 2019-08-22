@@ -31,7 +31,7 @@ JAK_BEGIN_DECL
 
 struct jak_huffman {
         struct jak_vector ofType(struct pack_huffman_entry) table;
-        struct jak_error err;
+        jak_error err;
 };
 
 struct pack_huffman_entry {
@@ -57,7 +57,7 @@ bool coding_huffman_cpy(struct jak_huffman *dst, struct jak_huffman *src);
 
 bool coding_huffman_build(struct jak_huffman *encoder, const string_vector_t *strings);
 
-bool coding_huffman_get_error(struct jak_error *err, const struct jak_huffman *dic);
+bool coding_huffman_get_error(jak_error *err, const struct jak_huffman *dic);
 
 bool coding_huffman_encode(struct jak_memfile *file, struct jak_huffman *dic, const char *string);
 

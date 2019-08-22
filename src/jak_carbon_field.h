@@ -121,7 +121,7 @@ typedef enum jak_carbon_constant {
 
 JAK_BEGIN_DECL
 
-const char *jak_carbon_field_type_str(struct jak_error *err, jak_carbon_field_type_e type);
+const char *jak_carbon_field_type_str(jak_error *err, jak_carbon_field_type_e type);
 
 bool jak_carbon_field_type_is_traversable(jak_carbon_field_type_e type);
 bool jak_carbon_field_type_is_signed(jak_carbon_field_type_e type);
@@ -138,7 +138,7 @@ bool jak_carbon_field_type_is_null(jak_carbon_field_type_e type);
 bool jak_carbon_field_type_is_string(jak_carbon_field_type_e type);
 bool jak_carbon_field_type_is_constant(jak_carbon_field_type_e type);
 
-jak_carbon_field_class_e jak_carbon_field_type_get_class(jak_carbon_field_type_e type, struct jak_error *err);
+jak_carbon_field_class_e jak_carbon_field_type_get_class(jak_carbon_field_type_e type, jak_error *err);
 
 bool jak_carbon_field_skip(struct jak_memfile *file);
 bool jak_carbon_field_skip_object(struct jak_memfile *file);

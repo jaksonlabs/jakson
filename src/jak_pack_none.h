@@ -47,7 +47,7 @@ bool pack_none_print_extra(struct jak_packer *self, FILE *file, struct jak_memfi
 bool pack_none_print_encoded_string(struct jak_packer *self, FILE *file, struct jak_memfile *src,
                                     jak_u32 decompressed_strlen);
 
-bool pack_none_encode_string(struct jak_packer *self, struct jak_memfile *dst, struct jak_error *err,
+bool pack_none_encode_string(struct jak_packer *self, struct jak_memfile *dst, jak_error *err,
                              const char *string);
 
 bool pack_none_decode_string(struct jak_packer *self, char *dst, size_t strlen, FILE *src);

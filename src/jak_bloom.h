@@ -24,6 +24,7 @@
 
 #include <jak_stdinc.h>
 #include <jak_bitmap.h>
+#include <jak_hash.h>
 
 JAK_BEGIN_DECL
 

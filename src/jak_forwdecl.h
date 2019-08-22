@@ -58,6 +58,22 @@ typedef struct jak_strid_iter jak_strid_iter;
 typedef struct jak_path_entry jak_path_entry;
 typedef struct jak_archive_visitor_desc jak_archive_visitor_desc;
 typedef struct jak_archive_visitor jak_archive_visitor;
+typedef struct jak_column_doc_column jak_column_doc_column;
+typedef struct jak_column_doc_group jak_column_doc_group;
+typedef struct jak_column_doc_obj jak_column_doc_obj;
+typedef struct jak_column_doc jak_column_doc;
+typedef struct jak_doc_entries jak_doc_entries;
+typedef struct jak_doc_bulk jak_doc_bulk;
+typedef struct jak_doc jak_doc;
+typedef struct jak_doc_obj jak_doc_obj;
+typedef union jak_encoded_doc_value jak_encoded_doc_value_u;
+typedef struct jak_encoded_doc_prop_header jak_encoded_doc_prop_header;
+typedef struct jak_encoded_doc_prop jak_encoded_doc_prop;
+typedef struct jak_encoded_doc_prop_array jak_encoded_doc_prop_array;
+typedef struct jak_encoded_doc jak_encoded_doc;
+typedef struct jak_encoded_doc_list jak_encoded_doc_list;
+
+typedef struct jak_error jak_error;
 
 typedef struct jak_async_func_proxy jak_async_func_proxy;
 typedef struct jak_filter_arg jak_filter_arg;
@@ -86,5 +102,10 @@ typedef struct jak_carbon_printer jak_carbon_printer;
 typedef struct jak_carbon_revise jak_carbon_revise;
 typedef struct jak_carbon_binary jak_carbon_binary;
 typedef struct jak_carbon_update jak_carbon_update;
+
+typedef struct jak_jak_hashset_bucket jak_jak_hashset_bucket;
+typedef struct jak_hashset jak_hashset;
+typedef struct jak_jak_hashtable_bucket jak_jak_hashtable_bucket;
+typedef struct jak_hashtable jak_hashtable;
 
 #endif

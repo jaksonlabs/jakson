@@ -96,7 +96,7 @@ DEFINE_ARRAY_UPDATE_FUNCTION(float, JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT, jak_carb
                                 status = true;                                                                         \
                         } break;                                                                                       \
                         default:                                                                                       \
-                        error(&context->original->err, JAK_ERR_INTERNALERR)                                            \
+                        JAK_ERROR(&context->original->err, JAK_ERR_INTERNALERR)                                            \
                         }                                                                                              \
                 }                                                                                                      \
                 jak_carbon_path_evaluator_end(&updater.path_evaluater);                                                    \
@@ -119,7 +119,7 @@ create(jak_carbon_update *updater, jak_carbon_revise *context, const jak_carbon_
         JAK_ERROR_IF_NULL(context)
         JAK_ERROR_IF_NULL(path)
 
-        error_init(&updater->err);
+        jak_error_init(&updater->err);
         updater->context = context;
         updater->path = path;
 
@@ -146,7 +146,7 @@ static bool column_update_u8(jak_carbon_column_it *it, jak_u32 pos, jak_u8 value
         JAK_UNUSED(it);
         JAK_UNUSED(pos);
         JAK_UNUSED(value);
-        error_print(JAK_ERR_NOTIMPLEMENTED);    // TODO: Implement
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
@@ -155,7 +155,7 @@ static bool column_update_u16(jak_carbon_column_it *it, jak_u32 pos, jak_u16 val
         JAK_UNUSED(it);
         JAK_UNUSED(pos);
         JAK_UNUSED(value);
-        error_print(JAK_ERR_NOTIMPLEMENTED);    // TODO: Implement
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
@@ -164,7 +164,7 @@ static bool column_update_u32(jak_carbon_column_it *it, jak_u32 pos, jak_u32 val
         JAK_UNUSED(it);
         JAK_UNUSED(pos);
         JAK_UNUSED(value);
-        error_print(JAK_ERR_NOTIMPLEMENTED);    // TODO: Implement
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
@@ -173,7 +173,7 @@ static bool column_update_u64(jak_carbon_column_it *it, jak_u32 pos, jak_u64 val
         JAK_UNUSED(it);
         JAK_UNUSED(pos);
         JAK_UNUSED(value);
-        error_print(JAK_ERR_NOTIMPLEMENTED);    // TODO: Implement
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
@@ -182,7 +182,7 @@ static bool column_update_i8(jak_carbon_column_it *it, jak_u32 pos, jak_i8 value
         JAK_UNUSED(it);
         JAK_UNUSED(pos);
         JAK_UNUSED(value);
-        error_print(JAK_ERR_NOTIMPLEMENTED);    // TODO: Implement
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
@@ -191,7 +191,7 @@ static bool column_update_i16(jak_carbon_column_it *it, jak_u32 pos, jak_i16 val
         JAK_UNUSED(it);
         JAK_UNUSED(pos);
         JAK_UNUSED(value);
-        error_print(JAK_ERR_NOTIMPLEMENTED);    // TODO: Implement
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
@@ -200,7 +200,7 @@ static bool column_update_i32(jak_carbon_column_it *it, jak_u32 pos, jak_i32 val
         JAK_UNUSED(it);
         JAK_UNUSED(pos);
         JAK_UNUSED(value);
-        error_print(JAK_ERR_NOTIMPLEMENTED);    // TODO: Implement
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
@@ -209,7 +209,7 @@ static bool column_update_i64(jak_carbon_column_it *it, jak_u32 pos, jak_i64 val
         JAK_UNUSED(it);
         JAK_UNUSED(pos);
         JAK_UNUSED(value);
-        error_print(JAK_ERR_NOTIMPLEMENTED);    // TODO: Implement
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
@@ -218,7 +218,7 @@ static bool column_update_float(jak_carbon_column_it *it, jak_u32 pos, float val
         JAK_UNUSED(it);
         JAK_UNUSED(pos);
         JAK_UNUSED(value);
-        error_print(JAK_ERR_NOTIMPLEMENTED);    // TODO: Implement
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED);    // TODO: Implement
         return false;
 }
 
@@ -245,7 +245,7 @@ static inline jak_carbon_column_it *column_iterator(jak_u32 *elem_pos, jak_carbo
                 status = func(context, &compiled_path);                                                                \
                 jak_carbon_dot_path_drop(&compiled_path);                                                                   \
         } else {                                                                                                       \
-                error(&context->err, JAK_ERR_DOT_PATH_PARSERR)                                                         \
+                JAK_ERROR(&context->err, JAK_ERR_DOT_PATH_PARSERR)                                                         \
                 status = false;                                                                                        \
         }                                                                                                              \
         status;                                                                                                        \
@@ -262,7 +262,7 @@ static inline jak_carbon_column_it *column_iterator(jak_u32 *elem_pos, jak_carbo
                 status = func(context, &compiled_path, __VA_ARGS__);                                                   \
                 jak_carbon_dot_path_drop(&compiled_path);                                                                   \
         } else {                                                                                                       \
-                error(&context->err, JAK_ERR_DOT_PATH_PARSERR)                                                         \
+                JAK_ERROR(&context->err, JAK_ERR_DOT_PATH_PARSERR)                                                         \
                 status = false;                                                                                        \
         }                                                                                                              \
         status;                                                                                                        \
@@ -340,7 +340,7 @@ bool jak_carbon_update_set_unsigned(jak_carbon_revise *context, const char *path
                         return jak_carbon_update_set_u32(context, path, (jak_u32) value);
                 case NUMBER_U64:
                         return jak_carbon_update_set_u64(context, path, (jak_u64) value);
-                default: error(&context->err, JAK_ERR_INTERNALERR);
+                default: JAK_ERROR(&context->err, JAK_ERR_INTERNALERR);
                         return false;
         }
 }
@@ -356,7 +356,7 @@ bool jak_carbon_update_set_signed(jak_carbon_revise *context, const char *path, 
                         return jak_carbon_update_set_i32(context, path, (jak_i32) value);
                 case NUMBER_I64:
                         return jak_carbon_update_set_i64(context, path, (jak_i64) value);
-                default: error(&context->err, JAK_ERR_INTERNALERR);
+                default: JAK_ERROR(&context->err, JAK_ERR_INTERNALERR);
                         return false;
         }
 }
@@ -367,7 +367,7 @@ bool jak_carbon_update_set_string(jak_carbon_revise *context, const char *path, 
         JAK_UNUSED(context);
         JAK_UNUSED(path);
         JAK_UNUSED(value);
-        error_print(JAK_ERR_NOTIMPLEMENTED)
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED)
         return false;
 }
 
@@ -381,7 +381,7 @@ bool jak_carbon_update_set_binary(jak_carbon_revise *context, const char *path, 
         JAK_UNUSED(file_ext);
         JAK_UNUSED(user_type);
         JAK_UNUSED(path);
-        error_print(JAK_ERR_NOTIMPLEMENTED)
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED)
         return false;
 }
 
@@ -394,7 +394,7 @@ jak_carbon_insert *jak_carbon_update_set_array_begin(jak_carbon_revise *context,
         JAK_UNUSED(state_out);
         JAK_UNUSED(array_capacity);
         JAK_UNUSED(path);
-        error_print(JAK_ERR_NOTIMPLEMENTED)
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED)
         return false;
 }
 
@@ -402,7 +402,7 @@ bool jak_carbon_update_set_array_end(jak_carbon_insert_array_state *state_in)
 {
         // TODO: Implement
         JAK_UNUSED(state_in);
-        error_print(JAK_ERR_NOTIMPLEMENTED)
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED)
         return false;
 }
 
@@ -416,7 +416,7 @@ jak_carbon_insert *jak_carbon_update_set_column_begin(jak_carbon_revise *context
         JAK_UNUSED(type);
         JAK_UNUSED(column_capacity);
         JAK_UNUSED(path);
-        error_print(JAK_ERR_NOTIMPLEMENTED)
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED)
         return false;
 }
 
@@ -424,7 +424,7 @@ bool jak_carbon_update_set_column_end(jak_carbon_insert_column_state *state_in)
 {
         // TODO: Implement
         JAK_UNUSED(state_in);
-        error_print(JAK_ERR_NOTIMPLEMENTED)
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED)
         return false;
 }
 
@@ -511,7 +511,7 @@ bool jak_carbon_update_set_unsigned_compiled(jak_carbon_revise *context, const j
                         return jak_carbon_update_set_u32_compiled(context, path, (jak_u32) value);
                 case NUMBER_U64:
                         return jak_carbon_update_set_u64_compiled(context, path, (jak_u64) value);
-                default: error(&context->err, JAK_ERR_INTERNALERR);
+                default: JAK_ERROR(&context->err, JAK_ERR_INTERNALERR);
                         return false;
         }
 }
@@ -528,7 +528,7 @@ bool jak_carbon_update_set_signed_compiled(jak_carbon_revise *context, const jak
                         return jak_carbon_update_set_i32_compiled(context, path, (jak_i32) value);
                 case NUMBER_I64:
                         return jak_carbon_update_set_i64_compiled(context, path, (jak_i64) value);
-                default: error(&context->err, JAK_ERR_INTERNALERR);
+                default: JAK_ERROR(&context->err, JAK_ERR_INTERNALERR);
                         return false;
         }
 }
@@ -540,7 +540,7 @@ bool jak_carbon_update_set_string_compiled(jak_carbon_revise *context, const jak
         JAK_UNUSED(context);
         JAK_UNUSED(path);
         JAK_UNUSED(value);
-        error_print(JAK_ERR_NOTIMPLEMENTED)
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED)
         return false;
 }
 
@@ -554,7 +554,7 @@ bool jak_carbon_update_set_binary_compiled(jak_carbon_revise *context, const jak
         JAK_UNUSED(file_ext);
         JAK_UNUSED(user_type);
         JAK_UNUSED(path);
-        error_print(JAK_ERR_NOTIMPLEMENTED)
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED)
         return false;
 }
 
@@ -568,7 +568,7 @@ jak_carbon_insert *jak_carbon_update_set_array_begin_compiled(jak_carbon_revise 
         JAK_UNUSED(state_out);
         JAK_UNUSED(array_capacity);
         JAK_UNUSED(path);
-        error_print(JAK_ERR_NOTIMPLEMENTED)
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED)
         return false;
 }
 
@@ -576,7 +576,7 @@ bool jak_carbon_update_set_array_end_compiled(jak_carbon_insert_array_state *sta
 {
         // TODO: Implement
         JAK_UNUSED(state_in);
-        error_print(JAK_ERR_NOTIMPLEMENTED)
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED)
         return false;
 }
 
@@ -592,7 +592,7 @@ jak_carbon_insert *jak_carbon_update_set_column_begin_compiled(jak_carbon_revise
         JAK_UNUSED(type);
         JAK_UNUSED(column_capacity);
         JAK_UNUSED(path);
-        error_print(JAK_ERR_NOTIMPLEMENTED)
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED)
         return false;
 }
 
@@ -600,7 +600,7 @@ bool jak_carbon_update_set_column_end_compiled(jak_carbon_insert_column_state *s
 {
         // TODO: Implement
         JAK_UNUSED(state_in);
-        error_print(JAK_ERR_NOTIMPLEMENTED)
+        JAK_ERROR_PRINT(JAK_ERR_NOTIMPLEMENTED)
         return false;
 }
 

@@ -58,11 +58,11 @@ bool jak_carbon_revise_begin(jak_carbon_revise *context, jak_carbon *revised_doc
                 original->versioning.commit_lock = true;
                 context->original = original;
                 context->revised_doc = revised_doc;
-                error_init(&context->err);
+                jak_error_init(&context->err);
                 jak_carbon_clone(context->revised_doc, context->original);
                 return true;
         } else {
-                error(&original->err, JAK_ERR_OUTDATED)
+                JAK_ERROR(&original->err, JAK_ERR_OUTDATED)
                 return false;
         }
 }
@@ -101,19 +101,19 @@ static void key_string_set(jak_carbon *doc, const char *key)
         memfile_restore_position(&doc->memfile);
 }
 
-bool jak_carbon_revise_key_generate(jak_global_id_t *out, jak_carbon_revise *context)
+bool jak_carbon_revise_key_generate(jak_uid_t *out, jak_carbon_revise *context)
 {
         JAK_ERROR_IF_NULL(context);
         jak_carbon_key_e key_type;
         jak_carbon_key_type(&key_type, context->revised_doc);
         if (key_type == JAK_CARBON_KEY_AUTOKEY) {
-                jak_global_id_t oid;
-                global_id_create(&oid);
+                jak_uid_t oid;
+                jak_unique_id_create(&oid);
                 key_unsigned_set(context->revised_doc, oid);
                 JAK_optional_set(out, oid);
                 return true;
         } else {
-                error(&context->err, JAK_ERR_TYPEMISMATCH)
+                JAK_ERROR(&context->err, JAK_ERR_TYPEMISMATCH)
                 return false;
         }
 }
@@ -127,7 +127,7 @@ bool jak_carbon_revise_key_set_unsigned(jak_carbon_revise *context, jak_u64 key_
                 key_unsigned_set(context->revised_doc, key_value);
                 return true;
         } else {
-                error(&context->err, JAK_ERR_TYPEMISMATCH)
+                JAK_ERROR(&context->err, JAK_ERR_TYPEMISMATCH)
                 return false;
         }
 }
@@ -141,7 +141,7 @@ bool jak_carbon_revise_key_set_signed(jak_carbon_revise *context, jak_i64 key_va
                 key_signed_set(context->revised_doc, key_value);
                 return true;
         } else {
-                error(&context->err, JAK_ERR_TYPEMISMATCH)
+                JAK_ERROR(&context->err, JAK_ERR_TYPEMISMATCH)
                 return false;
         }
 }
@@ -155,7 +155,7 @@ bool jak_carbon_revise_key_set_string(jak_carbon_revise *context, const char *ke
                 key_string_set(context->revised_doc, key_value);
                 return true;
         } else {
-                error(&context->err, JAK_ERR_TYPEMISMATCH)
+                JAK_ERROR(&context->err, JAK_ERR_TYPEMISMATCH)
                 return false;
         }
 }
@@ -165,7 +165,7 @@ bool jak_carbon_revise_iterator_open(jak_carbon_array_it *it, jak_carbon_revise 
         JAK_ERROR_IF_NULL(it);
         JAK_ERROR_IF_NULL(context);
         jak_offset_t payload_start = jak_carbon_int_payload_after_header(context->revised_doc);
-        error_if(context->revised_doc->memfile.mode != READ_WRITE, &context->original->err, JAK_ERR_INTERNALERR)
+        JAK_ERROR_IF(context->revised_doc->memfile.mode != READ_WRITE, &context->original->err, JAK_ERR_INTERNALERR)
         return jak_carbon_array_it_create(it, &context->revised_doc->memfile, &context->original->err, payload_start);
 }
 
@@ -229,14 +229,14 @@ bool jak_carbon_revise_remove(const char *dot_path, jak_carbon_revise *context)
                                         result = jak_carbon_column_it_remove(it, elem_pos);
                                 }
                                         break;
-                                default: error(&context->original->err, JAK_ERR_INTERNALERR);
+                                default: JAK_ERROR(&context->original->err, JAK_ERR_INTERNALERR);
                                         result = false;
                         }
                 }
                 jak_carbon_path_evaluator_end(&eval);
                 return result;
         } else {
-                error(&context->original->err, JAK_ERR_DOT_PATH_PARSERR);
+                JAK_ERROR(&context->original->err, JAK_ERR_DOT_PATH_PARSERR);
                 return false;
         }
 }
@@ -281,7 +281,7 @@ const jak_carbon *jak_carbon_revise_end(jak_carbon_revise *context)
 
                 return context->revised_doc;
         } else {
-                error_print(JAK_ERR_NULLPTR);
+                JAK_ERROR_PRINT(JAK_ERR_NULLPTR);
                 return NULL;
         }
 }
@@ -312,7 +312,7 @@ static bool internal_pack_array(jak_carbon_array_it *it)
 
                 if (!is_array_end) {
 
-                        error_if(!is_empty_slot, &it->err, JAK_ERR_CORRUPTED);
+                        JAK_ERROR_IF(!is_empty_slot, &it->err, JAK_ERR_CORRUPTED);
                         jak_offset_t first_empty_slot_offset = memfile_tell(&this_array_it.memfile);
                         char final;
                         while ((final = *memfile_read(&this_array_it.memfile, sizeof(char))) == 0) {}
@@ -395,7 +395,7 @@ static bool internal_pack_array(jak_carbon_array_it *it)
                                         jak_carbon_object_it_drop(&nested_object_it);
                                 }
                                         break;
-                                default: error(&it->err, JAK_ERR_INTERNALERR);
+                                default: JAK_ERROR(&it->err, JAK_ERR_INTERNALERR);
                                         return false;
                         }
                 }
@@ -420,7 +420,7 @@ static bool internal_pack_object(jak_carbon_object_it *it)
 
                 if (!is_object_end) {
 
-                        error_if(!is_empty_slot, &it->err, JAK_ERR_CORRUPTED);
+                        JAK_ERROR_IF(!is_empty_slot, &it->err, JAK_ERR_CORRUPTED);
                         jak_offset_t first_empty_slot_offset = memfile_tell(&this_object_it.memfile);
                         char final;
                         while ((final = *memfile_read(&this_object_it.memfile, sizeof(char))) == 0) {}
@@ -503,7 +503,7 @@ static bool internal_pack_object(jak_carbon_object_it *it)
                                         jak_carbon_object_it_drop(&nested_object_it);
                                 }
                                         break;
-                                default: error(&it->err, JAK_ERR_INTERNALERR);
+                                default: JAK_ERROR(&it->err, JAK_ERR_INTERNALERR);
                                         return false;
                         }
                 }

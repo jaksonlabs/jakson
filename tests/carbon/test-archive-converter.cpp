@@ -6,7 +6,7 @@ TEST(ConverterTest, PerformConversion)
 {
     bool status;
     jak_archive archive;
-    struct jak_encoded_doc_list collection;
+    jak_encoded_doc_list collection;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
@@ -19,7 +19,7 @@ TEST(ConverterTest, PerformConversion)
     {
         printf("\n\n\n*******************************\n\n\n");
 
-        encoded_doc_collection_print(stdout, &collection);
+        jak_encoded_doc_collection_print(stdout, &collection);
 
 
         struct jak_string_cache *cache = jak_archive_get_query_string_id_cache(&archive);
@@ -32,7 +32,7 @@ TEST(ConverterTest, PerformConversion)
         jak_string_id_cache_reset_statistics(cache);
     }
     printf("\n\n\n** CLOSING *****************************\n\n\n");
-    encoded_doc_collection_drop(&collection);
+    jak_encoded_doc_collection_drop(&collection);
 
 
     jak_archive_close(&archive);

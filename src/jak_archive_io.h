@@ -27,8 +27,8 @@
 
 JAK_BEGIN_DECL
 
-bool jak_io_context_create(jak_archive_io_context **context, struct jak_error *err, const char *file_path);
-struct jak_error *jak_io_context_get_error(jak_archive_io_context *context);
+bool jak_io_context_create(jak_archive_io_context **context, jak_error *err, const char *file_path);
+jak_error *jak_io_context_get_error(jak_archive_io_context *context);
 FILE *jak_io_context_lock_and_access(jak_archive_io_context *context);
 bool jak_io_context_unlock(jak_archive_io_context *context);
 bool jak_io_context_drop(jak_archive_io_context *context);

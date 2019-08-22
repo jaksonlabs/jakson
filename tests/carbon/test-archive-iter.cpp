@@ -24,7 +24,7 @@ iterate_object_vals(jak_archive_value_vector *value_iter)
     jak_u32 vector_length;
     jak_archive_object object;
     jak_prop_iter  prop_iter;
-    struct jak_error err;
+    jak_error err;
 
     status = jak_archive_value_vector_is_of_objects(&is_object, value_iter);
     ASSERT_TRUE(status);
@@ -289,7 +289,7 @@ print_basic_fixed_types(jak_archive_value_vector *value_iter, jak_u32 idx)
 static void
 iterate_properties(jak_prop_iter *prop_iter)
 {
-    jak_global_id_t                oid;
+    jak_uid_t                oid;
     jak_archive_value_vector     value_iter;
     enum jak_archive_field_type               type;
     bool                              is_array;
@@ -301,7 +301,7 @@ iterate_properties(jak_prop_iter *prop_iter)
     jak_independent_iter_state group_iter;
     jak_independent_iter_state       column_iter;
     jak_independent_iter_state entry_iter;
-    struct jak_error                       err;
+    jak_error                       err;
 
     while (jak_archive_prop_iter_next(&iter_type, &value_iter, &collection_iter, prop_iter))
     {
@@ -349,7 +349,7 @@ iterate_properties(jak_prop_iter *prop_iter)
             while (jak_archive_collection_next_column_group(&group_iter, &collection_iter)) {
 
                 jak_u32 num_objs;
-                const jak_global_id_t *ids = jak_archive_column_group_get_object_ids(&num_objs, &group_iter);
+                const jak_uid_t *ids = jak_archive_column_group_get_object_ids(&num_objs, &group_iter);
 
                 printf("\t\t{ column groups object ids:");
                 for (jak_u32 i = 0; i < num_objs; i++) {
@@ -479,7 +479,7 @@ iterate_properties(jak_prop_iter *prop_iter)
                             jak_archive_column_entry_get_objects(&iter, &entry_iter);
                             printf("\t\t{ << objects >>: [");
                             while ((archive_object = jak_archive_column_entry_object_iter_next_object(&iter)) != NULL) {
-                                jak_global_id_t id;
+                                jak_uid_t id;
                                 jak_archive_object_get_object_id(&id, archive_object);
                                 printf("{ oid: %" PRIu64 " } \n", id);
 
@@ -505,7 +505,7 @@ iterate_properties(jak_prop_iter *prop_iter)
 TEST(ArchiveIterTest, CreateIterator)
 {
     jak_archive            archive;
-    struct jak_error                err;
+    jak_error                err;
     jak_prop_iter  prop_iter;
     bool                        status;
 

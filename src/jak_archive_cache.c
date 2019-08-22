@@ -20,7 +20,7 @@
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <jak_hash_bern.h>
+#include <jak_hash.h>
 #include <jak_error.h>
 #include <jak_archive_cache.h>
 
@@ -40,7 +40,7 @@ struct jak_string_cache {
         struct jak_vector ofType(struct lru_list) list_entries;
         jak_sid_cache_stats statistics;
         jak_archive_query query;
-        struct jak_error err;
+        jak_error err;
         size_t capacity;
 };
 
@@ -82,14 +82,14 @@ bool jak_string_id_cache_create_lru_ex(struct jak_string_cache **cache, jak_arch
                 init_list(list);
         }
 
-        error_init(&result->err);
+        jak_error_init(&result->err);
         jak_string_id_cache_reset_statistics(result);
         *cache = result;
 
         return true;
 }
 
-bool jak_string_id_cache_get_error(struct jak_error *err, const struct jak_string_cache *cache)
+bool jak_string_id_cache_get_error(jak_error *err, const struct jak_string_cache *cache)
 {
         JAK_ERROR_IF_NULL(err)
         JAK_ERROR_IF_NULL(cache)

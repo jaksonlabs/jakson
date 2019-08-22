@@ -44,7 +44,7 @@ bool pack_huffman_print_extra(struct jak_packer *self, FILE *file, struct jak_me
 bool pack_huffman_print_encoded(struct jak_packer *self, FILE *file, struct jak_memfile *src,
                                 jak_u32 decompressed_strlen);
 
-bool pack_huffman_encode_string(struct jak_packer *self, struct jak_memfile *dst, struct jak_error *err,
+bool pack_huffman_encode_string(struct jak_packer *self, struct jak_memfile *dst, jak_error *err,
                                 const char *string);
 
 bool pack_huffman_decode_string(struct jak_packer *self, char *dst, size_t strlen, FILE *src);

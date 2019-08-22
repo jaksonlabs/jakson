@@ -135,7 +135,7 @@ struct jak_packer {
          *
          * @param self A pointer to the compressor that is used; maybe accesses <code>extra</code>
          * @param dst A memory file in which the encoded string should be stored
-         * @param err An error information
+         * @param err An JAK_ERROR information
          * @param string The string that should be encoded
          *
          * @return <b>true</b> in case of success, or <b>false</b> otherwise.
@@ -144,7 +144,7 @@ struct jak_packer {
          * @since 0.1.00.05
          */
         bool
-        (*encode_string)(struct jak_packer *self, struct jak_memfile *dst, struct jak_error *err, const char *string);
+        (*encode_string)(struct jak_packer *self, struct jak_memfile *dst, jak_error *err, const char *string);
 
         bool (*decode_string)(struct jak_packer *self, char *dst, size_t strlen, FILE *src);
 
@@ -231,7 +231,7 @@ static struct {
 
 #pragma GCC diagnostic pop
 
-bool pack_by_type(struct jak_error *err, struct jak_packer *strategy, enum jak_packer_type type);
+bool pack_by_type(jak_error *err, struct jak_packer *strategy, enum jak_packer_type type);
 
 jak_u8 pack_flagbit_by_type(enum jak_packer_type type);
 
@@ -239,22 +239,22 @@ bool pack_by_flags(struct jak_packer *strategy, jak_u8 flags);
 
 bool pack_by_name(enum jak_packer_type *type, const char *name);
 
-bool pack_cpy(struct jak_error *err, struct jak_packer *dst, const struct jak_packer *src);
+bool pack_cpy(jak_error *err, struct jak_packer *dst, const struct jak_packer *src);
 
-bool pack_drop(struct jak_error *err, struct jak_packer *self);
+bool pack_drop(jak_error *err, struct jak_packer *self);
 
-bool pack_write_extra(struct jak_error *err, struct jak_packer *self, struct jak_memfile *dst,
+bool pack_write_extra(jak_error *err, struct jak_packer *self, struct jak_memfile *dst,
                       const struct jak_vector ofType (const char *) *strings);
 
-bool pack_read_extra(struct jak_error *err, struct jak_packer *self, FILE *src, size_t nbytes);
+bool pack_read_extra(jak_error *err, struct jak_packer *self, FILE *src, size_t nbytes);
 
-bool pack_encode(struct jak_error *err, struct jak_packer *self, struct jak_memfile *dst, const char *string);
+bool pack_encode(jak_error *err, struct jak_packer *self, struct jak_memfile *dst, const char *string);
 
-bool pack_decode(struct jak_error *err, struct jak_packer *self, char *dst, size_t strlen, FILE *src);
+bool pack_decode(jak_error *err, struct jak_packer *self, char *dst, size_t strlen, FILE *src);
 
-bool pack_print_extra(struct jak_error *err, struct jak_packer *self, FILE *file, struct jak_memfile *src);
+bool pack_print_extra(jak_error *err, struct jak_packer *self, FILE *file, struct jak_memfile *src);
 
-bool pack_print_encoded(struct jak_error *err, struct jak_packer *self, FILE *file, struct jak_memfile *src,
+bool pack_print_encoded(jak_error *err, struct jak_packer *self, FILE *file, struct jak_memfile *src,
                         jak_u32 decompressed_strlen);
 
 JAK_END_DECL

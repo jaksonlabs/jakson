@@ -50,7 +50,7 @@ typedef struct jak_allocator {
         /**
          *  Error information
          */
-        struct jak_error err;
+        jak_error err;
 
         /**
          *  Implementation to call memory allocation.
@@ -99,7 +99,7 @@ bool jak_alloc_this_or_std(jak_allocator *dst, const jak_allocator *self);
  *
  * @param dst non-null pointer to allocator implementation (of same implementation as src)
  * @param src non-null pointer to allocator implementation (of same implementation as dst)
- * @return STATUS_OK in case of success, otherwise a value unequal to STATUS_OK describing the error
+ * @return STATUS_OK in case of success, otherwise a value unequal to STATUS_OK describing the JAK_ERROR
  */
 bool jak_alloc_clone(jak_allocator *dst, const jak_allocator *src);
 

@@ -46,7 +46,7 @@ struct token_memory {
         bool init;
 };
 
-static int process_token(struct jak_error *err, struct jak_json_err *error_desc, const struct jak_json_token *token,
+static int process_token(jak_error *err, struct jak_json_err *error_desc, const struct jak_json_token *token,
                          struct jak_vector ofType(enum json_token_type) *brackets, struct token_memory *token_mem);
 
 static int set_error(struct jak_json_err *error_desc, const struct jak_json_token *token, const char *msg);
@@ -58,7 +58,7 @@ bool json_tokenizer_init(struct jak_json_tokenizer *tokenizer, const char *input
         tokenizer->cursor = input;
         tokenizer->token =
                 (struct jak_json_token) {.type = JSON_UNKNOWN, .length = 0, .column = 0, .line = 1, .string = NULL};
-        error_init(&tokenizer->err);
+        jak_error_init(&tokenizer->err);
         return true;
 }
 
@@ -210,10 +210,10 @@ void json_token_print(FILE *file, const struct jak_json_token *token)
         free(string);
 }
 
-static bool parse_object(struct jak_json_object_t *object, struct jak_error *err,
+static bool parse_object(struct jak_json_object_t *object, jak_error *err,
                          struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx);
 
-static bool parse_array(struct jak_json_array *array, struct jak_error *err,
+static bool parse_array(struct jak_json_array *array, jak_error *err,
                         struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx);
 
 static void parse_string(struct jak_json_string *string, struct jak_vector ofType(struct jak_json_token) *token_stream,
@@ -222,13 +222,13 @@ static void parse_string(struct jak_json_string *string, struct jak_vector ofTyp
 static void parse_number(struct jak_json_number *number, struct jak_vector ofType(struct jak_json_token) *token_stream,
                          size_t *token_idx);
 
-static bool parse_element(struct jak_json_element *element, struct jak_error *err,
+static bool parse_element(struct jak_json_element *element, jak_error *err,
                           struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx);
 
-static bool parse_elements(struct jak_json_elements *elements, struct jak_error *err,
+static bool parse_elements(struct jak_json_elements *elements, jak_error *err,
                            struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx);
 
-static bool parse_token_stream(struct jak_json *json, struct jak_error *err,
+static bool parse_token_stream(struct jak_json *json, jak_error *err,
                                struct jak_vector ofType(struct jak_json_token) *token_stream);
 
 static struct jak_json_token get_token(struct jak_vector ofType(struct jak_json_token) *token_stream, size_t token_idx);
@@ -245,19 +245,19 @@ static void connect_child_and_parents_element(struct jak_json_element *element);
 
 static void connect_child_and_parents(struct jak_json *json);
 
-static bool json_ast_node_member_print(FILE *file, struct jak_error *err, struct jak_json_prop *member);
+static bool json_ast_node_member_print(FILE *file, jak_error *err, struct jak_json_prop *member);
 
-static bool json_ast_node_object_print(FILE *file, struct jak_error *err, struct jak_json_object_t *object);
+static bool json_ast_node_object_print(FILE *file, jak_error *err, struct jak_json_object_t *object);
 
-static bool json_ast_node_array_print(FILE *file, struct jak_error *err, struct jak_json_array *array);
+static bool json_ast_node_array_print(FILE *file, jak_error *err, struct jak_json_array *array);
 
 static void json_ast_node_string_print(FILE *file, struct jak_json_string *string);
 
-static bool json_ast_node_number_print(FILE *file, struct jak_error *err, struct jak_json_number *number);
+static bool json_ast_node_number_print(FILE *file, jak_error *err, struct jak_json_number *number);
 
-static bool json_ast_node_value_print(FILE *file, struct jak_error *err, struct jak_json_node_value *value);
+static bool json_ast_node_value_print(FILE *file, jak_error *err, struct jak_json_node_value *value);
 
-static bool json_ast_node_element_print(FILE *file, struct jak_error *err, struct jak_json_element *element);
+static bool json_ast_node_element_print(FILE *file, jak_error *err, struct jak_json_element *element);
 
 #define NEXT_TOKEN(x) { *x = *x + 1; }
 #define PREV_TOKEN(x) { *x = *x - 1; }
@@ -266,7 +266,7 @@ bool json_parser_create(struct jak_json_parser *parser)
 {
         JAK_ERROR_IF_NULL(parser)
 
-        error_init(&parser->err);
+        jak_error_init(&parser->err);
 
         return true;
 }
@@ -283,7 +283,7 @@ json_parse(struct jak_json *json, struct jak_json_err *error_desc, struct jak_js
         struct jak_json retval;
         JAK_zero_memory(&retval, sizeof(struct jak_json))
         retval.element = JAK_MALLOC(sizeof(struct jak_json_element));
-        error_init(&retval.err);
+        jak_error_init(&retval.err);
         const struct jak_json_token *token;
         int status;
 
@@ -326,7 +326,7 @@ json_parse(struct jak_json *json, struct jak_json_err *error_desc, struct jak_js
         return status;
 }
 
-bool test_condition_value(struct jak_error *err, struct jak_json_node_value *value)
+bool test_condition_value(jak_error *err, struct jak_json_node_value *value)
 {
         switch (value->value_type) {
                 case JSON_VALUE_OBJECT:
@@ -364,7 +364,7 @@ bool test_condition_value(struct jak_error *err, struct jak_json_node_value *val
                                         char message[] = "JSON file constraint broken: arrays of mixed types detected";
                                         char *result = JAK_MALLOC(strlen(message) + 1);
                                         strcpy(result, &message[0]);
-                                        error_with_details(err, JAK_ERR_ARRAYOFMIXEDTYPES, result);
+                                        JAK_ERROR_WDETAILS(err, JAK_ERR_ARRAYOFMIXEDTYPES, result);
                                         free(result);
                                         return false;
                                 }
@@ -386,7 +386,7 @@ bool test_condition_value(struct jak_error *err, struct jak_json_node_value *val
                                                 char message[] = "JSON file constraint broken: arrays of arrays detected";
                                                 char *result = JAK_MALLOC(strlen(message) + 1);
                                                 strcpy(result, &message[0]);
-                                                error_with_details(err, JAK_ERR_ARRAYOFARRAYS, result);
+                                                JAK_ERROR_WDETAILS(err, JAK_ERR_ARRAYOFARRAYS, result);
                                                 free(result);
                                                 return false;
                                         }
@@ -402,7 +402,7 @@ bool test_condition_value(struct jak_error *err, struct jak_json_node_value *val
         return true;
 }
 
-bool json_test(struct jak_error *err, struct jak_json *json)
+bool json_test(jak_error *err, struct jak_json *json)
 {
         return (test_condition_value(err, &json->element->value));
 }
@@ -412,7 +412,7 @@ static struct jak_json_token get_token(struct jak_vector ofType(struct jak_json_
         return *(struct jak_json_token *) vec_at(token_stream, token_idx);
 }
 
-bool parse_members(struct jak_error *err, struct jak_json_members *members,
+bool parse_members(jak_error *err, struct jak_json_members *members,
                    struct jak_vector ofType(struct jak_json_token) *token_stream,
                    size_t *token_idx)
 {
@@ -469,7 +469,7 @@ bool parse_members(struct jak_error *err, struct jak_json_members *members,
                                 member->value.value.value_type = JSON_VALUE_NULL;
                                 NEXT_TOKEN(token_idx);
                                 break;
-                        default: error(err, JAK_ERR_PARSETYPE)
+                        default: JAK_ERROR(err, JAK_ERR_PARSETYPE)
                                 return false;
                 }
 
@@ -480,7 +480,7 @@ bool parse_members(struct jak_error *err, struct jak_json_members *members,
         return true;
 }
 
-static bool parse_object(struct jak_json_object_t *object, struct jak_error *err,
+static bool parse_object(struct jak_json_object_t *object, jak_error *err,
                          struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx)
 {
         JAK_ASSERT(get_token(token_stream, *token_idx).type == OBJECT_OPEN);
@@ -502,7 +502,7 @@ static bool parse_object(struct jak_json_object_t *object, struct jak_error *err
         return true;
 }
 
-static bool parse_array(struct jak_json_array *array, struct jak_error *err,
+static bool parse_array(struct jak_json_array *array, jak_error *err,
                         struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx)
 {
         struct jak_json_token token = get_token(token_stream, *token_idx);
@@ -568,7 +568,7 @@ static void parse_number(struct jak_json_number *number, struct jak_vector ofTyp
         NEXT_TOKEN(token_idx);
 }
 
-static bool parse_element(struct jak_json_element *element, struct jak_error *err,
+static bool parse_element(struct jak_json_element *element, jak_error *err,
                           struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx)
 {
         struct jak_json_token token = get_token(token_stream, *token_idx);
@@ -608,7 +608,7 @@ static bool parse_element(struct jak_json_element *element, struct jak_error *er
         return true;
 }
 
-static bool parse_elements(struct jak_json_elements *elements, struct jak_error *err,
+static bool parse_elements(struct jak_json_elements *elements, jak_error *err,
                            struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx)
 {
         struct jak_json_token delimiter;
@@ -629,7 +629,7 @@ static bool parse_elements(struct jak_json_elements *elements, struct jak_error 
         return true;
 }
 
-static bool parse_token_stream(struct jak_json *json, struct jak_error *err,
+static bool parse_token_stream(struct jak_json *json, jak_error *err,
                                struct jak_vector ofType(struct jak_json_token) *token_stream)
 {
         size_t token_idx = 0;
@@ -705,7 +705,7 @@ static bool isValue(enum json_token_type token)
                 || token == LITERAL_FALSE || token == LITERAL_NULL);
 }
 
-static int process_token(struct jak_error *err, struct jak_json_err *error_desc, const struct jak_json_token *token,
+static int process_token(jak_error *err, struct jak_json_err *error_desc, const struct jak_json_token *token,
                          struct jak_vector ofType(enum json_token_type) *brackets, struct token_memory *token_mem)
 {
         switch (token->type) {
@@ -833,7 +833,7 @@ static int process_token(struct jak_error *err, struct jak_json_err *error_desc,
                                 return set_error(error_desc, token, "Unexpected token");
                         }
                         break;
-                default: error(err, JAK_ERR_NOJSONTOKEN)
+                default: JAK_ERROR(err, JAK_ERR_NOJSONTOKEN)
                         return false;
         }
 
@@ -851,13 +851,13 @@ static int set_error(struct jak_json_err *error_desc, const struct jak_json_toke
         return false;
 }
 
-static bool json_ast_node_member_print(FILE *file, struct jak_error *err, struct jak_json_prop *member)
+static bool json_ast_node_member_print(FILE *file, jak_error *err, struct jak_json_prop *member)
 {
         fprintf(file, "\"%s\": ", member->key.value);
         return json_ast_node_value_print(file, err, &member->value.value);
 }
 
-static bool json_ast_node_object_print(FILE *file, struct jak_error *err, struct jak_json_object_t *object)
+static bool json_ast_node_object_print(FILE *file, jak_error *err, struct jak_json_object_t *object)
 {
         fprintf(file, "{");
         for (size_t i = 0; i < object->value->members.num_elems; i++) {
@@ -871,7 +871,7 @@ static bool json_ast_node_object_print(FILE *file, struct jak_error *err, struct
         return true;
 }
 
-static bool json_ast_node_array_print(FILE *file, struct jak_error *err, struct jak_json_array *array)
+static bool json_ast_node_array_print(FILE *file, jak_error *err, struct jak_json_array *array)
 {
         fprintf(file, "[");
         for (size_t i = 0; i < array->elements.elements.num_elems; i++) {
@@ -890,7 +890,7 @@ static void json_ast_node_string_print(FILE *file, struct jak_json_string *strin
         fprintf(file, "\"%s\"", string->value);
 }
 
-static bool json_ast_node_number_print(FILE *file, struct jak_error *err, struct jak_json_number *number)
+static bool json_ast_node_number_print(FILE *file, jak_error *err, struct jak_json_number *number)
 {
         switch (number->value_type) {
                 case JSON_NUMBER_FLOAT:
@@ -902,13 +902,13 @@ static bool json_ast_node_number_print(FILE *file, struct jak_error *err, struct
                 case JSON_NUMBER_SIGNED:
                         fprintf(file, "%" PRIi64, number->value.signed_integer);
                         break;
-                default: error(err, JAK_ERR_NOJSONNUMBERT);
+                default: JAK_ERROR(err, JAK_ERR_NOJSONNUMBERT);
                         return false;
         }
         return true;
 }
 
-static bool json_ast_node_value_print(FILE *file, struct jak_error *err, struct jak_json_node_value *value)
+static bool json_ast_node_value_print(FILE *file, jak_error *err, struct jak_json_node_value *value)
 {
         switch (value->value_type) {
                 case JSON_VALUE_OBJECT:
@@ -938,31 +938,31 @@ static bool json_ast_node_value_print(FILE *file, struct jak_error *err, struct 
                 case JSON_VALUE_NULL:
                         fprintf(file, "null");
                         break;
-                default: error(err, JAK_ERR_NOTYPE);
+                default: JAK_ERROR(err, JAK_ERR_NOTYPE);
                         return false;
         }
         return true;
 }
 
-static bool json_ast_node_element_print(FILE *file, struct jak_error *err, struct jak_json_element *element)
+static bool json_ast_node_element_print(FILE *file, jak_error *err, struct jak_json_element *element)
 {
         return json_ast_node_value_print(file, err, &element->value);
 }
 
-static bool json_ast_node_value_drop(struct jak_json_node_value *value, struct jak_error *err);
+static bool json_ast_node_value_drop(struct jak_json_node_value *value, jak_error *err);
 
-static bool json_ast_node_element_drop(struct jak_json_element *element, struct jak_error *err)
+static bool json_ast_node_element_drop(struct jak_json_element *element, jak_error *err)
 {
         return json_ast_node_value_drop(&element->value, err);
 }
 
-static bool json_ast_node_member_drop(struct jak_json_prop *member, struct jak_error *err)
+static bool json_ast_node_member_drop(struct jak_json_prop *member, jak_error *err)
 {
         free(member->key.value);
         return json_ast_node_element_drop(&member->value, err);
 }
 
-static bool json_ast_node_members_drop(struct jak_json_members *members, struct jak_error *err)
+static bool json_ast_node_members_drop(struct jak_json_members *members, jak_error *err)
 {
         for (size_t i = 0; i < members->members.num_elems; i++) {
                 struct jak_json_prop *member = vec_get(&members->members, i, struct jak_json_prop);
@@ -974,7 +974,7 @@ static bool json_ast_node_members_drop(struct jak_json_members *members, struct 
         return true;
 }
 
-static bool json_ast_node_elements_drop(struct jak_json_elements *elements, struct jak_error *err)
+static bool json_ast_node_elements_drop(struct jak_json_elements *elements, jak_error *err)
 {
         for (size_t i = 0; i < elements->elements.num_elems; i++) {
                 struct jak_json_element *element = vec_get(&elements->elements, i, struct jak_json_element);
@@ -986,7 +986,7 @@ static bool json_ast_node_elements_drop(struct jak_json_elements *elements, stru
         return true;
 }
 
-static bool json_ast_node_object_drop(struct jak_json_object_t *object, struct jak_error *err)
+static bool json_ast_node_object_drop(struct jak_json_object_t *object, jak_error *err)
 {
         if (!json_ast_node_members_drop(object->value, err)) {
                 return false;
@@ -996,7 +996,7 @@ static bool json_ast_node_object_drop(struct jak_json_object_t *object, struct j
         }
 }
 
-static bool json_ast_node_array_drop(struct jak_json_array *array, struct jak_error *err)
+static bool json_ast_node_array_drop(struct jak_json_array *array, jak_error *err)
 {
         return json_ast_node_elements_drop(&array->elements, err);
 }
@@ -1011,7 +1011,7 @@ static void json_ast_node_number_drop(struct jak_json_number *number)
         JAK_UNUSED(number);
 }
 
-static bool json_ast_node_value_drop(struct jak_json_node_value *value, struct jak_error *err)
+static bool json_ast_node_value_drop(struct jak_json_node_value *value, jak_error *err)
 {
         switch (value->value_type) {
                 case JSON_VALUE_OBJECT:
@@ -1040,7 +1040,7 @@ static bool json_ast_node_value_drop(struct jak_json_node_value *value, struct j
                 case JSON_VALUE_FALSE:
                 case JSON_VALUE_NULL:
                         break;
-                default: error(err, JAK_ERR_NOTYPE)
+                default: JAK_ERROR(err, JAK_ERR_NOTYPE)
                         return false;
 
         }
@@ -1321,7 +1321,7 @@ static enum json_list_type number_type_to_list_type(enum number_min_type type)
                         return JSON_LIST_TYPE_FIXED_I32;
                 case NUMBER_I64:
                         return JSON_LIST_TYPE_FIXED_I64;
-                default: error_print(JAK_ERR_UNSUPPORTEDTYPE)
+                default: JAK_ERROR_PRINT(JAK_ERR_UNSUPPORTEDTYPE)
                         return JSON_LIST_TYPE_EMPTY;
 
         }
@@ -1354,7 +1354,7 @@ bool json_array_get_type(enum json_list_type *type, const struct jak_json_array 
                                                 elem_type = number_type_to_list_type(number_min_type_signed(
                                                         elem->value.value.number->value.signed_integer));
                                                 break;
-                                        default: error_print(JAK_ERR_UNSUPPORTEDTYPE);
+                                        default: JAK_ERROR_PRINT(JAK_ERR_UNSUPPORTEDTYPE);
                                                 continue;
                                 }
 
@@ -1377,7 +1377,7 @@ bool json_array_get_type(enum json_list_type *type, const struct jak_json_array 
                                         goto return_result;
                                 }
                                 break;
-                        default: error_print(JAK_ERR_UNSUPPORTEDTYPE);
+                        default: JAK_ERROR_PRINT(JAK_ERR_UNSUPPORTEDTYPE);
                                 break;
                 }
         }

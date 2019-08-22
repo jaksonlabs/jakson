@@ -27,11 +27,11 @@ bool string_create_ex(struct jak_string *builder, size_t capacity)
 {
         JAK_ERROR_IF_NULL(builder)
         JAK_ERROR_IF_NULL(capacity)
-        error_init(&builder->err);
+        jak_error_init(&builder->err);
         builder->cap = capacity;
         builder->end = 0;
         builder->data = JAK_MALLOC(capacity);
-        error_if_and_return(!builder->data, &builder->err, JAK_ERR_MALLOCERR, false);
+        JAK_ERROR_IF_AND_RETURN(!builder->data, &builder->err, JAK_ERR_MALLOCERR, false);
         JAK_zero_memory(builder->data, builder->cap);
         return true;
 }
@@ -53,7 +53,7 @@ bool string_add_nchar(struct jak_string *builder, const char *str, jak_u64 strle
         if (JAK_UNLIKELY(builder->end + strlen >= builder->cap)) {
                 size_t new_cap = (builder->end + strlen) * 1.7f;
                 builder->data = realloc(builder->data, new_cap);
-                error_if_and_return(!builder->data, &builder->err, JAK_ERR_REALLOCERR, false);
+                JAK_ERROR_IF_AND_RETURN(!builder->data, &builder->err, JAK_ERR_REALLOCERR, false);
                 JAK_zero_memory(builder->data + builder->cap, (new_cap - builder->cap));
                 builder->cap = new_cap;
         }
@@ -167,7 +167,7 @@ bool string_ensure_capacity(struct jak_string *builder, jak_u64 cap)
         if (JAK_UNLIKELY(cap > builder->cap)) {
                 size_t new_cap = cap * 1.7f;
                 builder->data = realloc(builder->data, new_cap);
-                error_if_and_return(!builder->data, &builder->err, JAK_ERR_REALLOCERR, false);
+                JAK_ERROR_IF_AND_RETURN(!builder->data, &builder->err, JAK_ERR_REALLOCERR, false);
                 JAK_zero_memory(builder->data + builder->cap, (new_cap - builder->cap));
                 builder->cap = new_cap;
         }

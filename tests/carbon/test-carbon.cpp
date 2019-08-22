@@ -18,7 +18,7 @@
 
 TEST(CarbonTest, CreateCarbon) {
         jak_carbon doc;
-        jak_global_id_t oid;
+        jak_uid_t oid;
         jak_u64 rev;
         struct jak_string builder;
         bool status;
@@ -202,8 +202,8 @@ TEST(CarbonTest, CreateCarbonRevisionAsyncReading) {
 
 TEST(CarbonTest, ModifyCarbonObjectId) {
         jak_carbon doc, rev_doc;
-        jak_global_id_t oid;
-        jak_global_id_t new_oid;
+        jak_uid_t oid;
+        jak_uid_t new_oid;
         jak_carbon_revise revise;
         jak_u64 commit_hash_old, commit_hash_new;
 
@@ -4053,7 +4053,7 @@ TEST(CarbonTest, CarbonKeyTypeAutoKeyUpdate)
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
         jak_carbon_revise revise;
-        jak_global_id_t id, id_read;
+        jak_uid_t id, id_read;
 
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_AUTOKEY, JAK_CARBON_OPTIMIZE);
@@ -7207,7 +7207,7 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 TEST(CarbonTest, CarbonFromEmptyJson)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7233,7 +7233,7 @@ TEST(CarbonTest, CarbonFromEmptyJson)
 TEST(CarbonTest, CarbonFromEmptyArray)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7259,7 +7259,7 @@ TEST(CarbonTest, CarbonFromEmptyArray)
 TEST(CarbonTest, CarbonFromJsonNull)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7286,7 +7286,7 @@ TEST(CarbonTest, CarbonFromJsonNull)
 TEST(CarbonTest, CarbonFromJsonTrue)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7313,7 +7313,7 @@ TEST(CarbonTest, CarbonFromJsonTrue)
 TEST(CarbonTest, CarbonFromJsonFalse)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7340,7 +7340,7 @@ TEST(CarbonTest, CarbonFromJsonFalse)
 TEST(CarbonTest, CarbonFromJsonNumberSigned)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7367,7 +7367,7 @@ TEST(CarbonTest, CarbonFromJsonNumberSigned)
 TEST(CarbonTest, CarbonFromJsonNumberUnsigned)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7394,7 +7394,7 @@ TEST(CarbonTest, CarbonFromJsonNumberUnsigned)
 TEST(CarbonTest, CarbonFromJsonNumberFloat)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7421,7 +7421,7 @@ TEST(CarbonTest, CarbonFromJsonNumberFloat)
 TEST(CarbonTest, CarbonFromJsonString)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7448,7 +7448,7 @@ TEST(CarbonTest, CarbonFromJsonString)
 TEST(CarbonTest, CarbonFromJsonObjectSingle)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7476,7 +7476,7 @@ TEST(CarbonTest, CarbonFromJsonObjectSingle)
 TEST(CarbonTest, CarbonFromJsonObjectEmptyArrayProp)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7503,7 +7503,7 @@ TEST(CarbonTest, CarbonFromJsonObjectEmptyArrayProp)
 TEST(CarbonTest, CarbonFromJsonObjectEmptyObjectProp)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7530,7 +7530,7 @@ TEST(CarbonTest, CarbonFromJsonObjectEmptyObjectProp)
 TEST(CarbonTest, CarbonFromJsonObjectTrueProp)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7557,7 +7557,7 @@ TEST(CarbonTest, CarbonFromJsonObjectTrueProp)
 TEST(CarbonTest, CarbonFromJsonObjectFalseProp)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7584,7 +7584,7 @@ TEST(CarbonTest, CarbonFromJsonObjectFalseProp)
 TEST(CarbonTest, CarbonFromJsonObjectNullProp)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7611,7 +7611,7 @@ TEST(CarbonTest, CarbonFromJsonObjectNullProp)
 TEST(CarbonTest, CarbonFromJsonObjectUnsignedProp)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7638,7 +7638,7 @@ TEST(CarbonTest, CarbonFromJsonObjectUnsignedProp)
 TEST(CarbonTest, CarbonFromJsonObjectSignedProp)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7665,7 +7665,7 @@ TEST(CarbonTest, CarbonFromJsonObjectSignedProp)
 TEST(CarbonTest, CarbonFromJsonObjectFloatProp)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7692,7 +7692,7 @@ TEST(CarbonTest, CarbonFromJsonObjectFloatProp)
 TEST(CarbonTest, CarbonFromJsonColumnNumber)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7733,7 +7733,7 @@ TEST(CarbonTest, CarbonFromJsonColumnNumber)
 TEST(CarbonTest, CarbonFromJsonColumnNullableNumber)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7775,7 +7775,7 @@ TEST(CarbonTest, CarbonFromJsonColumnNullableNumber)
 TEST(CarbonTest, CarbonFromJsonNonColumn)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7831,7 +7831,7 @@ TEST(CarbonTest, CarbonColumnOptimizeFix)
 TEST(CarbonTest, CarbonFromJsonExample)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact;
@@ -7874,7 +7874,7 @@ TEST(CarbonTest, CarbonFromJsonExample)
 TEST(CarbonTest, CarbonFromJsonUnitArrayPrimitive)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact;
@@ -7898,7 +7898,7 @@ TEST(CarbonTest, CarbonFromJsonUnitArrayPrimitive)
 TEST(CarbonTest, CarbonFromJsonUnitArrayObject)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in;
         char *json_out_compact;
@@ -7922,7 +7922,7 @@ TEST(CarbonTest, CarbonFromJsonUnitArrayObject)
 TEST(CarbonTest, CarbonFromJsonSimpleExample)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in = "{\"k\": {\"x\": [1,2,3], \"y\": \"z\"}}";
         jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
@@ -7934,7 +7934,7 @@ TEST(CarbonTest, CarbonFromJsonSimpleExample)
 TEST(CarbonTest, CarbonFromJsonFromExcerpt)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         /* the working directory must be 'tests/carbon' to find this file */
         int fd = open("./assets/ms-academic-graph.json", O_RDONLY);
@@ -7960,7 +7960,7 @@ TEST(CarbonTest, CarbonFromJsonFromExcerpt)
 TEST(CarbonTest, CarbonResolveDotPathForObjects)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
         jak_carbon_find find;
         jak_carbon_field_type_e result_type;
         jak_u64 number;
@@ -8100,7 +8100,7 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
 TEST(CarbonTest, CarbonResolveDotPathForObjectsBench)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
         jak_carbon_find find;
 
         const char *json_in = "{\"a\": 1, \"b\": {\"c\": [1,2,3], \"d\": [\"Hello\", \"World\"], \"e\": [4], \"f\": [\"!\"], \"the key\": \"x\"}}";
@@ -8251,7 +8251,7 @@ TEST(CarbonTest, CarbonFromJsonShortenedDotPath)
         jak_carbon doc;
         jak_carbon_find find;
         jak_carbon_field_type_e result_type;
-        struct jak_error err;
+        jak_error err;
 
         const char *json_in = "{\"x\": \"y\"}";
         jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
@@ -8308,7 +8308,7 @@ TEST(CarbonTest, CarbonFromJsonShortenedDotPath)
 TEST(CarbonTest, CarbonFindPrint)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
         jak_carbon_find find;
         char *result;
 
@@ -8625,7 +8625,7 @@ TEST(CarbonTest, CarbonFindPrint)
 TEST(CarbonTest, CarbonFindPrintExamples)
 {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
         jak_carbon_find find;
         struct jak_string result;
 
@@ -8666,7 +8666,7 @@ TEST(CarbonTest, CarbonFindPrintExamples)
 
 TEST(CarbonTest, ParseBooleanArray) {
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
         jak_carbon_find find;
         jak_carbon_field_type_e type;
         const char *json = "[{\"col\": [true, null, false]}]";
@@ -8703,7 +8703,7 @@ TEST(CarbonTest, ParseBooleanArray) {
 TEST(CarbonTest, PathIndex) {
         jak_carbon_path_index index;
         jak_carbon doc;
-        struct jak_error err;
+        jak_error err;
 
         const char *json = "[\n"
                            "   {\n"

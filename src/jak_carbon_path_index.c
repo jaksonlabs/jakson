@@ -246,7 +246,7 @@ static void record_ref_create(struct jak_memfile *memfile, jak_carbon *doc)
                         jak_carbon_key_update_string_wnchar(memfile, key, len);
                 }
                         break;
-                default: error(&doc->err, JAK_ERR_TYPEMISMATCH)
+                default: JAK_ERROR(&doc->err, JAK_ERR_TYPEMISMATCH)
         }
 
         /* write record version */
@@ -350,7 +350,7 @@ static void object_build_index(struct path_index_node *parent, jak_carbon_object
                         jak_carbon_object_it_drop(it);
                 }
                         break;
-                default: error(&elem_it->err, JAK_ERR_INTERNALERR);
+                default: JAK_ERROR(&elem_it->err, JAK_ERR_INTERNALERR);
         }
 }
 
@@ -405,7 +405,7 @@ static void array_build_index(struct path_index_node *parent, jak_carbon_array_i
                         jak_carbon_object_it_drop(it);
                 }
                         break;
-                default: error(&elem_it->err, JAK_ERR_INTERNALERR);
+                default: JAK_ERROR(&elem_it->err, JAK_ERR_INTERNALERR);
         }
 }
 
@@ -480,7 +480,7 @@ static void container_field_flat(struct jak_memfile *file, struct path_index_nod
                          * subsequent path element must exist */
                         container_contents_flat(file, node);
                         break;
-                default: error(&file->err, JAK_ERR_INTERNALERR);
+                default: JAK_ERROR(&file->err, JAK_ERR_INTERNALERR);
         }
 }
 
@@ -517,7 +517,7 @@ static void node_into_carbon(jak_carbon_insert *ins, jak_carbon_path_index *inde
                 case PATH_MARKER_COLUMN_NODE:
                         column_into_carbon(ins, index);
                         break;
-                default: error(&index->err, JAK_ERR_CORRUPTED)
+                default: JAK_ERROR(&index->err, JAK_ERR_CORRUPTED)
         }
 }
 
@@ -536,7 +536,7 @@ static void node_to_str(struct jak_string *str, jak_carbon_path_index *index, un
                 case PATH_MARKER_COLUMN_NODE:
                         column_to_str(str, index, intent_level);
                         break;
-                default: error(&index->err, JAK_ERR_CORRUPTED)
+                default: JAK_ERROR(&index->err, JAK_ERR_CORRUPTED)
         }
 }
 
@@ -709,7 +709,7 @@ container_to_str(struct jak_string *str, jak_carbon_path_index *index, jak_u8 fi
                         container_contents_to_str(str, index, ++intent_level);
                 }
                         break;
-                default: error(&index->err, JAK_ERR_INTERNALERR);
+                default: JAK_ERROR(&index->err, JAK_ERR_INTERNALERR);
         }
 }
 
@@ -749,7 +749,7 @@ static void container_into_carbon(jak_carbon_insert *ins, jak_carbon_path_index 
                         container_contents_into_carbon(ins, index);
                 }
                         break;
-                default: error(&index->err, JAK_ERR_INTERNALERR);
+                default: JAK_ERROR(&index->err, JAK_ERR_INTERNALERR);
         }
 }
 
@@ -847,7 +847,7 @@ static void node_flat(struct jak_memfile *file, struct path_index_node *node)
                 case JAK_PATH_INDEX_COLUMN_INDEX:
                         column_flat(file, node);
                         break;
-                default: error(&file->err, JAK_ERR_INTERNALERR);
+                default: JAK_ERROR(&file->err, JAK_ERR_INTERNALERR);
                         return;
         }
 }
@@ -921,7 +921,7 @@ static void record_ref_to_str(struct jak_string *str, jak_carbon_path_index *ind
                         string_add_char(str, ')');
                 }
                         break;
-                default: error(&index->err, JAK_ERR_INTERNALERR);
+                default: JAK_ERROR(&index->err, JAK_ERR_INTERNALERR);
         }
         jak_u64 commit_hash = memfile_read_u64(&index->memfile);
         string_add_char(str, '[');
@@ -955,7 +955,7 @@ static void record_ref_to_carbon(jak_carbon_insert *roins, jak_carbon_path_index
                         jak_carbon_insert_prop_nchar(roins, "key-value", key, key_len);
                 }
                         break;
-                default: error(&index->err, JAK_ERR_INTERNALERR);
+                default: JAK_ERROR(&index->err, JAK_ERR_INTERNALERR);
         }
         jak_u64 commit_hash = memfile_read_u64(&index->memfile);
         struct jak_string str;
@@ -975,7 +975,7 @@ bool jak_carbon_path_index_create(jak_carbon_path_index *index, jak_carbon *doc)
         JAK_ERROR_IF_NULL(doc);
         memblock_create(&index->memblock, PATH_INDEX_CAPACITY);
         memfile_open(&index->memfile, index->memblock, READ_WRITE);
-        error_init(&index->err);
+        jak_error_init(&index->err);
         record_ref_create(&index->memfile, doc);
         index_build(&index->memfile, doc);
         return true;
@@ -1024,7 +1024,7 @@ bool jak_carbon_path_index_key_unsigned_value(jak_u64 *key, jak_carbon_path_inde
         JAK_ERROR_IF_NULL(index)
         jak_carbon_key_e key_type;
         jak_u64 ret = *(jak_u64 *) record_ref_read(&key_type, NULL, NULL, &index->memfile);
-        error_if(key_type != JAK_CARBON_KEY_AUTOKEY && key_type != JAK_CARBON_KEY_UKEY, &index->err, JAK_ERR_TYPEMISMATCH);
+        JAK_ERROR_IF(key_type != JAK_CARBON_KEY_AUTOKEY && key_type != JAK_CARBON_KEY_UKEY, &index->err, JAK_ERR_TYPEMISMATCH);
         *key = ret;
         return true;
 }
@@ -1035,7 +1035,7 @@ bool jak_carbon_path_index_key_signed_value(jak_i64 *key, jak_carbon_path_index 
         JAK_ERROR_IF_NULL(index)
         jak_carbon_key_e key_type;
         jak_i64 ret = *(jak_i64 *) record_ref_read(&key_type, NULL, NULL, &index->memfile);
-        error_if(key_type != JAK_CARBON_KEY_IKEY, &index->err, JAK_ERR_TYPEMISMATCH);
+        JAK_ERROR_IF(key_type != JAK_CARBON_KEY_IKEY, &index->err, JAK_ERR_TYPEMISMATCH);
         *key = ret;
         return true;
 }
@@ -1045,10 +1045,10 @@ const char *jak_carbon_path_index_key_string_value(jak_u64 *str_len, jak_carbon_
         if (str_len && index) {
                 jak_carbon_key_e key_type;
                 const char *ret = (const char *) record_ref_read(&key_type, str_len, NULL, &index->memfile);
-                error_if(key_type != JAK_CARBON_KEY_SKEY, &index->err, JAK_ERR_TYPEMISMATCH);
+                JAK_ERROR_IF(key_type != JAK_CARBON_KEY_SKEY, &index->err, JAK_ERR_TYPEMISMATCH);
                 return ret;
         } else {
-                error(&index->err, JAK_ERR_NULLPTR);
+                JAK_ERROR(&index->err, JAK_ERR_NULLPTR);
                 return NULL;
         }
 }
@@ -1088,7 +1088,7 @@ bool jak_carbon_path_index_indexes_doc(jak_carbon_path_index *index, jak_carbon 
                                         const char *doc_key = jak_carbon_key_string_value(&doc_key_len, doc);
                                         return (index_key_len == doc_key_len) && (strcmp(index_key, doc_key) == 0);
                                 }
-                                default: error(&doc->err, JAK_ERR_TYPEMISMATCH)
+                                default: JAK_ERROR(&doc->err, JAK_ERR_TYPEMISMATCH)
                                         return false;
                         }
                 } else {
@@ -1111,13 +1111,13 @@ bool jak_carbon_path_index_it_open(jak_carbon_path_index_it *it, jak_carbon_path
         JAK_ERROR_IF_NULL(doc)
         if (jak_carbon_path_index_indexes_doc(index, doc)) {
                 JAK_zero_memory(it, sizeof(jak_carbon_path_index_it));
-                error_init(&it->err);
+                jak_error_init(&it->err);
                 memfile_open(&it->memfile, index->memfile.memblock, READ_ONLY);
                 it->doc = doc;
                 it->container_type = JAK_CARBON_ARRAY;
                 return true;
         } else {
-                error(&index->err, JAK_ERR_NOTINDEXED)
+                JAK_ERROR(&index->err, JAK_ERR_NOTINDEXED)
                 return false;
         }
 }

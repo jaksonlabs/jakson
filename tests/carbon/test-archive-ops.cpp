@@ -7,7 +7,7 @@
 TEST(CarbonArchiveOpsTest, CreateStreamFromJsonString)
 {
     struct jak_memblock *stream;
-    struct jak_error       err;
+    jak_error       err;
 
     const char        *json_string = "{ \"test\": 123 }";
     bool               read_optimized = false;
@@ -22,7 +22,7 @@ TEST(CarbonArchiveOpsTest, CreateStreamFromJsonString)
 TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonString)
 {
     jak_archive   archive;
-    struct jak_error       err;
+    jak_error       err;
 
     const char        *json_string = "{ \"test\": 123 }";
     const char        *archive_file = "tmp-test-archive.carbon";
@@ -42,7 +42,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonString)
 TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonStringWithBakedStringIdIndex)
 {
     jak_archive   archive;
-    struct jak_error       err;
+    jak_error       err;
 
     const char        *json_string = "{ \"test\": 123 }";
     const char        *archive_file = "tmp-test-archive.carbon";
@@ -69,7 +69,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
     size_t               vector_len;
     bool                 status;
     bool                 success;
-    struct jak_error         err;
+    jak_error         err;
     jak_archive_query       query;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
@@ -116,7 +116,7 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
     size_t               vector_len;
     bool                 status;
     bool                 success;
-    struct jak_error         err;
+    jak_error         err;
     jak_archive_query       query;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
@@ -162,7 +162,7 @@ TEST(CarbonArchiveOpsTest, DecodeStringByFastUnsafeAccess)
     size_t                           vector_len;
     bool                             status;
     bool                             success;
-    struct jak_error                     err;
+    jak_error                     err;
     jak_archive_query                   query;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory

@@ -78,8 +78,6 @@ typedef float jak_float;
 #define is_null_i64(x)          (x == I64_NULL)
 #define is_null_float(x)        (isnan(x))
 
-struct jak_doc_obj;
-
 typedef jak_u64 jak_archive_field_sid_t;  /* string identifier, resolvable by a string dictionary */
 typedef char field_null_t;
 
@@ -194,10 +192,10 @@ typedef const char *field_string_t;
             value_size = sizeof(jak_archive_field_sid_t);                                                                          \
             break;                                                                                                     \
         case JAK_FIELD_OBJECT:                                                                                             \
-            value_size = sizeof(struct jak_column_doc_obj);                                                                 \
+            value_size = sizeof(jak_column_doc_obj);                                                                 \
             break;                                                                                                     \
         default:                                                                                                       \
-        print_error_and_die(JAK_ERR_NOTYPE);                                                                           \
+        JAK_ERROR_PRINT_AND_DIE(JAK_ERR_NOTYPE);                                                                           \
     }                                                                                                                  \
     value_size;                                                                                                        \
 })

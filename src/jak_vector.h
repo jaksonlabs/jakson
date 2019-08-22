@@ -101,7 +101,7 @@ struct jak_vector {
         /**
          *  Error information
          */
-        struct jak_error err;
+        jak_error err;
 };
 
 /**
@@ -123,7 +123,7 @@ bool vec_create(struct jak_vector *out, const jak_allocator *alloc, size_t elem_
 
 bool vec_serialize(FILE *file, struct jak_vector *vec);
 
-bool vec_deserialize(struct jak_vector *vec, struct jak_error *err, FILE *file);
+bool vec_deserialize(struct jak_vector *vec, jak_error *err, FILE *file);
 
 /**
  * Provides hints on the OS kernel how to deal with memory inside this vector.
@@ -131,7 +131,7 @@ bool vec_deserialize(struct jak_vector *vec, struct jak_error *err, FILE *file);
  * @param vec non-null vector
  * @param madviseAdvice value to give underlying <code>madvise</code> syscall and advice, see man page
  * of <code>madvise</code>
- * @return STATUS_OK if success, otherwise a value indicating the error
+ * @return STATUS_OK if success, otherwise a value indicating the JAK_ERROR
  */
 bool vec_memadvice(struct jak_vector *vec, int madviseAdvice);
 
@@ -142,7 +142,7 @@ bool vec_memadvice(struct jak_vector *vec, int madviseAdvice);
  *
  * @param vec non-null vector for which the grow factor should be changed
  * @param factor a positive real number larger than 1
- * @return STATUS_OK if success, otherwise a value indicating the error
+ * @return STATUS_OK if success, otherwise a value indicating the JAK_ERROR
  */
 bool vec_set_grow_factor(struct jak_vector *vec, float factor);
 
@@ -161,8 +161,8 @@ bool vec_drop(struct jak_vector *vec);
  * Returns information on whether elements are stored in this vector or not.
  * @param vec non-null pointer to the vector
  * @return Returns <code>STATUS_TRUE</code> if <code>vec</code> is empty. Otherwise <code>STATUS_FALSE</code> unless
- *         an error occurs. In case an error is occured, the return value is neither <code>STATUS_TRUE</code> nor
- *         <code>STATUS_FALSE</code> but an value indicating that error.
+ *         an JAK_ERROR occurs. In case an JAK_ERROR is occured, the return value is neither <code>STATUS_TRUE</code> nor
+ *         <code>STATUS_FALSE</code> but an value indicating that JAK_ERROR.
  */
 bool vec_is_empty(const struct jak_vector *vec);
 
@@ -220,7 +220,7 @@ bool vec_shrink(struct jak_vector *vec);
  * @param numNewSlots a pointer to a value that will store the number of newly created slots in that vector if
  *                      <code>num_new_slots</code> is non-null. If this parameter is <code>NULL</code>, it is ignored.
  * @param vec non-null pointer to the vector that should be grown
- * @return STATUS_OK in case of success, and another value indicating an error otherwise.
+ * @return STATUS_OK in case of success, and another value indicating an JAK_ERROR otherwise.
  */
 bool vec_grow(size_t *numNewSlots, struct jak_vector *vec);
 

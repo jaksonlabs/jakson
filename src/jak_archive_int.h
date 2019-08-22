@@ -25,7 +25,7 @@
 #include <jak_stdinc.h>
 #include <jak_memfile.h>
 #include <jak_types.h>
-#include <jak_global_id.h>
+#include <jak_unique_id.h>
 #include <jak_pack.h>
 
 JAK_BEGIN_DECL
@@ -45,7 +45,7 @@ typedef struct __attribute__((packed)) jak_record_header {
 
 typedef struct __attribute__((packed)) jak_object_header {
         char marker;
-        jak_global_id_t oid;
+        jak_uid_t oid;
         jak_u32 flags;
 } jak_object_header;
 

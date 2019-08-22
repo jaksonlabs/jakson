@@ -50,20 +50,20 @@ jak_carbon_insert *jak_carbon_create_begin(jak_carbon_new *context, jak_carbon *
                                            jak_carbon_key_e type, int options)
 {
         if (JAK_LIKELY(context != NULL && doc != NULL)) {
-                error_if (options != JAK_CARBON_KEEP && options != JAK_CARBON_SHRINK && options != JAK_CARBON_COMPACT &&
+                JAK_ERROR_IF (options != JAK_CARBON_KEEP && options != JAK_CARBON_SHRINK && options != JAK_CARBON_COMPACT &&
                           options != JAK_CARBON_OPTIMIZE,
                           &doc->err, JAK_ERR_ILLEGALARG);
 
-                success_else_null(error_init(&context->err), &doc->err);
+                JAK_SUCCESS_ELSE_NULL(jak_error_init(&context->err), &doc->err);
                 context->content_it = JAK_MALLOC(sizeof(jak_carbon_array_it));
                 context->inserter = JAK_MALLOC(sizeof(jak_carbon_insert));
                 context->mode = options;
 
-                success_else_null(jak_carbon_create_empty(&context->original, type), &doc->err);
-                success_else_null(jak_carbon_revise_begin(&context->revision_context, doc, &context->original), &doc->err);
-                success_else_null(jak_carbon_revise_iterator_open(context->content_it, &context->revision_context),
+                JAK_SUCCESS_ELSE_NULL(jak_carbon_create_empty(&context->original, type), &doc->err);
+                JAK_SUCCESS_ELSE_NULL(jak_carbon_revise_begin(&context->revision_context, doc, &context->original), &doc->err);
+                JAK_SUCCESS_ELSE_NULL(jak_carbon_revise_iterator_open(context->content_it, &context->revision_context),
                                   &doc->err);
-                success_else_null(jak_carbon_array_it_insert_begin(context->inserter, context->content_it), &doc->err);
+                JAK_SUCCESS_ELSE_NULL(jak_carbon_array_it_insert_begin(context->inserter, context->content_it), &doc->err);
                 return context->inserter;
         } else {
                 return NULL;
@@ -87,13 +87,13 @@ bool jak_carbon_create_end(jak_carbon_new *context)
                 free(context->inserter);
                 jak_carbon_drop(&context->original);
                 if (JAK_UNLIKELY(!success)) {
-                        error(&context->err, JAK_ERR_CLEANUP);
+                        JAK_ERROR(&context->err, JAK_ERR_CLEANUP);
                         return false;
                 } else {
                         return true;
                 }
         } else {
-                error_print(JAK_ERR_NULLPTR);
+                JAK_ERROR_PRINT(JAK_ERR_NULLPTR);
                 return false;
         }
 }
@@ -110,7 +110,7 @@ bool jak_carbon_create_empty_ex(jak_carbon *doc, jak_carbon_key_e type, jak_u64 
 
         doc_cap = JAK_max(MIN_DOC_CAPACITY, doc_cap);
 
-        error_init(&doc->err);
+        jak_error_init(&doc->err);
         memblock_create(&doc->memblock, doc_cap);
         memblock_zero_out(doc->memblock);
         memfile_open(&doc->memfile, doc->memblock, READ_WRITE);
@@ -127,7 +127,7 @@ bool jak_carbon_create_empty_ex(jak_carbon *doc, jak_carbon_key_e type, jak_u64 
 }
 
 bool jak_carbon_from_json(jak_carbon *doc, const char *json, jak_carbon_key_e type,
-                      const void *key, struct jak_error *err)
+                      const void *key, jak_error *err)
 {
         JAK_ERROR_IF_NULL(doc)
         JAK_ERROR_IF_NULL(json)
@@ -154,7 +154,7 @@ bool jak_carbon_from_json(jak_carbon *doc, const char *json, jak_carbon_key_e ty
                         string_add(&sb, status.msg);
                 }
 
-                error_with_details(err, JAK_ERR_JSONPARSEERR, string_cstr(&sb));
+                JAK_ERROR_WDETAILS(err, JAK_ERR_JSONPARSEERR, string_cstr(&sb));
                 string_drop(&sb);
 
                 return false;
@@ -217,7 +217,7 @@ bool jak_carbon_key_signed_value(jak_i64 *key, jak_carbon *doc)
                 *key = *((const jak_i64 *) result);
                 return true;
         } else {
-                error(&doc->err, JAK_ERR_TYPEMISMATCH);
+                JAK_ERROR(&doc->err, JAK_ERR_TYPEMISMATCH);
                 return false;
         }
 }
@@ -233,7 +233,7 @@ bool jak_carbon_key_unsigned_value(jak_u64 *key, jak_carbon *doc)
                 *key = *((const jak_u64 *) result);
                 return true;
         } else {
-                error(&doc->err, JAK_ERR_TYPEMISMATCH);
+                JAK_ERROR(&doc->err, JAK_ERR_TYPEMISMATCH);
                 return false;
         }
 }
@@ -248,7 +248,7 @@ const char *jak_carbon_key_string_value(jak_u64 *len, jak_carbon *doc)
         if (JAK_LIKELY(jak_carbon_key_is_string(type))) {
                 return result;
         } else {
-                error(&doc->err, JAK_ERR_TYPEMISMATCH);
+                JAK_ERROR(&doc->err, JAK_ERR_TYPEMISMATCH);
                 return false;
         }
 }
@@ -279,7 +279,7 @@ bool jak_carbon_clone(jak_carbon *clone, jak_carbon *doc)
         JAK_ERROR_IF_NULL(doc);
         JAK_check_success(memblock_cpy(&clone->memblock, doc->memblock));
         JAK_check_success(memfile_open(&clone->memfile, clone->memblock, READ_WRITE));
-        JAK_check_success(error_init(&clone->err));
+        JAK_check_success(jak_error_init(&clone->err));
 
         spin_init(&clone->versioning.write_lock);
         clone->versioning.commit_lock = false;
@@ -295,7 +295,7 @@ bool jak_carbon_commit_hash(jak_u64 *hash, jak_carbon *doc)
         return true;
 }
 
-bool jak_carbon_to_str(struct jak_string *dst, jak_jak_carbon_printer_impl_e printer, jak_carbon *doc)
+bool jak_carbon_to_str(struct jak_string *dst, jak_carbon_printer_impl_e printer, jak_carbon *doc)
 {
         JAK_ERROR_IF_NULL(doc);
 
@@ -392,7 +392,7 @@ bool jak_carbon_iterator_close(jak_carbon_array_it *it)
         return jak_carbon_array_it_drop(it);
 }
 
-bool jak_carbon_print(FILE *file, jak_jak_carbon_printer_impl_e printer, jak_carbon *doc)
+bool jak_carbon_print(FILE *file, jak_carbon_printer_impl_e printer, jak_carbon *doc)
 {
         JAK_ERROR_IF_NULL(file);
         JAK_ERROR_IF_NULL(doc);

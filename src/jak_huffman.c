@@ -158,13 +158,13 @@ bool pack_huffman_print_encoded(struct jak_packer *self, FILE *file, struct jak_
 }
 
 bool
-pack_huffman_encode_string(struct jak_packer *self, struct jak_memfile *dst, struct jak_error *err, const char *string)
+pack_huffman_encode_string(struct jak_packer *self, struct jak_memfile *dst, jak_error *err, const char *string)
 {
         JAK_check_tag(self->tag, PACK_HUFFMAN);
 
         struct jak_huffman *encoder = (struct jak_huffman *) self->extra;
         bool status = coding_huffman_encode(dst, encoder, string);
-        error_cpy(err, &encoder->err);
+        jak_error_cpy(err, &encoder->err);
 
         return status;
 }

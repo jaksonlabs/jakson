@@ -25,7 +25,7 @@
 #include <jak_stdinc.h>
 #include <jak_types.h>
 #include <jak_string.h>
-#include <jak_global_id.h>
+#include <jak_unique_id.h>
 
 JAK_BEGIN_DECL
 
@@ -74,7 +74,7 @@ typedef struct jak_carbon_printer
         void (*obj_prop_name)(jak_carbon_printer *self, struct jak_string *builder, const char *key_name, jak_u64 key_len);
 } jak_carbon_printer;
 
-/* 'impl' is of jak_jak_carbon_printer_impl_e */
+/* 'impl' is of jak_carbon_printer_impl_e */
 bool jak_carbon_printer_drop(jak_carbon_printer *printer);
 bool jak_carbon_printer_by_type(jak_carbon_printer *printer, int impl);
 

@@ -104,7 +104,7 @@ inline static jak_offset_t offset_by_state(jak_prop_iter *iter)
                         return iter->object.prop_offsets.string_arrays;
                 case JAK_PROP_ITER_OBJECT_ARRAYS:
                         return iter->object.prop_offsets.object_arrays;
-                default: print_error_and_die(JAK_ERR_INTERNALERR)
+                default: JAK_ERROR_PRINT_AND_DIE(JAK_ERR_INTERNALERR)
         }
 }
 
@@ -156,7 +156,7 @@ static bool collection_iter_read_next_column_group(jak_collection_iter_state *st
         JAK_ASSERT(header->marker == JAK_MARKER_SYMBOL_COLUMN_GROUP);
         state->current_column_group.num_columns = header->num_columns;
         state->current_column_group.num_objects = header->num_objects;
-        state->current_column_group.object_ids = JAK_MEMFILE_READ_TYPE_LIST(memfile, jak_global_id_t,
+        state->current_column_group.object_ids = JAK_MEMFILE_READ_TYPE_LIST(memfile, jak_uid_t,
                                                                             header->num_objects);
         state->current_column_group.column_offs = JAK_MEMFILE_READ_TYPE_LIST(memfile, jak_offset_t,
                                                                              header->num_columns);
@@ -369,7 +369,7 @@ static jak_prop_iter_state_e prop_iter_state_next(jak_prop_iter *iter)
 
                 case JAK_PROP_ITER_DONE:
                         break;
-                default: print_error_and_die(JAK_ERR_INTERNALERR);
+                default: JAK_ERROR_PRINT_AND_DIE(JAK_ERR_INTERNALERR);
         }
 
         iter->mode = iter->prop_cursor == JAK_PROP_ITER_OBJECT_ARRAYS ? JAK_PROP_ITER_MODE_COLLECTION
@@ -389,7 +389,7 @@ static void prop_iter_state_init(jak_prop_iter *iter)
         iter->mode = JAK_PROP_ITER_MODE_OBJECT;
 }
 
-static bool archive_prop_iter_from_memblock(jak_prop_iter *iter, struct jak_error *err, jak_u16 mask,
+static bool archive_prop_iter_from_memblock(jak_prop_iter *iter, jak_error *err, jak_u16 mask,
                                             struct jak_memblock *memblock, jak_offset_t object_offset)
 {
         JAK_ERROR_IF_NULL(iter)
@@ -398,32 +398,32 @@ static bool archive_prop_iter_from_memblock(jak_prop_iter *iter, struct jak_erro
 
         iter->mask = mask;
         if (!memfile_open(&iter->record_table_memfile, memblock, READ_ONLY)) {
-                error(err, JAK_ERR_MEMFILEOPEN_FAILED)
+                JAK_ERROR(err, JAK_ERR_MEMFILEOPEN_FAILED)
                 return false;
         }
         if (!memfile_seek(&iter->record_table_memfile, object_offset)) {
-                error(err, JAK_ERR_MEMFILESEEK_FAILED)
+                JAK_ERROR(err, JAK_ERR_MEMFILESEEK_FAILED)
                 return false;
         }
         if (!init_object_from_memfile(&iter->object, &iter->record_table_memfile)) {
-                error(err, JAK_ERR_INTERNALERR);
+                JAK_ERROR(err, JAK_ERR_INTERNALERR);
                 return false;
         }
 
-        error_init(&iter->err);
+        jak_error_init(&iter->err);
         prop_iter_state_init(iter);
         prop_iter_state_next(iter);
 
         return true;
 }
 
-bool jak_archive_prop_iter_from_archive(jak_prop_iter *iter, struct jak_error *err, jak_u16 mask,
+bool jak_archive_prop_iter_from_archive(jak_prop_iter *iter, jak_error *err, jak_u16 mask,
                                         jak_archive *archive)
 {
         return archive_prop_iter_from_memblock(iter, err, mask, archive->record_table.record_db, 0);
 }
 
-bool jak_archive_prop_iter_from_object(jak_prop_iter *iter, jak_u16 mask, struct jak_error *err,
+bool jak_archive_prop_iter_from_object(jak_prop_iter *iter, jak_u16 mask, jak_error *err,
                                        const jak_archive_object *obj)
 {
         return archive_prop_iter_from_memblock(iter, err, mask, obj->memfile.memblock, obj->offset);
@@ -471,7 +471,7 @@ static enum jak_archive_field_type get_basic_type(jak_prop_iter_state_e state)
                 case JAK_PROP_ITER_OBJECTS:
                 case JAK_PROP_ITER_OBJECT_ARRAYS:
                         return JAK_FIELD_OBJECT;
-                default: print_error_and_die(JAK_ERR_INTERNALERR);
+                default: JAK_ERROR_PRINT_AND_DIE(JAK_ERR_INTERNALERR);
         }
 }
 
@@ -506,7 +506,7 @@ static bool is_array_type(jak_prop_iter_state_e state)
                 case JAK_PROP_ITER_STRING_ARRAYS:
                 case JAK_PROP_ITER_OBJECT_ARRAYS:
                         return true;
-                default: print_error_and_die(JAK_ERR_INTERNALERR);
+                default: JAK_ERROR_PRINT_AND_DIE(JAK_ERR_INTERNALERR);
         }
 }
 
@@ -531,7 +531,7 @@ bool jak_archive_prop_iter_next(jak_prop_iter_mode_e *type, jak_archive_value_ve
                                 if (value_vector
                                     && !jak_archive_value_vector_from_prop_iter(value_vector, &prop_iter->err,
                                                                                 prop_iter)) {
-                                        error(&prop_iter->err, JAK_ERR_VITEROPEN_FAILED);
+                                        JAK_ERROR(&prop_iter->err, JAK_ERR_VITEROPEN_FAILED);
                                         return false;
                                 }
                         }
@@ -541,10 +541,10 @@ bool jak_archive_prop_iter_next(jak_prop_iter_mode_e *type, jak_archive_value_ve
                                 memfile_open(&collection_iter->record_table_memfile,
                                              prop_iter->record_table_memfile.memblock,
                                              READ_ONLY);
-                                error_init(&collection_iter->err);
+                                jak_error_init(&collection_iter->err);
                         }
                                 break;
-                        default: error(&prop_iter->err, JAK_ERR_INTERNALERR);
+                        default: JAK_ERROR(&prop_iter->err, JAK_ERR_INTERNALERR);
                                 return false;
                 }
                 *type = prop_iter->mode;
@@ -562,7 +562,7 @@ jak_archive_collection_iter_get_keys(jak_u32 *num_keys, jak_independent_iter_sta
                 *num_keys = iter->state.num_column_groups;
                 return iter->state.column_group_keys;
         } else {
-                error(&iter->err, JAK_ERR_NULLPTR);
+                JAK_ERROR(&iter->err, JAK_ERR_NULLPTR);
                 return NULL;
         }
 }
@@ -577,21 +577,21 @@ bool jak_archive_collection_next_column_group(jak_independent_iter_state *group_
                 collection_iter_read_next_column_group(&iter->state, &iter->record_table_memfile);
                 memfile_open(&group_iter->record_table_memfile, iter->record_table_memfile.memblock, READ_ONLY);
                 group_iter->state = iter->state;
-                error_init(&group_iter->err);
+                jak_error_init(&group_iter->err);
                 return true;
         } else {
                 return false;
         }
 }
 
-const jak_global_id_t *
+const jak_uid_t *
 jak_archive_column_group_get_object_ids(jak_u32 *num_objects, jak_independent_iter_state *iter)
 {
         if (num_objects && iter) {
                 *num_objects = iter->state.current_column_group.num_objects;
                 return iter->state.current_column_group.object_ids;
         } else {
-                error(&iter->err, JAK_ERR_NULLPTR);
+                JAK_ERROR(&iter->err, JAK_ERR_NULLPTR);
                 return NULL;
         }
 }
@@ -606,7 +606,7 @@ bool jak_archive_column_group_next_column(jak_independent_iter_state *column_ite
                 prop_iter_read_column(&iter->state, &iter->record_table_memfile);
                 memfile_open(&column_iter->record_table_memfile, iter->record_table_memfile.memblock, READ_ONLY);
                 column_iter->state = iter->state;
-                error_init(&column_iter->err);
+                jak_error_init(&column_iter->err);
                 return true;
         } else {
                 return false;
@@ -629,7 +629,7 @@ jak_archive_column_get_entry_positions(jak_u32 *num_entry, jak_independent_iter_
                 *num_entry = column_iter->state.current_column_group.current_column.num_elem;
                 return column_iter->state.current_column_group.current_column.elem_positions;
         } else {
-                error(&column_iter->err, JAK_ERR_NULLPTR);
+                JAK_ERROR(&column_iter->err, JAK_ERR_NULLPTR);
                 return NULL;
         }
 }
@@ -645,7 +645,7 @@ jak_archive_column_next_entry(jak_independent_iter_state *entry_iter, jak_indepe
                 prop_iter_read_colum_entry(&iter->state, &iter->record_table_memfile);
                 memfile_open(&entry_iter->record_table_memfile, iter->record_table_memfile.memblock, READ_ONLY);
                 entry_iter->state = iter->state;
-                error_init(&entry_iter->err);
+                jak_error_init(&entry_iter->err);
                 return true;
         } else {
                 return false;
@@ -670,11 +670,11 @@ jak_archive_column_entry_get_##name(jak_u32 *array_length, jak_independent_iter_
             *array_length =  entry->state.current_column_group.current_column.current_entry.array_length;              \
             return (const built_in_type *) entry->state.current_column_group.current_column.current_entry.array_base;  \
         } else {                                                                                                       \
-            error(&entry->err, JAK_ERR_TYPEMISMATCH);                                                        \
+            JAK_ERROR(&entry->err, JAK_ERR_TYPEMISMATCH);                                                        \
             return NULL;                                                                                               \
         }                                                                                                              \
     } else {                                                                                                           \
-        error(&entry->err, JAK_ERR_NULLPTR);                                                                 \
+        JAK_ERROR(&entry->err, JAK_ERR_NULLPTR);                                                                 \
         return NULL;                                                                                                   \
     }                                                                                                                  \
 }
@@ -714,7 +714,7 @@ bool jak_archive_column_entry_get_objects(jak_column_object_iter *iter, jak_inde
                      entry->state.current_column_group.current_column.elem_offsets[
                              entry->state.current_column_group.current_column.current_entry.idx - 1] + sizeof(jak_u32));
         iter->next_obj_off = memfile_tell(&iter->memfile);
-        error_init(&iter->err);
+        jak_error_init(&iter->err);
 
         return true;
 }
@@ -728,19 +728,19 @@ const jak_archive_object *jak_archive_column_entry_object_iter_next_object(jak_c
                                 iter->next_obj_off = iter->obj.next_obj_off;
                                 return &iter->obj;
                         } else {
-                                error(&iter->err, JAK_ERR_INTERNALERR);
+                                JAK_ERROR(&iter->err, JAK_ERR_INTERNALERR);
                                 return NULL;
                         }
                 } else {
                         return NULL;
                 }
         } else {
-                error(&iter->err, JAK_ERR_NULLPTR);
+                JAK_ERROR(&iter->err, JAK_ERR_NULLPTR);
                 return NULL;
         }
 }
 
-bool jak_archive_object_get_object_id(jak_global_id_t *id, const jak_archive_object *object)
+bool jak_archive_object_get_object_id(jak_uid_t *id, const jak_archive_object *object)
 {
         JAK_ERROR_IF_NULL(id)
         JAK_ERROR_IF_NULL(object)
@@ -756,7 +756,7 @@ bool jak_archive_object_get_prop_iter(jak_prop_iter *iter, const jak_archive_obj
         return false;
 }
 
-bool jak_archive_value_vector_get_object_id(jak_global_id_t *id, const jak_archive_value_vector *iter)
+bool jak_archive_value_vector_get_object_id(jak_uid_t *id, const jak_archive_value_vector *iter)
 {
         JAK_ERROR_IF_NULL(id)
         JAK_ERROR_IF_NULL(iter)
@@ -771,7 +771,7 @@ jak_archive_value_vector_get_keys(jak_u32 *num_keys, jak_archive_value_vector *i
                 *num_keys = iter->value_max_idx;
                 return iter->keys;
         } else {
-                error(&iter->err, JAK_ERR_NULLPTR)
+                JAK_ERROR(&iter->err, JAK_ERR_NULLPTR)
                 return NULL;
         }
 }
@@ -831,7 +831,7 @@ static void value_vector_init_fixed_length_types_basic(jak_archive_value_vector 
                         value->data.basic.values.booleans = JAK_MEMFILE_PEEK(&value->record_table_memfile,
                                                                              jak_archive_field_boolean_t);
                         break;
-                default: print_error_and_die(JAK_ERR_INTERNALERR);
+                default: JAK_ERROR_PRINT_AND_DIE(JAK_ERR_INTERNALERR);
         }
 }
 
@@ -895,7 +895,7 @@ static void value_vector_init_fixed_length_types_non_null_arrays(jak_archive_val
                         value->data.arrays.values.booleans_base =
                                 JAK_MEMFILE_PEEK(&value->record_table_memfile, jak_archive_field_boolean_t);
                         break;
-                default: print_error_and_die(JAK_ERR_INTERNALERR);
+                default: JAK_ERROR_PRINT_AND_DIE(JAK_ERR_INTERNALERR);
         }
 }
 
@@ -917,29 +917,29 @@ static void value_vector_init_object(jak_archive_value_vector *value)
         }
 }
 
-bool jak_archive_value_vector_from_prop_iter(jak_archive_value_vector *value, struct jak_error *err,
+bool jak_archive_value_vector_from_prop_iter(jak_archive_value_vector *value, jak_error *err,
                                              jak_prop_iter *prop_iter)
 {
         JAK_ERROR_IF_NULL(value);
         JAK_ERROR_IF_NULL(prop_iter);
 
-        error_if_and_return (prop_iter->mode != JAK_PROP_ITER_MODE_OBJECT,
+        JAK_ERROR_IF_AND_RETURN (prop_iter->mode != JAK_PROP_ITER_MODE_OBJECT,
                              &prop_iter->err,
                              JAK_ERR_ITER_OBJECT_NEEDED,
                              false)
 
-        error_init(&value->err);
+        jak_error_init(&value->err);
 
         value->prop_iter = prop_iter;
         value->data_off = prop_iter->mode_object.prop_data_off;
         value->object_id = prop_iter->object.object_id;
 
         if (!memfile_open(&value->record_table_memfile, prop_iter->record_table_memfile.memblock, READ_ONLY)) {
-                error(err, JAK_ERR_MEMFILEOPEN_FAILED);
+                JAK_ERROR(err, JAK_ERR_MEMFILEOPEN_FAILED);
                 return false;
         }
         if (!memfile_skip(&value->record_table_memfile, value->data_off)) {
-                error(err, JAK_ERR_MEMFILESKIP_FAILED);
+                JAK_ERROR(err, JAK_ERR_MEMFILESKIP_FAILED);
                 return false;
         }
 
@@ -969,7 +969,7 @@ bool jak_archive_value_vector_from_prop_iter(jak_archive_value_vector *value, st
                 case JAK_FIELD_BOOLEAN:
                         value_vector_init_fixed_length_types(value);
                         break;
-                default: print_error_and_die(JAK_ERR_INTERNALERR);
+                default: JAK_ERROR_PRINT_AND_DIE(JAK_ERR_INTERNALERR);
         }
 
         return true;
@@ -1017,7 +1017,7 @@ bool jak_archive_value_vector_get_object_at(jak_archive_object *object, jak_u32 
         JAK_ERROR_IF_NULL(value)
 
         if (idx >= value->value_max_idx) {
-                error(&value->err, JAK_ERR_OUTOFBOUNDS);
+                JAK_ERROR(&value->err, JAK_ERR_OUTOFBOUNDS);
                 return false;
         }
 
@@ -1031,7 +1031,7 @@ bool jak_archive_value_vector_get_object_at(jak_archive_object *object, jak_u32 
                 *object = value->data.object.object;
                 return true;
         } else {
-                error(&value->err, JAK_ERR_ITER_NOOBJ);
+                JAK_ERROR(&value->err, JAK_ERR_ITER_NOOBJ);
                 return false;
         }
 }
@@ -1088,7 +1088,7 @@ jak_archive_value_vector_get_##names(jak_u32 *num_values, jak_archive_value_vect
         return value->data.basic.values.names;                                                                         \
     } else                                                                                                             \
     {                                                                                                                  \
-        error(&value->err, err_code);                                                                           \
+        JAK_ERROR(&value->err, err_code);                                                                           \
         return NULL;                                                                                                   \
     }                                                                                                                  \
 }

@@ -59,7 +59,7 @@ bool jak_carbon_string_remove(struct jak_memfile *file)
                 memfile_inplace_remove(file, sizeof(jak_u8));
                 return jak_carbon_string_nomarker_remove(file);
         } else {
-                error(&file->err, JAK_ERR_MARKERMAPPING)
+                JAK_ERROR(&file->err, JAK_ERR_MARKERMAPPING)
                 return false;
         }
 }
@@ -100,7 +100,7 @@ bool jak_carbon_string_update_wnchar(struct jak_memfile *file, const char *strin
                 write_payload(file, string, str_len);
                 return true;
         } else {
-                error(&file->err, JAK_ERR_MARKERMAPPING)
+                JAK_ERROR(&file->err, JAK_ERR_MARKERMAPPING)
                 return false;
         }
 }
@@ -122,7 +122,7 @@ const char *jak_carbon_string_read(jak_u64 *len, struct jak_memfile *file)
         if (JAK_LIKELY(marker == JAK_CARBON_FIELD_TYPE_STRING)) {
                 return jak_carbon_string_nomarker_read(len, file);
         } else {
-                error(&file->err, JAK_ERR_MARKERMAPPING)
+                JAK_ERROR(&file->err, JAK_ERR_MARKERMAPPING)
                 return false;
         }
 }

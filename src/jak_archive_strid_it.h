@@ -41,8 +41,8 @@ typedef struct jak_strid_iter {
         jak_strid_info vector[100000];
 } jak_strid_iter;
 
-bool jak_strid_iter_open(jak_strid_iter *it, struct jak_error *err, jak_archive *archive);
-bool jak_strid_iter_next(bool *success, jak_strid_info **info, struct jak_error *err, size_t *info_length, jak_strid_iter *it);
+bool jak_strid_iter_open(jak_strid_iter *it, jak_error *err, jak_archive *archive);
+bool jak_strid_iter_next(bool *success, jak_strid_info **info, jak_error *err, size_t *info_length, jak_strid_iter *it);
 bool jak_strid_iter_close(jak_strid_iter *it);
 
 JAK_END_DECL

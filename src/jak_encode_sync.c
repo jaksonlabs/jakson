@@ -22,11 +22,7 @@
 #include <jak_str_hash_mem.h>
 #include <jak_time.h>
 #include <jak_bloom.h>
-#include <jak_hash_fnv.h>
-#include <jak_hash_add.h>
-#include <jak_hash_xor.h>
-#include <jak_hash_rot.h>
-#include <jak_hash_sax.h>
+#include <jak_hash.h>
 
 #define STRING_DIC_SYNC_TAG "string-dic-sync"
 
@@ -85,7 +81,7 @@ static int freelist_pop(jak_archive_field_sid_t *out, struct jak_string_dict *se
 static int freelist_push(struct jak_string_dict *self, jak_archive_field_sid_t idx);
 
 int
-encode_sync_create(struct jak_string_dict *dic, size_t capacity, size_t num_indx_buckets, size_t num_index_bucket_cap,
+jak_encode_sync_create(struct jak_string_dict *dic, size_t capacity, size_t num_indx_buckets, size_t num_index_bucket_cap,
                    size_t num_threads, const jak_allocator *alloc)
 {
         JAK_ERROR_IF_NULL(dic);
@@ -139,15 +135,15 @@ create_extra(struct jak_string_dict *self, size_t capacity, size_t num_index_buc
         }
         JAK_UNUSED(num_threads);
 
-        jak_allocator hashtable_alloc;
+        jak_allocator jak_hashtable_alloc;
 #if defined(JAK_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
-        CHECK_SUCCESS(allocatorTrace(&hashtable_alloc));
+        CHECK_SUCCESS(allocatorTrace(&jak_hashtable_alloc));
 #else
-        JAK_check_success(jak_alloc_this_or_std(&hashtable_alloc, &self->alloc));
+        JAK_check_success(jak_alloc_this_or_std(&jak_hashtable_alloc, &self->alloc));
 #endif
 
         JAK_check_success(strhash_create_inmemory(&extra->index,
-                                                  &hashtable_alloc,
+                                                  &jak_hashtable_alloc,
                                                   num_index_buckets,
                                                   num_index_bucket_cap));
         return true;
@@ -226,14 +222,14 @@ this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *c
 
         struct sync_extra *extra = this_extra(self);
 
-        jak_allocator hashtable_alloc;
+        jak_allocator jak_hashtable_alloc;
 #if defined(JAK_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
-        CHECK_SUCCESS(allocatorTrace(&hashtable_alloc));
+        CHECK_SUCCESS(allocatorTrace(&jak_hashtable_alloc));
 #else
-        JAK_check_success(jak_alloc_this_or_std(&hashtable_alloc, &self->alloc));
+        JAK_check_success(jak_alloc_this_or_std(&jak_hashtable_alloc, &self->alloc));
 #endif
 
-        jak_archive_field_sid_t *ids_out = jak_alloc_malloc(&hashtable_alloc,
+        jak_archive_field_sid_t *ids_out = jak_alloc_malloc(&jak_hashtable_alloc,
                                                             num_strings * sizeof(jak_archive_field_sid_t));
         bool *found_mask;
         jak_archive_field_sid_t *values;
@@ -294,7 +290,7 @@ this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *c
 
                                 /** register in contents list */
                                 bool pop_result = freelist_pop(&string_id, self);
-                                error_print_and_die_if(!pop_result, JAK_ERR_SLOTBROKEN)
+                                JAK_ERROR_PRINT_AND_DIE_IF(!pop_result, JAK_ERR_SLOTBROKEN)
                                 struct entry *entries = (struct entry *) vec_data(&extra->contents);
                                 struct entry *entry = entries + string_id;
                                 JAK_ASSERT (!entry->in_use);
@@ -312,8 +308,8 @@ this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *c
         JAK_optional_set_or_else(out, ids_out, jak_alloc_free(&self->alloc, ids_out));
 
         /** cleanup */
-        jak_alloc_free(&hashtable_alloc, found_mask);
-        jak_alloc_free(&hashtable_alloc, values);
+        jak_alloc_free(&jak_hashtable_alloc, found_mask);
+        jak_alloc_free(&jak_hashtable_alloc, values);
         jak_bloom_drop(&bitmap);
 
         unlock(self);
@@ -425,15 +421,15 @@ static char **this_extract(struct jak_string_dict *self, const jak_archive_field
 
         lock(self);
 
-        jak_allocator hashtable_alloc;
+        jak_allocator jak_hashtable_alloc;
 #if defined(JAK_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
-        allocatorTrace(&hashtable_alloc);
+        allocatorTrace(&jak_hashtable_alloc);
 #else
-        jak_alloc_this_or_std(&hashtable_alloc, &self->alloc);
+        jak_alloc_this_or_std(&jak_hashtable_alloc, &self->alloc);
 #endif
 
         struct sync_extra *extra = this_extra(self);
-        char **result = jak_alloc_malloc(&hashtable_alloc, num_ids * sizeof(char *));
+        char **result = jak_alloc_malloc(&jak_hashtable_alloc, num_ids * sizeof(char *));
         struct entry *entries = (struct entry *) vec_data(&extra->contents);
 
         /** Optimization: notify the kernel that the content list is accessed randomly (since hash based access)*/
@@ -456,14 +452,14 @@ static bool this_free(struct jak_string_dict *self, void *ptr)
 {
         JAK_UNUSED(self);
 
-        jak_allocator hashtable_alloc;
+        jak_allocator jak_hashtable_alloc;
 #if defined(JAK_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
-        CHECK_SUCCESS(allocatorTrace(&hashtable_alloc));
+        CHECK_SUCCESS(allocatorTrace(&jak_hashtable_alloc));
 #else
-        JAK_check_success(jak_alloc_this_or_std(&hashtable_alloc, &self->alloc));
+        JAK_check_success(jak_alloc_this_or_std(&jak_hashtable_alloc, &self->alloc));
 #endif
 
-        return jak_alloc_free(&hashtable_alloc, ptr);
+        return jak_alloc_free(&jak_hashtable_alloc, ptr);
 }
 
 static bool this_reset_counters(struct jak_string_dict *self)

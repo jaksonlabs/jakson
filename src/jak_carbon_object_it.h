@@ -32,7 +32,7 @@ JAK_BEGIN_DECL
 
 typedef struct jak_carbon_object_it {
         struct jak_memfile memfile;
-        struct jak_error err;
+        jak_error err;
 
         jak_offset_t object_contents_off;
         bool object_end_reached;
@@ -56,7 +56,7 @@ typedef struct jak_carbon_object_it {
         jak_i64 mod_size;
 } jak_carbon_object_it;
 
-bool jak_carbon_object_it_create(jak_carbon_object_it *it, struct jak_memfile *memfile, struct jak_error *err, jak_offset_t payload_start);
+bool jak_carbon_object_it_create(jak_carbon_object_it *it, struct jak_memfile *memfile, jak_error *err, jak_offset_t payload_start);
 bool jak_carbon_object_it_copy(jak_carbon_object_it *dst, jak_carbon_object_it *src);
 bool jak_carbon_object_it_clone(jak_carbon_object_it *dst, jak_carbon_object_it *src);
 bool jak_carbon_object_it_drop(jak_carbon_object_it *it);

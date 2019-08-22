@@ -31,7 +31,7 @@ typedef struct jak_carbon_path_evaluator {
         jak_carbon *doc;
         jak_carbon_array_it root_it;
         jak_carbon_path_status_e status;
-        struct jak_error err;
+        jak_error err;
         struct {
                 jak_carbon_container_e container_type;
                 union {
