@@ -356,7 +356,7 @@ bool jak_carbon_array_it_fast_forward(jak_carbon_array_it *it)
         return true;
 }
 
-bool jak_carbon_array_it_field_type(enum carbon_field_type *type, jak_carbon_array_it *it)
+bool jak_carbon_array_it_field_type(carbon_field_type_e *type, jak_carbon_array_it *it)
 {
         return carbon_int_field_access_field_type(type, &it->field_access);
 }
@@ -436,7 +436,7 @@ struct jak_carbon_object_it *jak_carbon_array_it_object_value(jak_carbon_array_i
         return carbon_int_field_access_object_value(&it_in->field_access, &it_in->err);
 }
 
-struct jak_carbon_column_it *jak_carbon_array_it_column_value(jak_carbon_array_it *it_in)
+jak_carbon_column_it *jak_carbon_array_it_column_value(jak_carbon_array_it *it_in)
 {
         return carbon_int_field_access_column_value(&it_in->field_access, &it_in->err);
 }
@@ -457,7 +457,7 @@ bool jak_carbon_array_it_insert_end(jak_carbon_insert *inserter)
 bool jak_carbon_array_it_remove(jak_carbon_array_it *it)
 {
         JAK_ERROR_IF_NULL(it);
-        enum carbon_field_type type;
+        carbon_field_type_e type;
         if (jak_carbon_array_it_field_type(&type, it)) {
                 jak_offset_t prev_off = carbon_int_history_pop(&it->history);
                 memfile_seek(&it->memfile, prev_off);

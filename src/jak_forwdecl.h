@@ -71,5 +71,8 @@ typedef struct jak_carbon_insert jak_carbon_insert;
 typedef struct jak_carbon_new jak_carbon_new;
 typedef struct jak_field_access jak_field_access;
 typedef struct jak_carbon_array_it jak_carbon_array_it;
+typedef struct jak_carbon_column_it jak_carbon_column_it;
+typedef struct jak_carbon_dot_node jak_carbon_dot_node;
+typedef struct jak_carbon_dot_path jak_carbon_dot_path;
 
 #endif

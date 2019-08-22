@@ -32,10 +32,8 @@
 
 JAK_BEGIN_DECL
 
-struct jak_carbon_column_it; /* forwarded from carbon-column-it.h */
-
 typedef struct jak_field_access {
-        enum carbon_field_type it_field_type;
+        carbon_field_type_e it_field_type;
 
         const void *it_field_data;
         jak_u64 it_field_len;
@@ -52,7 +50,7 @@ typedef struct jak_field_access {
         bool nested_column_it_is_created;
 
         jak_carbon_array_it *nested_array_it;
-        struct jak_carbon_column_it *nested_column_it;
+        jak_carbon_column_it *nested_column_it;
         struct jak_carbon_object_it *nested_object_it;
 } jak_field_access;
 
@@ -136,7 +134,7 @@ jak_offset_t jak_carbon_array_it_tell(jak_carbon_array_it *it);
 bool jak_carbon_int_array_it_offset(jak_offset_t *off, jak_carbon_array_it *it);
 bool jak_carbon_array_it_fast_forward(jak_carbon_array_it *it);
 
-bool jak_carbon_array_it_field_type(enum carbon_field_type *type, jak_carbon_array_it *it);
+bool jak_carbon_array_it_field_type(carbon_field_type_e *type, jak_carbon_array_it *it);
 bool jak_carbon_array_it_u8_value(jak_u8 *value, jak_carbon_array_it *it);
 bool jak_carbon_array_it_u16_value(jak_u16 *value, jak_carbon_array_it *it);
 bool jak_carbon_array_it_u32_value(jak_u32 *value, jak_carbon_array_it *it);
@@ -152,7 +150,7 @@ const char *jak_carbon_array_it_string_value(jak_u64 *strlen, jak_carbon_array_i
 bool jak_carbon_array_it_binary_value(struct jak_carbon_binary *out, jak_carbon_array_it *it);
 jak_carbon_array_it *jak_carbon_array_it_array_value(jak_carbon_array_it *it_in);
 struct jak_carbon_object_it *jak_carbon_array_it_object_value(jak_carbon_array_it *it_in);
-struct jak_carbon_column_it *jak_carbon_array_it_column_value(jak_carbon_array_it *it_in);
+jak_carbon_column_it *jak_carbon_array_it_column_value(jak_carbon_array_it *it_in);
 
 /**
  * Inserts a new element at the current position of the iterator.

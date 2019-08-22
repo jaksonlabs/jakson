@@ -29,7 +29,7 @@ static bool internal_pack_array(jak_carbon_array_it *it);
 
 static bool internal_pack_object(struct jak_carbon_object_it *it);
 
-static bool internal_pack_column(struct jak_carbon_column_it *it);
+static bool internal_pack_column(jak_carbon_column_it *it);
 
 static bool internal_commit_update(jak_carbon *doc);
 
@@ -180,10 +180,10 @@ bool carbon_revise_find_open(struct jak_carbon_find *out, const char *dot_path, 
         JAK_ERROR_IF_NULL(out)
         JAK_ERROR_IF_NULL(dot_path)
         JAK_ERROR_IF_NULL(context)
-        struct jak_carbon_dot_path path;
-        carbon_dot_path_from_string(&path, dot_path);
+        jak_carbon_dot_path path;
+        jak_carbon_dot_path_from_string(&path, dot_path);
         bool status = carbon_find_create(out, &path, context->revised_doc);
-        carbon_dot_path_drop(&path);
+        jak_carbon_dot_path_drop(&path);
         return status;
 }
 
@@ -207,14 +207,14 @@ bool carbon_revise_remove(const char *dot_path, struct jak_carbon_revise *contex
         JAK_ERROR_IF_NULL(dot_path)
         JAK_ERROR_IF_NULL(context)
 
-        struct jak_carbon_dot_path dot;
+        jak_carbon_dot_path dot;
         struct jak_carbon_path_evaluator eval;
         bool result;
 
-        if (carbon_dot_path_from_string(&dot, dot_path)) {
+        if (jak_carbon_dot_path_from_string(&dot, dot_path)) {
                 carbon_path_evaluator_begin_mutable(&eval, &dot, context);
 
-                if (eval.status != CARBON_PATH_RESOLVED) {
+                if (eval.status != JAK_CARBON_PATH_RESOLVED) {
                         result = false;
                 } else {
                         switch (eval.result.container_type) {
@@ -224,9 +224,9 @@ bool carbon_revise_remove(const char *dot_path, struct jak_carbon_revise *contex
                                 }
                                         break;
                                 case JAK_CARBON_COLUMN: {
-                                        struct jak_carbon_column_it *it = &eval.result.containers.column.it;
+                                        jak_carbon_column_it *it = &eval.result.containers.column.it;
                                         jak_u32 elem_pos = eval.result.containers.column.elem_pos;
-                                        result = carbon_column_it_remove(it, elem_pos);
+                                        result = jak_carbon_column_it_remove(it, elem_pos);
                                 }
                                         break;
                                 default: error(&context->original->err, JAK_ERR_INTERNALERR);
@@ -334,7 +334,7 @@ static bool internal_pack_array(jak_carbon_array_it *it)
         /* shrink contained containers */
         {
                 while (jak_carbon_array_it_next(it)) {
-                        enum carbon_field_type type;
+                        carbon_field_type_e type;
                         jak_carbon_array_it_field_type(&type, it);
                         switch (type) {
                                 case CARBON_JAK_FIELD_TYPE_NULL:
@@ -377,7 +377,7 @@ static bool internal_pack_array(jak_carbon_array_it *it)
                                 case CARBON_JAK_FIELD_TYPE_COLUMN_I64:
                                 case CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT:
                                 case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN:
-                                        carbon_column_it_rewind(it->field_access.nested_column_it);
+                                        jak_carbon_column_it_rewind(it->field_access.nested_column_it);
                                         internal_pack_column(it->field_access.nested_column_it);
                                         memfile_seek(&it->memfile,
                                                      memfile_tell(&it->field_access.nested_column_it->memfile));
@@ -442,7 +442,7 @@ static bool internal_pack_object(struct jak_carbon_object_it *it)
         /* shrink contained containers */
         {
                 while (carbon_object_it_next(it)) {
-                        enum carbon_field_type type;
+                        carbon_field_type_e type;
                         carbon_object_it_prop_type(&type, it);
                         switch (type) {
                                 case CARBON_JAK_FIELD_TYPE_NULL:
@@ -485,7 +485,7 @@ static bool internal_pack_object(struct jak_carbon_object_it *it)
                                 case CARBON_JAK_FIELD_TYPE_COLUMN_I64:
                                 case CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT:
                                 case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN:
-                                        carbon_column_it_rewind(it->field.value.data.nested_column_it);
+                                        jak_carbon_column_it_rewind(it->field.value.data.nested_column_it);
                                         internal_pack_column(it->field.value.data.nested_column_it);
                                         memfile_seek(&it->memfile,
                                                      memfile_tell(&it->field.value.data.nested_column_it->memfile));
@@ -514,7 +514,7 @@ static bool internal_pack_object(struct jak_carbon_object_it *it)
         return true;
 }
 
-static bool internal_pack_column(struct jak_carbon_column_it *it)
+static bool internal_pack_column(jak_carbon_column_it *it)
 {
         JAK_ASSERT(it);
 
@@ -557,7 +557,7 @@ static bool carbon_header_rev_inc(jak_carbon *doc)
         if (jak_carbon_has_key(key_type)) {
                 jak_u64 raw_data_len = 0;
                 const void *raw_data = jak_carbon_raw_data(&raw_data_len, doc);
-                carbon_commit_hash_update(&doc->memfile, raw_data, raw_data_len);
+                jak_carbon_commit_hash_update(&doc->memfile, raw_data, raw_data_len);
         }
         memfile_restore_position(&doc->memfile);
 

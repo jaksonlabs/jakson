@@ -124,7 +124,7 @@ bool carbon_path_index_it_obj_enter(struct jak_carbon_path_index_it *it);
 //  field access
 // ---------------------------------------------------------------------------------------------------------------------
 
-bool carbon_path_index_it_field_type(enum carbon_field_type *type, struct jak_carbon_path_index_it *it);
+bool carbon_path_index_it_field_type(carbon_field_type_e *type, struct jak_carbon_path_index_it *it);
 
 bool carbon_path_index_it_field_u8_value(jak_u8 *value, struct jak_carbon_path_index_it *it);
 
@@ -158,7 +158,7 @@ bool
 carbon_path_index_it_field_object_value(struct jak_carbon_object_it *it_out, struct jak_carbon_path_index_it *it_in);
 
 bool
-carbon_path_index_it_field_column_value(struct jak_carbon_column_it *it_out, struct jak_carbon_path_index_it *it_in);
+carbon_path_index_it_field_column_value(jak_carbon_column_it *it_out, struct jak_carbon_path_index_it *it_in);
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  diagnostics

@@ -40,9 +40,9 @@ if (JAK_UNLIKELY(inserter->context_type == JAK_CARBON_COLUMN && inserter->contex
 static bool
 write_field_data(jak_carbon_insert *inserter, jak_u8 field_type_marker, const void *base, jak_u64 nbytes);
 
-static bool push_in_column(jak_carbon_insert *inserter, const void *base, enum carbon_field_type type);
+static bool push_in_column(jak_carbon_insert *inserter, const void *base, carbon_field_type_e type);
 
-static bool push_media_type_for_array(jak_carbon_insert *inserter, enum carbon_field_type type);
+static bool push_media_type_for_array(jak_carbon_insert *inserter, carbon_field_type_e type);
 
 static void internal_create(jak_carbon_insert *inserter, struct jak_memfile *src, jak_offset_t pos);
 
@@ -68,11 +68,11 @@ bool carbon_int_insert_create_for_array(jak_carbon_insert *inserter, jak_carbon_
         return true;
 }
 
-bool carbon_int_insert_create_for_column(jak_carbon_insert *inserter, struct jak_carbon_column_it *context)
+bool carbon_int_insert_create_for_column(jak_carbon_insert *inserter, jak_carbon_column_it *context)
 {
         JAK_ERROR_IF_NULL(inserter)
         JAK_ERROR_IF_NULL(context)
-        carbon_column_it_lock(context);
+        jak_carbon_column_it_lock(context);
         inserter->context_type = JAK_CARBON_COLUMN;
         inserter->context.column = context;
         internal_create(inserter, &context->memfile, memfile_tell(&context->memfile));
@@ -561,11 +561,11 @@ jak_carbon_insert *carbon_insert_column_begin(struct jak_carbon_insert_column_st
         error_if(inserter_in->context_type != JAK_CARBON_ARRAY && inserter_in->context_type != JAK_CARBON_OBJECT,
                  &inserter_in->err, JAK_ERR_UNSUPPCONTAINER);
 
-        enum carbon_field_type field_type = carbon_field_type_for_column(type);
+        carbon_field_type_e field_type = carbon_field_type_for_column(type);
 
         *state_out = (struct jak_carbon_insert_column_state) {
                 .parent_inserter = inserter_in,
-                .nested_column = JAK_MALLOC(sizeof(struct jak_carbon_column_it)),
+                .nested_column = JAK_MALLOC(sizeof(jak_carbon_column_it)),
                 .type = field_type,
                 .column_begin = memfile_tell(&inserter_in->memfile),
                 .column_end = 0
@@ -574,9 +574,9 @@ jak_carbon_insert *carbon_insert_column_begin(struct jak_carbon_insert_column_st
         jak_u64 container_start_off = memfile_tell(&inserter_in->memfile);
         carbon_int_insert_column(&inserter_in->memfile, &inserter_in->err, type, column_capacity);
 
-        carbon_column_it_create(state_out->nested_column, &inserter_in->memfile, &inserter_in->err,
+        jak_carbon_column_it_create(state_out->nested_column, &inserter_in->memfile, &inserter_in->err,
                                 container_start_off);
-        carbon_column_it_insert(&state_out->nested_inserter, state_out->nested_column);
+        jak_carbon_column_it_insert(&state_out->nested_inserter, state_out->nested_column);
 
         return &state_out->nested_inserter;
 }
@@ -585,10 +585,10 @@ bool carbon_insert_column_end(struct jak_carbon_insert_column_state *state_in)
 {
         JAK_ERROR_IF_NULL(state_in);
 
-        struct jak_carbon_column_it scan;
-        carbon_column_it_create(&scan, &state_in->parent_inserter->memfile, &state_in->parent_inserter->err,
+        jak_carbon_column_it scan;
+        jak_carbon_column_it_create(&scan, &state_in->parent_inserter->memfile, &state_in->parent_inserter->err,
                                 state_in->nested_column->column_start_offset);
-        carbon_column_it_fast_forward(&scan);
+        jak_carbon_column_it_fast_forward(&scan);
 
         state_in->column_end = memfile_tell(&scan.memfile);
         memfile_seek(&state_in->parent_inserter->memfile, memfile_tell(&scan.memfile));
@@ -865,7 +865,7 @@ bool carbon_insert_drop(jak_carbon_insert *inserter)
         if (inserter->context_type == JAK_CARBON_ARRAY) {
                 jak_carbon_array_it_unlock(inserter->context.array);
         } else if (inserter->context_type == JAK_CARBON_COLUMN) {
-                carbon_column_it_unlock(inserter->context.column);
+                jak_carbon_column_it_unlock(inserter->context.column);
         } else if (inserter->context_type == JAK_CARBON_OBJECT) {
                 carbon_object_it_unlock(inserter->context.object);
         } else {
@@ -885,7 +885,7 @@ write_field_data(jak_carbon_insert *inserter, jak_u8 field_type_marker, const vo
         return memfile_write(&inserter->memfile, base, nbytes);
 }
 
-static bool push_in_column(jak_carbon_insert *inserter, const void *base, enum carbon_field_type type)
+static bool push_in_column(jak_carbon_insert *inserter, const void *base, carbon_field_type_e type)
 {
         JAK_ASSERT(inserter->context_type == JAK_CARBON_COLUMN);
 
@@ -928,7 +928,7 @@ static bool push_in_column(jak_carbon_insert *inserter, const void *base, enum c
         return true;
 }
 
-static bool push_media_type_for_array(jak_carbon_insert *inserter, enum carbon_field_type type)
+static bool push_media_type_for_array(jak_carbon_insert *inserter, carbon_field_type_e type)
 {
         memfile_ensure_space(&inserter->memfile, sizeof(media_type_t));
         return carbon_media_write(&inserter->memfile, type);

@@ -31,14 +31,14 @@
 
 JAK_BEGIN_DECL
 
-struct jak_carbon_column_it {
+typedef struct jak_carbon_column_it {
         struct jak_memfile memfile;
 
         jak_offset_t num_and_capacity_start_offset;
         jak_offset_t column_start_offset;
 
         struct jak_error err;
-        enum carbon_field_type type;
+        carbon_field_type_e type;
 
         /* in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
         jak_i64 mod_size;
@@ -47,89 +47,61 @@ struct jak_carbon_column_it {
         jak_u32 column_num_elements;
 
         struct spinlock lock;
-};
+} jak_carbon_column_it;
 
-bool carbon_column_it_create(struct jak_carbon_column_it *it, struct jak_memfile *memfile, struct jak_error *err,
-                             jak_offset_t column_start_offset);
+bool jak_carbon_column_it_create(jak_carbon_column_it *it, struct jak_memfile *memfile, struct jak_error *err, jak_offset_t column_start_offset);
+bool jak_carbon_column_it_clone(jak_carbon_column_it *dst, jak_carbon_column_it *src);
 
-bool carbon_column_it_clone(struct jak_carbon_column_it *dst, struct jak_carbon_column_it *src);
+bool jak_carbon_column_it_insert(jak_carbon_insert *inserter, jak_carbon_column_it *it);
+bool jak_carbon_column_it_fast_forward(jak_carbon_column_it *it);
+jak_offset_t jak_carbon_column_it_memfilepos(jak_carbon_column_it *it);
+jak_offset_t jak_carbon_column_it_tell(jak_carbon_column_it *it, jak_u32 elem_idx);
 
-bool carbon_column_it_insert(jak_carbon_insert *inserter, struct jak_carbon_column_it *it);
+const void *jak_carbon_column_it_values(carbon_field_type_e *type, jak_u32 *nvalues, jak_carbon_column_it *it);
+bool jak_carbon_column_it_values_info(carbon_field_type_e *type, jak_u32 *nvalues, jak_carbon_column_it *it);
 
-bool carbon_column_it_fast_forward(struct jak_carbon_column_it *it);
+bool jak_carbon_column_it_value_is_null(jak_carbon_column_it *it, jak_u32 pos);
 
-jak_offset_t carbon_column_it_memfilepos(struct jak_carbon_column_it *it);
+const jak_u8 *jak_carbon_column_it_boolean_values(jak_u32 *nvalues, jak_carbon_column_it *it);
+const jak_u8 *jak_carbon_column_it_u8_values(jak_u32 *nvalues, jak_carbon_column_it *it);
+const jak_u16 *jak_carbon_column_it_u16_values(jak_u32 *nvalues, jak_carbon_column_it *it);
+const jak_u32 *jak_carbon_column_it_u32_values(jak_u32 *nvalues, jak_carbon_column_it *it);
+const jak_u64 *jak_carbon_column_it_u64_values(jak_u32 *nvalues, jak_carbon_column_it *it);
+const jak_i8 *jak_carbon_column_it_i8_values(jak_u32 *nvalues, jak_carbon_column_it *it);
+const jak_i16 *jak_carbon_column_it_i16_values(jak_u32 *nvalues, jak_carbon_column_it *it);
+const jak_i32 *jak_carbon_column_it_i32_values(jak_u32 *nvalues, jak_carbon_column_it *it);
+const jak_i64 *jak_carbon_column_it_i64_values(jak_u32 *nvalues, jak_carbon_column_it *it);
+const float *jak_carbon_column_it_float_values(jak_u32 *nvalues, jak_carbon_column_it *it);
 
-jak_offset_t carbon_column_it_tell(struct jak_carbon_column_it *it, jak_u32 elem_idx);
+bool jak_carbon_column_it_remove(jak_carbon_column_it *it, jak_u32 pos);
 
-const void *carbon_column_it_values(enum carbon_field_type *type, jak_u32 *nvalues, struct jak_carbon_column_it *it);
-
-bool carbon_column_it_values_info(enum carbon_field_type *type, jak_u32 *nvalues, struct jak_carbon_column_it *it);
-
-bool carbon_column_it_value_is_null(struct jak_carbon_column_it *it, jak_u32 pos);
-
-const jak_u8 *carbon_column_it_boolean_values(jak_u32 *nvalues, struct jak_carbon_column_it *it);
-
-const jak_u8 *carbon_column_it_u8_values(jak_u32 *nvalues, struct jak_carbon_column_it *it);
-
-const jak_u16 *carbon_column_it_u16_values(jak_u32 *nvalues, struct jak_carbon_column_it *it);
-
-const jak_u32 *carbon_column_it_u32_values(jak_u32 *nvalues, struct jak_carbon_column_it *it);
-
-const jak_u64 *carbon_column_it_u64_values(jak_u32 *nvalues, struct jak_carbon_column_it *it);
-
-const jak_i8 *carbon_column_it_i8_values(jak_u32 *nvalues, struct jak_carbon_column_it *it);
-
-const jak_i16 *carbon_column_it_i16_values(jak_u32 *nvalues, struct jak_carbon_column_it *it);
-
-const jak_i32 *carbon_column_it_i32_values(jak_u32 *nvalues, struct jak_carbon_column_it *it);
-
-const jak_i64 *carbon_column_it_i64_values(jak_u32 *nvalues, struct jak_carbon_column_it *it);
-
-const float *carbon_column_it_float_values(jak_u32 *nvalues, struct jak_carbon_column_it *it);
-
-bool carbon_column_it_remove(struct jak_carbon_column_it *it, jak_u32 pos);
-
-bool carbon_column_it_update_set_null(struct jak_carbon_column_it *it, jak_u32 pos);
-
-bool carbon_column_it_update_set_true(struct jak_carbon_column_it *it, jak_u32 pos);
-
-bool carbon_column_it_update_set_false(struct jak_carbon_column_it *it, jak_u32 pos);
-
-bool carbon_column_it_update_set_u8(struct jak_carbon_column_it *it, jak_u32 pos, jak_u8 value);
-
-bool carbon_column_it_update_set_u16(struct jak_carbon_column_it *it, jak_u32 pos, jak_u16 value);
-
-bool carbon_column_it_update_set_u32(struct jak_carbon_column_it *it, jak_u32 pos, jak_u32 value);
-
-bool carbon_column_it_update_set_u64(struct jak_carbon_column_it *it, jak_u32 pos, jak_u64 value);
-
-bool carbon_column_it_update_set_i8(struct jak_carbon_column_it *it, jak_u32 pos, jak_i8 value);
-
-bool carbon_column_it_update_set_i16(struct jak_carbon_column_it *it, jak_u32 pos, jak_i16 value);
-
-bool carbon_column_it_update_set_i32(struct jak_carbon_column_it *it, jak_u32 pos, jak_i32 value);
-
-bool carbon_column_it_update_set_i64(struct jak_carbon_column_it *it, jak_u32 pos, jak_i64 value);
-
-bool carbon_column_it_update_set_float(struct jak_carbon_column_it *it, jak_u32 pos, float value);
-
-
+bool jak_carbon_column_it_update_set_null(jak_carbon_column_it *it, jak_u32 pos);
+bool jak_carbon_column_it_update_set_true(jak_carbon_column_it *it, jak_u32 pos);
+bool jak_carbon_column_it_update_set_false(jak_carbon_column_it *it, jak_u32 pos);
+bool jak_carbon_column_it_update_set_u8(jak_carbon_column_it *it, jak_u32 pos, jak_u8 value);
+bool jak_carbon_column_it_update_set_u16(jak_carbon_column_it *it, jak_u32 pos, jak_u16 value);
+bool jak_carbon_column_it_update_set_u32(jak_carbon_column_it *it, jak_u32 pos, jak_u32 value);
+bool jak_carbon_column_it_update_set_u64(jak_carbon_column_it *it, jak_u32 pos, jak_u64 value);
+bool jak_carbon_column_it_update_set_i8(jak_carbon_column_it *it, jak_u32 pos, jak_i8 value);
+bool jak_carbon_column_it_update_set_i16(jak_carbon_column_it *it, jak_u32 pos, jak_i16 value);
+bool jak_carbon_column_it_update_set_i32(jak_carbon_column_it *it, jak_u32 pos, jak_i32 value);
+bool jak_carbon_column_it_update_set_i64(jak_carbon_column_it *it, jak_u32 pos, jak_i64 value);
+bool jak_carbon_column_it_update_set_float(jak_carbon_column_it *it, jak_u32 pos, float value);
 
 /**
- * Locks the iterator with a spinlock. A call to <code>carbon_column_it_unlock</code> is required for unlocking.
+ * Locks the iterator with a spinlock. A call to <code>jak_carbon_column_it_unlock</code> is required for unlocking.
  */
-bool carbon_column_it_lock(struct jak_carbon_column_it *it);
+bool jak_carbon_column_it_lock(jak_carbon_column_it *it);
 
 /**
  * Unlocks the iterator
  */
-bool carbon_column_it_unlock(struct jak_carbon_column_it *it);
+bool jak_carbon_column_it_unlock(jak_carbon_column_it *it);
 
 /**
  * Positions the iterator at the beginning of this array.
  */
-bool carbon_column_it_rewind(struct jak_carbon_column_it *it);
+bool jak_carbon_column_it_rewind(jak_carbon_column_it *it);
 
 JAK_END_DECL
 

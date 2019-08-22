@@ -81,7 +81,7 @@ const char *carbon_object_it_prop_name(jak_u64 *key_len, struct jak_carbon_objec
 
 bool carbon_object_it_remove(struct jak_carbon_object_it *it);
 
-bool carbon_object_it_prop_type(enum carbon_field_type *type, struct jak_carbon_object_it *it);
+bool carbon_object_it_prop_type(carbon_field_type_e *type, struct jak_carbon_object_it *it);
 
 bool carbon_object_it_insert_begin(jak_carbon_insert *inserter, struct jak_carbon_object_it *it);
 
@@ -123,7 +123,7 @@ jak_carbon_array_it *carbon_object_it_array_value(struct jak_carbon_object_it *i
 
 struct jak_carbon_object_it *carbon_object_it_object_value(struct jak_carbon_object_it *it_in);
 
-struct jak_carbon_column_it *carbon_object_it_column_value(struct jak_carbon_object_it *it_in);
+jak_carbon_column_it *carbon_object_it_column_value(struct jak_carbon_object_it *it_in);
 
 
 JAK_END_DECL

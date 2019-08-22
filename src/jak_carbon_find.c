@@ -28,17 +28,17 @@ static void result_from_array(struct jak_carbon_find *find, jak_carbon_array_it 
 static void result_from_object(struct jak_carbon_find *find, struct jak_carbon_object_it *it);
 
 static inline bool
-result_from_column(struct jak_carbon_find *find, jak_u32 requested_idx, struct jak_carbon_column_it *it);
+result_from_column(struct jak_carbon_find *find, jak_u32 requested_idx, jak_carbon_column_it *it);
 
 bool carbon_find_open(struct jak_carbon_find *out, const char *dot_path, jak_carbon *doc)
 {
         JAK_ERROR_IF_NULL(out)
         JAK_ERROR_IF_NULL(dot_path)
         JAK_ERROR_IF_NULL(doc)
-        struct jak_carbon_dot_path path;
-        carbon_dot_path_from_string(&path, dot_path);
+        jak_carbon_dot_path path;
+        jak_carbon_dot_path_from_string(&path, dot_path);
         carbon_find_create(out, &path, doc);
-        carbon_dot_path_drop(&path);
+        jak_carbon_dot_path_drop(&path);
         return true;
 }
 
@@ -46,7 +46,7 @@ bool carbon_find_close(struct jak_carbon_find *find)
 {
         JAK_ERROR_IF_NULL(find)
         if (carbon_find_has_result(find)) {
-                enum carbon_field_type type;
+                carbon_field_type_e type;
                 carbon_find_result_type(&type, find);
                 switch (type) {
                         case CARBON_JAK_FIELD_TYPE_OBJECT:
@@ -74,7 +74,7 @@ bool carbon_find_close(struct jak_carbon_find *find)
         return true;
 }
 
-bool carbon_find_create(struct jak_carbon_find *find, struct jak_carbon_dot_path *path, jak_carbon *doc)
+bool carbon_find_create(struct jak_carbon_find *find, jak_carbon_dot_path *path, jak_carbon *doc)
 {
         JAK_ERROR_IF_NULL(find)
         JAK_ERROR_IF_NULL(path)
@@ -122,7 +122,7 @@ carbon_find_result_to_str(struct jak_string *dst_str, jak_carbon_printer_impl_e 
         carbon_printer_by_type(&printer, print_type);
 
         if (carbon_find_has_result(find)) {
-                enum carbon_field_type result_type;
+                carbon_field_type_e result_type;
                 carbon_find_result_type(&result_type, find);
                 switch (result_type) {
                         case CARBON_JAK_FIELD_TYPE_NULL:
@@ -154,7 +154,7 @@ carbon_find_result_to_str(struct jak_string *dst_str, jak_carbon_printer_impl_e 
                         case CARBON_JAK_FIELD_TYPE_COLUMN_I64:
                         case CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT:
                         case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN: {
-                                struct jak_carbon_column_it *sub_it = carbon_find_result_column(find);
+                                jak_carbon_column_it *sub_it = carbon_find_result_column(find);
                                 carbon_printer_print_column(sub_it, &printer, dst_str);
                         }
                                 break;
@@ -250,7 +250,7 @@ char *carbon_find_result_to_json_compact_dup(struct jak_carbon_find *find)
         return ret;
 }
 
-bool carbon_find_result_type(enum carbon_field_type *type, struct jak_carbon_find *find)
+bool carbon_find_result_type(carbon_field_type_e *type, struct jak_carbon_find *find)
 {
         JAK_ERROR_IF_NULL(type)
         JAK_ERROR_IF_NULL(find)
@@ -275,7 +275,7 @@ struct jak_carbon_object_it *carbon_find_result_object(struct jak_carbon_find *f
         return find->value.object_it;
 }
 
-struct jak_carbon_column_it *carbon_find_result_column(struct jak_carbon_find *find)
+jak_carbon_column_it *carbon_find_result_column(struct jak_carbon_find *find)
 {
         JAK_ERROR_IF_NULL(find)
         error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
@@ -462,15 +462,15 @@ static void result_from_object(struct jak_carbon_find *find, struct jak_carbon_o
 }
 
 static inline bool
-result_from_column(struct jak_carbon_find *find, jak_u32 requested_idx, struct jak_carbon_column_it *it)
+result_from_column(struct jak_carbon_find *find, jak_u32 requested_idx, jak_carbon_column_it *it)
 {
         jak_u32 num_contained_values;
-        carbon_column_it_values_info(&find->type, &num_contained_values, it);
+        jak_carbon_column_it_values_info(&find->type, &num_contained_values, it);
         JAK_ASSERT(requested_idx < num_contained_values);
 
         switch (find->type) {
                 case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN: {
-                        jak_u8 field_value = carbon_column_it_boolean_values(NULL, it)[requested_idx];
+                        jak_u8 field_value = jak_carbon_column_it_boolean_values(NULL, it)[requested_idx];
                         if (is_null_boolean(field_value)) {
                                 find->type = CARBON_JAK_FIELD_TYPE_NULL;
                         } else if (field_value == JAK_CARBON_BOOLEAN_COLUMN_TRUE) {
@@ -483,92 +483,92 @@ result_from_column(struct jak_carbon_find *find, jak_u32 requested_idx, struct j
                 }
                         break;
                 case CARBON_JAK_FIELD_TYPE_COLUMN_U8: {
-                        jak_u8 field_value = carbon_column_it_u8_values(NULL, it)[requested_idx];
+                        jak_u8 field_value = jak_carbon_column_it_u8_values(NULL, it)[requested_idx];
                         if (is_null_u8(field_value)) {
                                 find->type = CARBON_JAK_FIELD_TYPE_NULL;
                         } else {
                                 find->type = CARBON_JAK_FIELD_TYPE_NUMBER_U8;
-                                find->value.unsigned_number = carbon_column_it_u8_values(NULL, it)[requested_idx];
+                                find->value.unsigned_number = jak_carbon_column_it_u8_values(NULL, it)[requested_idx];
                         }
                 }
                         break;
                 case CARBON_JAK_FIELD_TYPE_COLUMN_U16: {
-                        jak_u16 field_value = carbon_column_it_u16_values(NULL, it)[requested_idx];
+                        jak_u16 field_value = jak_carbon_column_it_u16_values(NULL, it)[requested_idx];
                         if (is_null_u16(field_value)) {
                                 find->type = CARBON_JAK_FIELD_TYPE_NULL;
                         } else {
                                 find->type = CARBON_JAK_FIELD_TYPE_NUMBER_U16;
-                                find->value.unsigned_number = carbon_column_it_u16_values(NULL, it)[requested_idx];
+                                find->value.unsigned_number = jak_carbon_column_it_u16_values(NULL, it)[requested_idx];
                         }
                 }
                         break;
                 case CARBON_JAK_FIELD_TYPE_COLUMN_U32: {
-                        jak_u32 field_value = carbon_column_it_u32_values(NULL, it)[requested_idx];
+                        jak_u32 field_value = jak_carbon_column_it_u32_values(NULL, it)[requested_idx];
                         if (is_null_u32(field_value)) {
                                 find->type = CARBON_JAK_FIELD_TYPE_NULL;
                         } else {
                                 find->type = CARBON_JAK_FIELD_TYPE_NUMBER_U32;
-                                find->value.unsigned_number = carbon_column_it_u32_values(NULL, it)[requested_idx];
+                                find->value.unsigned_number = jak_carbon_column_it_u32_values(NULL, it)[requested_idx];
                         }
                 }
                         break;
                 case CARBON_JAK_FIELD_TYPE_COLUMN_U64: {
-                        jak_u64 field_value = carbon_column_it_u64_values(NULL, it)[requested_idx];
+                        jak_u64 field_value = jak_carbon_column_it_u64_values(NULL, it)[requested_idx];
                         if (is_null_u64(field_value)) {
                                 find->type = CARBON_JAK_FIELD_TYPE_NULL;
                         } else {
                                 find->type = CARBON_JAK_FIELD_TYPE_NUMBER_U64;
-                                find->value.unsigned_number = carbon_column_it_u64_values(NULL, it)[requested_idx];
+                                find->value.unsigned_number = jak_carbon_column_it_u64_values(NULL, it)[requested_idx];
                         }
                 }
                         break;
                 case CARBON_JAK_FIELD_TYPE_COLUMN_I8: {
-                        jak_i8 field_value = carbon_column_it_i8_values(NULL, it)[requested_idx];
+                        jak_i8 field_value = jak_carbon_column_it_i8_values(NULL, it)[requested_idx];
                         if (is_null_i8(field_value)) {
                                 find->type = CARBON_JAK_FIELD_TYPE_NULL;
                         } else {
                                 find->type = CARBON_JAK_FIELD_TYPE_NUMBER_I8;
-                                find->value.signed_number = carbon_column_it_i8_values(NULL, it)[requested_idx];
+                                find->value.signed_number = jak_carbon_column_it_i8_values(NULL, it)[requested_idx];
                         }
                 }
                         break;
                 case CARBON_JAK_FIELD_TYPE_COLUMN_I16: {
-                        jak_i16 field_value = carbon_column_it_i16_values(NULL, it)[requested_idx];
+                        jak_i16 field_value = jak_carbon_column_it_i16_values(NULL, it)[requested_idx];
                         if (is_null_i16(field_value)) {
                                 find->type = CARBON_JAK_FIELD_TYPE_NULL;
                         } else {
                                 find->type = CARBON_JAK_FIELD_TYPE_NUMBER_I16;
-                                find->value.signed_number = carbon_column_it_i16_values(NULL, it)[requested_idx];
+                                find->value.signed_number = jak_carbon_column_it_i16_values(NULL, it)[requested_idx];
                         }
                 }
                         break;
                 case CARBON_JAK_FIELD_TYPE_COLUMN_I32: {
-                        jak_i32 field_value = carbon_column_it_i32_values(NULL, it)[requested_idx];
+                        jak_i32 field_value = jak_carbon_column_it_i32_values(NULL, it)[requested_idx];
                         if (is_null_i32(field_value)) {
                                 find->type = CARBON_JAK_FIELD_TYPE_NULL;
                         } else {
                                 find->type = CARBON_JAK_FIELD_TYPE_NUMBER_I32;
-                                find->value.signed_number = carbon_column_it_i32_values(NULL, it)[requested_idx];
+                                find->value.signed_number = jak_carbon_column_it_i32_values(NULL, it)[requested_idx];
                         }
                 }
                         break;
                 case CARBON_JAK_FIELD_TYPE_COLUMN_I64: {
-                        jak_i64 field_value = carbon_column_it_i64_values(NULL, it)[requested_idx];
+                        jak_i64 field_value = jak_carbon_column_it_i64_values(NULL, it)[requested_idx];
                         if (is_null_i64(field_value)) {
                                 find->type = CARBON_JAK_FIELD_TYPE_NULL;
                         } else {
                                 find->type = CARBON_JAK_FIELD_TYPE_NUMBER_I64;
-                                find->value.signed_number = carbon_column_it_i64_values(NULL, it)[requested_idx];
+                                find->value.signed_number = jak_carbon_column_it_i64_values(NULL, it)[requested_idx];
                         }
                 }
                         break;
                 case CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT: {
-                        float field_value = carbon_column_it_float_values(NULL, it)[requested_idx];
+                        float field_value = jak_carbon_column_it_float_values(NULL, it)[requested_idx];
                         if (is_null_float(field_value)) {
                                 find->type = CARBON_JAK_FIELD_TYPE_NULL;
                         } else {
                                 find->type = CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT;
-                                find->value.float_number = carbon_column_it_float_values(NULL, it)[requested_idx];
+                                find->value.float_number = jak_carbon_column_it_float_values(NULL, it)[requested_idx];
                         }
                 }
                         break;

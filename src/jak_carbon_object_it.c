@@ -165,7 +165,7 @@ const char *carbon_object_it_prop_name(jak_u64 *key_len, struct jak_carbon_objec
         return it->field.key.name;
 }
 
-static jak_i64 prop_remove(struct jak_carbon_object_it *it, enum carbon_field_type type)
+static jak_i64 prop_remove(struct jak_carbon_object_it *it, carbon_field_type_e type)
 {
         jak_i64 prop_size = carbon_prop_size(&it->memfile);
         carbon_string_nomarker_remove(&it->memfile);
@@ -180,7 +180,7 @@ static jak_i64 prop_remove(struct jak_carbon_object_it *it, enum carbon_field_ty
 bool carbon_object_it_remove(struct jak_carbon_object_it *it)
 {
         JAK_ERROR_IF_NULL(it);
-        enum carbon_field_type type;
+        carbon_field_type_e type;
         if (carbon_object_it_prop_type(&type, it)) {
                 jak_offset_t prop_off = carbon_int_history_pop(&it->history);
                 memfile_seek(&it->memfile, prop_off);
@@ -192,7 +192,7 @@ bool carbon_object_it_remove(struct jak_carbon_object_it *it)
         }
 }
 
-bool carbon_object_it_prop_type(enum carbon_field_type *type, struct jak_carbon_object_it *it)
+bool carbon_object_it_prop_type(carbon_field_type_e *type, struct jak_carbon_object_it *it)
 {
         return carbon_int_field_access_field_type(type, &it->field.value.data);
 }
@@ -272,7 +272,7 @@ struct jak_carbon_object_it *carbon_object_it_object_value(struct jak_carbon_obj
         return carbon_int_field_access_object_value(&it_in->field.value.data, &it_in->err);
 }
 
-struct jak_carbon_column_it *carbon_object_it_column_value(struct jak_carbon_object_it *it_in)
+jak_carbon_column_it *carbon_object_it_column_value(struct jak_carbon_object_it *it_in)
 {
         return carbon_int_field_access_column_value(&it_in->field.value.data, &it_in->err);
 }

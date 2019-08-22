@@ -53,7 +53,7 @@ struct path_index_node {
                 } key;
         } entry;
 
-        enum carbon_field_type field_type;
+        carbon_field_type_e field_type;
         jak_offset_t field_offset;
 
         struct jak_vector ofType(struct path_index_node) sub_entries;
@@ -137,7 +137,7 @@ static void path_index_node_new_object_prop(struct path_index_node *node, jak_of
         node->field_offset = value_off;
 }
 
-static void path_index_node_set_field_type(struct path_index_node *node, enum carbon_field_type field_type)
+static void path_index_node_set_field_type(struct path_index_node *node, carbon_field_type_e field_type)
 {
         node->field_type = field_type;
 }
@@ -265,21 +265,21 @@ static void array_traverse(struct path_index_node *parent, jak_carbon_array_it *
         }
 }
 
-static void column_traverse(struct path_index_node *parent, struct jak_carbon_column_it *it)
+static void column_traverse(struct path_index_node *parent, jak_carbon_column_it *it)
 {
-        enum carbon_field_type column_type, entry_type;
+        carbon_field_type_e column_type, entry_type;
         jak_u32 nvalues;
 
-        carbon_column_it_values_info(&column_type, &nvalues, it);
+        jak_carbon_column_it_values_info(&column_type, &nvalues, it);
 
         for (jak_u32 i = 0; i < nvalues; i++) {
-                bool is_null = carbon_column_it_value_is_null(it, i);
+                bool is_null = jak_carbon_column_it_value_is_null(it, i);
                 bool is_true = false;
                 if (column_type == CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN) {
-                        is_true = carbon_column_it_boolean_values(NULL, it)[i];
+                        is_true = jak_carbon_column_it_boolean_values(NULL, it)[i];
                 }
                 entry_type = carbon_field_type_column_entry_to_regular_type(column_type, is_null, is_true);
-                jak_offset_t sub_elem_off = carbon_column_it_tell(it, i);
+                jak_offset_t sub_elem_off = jak_carbon_column_it_tell(it, i);
 
                 struct path_index_node *node = path_index_node_add_column_elem(parent, i, sub_elem_off);
                 path_index_node_set_field_type(node, entry_type);
@@ -301,7 +301,7 @@ static void object_traverse(struct path_index_node *parent, struct jak_carbon_ob
 
 static void object_build_index(struct path_index_node *parent, struct jak_carbon_object_it *elem_it)
 {
-        enum carbon_field_type field_type;
+        carbon_field_type_e field_type;
         carbon_object_it_prop_type(&field_type, elem_it);
         path_index_node_set_field_type(parent, field_type);
 
@@ -333,7 +333,7 @@ static void object_build_index(struct path_index_node *parent, struct jak_carbon
                 case CARBON_JAK_FIELD_TYPE_COLUMN_I16:
                 case CARBON_JAK_FIELD_TYPE_COLUMN_I32:
                 case CARBON_JAK_FIELD_TYPE_COLUMN_I64: {
-                        struct jak_carbon_column_it *it = carbon_object_it_column_value(elem_it);
+                        jak_carbon_column_it *it = carbon_object_it_column_value(elem_it);
                         column_traverse(parent, it);
 
                 }
@@ -356,7 +356,7 @@ static void object_build_index(struct path_index_node *parent, struct jak_carbon
 
 static void array_build_index(struct path_index_node *parent, jak_carbon_array_it *elem_it)
 {
-        enum carbon_field_type field_type;
+        carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, elem_it);
         path_index_node_set_field_type(parent, field_type);
 
@@ -388,7 +388,7 @@ static void array_build_index(struct path_index_node *parent, jak_carbon_array_i
                 case CARBON_JAK_FIELD_TYPE_COLUMN_I16:
                 case CARBON_JAK_FIELD_TYPE_COLUMN_I32:
                 case CARBON_JAK_FIELD_TYPE_COLUMN_I64: {
-                        struct jak_carbon_column_it *it = jak_carbon_array_it_column_value(elem_it);
+                        jak_carbon_column_it *it = jak_carbon_array_it_column_value(elem_it);
                         column_traverse(parent, it);
 
                 }
@@ -960,7 +960,7 @@ static void record_ref_to_carbon(jak_carbon_insert *roins, struct jak_carbon_pat
         jak_u64 commit_hash = memfile_read_u64(&index->memfile);
         struct jak_string str;
         string_create(&str);
-        carbon_commit_hash_to_str(&str, commit_hash);
+        jak_carbon_commit_hash_to_str(&str, commit_hash);
         carbon_insert_prop_string(roins, "commit-hash", string_cstr(&str));
         string_drop(&str);
 }
@@ -1189,7 +1189,7 @@ bool carbon_path_index_it_open(struct jak_carbon_path_index_it *it, struct jak_c
 ////  field access
 //// ---------------------------------------------------------------------------------------------------------------------
 //
-//bool carbon_path_index_it_field_type(enum carbon_field_type *type, struct jak_carbon_path_index_it *it)
+//bool carbon_path_index_it_field_type(carbon_field_type_e *type, struct jak_carbon_path_index_it *it)
 //{
 //
 //}
@@ -1269,7 +1269,7 @@ bool carbon_path_index_it_open(struct jak_carbon_path_index_it *it, struct jak_c
 //
 //}
 //
-//bool carbon_path_index_it_field_column_value(struct jak_carbon_column_it *it_out, struct jak_carbon_path_index_it *it_in)
+//bool carbon_path_index_it_field_column_value(jak_carbon_column_it *it_out, struct jak_carbon_path_index_it *it_in)
 //{
 //
 //}

@@ -33,66 +33,55 @@
 
 JAK_BEGIN_DECL
 
-enum carbon_dot_node_type {
-        DOT_NODE_ARRAY_IDX,
-        DOT_NODE_KEY_NAME
-};
+typedef enum carbon_dot_node {
+        JAK_DOT_NODE_ARRAY_IDX,
+        JAK_DOT_NODE_KEY_NAME
+} carbon_dot_node_e;
 
-struct jak_carbon_dot_node {
-        enum carbon_dot_node_type type;
+typedef struct jak_carbon_dot_node {
+        carbon_dot_node_e type;
         union {
                 char *string;
                 jak_u32 idx;
         } identifier;
-};
+} jak_carbon_dot_node;
 
-struct jak_carbon_dot_path {
-        struct jak_carbon_dot_node nodes[256];
+typedef struct jak_carbon_dot_path {
+        jak_carbon_dot_node nodes[256];
         jak_u32 path_len;
         struct jak_error err;
-};
+} jak_carbon_dot_path;
 
-enum carbon_path_status {
-        CARBON_PATH_RESOLVED,
-        CARBON_PATH_EMPTY_DOC,
-        CARBON_PATH_NOSUCHINDEX,
-        CARBON_PATH_NOSUCHKEY,
-        CARBON_PATH_NOTTRAVERSABLE,
-        CARBON_PATH_NOCONTAINER,
-        CARBON_PATH_NOTANOBJECT,
-        CARBON_PATH_NONESTING,
-        CARBON_PATH_INTERNAL
-};
+typedef enum carbon_path_status {
+        JAK_CARBON_PATH_RESOLVED,
+        JAK_CARBON_PATH_EMPTY_DOC,
+        JAK_CARBON_PATH_NOSUCHINDEX,
+        JAK_CARBON_PATH_NOSUCHKEY,
+        JAK_CARBON_PATH_NOTTRAVERSABLE,
+        JAK_CARBON_PATH_NOCONTAINER,
+        JAK_CARBON_PATH_NOTANOBJECT,
+        JAK_CARBON_PATH_NONESTING,
+        JAK_CARBON_PATH_INTERNAL
+} carbon_path_status_e;
 
 JAK_DEFINE_ERROR_GETTER(jak_carbon_dot_path)
 
-bool carbon_dot_path_create(struct jak_carbon_dot_path *path);
+bool jak_carbon_dot_path_create(jak_carbon_dot_path *path);
+bool jak_carbon_dot_path_from_string(jak_carbon_dot_path *path, const char *path_string);
+bool jak_carbon_dot_path_drop(jak_carbon_dot_path *path);
 
-bool carbon_dot_path_from_string(struct jak_carbon_dot_path *path, const char *path_string);
+bool jak_carbon_dot_path_add_key(jak_carbon_dot_path *dst, const char *key);
+bool jak_carbon_dot_path_add_nkey(jak_carbon_dot_path *dst, const char *key, size_t len);
+bool jak_carbon_dot_path_add_idx(jak_carbon_dot_path *dst, jak_u32 idx);
+bool jak_carbon_dot_path_len(jak_u32 *len, const jak_carbon_dot_path *path);
+bool jak_carbon_dot_path_is_empty(const jak_carbon_dot_path *path);
+bool jak_carbon_dot_path_type_at(carbon_dot_node_e *type_out, jak_u32 pos, const jak_carbon_dot_path *path);
+bool jak_carbon_dot_path_idx_at(jak_u32 *idx, jak_u32 pos, const jak_carbon_dot_path *path);
+const char *jak_carbon_dot_path_key_at(jak_u32 pos, const jak_carbon_dot_path *path);
 
-bool carbon_dot_path_add_key(struct jak_carbon_dot_path *dst, const char *key);
-
-bool carbon_dot_path_add_nkey(struct jak_carbon_dot_path *dst, const char *key, size_t len);
-
-bool carbon_dot_path_add_idx(struct jak_carbon_dot_path *dst, jak_u32 idx);
-
-bool carbon_dot_path_len(jak_u32 *len, const struct jak_carbon_dot_path *path);
-
-bool carbon_dot_path_is_empty(const struct jak_carbon_dot_path *path);
-
-bool carbon_dot_path_type_at(enum carbon_dot_node_type *type_out, jak_u32 pos, const struct jak_carbon_dot_path *path);
-
-bool carbon_dot_path_idx_at(jak_u32 *idx, jak_u32 pos, const struct jak_carbon_dot_path *path);
-
-const char *carbon_dot_path_key_at(jak_u32 pos, const struct jak_carbon_dot_path *path);
-
-bool carbon_dot_path_drop(struct jak_carbon_dot_path *path);
-
-bool carbon_dot_path_to_str(struct jak_string *sb, struct jak_carbon_dot_path *path);
-
-bool carbon_dot_path_fprint(FILE *file, struct jak_carbon_dot_path *path);
-
-bool carbon_dot_path_print(struct jak_carbon_dot_path *path);
+bool jak_carbon_dot_path_to_str(struct jak_string *sb, jak_carbon_dot_path *path);
+bool jak_carbon_dot_path_fprint(FILE *file, jak_carbon_dot_path *path);
+bool jak_carbon_dot_path_print(jak_carbon_dot_path *path);
 
 JAK_END_DECL
 

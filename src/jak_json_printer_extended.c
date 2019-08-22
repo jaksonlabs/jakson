@@ -101,7 +101,7 @@ static void meta_data(struct printer *self, struct jak_string *builder,
         string_add(builder, "}, \"commit\": ");
         if (commit_hash) {
                 string_add(builder, "\"");
-                carbon_commit_hash_append_to_str(builder, commit_hash);
+                jak_carbon_commit_hash_append_to_str(builder, commit_hash);
                 string_add(builder, "\"");
         } else {
                 string_add(builder, "null");

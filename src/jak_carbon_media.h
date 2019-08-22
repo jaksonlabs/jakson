@@ -724,7 +724,7 @@ static struct mime_type {
 
 static const jak_u32 _nmime_type_register = (jak_u32) JAK_ARRAY_LENGTH(mime_type_register);
 
-bool carbon_media_write(struct jak_memfile *dst, enum carbon_field_type type);
+bool carbon_media_write(struct jak_memfile *dst, carbon_field_type_e type);
 
 /**
  * Returns the mime type identifier for a file extension <code>ext</code>. If <code>ext</code> is not known,

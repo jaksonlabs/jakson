@@ -26,8 +26,6 @@
 #include <jak_types.h>
 #include <jak_carbon.h>
 
-struct jak_carbon_column_it; /* forwarded from carbon-column-it.h */
-
 JAK_BEGIN_DECL
 
 jak_u64 carbon_get_or_default_unsigned(jak_carbon *doc, const char *path, jak_u64 default_val);
@@ -46,7 +44,7 @@ carbon_get_or_default_binary(jak_carbon *doc, const char *path, struct jak_carbo
 
 jak_carbon_array_it *carbon_get_array_or_null(jak_carbon *doc, const char *path);
 
-struct jak_carbon_column_it *carbon_get_column_or_null(jak_carbon *doc, const char *path);
+jak_carbon_column_it *carbon_get_column_or_null(jak_carbon *doc, const char *path);
 
 JAK_END_DECL
 

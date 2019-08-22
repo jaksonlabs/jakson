@@ -112,23 +112,23 @@ static const char *next_token(struct dot_token *token, const char *str)
         return str;
 }
 
-bool carbon_dot_path_create(struct jak_carbon_dot_path *path)
+bool jak_carbon_dot_path_create(jak_carbon_dot_path *path)
 {
         JAK_ERROR_IF_NULL(path)
         error_init(&path->err);
         path->path_len = 0;
-        JAK_zero_memory(&path->nodes, JAK_ARRAY_LENGTH(path->nodes) * sizeof(struct jak_carbon_dot_node));
+        JAK_zero_memory(&path->nodes, JAK_ARRAY_LENGTH(path->nodes) * sizeof(jak_carbon_dot_node));
         return true;
 }
 
-bool carbon_dot_path_from_string(struct jak_carbon_dot_path *path, const char *path_string)
+bool jak_carbon_dot_path_from_string(jak_carbon_dot_path *path, const char *path_string)
 {
         JAK_ERROR_IF_NULL(path)
         JAK_UNUSED(path_string);
 
         struct dot_token token;
         int status = JAK_ERR_NOERR;
-        carbon_dot_path_create(path);
+        jak_carbon_dot_path_create(path);
 
         enum path_entry {
                 DOT, ENTRY
@@ -148,7 +148,7 @@ bool carbon_dot_path_from_string(struct jak_carbon_dot_path *path, const char *p
                                         status = JAK_ERR_PARSE_ENTRY_EXPECTED;
                                         goto cleanup_and_error;
                                 } else {
-                                        carbon_dot_path_add_nkey(path, token.str, token.len);
+                                        jak_carbon_dot_path_add_nkey(path, token.str, token.len);
                                 }
                                 break;
                         case TOKEN_NUMBER:
@@ -157,7 +157,7 @@ bool carbon_dot_path_from_string(struct jak_carbon_dot_path *path, const char *p
                                         goto cleanup_and_error;
                                 } else {
                                         jak_u64 num = convert_atoiu64(token.str);
-                                        carbon_dot_path_add_idx(path, num);
+                                        jak_carbon_dot_path_add_idx(path, num);
                                 }
                                 break;
                         case TOKEN_UNKNOWN:
@@ -172,24 +172,24 @@ bool carbon_dot_path_from_string(struct jak_carbon_dot_path *path, const char *p
         return true;
 
         cleanup_and_error:
-        carbon_dot_path_drop(path);
+        jak_carbon_dot_path_drop(path);
         error_no_abort(&path->err, status);
         return false;
 }
 
-bool carbon_dot_path_add_key(struct jak_carbon_dot_path *dst, const char *key)
+bool jak_carbon_dot_path_add_key(jak_carbon_dot_path *dst, const char *key)
 {
-        return carbon_dot_path_add_nkey(dst, key, strlen(key));
+        return jak_carbon_dot_path_add_nkey(dst, key, strlen(key));
 }
 
-bool carbon_dot_path_add_nkey(struct jak_carbon_dot_path *dst, const char *key, size_t len)
+bool jak_carbon_dot_path_add_nkey(jak_carbon_dot_path *dst, const char *key, size_t len)
 {
         JAK_ERROR_IF_NULL(dst)
         JAK_ERROR_IF_NULL(key)
         if (JAK_LIKELY(dst->path_len < JAK_ARRAY_LENGTH(dst->nodes))) {
-                struct jak_carbon_dot_node *node = dst->nodes + dst->path_len++;
+                jak_carbon_dot_node *node = dst->nodes + dst->path_len++;
                 bool enquoted = strings_is_enquoted_wlen(key, len);
-                node->type = DOT_NODE_KEY_NAME;
+                node->type = JAK_DOT_NODE_KEY_NAME;
                 node->identifier.string = strndup(enquoted ? key + 1 : key, len);
                 if (enquoted) {
                         char *str_wo_rightspaces = strings_remove_tailing_blanks(node->identifier.string);
@@ -204,12 +204,12 @@ bool carbon_dot_path_add_nkey(struct jak_carbon_dot_path *dst, const char *key, 
         }
 }
 
-bool carbon_dot_path_add_idx(struct jak_carbon_dot_path *dst, jak_u32 idx)
+bool jak_carbon_dot_path_add_idx(jak_carbon_dot_path *dst, jak_u32 idx)
 {
         JAK_ERROR_IF_NULL(dst)
         if (JAK_LIKELY(dst->path_len < JAK_ARRAY_LENGTH(dst->nodes))) {
-                struct jak_carbon_dot_node *node = dst->nodes + dst->path_len++;
-                node->type = DOT_NODE_ARRAY_IDX;
+                jak_carbon_dot_node *node = dst->nodes + dst->path_len++;
+                node->type = JAK_DOT_NODE_ARRAY_IDX;
                 node->identifier.idx = idx;
                 return true;
         } else {
@@ -218,7 +218,7 @@ bool carbon_dot_path_add_idx(struct jak_carbon_dot_path *dst, jak_u32 idx)
         }
 }
 
-bool carbon_dot_path_len(jak_u32 *len, const struct jak_carbon_dot_path *path)
+bool jak_carbon_dot_path_len(jak_u32 *len, const jak_carbon_dot_path *path)
 {
         JAK_ERROR_IF_NULL(len)
         JAK_ERROR_IF_NULL(path)
@@ -226,55 +226,55 @@ bool carbon_dot_path_len(jak_u32 *len, const struct jak_carbon_dot_path *path)
         return true;
 }
 
-bool carbon_dot_path_is_empty(const struct jak_carbon_dot_path *path)
+bool jak_carbon_dot_path_is_empty(const jak_carbon_dot_path *path)
 {
         JAK_ERROR_IF_NULL(path)
         return (path->path_len == 0);
 }
 
-bool carbon_dot_path_type_at(enum carbon_dot_node_type *type_out, jak_u32 pos, const struct jak_carbon_dot_path *path)
+bool jak_carbon_dot_path_type_at(carbon_dot_node_e *type_out, jak_u32 pos, const jak_carbon_dot_path *path)
 {
         JAK_ERROR_IF_NULL(type_out)
         JAK_ERROR_IF_NULL(path)
         if (JAK_LIKELY(pos < JAK_ARRAY_LENGTH(path->nodes))) {
                 *type_out = path->nodes[pos].type;
         } else {
-                error(&((struct jak_carbon_dot_path *) path)->err, JAK_ERR_OUTOFBOUNDS)
+                error(&((jak_carbon_dot_path *) path)->err, JAK_ERR_OUTOFBOUNDS)
                 return false;
         }
         return true;
 }
 
-bool carbon_dot_path_idx_at(jak_u32 *idx, jak_u32 pos, const struct jak_carbon_dot_path *path)
+bool jak_carbon_dot_path_idx_at(jak_u32 *idx, jak_u32 pos, const jak_carbon_dot_path *path)
 {
         JAK_ERROR_IF_NULL(idx)
         JAK_ERROR_IF_NULL(path)
-        error_if_and_return(pos >= JAK_ARRAY_LENGTH(path->nodes), &((struct jak_carbon_dot_path *) path)->err,
+        error_if_and_return(pos >= JAK_ARRAY_LENGTH(path->nodes), &((jak_carbon_dot_path *) path)->err,
                             JAK_ERR_OUTOFBOUNDS, NULL);
-        error_if_and_return(path->nodes[pos].type != DOT_NODE_ARRAY_IDX, &((struct jak_carbon_dot_path *) path)->err,
+        error_if_and_return(path->nodes[pos].type != JAK_DOT_NODE_ARRAY_IDX, &((jak_carbon_dot_path *) path)->err,
                             JAK_ERR_TYPEMISMATCH, NULL);
 
         *idx = path->nodes[pos].identifier.idx;
         return true;
 }
 
-const char *carbon_dot_path_key_at(jak_u32 pos, const struct jak_carbon_dot_path *path)
+const char *jak_carbon_dot_path_key_at(jak_u32 pos, const jak_carbon_dot_path *path)
 {
         JAK_ERROR_IF_NULL(path)
-        error_if_and_return(pos >= JAK_ARRAY_LENGTH(path->nodes), &((struct jak_carbon_dot_path *) path)->err,
+        error_if_and_return(pos >= JAK_ARRAY_LENGTH(path->nodes), &((jak_carbon_dot_path *) path)->err,
                             JAK_ERR_OUTOFBOUNDS, NULL);
-        error_if_and_return(path->nodes[pos].type != DOT_NODE_KEY_NAME, &((struct jak_carbon_dot_path *) path)->err,
+        error_if_and_return(path->nodes[pos].type != JAK_DOT_NODE_KEY_NAME, &((jak_carbon_dot_path *) path)->err,
                             JAK_ERR_TYPEMISMATCH, NULL);
 
         return path->nodes[pos].identifier.string;
 }
 
-bool carbon_dot_path_drop(struct jak_carbon_dot_path *path)
+bool jak_carbon_dot_path_drop(jak_carbon_dot_path *path)
 {
         JAK_ERROR_IF_NULL(path)
         for (jak_u32 i = 0; i < path->path_len; i++) {
-                struct jak_carbon_dot_node *node = path->nodes + i;
-                if (node->type == DOT_NODE_KEY_NAME) {
+                jak_carbon_dot_node *node = path->nodes + i;
+                if (node->type == JAK_DOT_NODE_KEY_NAME) {
                         free(node->identifier.string);
                 }
         }
@@ -282,13 +282,13 @@ bool carbon_dot_path_drop(struct jak_carbon_dot_path *path)
         return true;
 }
 
-bool carbon_dot_path_to_str(struct jak_string *sb, struct jak_carbon_dot_path *path)
+bool jak_carbon_dot_path_to_str(struct jak_string *sb, jak_carbon_dot_path *path)
 {
         JAK_ERROR_IF_NULL(path)
         for (jak_u32 i = 0; i < path->path_len; i++) {
-                struct jak_carbon_dot_node *node = path->nodes + i;
+                jak_carbon_dot_node *node = path->nodes + i;
                 switch (node->type) {
-                        case DOT_NODE_KEY_NAME: {
+                        case JAK_DOT_NODE_KEY_NAME: {
                                 bool empty_str = strlen(node->identifier.string) == 0;
                                 bool quotes_required =
                                         empty_str || strings_contains_blank_char(node->identifier.string);
@@ -303,7 +303,7 @@ bool carbon_dot_path_to_str(struct jak_string *sb, struct jak_carbon_dot_path *p
                                 }
                         }
                                 break;
-                        case DOT_NODE_ARRAY_IDX:
+                        case JAK_DOT_NODE_ARRAY_IDX:
                                 string_add_u32(sb, node->identifier.idx);
                                 break;
                 }
@@ -314,19 +314,19 @@ bool carbon_dot_path_to_str(struct jak_string *sb, struct jak_carbon_dot_path *p
         return true;
 }
 
-bool carbon_dot_path_fprint(FILE *file, struct jak_carbon_dot_path *path)
+bool jak_carbon_dot_path_fprint(FILE *file, jak_carbon_dot_path *path)
 {
         JAK_ERROR_IF_NULL(file);
         JAK_ERROR_IF_NULL(path);
         struct jak_string sb;
         string_create(&sb);
-        carbon_dot_path_to_str(&sb, path);
+        jak_carbon_dot_path_to_str(&sb, path);
         fprintf(file, "%s", string_cstr(&sb));
         string_drop(&sb);
         return true;
 }
 
-bool carbon_dot_path_print(struct jak_carbon_dot_path *path)
+bool jak_carbon_dot_path_print(jak_carbon_dot_path *path)
 {
-        return carbon_dot_path_fprint(stdout, path);
+        return jak_carbon_dot_path_fprint(stdout, path);
 }

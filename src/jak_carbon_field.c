@@ -26,7 +26,7 @@
 #include <jak_carbon_array_it.h>
 #include <jak_carbon_object_it.h>
 
-const char *carbon_field_type_str(struct jak_error *err, enum carbon_field_type type)
+const char *carbon_field_type_str(struct jak_error *err, carbon_field_type_e type)
 {
         switch (type) {
                 case CARBON_JAK_FIELD_TYPE_NULL:
@@ -90,7 +90,7 @@ const char *carbon_field_type_str(struct jak_error *err, enum carbon_field_type 
         }
 }
 
-bool carbon_field_type_is_traversable(enum carbon_field_type type)
+bool carbon_field_type_is_traversable(carbon_field_type_e type)
 {
         switch (type) {
                 case CARBON_JAK_FIELD_TYPE_OBJECT:
@@ -111,7 +111,7 @@ bool carbon_field_type_is_traversable(enum carbon_field_type type)
         }
 }
 
-bool carbon_field_type_is_signed_integer(enum carbon_field_type type)
+bool carbon_field_type_is_signed_integer(carbon_field_type_e type)
 {
         return (type == CARBON_JAK_FIELD_TYPE_NUMBER_I8 || type == CARBON_JAK_FIELD_TYPE_NUMBER_I16 ||
                 type == CARBON_JAK_FIELD_TYPE_NUMBER_I32 || type == CARBON_JAK_FIELD_TYPE_NUMBER_I64 ||
@@ -119,7 +119,7 @@ bool carbon_field_type_is_signed_integer(enum carbon_field_type type)
                 type == CARBON_JAK_FIELD_TYPE_COLUMN_I32 || type == CARBON_JAK_FIELD_TYPE_COLUMN_I64);
 }
 
-bool carbon_field_type_is_unsigned_integer(enum carbon_field_type type)
+bool carbon_field_type_is_unsigned_integer(carbon_field_type_e type)
 {
         return (type == CARBON_JAK_FIELD_TYPE_NUMBER_U8 || type == CARBON_JAK_FIELD_TYPE_NUMBER_U16 ||
                 type == CARBON_JAK_FIELD_TYPE_NUMBER_U32 || type == CARBON_JAK_FIELD_TYPE_NUMBER_U64 ||
@@ -127,38 +127,38 @@ bool carbon_field_type_is_unsigned_integer(enum carbon_field_type type)
                 type == CARBON_JAK_FIELD_TYPE_COLUMN_U32 || type == CARBON_JAK_FIELD_TYPE_COLUMN_U64);
 }
 
-bool carbon_field_type_is_floating_number(enum carbon_field_type type)
+bool carbon_field_type_is_floating_number(carbon_field_type_e type)
 {
         return (type == CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT || type == CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT);
 }
 
-bool carbon_field_type_is_number(enum carbon_field_type type)
+bool carbon_field_type_is_number(carbon_field_type_e type)
 {
         return carbon_field_type_is_integer(type) || carbon_field_type_is_floating_number(type);
 }
 
-bool carbon_field_type_is_integer(enum carbon_field_type type)
+bool carbon_field_type_is_integer(carbon_field_type_e type)
 {
         return carbon_field_type_is_signed_integer(type) || carbon_field_type_is_unsigned_integer(type);
 }
 
-bool carbon_field_type_is_binary(enum carbon_field_type type)
+bool carbon_field_type_is_binary(carbon_field_type_e type)
 {
         return (type == CARBON_JAK_FIELD_TYPE_BINARY || type == CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM);
 }
 
-bool carbon_field_type_is_boolean(enum carbon_field_type type)
+bool carbon_field_type_is_boolean(carbon_field_type_e type)
 {
         return (type == CARBON_JAK_FIELD_TYPE_TRUE || type == CARBON_JAK_FIELD_TYPE_FALSE ||
                 type == CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN);
 }
 
-bool carbon_field_type_is_string(enum carbon_field_type type)
+bool carbon_field_type_is_string(carbon_field_type_e type)
 {
         return (type == CARBON_JAK_FIELD_TYPE_STRING);
 }
 
-bool carbon_field_type_is_constant(enum carbon_field_type type)
+bool carbon_field_type_is_constant(carbon_field_type_e type)
 {
         return (carbon_field_type_is_null(type) || carbon_field_type_is_boolean(type));
 }
@@ -269,10 +269,10 @@ bool carbon_field_skip_column(struct jak_memfile *file)
                  type_marker != CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN &&
                  type_marker != CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT, &file->err, JAK_ERR_TYPEMISMATCH);
 
-        struct jak_carbon_column_it skip_it;
-        carbon_column_it_create(&skip_it, file, &file->err,
+        jak_carbon_column_it skip_it;
+        jak_carbon_column_it_create(&skip_it, file, &file->err,
                                 memfile_tell(file) - sizeof(jak_u8));
-        carbon_column_it_fast_forward(&skip_it);
+        jak_carbon_column_it_fast_forward(&skip_it);
         memfile_seek(file, memfile_tell(&skip_it.memfile));
         return true;
 }
@@ -389,7 +389,7 @@ bool carbon_field_skip_64(struct jak_memfile *file)
         return true;
 }
 
-enum carbon_field_type carbon_field_type_for_column(enum carbon_column_type type)
+carbon_field_type_e carbon_field_type_for_column(enum carbon_column_type type)
 {
         switch (type) {
                 case CARBON_COLUMN_TYPE_U8:
@@ -417,8 +417,8 @@ enum carbon_field_type carbon_field_type_for_column(enum carbon_column_type type
         }
 }
 
-enum carbon_field_type
-carbon_field_type_column_entry_to_regular_type(enum carbon_field_type type, bool is_null, bool is_true)
+carbon_field_type_e
+carbon_field_type_column_entry_to_regular_type(carbon_field_type_e type, bool is_null, bool is_true)
 {
         if (is_null) {
                 return CARBON_JAK_FIELD_TYPE_NULL;
@@ -450,7 +450,7 @@ carbon_field_type_column_entry_to_regular_type(enum carbon_field_type type, bool
         }
 }
 
-enum carbon_field_class carbon_field_type_get_class(enum carbon_field_type type, struct jak_error *err)
+enum carbon_field_class carbon_field_type_get_class(carbon_field_type_e type, struct jak_error *err)
 {
         switch (type) {
                 case CARBON_JAK_FIELD_TYPE_NULL:
@@ -490,12 +490,12 @@ enum carbon_field_class carbon_field_type_get_class(enum carbon_field_type type,
         }
 }
 
-bool carbon_field_type_is_array(enum carbon_field_type type)
+bool carbon_field_type_is_array(carbon_field_type_e type)
 {
         return (type == CARBON_JAK_FIELD_TYPE_ARRAY);
 }
 
-bool carbon_field_type_is_column(enum carbon_field_type type)
+bool carbon_field_type_is_column(carbon_field_type_e type)
 {
         return (type == CARBON_JAK_FIELD_TYPE_COLUMN_U8 ||
                 type == CARBON_JAK_FIELD_TYPE_COLUMN_U16 ||
@@ -509,12 +509,12 @@ bool carbon_field_type_is_column(enum carbon_field_type type)
                 type == CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN);
 }
 
-bool carbon_field_type_is_object(enum carbon_field_type type)
+bool carbon_field_type_is_object(carbon_field_type_e type)
 {
         return (type == CARBON_JAK_FIELD_TYPE_OBJECT);
 }
 
-bool carbon_field_type_is_null(enum carbon_field_type type)
+bool carbon_field_type_is_null(carbon_field_type_e type)
 {
         return (type == CARBON_JAK_FIELD_TYPE_NULL);
 }

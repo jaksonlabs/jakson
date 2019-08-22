@@ -25,7 +25,7 @@
 #include <jak_hash_jenkins.h>
 #include <jak_hash_fnv.h>
 
-bool carbon_commit_hash_create(struct jak_memfile *file)
+bool jak_carbon_commit_hash_create(struct jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(file)
 
@@ -38,14 +38,14 @@ bool carbon_commit_hash_create(struct jak_memfile *file)
         return true;
 }
 
-bool carbon_commit_hash_skip(struct jak_memfile *file)
+bool jak_carbon_commit_hash_skip(struct jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(file)
         memfile_skip(file, sizeof(jak_u64));
         return true;
 }
 
-bool carbon_commit_hash_read(jak_u64 *commit_hash, struct jak_memfile *file)
+bool jak_carbon_commit_hash_read(jak_u64 *commit_hash, struct jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(commit_hash)
@@ -53,7 +53,7 @@ bool carbon_commit_hash_read(jak_u64 *commit_hash, struct jak_memfile *file)
         return true;
 }
 
-bool carbon_commit_hash_peek(jak_u64 *commit_hash, struct jak_memfile *file)
+bool jak_carbon_commit_hash_peek(jak_u64 *commit_hash, struct jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(commit_hash)
@@ -61,18 +61,18 @@ bool carbon_commit_hash_peek(jak_u64 *commit_hash, struct jak_memfile *file)
         return true;
 }
 
-bool carbon_commit_hash_update(struct jak_memfile *file, const char *base, jak_u64 len)
+bool jak_carbon_commit_hash_update(struct jak_memfile *file, const char *base, jak_u64 len)
 {
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(base)
         JAK_ERROR_IF_NULL(len)
         jak_u64 commit_hash;
-        carbon_commit_hash_compute(&commit_hash, base, len);
+        jak_carbon_commit_hash_compute(&commit_hash, base, len);
         memfile_write(file, &commit_hash, sizeof(jak_u64));
         return true;
 }
 
-bool carbon_commit_hash_compute(jak_u64 *commit_hash, const void *base, jak_u64 len)
+bool jak_carbon_commit_hash_compute(jak_u64 *commit_hash, const void *base, jak_u64 len)
 {
         JAK_ERROR_IF_NULL(commit_hash)
         JAK_ERROR_IF_NULL(base)
@@ -81,7 +81,7 @@ bool carbon_commit_hash_compute(jak_u64 *commit_hash, const void *base, jak_u64 
         return true;
 }
 
-const char *carbon_commit_hash_to_str(struct jak_string *dst, jak_u64 commit_hash)
+const char *jak_carbon_commit_hash_to_str(struct jak_string *dst, jak_u64 commit_hash)
 {
         if (dst) {
                 string_clear(dst);
@@ -92,14 +92,14 @@ const char *carbon_commit_hash_to_str(struct jak_string *dst, jak_u64 commit_has
         }
 }
 
-bool carbon_commit_hash_append_to_str(struct jak_string *dst, jak_u64 commit_hash)
+bool jak_carbon_commit_hash_append_to_str(struct jak_string *dst, jak_u64 commit_hash)
 {
         JAK_ERROR_IF_NULL(dst)
         string_add_u64_as_hex(dst, commit_hash);
         return true;
 }
 
-jak_u64 carbon_commit_hash_from_str(const char *commit_str, struct jak_error *err)
+jak_u64 jak_carbon_commit_hash_from_str(const char *commit_str, struct jak_error *err)
 {
         if (commit_str && strlen(commit_str) == 16) {
                 char *illegal_char;

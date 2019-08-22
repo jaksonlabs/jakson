@@ -35,7 +35,7 @@ JAK_BEGIN_DECL
 
 struct jak_carbon_find {
         jak_carbon *doc;
-        enum carbon_field_type type;
+        carbon_field_type_e type;
         struct jak_error err;
         struct jak_carbon_path_evaluator path_evaluater;
 
@@ -43,7 +43,7 @@ struct jak_carbon_find {
 
         union {
                 jak_carbon_array_it *array_it;
-                struct jak_carbon_column_it *column_it;
+                jak_carbon_column_it *column_it;
                 struct jak_carbon_object_it *object_it;
                 bool boolean;
                 jak_u64 unsigned_number;
@@ -65,7 +65,7 @@ bool carbon_find_open(struct jak_carbon_find *out, const char *dot_path, jak_car
 
 bool carbon_find_close(struct jak_carbon_find *find);
 
-bool carbon_find_create(struct jak_carbon_find *find, struct jak_carbon_dot_path *path, jak_carbon *doc);
+bool carbon_find_create(struct jak_carbon_find *find, jak_carbon_dot_path *path, jak_carbon *doc);
 
 bool carbon_find_has_result(struct jak_carbon_find *find);
 
@@ -76,13 +76,13 @@ const char *carbon_find_result_to_json_compact(struct jak_string *dst_str, struc
 
 char *carbon_find_result_to_json_compact_dup(struct jak_carbon_find *find);
 
-bool carbon_find_result_type(enum carbon_field_type *type, struct jak_carbon_find *find);
+bool carbon_find_result_type(carbon_field_type_e *type, struct jak_carbon_find *find);
 
 jak_carbon_array_it *carbon_find_result_array(struct jak_carbon_find *find);
 
 struct jak_carbon_object_it *carbon_find_result_object(struct jak_carbon_find *find);
 
-struct jak_carbon_column_it *carbon_find_result_column(struct jak_carbon_find *find);
+jak_carbon_column_it *carbon_find_result_column(struct jak_carbon_find *find);
 
 bool carbon_find_result_boolean(bool *out, struct jak_carbon_find *find);
 

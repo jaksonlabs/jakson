@@ -24,7 +24,7 @@
 
 #define try_array_update(type_match, in_place_update_fn, insert_fn)                                                    \
 ({                                                                                                                     \
-        enum carbon_field_type type_is = 0;                                                                            \
+        carbon_field_type_e type_is = 0;                                                                            \
         jak_carbon_array_it_field_type(&type_is, it);                                                                      \
         bool status = false;                                                                                           \
         switch (type_is) {                                                                                             \
@@ -91,7 +91,7 @@ DEFINE_ARRAY_UPDATE_FUNCTION(float, CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT, jak_carb
                                 break;                                                                                 \
                         case JAK_CARBON_COLUMN: {                                                                           \
                                 jak_u32 elem_pos;                                                                          \
-                                struct jak_carbon_column_it *it = column_iterator(&elem_pos, &updater);                     \
+                                jak_carbon_column_it *it = column_iterator(&elem_pos, &updater);                     \
                                 column_exec;                                                                           \
                                 status = true;                                                                         \
                         } break;                                                                                       \
@@ -113,7 +113,7 @@ DEFINE_ARRAY_UPDATE_FUNCTION(float, CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT, jak_carb
 
 
 static bool
-create(struct jak_carbon_update *updater, struct jak_carbon_revise *context, const struct jak_carbon_dot_path *path)
+create(struct jak_carbon_update *updater, struct jak_carbon_revise *context, const jak_carbon_dot_path *path)
 {
         JAK_ERROR_IF_NULL(updater)
         JAK_ERROR_IF_NULL(context)
@@ -126,9 +126,9 @@ create(struct jak_carbon_update *updater, struct jak_carbon_revise *context, con
         return true;
 }
 
-static bool compile_path(struct jak_carbon_dot_path *out, const char *in)
+static bool compile_path(jak_carbon_dot_path *out, const char *in)
 {
-        return carbon_dot_path_from_string(out, in);
+        return jak_carbon_dot_path_from_string(out, in);
 }
 
 static bool resolve_path(struct jak_carbon_update *updater)
@@ -141,7 +141,7 @@ static bool path_resolved(struct jak_carbon_update *updater)
         return carbon_path_evaluator_has_result(&updater->path_evaluater);
 }
 
-static bool column_update_u8(struct jak_carbon_column_it *it, jak_u32 pos, jak_u8 value)
+static bool column_update_u8(jak_carbon_column_it *it, jak_u32 pos, jak_u8 value)
 {
         JAK_UNUSED(it);
         JAK_UNUSED(pos);
@@ -150,7 +150,7 @@ static bool column_update_u8(struct jak_carbon_column_it *it, jak_u32 pos, jak_u
         return false;
 }
 
-static bool column_update_u16(struct jak_carbon_column_it *it, jak_u32 pos, jak_u16 value)
+static bool column_update_u16(jak_carbon_column_it *it, jak_u32 pos, jak_u16 value)
 {
         JAK_UNUSED(it);
         JAK_UNUSED(pos);
@@ -159,7 +159,7 @@ static bool column_update_u16(struct jak_carbon_column_it *it, jak_u32 pos, jak_
         return false;
 }
 
-static bool column_update_u32(struct jak_carbon_column_it *it, jak_u32 pos, jak_u32 value)
+static bool column_update_u32(jak_carbon_column_it *it, jak_u32 pos, jak_u32 value)
 {
         JAK_UNUSED(it);
         JAK_UNUSED(pos);
@@ -168,7 +168,7 @@ static bool column_update_u32(struct jak_carbon_column_it *it, jak_u32 pos, jak_
         return false;
 }
 
-static bool column_update_u64(struct jak_carbon_column_it *it, jak_u32 pos, jak_u64 value)
+static bool column_update_u64(jak_carbon_column_it *it, jak_u32 pos, jak_u64 value)
 {
         JAK_UNUSED(it);
         JAK_UNUSED(pos);
@@ -177,7 +177,7 @@ static bool column_update_u64(struct jak_carbon_column_it *it, jak_u32 pos, jak_
         return false;
 }
 
-static bool column_update_i8(struct jak_carbon_column_it *it, jak_u32 pos, jak_i8 value)
+static bool column_update_i8(jak_carbon_column_it *it, jak_u32 pos, jak_i8 value)
 {
         JAK_UNUSED(it);
         JAK_UNUSED(pos);
@@ -186,7 +186,7 @@ static bool column_update_i8(struct jak_carbon_column_it *it, jak_u32 pos, jak_i
         return false;
 }
 
-static bool column_update_i16(struct jak_carbon_column_it *it, jak_u32 pos, jak_i16 value)
+static bool column_update_i16(jak_carbon_column_it *it, jak_u32 pos, jak_i16 value)
 {
         JAK_UNUSED(it);
         JAK_UNUSED(pos);
@@ -195,7 +195,7 @@ static bool column_update_i16(struct jak_carbon_column_it *it, jak_u32 pos, jak_
         return false;
 }
 
-static bool column_update_i32(struct jak_carbon_column_it *it, jak_u32 pos, jak_i32 value)
+static bool column_update_i32(jak_carbon_column_it *it, jak_u32 pos, jak_i32 value)
 {
         JAK_UNUSED(it);
         JAK_UNUSED(pos);
@@ -204,7 +204,7 @@ static bool column_update_i32(struct jak_carbon_column_it *it, jak_u32 pos, jak_
         return false;
 }
 
-static bool column_update_i64(struct jak_carbon_column_it *it, jak_u32 pos, jak_i64 value)
+static bool column_update_i64(jak_carbon_column_it *it, jak_u32 pos, jak_i64 value)
 {
         JAK_UNUSED(it);
         JAK_UNUSED(pos);
@@ -213,7 +213,7 @@ static bool column_update_i64(struct jak_carbon_column_it *it, jak_u32 pos, jak_
         return false;
 }
 
-static bool column_update_float(struct jak_carbon_column_it *it, jak_u32 pos, float value)
+static bool column_update_float(jak_carbon_column_it *it, jak_u32 pos, float value)
 {
         JAK_UNUSED(it);
         JAK_UNUSED(pos);
@@ -228,7 +228,7 @@ static inline jak_carbon_array_it *array_iterator(struct jak_carbon_update *upda
         return &updater->path_evaluater.result.containers.array.it;
 }
 
-static inline struct jak_carbon_column_it *column_iterator(jak_u32 *elem_pos, struct jak_carbon_update *updater)
+static inline jak_carbon_column_it *column_iterator(jak_u32 *elem_pos, struct jak_carbon_update *updater)
 {
         *elem_pos = updater->path_evaluater.result.containers.column.elem_pos;
         return &updater->path_evaluater.result.containers.column.it;
@@ -239,11 +239,11 @@ static inline struct jak_carbon_column_it *column_iterator(jak_u32 *elem_pos, st
         JAK_ERROR_IF_NULL(context)                                                                                         \
         JAK_ERROR_IF_NULL(path)                                                                                            \
                                                                                                                        \
-        struct jak_carbon_dot_path compiled_path;                                                                           \
+        jak_carbon_dot_path compiled_path;                                                                           \
         bool status;                                                                                                   \
         if (compile_path(&compiled_path, path)) {                                                                      \
                 status = func(context, &compiled_path);                                                                \
-                carbon_dot_path_drop(&compiled_path);                                                                   \
+                jak_carbon_dot_path_drop(&compiled_path);                                                                   \
         } else {                                                                                                       \
                 error(&context->err, JAK_ERR_DOT_PATH_PARSERR)                                                         \
                 status = false;                                                                                        \
@@ -256,11 +256,11 @@ static inline struct jak_carbon_column_it *column_iterator(jak_u32 *elem_pos, st
         JAK_ERROR_IF_NULL(context)                                                                                         \
         JAK_ERROR_IF_NULL(path)                                                                                            \
                                                                                                                        \
-        struct jak_carbon_dot_path compiled_path;                                                                           \
+        jak_carbon_dot_path compiled_path;                                                                           \
         bool status;                                                                                                   \
         if (compile_path(&compiled_path, path)) {                                                                      \
                 status = func(context, &compiled_path, __VA_ARGS__);                                                   \
-                carbon_dot_path_drop(&compiled_path);                                                                   \
+                jak_carbon_dot_path_drop(&compiled_path);                                                                   \
         } else {                                                                                                       \
                 error(&context->err, JAK_ERR_DOT_PATH_PARSERR)                                                         \
                 status = false;                                                                                        \
@@ -408,7 +408,7 @@ bool carbon_update_set_array_end(struct jak_carbon_insert_array_state *state_in)
 
 jak_carbon_insert *carbon_update_set_column_begin(struct jak_carbon_revise *context, const char *path,
                                                          struct jak_carbon_insert_column_state *state_out,
-                                                         enum carbon_field_type type, jak_u64 column_capacity)
+                                                         carbon_field_type_e type, jak_u64 column_capacity)
 {
         // TODO: Implement
         JAK_UNUSED(state_out);
@@ -430,76 +430,76 @@ bool carbon_update_set_column_end(struct jak_carbon_insert_column_state *state_i
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bool carbon_update_set_null_compiled(struct jak_carbon_revise *context, const struct jak_carbon_dot_path *path)
+bool carbon_update_set_null_compiled(struct jak_carbon_revise *context, const jak_carbon_dot_path *path)
 {
-        return try_update(context, path, jak_carbon_array_it_update_in_place_null, carbon_column_it_update_set_null);
+        return try_update(context, path, jak_carbon_array_it_update_in_place_null, jak_carbon_column_it_update_set_null);
 }
 
-bool carbon_update_set_true_compiled(struct jak_carbon_revise *context, const struct jak_carbon_dot_path *path)
+bool carbon_update_set_true_compiled(struct jak_carbon_revise *context, const jak_carbon_dot_path *path)
 {
-        return try_update(context, path, jak_carbon_array_it_update_in_place_true, carbon_column_it_update_set_true);
+        return try_update(context, path, jak_carbon_array_it_update_in_place_true, jak_carbon_column_it_update_set_true);
 }
 
-bool carbon_update_set_false_compiled(struct jak_carbon_revise *context, const struct jak_carbon_dot_path *path)
+bool carbon_update_set_false_compiled(struct jak_carbon_revise *context, const jak_carbon_dot_path *path)
 {
-        return try_update(context, path, jak_carbon_array_it_update_in_place_false, carbon_column_it_update_set_false);
+        return try_update(context, path, jak_carbon_array_it_update_in_place_false, jak_carbon_column_it_update_set_false);
 }
 
-bool carbon_update_set_u8_compiled(struct jak_carbon_revise *context, const struct jak_carbon_dot_path *path,
+bool carbon_update_set_u8_compiled(struct jak_carbon_revise *context, const jak_carbon_dot_path *path,
                                    jak_u8 value)
 {
         return try_update_value(context, path, value, array_update_u8, column_update_u8);
 }
 
-bool carbon_update_set_u16_compiled(struct jak_carbon_revise *context, const struct jak_carbon_dot_path *path,
+bool carbon_update_set_u16_compiled(struct jak_carbon_revise *context, const jak_carbon_dot_path *path,
                                     jak_u16 value)
 {
         return try_update_value(context, path, value, array_update_u16, column_update_u16);
 }
 
-bool carbon_update_set_u32_compiled(struct jak_carbon_revise *context, const struct jak_carbon_dot_path *path,
+bool carbon_update_set_u32_compiled(struct jak_carbon_revise *context, const jak_carbon_dot_path *path,
                                     jak_u32 value)
 {
         return try_update_value(context, path, value, array_update_u32, column_update_u32);
 }
 
-bool carbon_update_set_u64_compiled(struct jak_carbon_revise *context, const struct jak_carbon_dot_path *path,
+bool carbon_update_set_u64_compiled(struct jak_carbon_revise *context, const jak_carbon_dot_path *path,
                                     jak_u64 value)
 {
         return try_update_value(context, path, value, array_update_u64, column_update_u64);
 }
 
-bool carbon_update_set_i8_compiled(struct jak_carbon_revise *context, const struct jak_carbon_dot_path *path,
+bool carbon_update_set_i8_compiled(struct jak_carbon_revise *context, const jak_carbon_dot_path *path,
                                    jak_i8 value)
 {
         return try_update_value(context, path, value, array_update_i8, column_update_i8);
 }
 
-bool carbon_update_set_i16_compiled(struct jak_carbon_revise *context, const struct jak_carbon_dot_path *path,
+bool carbon_update_set_i16_compiled(struct jak_carbon_revise *context, const jak_carbon_dot_path *path,
                                     jak_i16 value)
 {
         return try_update_value(context, path, value, array_update_i16, column_update_i16);
 }
 
-bool carbon_update_set_i32_compiled(struct jak_carbon_revise *context, const struct jak_carbon_dot_path *path,
+bool carbon_update_set_i32_compiled(struct jak_carbon_revise *context, const jak_carbon_dot_path *path,
                                     jak_i32 value)
 {
         return try_update_value(context, path, value, array_update_i32, column_update_i32);
 }
 
-bool carbon_update_set_i64_compiled(struct jak_carbon_revise *context, const struct jak_carbon_dot_path *path,
+bool carbon_update_set_i64_compiled(struct jak_carbon_revise *context, const jak_carbon_dot_path *path,
                                     jak_i64 value)
 {
         return try_update_value(context, path, value, array_update_i64, column_update_i64);
 }
 
-bool carbon_update_set_float_compiled(struct jak_carbon_revise *context, const struct jak_carbon_dot_path *path,
+bool carbon_update_set_float_compiled(struct jak_carbon_revise *context, const jak_carbon_dot_path *path,
                                       float value)
 {
         return try_update_value(context, path, value, array_update_float, column_update_float);
 }
 
-bool carbon_update_set_unsigned_compiled(struct jak_carbon_revise *context, const struct jak_carbon_dot_path *path,
+bool carbon_update_set_unsigned_compiled(struct jak_carbon_revise *context, const jak_carbon_dot_path *path,
                                          jak_u64 value)
 {
         switch (number_min_type_unsigned(value)) {
@@ -516,7 +516,7 @@ bool carbon_update_set_unsigned_compiled(struct jak_carbon_revise *context, cons
         }
 }
 
-bool carbon_update_set_signed_compiled(struct jak_carbon_revise *context, const struct jak_carbon_dot_path *path,
+bool carbon_update_set_signed_compiled(struct jak_carbon_revise *context, const jak_carbon_dot_path *path,
                                        jak_i64 value)
 {
         switch (number_min_type_signed(value)) {
@@ -533,7 +533,7 @@ bool carbon_update_set_signed_compiled(struct jak_carbon_revise *context, const 
         }
 }
 
-bool carbon_update_set_string_compiled(struct jak_carbon_revise *context, const struct jak_carbon_dot_path *path,
+bool carbon_update_set_string_compiled(struct jak_carbon_revise *context, const jak_carbon_dot_path *path,
                                        const char *value)
 {
         // TODO: Implement
@@ -544,7 +544,7 @@ bool carbon_update_set_string_compiled(struct jak_carbon_revise *context, const 
         return false;
 }
 
-bool carbon_update_set_binary_compiled(struct jak_carbon_revise *context, const struct jak_carbon_dot_path *path,
+bool carbon_update_set_binary_compiled(struct jak_carbon_revise *context, const jak_carbon_dot_path *path,
                                        const void *value, size_t nbytes, const char *file_ext, const char *user_type)
 {
         // TODO: Implement
@@ -559,7 +559,7 @@ bool carbon_update_set_binary_compiled(struct jak_carbon_revise *context, const 
 }
 
 jak_carbon_insert *carbon_update_set_array_begin_compiled(struct jak_carbon_revise *context,
-                                                                 const struct jak_carbon_dot_path *path,
+                                                                 const jak_carbon_dot_path *path,
                                                                  struct jak_carbon_insert_array_state *state_out,
                                                                  jak_u64 array_capacity)
 {
@@ -581,9 +581,9 @@ bool carbon_update_set_array_end_compiled(struct jak_carbon_insert_array_state *
 }
 
 jak_carbon_insert *carbon_update_set_column_begin_compiled(struct jak_carbon_revise *context,
-                                                                  const struct jak_carbon_dot_path *path,
+                                                                  const jak_carbon_dot_path *path,
                                                                   struct jak_carbon_insert_column_state *state_out,
-                                                                  enum carbon_field_type type,
+                                                                  carbon_field_type_e type,
                                                                   jak_u64 column_capacity)
 {
         // TODO: Implement
@@ -721,7 +721,7 @@ bool carbon_update_one_set_array_end(struct jak_carbon_insert_array_state *state
 
 jak_carbon_insert *carbon_update_one_set_column_begin(struct jak_carbon_insert_column_state *state_out,
                                                              const char *dot_path, jak_carbon *rev_doc,
-                                                             jak_carbon *doc, enum carbon_field_type type,
+                                                             jak_carbon *doc, carbon_field_type_e type,
                                                              jak_u64 column_capacity)
 {
         struct jak_carbon_revise revise;
@@ -741,97 +741,97 @@ bool carbon_update_one_set_column_end(struct jak_carbon_insert_column_state *sta
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bool carbon_update_one_set_null_compiled(const struct jak_carbon_dot_path *path, jak_carbon *rev_doc,
+bool carbon_update_one_set_null_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc,
                                          jak_carbon *doc)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_null_compiled, path);
 }
 
-bool carbon_update_one_set_true_compiled(const struct jak_carbon_dot_path *path, jak_carbon *rev_doc,
+bool carbon_update_one_set_true_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc,
                                          jak_carbon *doc)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_true_compiled, path);
 }
 
-bool carbon_update_one_set_false_compiled(const struct jak_carbon_dot_path *path, jak_carbon *rev_doc,
+bool carbon_update_one_set_false_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc,
                                           jak_carbon *doc)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_false_compiled, path);
 }
 
-bool carbon_update_one_set_u8_compiled(const struct jak_carbon_dot_path *path, jak_carbon *rev_doc,
+bool carbon_update_one_set_u8_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc,
                                        jak_carbon *doc, jak_u8 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_u8_compiled, path, value);
 }
 
-bool carbon_update_one_set_u16_compiled(const struct jak_carbon_dot_path *path, jak_carbon *rev_doc,
+bool carbon_update_one_set_u16_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc,
                                         jak_carbon *doc, jak_u16 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_u16_compiled, path, value);
 }
 
-bool carbon_update_one_set_u32_compiled(const struct jak_carbon_dot_path *path, jak_carbon *rev_doc,
+bool carbon_update_one_set_u32_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc,
                                         jak_carbon *doc, jak_u32 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_u32_compiled, path, value);
 }
 
-bool carbon_update_one_set_u64_compiled(const struct jak_carbon_dot_path *path, jak_carbon *rev_doc,
+bool carbon_update_one_set_u64_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc,
                                         jak_carbon *doc, jak_u64 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_u64_compiled, path, value);
 }
 
-bool carbon_update_one_set_i8_compiled(const struct jak_carbon_dot_path *path, jak_carbon *rev_doc,
+bool carbon_update_one_set_i8_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc,
                                        jak_carbon *doc, jak_i8 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_i8_compiled, path, value);
 }
 
-bool carbon_update_one_set_i16_compiled(const struct jak_carbon_dot_path *path, jak_carbon *rev_doc,
+bool carbon_update_one_set_i16_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc,
                                         jak_carbon *doc, jak_i16 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_i16_compiled, path, value);
 }
 
-bool carbon_update_one_set_i32_compiled(const struct jak_carbon_dot_path *path, jak_carbon *rev_doc,
+bool carbon_update_one_set_i32_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc,
                                         jak_carbon *doc, jak_i32 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_i32_compiled, path, value);
 }
 
-bool carbon_update_one_set_i64_compiled(const struct jak_carbon_dot_path *path, jak_carbon *rev_doc,
+bool carbon_update_one_set_i64_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc,
                                         jak_carbon *doc, jak_i64 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_i64_compiled, path, value);
 }
 
-bool carbon_update_one_set_float_compiled(const struct jak_carbon_dot_path *path, jak_carbon *rev_doc,
+bool carbon_update_one_set_float_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc,
                                           jak_carbon *doc, float value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_float_compiled, path, value);
 }
 
-bool carbon_update_one_set_unsigned_compiled(const struct jak_carbon_dot_path *path, jak_carbon *rev_doc,
+bool carbon_update_one_set_unsigned_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc,
                                              jak_carbon *doc, jak_u64 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_unsigned_compiled, path, value);
 }
 
-bool carbon_update_one_set_signed_compiled(const struct jak_carbon_dot_path *path, jak_carbon *rev_doc,
+bool carbon_update_one_set_signed_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc,
                                            jak_carbon *doc, jak_i64 value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_signed_compiled, path, value);
 }
 
-bool carbon_update_one_set_string_compiled(const struct jak_carbon_dot_path *path, jak_carbon *rev_doc,
+bool carbon_update_one_set_string_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc,
                                            jak_carbon *doc, const char *value)
 {
         return revision_context_delegate_func(rev_doc, doc, carbon_update_set_string_compiled, path, value);
 }
 
-bool carbon_update_one_set_binary_compiled(const struct jak_carbon_dot_path *path, jak_carbon *rev_doc,
+bool carbon_update_one_set_binary_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc,
                                            jak_carbon *doc, const void *value, size_t nbytes,
                                            const char *file_ext,
                                            const char *user_type)
@@ -841,7 +841,7 @@ bool carbon_update_one_set_binary_compiled(const struct jak_carbon_dot_path *pat
 }
 
 jak_carbon_insert *carbon_update_one_set_array_begin_compiled(struct jak_carbon_insert_array_state *state_out,
-                                                                     const struct jak_carbon_dot_path *path,
+                                                                     const jak_carbon_dot_path *path,
                                                                      jak_carbon *rev_doc, jak_carbon *doc,
                                                                      jak_u64 array_capacity)
 {
@@ -861,9 +861,9 @@ bool carbon_update_one_set_array_end_compiled(struct jak_carbon_insert_array_sta
 }
 
 jak_carbon_insert *carbon_update_one_set_column_begin_compiled(
-        struct jak_carbon_insert_column_state *state_out, const struct jak_carbon_dot_path *path,
+        struct jak_carbon_insert_column_state *state_out, const jak_carbon_dot_path *path,
         jak_carbon *rev_doc,
-        jak_carbon *doc, enum carbon_field_type type, jak_u64 column_capacity)
+        jak_carbon *doc, carbon_field_type_e type, jak_u64 column_capacity)
 {
         struct jak_carbon_revise revise;
         carbon_revise_begin(&revise, rev_doc, doc);

@@ -434,6 +434,6 @@ static void carbon_header_init(jak_carbon *doc, jak_carbon_key_e key_type)
         carbon_key_create(&doc->memfile, key_type, &doc->err);
 
         if (key_type != JAK_CARBON_KEY_NOKEY) {
-                carbon_commit_hash_create(&doc->memfile);
+                jak_carbon_commit_hash_create(&doc->memfile);
         }
 }

@@ -30,7 +30,7 @@ JAK_BEGIN_DECL
 struct jak_carbon_path_evaluator {
         jak_carbon *doc;
         jak_carbon_array_it root_it;
-        enum carbon_path_status status;
+        carbon_path_status_e status;
         struct jak_error err;
 
         struct {
@@ -45,7 +45,7 @@ struct jak_carbon_path_evaluator {
                         } object;
 
                         struct {
-                                struct jak_carbon_column_it it;
+                                jak_carbon_column_it it;
                                 jak_u32 elem_pos;
                         } column;
 
@@ -53,13 +53,13 @@ struct jak_carbon_path_evaluator {
         } result;
 };
 
-bool carbon_path_evaluator_begin(struct jak_carbon_path_evaluator *eval, struct jak_carbon_dot_path *path,
+bool carbon_path_evaluator_begin(struct jak_carbon_path_evaluator *eval, jak_carbon_dot_path *path,
                                  jak_carbon *doc);
 
-bool carbon_path_evaluator_begin_mutable(struct jak_carbon_path_evaluator *eval, const struct jak_carbon_dot_path *path,
+bool carbon_path_evaluator_begin_mutable(struct jak_carbon_path_evaluator *eval, const jak_carbon_dot_path *path,
                                          struct jak_carbon_revise *context);
 
-bool carbon_path_evaluator_status(enum carbon_path_status *status, struct jak_carbon_path_evaluator *state);
+bool carbon_path_evaluator_status(carbon_path_status_e *status, struct jak_carbon_path_evaluator *state);
 
 bool carbon_path_evaluator_has_result(struct jak_carbon_path_evaluator *state);
 
