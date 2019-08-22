@@ -471,7 +471,7 @@ result_from_column(jak_carbon_find *find, jak_u32 requested_idx, jak_carbon_colu
         switch (find->type) {
                 case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
                         jak_u8 field_value = jak_carbon_column_it_boolean_values(NULL, it)[requested_idx];
-                        if (is_null_boolean(field_value)) {
+                        if (JAK_IS_NULL_BOOLEAN(field_value)) {
                                 find->type = JAK_CARBON_FIELD_TYPE_NULL;
                         } else if (field_value == JAK_CARBON_BOOLEAN_COLUMN_TRUE) {
                                 find->type = JAK_CARBON_FIELD_TYPE_TRUE;
@@ -484,7 +484,7 @@ result_from_column(jak_carbon_find *find, jak_u32 requested_idx, jak_carbon_colu
                         break;
                 case JAK_CARBON_FIELD_TYPE_COLUMN_U8: {
                         jak_u8 field_value = jak_carbon_column_it_u8_values(NULL, it)[requested_idx];
-                        if (is_null_u8(field_value)) {
+                        if (JAK_IS_NULL_U8(field_value)) {
                                 find->type = JAK_CARBON_FIELD_TYPE_NULL;
                         } else {
                                 find->type = JAK_CARBON_FIELD_TYPE_NUMBER_U8;
@@ -494,7 +494,7 @@ result_from_column(jak_carbon_find *find, jak_u32 requested_idx, jak_carbon_colu
                         break;
                 case JAK_CARBON_FIELD_TYPE_COLUMN_U16: {
                         jak_u16 field_value = jak_carbon_column_it_u16_values(NULL, it)[requested_idx];
-                        if (is_null_u16(field_value)) {
+                        if (JAK_IS_NULL_U16(field_value)) {
                                 find->type = JAK_CARBON_FIELD_TYPE_NULL;
                         } else {
                                 find->type = JAK_CARBON_FIELD_TYPE_NUMBER_U16;
@@ -504,7 +504,7 @@ result_from_column(jak_carbon_find *find, jak_u32 requested_idx, jak_carbon_colu
                         break;
                 case JAK_CARBON_FIELD_TYPE_COLUMN_U32: {
                         jak_u32 field_value = jak_carbon_column_it_u32_values(NULL, it)[requested_idx];
-                        if (is_null_u32(field_value)) {
+                        if (JAK_IS_NULL_U32(field_value)) {
                                 find->type = JAK_CARBON_FIELD_TYPE_NULL;
                         } else {
                                 find->type = JAK_CARBON_FIELD_TYPE_NUMBER_U32;
@@ -514,7 +514,7 @@ result_from_column(jak_carbon_find *find, jak_u32 requested_idx, jak_carbon_colu
                         break;
                 case JAK_CARBON_FIELD_TYPE_COLUMN_U64: {
                         jak_u64 field_value = jak_carbon_column_it_u64_values(NULL, it)[requested_idx];
-                        if (is_null_u64(field_value)) {
+                        if (JAK_IS_NULL_U64(field_value)) {
                                 find->type = JAK_CARBON_FIELD_TYPE_NULL;
                         } else {
                                 find->type = JAK_CARBON_FIELD_TYPE_NUMBER_U64;
@@ -524,7 +524,7 @@ result_from_column(jak_carbon_find *find, jak_u32 requested_idx, jak_carbon_colu
                         break;
                 case JAK_CARBON_FIELD_TYPE_COLUMN_I8: {
                         jak_i8 field_value = jak_carbon_column_it_i8_values(NULL, it)[requested_idx];
-                        if (is_null_i8(field_value)) {
+                        if (JAK_IS_NULL_I8(field_value)) {
                                 find->type = JAK_CARBON_FIELD_TYPE_NULL;
                         } else {
                                 find->type = JAK_CARBON_FIELD_TYPE_NUMBER_I8;
@@ -534,7 +534,7 @@ result_from_column(jak_carbon_find *find, jak_u32 requested_idx, jak_carbon_colu
                         break;
                 case JAK_CARBON_FIELD_TYPE_COLUMN_I16: {
                         jak_i16 field_value = jak_carbon_column_it_i16_values(NULL, it)[requested_idx];
-                        if (is_null_i16(field_value)) {
+                        if (JAK_IS_NULL_I16(field_value)) {
                                 find->type = JAK_CARBON_FIELD_TYPE_NULL;
                         } else {
                                 find->type = JAK_CARBON_FIELD_TYPE_NUMBER_I16;
@@ -544,7 +544,7 @@ result_from_column(jak_carbon_find *find, jak_u32 requested_idx, jak_carbon_colu
                         break;
                 case JAK_CARBON_FIELD_TYPE_COLUMN_I32: {
                         jak_i32 field_value = jak_carbon_column_it_i32_values(NULL, it)[requested_idx];
-                        if (is_null_i32(field_value)) {
+                        if (JAK_IS_NULL_I32(field_value)) {
                                 find->type = JAK_CARBON_FIELD_TYPE_NULL;
                         } else {
                                 find->type = JAK_CARBON_FIELD_TYPE_NUMBER_I32;
@@ -554,7 +554,7 @@ result_from_column(jak_carbon_find *find, jak_u32 requested_idx, jak_carbon_colu
                         break;
                 case JAK_CARBON_FIELD_TYPE_COLUMN_I64: {
                         jak_i64 field_value = jak_carbon_column_it_i64_values(NULL, it)[requested_idx];
-                        if (is_null_i64(field_value)) {
+                        if (JAK_IS_NULL_I64(field_value)) {
                                 find->type = JAK_CARBON_FIELD_TYPE_NULL;
                         } else {
                                 find->type = JAK_CARBON_FIELD_TYPE_NUMBER_I64;
@@ -564,7 +564,7 @@ result_from_column(jak_carbon_find *find, jak_u32 requested_idx, jak_carbon_colu
                         break;
                 case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT: {
                         float field_value = jak_carbon_column_it_float_values(NULL, it)[requested_idx];
-                        if (is_null_float(field_value)) {
+                        if (JAK_IS_NULL_FLOAT(field_value)) {
                                 find->type = JAK_CARBON_FIELD_TYPE_NULL;
                         } else {
                                 find->type = JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT;

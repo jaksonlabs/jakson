@@ -1,4 +1,4 @@
-# Donors to Libcarbon 
+# Donors to Jakson
 
 [libcarbon](https://github.com/protolabs/libcarbon) is a not-for-profit, community-driven open source project. It is 
 legally represented by [Marcus Pinnecke](http://www.pinnecke.info). The project lives of the energetic efforts of its 
@@ -7,7 +7,7 @@ contributors and by the donations from the community.
 For more information about how donations are used, see [dontation section of our README](README.md). 
 
 The following list shows currently active monthly donors who made themself generous deed immortalized in the next 
-stable release of libcarbon:
+stable release of Jakson:
 
 ## Sponsors
 

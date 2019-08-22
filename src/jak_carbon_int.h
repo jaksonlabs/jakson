@@ -41,7 +41,7 @@ typedef struct jak_carbon_insert {
                 jak_carbon_object_it *object;
         } context;
 
-        struct jak_memfile memfile;
+        jak_memfile memfile;
         jak_offset_t position;
         jak_error err;
 } jak_carbon_insert;
@@ -68,9 +68,9 @@ typedef struct jak_carbon_insert_column_state {
         jak_offset_t column_begin, column_end;
 } jak_carbon_insert_column_state;
 
-bool jak_carbon_int_insert_object(struct jak_memfile *memfile, size_t nbytes);
-bool jak_carbon_int_insert_array(struct jak_memfile *memfile, size_t nbytes);
-bool jak_carbon_int_insert_column(struct jak_memfile *memfile_in, jak_error *err_in, jak_carbon_column_type_e type, size_t capactity);
+bool jak_carbon_int_insert_object(jak_memfile *memfile, size_t nbytes);
+bool jak_carbon_int_insert_array(jak_memfile *memfile, size_t nbytes);
+bool jak_carbon_int_insert_column(jak_memfile *jak_memfile_in, jak_error *err_in, jak_carbon_column_type_e type, size_t capactity);
 
 /**
  * Returns the number of bytes required to store a field type including its type marker in a byte sequence.
@@ -93,18 +93,18 @@ bool jak_carbon_int_object_it_prop_key_access(jak_carbon_object_it *it);
 bool jak_carbon_int_object_it_prop_value_skip(jak_carbon_object_it *it);
 bool jak_carbon_int_object_it_prop_skip(jak_carbon_object_it *it);
 bool jak_carbon_int_object_skip_contents(bool *is_empty_slot, bool *is_array_end, jak_carbon_object_it *it);
-bool jak_carbon_int_field_data_access(struct jak_memfile *file, jak_error *err, jak_field_access *field_access);
+bool jak_carbon_int_field_data_access(jak_memfile *file, jak_error *err, jak_field_access *field_access);
 
 jak_offset_t jak_carbon_int_column_get_payload_off(jak_carbon_column_it *it);
 jak_offset_t jak_carbon_int_payload_after_header(jak_carbon *doc);
 
 jak_u64 jak_carbon_int_header_get_commit_hash(jak_carbon *doc);
 
-void jak_carbon_int_history_push(struct jak_vector ofType(jak_offset_t) *vec, jak_offset_t off);
-void jak_carbon_int_history_clear(struct jak_vector ofType(jak_offset_t) *vec);
-jak_offset_t jak_carbon_int_history_pop(struct jak_vector ofType(jak_offset_t) *vec);
-jak_offset_t jak_carbon_int_history_peek(struct jak_vector ofType(jak_offset_t) *vec);
-bool jak_carbon_int_history_has(struct jak_vector ofType(jak_offset_t) *vec);
+void jak_carbon_int_history_push(jak_vector ofType(jak_offset_t) *vec, jak_offset_t off);
+void jak_carbon_int_history_clear(jak_vector ofType(jak_offset_t) *vec);
+jak_offset_t jak_carbon_int_history_pop(jak_vector ofType(jak_offset_t) *vec);
+jak_offset_t jak_carbon_int_history_peek(jak_vector ofType(jak_offset_t) *vec);
+bool jak_carbon_int_history_has(jak_vector ofType(jak_offset_t) *vec);
 
 bool jak_carbon_int_field_access_create(jak_field_access *field);
 bool jak_carbon_int_field_access_clone(jak_field_access *dst, jak_field_access *src);
@@ -135,7 +135,7 @@ void jak_carbon_int_auto_close_nested_array_it(jak_field_access *field);
 void jak_carbon_int_auto_close_nested_object_it(jak_field_access *field);
 void jak_carbon_int_auto_close_nested_column_it(jak_field_access *field);
 
-bool jak_carbon_int_field_remove(struct jak_memfile *memfile, jak_error *err, jak_carbon_field_type_e type);
+bool jak_carbon_int_field_remove(jak_memfile *memfile, jak_error *err, jak_carbon_field_type_e type);
 
 /**
  * For <code>mode</code>, see <code>jak_carbon_create_begin</code>

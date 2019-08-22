@@ -29,9 +29,9 @@
 
 JAK_BEGIN_DECL
 
-#ifndef noop
-#define noop (void)0
-#endif //noop
+#ifndef JAK_NOOP
+#define JAK_NOOP (void)0
+#endif
 
 #include <stdlib.h>
 #include <pthread.h>
@@ -44,92 +44,84 @@ JAK_BEGIN_DECL
 
 #endif
 
-#define MAX_NUM_TASKS 4097
+#define JAK_THREAD_POOL_MAX_TASKS 4097
 
-typedef void (*task_routine)(void *routine);
+typedef void (*jak_task_routine)(void *routine);
 
-struct thread_task {
+typedef struct jak_thread_task {
         void *args;
         pthread_attr_t *attr;
-        task_routine routine;
+        jak_task_routine routine;
         size_t group_id;
         size_t priority;
-        struct task_stats statistics;
-};
+        jak_task_stats statistics;
+} jak_thread_task;
 
-struct thread_info;
-
-struct task_state {
+typedef struct jak_task_state {
         atomic_int task_count; // remaining tasks in this group
         unsigned generation;
-};
+} jak_task_state;
 
-struct task_handle {
+typedef struct jak_task_handle {
         size_t index;
         unsigned generation;
-};
+} jak_task_handle;
 
-struct thread_pool {
+typedef struct jak_thread_pool {
         char *name;
         pthread_t *pool;
         jak_priority_queue waiting_tasks;
-        struct task_state *task_group_states;
+        jak_task_state *task_group_states;
         size_t task_state_capacity; // number of tasks that can be tracked
         size_t size;
         size_t capacity;
-        struct thread_info **thread_infos;
-        struct thread_task **thread_tasks;
-        struct thread_pool_stats *statistics;
+        jak_thread_info **thread_infos;
+        jak_thread_task **thread_tasks;
+        jak_thread_pool_stats *statistics;
         int enable_monitoring;
-};
+} jak_thread_pool;
 
-struct thread_info {
+typedef struct jak_thread_info {
         char name[12];
-        struct thread_pool *pool;
+        jak_thread_pool *pool;
         size_t id;
         atomic_int status;
-        struct thread_stats *statistics;
-};
+        jak_thread_stats *statistics;
+} jak_thread_info;
 
-struct thread_pool *thread_pool_create(size_t num_threads, int enable_monitoring);
-
-struct thread_pool *thread_pool_create_named(size_t num_threads, const char *name, int enable_monitoring);
+jak_thread_pool *jak_thread_pool_create(size_t num_threads, int enable_monitoring);
+jak_thread_pool *jak_thread_pool_create_named(size_t num_threads, const char *name, int enable_monitoring);
 
 // Releases all resources hold by the threadpool. 
 // Currently working threads may finish but tasks left in the queue will be discarded.
-void thread_pool_free(struct thread_pool *pool);
-
-void thread_pool_set_name(struct thread_pool *pool, const char *name);
+void jak_thread_pool_free(jak_thread_pool *pool);
+void jak_thread_pool_set_name(jak_thread_pool *pool, const char *name);
 
 // Sets the number of active threads to num_threads.
 // Currently working threads are terminated after there task is completed.
-bool thread_pool_resize(struct thread_pool *pool, size_t num_threads);
+bool jak_thread_pool_resize(jak_thread_pool *pool, size_t num_threads);
 
 // Add multiple tasks to be executed. Their progress is tracked by a single handle.
 // hndl can be a nullptr.
-bool thread_pool_enqueue_tasks(struct thread_task *task, struct thread_pool *pool, size_t num_tasks,
-                               struct task_handle *hndl);
+bool jak_thread_pool_enqueue_tasks(jak_thread_task *task, jak_thread_pool *pool, size_t num_tasks, jak_task_handle *hndl);
 
-bool thread_pool_enqueue_task(struct thread_task *task, struct thread_pool *pool, struct task_handle *hndl);
+bool jak_thread_pool_enqueue_task(jak_thread_task *task, jak_thread_pool *pool, jak_task_handle *hndl);
 
 // Add multiple tasks to be executed. Waits until all passed tasks are finished. 
 // The main thread also participates in task execution
-bool thread_pool_enqueue_tasks_wait(struct thread_task *task, struct thread_pool *pool, size_t num_tasks);
+bool jak_thread_pool_enqueue_tasks_wait(jak_thread_task *task, jak_thread_pool *pool, size_t num_tasks);
 
 // Waits until the tasks referenced by hndl are completed.
-bool thread_pool_wait_for_task(struct thread_pool *pool, struct task_handle *hndl);
+bool jak_thread_pool_wait_for_task(jak_thread_pool *pool, jak_task_handle *hndl);
 
 // Waits until all tasks currently in the queue are executed.
 // The main thread also participates in task execution.
-bool thread_pool_wait_for_all(struct thread_pool *pool);
+bool jak_thread_pool_wait_for_all(jak_thread_pool *pool);
 
-void *__thread_main(void *args);
-
-struct thread_task *__get_next_task(struct thread_pool *pool);
-
-bool __create_thread(struct thread_info *thread_info, pthread_t *pp);
-
-void __sig_seg(int sig);
+void *__jak_thread_main(void *args);
+jak_thread_task *__jak_get_next_task(jak_thread_pool *pool);
+bool __jak_create_thread(jak_thread_info *thread_info, pthread_t *pp);
+void __jak_sig_seg(int sig);
 
 JAK_END_DECL
 

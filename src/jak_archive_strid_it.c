@@ -48,7 +48,7 @@ bool jak_strid_iter_next(bool *success, jak_strid_info **info, jak_error *err, s
 
         if (it->disk_offset != 0 && it->is_open) {
                 jak_string_entry_header header;
-                size_t vec_pos = 0;
+                size_t jak_vector_pos = 0;
                 do {
                         fseek(it->disk_file, it->disk_offset, SEEK_SET);
                         int num_read = fread(&header, sizeof(jak_string_entry_header), 1, it->disk_file);
@@ -61,15 +61,15 @@ bool jak_strid_iter_next(bool *success, jak_strid_info **info, jak_error *err, s
                                 *success = false;
                                 return false;
                         } else {
-                                it->vector[vec_pos].id = header.jak_string_id;
-                                it->vector[vec_pos].offset = ftell(it->disk_file);
-                                it->vector[vec_pos].strlen = header.jak_string_len;
+                                it->vector[jak_vector_pos].id = header.jak_string_id;
+                                it->vector[jak_vector_pos].offset = ftell(it->disk_file);
+                                it->vector[jak_vector_pos].strlen = header.jak_string_len;
                                 it->disk_offset = header.next_entry_off;
-                                vec_pos++;
+                                jak_vector_pos++;
                         }
-                } while (header.next_entry_off != 0 && vec_pos < JAK_ARRAY_LENGTH(it->vector));
+                } while (header.next_entry_off != 0 && jak_vector_pos < JAK_ARRAY_LENGTH(it->vector));
 
-                *info_length = vec_pos;
+                *info_length = jak_vector_pos;
                 *success = true;
                 *info = &it->vector[0];
                 return true;

@@ -140,20 +140,20 @@ bool jak_carbon_field_type_is_constant(jak_carbon_field_type_e type);
 
 jak_carbon_field_class_e jak_carbon_field_type_get_class(jak_carbon_field_type_e type, jak_error *err);
 
-bool jak_carbon_field_skip(struct jak_memfile *file);
-bool jak_carbon_field_skip_object(struct jak_memfile *file);
-bool jak_carbon_field_skip_array(struct jak_memfile *file);
-bool jak_carbon_field_skip_column(struct jak_memfile *file);
-bool jak_carbon_field_skip_binary(struct jak_memfile *file);
-bool jak_carbon_field_skip_custom_binary(struct jak_memfile *file);
-bool jak_carbon_field_skip_string(struct jak_memfile *file);
-bool jak_carbon_field_skip_float(struct jak_memfile *file);
-bool jak_carbon_field_skip_boolean(struct jak_memfile *file);
-bool jak_carbon_field_skip_null(struct jak_memfile *file);
-bool jak_carbon_field_skip_8(struct jak_memfile *file);
-bool jak_carbon_field_skip_16(struct jak_memfile *file);
-bool jak_carbon_field_skip_32(struct jak_memfile *file);
-bool jak_carbon_field_skip_64(struct jak_memfile *file);
+bool jak_carbon_field_skip(jak_memfile *file);
+bool jak_carbon_field_skip_object(jak_memfile *file);
+bool jak_carbon_field_skip_array(jak_memfile *file);
+bool jak_carbon_field_skip_column(jak_memfile *file);
+bool jak_carbon_field_skip_binary(jak_memfile *file);
+bool jak_carbon_field_skip_custom_binary(jak_memfile *file);
+bool jak_carbon_field_skip_string(jak_memfile *file);
+bool jak_carbon_field_skip_float(jak_memfile *file);
+bool jak_carbon_field_skip_boolean(jak_memfile *file);
+bool jak_carbon_field_skip_null(jak_memfile *file);
+bool jak_carbon_field_skip_8(jak_memfile *file);
+bool jak_carbon_field_skip_16(jak_memfile *file);
+bool jak_carbon_field_skip_32(jak_memfile *file);
+bool jak_carbon_field_skip_64(jak_memfile *file);
 
 jak_carbon_field_type_e jak_carbon_field_type_for_column(jak_carbon_column_type_e type);
 jak_carbon_field_type_e jak_carbon_field_type_column_entry_to_regular_type(jak_carbon_field_type_e type, bool is_null, bool is_true);

@@ -9,7 +9,7 @@
 
 struct js_to_context
 {
-    struct jak_string_dict dictionary;
+    jak_string_dict dictionary;
     jak_doc_bulk context;
     jak_doc_entries *partition;
     jak_column_doc *partitionMetaModel;
@@ -100,7 +100,7 @@ static int convertJs2Model(struct js_to_context *context, FILE *file, bool optim
 static void cleanup(FILE *file, struct js_to_context *context)
 {
     JAK_CONSOLE_WRITE(file, "  - Perform cleanup operations%s", "");
-    strdic_drop(&context->dictionary);
+    jak_string_dict_drop(&context->dictionary);
     jak_doc_bulk_drop(&context->context);
     jak_doc_entries_drop(context->partition);
     jak_columndoc_free(context->partitionMetaModel);
@@ -223,12 +223,12 @@ static void tracker_end_load_archive()
     JAK_CONSOLE_WRITELN(stdout, "%s", "  - Load archive from disk finished");
 }
 
-static void tracker_begin_setup_jak_string_dictionary()
+static void tracker_begin_setup_jak_string_dict_ionary()
 {
     JAK_CONSOLE_WRITELN(stdout, "%s", "  - Setup string dictionary started");
 }
 
-static void tracker_end_setup_jak_string_dictionary()
+static void tracker_end_setup_jak_string_dict_ionary()
 {
     JAK_CONSOLE_WRITELN(stdout, "%s", "  - Setup string dictionary finished");
 }
@@ -324,7 +324,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *
         bool flagForceOverwrite = false;
         bool flagBakeStringIdIndex = true;
         jak_packer_e compressor = JAK_PACK_NONE;
-        enum jak_str_dict_tag dic_type = ASYNC;
+        jak_str_dict_tag_e dic_type = JAK_ASYNC;
         int jak_string_dic_async_nthreads = 8;
 
         int outputIdx = 0, inputIdx = 1;
@@ -356,9 +356,9 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *
                 } else if (strcmp(opt, JS_2_CAB_OPTION_DIC_TYPE) == 0 && i++ < argc) {
                     const char *dic_type_name = argv[i];
                     if (strcmp(dic_type_name, "async") == 0) {
-                        dic_type = ASYNC;
+                        dic_type = JAK_ASYNC;
                     } else if (strcmp(dic_type_name, "sync") == 0) {
-                        dic_type = SYNC;
+                        dic_type = JAK_SYNC;
                     } else {
                         JAK_CONSOLE_WRITE(file, "unsupported dictionary type requested: '%s'",
                                              dic_type_name);
@@ -441,8 +441,8 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *
         progress_tracker.end_write_archive_file_to_disk = tracker_end_write_archive_file_to_disk;
         progress_tracker.begin_load_archive = tracker_begin_load_archive;
         progress_tracker.end_load_archive = tracker_end_load_archive;
-        progress_tracker.begin_setup_jak_string_dictionary = tracker_begin_setup_jak_string_dictionary;
-        progress_tracker.end_setup_jak_string_dictionary = tracker_end_setup_jak_string_dictionary;
+        progress_tracker.begin_setup_jak_string_dict_ionary = tracker_begin_setup_jak_string_dict_ionary;
+        progress_tracker.end_setup_jak_string_dict_ionary = tracker_end_setup_jak_string_dict_ionary;
         progress_tracker.begin_parse_json = tracker_begin_parse_json;
         progress_tracker.end_parse_json = tracker_end_parse_json;
         progress_tracker.begin_test_json = tracker_begin_test_json;
@@ -594,7 +594,7 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *
     if (argc != 1) {
         JAK_CONSOLE_WRITE(file, "Require exactly one <input> parameter for <args>.%s", "");
         JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
-        JAK_CONSOLE_WRITELN(file, "Run '%s' to see an example on the usage.", "$ ark-carbon to_json");
+        JAK_CONSOLE_WRITELN(file, "Run '%s' to see an example on the usage.", "$ jakson-tool to_json");
         return false;
     } else {
         const int filePathArgIdx = 0;

@@ -65,24 +65,24 @@ JAK_BEGIN_DECL
  *          - ... if speed matters, use fast-types of the C library (e.g., <code>uint_fast32_t</code>)
  *          - ... if space matters, use fix-types of the C library (e.g., <code>uint32_t</code>)
  *      - if variable-length types are a good choice, and...
- *          - ... if space shall be minimized in exchange of read/write performance, use <code>uintvar_stream_t</code>
- *          - ... if read/write performance shall be maximized in exchange of space, use <code>uintvar_marker_t</code>
+ *          - ... if space shall be minimized in exchange of read/write performance, use <code>jak_uintvar_stream_t</code>
+ *          - ... if read/write performance shall be maximized in exchange of space, use <code>jak_uintvar_marker_t</code>
  */
 
-typedef void *uintvar_stream_t;
+typedef void *jak_uintvar_stream_t;
 
-#define uintvar_stream_max_blocks()    (4)
+#define JAK_UINTVAR_STREAM_MAX_BLOCKS()    (4)
 
-jak_u8 uintvar_stream_write(uintvar_stream_t dst, jak_u64 value);
+jak_u8 jak_uintvar_stream_write(jak_uintvar_stream_t dst, jak_u64 value);
 
-#define uintvar_stream_sizeof(value)                                                                                   \
+#define JAK_UINTVAR_STREAM_SIZEOF(value)                                                                                   \
 ({                                                                                                                     \
-        size_t num_blocks_strlen = uintvar_stream_required_blocks(value);                                              \
-        num_blocks_strlen = num_blocks_strlen < sizeof(uintvar_stream_t) ? sizeof(uintvar_stream_t):num_blocks_strlen; \
+        size_t num_blocks_strlen = JAK_UINTVAR_STREAM_REQUIRED_BLOCKS(value);                                              \
+        num_blocks_strlen = num_blocks_strlen < sizeof(jak_uintvar_stream_t) ? sizeof(jak_uintvar_stream_t):num_blocks_strlen; \
         num_blocks_strlen;                                                                                             \
 })
 
-#define uintvar_stream_required_blocks(value)           \
+#define JAK_UINTVAR_STREAM_REQUIRED_BLOCKS(value)           \
 ({                                                      \
         jak_u8 num_blocks_required;                         \
         if (value < 128u) {                             \
@@ -109,7 +109,7 @@ jak_u8 uintvar_stream_write(uintvar_stream_t dst, jak_u64 value);
         num_blocks_required;                            \
 })
 
-jak_u64 uintvar_stream_read(jak_u8 *nbytes, uintvar_stream_t src);
+jak_u64 jak_uintvar_stream_read(jak_u8 *nbytes, jak_uintvar_stream_t src);
 
 JAK_END_DECL
 

@@ -27,10 +27,10 @@ bool jak_bitmap_create(jak_bitmap *bitmap, jak_u16 num_bits)
 
         jak_allocator alloc;
         jak_alloc_create_std(&alloc);
-        vec_create(&bitmap->data, &alloc, sizeof(jak_u32), ceil(num_bits / (double) JAK_BIT_NUM_OF(jak_u32)));
-        size_t cap = vec_capacity(&bitmap->data);
+        jak_vector_create(&bitmap->data, &alloc, sizeof(jak_u32), ceil(num_bits / (double) JAK_BIT_NUM_OF(jak_u32)));
+        size_t cap = jak_vector_capacity(&bitmap->data);
         jak_u32 zero = 0;
-        vec_repeated_push(&bitmap->data, &zero, cap);
+        jak_vector_repeated_push(&bitmap->data, &zero, cap);
         bitmap->num_bits = num_bits;
 
         return true;
@@ -39,12 +39,12 @@ bool jak_bitmap_create(jak_bitmap *bitmap, jak_u16 num_bits)
 bool jak_bitmap_cpy(jak_bitmap *dst, const jak_bitmap *src)
 {
         dst->num_bits = src->num_bits;
-        return vec_cpy(&dst->data, &src->data);
+        return jak_vector_cpy(&dst->data, &src->data);
 }
 
 bool jak_bitmap_drop(jak_bitmap *bitset)
 {
-        return vec_drop(&bitset->data);
+        return jak_vector_drop(&bitset->data);
 }
 
 size_t jak_bitmap_nbits(const jak_bitmap *bitset)
@@ -56,8 +56,8 @@ size_t jak_bitmap_nbits(const jak_bitmap *bitset)
 bool jak_bitmap_clear(jak_bitmap *bitset)
 {
         JAK_ERROR_IF_NULL(bitset);
-        void *data = (void *) vec_data(&bitset->data);
-        memset(data, 0, sizeof(jak_u32) * vec_capacity(&bitset->data));
+        void *data = (void *) jak_vector_data(&bitset->data);
+        memset(data, 0, sizeof(jak_u32) * jak_vector_capacity(&bitset->data));
         return true;
 }
 
@@ -66,14 +66,14 @@ bool jak_bitmap_set(jak_bitmap *bitset, jak_u16 bit_position, bool on)
         JAK_ERROR_IF_NULL(bitset)
         size_t block_pos = floor(bit_position / (double) JAK_BIT_NUM_OF(jak_u32));
         size_t block_bit = bit_position % JAK_BIT_NUM_OF(jak_u32);
-        jak_u32 block = *vec_get(&bitset->data, block_pos, jak_u32);
+        jak_u32 block = *JAK_VECTOR_GET(&bitset->data, block_pos, jak_u32);
         jak_u32 mask = JAK_SET_BIT(block_bit);
         if (on) {
                 JAK_SET_BITS(block, mask);
         } else {
                 JAK_UNSET_BITS(block, mask);
         }
-        vec_set(&bitset->data, block_pos, &block);
+        jak_vector_set(&bitset->data, block_pos, &block);
         return true;
 }
 
@@ -82,7 +82,7 @@ bool jak_bitmap_get(jak_bitmap *bitset, jak_u16 bit_position)
         JAK_ERROR_IF_NULL(bitset)
         size_t block_pos = floor(bit_position / (double) JAK_BIT_NUM_OF(jak_u32));
         size_t block_bit = bit_position % JAK_BIT_NUM_OF(jak_u32);
-        jak_u32 block = *vec_get(&bitset->data, block_pos, jak_u32);
+        jak_u32 block = *JAK_VECTOR_GET(&bitset->data, block_pos, jak_u32);
         jak_u32 mask = JAK_SET_BIT(block_bit);
         return ((mask & block) >> bit_position) == true;
 }
@@ -125,7 +125,7 @@ bool jak_bitmap_blocks(jak_u32 **blocks, jak_u32 *num_blocks, const jak_bitmap *
         jak_u32 *result = JAK_MALLOC(map->data.num_elems * sizeof(jak_u32));
         jak_i32 k = 0;
         for (jak_i32 i = map->data.num_elems - 1; i >= 0; i--) {
-                result[k++] = *vec_get(&map->data, i, jak_u32);
+                result[k++] = *JAK_VECTOR_GET(&map->data, i, jak_u32);
         }
         *blocks = result;
         *num_blocks = map->data.num_elems;
@@ -148,7 +148,7 @@ bool jak_bitmap_print(FILE *file, const jak_bitmap *map)
         free(blocks);
 
         for (jak_i32 i = map->data.num_elems - 1; i >= 0; i--) {
-                jak_u32 block = *vec_get(&map->data, i, jak_u32);
+                jak_u32 block = *JAK_VECTOR_GET(&map->data, i, jak_u32);
                 jak_bitmap_print_bits(stdout, block);
                 fprintf(file, " |");
         }

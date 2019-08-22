@@ -23,27 +23,27 @@
 #include <jak_unique_id.h>
 #include <jak_hash.h>
 
-bool jak_carbon_commit_hash_create(struct jak_memfile *file)
+bool jak_carbon_commit_hash_create(jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(file)
 
         jak_u64 init_rev = 0;
         jak_unique_id_create(&init_rev);
 
-        memfile_ensure_space(file, sizeof(jak_u64));
-        memfile_write(file, &init_rev, sizeof(jak_u64));
+        jak_memfile_ensure_space(file, sizeof(jak_u64));
+        jak_memfile_write(file, &init_rev, sizeof(jak_u64));
 
         return true;
 }
 
-bool jak_carbon_commit_hash_skip(struct jak_memfile *file)
+bool jak_carbon_commit_hash_skip(jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(file)
-        memfile_skip(file, sizeof(jak_u64));
+        jak_memfile_skip(file, sizeof(jak_u64));
         return true;
 }
 
-bool jak_carbon_commit_hash_read(jak_u64 *commit_hash, struct jak_memfile *file)
+bool jak_carbon_commit_hash_read(jak_u64 *commit_hash, jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(commit_hash)
@@ -51,7 +51,7 @@ bool jak_carbon_commit_hash_read(jak_u64 *commit_hash, struct jak_memfile *file)
         return true;
 }
 
-bool jak_carbon_commit_hash_peek(jak_u64 *commit_hash, struct jak_memfile *file)
+bool jak_carbon_commit_hash_peek(jak_u64 *commit_hash, jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(commit_hash)
@@ -59,14 +59,14 @@ bool jak_carbon_commit_hash_peek(jak_u64 *commit_hash, struct jak_memfile *file)
         return true;
 }
 
-bool jak_carbon_commit_hash_update(struct jak_memfile *file, const char *base, jak_u64 len)
+bool jak_carbon_commit_hash_update(jak_memfile *file, const char *base, jak_u64 len)
 {
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(base)
         JAK_ERROR_IF_NULL(len)
         jak_u64 commit_hash;
         jak_carbon_commit_hash_compute(&commit_hash, base, len);
-        memfile_write(file, &commit_hash, sizeof(jak_u64));
+        jak_memfile_write(file, &commit_hash, sizeof(jak_u64));
         return true;
 }
 

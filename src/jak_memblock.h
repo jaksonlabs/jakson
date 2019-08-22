@@ -47,7 +47,7 @@ bool jak_memblock_move_right(jak_memblock *block, jak_offset_t where, size_t nby
 bool jak_memblock_move_left(jak_memblock *block, jak_offset_t where, size_t nbytes);
 bool jak_memblock_move_ex(jak_memblock *block, jak_offset_t where, size_t nbytes, bool zero_out);
 void *jak_memblock_move_contents_and_drop(jak_memblock *block);
-bool memfile_update_last_byte(jak_memblock *block, size_t where);
+bool jak_memfile_update_last_byte(jak_memblock *block, size_t where);
 
 JAK_END_DECL
 

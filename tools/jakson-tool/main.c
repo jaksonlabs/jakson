@@ -15,7 +15,7 @@
                           "                              particular compressor\n" \
                           "   --compressor <compressor>  Use <compressor> as compression technique for\n" \
                           "                              size optimization. Run `list compressors` in\n" \
-                          "                              ark-carbon to see available compressors\n" \
+                          "                              jakson-tool to see available compressors\n" \
                           "   --no-string-id-index       Turn-off pre-computation of string id to offset\n" \
                           "                              index\n" \
                           "   --read-optimized           Sort keys and values during pre-processing for\n" \
@@ -32,8 +32,8 @@
                           "                              parameter `--dic-type` is set to `async`.\n" \
                           "                              By default, 8 threads are spawned\n" \
                           "\nEXAMPLE\n" \
-                          "   $ ark-carbon convert out.carbon in.jak_json\n" \
-                          "   $ ark-carbon convert --size-optimized --read-optimized out.carbon in.jak_json" \
+                          "   $ jakson-tool convert out.carbon in.jak_json\n" \
+                          "   $ jakson-tool convert --size-optimized --read-optimized out.carbon in.jak_json" \
 
 #define DESC_CAB2JS_INFO  "Convert single CARBON file into JSON and print it to stdout"
 #define DESC_CAB2JS_USAGE "The parameter <args> is a path to a CARBON file that is converted JSON and printed on stdout.\n" \
@@ -48,7 +48,7 @@
                       "\nEXAMPLE\n" \
                       "   $ carbon cli myfile.carbon\n" \
 
-#define DESC_LIST       "List properties and configurations for ark-carbon to stdout"
+#define DESC_LIST       "List properties and configurations for jakson-tool to stdout"
 #define DESC_LIST_USAGE "The parameter <args> is one of the following constants:\n\n"                                  \
                         "   compressors               Shows available compressors used by `convert` module"
 
@@ -81,7 +81,7 @@ int main (int argc, char **argv)
     jak_command_opt_mgr manager;
     jak_command_opt_group *group;
 
-    jak_opt_manager_create(&manager, "ark-carbon", "A tool to work with CARBON files.\n"
+    jak_opt_manager_create(&manager, "jakson-tool", "A tool to work with CARBON files.\n"
                                  "Copyright (c) 2018-2019 Marcus Pinnecke (pinnecke@ovgu.de)", JAK_MOD_ARG_MAYBE_REQUIRED,
                              showHelp);
 

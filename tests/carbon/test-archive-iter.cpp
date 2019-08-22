@@ -21,21 +21,21 @@ iterate_object_vals(jak_archive_value_vector *value_iter)
 {
     bool status;
     bool is_object;
-    jak_u32 vector_length;
+    jak_u32 jak_vector_length;
     jak_archive_object object;
     jak_prop_iter  prop_iter;
     jak_error err;
 
-    status = jak_archive_value_vector_is_of_objects(&is_object, value_iter);
+    status = jak_archive_value_jak_vector_is_of_objects(&is_object, value_iter);
     ASSERT_TRUE(status);
     ASSERT_TRUE(is_object);
 
-    status = jak_archive_value_vector_get_length(&vector_length, value_iter);
+    status = jak_archive_value_jak_vector_get_length(&jak_vector_length, value_iter);
     ASSERT_TRUE(status);
 
-    for (jak_u32 i = 0; i < vector_length; i++)
+    for (jak_u32 i = 0; i < jak_vector_length; i++)
     {
-        status = jak_archive_value_vector_get_object_at(&object, i, value_iter);
+        status = jak_archive_value_jak_vector_get_object_at(&object, i, value_iter);
         ASSERT_TRUE(status);
         printf("\t\t{type: object, id: %" PRIu64 "}\n", object.object_id);
 
@@ -60,67 +60,67 @@ print_basic_fixed_types_basic(jak_archive_value_vector *value_iter, jak_u32 idx)
     jak_u32 num_values;
     switch (value_iter->prop_type) {
     case JAK_FIELD_INT8: {
-        const jak_archive_field_i8_t *values = jak_archive_value_vector_get_int8s(&num_values, value_iter);
+        const jak_archive_field_i8_t *values = jak_archive_value_jak_vector_get_int8s(&num_values, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(idx < num_values);
         printf("\t\t{ type: int8, value: %" PRIi8 " }\n", values[idx]);
     } break;
     case JAK_FIELD_INT16: {
-        const jak_archive_field_i16_t *values = jak_archive_value_vector_get_int16s(&num_values, value_iter);
+        const jak_archive_field_i16_t *values = jak_archive_value_jak_vector_get_int16s(&num_values, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(idx < num_values);
         printf("\t\t{ type: int16, value: %" PRIi16 " }\n", values[idx]);
     } break;
     case JAK_FIELD_INT32: {
-        const jak_archive_field_i32_t *values = jak_archive_value_vector_get_int32s(&num_values, value_iter);
+        const jak_archive_field_i32_t *values = jak_archive_value_jak_vector_get_int32s(&num_values, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(idx < num_values);
         printf("\t\t{ type: int32, value: %" PRIi32 " }\n", values[idx]);
     } break;
     case JAK_FIELD_INT64: {
-        const jak_archive_field_i64_t *values = jak_archive_value_vector_get_int64s(&num_values, value_iter);
+        const jak_archive_field_i64_t *values = jak_archive_value_jak_vector_get_int64s(&num_values, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(idx < num_values);
         printf("\t\t{ type: int64, value: %" PRIi64 " }\n", values[idx]);
     } break;
     case JAK_FIELD_UINT8: {
-        const jak_archive_field_u8_t *values = jak_archive_value_vector_get_uint8s(&num_values, value_iter);
+        const jak_archive_field_u8_t *values = jak_archive_value_jak_vector_get_uint8s(&num_values, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(idx < num_values);
         printf("\t\t{ type: uint8, value: %" PRIu8 " }\n", values[idx]);
     } break;
     case JAK_FIELD_UINT16: {
-        const jak_archive_field_u16_t *values = jak_archive_value_vector_get_uint16s(&num_values, value_iter);
+        const jak_archive_field_u16_t *values = jak_archive_value_jak_vector_get_uint16s(&num_values, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(idx < num_values);
         printf("\t\t{ type: uint16, value: %" PRIu16 " }\n", values[idx]);
     } break;
     case JAK_FIELD_UINT32: {
-        const jak_archive_field_u32_t *values = jak_archive_value_vector_get_uint32s(&num_values, value_iter);
+        const jak_archive_field_u32_t *values = jak_archive_value_jak_vector_get_uint32s(&num_values, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(idx < num_values);
         printf("\t\t{ type: uint32, value: %" PRIu32 " }\n", values[idx]);
     } break;
     case JAK_FIELD_UINT64: {
-        const jak_archive_field_u64_t *values = jak_archive_value_vector_get_uint64s(&num_values, value_iter);
+        const jak_archive_field_u64_t *values = jak_archive_value_jak_vector_get_uint64s(&num_values, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(idx < num_values);
         printf("\t\t{ type: uint64, value: %" PRIu64 " }\n", values[idx]);
     } break;
     case JAK_FIELD_FLOAT: {
-        const jak_archive_field_number_t *values = jak_archive_value_vector_get_numbers(&num_values, value_iter);
+        const jak_archive_field_number_t *values = jak_archive_value_jak_vector_get_numbers(&num_values, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(idx < num_values);
         printf("\t\t{ type: number, value: %f }\n", values[idx]);
     } break;
     case JAK_FIELD_STRING: {
-            const jak_archive_field_sid_t *values = jak_archive_value_vector_get_strings(&num_values, value_iter);
+            const jak_archive_field_sid_t *values = jak_archive_value_jak_vector_get_strings(&num_values, value_iter);
             ASSERT_TRUE(values != NULL);
             ASSERT_TRUE(idx < num_values);
             printf("\t\t{ type: string, value: %" PRIu64 " }\n", values[idx]);
         } break;
     case JAK_FIELD_BOOLEAN: {
-        const jak_archive_field_boolean_t *values = jak_archive_value_vector_get_booleans(&num_values, value_iter);
+        const jak_archive_field_boolean_t *values = jak_archive_value_jak_vector_get_booleans(&num_values, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(idx < num_values);
         printf("\t\t{ type: boolean, value: %d }\n", values[idx]);
@@ -136,7 +136,7 @@ print_basic_fixed_types_array(jak_archive_value_vector *value_iter, jak_u32 idx)
     jak_u32 array_length;
     switch (value_iter->prop_type) {
     case JAK_FIELD_NULL: {
-        const jak_archive_field_u32_t *number_contained = jak_archive_value_vector_get_null_arrays(&array_length, value_iter);
+        const jak_archive_field_u32_t *number_contained = jak_archive_value_jak_vector_get_null_arrays(&array_length, value_iter);
         ASSERT_TRUE(number_contained != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: null_array, values: [");
@@ -147,7 +147,7 @@ print_basic_fixed_types_array(jak_archive_value_vector *value_iter, jak_u32 idx)
         printf("]\n");
     } break;
     case JAK_FIELD_INT8: {
-        const jak_archive_field_i8_t *values = jak_archive_value_vector_get_int8_arrays_at(&array_length, idx, value_iter);
+        const jak_archive_field_i8_t *values = jak_archive_value_jak_vector_get_int8_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: int8_array, values: [");
@@ -158,7 +158,7 @@ print_basic_fixed_types_array(jak_archive_value_vector *value_iter, jak_u32 idx)
         printf("]\n");
     } break;
     case JAK_FIELD_INT16: {
-        const jak_archive_field_i16_t *values = jak_archive_value_vector_get_int16_arrays_at(&array_length, idx, value_iter);
+        const jak_archive_field_i16_t *values = jak_archive_value_jak_vector_get_int16_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: int16_array, values: [");
@@ -169,7 +169,7 @@ print_basic_fixed_types_array(jak_archive_value_vector *value_iter, jak_u32 idx)
         printf("]\n");
     } break;
     case JAK_FIELD_INT32: {
-        const jak_archive_field_i32_t *values = jak_archive_value_vector_get_int32_arrays_at(&array_length, idx, value_iter);
+        const jak_archive_field_i32_t *values = jak_archive_value_jak_vector_get_int32_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: int32_array, values: [");
@@ -180,7 +180,7 @@ print_basic_fixed_types_array(jak_archive_value_vector *value_iter, jak_u32 idx)
         printf("]\n");
     } break;
     case JAK_FIELD_INT64: {
-        const jak_archive_field_i64_t *values = jak_archive_value_vector_get_int64_arrays_at(&array_length, idx, value_iter);
+        const jak_archive_field_i64_t *values = jak_archive_value_jak_vector_get_int64_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: int64_array, values: [");
@@ -191,7 +191,7 @@ print_basic_fixed_types_array(jak_archive_value_vector *value_iter, jak_u32 idx)
         printf("]\n");
     } break;
     case JAK_FIELD_UINT8: {
-        const jak_archive_field_u8_t *values = jak_archive_value_vector_get_uint8_arrays_at(&array_length, idx, value_iter);
+        const jak_archive_field_u8_t *values = jak_archive_value_jak_vector_get_uint8_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: uint8_array, values: [");
@@ -202,7 +202,7 @@ print_basic_fixed_types_array(jak_archive_value_vector *value_iter, jak_u32 idx)
         printf("]\n");
     } break;
     case JAK_FIELD_UINT16: {
-        const jak_archive_field_u16_t *values = jak_archive_value_vector_get_uint16_arrays_at(&array_length, idx, value_iter);
+        const jak_archive_field_u16_t *values = jak_archive_value_jak_vector_get_uint16_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: uint16_array, values: [");
@@ -213,7 +213,7 @@ print_basic_fixed_types_array(jak_archive_value_vector *value_iter, jak_u32 idx)
         printf("]\n");
     } break;
     case JAK_FIELD_UINT32: {
-        const jak_archive_field_u32_t *values = jak_archive_value_vector_get_uint32_arrays_at(&array_length, idx, value_iter);
+        const jak_archive_field_u32_t *values = jak_archive_value_jak_vector_get_uint32_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: uint32_array, values: [");
@@ -224,7 +224,7 @@ print_basic_fixed_types_array(jak_archive_value_vector *value_iter, jak_u32 idx)
         printf("]\n");
     } break;
     case JAK_FIELD_UINT64: {
-        const jak_archive_field_u64_t *values = jak_archive_value_vector_get_uint64_arrays_at(&array_length, idx, value_iter);
+        const jak_archive_field_u64_t *values = jak_archive_value_jak_vector_get_uint64_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: uint64_array, values: [");
@@ -235,7 +235,7 @@ print_basic_fixed_types_array(jak_archive_value_vector *value_iter, jak_u32 idx)
         printf("]\n");
     } break;
     case JAK_FIELD_FLOAT: {
-        const jak_archive_field_number_t *values = jak_archive_value_vector_get_number_arrays_at(&array_length, idx, value_iter);
+        const jak_archive_field_number_t *values = jak_archive_value_jak_vector_get_number_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: numbers_array, values: [");
@@ -246,7 +246,7 @@ print_basic_fixed_types_array(jak_archive_value_vector *value_iter, jak_u32 idx)
         printf("]\n");
     } break;
     case JAK_FIELD_STRING: {
-        const jak_archive_field_sid_t *values = jak_archive_value_vector_get_string_arrays_at(&array_length, idx, value_iter);
+        const jak_archive_field_sid_t *values = jak_archive_value_jak_vector_get_string_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: jak_string_array, values: [");
@@ -257,7 +257,7 @@ print_basic_fixed_types_array(jak_archive_value_vector *value_iter, jak_u32 idx)
         printf("]\n");
     } break;
     case JAK_FIELD_BOOLEAN: {
-        const jak_archive_field_boolean_t *values = jak_archive_value_vector_get_boolean_arrays_at(&array_length, idx, value_iter);
+        const jak_archive_field_boolean_t *values = jak_archive_value_jak_vector_get_boolean_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
         printf("\t\t{ type: boolean_array, values: [");
@@ -307,10 +307,10 @@ iterate_properties(jak_prop_iter *prop_iter)
     {
         if (iter_type == JAK_PROP_ITER_MODE_OBJECT)
         {
-            keys = jak_archive_value_vector_get_keys(&num_pairs, &value_iter);
-            jak_archive_value_vector_is_array_type(&is_array, &value_iter);
-            jak_archive_value_vector_get_basic_type(&type, &value_iter);
-            jak_archive_value_vector_get_object_id(&oid, &value_iter);
+            keys = jak_archive_value_jak_vector_get_keys(&num_pairs, &value_iter);
+            jak_archive_value_jak_vector_is_array_type(&is_array, &value_iter);
+            jak_archive_value_jak_vector_get_basic_type(&type, &value_iter);
+            jak_archive_value_jak_vector_get_object_id(&oid, &value_iter);
             for (jak_u32 i = 0; i < num_pairs; i++) {
                 printf("Key %" PRIu64 ", type: %d, is-array: %d\n", keys[i], type, is_array);
 

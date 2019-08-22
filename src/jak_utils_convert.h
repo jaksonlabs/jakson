@@ -27,9 +27,8 @@
 
 JAK_BEGIN_DECL
 
-jak_i64 convert_atoi64(const char *string);
-
-jak_u64 convert_atoiu64(const char *string);
+jak_i64 jak_convert_atoi64(const char *string);
+jak_u64 jak_convert_atoiu64(const char *string);
 
 JAK_END_DECL
 

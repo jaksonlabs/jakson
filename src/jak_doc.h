@@ -33,27 +33,27 @@ typedef struct jak_doc_entries {
         jak_doc_obj *context;
         const char *key;
         jak_archive_field_e type;
-        struct jak_vector ofType(<T>) values;
+        jak_vector ofType(<T>) values;
 } jak_doc_entries;
 
 typedef struct jak_doc_bulk {
-        struct jak_string_dict *dic;
-        struct jak_vector ofType(char *) keys, values;
-        struct jak_vector ofType(jak_doc) models;
+        jak_string_dict *dic;
+        jak_vector ofType(char *) keys, values;
+        jak_vector ofType(jak_doc) models;
 } jak_doc_bulk;
 
 typedef struct jak_doc {
         jak_doc_bulk *context;
-        struct jak_vector ofType(jak_doc_obj) obj_model;
+        jak_vector ofType(jak_doc_obj) obj_model;
         jak_archive_field_e type;
 } jak_doc;
 
 typedef struct jak_doc_obj {
-        struct jak_vector ofType(jak_doc_entries) entries;
+        jak_vector ofType(jak_doc_entries) entries;
         jak_doc *doc;
 } jak_doc_obj;
 
-bool jak_doc_bulk_create(jak_doc_bulk *bulk, struct jak_string_dict *dic);
+bool jak_doc_bulk_create(jak_doc_bulk *bulk, jak_string_dict *dic);
 bool jak_doc_bulk_drop(jak_doc_bulk *bulk);
 
 bool jak_doc_bulk_shrink(jak_doc_bulk *bulk);
@@ -61,10 +61,10 @@ bool jak_doc_bulk_print(FILE *file, jak_doc_bulk *bulk);
 
 jak_doc *jak_doc_bulk_new_doc(jak_doc_bulk *context, jak_archive_field_e type);
 jak_doc_obj *jak_doc_bulk_new_obj(jak_doc *model);
-bool jak_doc_bulk_get_dic_contents(struct jak_vector ofType (const char *) **strings, struct jak_vector ofType(jak_archive_field_sid_t) **jak_string_ids, const jak_doc_bulk *context);
+bool jak_doc_bulk_get_dic_contents(jak_vector ofType (const char *) **strings, jak_vector ofType(jak_archive_field_sid_t) **jak_string_ids, const jak_doc_bulk *context);
 
 bool jak_doc_print(FILE *file, const jak_doc *doc);
-const struct jak_vector ofType(jak_doc_entries) *jak_doc_get_entries(const jak_doc_obj *model);
+const jak_vector ofType(jak_doc_entries) *jak_doc_get_entries(const jak_doc_obj *model);
 void jak_doc_print_entries(FILE *file, const jak_doc_entries *entries);
 void jak_doc_drop(jak_doc_obj *model);
 

@@ -44,7 +44,7 @@ static bool push_in_column(jak_carbon_insert *inserter, const void *base, jak_ca
 
 static bool push_media_type_for_array(jak_carbon_insert *inserter, jak_carbon_field_type_e type);
 
-static void internal_create(jak_carbon_insert *inserter, struct jak_memfile *src, jak_offset_t pos);
+static void internal_create(jak_carbon_insert *inserter, jak_memfile *src, jak_offset_t pos);
 
 static void write_binary_blob(jak_carbon_insert *inserter, const void *value, size_t nbytes);
 
@@ -59,7 +59,7 @@ bool jak_carbon_int_insert_create_for_array(jak_carbon_insert *inserter, jak_car
 
         jak_offset_t pos = 0;
         if (context->array_end_reached) {
-                pos = memfile_tell(&context->memfile);
+                pos = jak_memfile_tell(&context->memfile);
         } else {
                 pos = jak_carbon_int_history_has(&context->history) ? jak_carbon_int_history_peek(&context->history) : 0;
         }
@@ -75,7 +75,7 @@ bool jak_carbon_int_insert_create_for_column(jak_carbon_insert *inserter, jak_ca
         jak_carbon_column_it_lock(context);
         inserter->context_type = JAK_CARBON_COLUMN;
         inserter->context.column = context;
-        internal_create(inserter, &context->memfile, memfile_tell(&context->memfile));
+        internal_create(inserter, &context->memfile, jak_memfile_tell(&context->memfile));
         return true;
 }
 
@@ -89,7 +89,7 @@ bool jak_carbon_int_insert_create_for_object(jak_carbon_insert *inserter, jak_ca
 
         jak_offset_t pos;
         if (context->object_end_reached) {
-                pos = memfile_tell(&context->memfile);
+                pos = jak_memfile_tell(&context->memfile);
         } else {
                 pos = jak_carbon_int_history_has(&context->history) ? jak_carbon_int_history_peek(&context->history) : 0;
         }
@@ -120,47 +120,47 @@ bool jak_carbon_insert_null(jak_carbon_insert *inserter)
                 case JAK_CARBON_COLUMN: {
                         switch (inserter->context.column->type) {
                                 case JAK_CARBON_FIELD_TYPE_COLUMN_U8: {
-                                        jak_u8 value = U8_NULL;
+                                        jak_u8 value = JAK_U8_NULL;
                                         return push_in_column(inserter, &value, inserter->context.column->type);
                                 }
                                         break;
                                 case JAK_CARBON_FIELD_TYPE_COLUMN_U16: {
-                                        jak_u16 value = U16_NULL;
+                                        jak_u16 value = JAK_U16_NULL;
                                         return push_in_column(inserter, &value, inserter->context.column->type);
                                 }
                                         break;
                                 case JAK_CARBON_FIELD_TYPE_COLUMN_U32: {
-                                        jak_u32 value = U32_NULL;
+                                        jak_u32 value = JAK_U32_NULL;
                                         return push_in_column(inserter, &value, inserter->context.column->type);
                                 }
                                         break;
                                 case JAK_CARBON_FIELD_TYPE_COLUMN_U64: {
-                                        jak_u64 value = U64_NULL;
+                                        jak_u64 value = JAK_U64_NULL;
                                         return push_in_column(inserter, &value, inserter->context.column->type);
                                 }
                                         break;
                                 case JAK_CARBON_FIELD_TYPE_COLUMN_I8: {
-                                        jak_i8 value = I8_NULL;
+                                        jak_i8 value = JAK_I8_NULL;
                                         return push_in_column(inserter, &value, inserter->context.column->type);
                                 }
                                         break;
                                 case JAK_CARBON_FIELD_TYPE_COLUMN_I16: {
-                                        jak_i16 value = I16_NULL;
+                                        jak_i16 value = JAK_I16_NULL;
                                         return push_in_column(inserter, &value, inserter->context.column->type);
                                 }
                                         break;
                                 case JAK_CARBON_FIELD_TYPE_COLUMN_I32: {
-                                        jak_i32 value = I32_NULL;
+                                        jak_i32 value = JAK_I32_NULL;
                                         return push_in_column(inserter, &value, inserter->context.column->type);
                                 }
                                         break;
                                 case JAK_CARBON_FIELD_TYPE_COLUMN_I64: {
-                                        jak_i64 value = I64_NULL;
+                                        jak_i64 value = JAK_I64_NULL;
                                         return push_in_column(inserter, &value, inserter->context.column->type);
                                 }
                                         break;
                                 case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT: {
-                                        float value = FLOAT_NULL;
+                                        float value = JAK_FLOAT_NULL;
                                         return push_in_column(inserter, &value, inserter->context.column->type);
                                 }
                                         break;
@@ -340,14 +340,14 @@ bool jak_carbon_insert_unsigned(jak_carbon_insert *inserter, jak_u64 value)
 {
         JAK_ERROR_IF(inserter->context_type == JAK_CARBON_COLUMN, &inserter->err, JAK_ERR_INSERT_TOO_DANGEROUS)
 
-        switch (number_min_type_signed(value)) {
-                case NUMBER_I8:
+        switch (jak_number_min_type_signed(value)) {
+                case JAK_NUMBER_I8:
                         return jak_carbon_insert_u8(inserter, (jak_u8) value);
-                case NUMBER_I16:
+                case JAK_NUMBER_I16:
                         return jak_carbon_insert_u16(inserter, (jak_u16) value);
-                case NUMBER_I32:
+                case JAK_NUMBER_I32:
                         return jak_carbon_insert_u32(inserter, (jak_u32) value);
-                case NUMBER_I64:
+                case JAK_NUMBER_I64:
                         return jak_carbon_insert_u64(inserter, (jak_u64) value);
                 default: JAK_ERROR(&inserter->err, JAK_ERR_INTERNALERR);
                         return false;
@@ -358,14 +358,14 @@ bool jak_carbon_insert_signed(jak_carbon_insert *inserter, jak_i64 value)
 {
         JAK_ERROR_IF(inserter->context_type == JAK_CARBON_COLUMN, &inserter->err, JAK_ERR_INSERT_TOO_DANGEROUS)
 
-        switch (number_min_type_signed(value)) {
-                case NUMBER_I8:
+        switch (jak_number_min_type_signed(value)) {
+                case JAK_NUMBER_I8:
                         return jak_carbon_insert_i8(inserter, (jak_i8) value);
-                case NUMBER_I16:
+                case JAK_NUMBER_I16:
                         return jak_carbon_insert_i16(inserter, (jak_i16) value);
-                case NUMBER_I32:
+                case JAK_NUMBER_I32:
                         return jak_carbon_insert_i32(inserter, (jak_i32) value);
-                case NUMBER_I64:
+                case JAK_NUMBER_I64:
                         return jak_carbon_insert_i64(inserter, (jak_i64) value);
                 default: JAK_ERROR(&inserter->err, JAK_ERR_INTERNALERR);
                         return false;
@@ -413,11 +413,11 @@ static void insert_binary(jak_carbon_insert *inserter, const void *value, size_t
                 /* write length of 'user_type' string with variable-length integer type */
                 jak_u64 user_type_strlen = strlen(user_type);
 
-                memfile_write_uintvar_stream(NULL, &inserter->memfile, user_type_strlen);
+                jak_memfile_write_uintvar_stream(NULL, &inserter->memfile, user_type_strlen);
 
                 /* write 'user_type' string */
-                memfile_ensure_space(&inserter->memfile, user_type_strlen);
-                memfile_write(&inserter->memfile, user_type, user_type_strlen);
+                jak_memfile_ensure_space(&inserter->memfile, user_type_strlen);
+                jak_memfile_write(&inserter->memfile, user_type, user_type_strlen);
 
                 /* write binary blob */
                 write_binary_blob(inserter, value, nbytes);
@@ -430,7 +430,7 @@ static void insert_binary(jak_carbon_insert *inserter, const void *value, size_t
                 jak_u64 mime_type_id = jak_carbon_media_mime_type_by_ext(file_ext);
 
                 /* write mime type id */
-                memfile_write_uintvar_stream(NULL, &inserter->memfile, mime_type_id);
+                jak_memfile_write_uintvar_stream(NULL, &inserter->memfile, mime_type_id);
 
                 /* write binary blob */
                 write_binary_blob(inserter, value, nbytes);
@@ -464,13 +464,13 @@ jak_carbon_insert *jak_carbon_insert_object_begin(jak_carbon_insert_object_state
         *out = (jak_carbon_insert_object_state) {
                 .parent_inserter = inserter,
                 .it = JAK_MALLOC(sizeof(jak_carbon_object_it)),
-                .object_begin = memfile_tell(&inserter->memfile),
+                .object_begin = jak_memfile_tell(&inserter->memfile),
                 .object_end = 0
         };
 
 
         jak_carbon_int_insert_object(&inserter->memfile, object_capacity);
-        jak_u64 payload_start = memfile_tell(&inserter->memfile) - 1;
+        jak_u64 payload_start = jak_memfile_tell(&inserter->memfile) - 1;
 
         jak_carbon_object_it_create(out->it, &inserter->memfile, &inserter->err, payload_start);
         jak_carbon_object_it_insert_begin(&out->inserter, out->it);
@@ -484,17 +484,17 @@ bool jak_carbon_insert_object_end(jak_carbon_insert_object_state *state)
 
         jak_carbon_object_it scan;
         jak_carbon_object_it_create(&scan, &state->parent_inserter->memfile, &state->parent_inserter->err,
-                                memfile_tell(&state->parent_inserter->memfile) - 1);
+                                jak_memfile_tell(&state->parent_inserter->memfile) - 1);
         while (jak_carbon_object_it_next(&scan)) {}
 
-        JAK_ASSERT(*memfile_peek(&scan.memfile, sizeof(char)) == JAK_CARBON_MARKER_OBJECT_END);
-        memfile_read(&scan.memfile, sizeof(char));
+        JAK_ASSERT(*jak_memfile_peek(&scan.memfile, sizeof(char)) == JAK_CARBON_MARKER_OBJECT_END);
+        jak_memfile_read(&scan.memfile, sizeof(char));
 
-        state->object_end = memfile_tell(&scan.memfile);
+        state->object_end = jak_memfile_tell(&scan.memfile);
 
-        memfile_skip(&scan.memfile, 1);
+        jak_memfile_skip(&scan.memfile, 1);
 
-        memfile_seek(&state->parent_inserter->memfile, memfile_tell(&scan.memfile) - 1);
+        jak_memfile_seek(&state->parent_inserter->memfile, jak_memfile_tell(&scan.memfile) - 1);
         jak_carbon_object_it_drop(&scan);
         jak_carbon_insert_drop(&state->inserter);
         jak_carbon_object_it_drop(state->it);
@@ -517,12 +517,12 @@ jak_carbon_insert *jak_carbon_insert_array_begin(jak_carbon_insert_array_state *
         *state_out = (jak_carbon_insert_array_state) {
                 .parent_inserter = inserter_in,
                 .nested_array = JAK_MALLOC(sizeof(jak_carbon_array_it)),
-                .array_begin = memfile_tell(&inserter_in->memfile),
+                .array_begin = jak_memfile_tell(&inserter_in->memfile),
                 .array_end = 0
         };
 
         jak_carbon_int_insert_array(&inserter_in->memfile, array_capacity);
-        jak_u64 payload_start = memfile_tell(&inserter_in->memfile) - 1;
+        jak_u64 payload_start = jak_memfile_tell(&inserter_in->memfile) - 1;
 
         jak_carbon_array_it_create(state_out->nested_array, &inserter_in->memfile, &inserter_in->err, payload_start);
         jak_carbon_array_it_insert_begin(&state_out->nested_inserter, state_out->nested_array);
@@ -536,14 +536,14 @@ bool jak_carbon_insert_array_end(jak_carbon_insert_array_state *state_in)
 
         jak_carbon_array_it scan;
         jak_carbon_array_it_create(&scan, &state_in->parent_inserter->memfile, &state_in->parent_inserter->err,
-                               memfile_tell(&state_in->parent_inserter->memfile) - 1);
+                               jak_memfile_tell(&state_in->parent_inserter->memfile) - 1);
 
         jak_carbon_array_it_fast_forward(&scan);
 
-        state_in->array_end = memfile_tell(&scan.memfile);
-        memfile_skip(&scan.memfile, 1);
+        state_in->array_end = jak_memfile_tell(&scan.memfile);
+        jak_memfile_skip(&scan.memfile, 1);
 
-        memfile_seek(&state_in->parent_inserter->memfile, memfile_tell(&scan.memfile) - 1);
+        jak_memfile_seek(&state_in->parent_inserter->memfile, jak_memfile_tell(&scan.memfile) - 1);
         jak_carbon_array_it_drop(&scan);
         jak_carbon_insert_drop(&state_in->nested_inserter);
         jak_carbon_array_it_drop(state_in->nested_array);
@@ -567,11 +567,11 @@ jak_carbon_insert *jak_carbon_insert_column_begin(jak_carbon_insert_column_state
                 .parent_inserter = inserter_in,
                 .nested_column = JAK_MALLOC(sizeof(jak_carbon_column_it)),
                 .type = field_type,
-                .column_begin = memfile_tell(&inserter_in->memfile),
+                .column_begin = jak_memfile_tell(&inserter_in->memfile),
                 .column_end = 0
         };
 
-        jak_u64 container_start_off = memfile_tell(&inserter_in->memfile);
+        jak_u64 container_start_off = jak_memfile_tell(&inserter_in->memfile);
         jak_carbon_int_insert_column(&inserter_in->memfile, &inserter_in->err, type, column_capacity);
 
         jak_carbon_column_it_create(state_out->nested_column, &inserter_in->memfile, &inserter_in->err,
@@ -590,8 +590,8 @@ bool jak_carbon_insert_column_end(jak_carbon_insert_column_state *state_in)
                                 state_in->nested_column->column_start_offset);
         jak_carbon_column_it_fast_forward(&scan);
 
-        state_in->column_end = memfile_tell(&scan.memfile);
-        memfile_seek(&state_in->parent_inserter->memfile, memfile_tell(&scan.memfile));
+        state_in->column_end = jak_memfile_tell(&scan.memfile);
+        jak_memfile_seek(&state_in->parent_inserter->memfile, jak_memfile_tell(&scan.memfile));
 
         jak_carbon_insert_drop(&state_in->nested_inserter);
         free(state_in->nested_column);
@@ -621,10 +621,10 @@ static void inserter_refresh_mod_size(jak_carbon_insert *inserter, jak_i64 mod_s
 bool jak_carbon_insert_prop_null(jak_carbon_insert *inserter, const char *key)
 {
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
-        jak_offset_t prop_start = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
         push_media_type_for_array(inserter, JAK_CARBON_FIELD_TYPE_NULL);
-        jak_offset_t prop_end = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
 }
@@ -632,10 +632,10 @@ bool jak_carbon_insert_prop_null(jak_carbon_insert *inserter, const char *key)
 bool jak_carbon_insert_prop_true(jak_carbon_insert *inserter, const char *key)
 {
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
-        jak_offset_t prop_start = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
         push_media_type_for_array(inserter, JAK_CARBON_FIELD_TYPE_TRUE);
-        jak_offset_t prop_end = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
 }
@@ -643,10 +643,10 @@ bool jak_carbon_insert_prop_true(jak_carbon_insert *inserter, const char *key)
 bool jak_carbon_insert_prop_false(jak_carbon_insert *inserter, const char *key)
 {
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
-        jak_offset_t prop_start = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
         push_media_type_for_array(inserter, JAK_CARBON_FIELD_TYPE_FALSE);
-        jak_offset_t prop_end = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
 }
@@ -654,10 +654,10 @@ bool jak_carbon_insert_prop_false(jak_carbon_insert *inserter, const char *key)
 bool jak_carbon_insert_prop_u8(jak_carbon_insert *inserter, const char *key, jak_u8 value)
 {
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
-        jak_offset_t prop_start = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
         write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_U8, &value, sizeof(jak_u8));
-        jak_offset_t prop_end = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
 }
@@ -665,10 +665,10 @@ bool jak_carbon_insert_prop_u8(jak_carbon_insert *inserter, const char *key, jak
 bool jak_carbon_insert_prop_u16(jak_carbon_insert *inserter, const char *key, jak_u16 value)
 {
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
-        jak_offset_t prop_start = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
         write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_U16, &value, sizeof(jak_u16));
-        jak_offset_t prop_end = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
 }
@@ -676,10 +676,10 @@ bool jak_carbon_insert_prop_u16(jak_carbon_insert *inserter, const char *key, ja
 bool jak_carbon_insert_prop_u32(jak_carbon_insert *inserter, const char *key, jak_u32 value)
 {
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
-        jak_offset_t prop_start = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
         write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_U32, &value, sizeof(jak_u32));
-        jak_offset_t prop_end = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
 }
@@ -687,10 +687,10 @@ bool jak_carbon_insert_prop_u32(jak_carbon_insert *inserter, const char *key, ja
 bool jak_carbon_insert_prop_u64(jak_carbon_insert *inserter, const char *key, jak_u64 value)
 {
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
-        jak_offset_t prop_start = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
         write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_U64, &value, sizeof(jak_u64));
-        jak_offset_t prop_end = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
 }
@@ -698,10 +698,10 @@ bool jak_carbon_insert_prop_u64(jak_carbon_insert *inserter, const char *key, ja
 bool jak_carbon_insert_prop_i8(jak_carbon_insert *inserter, const char *key, jak_i8 value)
 {
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
-        jak_offset_t prop_start = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
         write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_I8, &value, sizeof(jak_i8));
-        jak_offset_t prop_end = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
 }
@@ -709,10 +709,10 @@ bool jak_carbon_insert_prop_i8(jak_carbon_insert *inserter, const char *key, jak
 bool jak_carbon_insert_prop_i16(jak_carbon_insert *inserter, const char *key, jak_i16 value)
 {
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
-        jak_offset_t prop_start = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
         write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_I16, &value, sizeof(jak_i16));
-        jak_offset_t prop_end = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
 }
@@ -720,10 +720,10 @@ bool jak_carbon_insert_prop_i16(jak_carbon_insert *inserter, const char *key, ja
 bool jak_carbon_insert_prop_i32(jak_carbon_insert *inserter, const char *key, jak_i32 value)
 {
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
-        jak_offset_t prop_start = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
         write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_I32, &value, sizeof(jak_i32));
-        jak_offset_t prop_end = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
 }
@@ -731,10 +731,10 @@ bool jak_carbon_insert_prop_i32(jak_carbon_insert *inserter, const char *key, ja
 bool jak_carbon_insert_prop_i64(jak_carbon_insert *inserter, const char *key, jak_i64 value)
 {
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
-        jak_offset_t prop_start = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
         write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_I64, &value, sizeof(jak_i64));
-        jak_offset_t prop_end = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
 }
@@ -743,14 +743,14 @@ bool jak_carbon_insert_prop_unsigned(jak_carbon_insert *inserter, const char *ke
 {
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER)
 
-        switch (number_min_type_unsigned(value)) {
-                case NUMBER_U8:
+        switch (jak_number_min_type_unsigned(value)) {
+                case JAK_NUMBER_U8:
                         return jak_carbon_insert_prop_u8(inserter, key, (jak_u8) value);
-                case NUMBER_U16:
+                case JAK_NUMBER_U16:
                         return jak_carbon_insert_prop_u16(inserter, key, (jak_u16) value);
-                case NUMBER_U32:
+                case JAK_NUMBER_U32:
                         return jak_carbon_insert_prop_u32(inserter, key, (jak_u32) value);
-                case NUMBER_U64:
+                case JAK_NUMBER_U64:
                         return jak_carbon_insert_prop_u64(inserter, key, (jak_u64) value);
                 default: JAK_ERROR(&inserter->err, JAK_ERR_INTERNALERR);
                         return false;
@@ -761,14 +761,14 @@ bool jak_carbon_insert_prop_signed(jak_carbon_insert *inserter, const char *key,
 {
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER)
 
-        switch (number_min_type_signed(value)) {
-                case NUMBER_I8:
+        switch (jak_number_min_type_signed(value)) {
+                case JAK_NUMBER_I8:
                         return jak_carbon_insert_prop_i8(inserter, key, (jak_i8) value);
-                case NUMBER_I16:
+                case JAK_NUMBER_I16:
                         return jak_carbon_insert_prop_i16(inserter, key, (jak_i16) value);
-                case NUMBER_I32:
+                case JAK_NUMBER_I32:
                         return jak_carbon_insert_prop_i32(inserter, key, (jak_i32) value);
-                case NUMBER_I64:
+                case JAK_NUMBER_I64:
                         return jak_carbon_insert_prop_i64(inserter, key, (jak_i64) value);
                 default: JAK_ERROR(&inserter->err, JAK_ERR_INTERNALERR);
                         return false;
@@ -778,10 +778,10 @@ bool jak_carbon_insert_prop_signed(jak_carbon_insert *inserter, const char *key,
 bool jak_carbon_insert_prop_float(jak_carbon_insert *inserter, const char *key, float value)
 {
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
-        jak_offset_t prop_start = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
         write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT, &value, sizeof(float));
-        jak_offset_t prop_end = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
 }
@@ -794,10 +794,10 @@ bool jak_carbon_insert_prop_string(jak_carbon_insert *inserter, const char *key,
 bool jak_carbon_insert_prop_nchar(jak_carbon_insert *inserter, const char *key, const char *value, jak_u64 value_len)
 {
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
-        jak_offset_t prop_start = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
         jak_carbon_jak_string_nchar_write(&inserter->memfile, value, value_len);
-        jak_offset_t prop_end = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
 }
@@ -806,10 +806,10 @@ bool jak_carbon_insert_prop_binary(jak_carbon_insert *inserter, const char *key,
                                size_t nbytes, const char *file_ext, const char *user_type)
 {
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
-        jak_offset_t prop_start = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
         insert_binary(inserter, value, nbytes, file_ext, user_type);
-        jak_offset_t prop_end = memfile_tell(&inserter->memfile);
+        jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
 }
@@ -880,9 +880,9 @@ write_field_data(jak_carbon_insert *inserter, jak_u8 field_type_marker, const vo
 {
         JAK_ASSERT(inserter->context_type == JAK_CARBON_ARRAY || inserter->context_type == JAK_CARBON_OBJECT);
 
-        memfile_ensure_space(&inserter->memfile, sizeof(jak_u8) + nbytes);
-        memfile_write(&inserter->memfile, &field_type_marker, sizeof(jak_u8));
-        return memfile_write(&inserter->memfile, base, nbytes);
+        jak_memfile_ensure_space(&inserter->memfile, sizeof(jak_u8) + nbytes);
+        jak_memfile_write(&inserter->memfile, &field_type_marker, sizeof(jak_u8));
+        return jak_memfile_write(&inserter->memfile, base, nbytes);
 }
 
 static bool push_in_column(jak_carbon_insert *inserter, const void *base, jak_carbon_field_type_e type)
@@ -891,63 +891,63 @@ static bool push_in_column(jak_carbon_insert *inserter, const void *base, jak_ca
 
         size_t type_size = jak_carbon_int_get_type_value_size(type);
 
-        memfile_save_position(&inserter->memfile);
+        jak_memfile_save_position(&inserter->memfile);
 
         // Increase element counter
-        memfile_seek(&inserter->memfile, inserter->context.column->num_and_capacity_start_offset);
-        jak_u32 num_elems = memfile_peek_uintvar_stream(NULL, &inserter->memfile);
+        jak_memfile_seek(&inserter->memfile, inserter->context.column->num_and_capacity_start_offset);
+        jak_u32 num_elems = jak_memfile_peek_uintvar_stream(NULL, &inserter->memfile);
         num_elems++;
-        memfile_update_uintvar_stream(&inserter->memfile, num_elems);
+        jak_memfile_update_uintvar_stream(&inserter->memfile, num_elems);
         inserter->context.column->column_num_elements = num_elems;
 
-        jak_u32 capacity = memfile_read_uintvar_stream(NULL, &inserter->memfile);
+        jak_u32 capacity = jak_memfile_read_uintvar_stream(NULL, &inserter->memfile);
 
         if (JAK_UNLIKELY(num_elems > capacity)) {
-                memfile_save_position(&inserter->memfile);
+                jak_memfile_save_position(&inserter->memfile);
 
                 jak_u32 new_capacity = (capacity + 1) * 1.7f;
 
                 // Update capacity counter
-                memfile_seek(&inserter->memfile, inserter->context.column->num_and_capacity_start_offset);
-                memfile_skip_uintvar_stream(&inserter->memfile); // skip num element counter
-                memfile_update_uintvar_stream(&inserter->memfile, new_capacity);
+                jak_memfile_seek(&inserter->memfile, inserter->context.column->num_and_capacity_start_offset);
+                jak_memfile_skip_uintvar_stream(&inserter->memfile); // skip num element counter
+                jak_memfile_update_uintvar_stream(&inserter->memfile, new_capacity);
                 inserter->context.column->column_capacity = new_capacity;
 
                 size_t payload_start = jak_carbon_int_column_get_payload_off(inserter->context.column);
-                memfile_seek(&inserter->memfile, payload_start + (num_elems - 1) * type_size);
-                memfile_ensure_space(&inserter->memfile, (new_capacity - capacity) * type_size);
+                jak_memfile_seek(&inserter->memfile, payload_start + (num_elems - 1) * type_size);
+                jak_memfile_ensure_space(&inserter->memfile, (new_capacity - capacity) * type_size);
 
-                memfile_restore_position(&inserter->memfile);
+                jak_memfile_restore_position(&inserter->memfile);
         }
 
         size_t payload_start = jak_carbon_int_column_get_payload_off(inserter->context.column);
-        memfile_seek(&inserter->memfile, payload_start + (num_elems - 1) * type_size);
-        memfile_write(&inserter->memfile, base, type_size);
+        jak_memfile_seek(&inserter->memfile, payload_start + (num_elems - 1) * type_size);
+        jak_memfile_write(&inserter->memfile, base, type_size);
 
-        memfile_restore_position(&inserter->memfile);
+        jak_memfile_restore_position(&inserter->memfile);
         return true;
 }
 
 static bool push_media_type_for_array(jak_carbon_insert *inserter, jak_carbon_field_type_e type)
 {
-        memfile_ensure_space(&inserter->memfile, sizeof(jak_media_type));
+        jak_memfile_ensure_space(&inserter->memfile, sizeof(jak_media_type));
         return jak_carbon_media_write(&inserter->memfile, type);
 }
 
-static void internal_create(jak_carbon_insert *inserter, struct jak_memfile *src, jak_offset_t pos)
+static void internal_create(jak_carbon_insert *inserter, jak_memfile *src, jak_offset_t pos)
 {
-        memfile_clone(&inserter->memfile, src);
+        jak_memfile_clone(&inserter->memfile, src);
         jak_error_init(&inserter->err);
-        inserter->position = pos ? pos : memfile_tell(src);
-        memfile_seek(&inserter->memfile, inserter->position);
+        inserter->position = pos ? pos : jak_memfile_tell(src);
+        jak_memfile_seek(&inserter->memfile, inserter->position);
 }
 
 static void write_binary_blob(jak_carbon_insert *inserter, const void *value, size_t nbytes)
 {
         /* write blob length */
-        memfile_write_uintvar_stream(NULL, &inserter->memfile, nbytes);
+        jak_memfile_write_uintvar_stream(NULL, &inserter->memfile, nbytes);
 
         /* write blob */
-        memfile_ensure_space(&inserter->memfile, nbytes);
-        memfile_write(&inserter->memfile, value, nbytes);
+        jak_memfile_ensure_space(&inserter->memfile, nbytes);
+        jak_memfile_write(&inserter->memfile, value, nbytes);
 }

@@ -19,13 +19,13 @@
 #include <jak_carbon_string.h>
 #include <jak_carbon_field.h>
 
-jak_u64 jak_carbon_prop_size(struct jak_memfile *file)
+jak_u64 jak_carbon_prop_size(jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(file);
-        jak_offset_t prop_start = memfile_save_position(file);
+        jak_offset_t prop_start = jak_memfile_save_position(file);
         jak_carbon_jak_string_nomarker_skip(file);
         jak_carbon_field_skip(file);
-        jak_offset_t prop_end = memfile_tell(file);
-        memfile_restore_position(file);
+        jak_offset_t prop_end = jak_memfile_tell(file);
+        jak_memfile_restore_position(file);
         return prop_end - prop_start;
 }

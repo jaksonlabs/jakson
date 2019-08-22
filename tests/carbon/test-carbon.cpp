@@ -1215,55 +1215,55 @@ TEST(CarbonTest, CarbonInsertNullTest) {
 
         ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
         jak_carbon_insert_u8(ins, 1);
-        jak_carbon_insert_u8(ins, U8_NULL);
+        jak_carbon_insert_u8(ins, JAK_U8_NULL);
         jak_carbon_insert_u8(ins, 3);
         jak_carbon_insert_column_end(&column_state);
 
         ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U16, 10);
         jak_carbon_insert_u16(ins, 4);
-        jak_carbon_insert_u16(ins, U16_NULL);
+        jak_carbon_insert_u16(ins, JAK_U16_NULL);
         jak_carbon_insert_u16(ins, 6);
         jak_carbon_insert_column_end(&column_state);
 
         ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U32, 10);
         jak_carbon_insert_u32(ins, 7);
-        jak_carbon_insert_u32(ins, U32_NULL);
+        jak_carbon_insert_u32(ins, JAK_U32_NULL);
         jak_carbon_insert_u32(ins, 9);
         jak_carbon_insert_column_end(&column_state);
 
         ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U64, 10);
         jak_carbon_insert_u64(ins, 10);
-        jak_carbon_insert_u64(ins, U64_NULL);
+        jak_carbon_insert_u64(ins, JAK_U64_NULL);
         jak_carbon_insert_u64(ins, 12);
         jak_carbon_insert_column_end(&column_state);
 
         ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I8, 10);
         jak_carbon_insert_i8(ins, -1);
-        jak_carbon_insert_i8(ins, I8_NULL);
+        jak_carbon_insert_i8(ins, JAK_I8_NULL);
         jak_carbon_insert_i8(ins, -3);
         jak_carbon_insert_column_end(&column_state);
 
         ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I16, 10);
         jak_carbon_insert_i16(ins, -4);
-        jak_carbon_insert_i16(ins, I16_NULL);
+        jak_carbon_insert_i16(ins, JAK_I16_NULL);
         jak_carbon_insert_i16(ins, -6);
         jak_carbon_insert_column_end(&column_state);
 
         ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I32, 10);
         jak_carbon_insert_i32(ins, -7);
-        jak_carbon_insert_i32(ins, I32_NULL);
+        jak_carbon_insert_i32(ins, JAK_I32_NULL);
         jak_carbon_insert_i32(ins, -9);
         jak_carbon_insert_column_end(&column_state);
 
         ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I64, 10);
         jak_carbon_insert_i64(ins, -10);
-        jak_carbon_insert_i64(ins, I64_NULL);
+        jak_carbon_insert_i64(ins, JAK_I64_NULL);
         jak_carbon_insert_i64(ins, -12);
         jak_carbon_insert_column_end(&column_state);
 
         ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_FLOAT, 10);
         jak_carbon_insert_float(ins, 42.0f);
-        jak_carbon_insert_float(ins, FLOAT_NULL);
+        jak_carbon_insert_float(ins, JAK_FLOAT_NULL);
         jak_carbon_insert_float(ins, 23.4221f);
         jak_carbon_insert_column_end(&column_state);
 
@@ -1318,49 +1318,49 @@ TEST(CarbonTest, CarbonShrinkColumnListTest) {
 
         ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
         jak_carbon_insert_u8(ins, 1);
-        jak_carbon_insert_u8(ins, U8_NULL);
+        jak_carbon_insert_u8(ins, JAK_U8_NULL);
         jak_carbon_insert_u8(ins, 2);
         jak_carbon_insert_column_end(&column_state);
 
         ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U16, 10);
         jak_carbon_insert_u16(ins, 3);
-        jak_carbon_insert_u16(ins, U16_NULL);
+        jak_carbon_insert_u16(ins, JAK_U16_NULL);
         jak_carbon_insert_u16(ins, 4);
         jak_carbon_insert_column_end(&column_state);
 
         ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U32, 10);
         jak_carbon_insert_u32(ins, 5);
-        jak_carbon_insert_u32(ins, U32_NULL);
+        jak_carbon_insert_u32(ins, JAK_U32_NULL);
         jak_carbon_insert_u32(ins, 6);
         jak_carbon_insert_column_end(&column_state);
 
         ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U64, 10);
         jak_carbon_insert_u64(ins, 7);
-        jak_carbon_insert_u64(ins, U64_NULL);
+        jak_carbon_insert_u64(ins, JAK_U64_NULL);
         jak_carbon_insert_u64(ins, 8);
         jak_carbon_insert_column_end(&column_state);
 
         ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I8, 10);
         jak_carbon_insert_i8(ins, 9);
-        jak_carbon_insert_i8(ins, I8_NULL);
+        jak_carbon_insert_i8(ins, JAK_I8_NULL);
         jak_carbon_insert_i8(ins, 10);
         jak_carbon_insert_column_end(&column_state);
 
         ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I16, 10);
         jak_carbon_insert_i16(ins, 11);
-        jak_carbon_insert_i16(ins, I16_NULL);
+        jak_carbon_insert_i16(ins, JAK_I16_NULL);
         jak_carbon_insert_i16(ins, 12);
         jak_carbon_insert_column_end(&column_state);
 
         ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I32, 10);
         jak_carbon_insert_i32(ins, 13);
-        jak_carbon_insert_i32(ins, I32_NULL);
+        jak_carbon_insert_i32(ins, JAK_I32_NULL);
         jak_carbon_insert_i32(ins, 14);
         jak_carbon_insert_column_end(&column_state);
 
         ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I64, 10);
         jak_carbon_insert_i64(ins, 15);
-        jak_carbon_insert_i64(ins, I64_NULL);
+        jak_carbon_insert_i64(ins, JAK_I64_NULL);
         jak_carbon_insert_i64(ins, 16);
         jak_carbon_insert_column_end(&column_state);
 
@@ -4222,8 +4222,8 @@ TEST(CarbonTest, CarbonKeyTypeSignedKeyRevInc)
 
         jak_u64 test_max = 10000;
 
-        struct jak_vector ofType(jak_carbon) files;
-        vec_create(&files, NULL, sizeof(jak_carbon), test_max);
+        jak_vector ofType(jak_carbon) files;
+        jak_vector_create(&files, NULL, sizeof(jak_carbon), test_max);
         jak_carbon* old_f = &doc;
 
 
@@ -4231,7 +4231,7 @@ TEST(CarbonTest, CarbonKeyTypeSignedKeyRevInc)
 
                 jak_carbon_commit_hash(&rev_old, old_f);
 
-                jak_carbon* new_f = vec_new_and_get(&files, jak_carbon);
+                jak_carbon* new_f = JAK_VECTOR_NEW_AND_GET(&files, jak_carbon);
 
                 jak_carbon_revise_begin(&revise, new_f, old_f);
                 jak_carbon_revise_end(&revise);
@@ -7842,13 +7842,13 @@ TEST(CarbonTest, CarbonFromJsonExample)
         jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
         jak_u32 max = 10000;
-        timestamp_t t1 = time_now_wallclock();
+        jak_timestamp t1 = jak_wallclock();
         for (jak_u32 i = 0; i < max; i++) {
                 jak_carbon d;
                 jak_carbon_from_json(&d, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
                 jak_carbon_drop(&d);
         }
-        timestamp_t t2 = time_now_wallclock();
+        jak_timestamp t2 = jak_wallclock();
         printf("%.2fmsec/opp, %.4f ops/sec\n", (t2-t1)/(float)max, 1.0f/((t2-t1)/(float)max/1000.0f));
 
 
@@ -7936,7 +7936,7 @@ TEST(CarbonTest, CarbonFromJsonFromExcerpt)
         jak_carbon doc;
         jak_error err;
 
-        /* the working directory must be 'tests/carbon' to find this file */
+        /* the working directory must be 'tests/jakson-tool' to find this file */
         int fd = open("./assets/ms-academic-graph.json", O_RDONLY);
         ASSERT_NE(fd, -1);
         int json_in_len = lseek(fd, 0, SEEK_END);
@@ -8132,7 +8132,7 @@ TEST(CarbonTest, CarbonResolveDotPathForObjectsBench)
         ASSERT_TRUE(jak_carbon_dot_path_from_string(&path21, "0.b.\"the key\""));
 
         jak_u32 max = 10000;
-        timestamp_t t1 = time_now_wallclock();
+        jak_timestamp t1 = jak_wallclock();
         for (jak_u32 i = 0; i < max; i++) {
                 ASSERT_TRUE(jak_carbon_find_create(&find, &path1, &doc));
                 ASSERT_TRUE(jak_carbon_find_has_result(&find));
@@ -8218,7 +8218,7 @@ TEST(CarbonTest, CarbonResolveDotPathForObjectsBench)
                 ASSERT_TRUE(jak_carbon_find_has_result(&find));
                 ASSERT_TRUE(jak_carbon_find_close(&find));
         }
-        timestamp_t t2 = time_now_wallclock();
+        jak_timestamp t2 = jak_wallclock();
         printf("%.2fmsec/opp, %.4f ops/sec\n", (t2-t1)/(float)max/21.0f, 1.0f/((t2-t1)/(float)max/(21*1000.0f)));
 
         jak_carbon_dot_path_drop(&path1);

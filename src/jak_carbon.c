@@ -114,7 +114,7 @@ bool jak_carbon_create_empty_ex(jak_carbon *doc, jak_carbon_key_e type, jak_u64 
         jak_error_init(&doc->err);
         jak_memblock_create(&doc->memblock, doc_cap);
         jak_memblock_zero_out(doc->memblock);
-        memfile_open(&doc->memfile, doc->memblock, JAK_READ_WRITE);
+        jak_memfile_open(&doc->memfile, doc->memblock, JAK_READ_WRITE);
 
         jak_spinlock_init(&doc->versioning.write_lock);
 
@@ -192,28 +192,28 @@ bool jak_carbon_key_type(jak_carbon_key_e *out, jak_carbon *doc)
 {
         JAK_ERROR_IF_NULL(out)
         JAK_ERROR_IF_NULL(doc)
-        memfile_save_position(&doc->memfile);
+        jak_memfile_save_position(&doc->memfile);
         jak_carbon_key_skip(out, &doc->memfile);
-        memfile_restore_position(&doc->memfile);
+        jak_memfile_restore_position(&doc->memfile);
         return true;
 }
 
 const void *jak_carbon_key_raw_value(jak_u64 *len, jak_carbon_key_e *type, jak_carbon *doc)
 {
-        memfile_save_position(&doc->memfile);
-        memfile_seek(&doc->memfile, 0);
+        jak_memfile_save_position(&doc->memfile);
+        jak_memfile_seek(&doc->memfile, 0);
         const void *result = jak_carbon_key_read(len, type, &doc->memfile);
-        memfile_restore_position(&doc->memfile);
+        jak_memfile_restore_position(&doc->memfile);
         return result;
 }
 
 bool jak_carbon_key_signed_value(jak_i64 *key, jak_carbon *doc)
 {
         jak_carbon_key_e type;
-        memfile_save_position(&doc->memfile);
-        memfile_seek(&doc->memfile, 0);
+        jak_memfile_save_position(&doc->memfile);
+        jak_memfile_seek(&doc->memfile, 0);
         const void *result = jak_carbon_key_read(NULL, &type, &doc->memfile);
-        memfile_restore_position(&doc->memfile);
+        jak_memfile_restore_position(&doc->memfile);
         if (JAK_LIKELY(jak_carbon_key_is_signed(type))) {
                 *key = *((const jak_i64 *) result);
                 return true;
@@ -226,10 +226,10 @@ bool jak_carbon_key_signed_value(jak_i64 *key, jak_carbon *doc)
 bool jak_carbon_key_unsigned_value(jak_u64 *key, jak_carbon *doc)
 {
         jak_carbon_key_e type;
-        memfile_save_position(&doc->memfile);
-        memfile_seek(&doc->memfile, 0);
+        jak_memfile_save_position(&doc->memfile);
+        jak_memfile_seek(&doc->memfile, 0);
         const void *result = jak_carbon_key_read(NULL, &type, &doc->memfile);
-        memfile_restore_position(&doc->memfile);
+        jak_memfile_restore_position(&doc->memfile);
         if (JAK_LIKELY(jak_carbon_key_is_unsigned(type))) {
                 *key = *((const jak_u64 *) result);
                 return true;
@@ -242,10 +242,10 @@ bool jak_carbon_key_unsigned_value(jak_u64 *key, jak_carbon *doc)
 const char *jak_carbon_key_jak_string_value(jak_u64 *len, jak_carbon *doc)
 {
         jak_carbon_key_e type;
-        memfile_save_position(&doc->memfile);
-        memfile_seek(&doc->memfile, 0);
+        jak_memfile_save_position(&doc->memfile);
+        jak_memfile_seek(&doc->memfile, 0);
         const void *result = jak_carbon_key_read(len, &type, &doc->memfile);
-        memfile_restore_position(&doc->memfile);
+        jak_memfile_restore_position(&doc->memfile);
         if (JAK_LIKELY(jak_carbon_key_is_string(type))) {
                 return result;
         } else {
@@ -279,7 +279,7 @@ bool jak_carbon_clone(jak_carbon *clone, jak_carbon *doc)
         JAK_ERROR_IF_NULL(clone);
         JAK_ERROR_IF_NULL(doc);
         JAK_CHECK_SUCCESS(jak_memblock_cpy(&clone->memblock, doc->memblock));
-        JAK_CHECK_SUCCESS(memfile_open(&clone->memfile, clone->memblock, JAK_READ_WRITE));
+        JAK_CHECK_SUCCESS(jak_memfile_open(&clone->memfile, clone->memblock, JAK_READ_WRITE));
         JAK_CHECK_SUCCESS(jak_error_init(&clone->err));
 
         jak_spinlock_init(&clone->versioning.write_lock);
@@ -308,7 +308,7 @@ bool jak_carbon_to_str(jak_string *dst, jak_carbon_printer_impl_e printer, jak_c
 
         jak_string_clear(dst);
 
-        memfile_save_position(&doc->memfile);
+        jak_memfile_save_position(&doc->memfile);
 
         JAK_ZERO_MEMORY(&p, sizeof(jak_carbon_printer));
         jak_string_create(&b);
@@ -339,7 +339,7 @@ bool jak_carbon_to_str(jak_string *dst, jak_carbon_printer_impl_e printer, jak_c
         jak_string_add(dst, jak_string_cstr(&b));
         jak_string_drop(&b);
 
-        memfile_restore_position(&doc->memfile);
+        jak_memfile_restore_position(&doc->memfile);
         return true;
 }
 
@@ -411,10 +411,10 @@ bool jak_carbon_hexdump_print(FILE *file, jak_carbon *doc)
 {
         JAK_ERROR_IF_NULL(file);
         JAK_ERROR_IF_NULL(doc);
-        memfile_save_position(&doc->memfile);
-        memfile_seek(&doc->memfile, 0);
-        bool status = hexdump_print(file, memfile_peek(&doc->memfile, 1), memfile_size(&doc->memfile));
-        memfile_restore_position(&doc->memfile);
+        jak_memfile_save_position(&doc->memfile);
+        jak_memfile_seek(&doc->memfile, 0);
+        bool status = jak_hexdump_print(file, jak_memfile_peek(&doc->memfile, 1), jak_memfile_size(&doc->memfile));
+        jak_memfile_restore_position(&doc->memfile);
         return status;
 }
 
@@ -431,7 +431,7 @@ static void carbon_header_init(jak_carbon *doc, jak_carbon_key_e key_type)
 {
         JAK_ASSERT(doc);
 
-        memfile_seek(&doc->memfile, 0);
+        jak_memfile_seek(&doc->memfile, 0);
         jak_carbon_key_create(&doc->memfile, key_type, &doc->err);
 
         if (key_type != JAK_CARBON_KEY_NOKEY) {

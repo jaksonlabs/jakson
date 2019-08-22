@@ -46,8 +46,8 @@ typedef struct jak_hashset_bucket {
  * lock implementation.
  */
 typedef struct jak_hashset {
-        struct jak_vector key_data;
-        struct jak_vector ofType(jak_hashset_bucket) table;
+        jak_vector key_data;
+        jak_vector ofType(jak_hashset_bucket) table;
         jak_spinlock lock;
         jak_u32 size;
         jak_error err;
@@ -59,7 +59,7 @@ bool jak_hashset_create(jak_hashset *map, jak_error *err, size_t key_size, size_
 jak_hashset *jak_hashset_cpy(jak_hashset *src);
 bool jak_hashset_drop(jak_hashset *map);
 
-struct jak_vector *jak_hashset_keys(jak_hashset *map);
+jak_vector *jak_hashset_keys(jak_hashset *map);
 bool jak_hashset_clear(jak_hashset *map);
 bool jak_hashset_avg_displace(float *displace, const jak_hashset *map);
 bool jak_hashset_lock(jak_hashset *map);

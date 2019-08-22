@@ -71,34 +71,34 @@ bool jak_carbon_revise_begin(jak_carbon_revise *context, jak_carbon *revised_doc
 static void key_unsigned_set(jak_carbon *doc, jak_u64 key)
 {
         JAK_ASSERT(doc);
-        memfile_save_position(&doc->memfile);
-        memfile_seek(&doc->memfile, 0);
+        jak_memfile_save_position(&doc->memfile);
+        jak_memfile_seek(&doc->memfile, 0);
 
         jak_carbon_key_write_unsigned(&doc->memfile, key);
 
-        memfile_restore_position(&doc->memfile);
+        jak_memfile_restore_position(&doc->memfile);
 }
 
 static void key_signed_set(jak_carbon *doc, jak_i64 key)
 {
         JAK_ASSERT(doc);
-        memfile_save_position(&doc->memfile);
-        memfile_seek(&doc->memfile, 0);
+        jak_memfile_save_position(&doc->memfile);
+        jak_memfile_seek(&doc->memfile, 0);
 
         jak_carbon_key_write_signed(&doc->memfile, key);
 
-        memfile_restore_position(&doc->memfile);
+        jak_memfile_restore_position(&doc->memfile);
 }
 
 static void key_jak_string_set(jak_carbon *doc, const char *key)
 {
         JAK_ASSERT(doc);
-        memfile_save_position(&doc->memfile);
-        memfile_seek(&doc->memfile, 0);
+        jak_memfile_save_position(&doc->memfile);
+        jak_memfile_seek(&doc->memfile, 0);
 
         jak_carbon_key_update_string(&doc->memfile, key);
 
-        memfile_restore_position(&doc->memfile);
+        jak_memfile_restore_position(&doc->memfile);
 }
 
 bool jak_carbon_revise_key_generate(jak_uid_t *out, jak_carbon_revise *context)
@@ -256,11 +256,11 @@ bool jak_carbon_revise_shrink(jak_carbon_revise *context)
         jak_carbon_array_it it;
         jak_carbon_revise_iterator_open(&it, context);
         jak_carbon_array_it_fast_forward(&it);
-        if (memfile_remain_size(&it.memfile) > 0) {
-                jak_offset_t first_empty_slot = memfile_tell(&it.memfile);
-                JAK_ASSERT(memfile_size(&it.memfile) > first_empty_slot);
-                jak_offset_t shrink_size = memfile_size(&it.memfile) - first_empty_slot;
-                memfile_cut(&it.memfile, shrink_size);
+        if (jak_memfile_remain_size(&it.memfile) > 0) {
+                jak_offset_t first_empty_slot = jak_memfile_tell(&it.memfile);
+                JAK_ASSERT(jak_memfile_size(&it.memfile) > first_empty_slot);
+                jak_offset_t shrink_size = jak_memfile_size(&it.memfile) - first_empty_slot;
+                jak_memfile_cut(&it.memfile, shrink_size);
         }
 
         jak_offset_t size;
@@ -313,18 +313,18 @@ static bool internal_jak_pack_array(jak_carbon_array_it *it)
                 if (!is_array_end) {
 
                         JAK_ERROR_IF(!is_empty_slot, &it->err, JAK_ERR_CORRUPTED);
-                        jak_offset_t first_empty_slot_offset = memfile_tell(&this_array_it.memfile);
+                        jak_offset_t first_empty_slot_offset = jak_memfile_tell(&this_array_it.memfile);
                         char final;
-                        while ((final = *memfile_read(&this_array_it.memfile, sizeof(char))) == 0) {}
+                        while ((final = *jak_memfile_read(&this_array_it.memfile, sizeof(char))) == 0) {}
                         JAK_ASSERT(final == JAK_CARBON_MARKER_ARRAY_END);
-                        jak_offset_t last_empty_slot_offset = memfile_tell(&this_array_it.memfile) - sizeof(char);
-                        memfile_seek(&this_array_it.memfile, first_empty_slot_offset);
+                        jak_offset_t last_empty_slot_offset = jak_memfile_tell(&this_array_it.memfile) - sizeof(char);
+                        jak_memfile_seek(&this_array_it.memfile, first_empty_slot_offset);
                         JAK_ASSERT(last_empty_slot_offset > first_empty_slot_offset);
 
-                        memfile_inplace_remove(&this_array_it.memfile,
+                        jak_memfile_inplace_remove(&this_array_it.memfile,
                                                last_empty_slot_offset - first_empty_slot_offset);
 
-                        final = *memfile_read(&this_array_it.memfile, sizeof(char));
+                        final = *jak_memfile_read(&this_array_it.memfile, sizeof(char));
                         JAK_ASSERT(final == JAK_CARBON_MARKER_ARRAY_END);
                 }
 
@@ -360,10 +360,10 @@ static bool internal_jak_pack_array(jak_carbon_array_it *it)
                                                                it->field_access.nested_array_it->payload_start -
                                                                sizeof(jak_u8));
                                         internal_jak_pack_array(&nested_array_it);
-                                        JAK_ASSERT(*memfile_peek(&nested_array_it.memfile, sizeof(char)) ==
+                                        JAK_ASSERT(*jak_memfile_peek(&nested_array_it.memfile, sizeof(char)) ==
                                                    JAK_CARBON_MARKER_ARRAY_END);
-                                        memfile_skip(&nested_array_it.memfile, sizeof(char));
-                                        memfile_seek(&it->memfile, memfile_tell(&nested_array_it.memfile));
+                                        jak_memfile_skip(&nested_array_it.memfile, sizeof(char));
+                                        jak_memfile_seek(&it->memfile, jak_memfile_tell(&nested_array_it.memfile));
                                         jak_carbon_array_it_drop(&nested_array_it);
                                 }
                                         break;
@@ -379,8 +379,8 @@ static bool internal_jak_pack_array(jak_carbon_array_it *it)
                                 case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
                                         jak_carbon_column_it_rewind(it->field_access.nested_column_it);
                                         internal_jak_pack_column(it->field_access.nested_column_it);
-                                        memfile_seek(&it->memfile,
-                                                     memfile_tell(&it->field_access.nested_column_it->memfile));
+                                        jak_memfile_seek(&it->memfile,
+                                                     jak_memfile_tell(&it->field_access.nested_column_it->memfile));
                                         break;
                                 case JAK_CARBON_FIELD_TYPE_OBJECT: {
                                         jak_carbon_object_it nested_object_it;
@@ -388,10 +388,10 @@ static bool internal_jak_pack_array(jak_carbon_array_it *it)
                                                                 it->field_access.nested_object_it->object_contents_off -
                                                                 sizeof(jak_u8));
                                         internal_jak_pack_object(&nested_object_it);
-                                        JAK_ASSERT(*memfile_peek(&nested_object_it.memfile, sizeof(char)) ==
+                                        JAK_ASSERT(*jak_memfile_peek(&nested_object_it.memfile, sizeof(char)) ==
                                                    JAK_CARBON_MARKER_OBJECT_END);
-                                        memfile_skip(&nested_object_it.memfile, sizeof(char));
-                                        memfile_seek(&it->memfile, memfile_tell(&nested_object_it.memfile));
+                                        jak_memfile_skip(&nested_object_it.memfile, sizeof(char));
+                                        jak_memfile_seek(&it->memfile, jak_memfile_tell(&nested_object_it.memfile));
                                         jak_carbon_object_it_drop(&nested_object_it);
                                 }
                                         break;
@@ -401,7 +401,7 @@ static bool internal_jak_pack_array(jak_carbon_array_it *it)
                 }
         }
 
-        JAK_ASSERT(*memfile_peek(&it->memfile, sizeof(char)) == JAK_CARBON_MARKER_ARRAY_END);
+        JAK_ASSERT(*jak_memfile_peek(&it->memfile, sizeof(char)) == JAK_CARBON_MARKER_ARRAY_END);
 
         return true;
 }
@@ -421,18 +421,18 @@ static bool internal_jak_pack_object(jak_carbon_object_it *it)
                 if (!is_object_end) {
 
                         JAK_ERROR_IF(!is_empty_slot, &it->err, JAK_ERR_CORRUPTED);
-                        jak_offset_t first_empty_slot_offset = memfile_tell(&this_object_it.memfile);
+                        jak_offset_t first_empty_slot_offset = jak_memfile_tell(&this_object_it.memfile);
                         char final;
-                        while ((final = *memfile_read(&this_object_it.memfile, sizeof(char))) == 0) {}
+                        while ((final = *jak_memfile_read(&this_object_it.memfile, sizeof(char))) == 0) {}
                         JAK_ASSERT(final == JAK_CARBON_MARKER_OBJECT_END);
-                        jak_offset_t last_empty_slot_offset = memfile_tell(&this_object_it.memfile) - sizeof(char);
-                        memfile_seek(&this_object_it.memfile, first_empty_slot_offset);
+                        jak_offset_t last_empty_slot_offset = jak_memfile_tell(&this_object_it.memfile) - sizeof(char);
+                        jak_memfile_seek(&this_object_it.memfile, first_empty_slot_offset);
                         JAK_ASSERT(last_empty_slot_offset > first_empty_slot_offset);
 
-                        memfile_inplace_remove(&this_object_it.memfile,
+                        jak_memfile_inplace_remove(&this_object_it.memfile,
                                                last_empty_slot_offset - first_empty_slot_offset);
 
-                        final = *memfile_read(&this_object_it.memfile, sizeof(char));
+                        final = *jak_memfile_read(&this_object_it.memfile, sizeof(char));
                         JAK_ASSERT(final == JAK_CARBON_MARKER_OBJECT_END);
                 }
 
@@ -468,10 +468,10 @@ static bool internal_jak_pack_object(jak_carbon_object_it *it)
                                                                it->field.value.data.nested_array_it->payload_start -
                                                                sizeof(jak_u8));
                                         internal_jak_pack_array(&nested_array_it);
-                                        JAK_ASSERT(*memfile_peek(&nested_array_it.memfile, sizeof(char)) ==
+                                        JAK_ASSERT(*jak_memfile_peek(&nested_array_it.memfile, sizeof(char)) ==
                                                    JAK_CARBON_MARKER_ARRAY_END);
-                                        memfile_skip(&nested_array_it.memfile, sizeof(char));
-                                        memfile_seek(&it->memfile, memfile_tell(&nested_array_it.memfile));
+                                        jak_memfile_skip(&nested_array_it.memfile, sizeof(char));
+                                        jak_memfile_seek(&it->memfile, jak_memfile_tell(&nested_array_it.memfile));
                                         jak_carbon_array_it_drop(&nested_array_it);
                                 }
                                         break;
@@ -487,8 +487,8 @@ static bool internal_jak_pack_object(jak_carbon_object_it *it)
                                 case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
                                         jak_carbon_column_it_rewind(it->field.value.data.nested_column_it);
                                         internal_jak_pack_column(it->field.value.data.nested_column_it);
-                                        memfile_seek(&it->memfile,
-                                                     memfile_tell(&it->field.value.data.nested_column_it->memfile));
+                                        jak_memfile_seek(&it->memfile,
+                                                     jak_memfile_tell(&it->field.value.data.nested_column_it->memfile));
                                         break;
                                 case JAK_CARBON_FIELD_TYPE_OBJECT: {
                                         jak_carbon_object_it nested_object_it;
@@ -496,10 +496,10 @@ static bool internal_jak_pack_object(jak_carbon_object_it *it)
                                                                 it->field.value.data.nested_object_it->object_contents_off -
                                                                 sizeof(jak_u8));
                                         internal_jak_pack_object(&nested_object_it);
-                                        JAK_ASSERT(*memfile_peek(&nested_object_it.memfile, sizeof(char)) ==
+                                        JAK_ASSERT(*jak_memfile_peek(&nested_object_it.memfile, sizeof(char)) ==
                                                    JAK_CARBON_MARKER_OBJECT_END);
-                                        memfile_skip(&nested_object_it.memfile, sizeof(char));
-                                        memfile_seek(&it->memfile, memfile_tell(&nested_object_it.memfile));
+                                        jak_memfile_skip(&nested_object_it.memfile, sizeof(char));
+                                        jak_memfile_seek(&it->memfile, jak_memfile_tell(&nested_object_it.memfile));
                                         jak_carbon_object_it_drop(&nested_object_it);
                                 }
                                         break;
@@ -509,7 +509,7 @@ static bool internal_jak_pack_object(jak_carbon_object_it *it)
                 }
         }
 
-        JAK_ASSERT(*memfile_peek(&it->memfile, sizeof(char)) == JAK_CARBON_MARKER_OBJECT_END);
+        JAK_ASSERT(*jak_memfile_peek(&it->memfile, sizeof(char)) == JAK_CARBON_MARKER_OBJECT_END);
 
         return true;
 }
@@ -521,18 +521,18 @@ static bool internal_jak_pack_column(jak_carbon_column_it *it)
         jak_u32 free_space = (it->column_capacity - it->column_num_elements) * jak_carbon_int_get_type_value_size(it->type);
         jak_offset_t payload_start = jak_carbon_int_column_get_payload_off(it);
         jak_u64 payload_size = it->column_num_elements * jak_carbon_int_get_type_value_size(it->type);
-        memfile_seek(&it->memfile, payload_start);
-        memfile_skip(&it->memfile, payload_size);
+        jak_memfile_seek(&it->memfile, payload_start);
+        jak_memfile_skip(&it->memfile, payload_size);
 
         if (free_space > 0) {
-                memfile_inplace_remove(&it->memfile, free_space);
+                jak_memfile_inplace_remove(&it->memfile, free_space);
 
-                memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
-                memfile_skip_uintvar_stream(&it->memfile); // skip num of elements counter
-                memfile_update_uintvar_stream(&it->memfile,
+                jak_memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
+                jak_memfile_skip_uintvar_stream(&it->memfile); // skip num of elements counter
+                jak_memfile_update_uintvar_stream(&it->memfile,
                                               it->column_num_elements); // update capacity counter to num elems
 
-                memfile_skip(&it->memfile, payload_size);
+                jak_memfile_skip(&it->memfile, payload_size);
 
                 return true;
         } else {
@@ -551,15 +551,15 @@ static bool carbon_header_rev_inc(jak_carbon *doc)
         JAK_ASSERT(doc);
 
         jak_carbon_key_e key_type;
-        memfile_save_position(&doc->memfile);
-        memfile_seek(&doc->memfile, 0);
+        jak_memfile_save_position(&doc->memfile);
+        jak_memfile_seek(&doc->memfile, 0);
         jak_carbon_key_read(NULL, &key_type, &doc->memfile);
         if (jak_carbon_has_key(key_type)) {
                 jak_u64 raw_data_len = 0;
                 const void *raw_data = jak_carbon_raw_data(&raw_data_len, doc);
                 jak_carbon_commit_hash_update(&doc->memfile, raw_data, raw_data_len);
         }
-        memfile_restore_position(&doc->memfile);
+        jak_memfile_restore_position(&doc->memfile);
 
         return true;
 }

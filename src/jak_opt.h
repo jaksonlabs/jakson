@@ -33,7 +33,7 @@ typedef struct jak_command_opt {
 } jak_command_opt;
 
 typedef struct jak_command_opt_group {
-        struct jak_vector ofType(jak_command_opt) cmd_options;
+        jak_vector ofType(jak_command_opt) cmd_options;
         char *desc;
 } jak_command_opt_group;
 
@@ -42,7 +42,7 @@ typedef enum jak_module_arg_policy {
 } jak_module_arg_policy;
 
 typedef struct jak_command_opt_mgr {
-        struct jak_vector ofType(jak_command_opt_group) groups;
+        jak_vector ofType(jak_command_opt_group) groups;
         jak_module_arg_policy policy;
         bool (*fallback)(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager);
         char *module_name;

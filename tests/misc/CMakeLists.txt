@@ -12,7 +12,7 @@ set(
 )
 
 add_executable(test-thread-pool test-thread-pool.cpp)
-target_link_libraries(test-thread-pool PUBLIC gtest ${TEST_LIBS} PRIVATE ark-sources)
+target_link_libraries(test-thread-pool PUBLIC gtest ${TEST_LIBS} PRIVATE jakson-sources)
 
 ADD_DEPENDENCIES(tests test-thread-pool)
 

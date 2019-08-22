@@ -204,42 +204,42 @@ bool jak_carbon_printer_unsigned_nonull(jak_carbon_printer *printer, jak_string 
 
 bool jak_carbon_printer_u8_or_null(jak_carbon_printer *printer, jak_string *str, jak_u8 value)
 {
-        return delegate_print_call(printer, str, value, is_null_u8, jak_carbon_printer_unsigned_nonull, jak_u64);
+        return delegate_print_call(printer, str, value, JAK_IS_NULL_U8, jak_carbon_printer_unsigned_nonull, jak_u64);
 }
 
 bool jak_carbon_printer_u16_or_null(jak_carbon_printer *printer, jak_string *str, jak_u16 value)
 {
-        return delegate_print_call(printer, str, value, is_null_u16, jak_carbon_printer_unsigned_nonull, jak_u64);
+        return delegate_print_call(printer, str, value, JAK_IS_NULL_U16, jak_carbon_printer_unsigned_nonull, jak_u64);
 }
 
 bool jak_carbon_printer_u32_or_null(jak_carbon_printer *printer, jak_string *str, jak_u32 value)
 {
-        return delegate_print_call(printer, str, value, is_null_u32, jak_carbon_printer_unsigned_nonull, jak_u64);
+        return delegate_print_call(printer, str, value, JAK_IS_NULL_U32, jak_carbon_printer_unsigned_nonull, jak_u64);
 }
 
 bool jak_carbon_printer_u64_or_null(jak_carbon_printer *printer, jak_string *str, jak_u64 value)
 {
-        return delegate_print_call(printer, str, value, is_null_u64, jak_carbon_printer_unsigned_nonull, jak_u64);
+        return delegate_print_call(printer, str, value, JAK_IS_NULL_U64, jak_carbon_printer_unsigned_nonull, jak_u64);
 }
 
 bool jak_carbon_printer_i8_or_null(jak_carbon_printer *printer, jak_string *str, jak_i8 value)
 {
-        return delegate_print_call(printer, str, value, is_null_i8, jak_carbon_printer_signed_nonull, jak_i64);
+        return delegate_print_call(printer, str, value, JAK_IS_NULL_I8, jak_carbon_printer_signed_nonull, jak_i64);
 }
 
 bool jak_carbon_printer_i16_or_null(jak_carbon_printer *printer, jak_string *str, jak_i16 value)
 {
-        return delegate_print_call(printer, str, value, is_null_i16, jak_carbon_printer_signed_nonull, jak_i64);
+        return delegate_print_call(printer, str, value, JAK_IS_NULL_I16, jak_carbon_printer_signed_nonull, jak_i64);
 }
 
 bool jak_carbon_printer_i32_or_null(jak_carbon_printer *printer, jak_string *str, jak_i32 value)
 {
-        return delegate_print_call(printer, str, value, is_null_i32, jak_carbon_printer_signed_nonull, jak_i64);
+        return delegate_print_call(printer, str, value, JAK_IS_NULL_I32, jak_carbon_printer_signed_nonull, jak_i64);
 }
 
 bool jak_carbon_printer_i64_or_null(jak_carbon_printer *printer, jak_string *str, jak_i64 value)
 {
-        return delegate_print_call(printer, str, value, is_null_i64, jak_carbon_printer_signed_nonull, jak_i64);
+        return delegate_print_call(printer, str, value, JAK_IS_NULL_I64, jak_carbon_printer_signed_nonull, jak_i64);
 }
 
 bool jak_carbon_printer_float(jak_carbon_printer *printer, jak_string *str, const float *value)
@@ -608,7 +608,7 @@ bool jak_carbon_printer_print_column(jak_carbon_column_it *it, jak_carbon_printe
                 switch (type) {
                         case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
                                 jak_u8 value = ((jak_u8 *) values)[i];
-                                if (is_null_boolean(value)) {
+                                if (JAK_IS_NULL_BOOLEAN(value)) {
                                         jak_carbon_printer_null(printer, builder);
                                 } else if (value == JAK_CARBON_BOOLEAN_COLUMN_TRUE) {
                                         jak_carbon_printer_true(printer, false, builder);
@@ -619,47 +619,47 @@ bool jak_carbon_printer_print_column(jak_carbon_column_it *it, jak_carbon_printe
                                 break;
                         case JAK_CARBON_FIELD_TYPE_COLUMN_U8: {
                                 jak_u64 number = ((jak_u8 *) values)[i];
-                                jak_carbon_printer_unsigned_nonull(printer, builder, is_null_u8(number) ? NULL : &number);
+                                jak_carbon_printer_unsigned_nonull(printer, builder, JAK_IS_NULL_U8(number) ? NULL : &number);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_COLUMN_U16: {
                                 jak_u64 number = ((jak_u16 *) values)[i];
-                                jak_carbon_printer_unsigned_nonull(printer, builder, is_null_u16(number) ? NULL : &number);
+                                jak_carbon_printer_unsigned_nonull(printer, builder, JAK_IS_NULL_U16(number) ? NULL : &number);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_COLUMN_U32: {
                                 jak_u64 number = ((jak_u32 *) values)[i];
-                                jak_carbon_printer_unsigned_nonull(printer, builder, is_null_u32(number) ? NULL : &number);
+                                jak_carbon_printer_unsigned_nonull(printer, builder, JAK_IS_NULL_U32(number) ? NULL : &number);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_COLUMN_U64: {
                                 jak_u64 number = ((jak_u64 *) values)[i];
-                                jak_carbon_printer_unsigned_nonull(printer, builder, is_null_u64(number) ? NULL : &number);
+                                jak_carbon_printer_unsigned_nonull(printer, builder, JAK_IS_NULL_U64(number) ? NULL : &number);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_COLUMN_I8: {
                                 jak_i64 number = ((jak_i8 *) values)[i];
-                                jak_carbon_printer_signed_nonull(printer, builder, is_null_i8(number) ? NULL : &number);
+                                jak_carbon_printer_signed_nonull(printer, builder, JAK_IS_NULL_I8(number) ? NULL : &number);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_COLUMN_I16: {
                                 jak_i64 number = ((jak_i16 *) values)[i];
-                                jak_carbon_printer_signed_nonull(printer, builder, is_null_i16(number) ? NULL : &number);
+                                jak_carbon_printer_signed_nonull(printer, builder, JAK_IS_NULL_I16(number) ? NULL : &number);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_COLUMN_I32: {
                                 jak_i64 number = ((jak_i32 *) values)[i];
-                                jak_carbon_printer_signed_nonull(printer, builder, is_null_i32(number) ? NULL : &number);
+                                jak_carbon_printer_signed_nonull(printer, builder, JAK_IS_NULL_I32(number) ? NULL : &number);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_COLUMN_I64: {
                                 jak_i64 number = ((jak_i64 *) values)[i];
-                                jak_carbon_printer_signed_nonull(printer, builder, is_null_i64(number) ? NULL : &number);
+                                jak_carbon_printer_signed_nonull(printer, builder, JAK_IS_NULL_I64(number) ? NULL : &number);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT: {
                                 float number = ((float *) values)[i];
-                                jak_carbon_printer_float(printer, builder, is_null_float(number) ? NULL : &number);
+                                jak_carbon_printer_float(printer, builder, JAK_IS_NULL_FLOAT(number) ? NULL : &number);
                         }
                                 break;
                         default:

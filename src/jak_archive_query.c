@@ -44,7 +44,7 @@ struct jak_sid_to_offset {
                                                                                                                        \
     if (obj->flags.bits.bit_flag_name) {                                                                               \
         JAK_ASSERT(obj->props.offset_name != 0);                                                                           \
-        memfile_seek(&obj->file, obj->props.offset_name);                                                       \
+        jak_memfile_seek(&obj->file, obj->props.offset_name);                                                       \
         jak_fixed_prop prop;                                                                                      \
         jak_int_embedded_fixed_props_read(&prop, &obj->file);                                                       \
         jak_archive_int_reset_carbon_object_mem_file(obj);                                                                   \
@@ -101,7 +101,7 @@ bool jak_query_create_index_jak_string_id_to_offset(struct jak_sid_to_offset **i
 
         jak_strid_iter strid_iter;
         jak_strid_info *info;
-        size_t vector_len;
+        size_t jak_vector_len;
         bool status;
         bool success;
         jak_u32 capacity;
@@ -123,8 +123,8 @@ bool jak_query_create_index_jak_string_id_to_offset(struct jak_sid_to_offset **i
         status = jak_query_scan_strids(&strid_iter, query);
 
         if (status) {
-                while (jak_strid_iter_next(&success, &info, &query->err, &vector_len, &strid_iter)) {
-                        for (size_t i = 0; i < vector_len; i++) {
+                while (jak_strid_iter_next(&success, &info, &query->err, &jak_vector_len, &strid_iter)) {
+                        for (size_t i = 0; i < jak_vector_len; i++) {
                                 struct jak_sid_to_offset_arg arg = {.offset = info[i].offset, .strlen = info[i].strlen};
                                 jak_hashtable_insert_or_update(&result->mapping, &info[i].id, &arg, 1);
                         }
@@ -222,15 +222,15 @@ static char *fetch_jak_string_by_id_via_scan(jak_archive_query *query, jak_archi
 
         jak_strid_iter strid_iter;
         jak_strid_info *info;
-        size_t vector_len;
+        size_t jak_vector_len;
         bool status;
         bool success;
 
         status = jak_query_scan_strids(&strid_iter, query);
 
         if (status) {
-                while (jak_strid_iter_next(&success, &info, &query->err, &vector_len, &strid_iter)) {
-                        for (size_t i = 0; i < vector_len; i++) {
+                while (jak_strid_iter_next(&success, &info, &query->err, &jak_vector_len, &strid_iter)) {
+                        for (size_t i = 0; i < jak_vector_len; i++) {
                                 if (info[i].id == id) {
                                         bool decode_result;
                                         char *result = fetch_jak_string_from_file(&decode_result,

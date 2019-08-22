@@ -37,7 +37,7 @@ typedef enum jak_visit_policy {
         JAK_VISIT_INCLUDE, JAK_VISIT_EXCLUDE,
 } jak_visit_policy_e;
 
-typedef const struct jak_vector ofType(jak_path_entry) *path_stack_t;
+typedef const jak_vector ofType(jak_path_entry) *path_stack_t;
 
 #define JAK_DEFINE_VISIT_BASIC_TYPE_PAIRS(name, built_in_type)                                                             \
 void (*visit_##name##_pairs) (jak_archive *jak_archive, path_stack_t path, jak_uid_t id,                              \
@@ -135,8 +135,8 @@ typedef struct jak_archive_visitor {
 } jak_archive_visitor;
 
 bool jak_archive_visit_archive(jak_archive *archive, const jak_archive_visitor_desc *desc, jak_archive_visitor *visitor, void *capture);
-bool jak_archive_visitor_print_path(FILE *file, jak_archive *archive, const struct jak_vector ofType(jak_path_entry) *path_stack);
-void jak_archive_visitor_path_to_string(char path_buffer[2048], jak_archive *archive, const struct jak_vector ofType(jak_path_entry) *path_stack);
-bool jak_archive_visitor_path_compare(const struct jak_vector ofType(jak_path_entry) *path, jak_archive_field_sid_t *group_name, const char *path_str, jak_archive *archive);
+bool jak_archive_visitor_print_path(FILE *file, jak_archive *archive, const jak_vector ofType(jak_path_entry) *path_stack);
+void jak_archive_visitor_path_to_string(char path_buffer[2048], jak_archive *archive, const jak_vector ofType(jak_path_entry) *path_stack);
+bool jak_archive_visitor_path_compare(const jak_vector ofType(jak_path_entry) *path, jak_archive_field_sid_t *group_name, const char *path_str, jak_archive *archive);
 
 #endif

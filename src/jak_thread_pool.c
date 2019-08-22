@@ -24,65 +24,65 @@
 
 static inline void __execute_task();
 
-struct thread_pool *thread_pool_create(size_t num_threads, int enable_monitoring)
+jak_thread_pool *jak_thread_pool_create(size_t num_threads, int enable_monitoring)
 {
-        struct thread_pool *pool = JAK_MALLOC(sizeof(struct thread_pool));
+        jak_thread_pool *pool = JAK_MALLOC(sizeof(jak_thread_pool));
 
         pool->name = NULL;
         pool->size = num_threads;
         pool->capacity = num_threads * 2;
         jak_priority_queue_init(&pool->waiting_tasks);
 
-        pool->thread_tasks = calloc(num_threads, sizeof(struct thread_task *));
-        pool->thread_infos = calloc(sizeof(struct thread_info *) * pool->capacity, 1);
-        pool->task_state_capacity = MAX_NUM_TASKS;
-        pool->task_group_states = calloc(pool->task_state_capacity, sizeof(struct task_state));
+        pool->thread_tasks = calloc(num_threads, sizeof(jak_thread_task *));
+        pool->thread_infos = calloc(sizeof(jak_thread_info *) * pool->capacity, 1);
+        pool->task_state_capacity = JAK_THREAD_POOL_MAX_TASKS;
+        pool->task_group_states = calloc(pool->task_state_capacity, sizeof(jak_task_state));
         pool->enable_monitoring = enable_monitoring;
 
         pthread_t *threads = JAK_MALLOC(sizeof(pthread_t) * pool->capacity);
         pool->pool = threads;
 
         if (enable_monitoring) {
-                pool->statistics = calloc(1, sizeof(struct thread_pool_stats));
+                pool->statistics = calloc(1, sizeof(jak_thread_pool_stats));
         }
 
         for (size_t i = 0; i < pool->capacity; i++) {
                 // one block per thread to reduce risk of two threads sharing the same cache line
-                struct thread_info *thread_info = JAK_MALLOC(sizeof(struct thread_info));
+                jak_thread_info *thread_info = JAK_MALLOC(sizeof(jak_thread_info));
                 pool->thread_infos[i] = thread_info;
                 thread_info->pool = pool;
                 thread_info->id = i;
-                thread_info->status = thread_status_empty;
+                thread_info->status = JAK_THREAD_STATUS_EMPTY;
                 sprintf(thread_info->name, "worker-%zu", i); // "worker%I64d" lead to segfault on linux
 
                 if (enable_monitoring) {
-                        thread_info->statistics = calloc(1, sizeof(struct thread_stats));
+                        thread_info->statistics = calloc(1, sizeof(jak_thread_stats));
                 }
 
         }
         for (size_t i = 0; i < num_threads; ++i) {
-                __create_thread(pool->thread_infos[i], &pool->pool[i]);
+                __jak_create_thread(pool->thread_infos[i], &pool->pool[i]);
         }
 
         return pool;
 }
 
-struct thread_pool *thread_pool_create_named(size_t num_threads, const char *name, int enable_monitoring)
+jak_thread_pool *jak_thread_pool_create_named(size_t num_threads, const char *name, int enable_monitoring)
 {
-        struct thread_pool *pool = thread_pool_create(num_threads, enable_monitoring);
+        jak_thread_pool *pool = jak_thread_pool_create(num_threads, enable_monitoring);
 
         if (name) {
-                thread_pool_set_name(pool, name);
+                jak_thread_pool_set_name(pool, name);
         }
 
         return pool;
 }
 
-void thread_pool_free(struct thread_pool *pool)
+void jak_thread_pool_free(jak_thread_pool *pool)
 {
         // Update all status
         for (size_t i = 0; i < pool->size; ++i) {
-                pool->thread_infos[i]->status = thread_status_will_terminate;
+                pool->thread_infos[i]->status = JAK_THREAD_STATUS_WILL_TERMINATE;
         }
         // wait for threads to finish
         for (size_t i = 0; i < pool->size; ++i) {
@@ -115,7 +115,7 @@ void thread_pool_free(struct thread_pool *pool)
         free(pool);
 }
 
-void thread_pool_set_name(struct thread_pool *pool, const char *name)
+void jak_thread_pool_set_name(jak_thread_pool *pool, const char *name)
 {
         if (pool->name) {
                 free(pool->name);
@@ -127,7 +127,7 @@ void thread_pool_set_name(struct thread_pool *pool, const char *name)
         pool->name = str;
 }
 
-bool thread_pool_resize(struct thread_pool *pool, size_t num_threads)
+bool jak_thread_pool_resize(jak_thread_pool *pool, size_t num_threads)
 {
         if (num_threads > pool->size) {
                 if (num_threads > pool->capacity) {
@@ -136,22 +136,22 @@ bool thread_pool_resize(struct thread_pool *pool, size_t num_threads)
 
                 for (size_t i = pool->size; i < num_threads; ++i) {
                         //try to revive thread
-                        int will_terminate = thread_status_will_terminate;
+                        int will_terminate = JAK_THREAD_STATUS_WILL_TERMINATE;
                         if (atomic_compare_exchange_strong(&pool->thread_infos[i]->status,
                                                            &will_terminate,
-                                                           thread_status_idle)) {}
+                                                           JAK_THREAD_STATUS_IDLE)) {}
                         else {
                                 // create a new
                                 if (pool->enable_monitoring && !pool->thread_infos[i]->statistics) {
-                                        pool->thread_infos[i]->statistics = calloc(1, sizeof(struct thread_stats));
+                                        pool->thread_infos[i]->statistics = calloc(1, sizeof(jak_thread_stats));
                                 }
-                                __create_thread(pool->thread_infos[i], &pool->pool[i]);
+                                __jak_create_thread(pool->thread_infos[i], &pool->pool[i]);
                         }
                 }
         } else if (num_threads < pool->size) {
                 for (size_t i = num_threads; i < pool->size; ++i) {
                         // mark threads for termination
-                        pool->thread_infos[i]->status = thread_status_will_terminate;
+                        pool->thread_infos[i]->status = JAK_THREAD_STATUS_WILL_TERMINATE;
                 }
         }
 
@@ -160,13 +160,13 @@ bool thread_pool_resize(struct thread_pool *pool, size_t num_threads)
         return true;
 }
 
-bool thread_pool_enqueue_tasks(struct thread_task *tasks, struct thread_pool *pool, size_t num_tasks,
-                               struct task_handle *hndl)
+bool jak_thread_pool_enqueue_tasks(jak_thread_task *tasks, jak_thread_pool *pool, size_t num_tasks,
+                               jak_task_handle *hndl)
 {
         // find JAK_UNUSED slot
         size_t ind = 0;
 
-        for (; pool->task_group_states[ind].task_count; ind = (ind + 8) % MAX_NUM_TASKS) {}
+        for (; pool->task_group_states[ind].task_count; ind = (ind + 8) % JAK_THREAD_POOL_MAX_TASKS) {}
 
         // increment generation first to always be identifiable as finished
         ++pool->task_group_states[ind].generation;
@@ -192,19 +192,19 @@ bool thread_pool_enqueue_tasks(struct thread_task *tasks, struct thread_pool *po
         return true;
 }
 
-bool thread_pool_enqueue_task(struct thread_task *task, struct thread_pool *pool, struct task_handle *hndl)
+bool jak_thread_pool_enqueue_task(jak_thread_task *task, jak_thread_pool *pool, jak_task_handle *hndl)
 {
-        return thread_pool_enqueue_tasks(task, pool, 1, hndl);
+        return jak_thread_pool_enqueue_tasks(task, pool, 1, hndl);
 }
 
-bool thread_pool_enqueue_tasks_wait(struct thread_task *tasks, struct thread_pool *pool, size_t num_tasks)
+bool jak_thread_pool_enqueue_tasks_wait(jak_thread_task *tasks, jak_thread_pool *pool, size_t num_tasks)
 {
         // Pass all tasks except the last one to the queue
-        struct task_handle hndl;
-        thread_pool_enqueue_tasks(tasks, pool, num_tasks - 1, &hndl);
+        jak_task_handle hndl;
+        jak_thread_pool_enqueue_tasks(tasks, pool, num_tasks - 1, &hndl);
 
         // Execute the last tasks in the calling thread
-        struct thread_task *main_task = &tasks[num_tasks - 1];
+        jak_thread_task *main_task = &tasks[num_tasks - 1];
 
         if (pool->enable_monitoring) {
                 pool->statistics->task_enqueued_count++;
@@ -221,20 +221,20 @@ bool thread_pool_enqueue_tasks_wait(struct thread_task *tasks, struct thread_poo
                 (*main_task->routine)(main_task->args);
         }
 
-        return thread_pool_wait_for_task(pool, &hndl);
+        return jak_thread_pool_wait_for_task(pool, &hndl);
 }
 
-bool thread_pool_wait_for_task(struct thread_pool *pool, struct task_handle *hndl)
+bool jak_thread_pool_wait_for_task(jak_thread_pool *pool, jak_task_handle *hndl)
 {
         volatile unsigned *gen = &pool->task_group_states[hndl->index].generation;
         while (*gen == hndl->generation && pool->task_group_states[hndl->index].task_count) {}
         return true;
 }
 
-bool thread_pool_wait_for_all(struct thread_pool *pool)
+bool jak_thread_pool_wait_for_all(jak_thread_pool *pool)
 {
-        struct thread_task *next_task;
-        while ((next_task = __get_next_task(pool))) {
+        jak_thread_task *next_task;
+        while ((next_task = __jak_get_next_task(pool))) {
 
                 if (pool->enable_monitoring) {
                         clock_gettime(CLOCK_MONOTONIC, &next_task->statistics.execution_time);
@@ -243,9 +243,9 @@ bool thread_pool_wait_for_all(struct thread_pool *pool)
                         pool->statistics->task_complete_count++;
 
                         // Just add the time, calculate the average at evaluation time
-                        pool->statistics->wait_time += __get_time_diff(&next_task->statistics.enqueue_time,
+                        pool->statistics->wait_time += __jak_get_time_diff(&next_task->statistics.enqueue_time,
                                                                        &next_task->statistics.execution_time);
-                        pool->statistics->complete_time += __get_time_diff(&next_task->statistics.execution_time,
+                        pool->statistics->complete_time += __jak_get_time_diff(&next_task->statistics.execution_time,
                                                                            &next_task->statistics.complete_time);
                 } else {
                         __execute_task(pool, next_task);
@@ -262,9 +262,9 @@ bool thread_pool_wait_for_all(struct thread_pool *pool)
         return false;
 }
 
-void *__thread_main(void *args)
+void *__jak_thread_main(void *args)
 {
-        struct thread_info *thread_info = (struct thread_info *) args;
+        jak_thread_info *thread_info = (jak_thread_info *) args;
 
         // Fill statistics if available
         struct timespec begin;
@@ -274,7 +274,7 @@ void *__thread_main(void *args)
         }
 
         while (1) {
-                struct thread_task *next_task = __get_next_task(thread_info->pool);
+                jak_thread_task *next_task = __jak_get_next_task(thread_info->pool);
                 // the task has to be executed since it has been taken out of the queue
                 if (next_task) {
 
@@ -284,7 +284,7 @@ void *__thread_main(void *args)
                                 struct timespec end;
                                 clock_gettime(CLOCK_MONOTONIC, &end);
                                 next_task->statistics.execution_time = end;
-                                thread_info->statistics->idle_time += __get_time_diff(&begin, &end);
+                                thread_info->statistics->idle_time += __jak_get_time_diff(&begin, &end);
 
                                 __execute_task(thread_info->pool, next_task);
                                 clock_gettime(CLOCK_MONOTONIC, &begin);
@@ -294,10 +294,10 @@ void *__thread_main(void *args)
 
                                 // Just add the time, calculate the average at evaluation time
                                 thread_info->pool->statistics->wait_time +=
-                                        __get_time_diff(&next_task->statistics.enqueue_time,
+                                        __jak_get_time_diff(&next_task->statistics.enqueue_time,
                                                         &next_task->statistics.execution_time);
                                 thread_info->pool->statistics->complete_time +=
-                                        __get_time_diff(&next_task->statistics.execution_time,
+                                        __jak_get_time_diff(&next_task->statistics.execution_time,
                                                         &next_task->statistics.complete_time);
 
                         } else {
@@ -307,8 +307,8 @@ void *__thread_main(void *args)
                 }
 
                 // Check if this thread has to terminate, set the status and leave the loop
-                int will_terminate = thread_status_will_terminate;
-                if (atomic_compare_exchange_strong(&thread_info->status, &will_terminate, thread_status_killed)) {
+                int will_terminate = JAK_THREAD_STATUS_WILL_TERMINATE;
+                if (atomic_compare_exchange_strong(&thread_info->status, &will_terminate, JAK_THREAD_STATUS_KILLED)) {
                         break;
                 }
 
@@ -317,7 +317,7 @@ void *__thread_main(void *args)
 //      nanosleep(&waiting_time_start, &waiting_time_end);
         }
 
-        thread_info->status = thread_status_finished;
+        thread_info->status = JAK_THREAD_STATUS_FINISHED;
 
         // Be sure to free the passed thread_information since no other reference exists
         // free(thread_info);
@@ -325,16 +325,16 @@ void *__thread_main(void *args)
         return (void *) 0;
 }
 
-struct thread_task *__get_next_task(struct thread_pool *pool)
+jak_thread_task *__jak_get_next_task(jak_thread_pool *pool)
 {
-        struct thread_task *next_task = jak_priority_queue_pop(&pool->waiting_tasks);
+        jak_thread_task *next_task = jak_priority_queue_pop(&pool->waiting_tasks);
         return next_task;
 }
 
-bool __create_thread(struct thread_info *thread_info, pthread_t *pp)
+bool __jak_create_thread(jak_thread_info *thread_info, pthread_t *pp)
 {
-        thread_info->status = thread_status_created;
-        pthread_create(pp, NULL, &__thread_main, thread_info);
+        thread_info->status = JAK_THREAD_STATUS_CREATED;
+        pthread_create(pp, NULL, &__jak_thread_main, thread_info);
 
         return true;
 }
@@ -343,7 +343,7 @@ void *faulty;
 
 size_t num;
 
-void __execute_task(struct thread_pool *pool, struct thread_task *task)
+void __execute_task(jak_thread_pool *pool, jak_thread_task *task)
 {
         faulty = task->routine;
         num++;
@@ -351,7 +351,7 @@ void __execute_task(struct thread_pool *pool, struct thread_task *task)
         --pool->task_group_states[task->group_id].task_count;
 }
 
-void __sig_seg(int sig)
+void __jak_sig_seg(int sig)
 {
         if (sig != SIGSEGV) {
                 return;

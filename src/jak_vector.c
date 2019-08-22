@@ -22,22 +22,22 @@
 #include <jak_vector.h>
 
 #define DEFINE_PRINTER_FUNCTION_WCAST(type, castType, format_string)                                                   \
-void vector_##type##_PrinterFunc(struct jak_memfile *dst, void ofType(T) *values, size_t num_elems)                      \
+void jak_vector_##type##_printer_func(jak_memfile *dst, void ofType(T) *values, size_t num_elems)                      \
 {                                                                                                                      \
     char *data;                                                                                                        \
     type *typedValues = (type *) values;                                                                               \
                                                                                                                        \
-    data = memfile_current_pos(dst, sizeof(char));                                                              \
+    data = jak_memfile_current_pos(dst, sizeof(char));                                                              \
     int nchars = sprintf(data, "[");                                                                                   \
-    memfile_skip(dst, nchars);                                                                                  \
+    jak_memfile_skip(dst, nchars);                                                                                  \
     for (size_t i = 0; i < num_elems; i++) {                                                                           \
-        data = memfile_current_pos(dst, sizeof(type));                                                          \
+        data = jak_memfile_current_pos(dst, sizeof(type));                                                          \
         nchars = sprintf(data, format_string"%s", (castType) typedValues[i], i + 1 < num_elems ? ", " : "");           \
-        memfile_skip(dst, nchars);                                                                              \
+        jak_memfile_skip(dst, nchars);                                                                              \
     }                                                                                                                  \
-    data = memfile_current_pos(dst, sizeof(char));                                                              \
+    data = jak_memfile_current_pos(dst, sizeof(char));                                                              \
     nchars = sprintf(data, "]");                                                                                       \
-    memfile_skip(dst, nchars);                                                                                  \
+    jak_memfile_skip(dst, nchars);                                                                                  \
 }
 
 #define DEFINE_PRINTER_FUNCTION(type, format_string)                                                                   \
@@ -65,7 +65,7 @@ DEFINE_PRINTER_FUNCTION(jak_u64, "%"
 
 DEFINE_PRINTER_FUNCTION(size_t, "%zu")
 
-bool vec_create(struct jak_vector *out, const jak_allocator *alloc, size_t elem_size, size_t cap_elems)
+bool jak_vector_create(jak_vector *out, const jak_allocator *alloc, size_t elem_size, size_t cap_elems)
 {
         JAK_ERROR_IF_NULL(out)
         out->allocator = JAK_MALLOC(sizeof(jak_allocator));
@@ -79,23 +79,23 @@ bool vec_create(struct jak_vector *out, const jak_allocator *alloc, size_t elem_
         return true;
 }
 
-struct vector_serialize_header {
+typedef struct jak_vector_serialize_header {
         char marker;
         jak_u32 elem_size;
         jak_u32 num_elems;
         jak_u32 cap_elems;
         float grow_factor;
-};
+} jak_vector_serialize_header;
 
-bool vec_serialize(FILE *file, struct jak_vector *vec)
+bool jak_vector_serialize(FILE *file, jak_vector *vec)
 {
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(vec)
 
-        struct vector_serialize_header header =
+        jak_vector_serialize_header header =
                 {.marker = JAK_MARKER_SYMBOL_VECTOR_HEADER, .elem_size = vec->elem_size, .num_elems = vec
                         ->num_elems, .cap_elems = vec->cap_elems, .grow_factor = vec->grow_factor};
-        int nwrite = fwrite(&header, sizeof(struct vector_serialize_header), 1, file);
+        int nwrite = fwrite(&header, sizeof(jak_vector_serialize_header), 1, file);
         JAK_ERROR_IF(nwrite != 1, &vec->err, JAK_ERR_FWRITE_FAILED);
         nwrite = fwrite(vec->base, vec->elem_size, vec->num_elems, file);
         JAK_ERROR_IF(nwrite != (int) vec->num_elems, &vec->err, JAK_ERR_FWRITE_FAILED);
@@ -103,7 +103,7 @@ bool vec_serialize(FILE *file, struct jak_vector *vec)
         return true;
 }
 
-bool vec_deserialize(struct jak_vector *vec, jak_error *err, FILE *file)
+bool jak_vector_deserialize(jak_vector *vec, jak_error *err, FILE *file)
 {
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(err)
@@ -112,8 +112,8 @@ bool vec_deserialize(struct jak_vector *vec, jak_error *err, FILE *file)
         jak_offset_t start = ftell(file);
         int err_code = JAK_ERR_NOERR;
 
-        struct vector_serialize_header header;
-        if (fread(&header, sizeof(struct vector_serialize_header), 1, file) != 1) {
+        jak_vector_serialize_header header;
+        if (fread(&header, sizeof(jak_vector_serialize_header), 1, file) != 1) {
                 err_code = JAK_ERR_FREAD_FAILED;
                 goto error_handling;
         }
@@ -145,7 +145,7 @@ bool vec_deserialize(struct jak_vector *vec, jak_error *err, FILE *file)
         return false;
 }
 
-bool vec_memadvice(struct jak_vector *vec, int madviseAdvice)
+bool jak_vector_memadvice(jak_vector *vec, int madviseAdvice)
 {
         JAK_ERROR_IF_NULL(vec);
         JAK_UNUSED(vec);
@@ -154,7 +154,7 @@ bool vec_memadvice(struct jak_vector *vec, int madviseAdvice)
         return true;
 }
 
-bool vec_set_grow_factor(struct jak_vector *vec, float factor)
+bool jak_vector_set_grow_factor(jak_vector *vec, float factor)
 {
         JAK_ERROR_IF_NULL(vec);
         JAK_ERROR_PRINT_IF(factor <= 1.01f, JAK_ERR_ILLEGALARG)
@@ -162,7 +162,7 @@ bool vec_set_grow_factor(struct jak_vector *vec, float factor)
         return true;
 }
 
-bool vec_drop(struct jak_vector *vec)
+bool jak_vector_drop(jak_vector *vec)
 {
         JAK_ERROR_IF_NULL(vec)
         jak_alloc_free(vec->allocator, vec->base);
@@ -171,13 +171,13 @@ bool vec_drop(struct jak_vector *vec)
         return true;
 }
 
-bool vec_is_empty(const struct jak_vector *vec)
+bool jak_vector_is_empty(const jak_vector *vec)
 {
         JAK_ERROR_IF_NULL(vec)
         return vec->num_elems == 0 ? true : false;
 }
 
-bool vec_push(struct jak_vector *vec, const void *data, size_t num_elems)
+bool jak_vector_push(jak_vector *vec, const void *data, size_t num_elems)
 {
         JAK_ERROR_IF_NULL(vec && data)
         size_t next_num = vec->num_elems + num_elems;
@@ -191,16 +191,16 @@ bool vec_push(struct jak_vector *vec, const void *data, size_t num_elems)
         return true;
 }
 
-const void *vec_peek(struct jak_vector *vec)
+const void *jak_vector_peek(jak_vector *vec)
 {
         if (!vec) {
                 return NULL;
         } else {
-                return (vec->num_elems > 0) ? vec_at(vec, vec->num_elems - 1) : NULL;
+                return (vec->num_elems > 0) ? jak_vector_at(vec, vec->num_elems - 1) : NULL;
         }
 }
 
-bool vec_repeated_push(struct jak_vector *vec, const void *data, size_t how_often)
+bool jak_vector_repeated_push(jak_vector *vec, const void *data, size_t how_often)
 {
         JAK_ERROR_IF_NULL(vec && data)
         size_t next_num = vec->num_elems + how_often;
@@ -217,7 +217,7 @@ bool vec_repeated_push(struct jak_vector *vec, const void *data, size_t how_ofte
         return true;
 }
 
-const void *vec_pop(struct jak_vector *vec)
+const void *jak_vector_pop(jak_vector *vec)
 {
         void *result;
         if (JAK_LIKELY((result = (vec ? (vec->num_elems > 0 ? vec->base + (vec->num_elems - 1) * vec->elem_size : NULL)
@@ -227,14 +227,14 @@ const void *vec_pop(struct jak_vector *vec)
         return result;
 }
 
-bool vec_clear(struct jak_vector *vec)
+bool jak_vector_clear(jak_vector *vec)
 {
         JAK_ERROR_IF_NULL(vec)
         vec->num_elems = 0;
         return true;
 }
 
-bool vec_shrink(struct jak_vector *vec)
+bool jak_vector_shrink(jak_vector *vec)
 {
         JAK_ERROR_IF_NULL(vec);
         if (vec->num_elems < vec->cap_elems) {
@@ -244,7 +244,7 @@ bool vec_shrink(struct jak_vector *vec)
         return true;
 }
 
-bool vec_grow(size_t *numNewSlots, struct jak_vector *vec)
+bool jak_vector_grow(size_t *numNewSlots, jak_vector *vec)
 {
         JAK_ERROR_IF_NULL(vec)
         size_t freeSlotsBefore = vec->cap_elems - vec->num_elems;
@@ -258,7 +258,7 @@ bool vec_grow(size_t *numNewSlots, struct jak_vector *vec)
         return true;
 }
 
-bool vec_grow_to(struct jak_vector *vec, size_t capacity)
+bool jak_vector_grow_to(jak_vector *vec, size_t capacity)
 {
         JAK_ERROR_IF_NULL(vec);
         vec->cap_elems = JAK_MAX(vec->cap_elems, capacity);
@@ -266,38 +266,38 @@ bool vec_grow_to(struct jak_vector *vec, size_t capacity)
         return true;
 }
 
-size_t vec_length(const struct jak_vector *vec)
+size_t jak_vector_length(const jak_vector *vec)
 {
         JAK_ERROR_IF_NULL(vec)
         return vec->num_elems;
 }
 
-const void *vec_at(const struct jak_vector *vec, size_t pos)
+const void *jak_vector_at(const jak_vector *vec, size_t pos)
 {
         return (vec && pos < vec->num_elems) ? vec->base + pos * vec->elem_size : NULL;
 }
 
-size_t vec_capacity(const struct jak_vector *vec)
+size_t jak_vector_capacity(const jak_vector *vec)
 {
         JAK_ERROR_IF_NULL(vec)
         return vec->cap_elems;
 }
 
-bool vec_enlarge_size_to_capacity(struct jak_vector *vec)
+bool jak_vector_enlarge_size_to_capacity(jak_vector *vec)
 {
         JAK_ERROR_IF_NULL(vec);
         vec->num_elems = vec->cap_elems;
         return true;
 }
 
-bool vec_zero_memory(struct jak_vector *vec)
+bool jak_vector_zero_memory(jak_vector *vec)
 {
         JAK_ERROR_IF_NULL(vec);
         JAK_ZERO_MEMORY(vec->base, vec->elem_size * vec->num_elems);
         return true;
 }
 
-bool vec_zero_memory_in_range(struct jak_vector *vec, size_t from, size_t to)
+bool jak_vector_zero_memory_in_range(jak_vector *vec, size_t from, size_t to)
 {
         JAK_ERROR_IF_NULL(vec);
         JAK_ASSERT(from < to);
@@ -306,7 +306,7 @@ bool vec_zero_memory_in_range(struct jak_vector *vec, size_t from, size_t to)
         return true;
 }
 
-bool vec_set(struct jak_vector *vec, size_t pos, const void *data)
+bool jak_vector_set(jak_vector *vec, size_t pos, const void *data)
 {
         JAK_ERROR_IF_NULL(vec)
         JAK_ASSERT(pos < vec->num_elems);
@@ -314,9 +314,9 @@ bool vec_set(struct jak_vector *vec, size_t pos, const void *data)
         return true;
 }
 
-bool vec_cpy(struct jak_vector *dst, const struct jak_vector *src)
+bool jak_vector_cpy(jak_vector *dst, const jak_vector *src)
 {
-        JAK_CHECK_SUCCESS(vec_create(dst, NULL, src->elem_size, src->num_elems));
+        JAK_CHECK_SUCCESS(jak_vector_create(dst, NULL, src->elem_size, src->num_elems));
         dst->num_elems = src->num_elems;
         if (dst->num_elems > 0) {
                 memcpy(dst->base, src->base, src->elem_size * src->num_elems);
@@ -324,7 +324,7 @@ bool vec_cpy(struct jak_vector *dst, const struct jak_vector *src)
         return true;
 }
 
-bool vec_cpy_to(struct jak_vector *dst, struct jak_vector *src)
+bool jak_vector_cpy_to(jak_vector *dst, jak_vector *src)
 {
         JAK_ERROR_IF_NULL(dst)
         JAK_ERROR_IF_NULL(src)
@@ -344,18 +344,18 @@ bool vec_cpy_to(struct jak_vector *dst, struct jak_vector *src)
         }
 }
 
-const void *vec_data(const struct jak_vector *vec)
+const void *jak_vector_data(const jak_vector *vec)
 {
         return vec ? vec->base : NULL;
 }
 
-char *vector_string(const struct jak_vector ofType(T) *vec,
-                    void (*printerFunc)(struct jak_memfile *dst, void ofType(T) *values, size_t num_elems))
+char *jak_vector_string(const jak_vector ofType(T) *vec,
+                    void (*printerFunc)(jak_memfile *dst, void ofType(T) *values, size_t num_elems))
 {
         jak_memblock *block;
-        struct jak_memfile file;
+        jak_memfile file;
         jak_memblock_create(&block, vec->num_elems * vec->elem_size);
-        memfile_open(&file, block, JAK_READ_WRITE);
+        jak_memfile_open(&file, block, JAK_READ_WRITE);
         printerFunc(&file, vec->base, vec->num_elems);
         return jak_memblock_move_contents_and_drop(block);
 }

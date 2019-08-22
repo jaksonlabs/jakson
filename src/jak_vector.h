@@ -31,7 +31,7 @@
 JAK_BEGIN_DECL
 
 #define DECLARE_PRINTER_FUNC(type)                                                                                     \
-    void vector_##type##_PrinterFunc(struct jak_memfile *dst, void ofType(T) *values, size_t num_elems);
+    void jak_vector_##type##_printer_func(jak_memfile *dst, void ofType(T) *values, size_t num_elems);
 
 DECLARE_PRINTER_FUNC(u_char)
 
@@ -53,21 +53,21 @@ DECLARE_PRINTER_FUNC(jak_u64)
 
 DECLARE_PRINTER_FUNC(size_t)
 
-#define VECTOR_PRINT_UCHAR  vector_u_char_PrinterFunc
-#define VECTOR_PRINT_UINT8  vector_u8_PrinterFunc
-#define VECTOR_PRINT_UINT16 vector_u16_PrinterFunc
-#define VECTOR_PRINT_UINT32 vector_u32_PrinterFunc
-#define VECTOR_PRINT_UINT64 vector_u64_PrinterFunc
-#define VECTOR_PRINT_INT8   vector_i8_PrinterFunc
-#define VECTOR_PRINT_INT16  vector_i16_PrinterFunc
-#define VECTOR_PRINT_INT32  vector_i32_PrinterFunc
-#define VECTOR_PRINT_INT64  vector_i64_PrinterFunc
-#define VECTOR_PRINT_SIZE_T vector_size_t_PrinterFunc
+#define VECTOR_PRINT_UCHAR  jak_vector_u_char_printer_func
+#define VECTOR_PRINT_UINT8  jak_vector_u8_printer_func
+#define VECTOR_PRINT_UINT16 jak_vector_u16_printer_func
+#define VECTOR_PRINT_UINT32 jak_vector_u32_printer_func
+#define VECTOR_PRINT_UINT64 jak_vector_u64_printer_func
+#define VECTOR_PRINT_INT8   jak_vector_i8_printer_func
+#define VECTOR_PRINT_INT16  jak_vector_i16_printer_func
+#define VECTOR_PRINT_INT32  jak_vector_i32_printer_func
+#define VECTOR_PRINT_INT64  jak_vector_i64_printer_func
+#define VECTOR_PRINT_SIZE_T jak_vector_size_t_printer_func
 
 /**
  * An implementation of the concrete data type Vector, a resizeable dynamic array.
  */
-struct jak_vector {
+typedef struct jak_vector {
         /**
         *  Memory allocator that is used to get memory for user data
         */
@@ -102,12 +102,12 @@ struct jak_vector {
          *  Error information
          */
         jak_error err;
-};
+} jak_vector;
 
 /**
  * Utility implementation of generic vector to specialize for type of 'char *'
  */
-typedef struct jak_vector ofType(const char *) jak_string_vector_t;
+typedef jak_vector ofType(const char *) jak_string_jak_vector_t;
 
 /**
  * Constructs a new vector for elements of size 'elem_size', reserving memory for 'cap_elems' elements using
@@ -119,11 +119,11 @@ typedef struct jak_vector ofType(const char *) jak_string_vector_t;
  * @param cap_elems number of elements for which memory should be reserved
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
-bool vec_create(struct jak_vector *out, const jak_allocator *alloc, size_t elem_size, size_t cap_elems);
+bool jak_vector_create(jak_vector *out, const jak_allocator *alloc, size_t elem_size, size_t cap_elems);
 
-bool vec_serialize(FILE *file, struct jak_vector *vec);
+bool jak_vector_serialize(FILE *file, jak_vector *vec);
 
-bool vec_deserialize(struct jak_vector *vec, jak_error *err, FILE *file);
+bool jak_vector_deserialize(jak_vector *vec, jak_error *err, FILE *file);
 
 /**
  * Provides hints on the OS kernel how to deal with memory inside this vector.
@@ -133,7 +133,7 @@ bool vec_deserialize(struct jak_vector *vec, jak_error *err, FILE *file);
  * of <code>madvise</code>
  * @return STATUS_OK if success, otherwise a value indicating the JAK_ERROR
  */
-bool vec_memadvice(struct jak_vector *vec, int madviseAdvice);
+bool jak_vector_memadvice(jak_vector *vec, int madviseAdvice);
 
 /**
  * Sets the factor for determining the reallocation size in case of a resizing operation.
@@ -144,7 +144,7 @@ bool vec_memadvice(struct jak_vector *vec, int madviseAdvice);
  * @param factor a positive real number larger than 1
  * @return STATUS_OK if success, otherwise a value indicating the JAK_ERROR
  */
-bool vec_set_grow_factor(struct jak_vector *vec, float factor);
+bool jak_vector_set_grow_factor(jak_vector *vec, float factor);
 
 /**
  * Frees up memory requested via the allocator.
@@ -155,7 +155,7 @@ bool vec_set_grow_factor(struct jak_vector *vec, float factor);
  * @param vec vector to be freed
  * @return STATUS_OK if success, and STATUS_NULL_PTR in case of NULL pointer to 'vec'
  */
-bool vec_drop(struct jak_vector *vec);
+bool jak_vector_drop(jak_vector *vec);
 
 /**
  * Returns information on whether elements are stored in this vector or not.
@@ -164,7 +164,7 @@ bool vec_drop(struct jak_vector *vec);
  *         an JAK_ERROR occurs. In case an JAK_ERROR is occured, the return value is neither <code>STATUS_TRUE</code> nor
  *         <code>STATUS_FALSE</code> but an value indicating that JAK_ERROR.
  */
-bool vec_is_empty(const struct jak_vector *vec);
+bool jak_vector_is_empty(const jak_vector *vec);
 
 /**
  * Appends 'num_elems' elements stored in 'data' into the vector by copying num_elems * vec->elem_size into the
@@ -177,11 +177,11 @@ bool vec_is_empty(const struct jak_vector *vec);
  * @param num_elems number of elements stored in data
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
-bool vec_push(struct jak_vector *vec, const void *data, size_t num_elems);
+bool jak_vector_push(jak_vector *vec, const void *data, size_t num_elems);
 
-const void *vec_peek(struct jak_vector *vec);
+const void *jak_vector_peek(jak_vector *vec);
 
-#define VECTOR_PEEK(vec, type) (type *)(vec_peek(vec))
+#define JAK_VECTOR_PEEK(vec, type) (type *)(jak_vector_peek(vec))
 
 /**
  * Appends 'how_many' elements of the same source stored in 'data' into the vector by copying how_many * vec->elem_size
@@ -194,7 +194,7 @@ const void *vec_peek(struct jak_vector *vec);
  * @param num_elems number of elements stored in data
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
-bool vec_repeated_push(struct jak_vector *vec, const void *data, size_t how_often);
+bool jak_vector_repeated_push(jak_vector *vec, const void *data, size_t how_often);
 
 /**
  * Returns a pointer to the last element in this vector, or <code>NULL</code> is the vector is already empty.
@@ -203,9 +203,9 @@ bool vec_repeated_push(struct jak_vector *vec, const void *data, size_t how_ofte
  * @param vec non-null pointer to the vector
  * @return Pointer to last element, or <code>NULL</code> if vector is empty
  */
-const void *vec_pop(struct jak_vector *vec);
+const void *jak_vector_pop(jak_vector *vec);
 
-bool vec_clear(struct jak_vector *vec);
+bool jak_vector_clear(jak_vector *vec);
 
 /**
  * Shinks the vector's internal data block to fits its real size, i.e., remove reserved memory
@@ -213,7 +213,7 @@ bool vec_clear(struct jak_vector *vec);
  * @param vec
  * @return
  */
-bool vec_shrink(struct jak_vector *vec);
+bool jak_vector_shrink(jak_vector *vec);
 
 /**
  * Increases the capacity of that vector according the internal grow factor
@@ -222,9 +222,9 @@ bool vec_shrink(struct jak_vector *vec);
  * @param vec non-null pointer to the vector that should be grown
  * @return STATUS_OK in case of success, and another value indicating an JAK_ERROR otherwise.
  */
-bool vec_grow(size_t *numNewSlots, struct jak_vector *vec);
+bool jak_vector_grow(size_t *numNewSlots, jak_vector *vec);
 
-bool vec_grow_to(struct jak_vector *vec, size_t capacity);
+bool jak_vector_grow_to(jak_vector *vec, size_t capacity);
 
 /**
  * Returns the number of elements currently stored in the vector
@@ -232,19 +232,19 @@ bool vec_grow_to(struct jak_vector *vec, size_t capacity);
  * @param vec the vector for which the operation is started
  * @return 0 in case of NULL pointer to 'vec', or the number of elements otherwise.
  */
-size_t vec_length(const struct jak_vector *vec);
+size_t jak_vector_length(const jak_vector *vec);
 
-#define vec_get(vec, pos, type) (type *) vec_at(vec, pos)
+#define JAK_VECTOR_GET(vec, pos, type) (type *) jak_vector_at(vec, pos)
 
-#define vec_new_and_get(vec, type)                                                                                     \
+#define JAK_VECTOR_NEW_AND_GET(vec, type)                                                                                     \
 ({                                                                                                                     \
     type obj;                                                                                                          \
-    size_t vectorLength = vec_length(vec);                                                                             \
-    vec_push(vec, &obj, 1);                                                                                            \
-    vec_get(vec, vectorLength, type);                                                                                  \
+    size_t vectorLength = jak_vector_length(vec);                                                                             \
+    jak_vector_push(vec, &obj, 1);                                                                                            \
+    JAK_VECTOR_GET(vec, vectorLength, type);                                                                                  \
 })
 
-const void *vec_at(const struct jak_vector *vec, size_t pos);
+const void *jak_vector_at(const jak_vector *vec, size_t pos);
 
 /**
  * Returns the number of elements for which memory is currently reserved in the vector
@@ -252,22 +252,22 @@ const void *vec_at(const struct jak_vector *vec, size_t pos);
  * @param vec the vector for which the operation is started
  * @return 0 in case of NULL pointer to 'vec', or the number of elements otherwise.
  */
-size_t vec_capacity(const struct jak_vector *vec);
+size_t jak_vector_capacity(const jak_vector *vec);
 
 /**
  * Set the internal size of <code>vec</code> to its capacity.
  */
-bool vec_enlarge_size_to_capacity(struct jak_vector *vec);
+bool jak_vector_enlarge_size_to_capacity(jak_vector *vec);
 
-bool vec_zero_memory(struct jak_vector *vec);
+bool jak_vector_zero_memory(jak_vector *vec);
 
-bool vec_zero_memory_in_range(struct jak_vector *vec, size_t from, size_t to);
+bool jak_vector_zero_memory_in_range(jak_vector *vec, size_t from, size_t to);
 
-bool vec_set(struct jak_vector *vec, size_t pos, const void *data);
+bool jak_vector_set(jak_vector *vec, size_t pos, const void *data);
 
-bool vec_cpy(struct jak_vector *dst, const struct jak_vector *src);
+bool jak_vector_cpy(jak_vector *dst, const jak_vector *src);
 
-bool vec_cpy_to(struct jak_vector *dst, struct jak_vector *src);
+bool jak_vector_cpy_to(jak_vector *dst, jak_vector *src);
 
 /**
  * Gives raw data access to data stored in the vector; do not manipulate this data since otherwise the vector
@@ -276,12 +276,12 @@ bool vec_cpy_to(struct jak_vector *dst, struct jak_vector *src);
  * @param vec the vector for which the operation is started
  * @return pointer to user-data managed by this vector
  */
-const void *vec_data(const struct jak_vector *vec);
+const void *jak_vector_data(const jak_vector *vec);
 
-char *vector_string(const struct jak_vector ofType(T) *vec,
-                    void (*printerFunc)(struct jak_memfile *dst, void ofType(T) *values, size_t num_elems));
+char *jak_vector_string(const jak_vector ofType(T) *vec,
+                    void (*printerFunc)(jak_memfile *dst, void ofType(T) *values, size_t num_elems));
 
-#define vec_all(vec, type) (type *) vec_data(vec)
+#define JAK_VECTOR_ALL(vec, type) (type *) jak_vector_data(vec)
 
 JAK_END_DECL
 

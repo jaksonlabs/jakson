@@ -77,14 +77,14 @@ typedef struct jak_encoded_doc_prop {
 
 typedef struct jak_encoded_doc_prop_array {
         jak_encoded_doc_prop_header header;
-        struct jak_vector ofType(jak_encoded_doc_value_u) values;
+        jak_vector ofType(jak_encoded_doc_value_u) values;
 } jak_encoded_doc_prop_array;
 
 typedef struct jak_encoded_doc {
         jak_encoded_doc_list *context;
         jak_uid_t object_id;
-        struct jak_vector ofType(jak_encoded_doc_prop) props;
-        struct jak_vector ofType(jak_encoded_doc_prop_array) props_arrays;
+        jak_vector ofType(jak_encoded_doc_prop) props;
+        jak_vector ofType(jak_encoded_doc_prop_array) props_arrays;
         jak_hashtable ofMapping(jak_archive_field_sid_t,
                                    jak_u32) prop_array_index; /* maps key to index in prop arrays */
         jak_error err;
@@ -92,7 +92,7 @@ typedef struct jak_encoded_doc {
 
 typedef struct jak_encoded_doc_list {
         jak_archive *archive;
-        struct jak_vector ofType(
+        jak_vector ofType(
                 jak_encoded_doc) flat_object_collection;   /* list of objects; also nested ones */
         jak_hashtable ofMapping(object_id_t, jak_u32) index;   /* maps oid to index in collection */
         jak_error err;

@@ -25,7 +25,7 @@ JAK_BEGIN_DECL
 #include <jak_time.h>
 #include <stdio.h>
 
-struct thread_pool_stats {
+typedef struct jak_thread_pool_stats {
         struct timespec creation_time;
         unsigned int task_enqueued_count;
         unsigned int task_complete_count;
@@ -33,22 +33,22 @@ struct thread_pool_stats {
         long long wait_time;
         long long avg_complete_time;
         long long avg_wait_time;
-};
+} jak_thread_pool_stats;
 
-struct thread_stats {
+typedef struct jak_thread_stats {
         struct timespec creation_time;
         long long idle_time;
         long long busy_time;
         size_t task_count;
-};
+} jak_thread_stats;
 
-struct task_stats {
+typedef struct jak_task_stats {
         struct timespec enqueue_time;
         struct timespec execution_time;
         struct timespec complete_time;
-};
+} jak_task_stats;
 
-static inline long long __get_time_diff(struct timespec *begin, struct timespec *end)
+static inline long long __jak_get_time_diff(struct timespec *begin, struct timespec *end)
 {
         return (end->tv_sec - begin->tv_sec) * 1000000000L + (end->tv_nsec - begin->tv_nsec); /// 1000000000.0;
 }

@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef LIBCARBON_STRING_UTILS_H
-#define LIBCARBON_STRING_UTILS_H
+#ifndef JAK_STRING_UTILS_H
+#define JAK_STRING_UTILS_H
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  includes
@@ -26,15 +26,11 @@
 
 JAK_BEGIN_DECL
 
-bool strings_contains_blank_char(const char *str);
-
-bool strings_is_enquoted(const char *str);
-
-bool strings_is_enquoted_wlen(const char *str, size_t len);
-
-const char *strings_skip_blanks(const char *str);
-
-char *strings_remove_tailing_blanks(char *str_in);
+bool jak_strings_contains_blank_char(const char *str);
+bool jak_strings_is_enquoted(const char *str);
+bool jak_strings_is_enquoted_wlen(const char *str, size_t len);
+const char *jak_strings_skip_blanks(const char *str);
+char *jak_strings_remove_tailing_blanks(char *str_in);
 
 JAK_END_DECL
 

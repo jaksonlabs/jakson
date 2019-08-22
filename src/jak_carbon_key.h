@@ -29,15 +29,15 @@
 
 JAK_BEGIN_DECL
 
-bool jak_carbon_key_create(struct jak_memfile *file, jak_carbon_key_e type, jak_error *err);
-bool jak_carbon_key_skip(jak_carbon_key_e *out, struct jak_memfile *file);
-bool jak_carbon_key_read_type(jak_carbon_key_e *out, struct jak_memfile *file);
-bool jak_carbon_key_write_unsigned(struct jak_memfile *file, jak_u64 key);
-bool jak_carbon_key_write_signed(struct jak_memfile *file, jak_i64 key);
-bool jak_carbon_key_write_string(struct jak_memfile *file, const char *key);
-bool jak_carbon_key_update_string(struct jak_memfile *file, const char *key);
-bool jak_carbon_key_update_jak_string_wnchar(struct jak_memfile *file, const char *key, size_t length);
-const void *jak_carbon_key_read(jak_u64 *len, jak_carbon_key_e *out, struct jak_memfile *file);
+bool jak_carbon_key_create(jak_memfile *file, jak_carbon_key_e type, jak_error *err);
+bool jak_carbon_key_skip(jak_carbon_key_e *out, jak_memfile *file);
+bool jak_carbon_key_read_type(jak_carbon_key_e *out, jak_memfile *file);
+bool jak_carbon_key_write_unsigned(jak_memfile *file, jak_u64 key);
+bool jak_carbon_key_write_signed(jak_memfile *file, jak_i64 key);
+bool jak_carbon_key_write_string(jak_memfile *file, const char *key);
+bool jak_carbon_key_update_string(jak_memfile *file, const char *key);
+bool jak_carbon_key_update_jak_string_wnchar(jak_memfile *file, const char *key, size_t length);
+const void *jak_carbon_key_read(jak_u64 *len, jak_carbon_key_e *out, jak_memfile *file);
 const char *jak_carbon_key_type_str(jak_carbon_key_e type);
 
 JAK_END_DECL

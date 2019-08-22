@@ -144,12 +144,12 @@ typedef struct jak_json_prop {
 
 typedef struct jak_json_members {
         jak_json_object *parent;
-        struct jak_vector ofType(jak_json_prop) members;
+        jak_vector ofType(jak_json_prop) members;
 } jak_json_members;
 
 typedef struct jak_json_elements {
         jak_json_array *parent;
-        struct jak_vector ofType(jak_json_element) elements;
+        jak_vector ofType(jak_json_element) elements;
 } jak_json_elements;
 
 typedef struct jak_json_array {

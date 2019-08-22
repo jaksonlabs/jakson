@@ -29,11 +29,11 @@
 
 JAK_BEGIN_DECL
 
-bool jak_carbon_commit_hash_create(struct jak_memfile *file);
-bool jak_carbon_commit_hash_skip(struct jak_memfile *file);
-bool jak_carbon_commit_hash_read(jak_u64 *commit_hash, struct jak_memfile *file);
-bool jak_carbon_commit_hash_peek(jak_u64 *commit_hash, struct jak_memfile *file);
-bool jak_carbon_commit_hash_update(struct jak_memfile *file, const char *base, jak_u64 len);
+bool jak_carbon_commit_hash_create(jak_memfile *file);
+bool jak_carbon_commit_hash_skip(jak_memfile *file);
+bool jak_carbon_commit_hash_read(jak_u64 *commit_hash, jak_memfile *file);
+bool jak_carbon_commit_hash_peek(jak_u64 *commit_hash, jak_memfile *file);
+bool jak_carbon_commit_hash_update(jak_memfile *file, const char *base, jak_u64 len);
 bool jak_carbon_commit_hash_compute(jak_u64 *commit_hash, const void *base, jak_u64 len);
 const char *jak_carbon_commit_hash_to_str(jak_string *dst, jak_u64 commit_hash);
 bool jak_carbon_commit_hash_append_to_str(jak_string *dst, jak_u64 commit_hash);

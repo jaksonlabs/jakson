@@ -18,7 +18,7 @@
 #include <ctype.h>
 #include <jak_string_utils.h>
 
-bool strings_contains_blank_char(const char *str)
+bool jak_strings_contains_blank_char(const char *str)
 {
         if (JAK_LIKELY(str != NULL)) {
                 for (const char *it = str; *it != '\0'; it++) {
@@ -32,12 +32,12 @@ bool strings_contains_blank_char(const char *str)
         }
 }
 
-bool strings_is_enquoted(const char *str)
+bool jak_strings_is_enquoted(const char *str)
 {
-        return strings_is_enquoted_wlen(str, strlen(str));
+        return jak_strings_is_enquoted_wlen(str, strlen(str));
 }
 
-bool strings_is_enquoted_wlen(const char *str, size_t len)
+bool jak_strings_is_enquoted_wlen(const char *str, size_t len)
 {
         if (*str == '"') {
                 if (len > 1) {
@@ -50,7 +50,7 @@ bool strings_is_enquoted_wlen(const char *str, size_t len)
         }
 }
 
-char *strings_remove_tailing_blanks(char *str_in)
+char *jak_strings_remove_tailing_blanks(char *str_in)
 {
         size_t sl = strlen(str_in);
         size_t i = sl > 0 ? sl - 1 : 0;
@@ -66,7 +66,7 @@ char *strings_remove_tailing_blanks(char *str_in)
         return str_in;
 }
 
-const char *strings_skip_blanks(const char *str)
+const char *jak_strings_skip_blanks(const char *str)
 {
         if (JAK_LIKELY(str != NULL)) {
                 const char *ret = str;

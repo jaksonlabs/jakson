@@ -33,7 +33,7 @@ struct bucket {
 };
 
 struct mem_extra {
-        struct jak_vector ofType(bucket) buckets;
+        jak_vector ofType(bucket) buckets;
 };
 
 static int this_drop(jak_str_hash *self);
@@ -64,24 +64,24 @@ static int this_remove(jak_str_hash *self, char *const *keys, size_t num_keys);
 
 static int this_free(jak_str_hash *self, void *ptr);
 
-static int this_insert_bulk(struct jak_vector ofType(bucket) *buckets, char *const *restrict keys,
+static int this_insert_bulk(jak_vector ofType(bucket) *buckets, char *const *restrict keys,
                             const jak_archive_field_sid_t *restrict values, size_t *restrict bucket_idxs,
                             size_t num_pairs,
                             jak_allocator *alloc,
                             jak_str_hash_counters *counter);
 
 static int
-this_insert_exact(struct jak_vector ofType(bucket) *buckets, const char *restrict key, jak_archive_field_sid_t value,
+this_insert_exact(jak_vector ofType(bucket) *buckets, const char *restrict key, jak_archive_field_sid_t value,
                   size_t bucket_idx, jak_allocator *alloc, jak_str_hash_counters *counter);
 
 static int
-this_fetch_bulk(struct jak_vector ofType(bucket) *buckets, jak_archive_field_sid_t *values_out, bool *key_found_mask,
+this_fetch_bulk(jak_vector ofType(bucket) *buckets, jak_archive_field_sid_t *values_out, bool *key_found_mask,
                 size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
                 jak_allocator *alloc,
                 jak_str_hash_counters *counter);
 
 static int
-this_fetch_single(struct jak_vector ofType(bucket) *buckets, jak_archive_field_sid_t *value_out, bool *key_found,
+this_fetch_single(jak_vector ofType(bucket) *buckets, jak_archive_field_sid_t *value_out, bool *key_found,
                   const size_t bucket_idx, const char *key, jak_str_hash_counters *counter);
 
 static int this_create_extra(jak_str_hash *self, size_t num_buckets, size_t cap_buckets);
@@ -128,9 +128,9 @@ static int this_drop(jak_str_hash *self)
 {
         JAK_ASSERT(self->tag == JAK_MEMORY_RESIDENT);
         struct mem_extra *extra = this_get_exta(self);
-        struct bucket *data = (struct bucket *) vec_data(&extra->buckets);
+        struct bucket *data = (struct bucket *) jak_vector_data(&extra->buckets);
         JAK_CHECK_SUCCESS(bucket_drop(data, extra->buckets.cap_elems, &self->allocator));
-        vec_drop(&extra->buckets);
+        jak_vector_drop(&extra->buckets);
         jak_alloc_free(&self->allocator, self->extra);
         return true;
 }
@@ -197,7 +197,7 @@ static int this_put_fast_bulk(jak_str_hash *self, char *const *keys, const jak_a
 }
 
 static int
-this_fetch_bulk(struct jak_vector ofType(bucket) *buckets, jak_archive_field_sid_t *values_out, bool *key_found_mask,
+this_fetch_bulk(jak_vector ofType(bucket) *buckets, jak_archive_field_sid_t *values_out, bool *key_found_mask,
                 size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
                 jak_allocator *alloc,
                 jak_str_hash_counters *counter)
@@ -207,7 +207,7 @@ this_fetch_bulk(struct jak_vector ofType(bucket) *buckets, jak_archive_field_sid
 
         jak_slice_handle result_handle;
         size_t num_not_found = 0;
-        struct bucket *data = (struct bucket *) vec_data(buckets);
+        struct bucket *data = (struct bucket *) jak_vector_data(buckets);
 
         JAK_PREFETCH_WRITE(values_out);
 
@@ -231,13 +231,13 @@ this_fetch_bulk(struct jak_vector ofType(bucket) *buckets, jak_archive_field_sid
 }
 
 static int
-this_fetch_single(struct jak_vector ofType(bucket) *buckets, jak_archive_field_sid_t *value_out, bool *key_found,
+this_fetch_single(jak_vector ofType(bucket) *buckets, jak_archive_field_sid_t *value_out, bool *key_found,
                   const size_t bucket_idx, const char *key, jak_str_hash_counters *counter)
 {
         JAK_UNUSED(counter);
 
         jak_slice_handle handle;
-        struct bucket *data = (struct bucket *) vec_data(buckets);
+        struct bucket *data = (struct bucket *) jak_vector_data(buckets);
 
         JAK_PREFETCH_WRITE(value_out);
         JAK_PREFETCH_WRITE(key_found);
@@ -258,7 +258,7 @@ this_get_safe(jak_str_hash *self, jak_archive_field_sid_t **out, bool **found_ma
 {
         JAK_ASSERT(self->tag == JAK_MEMORY_RESIDENT);
 
-        timestamp_t begin = time_now_wallclock();
+        jak_timestamp begin = jak_wallclock();
         JAK_TRACE(SMART_MAP_TAG, "'get_safe' function invoked for %zu strings", num_keys)
 
         jak_allocator jak_hashtable_alloc;
@@ -282,7 +282,7 @@ this_get_safe(jak_str_hash *self, jak_archive_field_sid_t **out, bool **found_ma
                 const char *key = keys[i];
                 hash32_t hash = key && strcmp("", key) != 0 ? HASHCODE_OF(key) : 0;
                 bucket_idxs[i] = hash % extra->buckets.cap_elems;
-                JAK_PREFETCH_READ((struct bucket *) vec_data(&extra->buckets) + bucket_idxs[i]);
+                JAK_PREFETCH_READ((struct bucket *) jak_vector_data(&extra->buckets) + bucket_idxs[i]);
         }
 
         JAK_TRACE(SMART_MAP_TAG, "'get_safe' function invoke fetch...for %zu strings", num_keys)
@@ -304,7 +304,7 @@ this_get_safe(jak_str_hash *self, jak_archive_field_sid_t **out, bool **found_ma
         *out = values_out;
         *found_mask = found_mask_out;
 
-        timestamp_t end = time_now_wallclock();
+        jak_timestamp end = jak_wallclock();
         JAK_UNUSED(begin);
         JAK_UNUSED(end);
         JAK_TRACE(SMART_MAP_TAG, "'get_safe' function done: %f seconds spent here", (end - begin) / 1000.0f)
@@ -328,7 +328,7 @@ this_get_safe_exact(jak_str_hash *self, jak_archive_field_sid_t *out, bool *foun
 
         hash32_t hash = strcmp("", key) != 0 ? HASHCODE_OF(key) : 0;
         size_t bucket_idx = hash % extra->buckets.cap_elems;
-        JAK_PREFETCH_READ((struct bucket *) vec_data(&extra->buckets) + bucket_idx);
+        JAK_PREFETCH_READ((struct bucket *) jak_vector_data(&extra->buckets) + bucket_idx);
 
         JAK_CHECK_SUCCESS(this_fetch_single(&extra->buckets, out, found_mask, bucket_idx, key, &self->counters));
 
@@ -363,7 +363,7 @@ static int simple_map_remove(struct mem_extra *extra, size_t *bucket_idxs, char 
         JAK_UNUSED(alloc);
 
         jak_slice_handle handle;
-        struct bucket *data = (struct bucket *) vec_data(&extra->buckets);
+        struct bucket *data = (struct bucket *) jak_vector_data(&extra->buckets);
 
         for (register size_t i = 0; i < num_keys; i++) {
                 struct bucket *bucket = data + bucket_idxs[i];
@@ -407,12 +407,12 @@ static int this_create_extra(jak_str_hash *self, size_t num_buckets, size_t cap_
 {
         if ((self->extra = jak_alloc_malloc(&self->allocator, sizeof(struct mem_extra))) != NULL) {
                 struct mem_extra *extra = this_get_exta(self);
-                vec_create(&extra->buckets, &self->allocator, sizeof(struct bucket), num_buckets);
+                jak_vector_create(&extra->buckets, &self->allocator, sizeof(struct bucket), num_buckets);
 
                 /** Optimization: notify the kernel that the list of buckets are accessed randomly (since hash based access)*/
-                vec_memadvice(&extra->buckets, MADV_RANDOM | MADV_WILLNEED);
+                jak_vector_memadvice(&extra->buckets, MADV_RANDOM | MADV_WILLNEED);
 
-                struct bucket *data = (struct bucket *) vec_data(&extra->buckets);
+                struct bucket *data = (struct bucket *) jak_vector_data(&extra->buckets);
                 JAK_CHECK_SUCCESS(bucket_create(data, num_buckets, cap_buckets, &self->allocator));
                 return true;
         } else {
@@ -483,7 +483,7 @@ static int bucket_insert(struct bucket *bucket, const char *restrict key, jak_ar
         return true;
 }
 
-static int this_insert_bulk(struct jak_vector ofType(bucket) *buckets, char *const *restrict keys,
+static int this_insert_bulk(jak_vector ofType(bucket) *buckets, char *const *restrict keys,
                             const jak_archive_field_sid_t *restrict values, size_t *restrict bucket_idxs,
                             size_t num_pairs,
                             jak_allocator *alloc,
@@ -494,7 +494,7 @@ static int this_insert_bulk(struct jak_vector ofType(bucket) *buckets, char *con
         JAK_ERROR_IF_NULL(values)
         JAK_ERROR_IF_NULL(bucket_idxs)
 
-        struct bucket *buckets_data = (struct bucket *) vec_data(buckets);
+        struct bucket *buckets_data = (struct bucket *) jak_vector_data(buckets);
         int status = true;
         for (register size_t i = 0; status == true && i < num_pairs; i++) {
                 size_t bucket_idx = bucket_idxs[i];
@@ -509,13 +509,13 @@ static int this_insert_bulk(struct jak_vector ofType(bucket) *buckets, char *con
 }
 
 static int
-this_insert_exact(struct jak_vector ofType(bucket) *buckets, const char *restrict key, jak_archive_field_sid_t value,
+this_insert_exact(jak_vector ofType(bucket) *buckets, const char *restrict key, jak_archive_field_sid_t value,
                   size_t bucket_idx, jak_allocator *alloc, jak_str_hash_counters *counter)
 {
         JAK_ERROR_IF_NULL(buckets)
         JAK_ERROR_IF_NULL(key)
 
-        struct bucket *buckets_data = (struct bucket *) vec_data(buckets);
+        struct bucket *buckets_data = (struct bucket *) jak_vector_data(buckets);
         struct bucket *bucket = buckets_data + bucket_idx;
         return bucket_insert(bucket, key, value, alloc, counter);
 }

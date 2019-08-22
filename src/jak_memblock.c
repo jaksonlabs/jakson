@@ -191,7 +191,7 @@ void *jak_memblock_move_contents_and_drop(jak_memblock *block)
         return result;
 }
 
-bool memfile_update_last_byte(jak_memblock *block, size_t where)
+bool jak_memfile_update_last_byte(jak_memblock *block, size_t where)
 {
         JAK_ERROR_IF_NULL(block);
         JAK_ERROR_IF(where >= block->blockLength, &block->err, JAK_ERR_ILLEGALSTATE);

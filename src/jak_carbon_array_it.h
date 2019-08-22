@@ -55,7 +55,7 @@ typedef struct jak_field_access {
 } jak_field_access;
 
 typedef struct jak_carbon_array_it {
-        struct jak_memfile memfile;
+        jak_memfile memfile;
         jak_offset_t payload_start;
         jak_spinlock lock;
         jak_error err;
@@ -64,7 +64,7 @@ typedef struct jak_carbon_array_it {
         jak_i64 mod_size;
         bool array_end_reached;
 
-        struct jak_vector ofType(jak_offset_t) history;
+        jak_vector ofType(jak_offset_t) history;
         jak_field_access field_access;
         jak_offset_t field_offset;
 } jak_carbon_array_it;
@@ -93,7 +93,7 @@ bool jak_carbon_array_it_update_in_place_null(jak_carbon_array_it *it);
  * that starts with the first (potentially empty) array entry. If there is some data before the array contents
  * (e.g., a header), <code>payload_start</code> must not include this data.
  */
-bool jak_carbon_array_it_create(jak_carbon_array_it *it, struct jak_memfile *memfile, jak_error *err, jak_offset_t payload_start);
+bool jak_carbon_array_it_create(jak_carbon_array_it *it, jak_memfile *memfile, jak_error *err, jak_offset_t payload_start);
 bool jak_carbon_array_it_copy(jak_carbon_array_it *dst, jak_carbon_array_it *src);
 bool jak_carbon_array_it_clone(jak_carbon_array_it *dst, jak_carbon_array_it *src);
 bool jak_carbon_array_it_readonly(jak_carbon_array_it *it);

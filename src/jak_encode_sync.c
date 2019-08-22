@@ -32,63 +32,63 @@ struct entry {
 };
 
 struct sync_extra {
-        struct jak_vector ofType(entry) contents;
-        struct jak_vector ofType(jak_string_id_t_t) freelist;
+        jak_vector ofType(entry) contents;
+        jak_vector ofType(jak_string_id_t_t) freelist;
         jak_str_hash index;
         jak_spinlock lock;
 };
 
-static bool this_drop(struct jak_string_dict *self);
+static bool this_drop(jak_string_dict *self);
 
 static bool
-this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *const *strings, size_t num_strings,
+this_insert(jak_string_dict *self, jak_archive_field_sid_t **out, char *const *strings, size_t num_strings,
             size_t num_threads);
 
-static bool this_remove(struct jak_string_dict *self, jak_archive_field_sid_t *strings, size_t num_strings);
+static bool this_remove(jak_string_dict *self, jak_archive_field_sid_t *strings, size_t num_strings);
 
 static bool
-this_locate_safe(struct jak_string_dict *self, jak_archive_field_sid_t **out, bool **found_mask, size_t *num_not_found,
+this_locate_safe(jak_string_dict *self, jak_archive_field_sid_t **out, bool **found_mask, size_t *num_not_found,
                  char *const *keys, size_t num_keys);
 
 static bool
-this_locate_fast(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *const *keys, size_t num_keys);
+this_locate_fast(jak_string_dict *self, jak_archive_field_sid_t **out, char *const *keys, size_t num_keys);
 
-static char **this_extract(struct jak_string_dict *self, const jak_archive_field_sid_t *ids, size_t num_ids);
+static char **this_extract(jak_string_dict *self, const jak_archive_field_sid_t *ids, size_t num_ids);
 
-static bool this_free(struct jak_string_dict *self, void *ptr);
+static bool this_free(jak_string_dict *self, void *ptr);
 
-static bool this_reset_counters(struct jak_string_dict *self);
+static bool this_reset_counters(jak_string_dict *self);
 
-static bool this_counters(struct jak_string_dict *self, jak_str_hash_counters *counters);
+static bool this_counters(jak_string_dict *self, jak_str_hash_counters *counters);
 
-static bool this_num_distinct(struct jak_string_dict *self, size_t *num);
+static bool this_num_distinct(jak_string_dict *self, size_t *num);
 
-static bool this_get_contents(struct jak_string_dict *self, struct jak_vector ofType (char *) *strings,
-                              struct jak_vector ofType(jak_archive_field_sid_t) *jak_string_ids);
+static bool this_get_contents(jak_string_dict *self, jak_vector ofType (char *) *strings,
+                              jak_vector ofType(jak_archive_field_sid_t) *jak_string_ids);
 
-static void lock(struct jak_string_dict *self);
+static void lock(jak_string_dict *self);
 
-static void unlock(struct jak_string_dict *self);
+static void unlock(jak_string_dict *self);
 
 static int
-create_extra(struct jak_string_dict *self, size_t capacity, size_t num_index_buckets, size_t num_index_bucket_cap,
+create_extra(jak_string_dict *self, size_t capacity, size_t num_index_buckets, size_t num_index_bucket_cap,
              size_t num_threads);
 
-static struct sync_extra *this_extra(struct jak_string_dict *self);
+static struct sync_extra *this_extra(jak_string_dict *self);
 
-static int freelist_pop(jak_archive_field_sid_t *out, struct jak_string_dict *self);
+static int freelist_pop(jak_archive_field_sid_t *out, jak_string_dict *self);
 
-static int freelist_push(struct jak_string_dict *self, jak_archive_field_sid_t idx);
+static int freelist_push(jak_string_dict *self, jak_archive_field_sid_t idx);
 
 int
-jak_encode_sync_create(struct jak_string_dict *dic, size_t capacity, size_t num_indx_buckets, size_t num_index_bucket_cap,
+jak_encode_sync_create(jak_string_dict *dic, size_t capacity, size_t num_indx_buckets, size_t num_index_bucket_cap,
                    size_t num_threads, const jak_allocator *alloc)
 {
         JAK_ERROR_IF_NULL(dic);
 
         JAK_CHECK_SUCCESS(jak_alloc_this_or_std(&dic->alloc, alloc));
 
-        dic->tag = SYNC;
+        dic->tag = JAK_SYNC;
         dic->drop = this_drop;
         dic->insert = this_insert;
         dic->remove = this_remove;
@@ -105,32 +105,32 @@ jak_encode_sync_create(struct jak_string_dict *dic, size_t capacity, size_t num_
         return true;
 }
 
-static void lock(struct jak_string_dict *self)
+static void lock(jak_string_dict *self)
 {
-        JAK_ASSERT(self->tag == SYNC);
+        JAK_ASSERT(self->tag == JAK_SYNC);
         struct sync_extra *extra = this_extra(self);
         jak_spinlock_acquire(&extra->lock);
 }
 
-static void unlock(struct jak_string_dict *self)
+static void unlock(jak_string_dict *self)
 {
-        JAK_ASSERT(self->tag == SYNC);
+        JAK_ASSERT(self->tag == JAK_SYNC);
         struct sync_extra *extra = this_extra(self);
         jak_spinlock_release(&extra->lock);
 }
 
 static int
-create_extra(struct jak_string_dict *self, size_t capacity, size_t num_index_buckets, size_t num_index_bucket_cap,
+create_extra(jak_string_dict *self, size_t capacity, size_t num_index_buckets, size_t num_index_bucket_cap,
              size_t num_threads)
 {
         self->extra = jak_alloc_malloc(&self->alloc, sizeof(struct sync_extra));
         struct sync_extra *extra = this_extra(self);
         jak_spinlock_init(&extra->lock);
-        JAK_CHECK_SUCCESS(vec_create(&extra->contents, &self->alloc, sizeof(struct entry), capacity));
-        JAK_CHECK_SUCCESS(vec_create(&extra->freelist, &self->alloc, sizeof(jak_archive_field_sid_t), capacity));
+        JAK_CHECK_SUCCESS(jak_vector_create(&extra->contents, &self->alloc, sizeof(struct entry), capacity));
+        JAK_CHECK_SUCCESS(jak_vector_create(&extra->freelist, &self->alloc, sizeof(jak_archive_field_sid_t), capacity));
         struct entry empty = {.str    = NULL, .in_use = false};
         for (size_t i = 0; i < capacity; i++) {
-                JAK_CHECK_SUCCESS(vec_push(&extra->contents, &empty, 1));
+                JAK_CHECK_SUCCESS(jak_vector_push(&extra->contents, &empty, 1));
                 freelist_push(self, i);
         }
         JAK_UNUSED(num_threads);
@@ -149,44 +149,44 @@ create_extra(struct jak_string_dict *self, size_t capacity, size_t num_index_buc
         return true;
 }
 
-static struct sync_extra *this_extra(struct jak_string_dict *self)
+static struct sync_extra *this_extra(jak_string_dict *self)
 {
-        JAK_ASSERT (self->tag == SYNC);
+        JAK_ASSERT (self->tag == JAK_SYNC);
         return (struct sync_extra *) self->extra;
 }
 
-static int freelist_pop(jak_archive_field_sid_t *out, struct jak_string_dict *self)
+static int freelist_pop(jak_archive_field_sid_t *out, jak_string_dict *self)
 {
-        JAK_ASSERT (self->tag == SYNC);
+        JAK_ASSERT (self->tag == JAK_SYNC);
         struct sync_extra *extra = this_extra(self);
-        if (JAK_UNLIKELY(vec_is_empty(&extra->freelist))) {
+        if (JAK_UNLIKELY(jak_vector_is_empty(&extra->freelist))) {
                 size_t num_new_pos;
-                JAK_CHECK_SUCCESS(vec_grow(&num_new_pos, &extra->freelist));
-                JAK_CHECK_SUCCESS(vec_grow(NULL, &extra->contents));
+                JAK_CHECK_SUCCESS(jak_vector_grow(&num_new_pos, &extra->freelist));
+                JAK_CHECK_SUCCESS(jak_vector_grow(NULL, &extra->contents));
                 JAK_ASSERT (extra->freelist.cap_elems == extra->contents.cap_elems);
                 struct entry empty = {.in_use = false, .str    = NULL};
                 while (num_new_pos--) {
-                        size_t new_pos = vec_length(&extra->contents);
-                        JAK_CHECK_SUCCESS(vec_push(&extra->freelist, &new_pos, 1));
-                        JAK_CHECK_SUCCESS(vec_push(&extra->contents, &empty, 1));
+                        size_t new_pos = jak_vector_length(&extra->contents);
+                        JAK_CHECK_SUCCESS(jak_vector_push(&extra->freelist, &new_pos, 1));
+                        JAK_CHECK_SUCCESS(jak_vector_push(&extra->contents, &empty, 1));
                 }
         }
-        *out = *(jak_archive_field_sid_t *) vec_pop(&extra->freelist);
+        *out = *(jak_archive_field_sid_t *) jak_vector_pop(&extra->freelist);
         return true;
 }
 
-static int freelist_push(struct jak_string_dict *self, jak_archive_field_sid_t idx)
+static int freelist_push(jak_string_dict *self, jak_archive_field_sid_t idx)
 {
-        JAK_ASSERT (self->tag == SYNC);
+        JAK_ASSERT (self->tag == JAK_SYNC);
         struct sync_extra *extra = this_extra(self);
-        JAK_CHECK_SUCCESS(vec_push(&extra->freelist, &idx, 1));
+        JAK_CHECK_SUCCESS(jak_vector_push(&extra->freelist, &idx, 1));
         JAK_ASSERT (extra->freelist.cap_elems == extra->contents.cap_elems);
         return true;
 }
 
-static bool this_drop(struct jak_string_dict *self)
+static bool this_drop(jak_string_dict *self)
 {
-        JAK_CHECK_TAG(self->tag, SYNC)
+        JAK_CHECK_TAG(self->tag, JAK_SYNC)
 
         struct sync_extra *extra = this_extra(self);
 
@@ -200,8 +200,8 @@ static bool this_drop(struct jak_string_dict *self)
                 }
         }
 
-        vec_drop(&extra->freelist);
-        vec_drop(&extra->contents);
+        jak_vector_drop(&extra->freelist);
+        jak_vector_drop(&extra->contents);
         jak_str_hash_drop(&extra->index);
         jak_alloc_free(&self->alloc, self->extra);
 
@@ -209,15 +209,15 @@ static bool this_drop(struct jak_string_dict *self)
 }
 
 static bool
-this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *const *strings, size_t num_strings,
+this_insert(jak_string_dict *self, jak_archive_field_sid_t **out, char *const *strings, size_t num_strings,
             size_t num_threads)
 {
         JAK_TRACE(STRING_DIC_SYNC_TAG, "local string dictionary insertion invoked for %zu strings", num_strings);
-        timestamp_t begin = time_now_wallclock();
+        jak_timestamp begin = jak_wallclock();
 
         JAK_UNUSED(num_threads);
 
-        JAK_CHECK_TAG(self->tag, SYNC)
+        JAK_CHECK_TAG(self->tag, JAK_SYNC)
         lock(self);
 
         struct sync_extra *extra = this_extra(self);
@@ -291,7 +291,7 @@ this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *c
                                 /** register in contents list */
                                 bool pop_result = freelist_pop(&jak_string_id, self);
                                 JAK_ERROR_PRINT_AND_DIE_IF(!pop_result, JAK_ERR_SLOTBROKEN)
-                                struct entry *entries = (struct entry *) vec_data(&extra->contents);
+                                struct entry *entries = (struct entry *) jak_vector_data(&extra->contents);
                                 struct entry *entry = entries + jak_string_id;
                                 JAK_ASSERT (!entry->in_use);
                                 entry->in_use = true;
@@ -314,7 +314,7 @@ this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *c
 
         unlock(self);
 
-        timestamp_t end = time_now_wallclock();
+        jak_timestamp end = jak_wallclock();
         JAK_UNUSED(begin);
         JAK_UNUSED(end);
         JAK_INFO(STRING_DIC_SYNC_TAG, "insertion operation done: %f seconds spent here", (end - begin) / 1000.0f)
@@ -323,12 +323,12 @@ this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *c
 
 }
 
-static bool this_remove(struct jak_string_dict *self, jak_archive_field_sid_t *strings, size_t num_strings)
+static bool this_remove(jak_string_dict *self, jak_archive_field_sid_t *strings, size_t num_strings)
 {
         JAK_ERROR_IF_NULL(self);
         JAK_ERROR_IF_NULL(strings);
         JAK_ERROR_IF_NULL(num_strings);
-        JAK_CHECK_TAG(self->tag, SYNC)
+        JAK_CHECK_TAG(self->tag, JAK_SYNC)
         lock(self);
 
         struct sync_extra *extra = this_extra(self);
@@ -341,7 +341,7 @@ static bool this_remove(struct jak_string_dict *self, jak_archive_field_sid_t *s
         /** remove strings from contents JAK_vector, and skip duplicates */
         for (size_t i = 0; i < num_strings; i++) {
                 jak_archive_field_sid_t jak_archive_field_sid_t = strings[i];
-                struct entry *entry = (struct entry *) vec_data(&extra->contents) + jak_archive_field_sid_t;
+                struct entry *entry = (struct entry *) jak_vector_data(&extra->contents) + jak_archive_field_sid_t;
                 if (JAK_LIKELY(entry->in_use)) {
                         jak_string_to_delete[num_strings_to_delete] = entry->str;
                         jak_string_ids_to_delete[num_strings_to_delete] = strings[i];
@@ -369,10 +369,10 @@ static bool this_remove(struct jak_string_dict *self, jak_archive_field_sid_t *s
 }
 
 static bool
-this_locate_safe(struct jak_string_dict *self, jak_archive_field_sid_t **out, bool **found_mask, size_t *num_not_found,
+this_locate_safe(jak_string_dict *self, jak_archive_field_sid_t **out, bool **found_mask, size_t *num_not_found,
                  char *const *keys, size_t num_keys)
 {
-        timestamp_t begin = time_now_wallclock();
+        jak_timestamp begin = jak_wallclock();
         JAK_TRACE(STRING_DIC_SYNC_TAG, "'locate_safe' function invoked for %zu strings", num_keys)
 
         JAK_ERROR_IF_NULL(self);
@@ -381,14 +381,14 @@ this_locate_safe(struct jak_string_dict *self, jak_archive_field_sid_t **out, bo
         JAK_ERROR_IF_NULL(num_not_found);
         JAK_ERROR_IF_NULL(keys);
         JAK_ERROR_IF_NULL(num_keys);
-        JAK_CHECK_TAG(self->tag, SYNC)
+        JAK_CHECK_TAG(self->tag, JAK_SYNC)
 
         lock(self);
         struct sync_extra *extra = this_extra(self);
         int status = jak_str_hash_get_bulk_safe(out, found_mask, num_not_found, &extra->index, keys, num_keys);
         unlock(self);
 
-        timestamp_t end = time_now_wallclock();
+        jak_timestamp end = jak_wallclock();
         JAK_UNUSED(begin);
         JAK_UNUSED(end);
         JAK_TRACE(STRING_DIC_SYNC_TAG, "'locate_safe' function done: %f seconds spent here", (end - begin) / 1000.0f)
@@ -397,9 +397,9 @@ this_locate_safe(struct jak_string_dict *self, jak_archive_field_sid_t **out, bo
 }
 
 static bool
-this_locate_fast(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *const *keys, size_t num_keys)
+this_locate_fast(jak_string_dict *self, jak_archive_field_sid_t **out, char *const *keys, size_t num_keys)
 {
-        JAK_CHECK_TAG(self->tag, SYNC)
+        JAK_CHECK_TAG(self->tag, JAK_SYNC)
 
         bool *found_mask;
         size_t num_not_found;
@@ -413,9 +413,9 @@ this_locate_fast(struct jak_string_dict *self, jak_archive_field_sid_t **out, ch
         return result;
 }
 
-static char **this_extract(struct jak_string_dict *self, const jak_archive_field_sid_t *ids, size_t num_ids)
+static char **this_extract(jak_string_dict *self, const jak_archive_field_sid_t *ids, size_t num_ids)
 {
-        if (JAK_UNLIKELY(!self || !ids || num_ids == 0 || self->tag != SYNC)) {
+        if (JAK_UNLIKELY(!self || !ids || num_ids == 0 || self->tag != JAK_SYNC)) {
                 return NULL;
         }
 
@@ -430,14 +430,14 @@ static char **this_extract(struct jak_string_dict *self, const jak_archive_field
 
         struct sync_extra *extra = this_extra(self);
         char **result = jak_alloc_malloc(&jak_hashtable_alloc, num_ids * sizeof(char *));
-        struct entry *entries = (struct entry *) vec_data(&extra->contents);
+        struct entry *entries = (struct entry *) jak_vector_data(&extra->contents);
 
         /** Optimization: notify the kernel that the content list is accessed randomly (since hash based access)*/
-        vec_memadvice(&extra->contents, MADV_RANDOM | MADV_WILLNEED);
+        jak_vector_memadvice(&extra->contents, MADV_RANDOM | MADV_WILLNEED);
 
         for (size_t i = 0; i < num_ids; i++) {
                 jak_archive_field_sid_t jak_archive_field_sid_t = ids[i];
-                JAK_ASSERT(jak_archive_field_sid_t < vec_length(&extra->contents));
+                JAK_ASSERT(jak_archive_field_sid_t < jak_vector_length(&extra->contents));
                 JAK_ASSERT(
                         jak_archive_field_sid_t == JAK_NULL_ENCODED_STRING || entries[jak_archive_field_sid_t].in_use);
                 result[i] = jak_archive_field_sid_t != JAK_NULL_ENCODED_STRING ? entries[jak_archive_field_sid_t].str
@@ -448,7 +448,7 @@ static char **this_extract(struct jak_string_dict *self, const jak_archive_field
         return result;
 }
 
-static bool this_free(struct jak_string_dict *self, void *ptr)
+static bool this_free(jak_string_dict *self, void *ptr)
 {
         JAK_UNUSED(self);
 
@@ -462,41 +462,41 @@ static bool this_free(struct jak_string_dict *self, void *ptr)
         return jak_alloc_free(&jak_hashtable_alloc, ptr);
 }
 
-static bool this_reset_counters(struct jak_string_dict *self)
+static bool this_reset_counters(jak_string_dict *self)
 {
-        JAK_CHECK_TAG(self->tag, SYNC)
+        JAK_CHECK_TAG(self->tag, JAK_SYNC)
         struct sync_extra *extra = this_extra(self);
         JAK_CHECK_SUCCESS(jak_str_hash_reset_counters(&extra->index));
         return true;
 }
 
-static bool this_counters(struct jak_string_dict *self, jak_str_hash_counters *counters)
+static bool this_counters(jak_string_dict *self, jak_str_hash_counters *counters)
 {
-        JAK_CHECK_TAG(self->tag, SYNC)
+        JAK_CHECK_TAG(self->tag, JAK_SYNC)
         struct sync_extra *extra = this_extra(self);
         JAK_CHECK_SUCCESS(jak_str_hash_get_counters(counters, &extra->index));
         return true;
 }
 
-static bool this_num_distinct(struct jak_string_dict *self, size_t *num)
+static bool this_num_distinct(jak_string_dict *self, size_t *num)
 {
-        JAK_CHECK_TAG(self->tag, SYNC)
+        JAK_CHECK_TAG(self->tag, JAK_SYNC)
         struct sync_extra *extra = this_extra(self);
-        *num = vec_length(&extra->contents);
+        *num = jak_vector_length(&extra->contents);
         return true;
 }
 
-static bool this_get_contents(struct jak_string_dict *self, struct jak_vector ofType (char *) *strings,
-                              struct jak_vector ofType(jak_archive_field_sid_t) *jak_string_ids)
+static bool this_get_contents(jak_string_dict *self, jak_vector ofType (char *) *strings,
+                              jak_vector ofType(jak_archive_field_sid_t) *jak_string_ids)
 {
-        JAK_CHECK_TAG(self->tag, SYNC);
+        JAK_CHECK_TAG(self->tag, JAK_SYNC);
         struct sync_extra *extra = this_extra(self);
 
         for (jak_archive_field_sid_t i = 0; i < extra->contents.num_elems; i++) {
-                const struct entry *e = vec_get(&extra->contents, i, struct entry);
+                const struct entry *e = JAK_VECTOR_GET(&extra->contents, i, struct entry);
                 if (e->in_use) {
-                        vec_push(strings, &e->str, 1);
-                        vec_push(jak_string_ids, &i, 1);
+                        jak_vector_push(strings, &e->str, 1);
+                        jak_vector_push(jak_string_ids, &i, 1);
                 }
         }
         return true;

@@ -11,7 +11,7 @@ TEST(ConverterTest, PerformConversion)
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
     status = jak_archive_open(&archive, "./assets/test-archive.carbon");
-    //status = jak_archive_open(&archive, "../mag_papers_excerpt.carbon");
+    //status = jak_archive_open(&archive, "../mag_papers_excerpt.jakson-tool");
     ASSERT_TRUE(status);
 
     jak_archive_converter(&collection, &archive);

@@ -32,27 +32,27 @@ bool jak_hashtable_create(jak_hashtable *map, jak_error *err, size_t key_size, s
 
         map->size = 0;
 
-        JAK_SUCCESS_OR_JUMP(vec_create(&map->key_data, NULL, key_size, capacity), error_handling);
-        JAK_SUCCESS_OR_JUMP(vec_create(&map->value_data, NULL, value_size, capacity), cleanup_key_data_and_error);
-        JAK_SUCCESS_OR_JUMP(vec_create(&map->table, NULL, sizeof(jak_hashtable_bucket), capacity),
+        JAK_SUCCESS_OR_JUMP(jak_vector_create(&map->key_data, NULL, key_size, capacity), error_handling);
+        JAK_SUCCESS_OR_JUMP(jak_vector_create(&map->value_data, NULL, value_size, capacity), cleanup_key_data_and_error);
+        JAK_SUCCESS_OR_JUMP(jak_vector_create(&map->table, NULL, sizeof(jak_hashtable_bucket), capacity),
                             cleanup_value_key_data_and_error);
-        JAK_SUCCESS_OR_JUMP(vec_enlarge_size_to_capacity(&map->table), cleanup_key_value_table_and_error);
-        JAK_SUCCESS_OR_JUMP(vec_zero_memory(&map->table), cleanup_key_value_table_and_error);
+        JAK_SUCCESS_OR_JUMP(jak_vector_enlarge_size_to_capacity(&map->table), cleanup_key_value_table_and_error);
+        JAK_SUCCESS_OR_JUMP(jak_vector_zero_memory(&map->table), cleanup_key_value_table_and_error);
         JAK_SUCCESS_OR_JUMP(jak_spinlock_init(&map->lock), cleanup_key_value_table_and_error);
         JAK_SUCCESS_OR_JUMP(jak_error_init(&map->err), cleanup_key_value_table_and_error);
 
         return true;
 
         cleanup_key_value_table_and_error:
-        if (!vec_drop(&map->table)) {
+        if (!jak_vector_drop(&map->table)) {
                 err_code = JAK_ERR_DROPFAILED;
         }
         cleanup_value_key_data_and_error:
-        if (!vec_drop(&map->value_data)) {
+        if (!jak_vector_drop(&map->value_data)) {
                 err_code = JAK_ERR_DROPFAILED;
         }
         cleanup_key_data_and_error:
-        if (!vec_drop(&map->key_data)) {
+        if (!jak_vector_drop(&map->key_data)) {
                 err_code = JAK_ERR_DROPFAILED;
         }
         error_handling:
@@ -66,9 +66,9 @@ bool jak_hashtable_drop(jak_hashtable *map)
 
         bool status = true;
 
-        status &= vec_drop(&map->table);
-        status &= vec_drop(&map->value_data);
-        status &= vec_drop(&map->key_data);
+        status &= jak_vector_drop(&map->table);
+        status &= jak_vector_drop(&map->value_data);
+        status &= jak_vector_drop(&map->key_data);
 
         if (!status) {
                 JAK_ERROR(&map->err, JAK_ERR_DROPFAILED);
@@ -95,9 +95,9 @@ jak_hashtable *jak_hashtable_cpy(jak_hashtable *src)
                 JAK_ASSERT((src->key_data.num_elems == src->value_data.num_elems)
                            && src->value_data.num_elems <= src->table.num_elems);
 
-                vec_cpy_to(&cpy->key_data, &src->key_data);
-                vec_cpy_to(&cpy->value_data, &src->value_data);
-                vec_cpy_to(&cpy->table, &src->table);
+                jak_vector_cpy_to(&cpy->key_data, &src->key_data);
+                jak_vector_cpy_to(&cpy->value_data, &src->value_data);
+                jak_vector_cpy_to(&cpy->table, &src->table);
                 cpy->size = src->size;
                 jak_error_cpy(&cpy->err, &src->err);
 
@@ -124,7 +124,7 @@ bool jak_hashtable_clear(jak_hashtable *map)
 
         jak_hashtable_lock(map);
 
-        bool status = vec_clear(&map->key_data) && vec_clear(&map->value_data) && vec_zero_memory(&map->table);
+        bool status = jak_vector_clear(&map->key_data) && jak_vector_clear(&map->value_data) && jak_vector_zero_memory(&map->table);
 
         map->size = 0;
 
@@ -149,7 +149,7 @@ bool jak_hashtable_avg_displace(float *displace, const jak_hashtable *map)
 
         size_t sum_dis = 0;
         for (size_t i = 0; i < map->table.num_elems; i++) {
-                jak_hashtable_bucket *bucket = vec_get(&map->table, i, jak_hashtable_bucket);
+                jak_hashtable_bucket *bucket = JAK_VECTOR_GET(&map->table, i, jak_hashtable_bucket);
                 sum_dis += abs(bucket->displacement);
         }
         *displace = (sum_dis / (float) map->table.num_elems);
@@ -186,8 +186,8 @@ static void insert(jak_hashtable_bucket *bucket, jak_hashtable *map, const void 
 {
         JAK_ASSERT(map->key_data.num_elems == map->value_data.num_elems);
         jak_u64 idx = map->key_data.num_elems;
-        void *key_datum = vec_new_and_get(&map->key_data, void *);
-        void *value_datum = vec_new_and_get(&map->value_data, void *);
+        void *key_datum = JAK_VECTOR_NEW_AND_GET(&map->key_data, void *);
+        void *value_datum = JAK_VECTOR_NEW_AND_GET(&map->value_data, void *);
         memcpy(key_datum, key, map->key_data.elem_size);
         memcpy(value_datum, value, map->value_data.elem_size);
         bucket->data_idx = idx;
@@ -206,13 +206,13 @@ static inline uint_fast32_t insert_or_update(jak_hashtable *map, const jak_u32 *
 
                 jak_u32 bucket_idx = intended_bucket_idx;
 
-                jak_hashtable_bucket *bucket = vec_get(&map->table, bucket_idx, jak_hashtable_bucket);
+                jak_hashtable_bucket *bucket = JAK_VECTOR_GET(&map->table, bucket_idx, jak_hashtable_bucket);
                 if (bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) != 0) {
                         bool fitting_bucket_found = false;
                         jak_u32 displace_idx;
                         for (displace_idx = bucket_idx + 1; displace_idx < map->table.num_elems; displace_idx++) {
                                 jak_hashtable_bucket
-                                        *bucket = vec_get(&map->table, displace_idx, jak_hashtable_bucket);
+                                        *bucket = JAK_VECTOR_GET(&map->table, displace_idx, jak_hashtable_bucket);
                                 fitting_bucket_found = !bucket->in_use_flag || (bucket->in_use_flag
                                                                                 &&
                                                                                 memcmp(get_bucket_key(bucket, map), key,
@@ -234,7 +234,7 @@ static inline uint_fast32_t insert_or_update(jak_hashtable *map, const jak_u32 *
                         if (!fitting_bucket_found) {
                                 for (displace_idx = 0; displace_idx < bucket_idx - 1; displace_idx++) {
                                         const jak_hashtable_bucket
-                                                *bucket = vec_get(&map->table, displace_idx, jak_hashtable_bucket);
+                                                *bucket = JAK_VECTOR_GET(&map->table, displace_idx, jak_hashtable_bucket);
                                         fitting_bucket_found = !bucket->in_use_flag || (bucket->in_use_flag
                                                                                         && memcmp(get_bucket_key(bucket,
                                                                                                                  map),
@@ -249,7 +249,7 @@ static inline uint_fast32_t insert_or_update(jak_hashtable *map, const jak_u32 *
 
                         JAK_ASSERT(fitting_bucket_found == true);
                         bucket_idx = displace_idx;
-                        bucket = vec_get(&map->table, bucket_idx, jak_hashtable_bucket);
+                        bucket = JAK_VECTOR_GET(&map->table, bucket_idx, jak_hashtable_bucket);
                 }
 
                 bool is_update =
@@ -333,17 +333,17 @@ bool jak_hashtable_serialize(FILE *file, jak_hashtable *table)
         fseek(file, sizeof(jak_hashtable_header), SEEK_CUR);
 
         jak_offset_t key_data_off = ftell(file);
-        if (!vec_serialize(file, &table->key_data)) {
+        if (!jak_vector_serialize(file, &table->key_data)) {
                 goto error_handling;
         }
 
         jak_offset_t value_data_off = ftell(file);
-        if (!vec_serialize(file, &table->value_data)) {
+        if (!jak_vector_serialize(file, &table->value_data)) {
                 goto error_handling;
         }
 
         jak_offset_t table_off = ftell(file);
-        if (!vec_serialize(file, &table->table)) {
+        if (!jak_vector_serialize(file, &table->table)) {
                 goto error_handling;
         }
 
@@ -383,19 +383,19 @@ bool jak_hashtable_deserialize(jak_hashtable *table, jak_error *err, FILE *file)
         }
 
         fseek(file, header.key_data_off, SEEK_SET);
-        if (!vec_deserialize(&table->key_data, err, file)) {
+        if (!jak_vector_deserialize(&table->key_data, err, file)) {
                 err_code = err->code;
                 goto error_handling;
         }
 
         fseek(file, header.value_data_off, SEEK_SET);
-        if (!vec_deserialize(&table->value_data, err, file)) {
+        if (!jak_vector_deserialize(&table->value_data, err, file)) {
                 err_code = err->code;
                 goto error_handling;
         }
 
         fseek(file, header.table_off, SEEK_SET);
-        if (!vec_deserialize(&table->table, err, file)) {
+        if (!jak_vector_deserialize(&table->table, err, file)) {
                 err_code = err->code;
                 goto error_handling;
         }
@@ -436,20 +436,20 @@ bool jak_hashtable_remove_if_contained(jak_hashtable *map, const void *keys, siz
                 bool bucket_found = false;
 
                 for (jak_u32 k = bucket_idx; !bucket_found && k < map->table.num_elems; k++) {
-                        const jak_hashtable_bucket *bucket = vec_get(&map->table, k, jak_hashtable_bucket);
+                        const jak_hashtable_bucket *bucket = JAK_VECTOR_GET(&map->table, k, jak_hashtable_bucket);
                         bucket_found = bucket->in_use_flag
                                        && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
                         actual_idx = k;
                 }
                 for (jak_u32 k = 0; !bucket_found && k < bucket_idx; k++) {
-                        const jak_hashtable_bucket *bucket = vec_get(&map->table, k, jak_hashtable_bucket);
+                        const jak_hashtable_bucket *bucket = JAK_VECTOR_GET(&map->table, k, jak_hashtable_bucket);
                         bucket_found = bucket->in_use_flag
                                        && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
                         actual_idx = k;
                 }
 
                 if (bucket_found) {
-                        jak_hashtable_bucket *bucket = vec_get(&map->table, actual_idx, jak_hashtable_bucket);
+                        jak_hashtable_bucket *bucket = JAK_VECTOR_GET(&map->table, actual_idx, jak_hashtable_bucket);
                         bucket->in_use_flag = false;
                         bucket->data_idx = 0;
                         bucket->num_probs = 0;
@@ -477,20 +477,20 @@ const void *jak_hashtable_get_value(jak_hashtable *map, const void *key)
         bool bucket_found = false;
 
         for (jak_u32 k = bucket_idx; !bucket_found && k < map->table.num_elems; k++) {
-                const jak_hashtable_bucket *bucket = vec_get(&map->table, k, jak_hashtable_bucket);
+                const jak_hashtable_bucket *bucket = JAK_VECTOR_GET(&map->table, k, jak_hashtable_bucket);
                 bucket_found =
                         bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
                 actual_idx = k;
         }
         for (jak_u32 k = 0; !bucket_found && k < bucket_idx; k++) {
-                const jak_hashtable_bucket *bucket = vec_get(&map->table, k, jak_hashtable_bucket);
+                const jak_hashtable_bucket *bucket = JAK_VECTOR_GET(&map->table, k, jak_hashtable_bucket);
                 bucket_found =
                         bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
                 actual_idx = k;
         }
 
         if (bucket_found) {
-                jak_hashtable_bucket *bucket = vec_get(&map->table, actual_idx, jak_hashtable_bucket);
+                jak_hashtable_bucket *bucket = JAK_VECTOR_GET(&map->table, actual_idx, jak_hashtable_bucket);
                 result = get_bucket_value(bucket, map);
         }
 
@@ -524,11 +524,11 @@ bool jak_hashtable_rehash(jak_hashtable *map)
 
         size_t new_cap = (cpy->key_data.cap_elems + 1) * 1.7f;
 
-        vec_grow_to(&map->key_data, new_cap);
-        vec_grow_to(&map->value_data, new_cap);
-        vec_grow_to(&map->table, new_cap);
-        vec_enlarge_size_to_capacity(&map->table);
-        vec_zero_memory(&map->table);
+        jak_vector_grow_to(&map->key_data, new_cap);
+        jak_vector_grow_to(&map->value_data, new_cap);
+        jak_vector_grow_to(&map->table, new_cap);
+        jak_vector_enlarge_size_to_capacity(&map->table);
+        jak_vector_zero_memory(&map->table);
 
         JAK_ASSERT(map->key_data.cap_elems == map->value_data.cap_elems
                    && map->value_data.cap_elems == map->table.cap_elems);
@@ -536,7 +536,7 @@ bool jak_hashtable_rehash(jak_hashtable *map)
                    && map->value_data.num_elems <= map->table.num_elems);
 
         for (size_t i = 0; i < cpy->table.num_elems; i++) {
-                jak_hashtable_bucket *bucket = vec_get(&cpy->table, i, jak_hashtable_bucket);
+                jak_hashtable_bucket *bucket = JAK_VECTOR_GET(&cpy->table, i, jak_hashtable_bucket);
                 if (bucket->in_use_flag) {
                         const void *old_key = get_bucket_key(bucket, cpy);
                         const void *old_value = get_bucket_value(bucket, cpy);

@@ -381,12 +381,12 @@ typedef struct __attribute__((packed)) jak_string_entry_header {
         jak_u32 jak_string_len;
 } jak_string_entry_header;
 
-void jak_int_read_prop_offsets(jak_archive_prop_offs *prop_offsets, struct jak_memfile *memfile, const jak_object_flags_u *flags);
-void jak_int_embedded_fixed_props_read(jak_fixed_prop *prop, struct jak_memfile *memfile);
-void jak_int_embedded_var_props_read(jak_var_prop *prop, struct jak_memfile *memfile);
-void jak_int_embedded_null_props_read(jak_null_prop *prop, struct jak_memfile *memfile);
-void jak_int_embedded_array_props_read(jak_array_prop *prop, struct jak_memfile *memfile);
-void jak_int_embedded_table_props_read(jak_table_prop *prop, struct jak_memfile *memfile);
+void jak_int_read_prop_offsets(jak_archive_prop_offs *prop_offsets, jak_memfile *memfile, const jak_object_flags_u *flags);
+void jak_int_embedded_fixed_props_read(jak_fixed_prop *prop, jak_memfile *memfile);
+void jak_int_embedded_var_props_read(jak_var_prop *prop, jak_memfile *memfile);
+void jak_int_embedded_null_props_read(jak_null_prop *prop, jak_memfile *memfile);
+void jak_int_embedded_array_props_read(jak_array_prop *prop, jak_memfile *memfile);
+void jak_int_embedded_table_props_read(jak_table_prop *prop, jak_memfile *memfile);
 jak_archive_field_e jak_int_get_value_type_of_char(char c);
 jak_archive_field_e jak_int_marker_to_field_type(char symbol);
 

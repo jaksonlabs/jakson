@@ -36,10 +36,10 @@ struct trace_stats {
         size_t num_realloc_calls;
         size_t num_free_calls;
         size_t total_size;
-        struct jak_vector ofType(size_t) *malloc_sizes;
+        jak_vector ofType(size_t) *malloc_sizes;
         jak_spinlock *spinlock;
         FILE *statistics_file;
-        timestamp_t startup_timestamp;
+        jak_timestamp startup_timestamp;
 };
 
 #define DEFINE_PAGE_WITH_SIZE(x)                                                                                       \
@@ -184,20 +184,20 @@ static void invoke_clone(jak_allocator *dst, const jak_allocator *self);
 
 #define LAZY_INIT()                                                                                                    \
 if (!global_trace_stats.malloc_sizes) {                                                                                \
-    global_trace_stats.malloc_sizes = malloc(sizeof(struct jak_vector));                                                    \
-    vec_create(global_trace_stats.malloc_sizes, &default_alloc, sizeof(size_t), 1000000);                       \
+    global_trace_stats.malloc_sizes = malloc(sizeof(jak_vector));                                                    \
+    jak_vector_create(global_trace_stats.malloc_sizes, &default_alloc, sizeof(size_t), 1000000);                       \
     global_trace_stats.spinlock = jak_alloc_malloc(&default_alloc, sizeof(jak_spinlock));                            \
     jak_spinlock_init(global_trace_stats.spinlock);                                                                 \
     global_trace_stats.statistics_file = fopen("trace-alloc-stats.csv", "a");                                          \
     fprintf(global_trace_stats.statistics_file,                                                                        \
             "system_time;num_alloc_calls;num_realloc_calls;num_free_calls;memory_in_use\n");                           \
-    global_trace_stats.startup_timestamp = time_now_wallclock();                                                \
+    global_trace_stats.startup_timestamp = jak_wallclock();                                                \
 }
 
 #define WRITE_STATS_FILE()                                                                                             \
 {                                                                                                                      \
     fprintf(global_trace_stats.statistics_file, "%" PRIu64 ";%zu;%zu;%zu;%zu\n",                                       \
-            time_now_wallclock() - global_trace_stats.startup_timestamp,                                        \
+            jak_wallclock() - global_trace_stats.startup_timestamp,                                        \
             global_trace_stats.num_malloc_calls,                                                                       \
             global_trace_stats.num_realloc_calls,                                                                      \
             global_trace_stats.num_free_calls,                                                                         \
@@ -237,14 +237,14 @@ static void *invoke_malloc(jak_allocator *self, size_t size)
 
         //DEBUG(TRACE_ALLOC_TAG, "malloc %zu B, call to malloc: %zu so far (allocator %p)", size,
         //      global_trace_stats.num_malloc_calls, self);
-        vec_push(global_trace_stats.malloc_sizes, &size, 1);
+        jak_vector_push(global_trace_stats.malloc_sizes, &size, 1);
 
-        size_t min_alloc_size = sort_get_min(vec_all(global_trace_stats.malloc_sizes, size_t),
-                                             vec_length(global_trace_stats.malloc_sizes));
-        size_t max_alloc_size = sort_get_max(vec_all(global_trace_stats.malloc_sizes, size_t),
-                                             vec_length(global_trace_stats.malloc_sizes));
-        double avg_alloc_size = sort_get_avg(vec_all(global_trace_stats.malloc_sizes, size_t),
-                                             vec_length(global_trace_stats.malloc_sizes));
+        size_t min_alloc_size = jak_sort_get_min(JAK_VECTOR_ALL(global_trace_stats.malloc_sizes, size_t),
+                                             jak_vector_length(global_trace_stats.malloc_sizes));
+        size_t max_alloc_size = jak_sort_get_max(JAK_VECTOR_ALL(global_trace_stats.malloc_sizes, size_t),
+                                             jak_vector_length(global_trace_stats.malloc_sizes));
+        double avg_alloc_size = jak_sort_get_avg(JAK_VECTOR_ALL(global_trace_stats.malloc_sizes, size_t),
+                                             jak_vector_length(global_trace_stats.malloc_sizes));
         global_trace_stats.total_size += size;
 
         JAK_UNUSED(min_alloc_size);

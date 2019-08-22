@@ -26,7 +26,7 @@
 
 JAK_BEGIN_DECL
 
-int jak_encode_async_create(struct jak_string_dict *dic, size_t capacity, size_t num_index_buckets, size_t approx_num_unique_strs, size_t num_threads, const jak_allocator *alloc);
+int jak_encode_async_create(jak_string_dict *dic, size_t capacity, size_t num_index_buckets, size_t approx_num_unique_strs, size_t num_threads, const jak_allocator *alloc);
 
 JAK_END_DECL
 

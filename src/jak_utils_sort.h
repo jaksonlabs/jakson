@@ -29,13 +29,13 @@
 
 JAK_BEGIN_DECL
 
-typedef bool (*less_eq_func_t)(const void *lhs, const void *rhs);
+typedef bool (*jak_less_eq_func_t)(const void *lhs, const void *rhs);
 
-typedef bool (*less_eq_wargs_func_t)(const void *lhs, const void *rhs, void *args);
+typedef bool (*jak_less_eq_wargs_func_t)(const void *lhs, const void *rhs, void *args);
 
-typedef bool (*eq_func_t)(const void *lhs, const void *rhs);
+typedef bool (*jak_eq_func_t)(const void *lhs, const void *rhs);
 
-typedef bool (*less_func_t)(const void *lhs, const void *rhs);
+typedef bool (*jak_less_func_t)(const void *lhs, const void *rhs);
 
 #define JAK_QSORT_INDICES_SWAP(x, y)                                                                                   \
 {                                                                                                                      \
@@ -80,22 +80,14 @@ typedef bool (*less_func_t)(const void *lhs, const void *rhs);
     (i + 1);                                                                                                           \
 })
 
-bool sort_qsort_indicies(size_t *indices, const void *base, size_t width, less_eq_func_t comp,
-                         size_t nelemns, jak_allocator *alloc);
+bool jak_sort_qsort_indicies(size_t *indices, const void *base, size_t width, jak_less_eq_func_t comp, size_t nelemns, jak_allocator *alloc);
+int jak_sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width, jak_less_eq_wargs_func_t comp, size_t nelemens, jak_allocator *alloc, void *args);
+size_t jak_sort_bsearch_indicies(const size_t *indicies, const void *base, size_t width, size_t nelemens, const void *neelde, jak_eq_func_t compEq, jak_less_func_t compLess);
 
-int sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width, less_eq_wargs_func_t comp,
-                              size_t nelemens, jak_allocator *alloc, void *args);
-
-size_t sort_bsearch_indicies(const size_t *indicies, const void *base, size_t width, size_t nelemens,
-                             const void *neelde, eq_func_t compEq, less_func_t compLess);
-
-size_t sort_get_min(const size_t *elements, size_t nelemens);
-
-size_t sort_get_max(const size_t *elements, size_t nelemens);
-
-double sort_get_sum(const size_t *elements, size_t nelemens);
-
-double sort_get_avg(const size_t *elements, size_t nelemens);
+size_t jak_sort_get_min(const size_t *elements, size_t nelemens);
+size_t jak_sort_get_max(const size_t *elements, size_t nelemens);
+double jak_sort_get_sum(const size_t *elements, size_t nelemens);
+double jak_sort_get_avg(const size_t *elements, size_t nelemens);
 
 JAK_END_DECL
 

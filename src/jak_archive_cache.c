@@ -37,7 +37,7 @@ struct lru_list {
 };
 
 struct jak_string_cache {
-        struct jak_vector ofType(struct lru_list) list_entries;
+        jak_vector ofType(struct lru_list) list_entries;
         jak_sid_cache_stats statistics;
         jak_archive_query query;
         jak_error err;
@@ -75,9 +75,9 @@ bool jak_string_id_cache_create_lru_ex(struct jak_string_cache **cache, jak_arch
         result->capacity = capacity;
 
         size_t num_buckets = JAK_MAX(1, capacity);
-        vec_create(&result->list_entries, NULL, sizeof(struct lru_list), num_buckets);
+        jak_vector_create(&result->list_entries, NULL, sizeof(struct lru_list), num_buckets);
         for (size_t i = 0; i < num_buckets; i++) {
-                struct lru_list *list = vec_new_and_get(&result->list_entries, struct lru_list);
+                struct lru_list *list = JAK_VECTOR_NEW_AND_GET(&result->list_entries, struct lru_list);
                 JAK_ZERO_MEMORY(list, sizeof(struct lru_list));
                 init_list(list);
         }
@@ -129,7 +129,7 @@ char *jak_string_id_cache_get(struct jak_string_cache *cache, jak_archive_field_
         JAK_ERROR_IF_NULL(cache)
         hash32_t id_hash = JAK_HASH_BERNSTEIN(sizeof(jak_archive_field_sid_t), &id);
         size_t bucket_pos = id_hash % cache->list_entries.num_elems;
-        struct lru_list *list = vec_get(&cache->list_entries, bucket_pos, struct lru_list);
+        struct lru_list *list = JAK_VECTOR_GET(&cache->list_entries, bucket_pos, struct lru_list);
         struct cache_entry *cursor = list->most_recent;
         while (cursor != NULL) {
                 if (id == cursor->id) {
@@ -170,7 +170,7 @@ bool jak_string_id_cache_drop(struct jak_string_cache *cache)
 {
         JAK_ERROR_IF_NULL(cache);
         for (size_t i = 0; i < cache->list_entries.num_elems; i++) {
-                struct lru_list *entry = vec_get(&cache->list_entries, i, struct lru_list);
+                struct lru_list *entry = JAK_VECTOR_GET(&cache->list_entries, i, struct lru_list);
                 for (size_t k = 0; k < sizeof(entry->entries) / sizeof(entry->entries[0]); k++) {
                         struct cache_entry *it = &entry->entries[k];
                         if (it->string) {
@@ -178,7 +178,7 @@ bool jak_string_id_cache_drop(struct jak_string_cache *cache)
                         }
                 }
         }
-        vec_drop(&cache->list_entries);
+        jak_vector_drop(&cache->list_entries);
         return true;
 }
 

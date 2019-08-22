@@ -44,8 +44,8 @@ bool jak_pack_none_drop(jak_packer *self)
         return true;
 }
 
-bool jak_pack_none_write_extra(jak_packer *self, struct jak_memfile *dst,
-                           const struct jak_vector ofType (const char *) *strings)
+bool jak_pack_none_write_extra(jak_packer *self, jak_memfile *dst,
+                           const jak_vector ofType (const char *) *strings)
 {
         JAK_CHECK_TAG(self->tag, JAK_PACK_NONE);
 
@@ -67,7 +67,7 @@ bool jak_pack_none_read_extra(jak_packer *self, FILE *src, size_t nbytes)
         return true;
 }
 
-bool jak_pack_none_print_extra(jak_packer *self, FILE *file, struct jak_memfile *src)
+bool jak_pack_none_print_extra(jak_packer *self, FILE *file, jak_memfile *src)
 {
         JAK_CHECK_TAG(self->tag, JAK_PACK_NONE);
 
@@ -78,7 +78,7 @@ bool jak_pack_none_print_extra(jak_packer *self, FILE *file, struct jak_memfile 
         return true;
 }
 
-bool jak_pack_none_print_encoded_string(jak_packer *self, FILE *file, struct jak_memfile *src,
+bool jak_pack_none_print_encoded_string(jak_packer *self, FILE *file, jak_memfile *src,
                                     jak_u32 decompressed_strlen)
 {
         JAK_CHECK_TAG(self->tag, JAK_PACK_NONE);
@@ -98,7 +98,7 @@ bool jak_pack_none_print_encoded_string(jak_packer *self, FILE *file, struct jak
         return true;
 }
 
-bool jak_pack_none_encode_string(jak_packer *self, struct jak_memfile *dst, jak_error *err,
+bool jak_pack_none_encode_string(jak_packer *self, jak_memfile *dst, jak_error *err,
                              const char *string)
 {
         JAK_CHECK_TAG(self->tag, JAK_PACK_NONE);
@@ -107,7 +107,7 @@ bool jak_pack_none_encode_string(jak_packer *self, struct jak_memfile *dst, jak_
 
         jak_u32 jak_string_length = strlen(string);
 
-        JAK_SUCCESS_OR_JUMP(memfile_write(dst, string, jak_string_length), error_handling)
+        JAK_SUCCESS_OR_JUMP(jak_memfile_write(dst, string, jak_string_length), error_handling)
 
         return true;
 

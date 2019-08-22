@@ -47,9 +47,9 @@ typedef struct jak_hashtable_bucket {
  * lock implementation.
  */
 typedef struct jak_hashtable {
-        struct jak_vector key_data;
-        struct jak_vector value_data;
-        struct jak_vector ofType(jak_hashtable_bucket) table;
+        jak_vector key_data;
+        jak_vector value_data;
+        jak_vector ofType(jak_hashtable_bucket) table;
         jak_spinlock lock;
         jak_u32 size;
         jak_error err;

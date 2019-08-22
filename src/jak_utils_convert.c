@@ -19,7 +19,7 @@
 
 #include <jak_utils_convert.h>
 
-jak_i64 convert_atoi64(const char *string)
+jak_i64 jak_convert_atoi64(const char *string)
 {
         jak_i64 number;
         char character;
@@ -33,7 +33,7 @@ jak_i64 convert_atoi64(const char *string)
         }
 }
 
-jak_u64 convert_atoiu64(const char *string)
+jak_u64 jak_convert_atoiu64(const char *string)
 {
         jak_u64 number;
         char character;

@@ -35,11 +35,11 @@ bool jak_carbon_array_it_update_in_place_##type_name(jak_carbon_array_it *it, ja
         jak_offset_t datum = 0;                                                                                                \
         JAK_ERROR_IF_NULL(it);                                                                                             \
         if (JAK_LIKELY(it->field_access.it_field_type == field_type)) {                                                    \
-                memfile_save_position(&it->memfile);                                                                   \
+                jak_memfile_save_position(&it->memfile);                                                                   \
                 jak_carbon_int_array_it_offset(&datum, it);                                                                 \
-                memfile_seek(&it->memfile, datum + sizeof(jak_u8));                                                        \
-                memfile_write(&it->memfile, &value, sizeof(jak_##type_name));                                                \
-                memfile_restore_position(&it->memfile);                                                                \
+                jak_memfile_seek(&it->memfile, datum + sizeof(jak_u8));                                                        \
+                jak_memfile_write(&it->memfile, &value, sizeof(jak_##type_name));                                                \
+                jak_memfile_restore_position(&it->memfile);                                                                \
                 return true;                                                                                           \
         } else {                                                                                                       \
                 JAK_ERROR(&it->err, JAK_ERR_TYPEMISMATCH);                                                                 \
@@ -69,7 +69,7 @@ static bool update_in_place_constant(jak_carbon_array_it *it, jak_carbon_constan
 {
         JAK_ERROR_IF_NULL(it);
 
-        memfile_save_position(&it->memfile);
+        jak_memfile_save_position(&it->memfile);
 
         if (jak_carbon_field_type_is_constant(it->field_access.it_field_type)) {
                 jak_u8 value;
@@ -88,8 +88,8 @@ static bool update_in_place_constant(jak_carbon_array_it *it, jak_carbon_constan
                 }
                 jak_offset_t datum = 0;
                 jak_carbon_int_array_it_offset(&datum, it);
-                memfile_seek(&it->memfile, datum);
-                memfile_write(&it->memfile, &value, sizeof(jak_u8));
+                jak_memfile_seek(&it->memfile, datum);
+                jak_memfile_write(&it->memfile, &value, sizeof(jak_u8));
         } else {
                 jak_carbon_insert ins;
                 jak_carbon_array_it_remove(it);
@@ -112,7 +112,7 @@ static bool update_in_place_constant(jak_carbon_array_it *it, jak_carbon_constan
                 jak_carbon_array_it_insert_end(&ins);
         }
 
-        memfile_restore_position(&it->memfile);
+        jak_memfile_restore_position(&it->memfile);
         return true;
 }
 
@@ -131,7 +131,7 @@ bool jak_carbon_array_it_update_in_place_null(jak_carbon_array_it *it)
         return update_in_place_constant(it, JAK_CARBON_CONSTANT_NULL);
 }
 
-bool jak_carbon_array_it_create(jak_carbon_array_it *it, struct jak_memfile *memfile, jak_error *err,
+bool jak_carbon_array_it_create(jak_carbon_array_it *it, jak_memfile *memfile, jak_error *err,
                             jak_offset_t payload_start)
 {
         JAK_ERROR_IF_NULL(it);
@@ -147,13 +147,13 @@ bool jak_carbon_array_it_create(jak_carbon_array_it *it, struct jak_memfile *mem
 
         jak_error_init(&it->err);
         jak_spinlock_init(&it->lock);
-        vec_create(&it->history, NULL, sizeof(jak_offset_t), 40);
-        memfile_open(&it->memfile, memfile->memblock, memfile->mode);
-        memfile_seek(&it->memfile, payload_start);
+        jak_vector_create(&it->history, NULL, sizeof(jak_offset_t), 40);
+        jak_memfile_open(&it->memfile, memfile->memblock, memfile->mode);
+        jak_memfile_seek(&it->memfile, payload_start);
 
-        JAK_ERROR_IF(memfile_remain_size(&it->memfile) < sizeof(jak_u8), err, JAK_ERR_CORRUPTED);
+        JAK_ERROR_IF(jak_memfile_remain_size(&it->memfile) < sizeof(jak_u8), err, JAK_ERR_CORRUPTED);
 
-        jak_u8 marker = *memfile_read(&it->memfile, sizeof(jak_u8));
+        jak_u8 marker = *jak_memfile_read(&it->memfile, sizeof(jak_u8));
         JAK_ERROR_IF_WDETAILS(marker != JAK_CARBON_MARKER_ARRAY_BEGIN, err, JAK_ERR_ILLEGALOP,
                               "array begin marker ('[') not found");
 
@@ -176,13 +176,13 @@ bool jak_carbon_array_it_copy(jak_carbon_array_it *dst, jak_carbon_array_it *src
 
 bool jak_carbon_array_it_clone(jak_carbon_array_it *dst, jak_carbon_array_it *src)
 {
-        memfile_clone(&dst->memfile, &src->memfile);
+        jak_memfile_clone(&dst->memfile, &src->memfile);
         dst->payload_start = src->payload_start;
         jak_spinlock_init(&dst->lock);
         jak_error_cpy(&dst->err, &src->err);
         dst->mod_size = src->mod_size;
         dst->array_end_reached = src->array_end_reached;
-        vec_cpy(&dst->history, &src->history);
+        jak_vector_cpy(&dst->history, &src->history);
         jak_carbon_int_field_access_clone(&dst->field_access, &src->field_access);
         dst->field_offset = src->field_offset;
         return true;
@@ -220,7 +220,7 @@ bool jak_carbon_array_it_drop(jak_carbon_array_it *it)
 {
         jak_carbon_int_field_auto_close(&it->field_access);
         jak_carbon_int_field_access_drop(&it->field_access);
-        vec_drop(&it->history);
+        jak_vector_drop(&it->history);
         return true;
 }
 
@@ -247,17 +247,17 @@ bool jak_carbon_array_it_unlock(jak_carbon_array_it *it)
 bool jak_carbon_array_it_rewind(jak_carbon_array_it *it)
 {
         JAK_ERROR_IF_NULL(it);
-        JAK_ERROR_IF(it->payload_start >= memfile_size(&it->memfile), &it->err, JAK_ERR_OUTOFBOUNDS);
+        JAK_ERROR_IF(it->payload_start >= jak_memfile_size(&it->memfile), &it->err, JAK_ERR_OUTOFBOUNDS);
         jak_carbon_int_history_clear(&it->history);
-        return memfile_seek(&it->memfile, it->payload_start);
+        return jak_memfile_seek(&it->memfile, it->payload_start);
 }
 
 static void auto_adjust_pos_after_mod(jak_carbon_array_it *it)
 {
         if (jak_carbon_int_field_access_object_it_opened(&it->field_access)) {
-                memfile_skip(&it->memfile, it->field_access.nested_object_it->mod_size);
+                jak_memfile_skip(&it->memfile, it->field_access.nested_object_it->mod_size);
         } else if (jak_carbon_int_field_access_array_it_opened(&it->field_access)) {
-                //memfile_skip(&it->memfile, it->field_access.nested_array_it->mod_size);
+                //jak_memfile_skip(&it->memfile, it->field_access.nested_array_it->mod_size);
                 //abort(); // TODO: implement!
         }
 }
@@ -288,7 +288,7 @@ bool jak_carbon_array_it_next(jak_carbon_array_it *it)
         bool is_empty_slot = true;
 
         auto_adjust_pos_after_mod(it);
-        jak_offset_t last_off = memfile_tell(&it->memfile);
+        jak_offset_t last_off = jak_memfile_tell(&it->memfile);
 
         if (jak_carbon_int_array_it_next(&is_empty_slot, &it->array_end_reached, it)) {
                 jak_carbon_int_history_push(&it->history, last_off);
@@ -298,11 +298,11 @@ bool jak_carbon_array_it_next(jak_carbon_array_it *it)
                 if (!it->array_end_reached) {
                         JAK_ERROR_IF(!is_empty_slot, &it->err, JAK_ERR_CORRUPTED);
 
-                        while (*memfile_peek(&it->memfile, 1) == 0) {
-                                memfile_skip(&it->memfile, 1);
+                        while (*jak_memfile_peek(&it->memfile, 1) == 0) {
+                                jak_memfile_skip(&it->memfile, 1);
                         }
                 }
-                JAK_ASSERT(*memfile_peek(&it->memfile, sizeof(char)) == JAK_CARBON_MARKER_ARRAY_END);
+                JAK_ASSERT(*jak_memfile_peek(&it->memfile, sizeof(char)) == JAK_CARBON_MARKER_ARRAY_END);
                 jak_carbon_int_field_auto_close(&it->field_access);
                 return false;
         }
@@ -313,7 +313,7 @@ bool jak_carbon_array_it_prev(jak_carbon_array_it *it)
         JAK_ERROR_IF_NULL(it);
         if (jak_carbon_int_history_has(&it->history)) {
                 jak_offset_t prev_off = jak_carbon_int_history_pop(&it->history);
-                memfile_seek(&it->memfile, prev_off);
+                jak_memfile_seek(&it->memfile, prev_off);
                 return jak_carbon_int_array_it_refresh(NULL, NULL, it);
         } else {
                 return false;
@@ -323,7 +323,7 @@ bool jak_carbon_array_it_prev(jak_carbon_array_it *it)
 jak_offset_t jak_carbon_array_it_memfilepos(jak_carbon_array_it *it)
 {
         if (JAK_LIKELY(it != NULL)) {
-                return memfile_tell(&it->memfile);
+                return jak_memfile_tell(&it->memfile);
         } else {
                 JAK_ERROR(&it->err, JAK_ERR_NULLPTR);
                 return 0;
@@ -351,8 +351,8 @@ bool jak_carbon_array_it_fast_forward(jak_carbon_array_it *it)
         JAK_ERROR_IF_NULL(it);
         while (jak_carbon_array_it_next(it)) {}
 
-        JAK_ASSERT(*memfile_peek(&it->memfile, sizeof(char)) == JAK_CARBON_MARKER_ARRAY_END);
-        memfile_skip(&it->memfile, sizeof(char));
+        JAK_ASSERT(*jak_memfile_peek(&it->memfile, sizeof(char)) == JAK_CARBON_MARKER_ARRAY_END);
+        jak_memfile_skip(&it->memfile, sizeof(char));
         return true;
 }
 
@@ -460,7 +460,7 @@ bool jak_carbon_array_it_remove(jak_carbon_array_it *it)
         jak_carbon_field_type_e type;
         if (jak_carbon_array_it_field_type(&type, it)) {
                 jak_offset_t prev_off = jak_carbon_int_history_pop(&it->history);
-                memfile_seek(&it->memfile, prev_off);
+                jak_memfile_seek(&it->memfile, prev_off);
                 if (jak_carbon_int_field_remove(&it->memfile, &it->err, type)) {
                         jak_carbon_int_array_it_refresh(NULL, NULL, it);
                         return true;

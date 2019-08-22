@@ -19,7 +19,7 @@
 
 #include <jak_time.h>
 
-timestamp_t time_now_wallclock()
+jak_timestamp jak_wallclock()
 {
         long ms;
         time_t s;

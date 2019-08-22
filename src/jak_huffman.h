@@ -30,7 +30,7 @@
 JAK_BEGIN_DECL
 
 typedef struct jak_huffman {
-        struct jak_vector ofType(jak_pack_huffman_entry) table;
+        jak_vector ofType(jak_pack_huffman_entry) table;
         jak_error err;
 } jak_huffman;
 
@@ -55,12 +55,12 @@ bool jak_coding_huffman_create(jak_huffman *dic);
 bool jak_coding_huffman_cpy(jak_huffman *dst, jak_huffman *src);
 bool jak_coding_huffman_drop(jak_huffman *dic);
 
-bool jak_coding_huffman_build(jak_huffman *encoder, const jak_string_vector_t *strings);
+bool jak_coding_huffman_build(jak_huffman *encoder, const jak_string_jak_vector_t *strings);
 bool jak_coding_huffman_get_error(jak_error *err, const jak_huffman *dic);
-bool jak_coding_huffman_encode(struct jak_memfile *file, jak_huffman *dic, const char *string);
-bool jak_coding_huffman_read_string(jak_pack_huffman_str_info *info, struct jak_memfile *src);
-bool jak_coding_huffman_serialize(struct jak_memfile *file, const jak_huffman *dic, char marker_symbol);
-bool jak_coding_huffman_read_entry(jak_pack_huffman_info *info, struct jak_memfile *file, char marker_symbol);
+bool jak_coding_huffman_encode(jak_memfile *file, jak_huffman *dic, const char *string);
+bool jak_coding_huffman_read_string(jak_pack_huffman_str_info *info, jak_memfile *src);
+bool jak_coding_huffman_serialize(jak_memfile *file, const jak_huffman *dic, char marker_symbol);
+bool jak_coding_huffman_read_entry(jak_pack_huffman_info *info, jak_memfile *file, char marker_symbol);
 
 JAK_END_DECL
 

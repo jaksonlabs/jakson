@@ -26,24 +26,24 @@
 #include <jak_slicelist.h>
 #include <jak_hash.h>
 
-#define STRING_DIC_ASYNC_TAG "strdic_async"
+#define STRING_DIC_ASYNC_TAG "jak_string_dict_async"
 
 #define HASH_FUNCTION                  JAK_HASH_SAX
 
 struct carrier {
-        struct jak_string_dict local_dictionary;
+        jak_string_dict local_dictionary;
         pthread_t thread;
         size_t id;
 };
 
 struct async_extra {
-        struct jak_vector ofType(carrier) carriers;
-        struct jak_vector ofType(struct carrier *) carrier_mapping;
+        jak_vector ofType(carrier) carriers;
+        jak_vector ofType(struct carrier *) carrier_mapping;
         jak_spinlock lock;
 };
 
 struct parallel_insert_arg {
-        struct jak_vector ofType(char *) strings;
+        jak_vector ofType(char *) strings;
         jak_archive_field_sid_t *out;
         struct carrier *carrier;
         bool enable_write_out;
@@ -52,7 +52,7 @@ struct parallel_insert_arg {
 };
 
 struct parallel_remove_arg {
-        struct jak_vector ofType(jak_archive_field_sid_t) *local_ids;
+        jak_vector ofType(jak_archive_field_sid_t) *local_ids;
         struct carrier *carrier;
         int result;
         bool did_work;
@@ -63,13 +63,13 @@ struct parallel_locate_arg {
         jak_archive_field_sid_t *ids_out;
         bool *found_mask_out;
         size_t num_not_found_out;
-        struct jak_vector ofType(char *) keys_in;
+        jak_vector ofType(char *) keys_in;
         int result;
         bool did_work;
 };
 
 struct parallel_extract_arg {
-        struct jak_vector ofType(jak_archive_field_sid_t) local_ids_in;
+        jak_vector ofType(jak_archive_field_sid_t) local_ids_in;
         char **strings_out;
         struct carrier *carrier;
         bool did_work;
@@ -87,56 +87,56 @@ struct parallel_extract_arg {
 #define GET_jak_string_id_t(globalId)                                                                               \
     ((~((jak_archive_field_sid_t) 0)) >> 10 & global_jak_string_id);
 
-static bool this_drop(struct jak_string_dict *self);
+static bool this_drop(jak_string_dict *self);
 
 static bool
-this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *const *strings, size_t num_strings,
+this_insert(jak_string_dict *self, jak_archive_field_sid_t **out, char *const *strings, size_t num_strings,
             size_t __num_threads);
 
-static bool this_remove(struct jak_string_dict *self, jak_archive_field_sid_t *strings, size_t num_strings);
+static bool this_remove(jak_string_dict *self, jak_archive_field_sid_t *strings, size_t num_strings);
 
 static bool
-this_locate_safe(struct jak_string_dict *self, jak_archive_field_sid_t **out, bool **found_mask, size_t *num_not_found,
+this_locate_safe(jak_string_dict *self, jak_archive_field_sid_t **out, bool **found_mask, size_t *num_not_found,
                  char *const *keys, size_t num_keys);
 
 static bool
-this_locate_fast(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *const *keys, size_t num_keys);
+this_locate_fast(jak_string_dict *self, jak_archive_field_sid_t **out, char *const *keys, size_t num_keys);
 
-static char **this_extract(struct jak_string_dict *self, const jak_archive_field_sid_t *ids, size_t num_ids);
+static char **this_extract(jak_string_dict *self, const jak_archive_field_sid_t *ids, size_t num_ids);
 
-static bool this_free(struct jak_string_dict *self, void *ptr);
+static bool this_free(jak_string_dict *self, void *ptr);
 
-static bool this_num_distinct(struct jak_string_dict *self, size_t *num);
+static bool this_num_distinct(jak_string_dict *self, size_t *num);
 
-static bool this_get_contents(struct jak_string_dict *self, struct jak_vector ofType (char *) *strings,
-                              struct jak_vector ofType(jak_archive_field_sid_t) *jak_string_ids);
+static bool this_get_contents(jak_string_dict *self, jak_vector ofType (char *) *strings,
+                              jak_vector ofType(jak_archive_field_sid_t) *jak_string_ids);
 
-static bool this_reset_counters(struct jak_string_dict *self);
+static bool this_reset_counters(jak_string_dict *self);
 
-static bool this_counters(struct jak_string_dict *self, jak_str_hash_counters *counters);
+static bool this_counters(jak_string_dict *self, jak_str_hash_counters *counters);
 
-static bool this_lock(struct jak_string_dict *self);
+static bool this_lock(jak_string_dict *self);
 
-static bool this_unlock(struct jak_string_dict *self);
+static bool this_unlock(jak_string_dict *self);
 
-static bool this_create_extra(struct jak_string_dict *self, size_t capacity, size_t num_index_buckets,
+static bool this_create_extra(jak_string_dict *self, size_t capacity, size_t num_index_buckets,
                               size_t approx_num_unique_str, size_t num_threads);
 
-static bool this_setup_carriers(struct jak_string_dict *self, size_t capacity, size_t num_index_buckets,
+static bool this_setup_carriers(jak_string_dict *self, size_t capacity, size_t num_index_buckets,
                                 size_t approx_num_unique_str, size_t num_threads);
 
 #define THIS_EXTRAS(self)                                                                                              \
 ({                                                                                                                     \
-    JAK_CHECK_TAG(self->tag, ASYNC);                                                             \
+    JAK_CHECK_TAG(self->tag, JAK_ASYNC);                                                             \
     (struct async_extra *) self->extra;                                                                                       \
 })
 
-int jak_encode_async_create(struct jak_string_dict *dic, size_t capacity, size_t num_index_buckets,
+int jak_encode_async_create(jak_string_dict *dic, size_t capacity, size_t num_index_buckets,
                         size_t approx_num_unique_strs, size_t num_threads, const jak_allocator *alloc)
 {
         JAK_CHECK_SUCCESS(jak_alloc_this_or_std(&dic->alloc, alloc));
 
-        dic->tag = ASYNC;
+        dic->tag = JAK_ASYNC;
         dic->drop = this_drop;
         dic->insert = this_insert;
         dic->remove = this_remove;
@@ -153,7 +153,7 @@ int jak_encode_async_create(struct jak_string_dict *dic, size_t capacity, size_t
         return true;
 }
 
-static bool this_create_extra(struct jak_string_dict *self, size_t capacity, size_t num_index_buckets,
+static bool this_create_extra(jak_string_dict *self, size_t capacity, size_t num_index_buckets,
                               size_t approx_num_unique_str, size_t num_threads)
 {
         JAK_ASSERT(self);
@@ -161,23 +161,23 @@ static bool this_create_extra(struct jak_string_dict *self, size_t capacity, siz
         self->extra = jak_alloc_malloc(&self->alloc, sizeof(struct async_extra));
         struct async_extra *extra = THIS_EXTRAS(self);
         jak_spinlock_init(&extra->lock);
-        vec_create(&extra->carriers, &self->alloc, sizeof(struct carrier), num_threads);
+        jak_vector_create(&extra->carriers, &self->alloc, sizeof(struct carrier), num_threads);
         this_setup_carriers(self, capacity, num_index_buckets, approx_num_unique_str, num_threads);
-        vec_create(&extra->carrier_mapping, &self->alloc, sizeof(struct carrier *), capacity);
+        jak_vector_create(&extra->carrier_mapping, &self->alloc, sizeof(struct carrier *), capacity);
 
         return true;
 }
 
-static bool this_drop(struct jak_string_dict *self)
+static bool this_drop(jak_string_dict *self)
 {
-        JAK_CHECK_TAG(self->tag, ASYNC);
+        JAK_CHECK_TAG(self->tag, JAK_ASYNC);
         struct async_extra *extra = THIS_EXTRAS(self);
         for (size_t i = 0; i < extra->carriers.num_elems; i++) {
-                struct carrier *carrier = vec_get(&extra->carriers, i, struct carrier);
-                strdic_drop(&carrier->local_dictionary);
+                struct carrier *carrier = JAK_VECTOR_GET(&extra->carriers, i, struct carrier);
+                jak_string_dict_drop(&carrier->local_dictionary);
         }
-        JAK_CHECK_SUCCESS(vec_drop(&extra->carriers));
-        JAK_CHECK_SUCCESS(vec_drop(&extra->carrier_mapping));
+        JAK_CHECK_SUCCESS(jak_vector_drop(&extra->carriers));
+        JAK_CHECK_SUCCESS(jak_vector_drop(&extra->carrier_mapping));
         JAK_CHECK_SUCCESS(jak_alloc_free(&self->alloc, extra));
         return true;
 }
@@ -185,17 +185,17 @@ static bool this_drop(struct jak_string_dict *self)
 void *parallel_remove_function(void *args)
 {
         struct parallel_remove_arg *carrier_arg = (struct parallel_remove_arg *) args;
-        jak_archive_field_sid_t len = vec_length(carrier_arg->local_ids);
+        jak_archive_field_sid_t len = jak_vector_length(carrier_arg->local_ids);
         carrier_arg->did_work = len > 0;
 
         JAK_DEBUG(STRING_DIC_ASYNC_TAG,
                   "thread %zu spawned for remove task (%zu elements)",
                   carrier_arg->carrier->id,
-                  vec_length(carrier_arg->local_ids));
+                  jak_vector_length(carrier_arg->local_ids));
         if (len > 0) {
-                struct jak_string_dict *dic = &carrier_arg->carrier->local_dictionary;
-                jak_archive_field_sid_t *ids = vec_all(carrier_arg->local_ids, jak_archive_field_sid_t);
-                carrier_arg->result = strdic_remove(dic, ids, len);
+                jak_string_dict *dic = &carrier_arg->carrier->local_dictionary;
+                jak_archive_field_sid_t *ids = JAK_VECTOR_ALL(carrier_arg->local_ids, jak_archive_field_sid_t);
+                carrier_arg->result = jak_string_dict_remove(dic, ids, len);
                 JAK_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu task done", carrier_arg->carrier->id);
         } else {
                 carrier_arg->result = true;
@@ -214,19 +214,19 @@ void *parallel_insert_function(void *args)
         JAK_DEBUG(STRING_DIC_ASYNC_TAG,
                   "thread %zu spawned for insert task (%zu elements)",
                   this_args->carrier->id,
-                  vec_length(&this_args->strings));
+                  jak_vector_length(&this_args->strings));
 
         if (this_args->did_work) {
                 JAK_TRACE(STRING_DIC_ASYNC_TAG,
                           "thread %zu starts insertion of %zu strings",
                           this_args->carrier->id,
-                          vec_length(&this_args->strings));
-                char **data = (char **) vec_data(&this_args->strings);
+                          jak_vector_length(&this_args->strings));
+                char **data = (char **) jak_vector_data(&this_args->strings);
 
-                int status = strdic_insert(&this_args->carrier->local_dictionary,
+                int status = jak_string_dict_insert(&this_args->carrier->local_dictionary,
                                            this_args->enable_write_out ? &this_args->out : NULL,
                                            data,
-                                           vec_length(&this_args->strings),
+                                           jak_vector_length(&this_args->strings),
                                            this_args->insert_num_threads);
 
                 /** internal JAK_ERROR during thread-local string dictionary building process */
@@ -242,7 +242,7 @@ void *parallel_insert_function(void *args)
 void *parallel_locate_safe_function(void *args)
 {
         struct parallel_locate_arg *restrict this_args = (struct parallel_locate_arg *restrict) args;
-        this_args->did_work = vec_length(&this_args->keys_in) > 0;
+        this_args->did_work = jak_vector_length(&this_args->keys_in) > 0;
 
         JAK_TRACE(STRING_DIC_ASYNC_TAG,
                   "thread-local 'locate' function invoked for thread %zu...",
@@ -251,15 +251,15 @@ void *parallel_locate_safe_function(void *args)
         JAK_DEBUG(STRING_DIC_ASYNC_TAG,
                   "thread %zu spawned for locate (safe) task (%zu elements)",
                   this_args->carrier->id,
-                  vec_length(&this_args->keys_in));
+                  jak_vector_length(&this_args->keys_in));
 
         if (this_args->did_work) {
-                this_args->result = strdic_locate_safe(&this_args->ids_out,
+                this_args->result = jak_string_dict_locate_safe(&this_args->ids_out,
                                                        &this_args->found_mask_out,
                                                        &this_args->num_not_found_out,
                                                        &this_args->carrier->local_dictionary,
-                                                       vec_all(&this_args->keys_in, char *),
-                                                       vec_length(&this_args->keys_in));
+                                                       JAK_VECTOR_ALL(&this_args->keys_in, char *),
+                                                       jak_vector_length(&this_args->keys_in));
 
                 JAK_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
         } else {
@@ -272,17 +272,17 @@ void *parallel_locate_safe_function(void *args)
 void *parallel_extract_function(void *args)
 {
         struct parallel_extract_arg *restrict this_args = (struct parallel_extract_arg *restrict) args;
-        this_args->did_work = vec_length(&this_args->local_ids_in) > 0;
+        this_args->did_work = jak_vector_length(&this_args->local_ids_in) > 0;
 
         JAK_DEBUG(STRING_DIC_ASYNC_TAG,
                   "thread %zu spawned for extract task (%zu elements)",
                   this_args->carrier->id,
-                  vec_length(&this_args->local_ids_in));
+                  jak_vector_length(&this_args->local_ids_in));
 
         if (this_args->did_work) {
-                this_args->strings_out = strdic_extract(&this_args->carrier->local_dictionary,
-                                                        vec_all(&this_args->local_ids_in, jak_archive_field_sid_t),
-                                                        vec_length(&this_args->local_ids_in));
+                this_args->strings_out = jak_string_dict_extract(&this_args->carrier->local_dictionary,
+                                                        JAK_VECTOR_ALL(&this_args->local_ids_in, jak_archive_field_sid_t),
+                                                        jak_vector_length(&this_args->local_ids_in));
                 JAK_DEBUG(STRING_DIC_ASYNC_TAG, "thread %zu done", this_args->carrier->id);
         } else {
                 JAK_WARN(STRING_DIC_ASYNC_TAG, "thread %zu had nothing to do", this_args->carrier->id);
@@ -291,18 +291,18 @@ void *parallel_extract_function(void *args)
         return NULL;
 }
 
-static void synchronize(struct jak_vector ofType(carrier) *carriers, size_t num_threads)
+static void synchronize(jak_vector ofType(carrier) *carriers, size_t num_threads)
 {
         JAK_DEBUG(STRING_DIC_ASYNC_TAG, "barrier installed for %d threads", num_threads);
 
-        timestamp_t begin = time_now_wallclock();
+        jak_timestamp begin = jak_wallclock();
         for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
-                volatile struct carrier *carrier = vec_get(carriers, thread_id, struct carrier);
+                volatile struct carrier *carrier = JAK_VECTOR_GET(carriers, thread_id, struct carrier);
                 pthread_join(carrier->thread, NULL);
                 JAK_DEBUG(STRING_DIC_ASYNC_TAG, "thread %d joined", carrier->id);
         }
-        timestamp_t end = time_now_wallclock();
-        timestamp_t duration = (end - begin);
+        jak_timestamp end = jak_wallclock();
+        jak_timestamp duration = (end - begin);
         JAK_UNUSED(duration);
 
         JAK_DEBUG(STRING_DIC_ASYNC_TAG,
@@ -382,20 +382,20 @@ static void compute_thread_assignment(atomic_uint_fast16_t *str_carrier_mapping,
 }
 
 static bool
-this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *const *strings, size_t num_strings,
+this_insert(jak_string_dict *self, jak_archive_field_sid_t **out, char *const *strings, size_t num_strings,
             size_t __num_threads)
 {
-        timestamp_t begin = time_now_wallclock();
+        jak_timestamp begin = jak_wallclock();
         JAK_INFO(STRING_DIC_ASYNC_TAG, "insert operation invoked: %zu strings in total", num_strings)
 
-        JAK_CHECK_TAG(self->tag, ASYNC);
+        JAK_CHECK_TAG(self->tag, JAK_ASYNC);
         /** parameter 'num_threads' must be set to 0 for async dictionary */
         JAK_ERROR_PRINT_AND_DIE_IF(__num_threads != 0, JAK_ERR_INTERNALERR);
 
         this_lock(self);
 
         struct async_extra *extra = THIS_EXTRAS(self);
-        uint_fast16_t num_threads = vec_length(&extra->carriers);
+        uint_fast16_t num_threads = jak_vector_length(&extra->carriers);
 
         atomic_uint_fast16_t *str_carrier_mapping;
         size_t *str_carrier_idx_mapping;
@@ -408,8 +408,8 @@ this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *c
                                  num_strings,
                                  num_threads);
 
-        struct jak_vector ofType(struct parallel_insert_arg *) carrier_args;
-        vec_create(&carrier_args, &self->alloc, sizeof(struct parallel_insert_arg *), num_threads);
+        jak_vector ofType(struct parallel_insert_arg *) carrier_args;
+        jak_vector_create(&carrier_args, &self->alloc, sizeof(struct parallel_insert_arg *), num_threads);
 
         /** compute which carrier is responsible for which string */
         compute_thread_assignment(str_carrier_mapping, carrier_num_strings, strings, num_strings, num_threads);
@@ -417,14 +417,14 @@ this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *c
         /** prepare to move string subsets to carriers */
         for (uint_fast16_t i = 0; i < num_threads; i++) {
                 struct parallel_insert_arg *entry = jak_alloc_malloc(&self->alloc, sizeof(struct parallel_insert_arg));
-                entry->carrier = vec_get(&extra->carriers, i, struct carrier);
+                entry->carrier = JAK_VECTOR_GET(&extra->carriers, i, struct carrier);
                 entry->insert_num_threads = num_threads;
 
-                vec_create(&entry->strings, &self->alloc, sizeof(char *), JAK_MAX(1, carrier_num_strings[i]));
-                vec_push(&carrier_args, &entry, 1);
+                jak_vector_create(&entry->strings, &self->alloc, sizeof(char *), JAK_MAX(1, carrier_num_strings[i]));
+                jak_vector_push(&carrier_args, &entry, 1);
                 JAK_ASSERT (entry->strings.base != NULL);
 
-                struct parallel_insert_arg *carrier_arg = *vec_get(&carrier_args, i, struct parallel_insert_arg *);
+                struct parallel_insert_arg *carrier_arg = *JAK_VECTOR_GET(&carrier_args, i, struct parallel_insert_arg *);
                 carrier_arg->out = NULL;
         }
 
@@ -433,13 +433,13 @@ this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *c
         for (size_t i = 0; i < num_strings; i++) {
                 uint_fast16_t thread_id = str_carrier_mapping[i];
                 struct parallel_insert_arg
-                        *carrier_arg = *vec_get(&carrier_args, thread_id, struct parallel_insert_arg *);
+                        *carrier_arg = *JAK_VECTOR_GET(&carrier_args, thread_id, struct parallel_insert_arg *);
                 carrier_arg->enable_write_out = out != NULL;
 
                 /** store local index of string i inside the thread */
-                str_carrier_idx_mapping[i] = vec_length(&carrier_arg->strings);
+                str_carrier_idx_mapping[i] = jak_vector_length(&carrier_arg->strings);
 
-                vec_push(&carrier_arg->strings, &strings[i], 1);
+                jak_vector_push(&carrier_arg->strings, &strings[i], 1);
         }
 
 
@@ -447,8 +447,8 @@ this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *c
         JAK_TRACE(STRING_DIC_ASYNC_TAG, "schedule insert operation to %zu threads", num_threads)
         for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
                 struct parallel_insert_arg
-                        *carrier_arg = *vec_get(&carrier_args, thread_id, struct parallel_insert_arg *);
-                struct carrier *carrier = vec_get(&extra->carriers, thread_id, struct carrier);
+                        *carrier_arg = *JAK_VECTOR_GET(&carrier_args, thread_id, struct parallel_insert_arg *);
+                struct carrier *carrier = JAK_VECTOR_GET(&extra->carriers, thread_id, struct carrier);
                 JAK_TRACE(STRING_DIC_ASYNC_TAG, "create thread %zu...", thread_id)
                 pthread_create(&carrier->thread, NULL, parallel_insert_function, carrier_arg);
                 JAK_TRACE(STRING_DIC_ASYNC_TAG, "thread %zu created", thread_id)
@@ -481,7 +481,7 @@ this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *c
                         uint_fast16_t thread_id = str_carrier_mapping[jak_string_idx];
                         size_t localIdx = str_carrier_idx_mapping[jak_string_idx];
                         struct parallel_insert_arg
-                                *carrier_arg = *vec_get(&carrier_args, thread_id, struct parallel_insert_arg *);
+                                *carrier_arg = *JAK_VECTOR_GET(&carrier_args, thread_id, struct parallel_insert_arg *);
                         jak_archive_field_sid_t global_jak_string_owner_id = thread_id;
                         jak_archive_field_sid_t global_jak_string_local_id = carrier_arg->out[localIdx];
                         jak_archive_field_sid_t global_jak_string_id = MAKE_GLOBAL(global_jak_string_owner_id,
@@ -495,21 +495,21 @@ this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *c
         /** cleanup */
         for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
                 struct parallel_insert_arg
-                        *carrier_arg = *vec_get(&carrier_args, thread_id, struct parallel_insert_arg *);
+                        *carrier_arg = *JAK_VECTOR_GET(&carrier_args, thread_id, struct parallel_insert_arg *);
                 if (carrier_arg->did_work) {
-                        strdic_free(&carrier_arg->carrier->local_dictionary, carrier_arg->out);
+                        jak_string_dict_free(&carrier_arg->carrier->local_dictionary, carrier_arg->out);
                 }
-                vec_drop(&carrier_arg->strings);
+                jak_vector_drop(&carrier_arg->strings);
                 jak_alloc_free(&self->alloc, carrier_arg);
         }
 
         /** cleanup */
         drop_thread_assignment(&self->alloc, str_carrier_mapping, carrier_num_strings, str_carrier_idx_mapping);
-        vec_drop(&carrier_args);
+        jak_vector_drop(&carrier_args);
 
         this_unlock(self);
 
-        timestamp_t end = time_now_wallclock();
+        jak_timestamp end = jak_wallclock();
         JAK_UNUSED(begin);
         JAK_UNUSED(end);
         JAK_INFO(STRING_DIC_ASYNC_TAG, "insertion operation done: %f seconds spent here", (end - begin) / 1000.0f)
@@ -517,29 +517,29 @@ this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *c
         return true;
 }
 
-static bool this_remove(struct jak_string_dict *self, jak_archive_field_sid_t *strings, size_t num_strings)
+static bool this_remove(jak_string_dict *self, jak_archive_field_sid_t *strings, size_t num_strings)
 {
-        timestamp_t begin = time_now_wallclock();
+        jak_timestamp begin = jak_wallclock();
         JAK_INFO(STRING_DIC_ASYNC_TAG, "remove operation started: %zu strings to remove", num_strings);
 
-        JAK_CHECK_TAG(self->tag, ASYNC);
+        JAK_CHECK_TAG(self->tag, JAK_ASYNC);
 
         this_lock(self);
 
         struct parallel_remove_arg empty;
         struct async_extra *extra = THIS_EXTRAS(self);
-        uint_fast16_t num_threads = vec_length(&extra->carriers);
+        uint_fast16_t num_threads = jak_vector_length(&extra->carriers);
         size_t approx_num_strings_per_thread = JAK_MAX(1, num_strings / num_threads);
-        struct jak_vector ofType(jak_archive_field_sid_t) *jak_string_map = jak_alloc_malloc(&self->alloc, num_threads *
-                                                                                                       sizeof(struct jak_vector));
+        jak_vector ofType(jak_archive_field_sid_t) *jak_string_map = jak_alloc_malloc(&self->alloc, num_threads *
+                                                                                                       sizeof(jak_vector));
 
-        struct jak_vector ofType(struct parallel_remove_arg) carrier_args;
-        vec_create(&carrier_args, &self->alloc, sizeof(struct parallel_remove_arg), num_threads);
+        jak_vector ofType(struct parallel_remove_arg) carrier_args;
+        jak_vector_create(&carrier_args, &self->alloc, sizeof(struct parallel_remove_arg), num_threads);
 
         /** prepare thread-local subset of string ids */
-        vec_repeated_push(&carrier_args, &empty, num_threads);
+        jak_vector_repeated_push(&carrier_args, &empty, num_threads);
         for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
-                vec_create(jak_string_map + thread_id, &self->alloc, sizeof(jak_archive_field_sid_t),
+                jak_vector_create(jak_string_map + thread_id, &self->alloc, sizeof(jak_archive_field_sid_t),
                            approx_num_strings_per_thread);
         }
 
@@ -550,13 +550,13 @@ static bool this_remove(struct jak_string_dict *self, jak_archive_field_sid_t *s
                 jak_archive_field_sid_t localjak_string_id_t = GET_jak_string_id_t(global_jak_string_id);
                 JAK_ASSERT(owning_thread_id < num_threads);
 
-                vec_push(jak_string_map + owning_thread_id, &localjak_string_id_t, 1);
+                jak_vector_push(jak_string_map + owning_thread_id, &localjak_string_id_t, 1);
         }
 
         /** schedule remove operation per carrier */
         for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
-                struct carrier *carrier = vec_get(&extra->carriers, thread_id, struct carrier);
-                struct parallel_remove_arg *carrier_arg = vec_get(&carrier_args, thread_id, struct parallel_remove_arg);
+                struct carrier *carrier = JAK_VECTOR_GET(&extra->carriers, thread_id, struct carrier);
+                struct parallel_remove_arg *carrier_arg = JAK_VECTOR_GET(&carrier_args, thread_id, struct parallel_remove_arg);
                 carrier_arg->carrier = carrier;
                 carrier_arg->local_ids = jak_string_map + thread_id;
 
@@ -568,15 +568,15 @@ static bool this_remove(struct jak_string_dict *self, jak_archive_field_sid_t *s
 
         /** cleanup */
         for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
-                vec_drop(jak_string_map + thread_id);
+                jak_vector_drop(jak_string_map + thread_id);
         }
 
         jak_alloc_free(&self->alloc, jak_string_map);
-        vec_data(&carrier_args);
+        jak_vector_data(&carrier_args);
 
         this_unlock(self);
 
-        timestamp_t end = time_now_wallclock();
+        jak_timestamp end = jak_wallclock();
         JAK_UNUSED(begin);
         JAK_UNUSED(end);
         JAK_INFO(STRING_DIC_ASYNC_TAG, "remove operation done: %f seconds spent here", (end - begin) / 1000.0f)
@@ -585,18 +585,18 @@ static bool this_remove(struct jak_string_dict *self, jak_archive_field_sid_t *s
 }
 
 static bool
-this_locate_safe(struct jak_string_dict *self, jak_archive_field_sid_t **out, bool **found_mask, size_t *num_not_found,
+this_locate_safe(jak_string_dict *self, jak_archive_field_sid_t **out, bool **found_mask, size_t *num_not_found,
                  char *const *keys, size_t num_keys)
 {
-        timestamp_t begin = time_now_wallclock();
+        jak_timestamp begin = jak_wallclock();
         JAK_INFO(STRING_DIC_ASYNC_TAG, "locate (safe) operation started: %zu strings to locate", num_keys)
 
-        JAK_CHECK_TAG(self->tag, ASYNC);
+        JAK_CHECK_TAG(self->tag, JAK_ASYNC);
 
         this_lock(self);
 
         struct async_extra *extra = THIS_EXTRAS(self);
-        uint_fast16_t num_threads = vec_length(&extra->carriers);
+        uint_fast16_t num_threads = jak_vector_length(&extra->carriers);
 
         /** global result output */
         JAK_ALLOC_MALLOC(jak_archive_field_sid_t, global_out, num_keys, &self->alloc);
@@ -623,7 +623,7 @@ this_locate_safe(struct jak_string_dict *self, jak_archive_field_sid_t **out, bo
         /** prepare to move string subsets to carriers */
         for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
                 struct parallel_locate_arg *arg = carrier_args + thread_id;
-                vec_create(&arg->keys_in, &self->alloc, sizeof(char *), carrier_num_strings[thread_id]);
+                jak_vector_create(&arg->keys_in, &self->alloc, sizeof(char *), carrier_num_strings[thread_id]);
                 JAK_ASSERT (&arg->keys_in.base != NULL);
         }
 
@@ -637,16 +637,16 @@ this_locate_safe(struct jak_string_dict *self, jak_archive_field_sid_t **out, bo
                 struct parallel_locate_arg *arg = carrier_args + thread_id;
 
                 /** store local index of string i inside the thread */
-                str_carrier_idx_mapping[i] = vec_length(&arg->keys_in);
+                str_carrier_idx_mapping[i] = jak_vector_length(&arg->keys_in);
 
                 /** push that string into the thread-local vector */
-                vec_push(&arg->keys_in, &keys[i], 1);
+                jak_vector_push(&arg->keys_in, &keys[i], 1);
         }
 
         JAK_TRACE(STRING_DIC_ASYNC_TAG, "schedule operation to threads to %zu threads...", num_threads)
         /** schedule operation to threads */
         for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
-                struct carrier *carrier = vec_get(&extra->carriers, thread_id, struct carrier);
+                struct carrier *carrier = JAK_VECTOR_GET(&extra->carriers, thread_id, struct carrier);
                 struct parallel_locate_arg *arg = carrier_args + thread_id;
                 carrier_args[thread_id].carrier = carrier;
                 pthread_create(&carrier->thread, NULL, parallel_locate_safe_function, arg);
@@ -682,8 +682,8 @@ this_locate_safe(struct jak_string_dict *self, jak_archive_field_sid_t **out, bo
 
                 /** cleanup */
                 if (JAK_LIKELY(arg->did_work)) {
-                        strdic_free(&arg->carrier->local_dictionary, arg->found_mask_out);
-                        strdic_free(&arg->carrier->local_dictionary, arg->ids_out);
+                        jak_string_dict_free(&arg->carrier->local_dictionary, arg->found_mask_out);
+                        jak_string_dict_free(&arg->carrier->local_dictionary, arg->ids_out);
                 }
         }
 
@@ -694,7 +694,7 @@ this_locate_safe(struct jak_string_dict *self, jak_archive_field_sid_t **out, bo
 
         for (size_t thread_id = 0; thread_id < num_threads; thread_id++) {
                 struct parallel_locate_arg *arg = carrier_args + thread_id;
-                vec_drop(&arg->keys_in);
+                jak_vector_drop(&arg->keys_in);
         }
 
         /** return results */
@@ -704,7 +704,7 @@ this_locate_safe(struct jak_string_dict *self, jak_archive_field_sid_t **out, bo
 
         this_unlock(self);
 
-        timestamp_t end = time_now_wallclock();
+        jak_timestamp end = jak_wallclock();
         JAK_UNUSED(begin);
         JAK_UNUSED(end);
         JAK_INFO(STRING_DIC_ASYNC_TAG, "locate (safe) operation done: %f seconds spent here", (end - begin) / 1000.0f)
@@ -713,9 +713,9 @@ this_locate_safe(struct jak_string_dict *self, jak_archive_field_sid_t **out, bo
 }
 
 static bool
-this_locate_fast(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *const *keys, size_t num_keys)
+this_locate_fast(jak_string_dict *self, jak_archive_field_sid_t **out, char *const *keys, size_t num_keys)
 {
-        JAK_CHECK_TAG(self->tag, ASYNC);
+        JAK_CHECK_TAG(self->tag, JAK_ASYNC);
 
         this_lock(self);
 
@@ -734,12 +734,12 @@ this_locate_fast(struct jak_string_dict *self, jak_archive_field_sid_t **out, ch
         return result;
 }
 
-static char **this_extract(struct jak_string_dict *self, const jak_archive_field_sid_t *ids, size_t num_ids)
+static char **this_extract(jak_string_dict *self, const jak_archive_field_sid_t *ids, size_t num_ids)
 {
-        timestamp_t begin = time_now_wallclock();
+        jak_timestamp begin = jak_wallclock();
         JAK_INFO(STRING_DIC_ASYNC_TAG, "extract (safe) operation started: %zu strings to extract", num_ids)
 
-        if (self->tag != ASYNC) {
+        if (self->tag != JAK_ASYNC) {
                 return NULL;
         }
 
@@ -748,7 +748,7 @@ static char **this_extract(struct jak_string_dict *self, const jak_archive_field
         JAK_ALLOC_MALLOC(char *, globalResult, num_ids, &self->alloc);
 
         struct async_extra *extra = (struct async_extra *) self->extra;
-        uint_fast16_t num_threads = vec_length(&extra->carriers);
+        uint_fast16_t num_threads = jak_vector_length(&extra->carriers);
         size_t approx_num_strings_per_thread = JAK_MAX(1, num_ids / num_threads);
 
         JAK_ALLOC_MALLOC(size_t, local_thread_idx, num_ids, &self->alloc);
@@ -757,7 +757,7 @@ static char **this_extract(struct jak_string_dict *self, const jak_archive_field
 
         for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
                 struct parallel_extract_arg *arg = thread_args + thread_id;
-                vec_create(&arg->local_ids_in, &self->alloc, sizeof(jak_archive_field_sid_t),
+                jak_vector_create(&arg->local_ids_in, &self->alloc, sizeof(jak_archive_field_sid_t),
                            approx_num_strings_per_thread);
         }
 
@@ -769,13 +769,13 @@ static char **this_extract(struct jak_string_dict *self, const jak_archive_field
                 JAK_ASSERT(owning_thread_ids[i] < num_threads);
 
                 struct parallel_extract_arg *arg = thread_args + owning_thread_ids[i];
-                local_thread_idx[i] = vec_length(&arg->local_ids_in);
-                vec_push(&arg->local_ids_in, &localjak_string_id_t, 1);
+                local_thread_idx[i] = jak_vector_length(&arg->local_ids_in);
+                jak_vector_push(&arg->local_ids_in, &localjak_string_id_t, 1);
         }
 
         /** schedule remove operation per carrier */
         for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
-                struct carrier *carrier = vec_get(&extra->carriers, thread_id, struct carrier);
+                struct carrier *carrier = JAK_VECTOR_GET(&extra->carriers, thread_id, struct carrier);
                 struct parallel_extract_arg *carrier_arg = thread_args + thread_id;
                 carrier_arg->carrier = carrier;
                 pthread_create(&carrier->thread, NULL, parallel_extract_function, carrier_arg);
@@ -795,9 +795,9 @@ static char **this_extract(struct jak_string_dict *self, const jak_archive_field
         /** cleanup */
         for (uint_fast16_t thread_id = 0; thread_id < num_threads; thread_id++) {
                 struct parallel_extract_arg *carrier_arg = thread_args + thread_id;
-                vec_drop(&carrier_arg->local_ids_in);
+                jak_vector_drop(&carrier_arg->local_ids_in);
                 if (JAK_LIKELY(carrier_arg->did_work)) {
-                        strdic_free(&carrier_arg->carrier->local_dictionary, carrier_arg->strings_out);
+                        jak_string_dict_free(&carrier_arg->carrier->local_dictionary, carrier_arg->strings_out);
                 }
         }
 
@@ -807,7 +807,7 @@ static char **this_extract(struct jak_string_dict *self, const jak_archive_field
 
         this_unlock(self);
 
-        timestamp_t end = time_now_wallclock();
+        jak_timestamp end = jak_wallclock();
         JAK_UNUSED(begin);
         JAK_UNUSED(end);
         JAK_INFO(STRING_DIC_ASYNC_TAG, "extract (safe) operation done: %f seconds spent here", (end - begin) / 1000.0f)
@@ -815,25 +815,25 @@ static char **this_extract(struct jak_string_dict *self, const jak_archive_field
         return globalResult;
 }
 
-static bool this_free(struct jak_string_dict *self, void *ptr)
+static bool this_free(jak_string_dict *self, void *ptr)
 {
-        JAK_CHECK_TAG(self->tag, ASYNC);
+        JAK_CHECK_TAG(self->tag, JAK_ASYNC);
         jak_alloc_free(&self->alloc, ptr);
         return true;
 }
 
-static bool this_num_distinct(struct jak_string_dict *self, size_t *num)
+static bool this_num_distinct(jak_string_dict *self, size_t *num)
 {
-        JAK_CHECK_TAG(self->tag, ASYNC);
+        JAK_CHECK_TAG(self->tag, JAK_ASYNC);
         this_lock(self);
 
         struct async_extra *extra = THIS_EXTRAS(self);
-        size_t num_carriers = vec_length(&extra->carriers);
-        struct carrier *carriers = vec_all(&extra->carriers, struct carrier);
+        size_t num_carriers = jak_vector_length(&extra->carriers);
+        struct carrier *carriers = JAK_VECTOR_ALL(&extra->carriers, struct carrier);
         size_t num_distinct = 0;
         while (num_carriers--) {
                 size_t local_distinct;
-                strdic_num_distinct(&local_distinct, &carriers->local_dictionary);
+                jak_string_dict_num_distinct(&local_distinct, &carriers->local_dictionary);
                 num_distinct += local_distinct;
                 carriers++;
         }
@@ -842,60 +842,60 @@ static bool this_num_distinct(struct jak_string_dict *self, size_t *num)
         return true;
 }
 
-static bool this_get_contents(struct jak_string_dict *self, struct jak_vector ofType (char *) *strings,
-                              struct jak_vector ofType(jak_archive_field_sid_t) *jak_string_ids)
+static bool this_get_contents(jak_string_dict *self, jak_vector ofType (char *) *strings,
+                              jak_vector ofType(jak_archive_field_sid_t) *jak_string_ids)
 {
-        JAK_CHECK_TAG(self->tag, ASYNC);
+        JAK_CHECK_TAG(self->tag, JAK_ASYNC);
         this_lock(self);
         struct async_extra *extra = THIS_EXTRAS(self);
-        size_t num_carriers = vec_length(&extra->carriers);
-        struct jak_vector ofType (char *) local_jak_string_results;
-        struct jak_vector ofType (jak_archive_field_sid_t) local_jak_string_id_results;
+        size_t num_carriers = jak_vector_length(&extra->carriers);
+        jak_vector ofType (char *) local_jak_string_results;
+        jak_vector ofType (jak_archive_field_sid_t) local_jak_string_id_results;
         size_t approx_num_distinct_local_values;
         this_num_distinct(self, &approx_num_distinct_local_values);
         approx_num_distinct_local_values = JAK_MAX(1, approx_num_distinct_local_values / extra->carriers.num_elems);
         approx_num_distinct_local_values *= 1.2f;
 
-        vec_create(&local_jak_string_results, NULL, sizeof(char *), approx_num_distinct_local_values);
-        vec_create(&local_jak_string_id_results, NULL, sizeof(jak_archive_field_sid_t), approx_num_distinct_local_values);
+        jak_vector_create(&local_jak_string_results, NULL, sizeof(char *), approx_num_distinct_local_values);
+        jak_vector_create(&local_jak_string_id_results, NULL, sizeof(jak_archive_field_sid_t), approx_num_distinct_local_values);
 
         for (size_t thread_id = 0; thread_id < num_carriers; thread_id++) {
-                vec_clear(&local_jak_string_results);
-                vec_clear(&local_jak_string_id_results);
+                jak_vector_clear(&local_jak_string_results);
+                jak_vector_clear(&local_jak_string_id_results);
 
-                struct carrier *carrier = vec_get(&extra->carriers, thread_id, struct carrier);
+                struct carrier *carrier = JAK_VECTOR_GET(&extra->carriers, thread_id, struct carrier);
 
-                strdic_get_contents(&local_jak_string_results, &local_jak_string_id_results, &carrier->local_dictionary);
+                jak_string_dict_get_contents(&local_jak_string_results, &local_jak_string_id_results, &carrier->local_dictionary);
 
                 JAK_ASSERT(local_jak_string_id_results.num_elems == local_jak_string_results.num_elems);
                 for (size_t k = 0; k < local_jak_string_results.num_elems; k++) {
-                        char *string = *vec_get(&local_jak_string_results, k, char *);
-                        jak_archive_field_sid_t localjak_string_id_t = *vec_get(&local_jak_string_id_results, k,
+                        char *string = *JAK_VECTOR_GET(&local_jak_string_results, k, char *);
+                        jak_archive_field_sid_t localjak_string_id_t = *JAK_VECTOR_GET(&local_jak_string_id_results, k,
                                                                             jak_archive_field_sid_t);
                         jak_archive_field_sid_t global_jak_string_id = MAKE_GLOBAL(thread_id, localjak_string_id_t);
-                        vec_push(strings, &string, 1);
-                        vec_push(jak_string_ids, &global_jak_string_id, 1);
+                        jak_vector_push(strings, &string, 1);
+                        jak_vector_push(jak_string_ids, &global_jak_string_id, 1);
                 }
         }
 
-        vec_drop(&local_jak_string_results);
-        vec_drop(&local_jak_string_id_results);
+        jak_vector_drop(&local_jak_string_results);
+        jak_vector_drop(&local_jak_string_id_results);
         this_unlock(self);
         return true;
 }
 
-static bool this_reset_counters(struct jak_string_dict *self)
+static bool this_reset_counters(jak_string_dict *self)
 {
-        JAK_CHECK_TAG(self->tag, ASYNC);
+        JAK_CHECK_TAG(self->tag, JAK_ASYNC);
 
         this_lock(self);
 
         struct async_extra *extra = THIS_EXTRAS(self);
-        size_t num_threads = vec_length(&extra->carriers);
+        size_t num_threads = jak_vector_length(&extra->carriers);
 
         for (size_t thread_id = 0; thread_id < num_threads; thread_id++) {
-                struct carrier *carrier = vec_get(&extra->carriers, thread_id, struct carrier);
-                strdic_reset_counters(&carrier->local_dictionary);
+                struct carrier *carrier = JAK_VECTOR_GET(&extra->carriers, thread_id, struct carrier);
+                jak_string_dict_reset_counters(&carrier->local_dictionary);
         }
 
         this_unlock(self);
@@ -903,21 +903,21 @@ static bool this_reset_counters(struct jak_string_dict *self)
         return true;
 }
 
-static bool this_counters(struct jak_string_dict *self, jak_str_hash_counters *counters)
+static bool this_counters(jak_string_dict *self, jak_str_hash_counters *counters)
 {
-        JAK_CHECK_TAG(self->tag, ASYNC);
+        JAK_CHECK_TAG(self->tag, JAK_ASYNC);
 
         this_lock(self);
 
         struct async_extra *extra = THIS_EXTRAS(self);
-        size_t num_threads = vec_length(&extra->carriers);
+        size_t num_threads = jak_vector_length(&extra->carriers);
 
         JAK_CHECK_SUCCESS(jak_str_hash_counters_init(counters));
 
         for (size_t thread_id = 0; thread_id < num_threads; thread_id++) {
-                struct carrier *carrier = vec_get(&extra->carriers, thread_id, struct carrier);
+                struct carrier *carrier = JAK_VECTOR_GET(&extra->carriers, thread_id, struct carrier);
                 jak_str_hash_counters local_counters;
-                strdic_get_counters(&local_counters, &carrier->local_dictionary);
+                jak_string_dict_get_counters(&local_counters, &carrier->local_dictionary);
                 jak_str_hash_counters_add(counters, &local_counters);
         }
 
@@ -953,7 +953,7 @@ static void parallel_create_carrier(const void *restrict start, size_t width, si
         }
 }
 
-static bool this_setup_carriers(struct jak_string_dict *self, size_t capacity, size_t num_index_buckets,
+static bool this_setup_carriers(jak_string_dict *self, size_t capacity, size_t num_index_buckets,
                                 size_t approx_num_unique_str, size_t num_threads)
 {
         struct async_extra *extra = THIS_EXTRAS(self);
@@ -969,10 +969,10 @@ static bool this_setup_carriers(struct jak_string_dict *self, size_t capacity, s
 
         for (size_t thread_id = 0; thread_id < num_threads; thread_id++) {
                 new_carrier.id = thread_id;
-                vec_push(&extra->carriers, &new_carrier, 1);
+                jak_vector_push(&extra->carriers, &new_carrier, 1);
         }
 
-        jak_for(vec_all(&extra->carriers, struct carrier),
+        jak_for(JAK_VECTOR_ALL(&extra->carriers, struct carrier),
                 sizeof(struct carrier),
                 num_threads,
                 parallel_create_carrier,
@@ -983,14 +983,14 @@ static bool this_setup_carriers(struct jak_string_dict *self, size_t capacity, s
         return true;
 }
 
-static bool this_lock(struct jak_string_dict *self)
+static bool this_lock(jak_string_dict *self)
 {
         struct async_extra *extra = THIS_EXTRAS(self);
         JAK_CHECK_SUCCESS(jak_spinlock_acquire(&extra->lock));
         return true;
 }
 
-static bool this_unlock(struct jak_string_dict *self)
+static bool this_unlock(jak_string_dict *self)
 {
         struct async_extra *extra = THIS_EXTRAS(self);
         JAK_CHECK_SUCCESS(jak_spinlock_release(&extra->lock));

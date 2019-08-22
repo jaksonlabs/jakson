@@ -114,8 +114,8 @@ typedef struct jak_packer {
          * @author Marcus Pinnecke
          * @since 0.1.00.05
          * */
-        bool (*write_extra)(jak_packer *self, struct jak_memfile *dst,
-                            const struct jak_vector ofType (const char *) *strings);
+        bool (*write_extra)(jak_packer *self, jak_memfile *dst,
+                            const jak_vector ofType (const char *) *strings);
 
         /**
          * Function to reconstruct implementation-specific dictionary, book-keeping or extra data by deserialization (
@@ -144,7 +144,7 @@ typedef struct jak_packer {
          * @since 0.1.00.05
          */
         bool
-        (*encode_string)(jak_packer *self, struct jak_memfile *dst, jak_error *err, const char *string);
+        (*encode_string)(jak_packer *self, jak_memfile *dst, jak_error *err, const char *string);
 
         bool (*decode_string)(jak_packer *self, char *dst, size_t strlen, FILE *src);
 
@@ -163,7 +163,7 @@ typedef struct jak_packer {
          * @author Marcus Pinnecke
          * @since 0.1.00.05
          */
-        bool (*print_extra)(jak_packer *self, FILE *file, struct jak_memfile *src);
+        bool (*print_extra)(jak_packer *self, FILE *file, jak_memfile *src);
 
         /**
          * Reads an implementation-specific encoded string from a memory file <code>src</code>, and prints
@@ -182,7 +182,7 @@ typedef struct jak_packer {
          * @since 0.1.00.05
          */
         bool
-        (*print_encoded)(jak_packer *self, FILE *file, struct jak_memfile *src, jak_u32 decompressed_strlen);
+        (*print_encoded)(jak_packer *self, FILE *file, jak_memfile *src, jak_u32 decompressed_strlen);
 } jak_packer;
 
 static void jak_pack_none_create(jak_packer *strategy)
@@ -235,12 +235,12 @@ jak_u8 jak_pack_flagbit_by_type(jak_packer_e type);
 bool jak_pack_by_flags(jak_packer *strategy, jak_u8 flags);
 bool jak_pack_by_name(jak_packer_e *type, const char *name);
 
-bool jak_pack_write_extra(jak_error *err, jak_packer *self, struct jak_memfile *dst, const struct jak_vector ofType (const char *) *strings);
+bool jak_pack_write_extra(jak_error *err, jak_packer *self, jak_memfile *dst, const jak_vector ofType (const char *) *strings);
 bool jak_pack_read_extra(jak_error *err, jak_packer *self, FILE *src, size_t nbytes);
-bool jak_pack_encode(jak_error *err, jak_packer *self, struct jak_memfile *dst, const char *string);
+bool jak_pack_encode(jak_error *err, jak_packer *self, jak_memfile *dst, const char *string);
 bool jak_pack_decode(jak_error *err, jak_packer *self, char *dst, size_t strlen, FILE *src);
-bool jak_pack_print_extra(jak_error *err, jak_packer *self, FILE *file, struct jak_memfile *src);
-bool jak_pack_print_encoded(jak_error *err, jak_packer *self, FILE *file, struct jak_memfile *src, jak_u32 decompressed_strlen);
+bool jak_pack_print_extra(jak_error *err, jak_packer *self, FILE *file, jak_memfile *src);
+bool jak_pack_print_encoded(jak_error *err, jak_packer *self, FILE *file, jak_memfile *src, jak_u32 decompressed_strlen);
 
 JAK_END_DECL
 

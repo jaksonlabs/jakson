@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.9.6)
 
-project(libcarbon VERSION 1.0.0.0 DESCRIPTION "A library to operate with CARBON files"
+project(jakson VERSION 1.0.0.0 DESCRIPTION "A library to operate with CARBON files"
         LANGUAGES C) # VERSION major.minor.patch.tweak
 
 set (CMAKE_C_STANDARD 11)
@@ -80,8 +80,8 @@ set (CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
 set (CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG")
 set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
 
-add_library(ark-sources STATIC ${LIB_SOURCES}) # used to share object files across different dependent targets
-link_libraries(ark-sources ${LIBS})
+add_library(jakson-sources STATIC ${LIB_SOURCES}) # used to share object files across different dependent targets
+link_libraries(jakson-sources ${LIBS})
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/tools")
 

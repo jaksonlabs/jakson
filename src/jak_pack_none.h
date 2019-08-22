@@ -32,11 +32,11 @@ JAK_BEGIN_DECL
 bool jak_pack_none_init(jak_packer *self);
 bool jak_pack_none_cpy(const jak_packer *self, jak_packer *dst);
 bool jak_pack_none_drop(jak_packer *self);
-bool jak_pack_none_write_extra(jak_packer *self, struct jak_memfile *dst, const struct jak_vector ofType (const char *) *strings);
+bool jak_pack_none_write_extra(jak_packer *self, jak_memfile *dst, const jak_vector ofType (const char *) *strings);
 bool jak_pack_none_read_extra(jak_packer *self, FILE *src, size_t nbytes);
-bool jak_pack_none_print_extra(jak_packer *self, FILE *file, struct jak_memfile *src);
-bool jak_pack_none_print_encoded_string(jak_packer *self, FILE *file, struct jak_memfile *src, jak_u32 decompressed_strlen);
-bool jak_pack_none_encode_string(jak_packer *self, struct jak_memfile *dst, jak_error *err, const char *string);
+bool jak_pack_none_print_extra(jak_packer *self, FILE *file, jak_memfile *src);
+bool jak_pack_none_print_encoded_string(jak_packer *self, FILE *file, jak_memfile *src, jak_u32 decompressed_strlen);
+bool jak_pack_none_encode_string(jak_packer *self, jak_memfile *dst, jak_error *err, const char *string);
 bool jak_pack_none_decode_string(jak_packer *self, char *dst, size_t strlen, FILE *src);
 
 JAK_END_DECL

@@ -779,9 +779,9 @@ TEST(JsonTest, ParseNullArray)
         ASSERT_TRUE(status);
         ASSERT_EQ(jak_json.element->value.value_type, JAK_JSON_VALUE_ARRAY);
         ASSERT_EQ(jak_json.element->value.value.array->elements.elements.num_elems, 3);
-        jak_json_element *e1 = vec_get(&jak_json.element->value.value.array->elements.elements, 0, jak_json_element);
-        jak_json_element *e2 = vec_get(&jak_json.element->value.value.array->elements.elements, 1, jak_json_element);
-        jak_json_element *e3 = vec_get(&jak_json.element->value.value.array->elements.elements, 2, jak_json_element);
+        jak_json_element *e1 = JAK_VECTOR_GET(&jak_json.element->value.value.array->elements.elements, 0, jak_json_element);
+        jak_json_element *e2 = JAK_VECTOR_GET(&jak_json.element->value.value.array->elements.elements, 1, jak_json_element);
+        jak_json_element *e3 = JAK_VECTOR_GET(&jak_json.element->value.value.array->elements.elements, 2, jak_json_element);
         ASSERT_EQ(e1->value.value_type, JAK_JSON_VALUE_NULL);
         ASSERT_EQ(e2->value.value_type, JAK_JSON_VALUE_NULL);
         ASSERT_EQ(e3->value.value_type, JAK_JSON_VALUE_NULL);
@@ -799,8 +799,8 @@ TEST(JsonTest, ParseBooleanArray)
         ASSERT_TRUE(status);
         ASSERT_EQ(jak_json.element->value.value_type, JAK_JSON_VALUE_ARRAY);
         ASSERT_EQ(jak_json.element->value.value.array->elements.elements.num_elems, 2);
-        jak_json_element *e1 = vec_get(&jak_json.element->value.value.array->elements.elements, 0, jak_json_element);
-        jak_json_element *e2 = vec_get(&jak_json.element->value.value.array->elements.elements, 1, jak_json_element);
+        jak_json_element *e1 = JAK_VECTOR_GET(&jak_json.element->value.value.array->elements.elements, 0, jak_json_element);
+        jak_json_element *e2 = JAK_VECTOR_GET(&jak_json.element->value.value.array->elements.elements, 1, jak_json_element);
         ASSERT_EQ(e1->value.value_type, JAK_JSON_VALUE_TRUE);
         ASSERT_EQ(e2->value.value_type, JAK_JSON_VALUE_FALSE);
 
@@ -817,9 +817,9 @@ TEST(JsonTest, ParseJsonFromString)
         ASSERT_TRUE(status);
         ASSERT_EQ(jak_json.element->value.value_type, JAK_JSON_VALUE_OBJECT);
         ASSERT_EQ(jak_json.element->value.value.object->value->members.num_elems, 1);
-        ASSERT_TRUE(strcmp((vec_get(&jak_json.element->value.value.object->value->members, 0,
+        ASSERT_TRUE(strcmp((JAK_VECTOR_GET(&jak_json.element->value.value.object->value->members, 0,
                 jak_json_prop))->key.value, "Hello World") == 0);
-        ASSERT_TRUE(strcmp((vec_get(&jak_json.element->value.value.object->value->members, 0,
+        ASSERT_TRUE(strcmp((JAK_VECTOR_GET(&jak_json.element->value.value.object->value->members, 0,
                             jak_json_prop))->value.value.value.string->value, "Value") == 0);
 
         jak_json_drop(&jak_json);
@@ -835,9 +835,9 @@ TEST(JsonTest, ParseJsonFromStringLaxQuotes)
         ASSERT_TRUE(status);
         ASSERT_EQ(jak_json.element->value.value_type, JAK_JSON_VALUE_OBJECT);
         ASSERT_EQ(jak_json.element->value.value.object->value->members.num_elems, 1);
-        ASSERT_TRUE(strcmp((vec_get(&jak_json.element->value.value.object->value->members, 0,
+        ASSERT_TRUE(strcmp((JAK_VECTOR_GET(&jak_json.element->value.value.object->value->members, 0,
                             jak_json_prop))->key.value, "Hello_World") == 0);
-        ASSERT_TRUE(strcmp((vec_get(&jak_json.element->value.value.object->value->members, 0,
+        ASSERT_TRUE(strcmp((JAK_VECTOR_GET(&jak_json.element->value.value.object->value->members, 0,
                             jak_json_prop))->value.value.value.string->value, "Value") == 0);
 
         jak_json_drop(&jak_json);
@@ -853,13 +853,13 @@ TEST(JsonTest, ParseJsonFromStringLaxQuotesList)
         ASSERT_TRUE(status);
         ASSERT_EQ(jak_json.element->value.value_type, JAK_JSON_VALUE_OBJECT);
         ASSERT_EQ(jak_json.element->value.value.object->value->members.num_elems, 2);
-        ASSERT_TRUE(strcmp((vec_get(&jak_json.element->value.value.object->value->members, 0,
+        ASSERT_TRUE(strcmp((JAK_VECTOR_GET(&jak_json.element->value.value.object->value->members, 0,
                             jak_json_prop))->key.value, "Hello") == 0);
-        ASSERT_TRUE(strcmp((vec_get(&jak_json.element->value.value.object->value->members, 0,
+        ASSERT_TRUE(strcmp((JAK_VECTOR_GET(&jak_json.element->value.value.object->value->members, 0,
                             jak_json_prop))->value.value.value.string->value, "Value1") == 0);
-        ASSERT_TRUE(strcmp((vec_get(&jak_json.element->value.value.object->value->members, 1,
+        ASSERT_TRUE(strcmp((JAK_VECTOR_GET(&jak_json.element->value.value.object->value->members, 1,
                             jak_json_prop))->key.value, "World") == 0);
-        ASSERT_TRUE(strcmp((vec_get(&jak_json.element->value.value.object->value->members, 1,
+        ASSERT_TRUE(strcmp((JAK_VECTOR_GET(&jak_json.element->value.value.object->value->members, 1,
                             jak_json_prop))->value.value.value.string->value, "Value2") == 0);
 
         jak_json_drop(&jak_json);
@@ -880,7 +880,7 @@ TEST(JsonTest, ParseJsonFromStringLaxQuotesTestNull)
 
 TEST(JsonTest, ParseRandomJson)
 {
-        /* the working directory must be 'tests/carbon' to find this file */
+        /* the working directory must be 'tests/jakson-tool' to find this file */
         int fd = open("./assets/random.json", O_RDONLY);
         ASSERT_NE(fd, -1);
         int json_in_len = lseek(fd, 0, SEEK_END);

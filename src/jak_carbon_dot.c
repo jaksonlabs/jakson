@@ -45,7 +45,7 @@ static const char *next_token(struct dot_token *token, const char *str)
         JAK_ASSERT(token);
         JAK_ASSERT(str);
 
-        str = strings_skip_blanks(str);
+        str = jak_strings_skip_blanks(str);
         char c = *str;
         if (c) {
                 if (isalpha(c)) {
@@ -156,7 +156,7 @@ bool jak_carbon_dot_path_from_string(jak_carbon_dot_path *path, const char *path
                                         status = JAK_ERR_PARSE_ENTRY_EXPECTED;
                                         goto cleanup_and_error;
                                 } else {
-                                        jak_u64 num = convert_atoiu64(token.str);
+                                        jak_u64 num = jak_convert_atoiu64(token.str);
                                         jak_carbon_dot_path_add_idx(path, num);
                                 }
                                 break;
@@ -188,15 +188,15 @@ bool jak_carbon_dot_path_add_nkey(jak_carbon_dot_path *dst, const char *key, siz
         JAK_ERROR_IF_NULL(key)
         if (JAK_LIKELY(dst->path_len < JAK_ARRAY_LENGTH(dst->nodes))) {
                 jak_carbon_dot_node *node = dst->nodes + dst->path_len++;
-                bool enquoted = strings_is_enquoted_wlen(key, len);
+                bool enquoted = jak_strings_is_enquoted_wlen(key, len);
                 node->type = JAK_DOT_NODE_KEY_NAME;
                 node->identifier.string = strndup(enquoted ? key + 1 : key, len);
                 if (enquoted) {
-                        char *str_wo_rightspaces = strings_remove_tailing_blanks(node->identifier.string);
+                        char *str_wo_rightspaces = jak_strings_remove_tailing_blanks(node->identifier.string);
                         size_t l = strlen(str_wo_rightspaces);
                         node->identifier.string[l - 1] = '\0';
                 }
-                JAK_ASSERT(!strings_is_enquoted(node->identifier.string));
+                JAK_ASSERT(!jak_strings_is_enquoted(node->identifier.string));
                 return true;
         } else {
                 JAK_ERROR(&dst->err, JAK_ERR_OUTOFBOUNDS)
@@ -291,7 +291,7 @@ bool jak_carbon_dot_path_to_str(jak_string *sb, jak_carbon_dot_path *path)
                         case JAK_DOT_NODE_KEY_NAME: {
                                 bool empty_str = strlen(node->identifier.string) == 0;
                                 bool quotes_required =
-                                        empty_str || strings_contains_blank_char(node->identifier.string);
+                                        empty_str || jak_strings_contains_blank_char(node->identifier.string);
                                 if (quotes_required) {
                                         jak_string_add_char(sb, '"');
                                 }

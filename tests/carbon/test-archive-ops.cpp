@@ -13,7 +13,7 @@ TEST(CarbonArchiveOpsTest, CreateStreamFromJsonString)
     bool               read_optimized = false;
 
     bool status = jak_archive_stream_from_json(&stream, &err, json_string,
-                                                  JAK_PACK_NONE, SYNC, 0, read_optimized, false, NULL);
+                                                  JAK_PACK_NONE, JAK_SYNC, 0, read_optimized, false, NULL);
 
     jak_memblock_drop(stream);
     ASSERT_TRUE(status);
@@ -29,7 +29,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonString)
     bool               read_optimized = false;
 
     bool status = jak_archive_from_json(&archive, archive_file, &err, json_string,
-                                           JAK_PACK_NONE, SYNC, 0, read_optimized, false, NULL);
+                                           JAK_PACK_NONE, JAK_SYNC, 0, read_optimized, false, NULL);
     ASSERT_TRUE(status);
     bool has_index;
     jak_archive_has_query_index_jak_string_id_to_offset(&has_index, &archive);
@@ -49,7 +49,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonStringWithBakedStringIdIndex)
     bool               read_optimized = false;
 
     bool status = jak_archive_from_json(&archive, archive_file, &err, json_string,
-                                           JAK_PACK_NONE, SYNC, 0, read_optimized, true, NULL);
+                                           JAK_PACK_NONE, JAK_SYNC, 0, read_optimized, true, NULL);
     ASSERT_TRUE(status);
     bool has_index;
     jak_archive_has_query_index_jak_string_id_to_offset(&has_index, &archive);
@@ -66,7 +66,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
     jak_archive     archive;
     jak_strid_iter  strid_iter;
     jak_strid_info *info;
-    size_t               vector_len;
+    size_t               jak_vector_len;
     bool                 status;
     bool                 success;
     jak_error         err;
@@ -83,8 +83,8 @@ TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
     status = jak_query_scan_strids(&strid_iter, &query);
     ASSERT_TRUE(status);
 
-    while (jak_strid_iter_next(&success, &info, &err, &vector_len, &strid_iter)) {
-        for (size_t i = 0; i < vector_len; i++) {
+    while (jak_strid_iter_next(&success, &info, &err, &jak_vector_len, &strid_iter)) {
+        for (size_t i = 0; i < jak_vector_len; i++) {
             /* Note, that 'info[i].id' cannot be tested based on its value because it is not deterministic generated;
              * all ids must be unique. In case we read something wrong, we may find some duplicate
              * (which is JAK_UNLIKELY, however) */
@@ -113,7 +113,7 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
     jak_archive     archive;
     jak_strid_iter  strid_iter;
     jak_strid_info *info;
-    size_t               vector_len;
+    size_t               jak_vector_len;
     bool                 status;
     bool                 success;
     jak_error         err;
@@ -130,8 +130,8 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
     status = jak_query_scan_strids(&strid_iter, &query);
     ASSERT_TRUE(status);
 
-    while (jak_strid_iter_next(&success, &info, &err, &vector_len, &strid_iter)) {
-        for (size_t i = 0; i < vector_len; i++) {
+    while (jak_strid_iter_next(&success, &info, &err, &jak_vector_len, &strid_iter)) {
+        for (size_t i = 0; i < jak_vector_len; i++) {
             all_str_ids.insert(info[i].id);
         }
     }
@@ -159,7 +159,7 @@ TEST(CarbonArchiveOpsTest, DecodeStringByFastUnsafeAccess)
     jak_archive                 archive;
     jak_strid_iter              strid_iter;
     jak_strid_info             *info;
-    size_t                           vector_len;
+    size_t                           jak_vector_len;
     bool                             status;
     bool                             success;
     jak_error                     err;
@@ -176,8 +176,8 @@ TEST(CarbonArchiveOpsTest, DecodeStringByFastUnsafeAccess)
     status = jak_query_scan_strids(&strid_iter, &query);
     ASSERT_TRUE(status);
 
-    while (jak_strid_iter_next(&success, &info, &err, &vector_len, &strid_iter)) {
-        for (size_t i = 0; i < vector_len; i++) {
+    while (jak_strid_iter_next(&success, &info, &err, &jak_vector_len, &strid_iter)) {
+        for (size_t i = 0; i < jak_vector_len; i++) {
             char **strings = jak_query_fetch_strings_by_offset(&query, &(info[i].offset), &(info[i].strlen), 1);
             ASSERT_TRUE(strings != NULL);
             ASSERT_TRUE(strings[0] != NULL);

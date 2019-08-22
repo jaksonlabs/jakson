@@ -36,15 +36,15 @@ typedef int32_t jak_i32;
 typedef int64_t jak_i64;
 typedef float jak_float;
 
-#define U8_NULL         UINT8_MAX
-#define U16_NULL        UINT16_MAX
-#define U32_NULL        UINT32_MAX
-#define U64_NULL        UINT64_MAX
-#define I8_NULL         INT8_MIN
-#define I16_NULL        INT16_MIN
-#define I32_NULL        INT32_MIN
-#define I64_NULL        INT64_MIN
-#define FLOAT_NULL      NAN
+#define JAK_U8_NULL         UINT8_MAX
+#define JAK_U16_NULL        UINT16_MAX
+#define JAK_U32_NULL        UINT32_MAX
+#define JAK_U64_NULL        UINT64_MAX
+#define JAK_I8_NULL         INT8_MIN
+#define JAK_I16_NULL        INT16_MIN
+#define JAK_I32_NULL        INT32_MIN
+#define JAK_I64_NULL        INT64_MIN
+#define JAK_FLOAT_NULL      NAN
 
 #define JAK_CARBON_U8_MIN    UINT8_MIN
 #define JAK_CARBON_U16_MIN   UINT16_MIN
@@ -54,10 +54,10 @@ typedef float jak_float;
 #define JAK_CARBON_I16_MIN   (INT16_MIN + 1)
 #define JAK_CARBON_I32_MIN   (INT32_MIN + 1)
 #define JAK_CARBON_I64_MIN   (INT64_MIN + 1)
-#define JAK_CARBON_U8_MAX    (U8_NULL - 1)
-#define JAK_CARBON_U16_MAX   (U16_NULL - 1)
-#define JAK_CARBON_U32_MAX   (U32_NULL - 1)
-#define JAK_CARBON_U64_MAX   (U64_NULL - 1)
+#define JAK_CARBON_U8_MAX    (JAK_U8_NULL - 1)
+#define JAK_CARBON_U16_MAX   (JAK_U16_NULL - 1)
+#define JAK_CARBON_U32_MAX   (JAK_U32_NULL - 1)
+#define JAK_CARBON_U64_MAX   (JAK_U64_NULL - 1)
 #define JAK_CARBON_I8_MAX    INT8_MAX
 #define JAK_CARBON_I16_MAX   INT16_MAX
 #define JAK_CARBON_I32_MAX   INT32_MAX
@@ -67,40 +67,29 @@ typedef float jak_float;
 #define JAK_CARBON_BOOLEAN_COLUMN_TRUE      1
 #define JAK_CARBON_BOOLEAN_COLUMN_NULL      2
 
-#define is_null_boolean(x)      (x == JAK_CARBON_BOOLEAN_COLUMN_NULL)
-#define is_null_u8(x)           (x == U8_NULL)
-#define is_null_u16(x)          (x == U16_NULL)
-#define is_null_u32(x)          (x == U32_NULL)
-#define is_null_u64(x)          (x == U64_NULL)
-#define is_null_i8(x)           (x == I8_NULL)
-#define is_null_i16(x)          (x == I16_NULL)
-#define is_null_i32(x)          (x == I32_NULL)
-#define is_null_i64(x)          (x == I64_NULL)
-#define is_null_float(x)        (isnan(x))
+#define JAK_IS_NULL_BOOLEAN(x)      (x == JAK_CARBON_BOOLEAN_COLUMN_NULL)
+#define JAK_IS_NULL_U8(x)           (x == JAK_U8_NULL)
+#define JAK_IS_NULL_U16(x)          (x == JAK_U16_NULL)
+#define JAK_IS_NULL_U32(x)          (x == JAK_U32_NULL)
+#define JAK_IS_NULL_U64(x)          (x == JAK_U64_NULL)
+#define JAK_IS_NULL_I8(x)           (x == JAK_I8_NULL)
+#define JAK_IS_NULL_I16(x)          (x == JAK_I16_NULL)
+#define JAK_IS_NULL_I32(x)          (x == JAK_I32_NULL)
+#define JAK_IS_NULL_I64(x)          (x == JAK_I64_NULL)
+#define JAK_IS_NULL_FLOAT(x)        (isnan(x))
 
 typedef jak_u64 jak_archive_field_sid_t;  /* string identifier, resolvable by a string dictionary */
 typedef char field_null_t;
-
 typedef jak_i8 jak_archive_field_boolean_t;
-
 typedef jak_i8 jak_archive_field_i8_t;
-
 typedef jak_i16 jak_archive_field_i16_t;
-
 typedef jak_i32 jak_archive_field_i32_t;
-
 typedef jak_i64 jak_archive_field_i64_t;
-
 typedef jak_u8 jak_archive_field_u8_t;
-
 typedef jak_u16 jak_archive_field_u16_t;
-
 typedef jak_u32 jak_archive_field_u32_t;
-
 typedef jak_u64 jak_archive_field_u64_t;
-
 typedef float jak_archive_field_number_t;
-
 typedef const char *field_jak_string_t;
 
 #define JAK_NULL_ENCODED_STRING            0
@@ -117,7 +106,7 @@ typedef const char *field_jak_string_t;
 #define JAK_NULL_OBJECT_MODEL(objectModel) (objectModel->entries.num_elems == 0)
 
 #define JAK_IS_NULL_STRING(str)   (str == JAK_NULL_ENCODED_STRING)
-#define JAK_IS_NULL_BOOLEAN(val)  (val == JAK_NULL_BOOLEAN)
+#define JAK_IS_NULL_BOOL(val)     (val == JAK_NULL_BOOLEAN)
 #define JAK_IS_NULL_INT8(val)     (val == JAK_NULL_INT8)
 #define JAK_IS_NULL_INT16(val)    (val == JAK_NULL_INT16)
 #define JAK_IS_NULL_INT32(val)    (val == JAK_NULL_INT32)

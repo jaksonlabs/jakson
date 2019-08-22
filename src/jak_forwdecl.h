@@ -129,6 +129,7 @@ typedef struct jak_json_array jak_json_array;
 typedef struct jak_json_number jak_json_number;
 
 typedef struct jak_memblock jak_memblock;
+typedef struct jak_memfile jak_memfile;
 
 typedef struct jak_command_opt jak_command_opt;
 typedef struct jak_command_opt_group jak_command_opt_group;
@@ -145,9 +146,22 @@ typedef struct jak_slice_handle jak_slice_handle;
 
 typedef struct jak_spinlock jak_spinlock;
 
+typedef struct jak_vector jak_vector;
+
 typedef struct jak_str_hash jak_str_hash;
 typedef struct jak_str_hash_counters jak_str_hash_counters;
 
 typedef struct jak_string jak_string;
+
+typedef struct jak_string_dict jak_string_dict;
+
+typedef struct jak_thread_task jak_thread_task;
+typedef struct jak_task_state jak_task_state;
+typedef struct jak_task_handle jak_task_handle;
+typedef struct jak_thread_pool jak_thread_pool;
+typedef struct jak_thread_info jak_thread_info;
+typedef struct jak_thread_pool_stats jak_thread_pool_stats;
+typedef struct jak_thread_stats jak_thread_stats;
+typedef struct jak_task_stats jak_task_stats;
 
 #endif

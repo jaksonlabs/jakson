@@ -76,7 +76,7 @@ JAK_BEGIN_DECL
 
 typedef struct jak_carbon {
         jak_memblock *memblock;
-        struct jak_memfile memfile;
+        jak_memfile memfile;
 
         struct {
                 jak_spinlock write_lock;

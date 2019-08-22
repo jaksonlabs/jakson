@@ -73,15 +73,15 @@ bool jak_slice_list_create(jak_slice_list_t *list, const jak_allocator *alloc, s
         jak_spinlock_init(&list->lock);
         jak_error_init(&list->err);
 
-        vec_create(&list->slices, &list->alloc, sizeof(jak_slice), slice_capacity);
-        vec_create(&list->descriptors, &list->alloc, sizeof(jak_slice_descriptor), slice_capacity);
-        vec_create(&list->filters, &list->alloc, sizeof(jak_bitmap), slice_capacity);
-        vec_create(&list->bounds, &list->alloc, sizeof(jak_hash_bounds), slice_capacity);
+        jak_vector_create(&list->slices, &list->alloc, sizeof(jak_slice), slice_capacity);
+        jak_vector_create(&list->descriptors, &list->alloc, sizeof(jak_slice_descriptor), slice_capacity);
+        jak_vector_create(&list->filters, &list->alloc, sizeof(jak_bitmap), slice_capacity);
+        jak_vector_create(&list->bounds, &list->alloc, sizeof(jak_hash_bounds), slice_capacity);
 
-        JAK_ZERO_MEMORY(vec_data(&list->slices), slice_capacity * sizeof(jak_slice));
-        JAK_ZERO_MEMORY(vec_data(&list->descriptors), slice_capacity * sizeof(jak_slice_descriptor));
-        JAK_ZERO_MEMORY(vec_data(&list->filters), slice_capacity * sizeof(jak_bitmap));
-        JAK_ZERO_MEMORY(vec_data(&list->bounds), slice_capacity * sizeof(jak_hash_bounds));
+        JAK_ZERO_MEMORY(jak_vector_data(&list->slices), slice_capacity * sizeof(jak_slice));
+        JAK_ZERO_MEMORY(jak_vector_data(&list->descriptors), slice_capacity * sizeof(jak_slice_descriptor));
+        JAK_ZERO_MEMORY(jak_vector_data(&list->filters), slice_capacity * sizeof(jak_bitmap));
+        JAK_ZERO_MEMORY(jak_vector_data(&list->bounds), slice_capacity * sizeof(jak_hash_bounds));
 
         appenderNew(list);
 
@@ -92,20 +92,20 @@ bool jak_slice_list_drop(jak_slice_list_t *list)
 {
         JAK_UNUSED(list);
 
-        vec_drop(&list->slices);
-        vec_drop(&list->descriptors);
-        vec_drop(&list->bounds);
+        jak_vector_drop(&list->slices);
+        jak_vector_drop(&list->descriptors);
+        jak_vector_drop(&list->bounds);
         for (size_t i = 0; i < list->filters.num_elems; i++) {
-                jak_bitmap *filter = vec_get(&list->filters, i, jak_bitmap);
+                jak_bitmap *filter = JAK_VECTOR_GET(&list->filters, i, jak_bitmap);
                 jak_bloom_drop(filter);
         }
-        vec_drop(&list->filters);
+        jak_vector_drop(&list->filters);
         return true;
 }
 
 bool jak_slice_list_is_empty(const jak_slice_list_t *list)
 {
-        return (vec_is_empty(&list->slices));
+        return (jak_vector_is_empty(&list->slices));
 }
 
 bool jak_slice_list_insert(jak_slice_list_t *list, char **strings, jak_archive_field_sid_t *ids, size_t num_pairs)
@@ -130,9 +130,9 @@ bool jak_slice_list_insert(jak_slice_list_t *list, char **strings, jak_archive_f
                         continue;
                 } else {
                         /** pair is not found; append it */
-                        jak_hash_bounds *restrict bounds = vec_all(&list->bounds, jak_hash_bounds);
-                        jak_bitmap *restrict filters = vec_all(&list->filters, jak_bitmap);
-                        jak_slice *restrict slices = vec_all(&list->slices, jak_slice);
+                        jak_hash_bounds *restrict bounds = JAK_VECTOR_ALL(&list->bounds, jak_hash_bounds);
+                        jak_bitmap *restrict filters = JAK_VECTOR_ALL(&list->filters, jak_bitmap);
+                        jak_slice *restrict slices = JAK_VECTOR_ALL(&list->slices, jak_slice);
 
                         jak_slice *restrict appender = slices + list->appender_idx;
                         jak_bitmap *restrict appenderFilter = filters + list->appender_idx;
@@ -168,13 +168,13 @@ bool jak_slice_list_lookup(jak_slice_handle *handle, jak_slice_list_t *list, con
         JAK_UNUSED(needle);
 
         hash32_t keyHash = get_hashcode(needle);
-        jak_u32 numSlices = vec_length(&list->slices);
+        jak_u32 numSlices = jak_vector_length(&list->slices);
 
         /** check whether the keys-values pair is already contained in one slice */
-        jak_hash_bounds *restrict bounds = vec_all(&list->bounds, jak_hash_bounds);
-        jak_bitmap *restrict filters = vec_all(&list->filters, jak_bitmap);
-        jak_slice *restrict slices = vec_all(&list->slices, jak_slice);
-        jak_slice_descriptor *restrict descs = vec_all(&list->descriptors, jak_slice_descriptor);
+        jak_hash_bounds *restrict bounds = JAK_VECTOR_ALL(&list->bounds, jak_hash_bounds);
+        jak_bitmap *restrict filters = JAK_VECTOR_ALL(&list->filters, jak_bitmap);
+        jak_slice *restrict slices = JAK_VECTOR_ALL(&list->slices, jak_slice);
+        jak_slice_descriptor *restrict descs = JAK_VECTOR_ALL(&list->descriptors, jak_slice_descriptor);
 
         for (register jak_u32 i = 0; i < numSlices; i++) {
                 jak_slice_descriptor *restrict desc = descs + i;
@@ -251,15 +251,15 @@ static void appenderNew(jak_slice_list_t *list)
         /** the slice itself */
         jak_slice slice = {.strat     = JAK_SLICE_LOOKUP_SCAN, .num_elems = 0, .cache_idx = (jak_u32) -1};
 
-        jak_u32 numSlices = vec_length(&list->slices);
-        vec_push(&list->slices, &slice, 1);
+        jak_u32 numSlices = jak_vector_length(&list->slices);
+        jak_vector_push(&list->slices, &slice, 1);
 
         JAK_ASSERT(SLICE_KEY_COLUMN_MAX_ELEMS > 0);
 
         /** the descriptor */
         jak_slice_descriptor desc = {.num_reads_hit  = 0, .num_reads_all  = 0,};
 
-        vec_push(&list->descriptors, &desc, 1);
+        jak_vector_push(&list->descriptors, &desc, 1);
 
         /** the lookup guards */
         JAK_ASSERT(sizeof(jak_bitmap) <= JAK_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE);
@@ -272,9 +272,9 @@ static void appenderNew(jak_slice_list_t *list)
          * keys-values pair - and that still works ;) */
         jak_bloom_create(&filter,
                          (JAK_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE - sizeof(jak_bitmap)) * 8);
-        vec_push(&list->filters, &filter, 1);
+        jak_vector_push(&list->filters, &filter, 1);
         jak_hash_bounds bounds = {.min_hash        = (hash32_t) -1, .max_hash        = (hash32_t) 0};
-        vec_push(&list->bounds, &bounds, 1);
+        jak_vector_push(&list->bounds, &bounds, 1);
 
         JAK_INFO(JAK_SLICE_LIST_TAG,
                  "created new appender in slice list %p\n\t"

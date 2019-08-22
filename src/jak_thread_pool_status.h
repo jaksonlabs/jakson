@@ -26,17 +26,17 @@
 
 JAK_BEGIN_DECL
 
-typedef enum thread_status_e {
-        thread_status_idle = 0,
-        thread_status_working = 1,
-        thread_status_aborted = 2,
-        thread_status_finished = 3,
-        thread_status_killed = 4,
-        thread_status_created = 5,
-        thread_status_will_terminate = 6,
-        thread_status_completed = 7,
-        thread_status_empty = 99
-} thread_status_e;
+typedef enum jak_thread_status_e {
+        JAK_THREAD_STATUS_IDLE = 0,
+        JAK_THREAD_STATUS_WORKING = 1,
+        JAK_THREAD_STATUS_ABORTED = 2,
+        JAK_THREAD_STATUS_FINISHED = 3,
+        JAK_THREAD_STATUS_KILLED = 4,
+        JAK_THREAD_STATUS_CREATED = 5,
+        JAK_THREAD_STATUS_WILL_TERMINATE = 6,
+        JAK_THREAD_STATUS_COMPLETED = 7,
+        JAK_THREAD_STATUS_EMPTY = 99
+} jak_thread_status_e;
 
 JAK_END_DECL
 

@@ -163,7 +163,7 @@ bool jak_carbon_field_type_is_constant(jak_carbon_field_type_e type)
         return (jak_carbon_field_type_is_null(type) || jak_carbon_field_type_is_boolean(type));
 }
 
-bool jak_carbon_field_skip(struct jak_memfile *file)
+bool jak_carbon_field_skip(jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(file)
         jak_u8 type_marker = *JAK_MEMFILE_PEEK(file, jak_u8);
@@ -228,33 +228,33 @@ bool jak_carbon_field_skip(struct jak_memfile *file)
         return true;
 }
 
-bool jak_carbon_field_skip_object(struct jak_memfile *file)
+bool jak_carbon_field_skip_object(jak_memfile *file)
 {
         jak_u8 type_marker = *JAK_MEMFILE_READ_TYPE(file, jak_u8);
 
         JAK_ERROR_IF(type_marker != JAK_CARBON_FIELD_TYPE_OBJECT, &file->err, JAK_ERR_TYPEMISMATCH);
         jak_carbon_object_it skip_it;
-        jak_carbon_object_it_create(&skip_it, file, &file->err, memfile_tell(file) - sizeof(jak_u8));
+        jak_carbon_object_it_create(&skip_it, file, &file->err, jak_memfile_tell(file) - sizeof(jak_u8));
         jak_carbon_object_it_fast_forward(&skip_it);
-        memfile_seek(file, memfile_tell(&skip_it.memfile));
+        jak_memfile_seek(file, jak_memfile_tell(&skip_it.memfile));
         jak_carbon_object_it_drop(&skip_it);
         return true;
 }
 
-bool jak_carbon_field_skip_array(struct jak_memfile *file)
+bool jak_carbon_field_skip_array(jak_memfile *file)
 {
         jak_u8 type_marker = *JAK_MEMFILE_READ_TYPE(file, jak_u8);
 
         JAK_ERROR_IF(type_marker != JAK_CARBON_FIELD_TYPE_ARRAY, &file->err, JAK_ERR_TYPEMISMATCH);
         jak_carbon_array_it skip_it;
-        jak_carbon_array_it_create(&skip_it, file, &file->err, memfile_tell(file) - sizeof(jak_u8));
+        jak_carbon_array_it_create(&skip_it, file, &file->err, jak_memfile_tell(file) - sizeof(jak_u8));
         jak_carbon_array_it_fast_forward(&skip_it);
-        memfile_seek(file, memfile_tell(&skip_it.memfile));
+        jak_memfile_seek(file, jak_memfile_tell(&skip_it.memfile));
         jak_carbon_array_it_drop(&skip_it);
         return true;
 }
 
-bool jak_carbon_field_skip_column(struct jak_memfile *file)
+bool jak_carbon_field_skip_column(jak_memfile *file)
 {
         jak_u8 type_marker = *JAK_MEMFILE_READ_TYPE(file, jak_u8);
 
@@ -271,64 +271,64 @@ bool jak_carbon_field_skip_column(struct jak_memfile *file)
 
         jak_carbon_column_it skip_it;
         jak_carbon_column_it_create(&skip_it, file, &file->err,
-                                memfile_tell(file) - sizeof(jak_u8));
+                                jak_memfile_tell(file) - sizeof(jak_u8));
         jak_carbon_column_it_fast_forward(&skip_it);
-        memfile_seek(file, memfile_tell(&skip_it.memfile));
+        jak_memfile_seek(file, jak_memfile_tell(&skip_it.memfile));
         return true;
 }
 
-bool jak_carbon_field_skip_binary(struct jak_memfile *file)
+bool jak_carbon_field_skip_binary(jak_memfile *file)
 {
         jak_u8 type_marker = *JAK_MEMFILE_READ_TYPE(file, jak_u8);
 
         JAK_ERROR_IF(type_marker != JAK_CARBON_FIELD_TYPE_BINARY, &file->err, JAK_ERR_TYPEMISMATCH);
         /* read and skip mime type with variable-length integer type */
-        jak_u64 mime_type = memfile_read_uintvar_stream(NULL, file);
+        jak_u64 mime_type = jak_memfile_read_uintvar_stream(NULL, file);
         JAK_UNUSED(mime_type);
 
         /* read blob length */
-        jak_u64 blob_len = memfile_read_uintvar_stream(NULL, file);
+        jak_u64 blob_len = jak_memfile_read_uintvar_stream(NULL, file);
 
         /* skip blob */
-        memfile_skip(file, blob_len);
+        jak_memfile_skip(file, blob_len);
         return true;
 }
 
-bool jak_carbon_field_skip_custom_binary(struct jak_memfile *file)
+bool jak_carbon_field_skip_custom_binary(jak_memfile *file)
 {
         jak_u8 type_marker = *JAK_MEMFILE_READ_TYPE(file, jak_u8);
 
         JAK_ERROR_IF(type_marker != JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM, &file->err, JAK_ERR_TYPEMISMATCH);
         /* read custom type string length, and skip the type string */
-        jak_u64 custom_type_str_len = memfile_read_uintvar_stream(NULL, file);
-        memfile_skip(file, custom_type_str_len);
+        jak_u64 custom_type_str_len = jak_memfile_read_uintvar_stream(NULL, file);
+        jak_memfile_skip(file, custom_type_str_len);
 
         /* read blob length, and skip blob data */
-        jak_u64 blob_len = memfile_read_uintvar_stream(NULL, file);
-        memfile_skip(file, blob_len);
+        jak_u64 blob_len = jak_memfile_read_uintvar_stream(NULL, file);
+        jak_memfile_skip(file, blob_len);
         return true;
 }
 
-bool jak_carbon_field_skip_string(struct jak_memfile *file)
+bool jak_carbon_field_skip_string(jak_memfile *file)
 {
         jak_u8 type_marker = *JAK_MEMFILE_READ_TYPE(file, jak_u8);
 
         JAK_ERROR_IF(type_marker != JAK_CARBON_FIELD_TYPE_STRING, &file->err, JAK_ERR_TYPEMISMATCH);
-        jak_u64 strlen = memfile_read_uintvar_stream(NULL, file);
-        memfile_skip(file, strlen);
+        jak_u64 strlen = jak_memfile_read_uintvar_stream(NULL, file);
+        jak_memfile_skip(file, strlen);
         return true;
 }
 
-bool jak_carbon_field_skip_float(struct jak_memfile *file)
+bool jak_carbon_field_skip_float(jak_memfile *file)
 {
         jak_u8 type_marker = *JAK_MEMFILE_READ_TYPE(file, jak_u8);
 
         JAK_ERROR_IF(type_marker != JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT, &file->err, JAK_ERR_TYPEMISMATCH);
-        memfile_skip(file, sizeof(float));
+        jak_memfile_skip(file, sizeof(float));
         return true;
 }
 
-bool jak_carbon_field_skip_boolean(struct jak_memfile *file)
+bool jak_carbon_field_skip_boolean(jak_memfile *file)
 {
         jak_u8 type_marker = *JAK_MEMFILE_READ_TYPE(file, jak_u8);
 
@@ -337,7 +337,7 @@ bool jak_carbon_field_skip_boolean(struct jak_memfile *file)
         return true;
 }
 
-bool jak_carbon_field_skip_null(struct jak_memfile *file)
+bool jak_carbon_field_skip_null(jak_memfile *file)
 {
         jak_u8 type_marker = *JAK_MEMFILE_READ_TYPE(file, jak_u8);
 
@@ -345,47 +345,47 @@ bool jak_carbon_field_skip_null(struct jak_memfile *file)
         return true;
 }
 
-bool jak_carbon_field_skip_8(struct jak_memfile *file)
+bool jak_carbon_field_skip_8(jak_memfile *file)
 {
         jak_u8 type_marker = *JAK_MEMFILE_READ_TYPE(file, jak_u8);
 
         JAK_ERROR_IF(type_marker != JAK_CARBON_FIELD_TYPE_NUMBER_I8 && type_marker != JAK_CARBON_FIELD_TYPE_NUMBER_U8,
                  &file->err, JAK_ERR_TYPEMISMATCH);
         JAK_ASSERT(sizeof(jak_u8) == sizeof(jak_i8));
-        memfile_skip(file, sizeof(jak_u8));
+        jak_memfile_skip(file, sizeof(jak_u8));
         return true;
 }
 
-bool jak_carbon_field_skip_16(struct jak_memfile *file)
+bool jak_carbon_field_skip_16(jak_memfile *file)
 {
         jak_u8 type_marker = *JAK_MEMFILE_READ_TYPE(file, jak_u8);
 
         JAK_ERROR_IF(type_marker != JAK_CARBON_FIELD_TYPE_NUMBER_I16 && type_marker != JAK_CARBON_FIELD_TYPE_NUMBER_U16,
                  &file->err, JAK_ERR_TYPEMISMATCH);
         JAK_ASSERT(sizeof(jak_u16) == sizeof(jak_i16));
-        memfile_skip(file, sizeof(jak_u16));
+        jak_memfile_skip(file, sizeof(jak_u16));
         return true;
 }
 
-bool jak_carbon_field_skip_32(struct jak_memfile *file)
+bool jak_carbon_field_skip_32(jak_memfile *file)
 {
         jak_u8 type_marker = *JAK_MEMFILE_READ_TYPE(file, jak_u8);
 
         JAK_ERROR_IF(type_marker != JAK_CARBON_FIELD_TYPE_NUMBER_I32 && type_marker != JAK_CARBON_FIELD_TYPE_NUMBER_U32,
                  &file->err, JAK_ERR_TYPEMISMATCH);
         JAK_ASSERT(sizeof(jak_u32) == sizeof(jak_i32));
-        memfile_skip(file, sizeof(jak_u32));
+        jak_memfile_skip(file, sizeof(jak_u32));
         return true;
 }
 
-bool jak_carbon_field_skip_64(struct jak_memfile *file)
+bool jak_carbon_field_skip_64(jak_memfile *file)
 {
         jak_u8 type_marker = *JAK_MEMFILE_READ_TYPE(file, jak_u8);
 
         JAK_ERROR_IF(type_marker != JAK_CARBON_FIELD_TYPE_NUMBER_I64 && type_marker != JAK_CARBON_FIELD_TYPE_NUMBER_U64,
                  &file->err, JAK_ERR_TYPEMISMATCH);
         JAK_ASSERT(sizeof(jak_u64) == sizeof(jak_i64));
-        memfile_skip(file, sizeof(jak_u64));
+        jak_memfile_skip(file, sizeof(jak_u64));
         return true;
 }
 

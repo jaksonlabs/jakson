@@ -88,8 +88,8 @@ bool jak_pack_drop(jak_error *err, jak_packer *self)
         return self->drop(self);
 }
 
-bool jak_pack_write_extra(jak_error *err, jak_packer *self, struct jak_memfile *dst,
-                      const struct jak_vector ofType (const char *) *strings)
+bool jak_pack_write_extra(jak_error *err, jak_packer *self, jak_memfile *dst,
+                      const jak_vector ofType (const char *) *strings)
 {
         JAK_ERROR_IF_NULL(self)
         JAK_ERROR_IF_NOT_IMPLEMENTED(err, self, write_extra)
@@ -103,7 +103,7 @@ bool jak_pack_read_extra(jak_error *err, jak_packer *self, FILE *src, size_t nby
         return self->read_extra(self, src, nbytes);
 }
 
-bool jak_pack_encode(jak_error *err, jak_packer *self, struct jak_memfile *dst, const char *string)
+bool jak_pack_encode(jak_error *err, jak_packer *self, jak_memfile *dst, const char *string)
 {
         JAK_ERROR_IF_NULL(self)
         JAK_ERROR_IF_NOT_IMPLEMENTED(err, self, encode_string)
@@ -117,14 +117,14 @@ bool jak_pack_decode(jak_error *err, jak_packer *self, char *dst, size_t strlen,
         return self->decode_string(self, dst, strlen, src);
 }
 
-bool jak_pack_print_extra(jak_error *err, jak_packer *self, FILE *file, struct jak_memfile *src)
+bool jak_pack_print_extra(jak_error *err, jak_packer *self, FILE *file, jak_memfile *src)
 {
         JAK_ERROR_IF_NULL(self)
         JAK_ERROR_IF_NOT_IMPLEMENTED(err, self, print_extra)
         return self->print_extra(self, file, src);
 }
 
-bool jak_pack_print_encoded(jak_error *err, jak_packer *self, FILE *file, struct jak_memfile *src,
+bool jak_pack_print_encoded(jak_error *err, jak_packer *self, FILE *file, jak_memfile *src,
                         jak_u32 decompressed_strlen)
 {
         JAK_ERROR_IF_NULL(self)

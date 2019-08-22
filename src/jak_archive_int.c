@@ -21,7 +21,7 @@
 
 #include <jak_archive_int.h>
 
-void jak_int_read_prop_offsets(jak_archive_prop_offs *prop_offsets, struct jak_memfile *memfile,
+void jak_int_read_prop_offsets(jak_archive_prop_offs *prop_offsets, jak_memfile *memfile,
                                const jak_object_flags_u *flags)
 {
         JAK_ZERO_MEMORY(prop_offsets, sizeof(jak_archive_prop_offs));
@@ -105,40 +105,40 @@ void jak_int_read_prop_offsets(jak_archive_prop_offs *prop_offsets, struct jak_m
         }
 }
 
-void jak_int_embedded_fixed_props_read(jak_fixed_prop *prop, struct jak_memfile *memfile)
+void jak_int_embedded_fixed_props_read(jak_fixed_prop *prop, jak_memfile *memfile)
 {
         prop->header = JAK_MEMFILE_READ_TYPE(memfile, jak_prop_header);
         prop->keys = (jak_archive_field_sid_t *) JAK_MEMFILE_READ(memfile, prop->header->num_entries *
                                                                            sizeof(jak_archive_field_sid_t));
-        prop->values = memfile_peek(memfile, 1);
+        prop->values = jak_memfile_peek(memfile, 1);
 }
 
-void jak_int_embedded_var_props_read(jak_var_prop *prop, struct jak_memfile *memfile)
+void jak_int_embedded_var_props_read(jak_var_prop *prop, jak_memfile *memfile)
 {
         prop->header = JAK_MEMFILE_READ_TYPE(memfile, jak_prop_header);
         prop->keys = (jak_archive_field_sid_t *) JAK_MEMFILE_READ(memfile, prop->header->num_entries *
                                                                            sizeof(jak_archive_field_sid_t));
         prop->offsets = (jak_offset_t *) JAK_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(jak_offset_t));
-        prop->values = memfile_peek(memfile, 1);
+        prop->values = jak_memfile_peek(memfile, 1);
 }
 
-void jak_int_embedded_null_props_read(jak_null_prop *prop, struct jak_memfile *memfile)
+void jak_int_embedded_null_props_read(jak_null_prop *prop, jak_memfile *memfile)
 {
         prop->header = JAK_MEMFILE_READ_TYPE(memfile, jak_prop_header);
         prop->keys = (jak_archive_field_sid_t *) JAK_MEMFILE_READ(memfile, prop->header->num_entries *
                                                                            sizeof(jak_archive_field_sid_t));
 }
 
-void jak_int_embedded_array_props_read(jak_array_prop *prop, struct jak_memfile *memfile)
+void jak_int_embedded_array_props_read(jak_array_prop *prop, jak_memfile *memfile)
 {
         prop->header = JAK_MEMFILE_READ_TYPE(memfile, jak_prop_header);
         prop->keys = (jak_archive_field_sid_t *) JAK_MEMFILE_READ(memfile, prop->header->num_entries *
                                                                            sizeof(jak_archive_field_sid_t));
         prop->lengths = (jak_u32 *) JAK_MEMFILE_READ(memfile, prop->header->num_entries * sizeof(jak_u32));
-        prop->values_begin = memfile_tell(memfile);
+        prop->values_begin = jak_memfile_tell(memfile);
 }
 
-void jak_int_embedded_table_props_read(jak_table_prop *prop, struct jak_memfile *memfile)
+void jak_int_embedded_table_props_read(jak_table_prop *prop, jak_memfile *memfile)
 {
         prop->header->marker = *JAK_MEMFILE_READ_TYPE(memfile, char);
         prop->header->num_entries = *JAK_MEMFILE_READ_TYPE(memfile, jak_u8);

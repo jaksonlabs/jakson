@@ -32,7 +32,7 @@
 JAK_BEGIN_DECL
 
 typedef struct jak_carbon_column_it {
-        struct jak_memfile memfile;
+        jak_memfile memfile;
 
         jak_offset_t num_and_capacity_start_offset;
         jak_offset_t column_start_offset;
@@ -49,7 +49,7 @@ typedef struct jak_carbon_column_it {
         jak_spinlock lock;
 } jak_carbon_column_it;
 
-bool jak_carbon_column_it_create(jak_carbon_column_it *it, struct jak_memfile *memfile, jak_error *err, jak_offset_t column_start_offset);
+bool jak_carbon_column_it_create(jak_carbon_column_it *it, jak_memfile *memfile, jak_error *err, jak_offset_t column_start_offset);
 bool jak_carbon_column_it_clone(jak_carbon_column_it *dst, jak_carbon_column_it *src);
 
 bool jak_carbon_column_it_insert(jak_carbon_insert *inserter, jak_carbon_column_it *it);

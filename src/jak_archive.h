@@ -54,8 +54,8 @@ typedef struct jak_archive_callback {
         void (*end_write_archive_file_to_disk)();
         void (*begin_load_archive)();
         void (*end_load_archive)();
-        void (*begin_setup_jak_string_dictionary)();
-        void (*end_setup_jak_string_dictionary)();
+        void (*begin_setup_jak_string_dict_ionary)();
+        void (*end_setup_jak_string_dict_ionary)();
         void (*begin_parse_json)();
         void (*end_parse_json)();
         void (*begin_test_json)();
@@ -75,8 +75,8 @@ typedef struct jak_archive_callback {
 
 JAK_DEFINE_GET_ERROR_FUNCTION(archive, jak_archive, archive);
 
-bool jak_archive_from_json(jak_archive *out, const char *file, jak_error *err, const char *json_string, jak_packer_e compressor, enum jak_str_dict_tag dictionary, size_t num_async_dic_threads, bool read_optimized, bool bake_jak_string_id_index, jak_archive_callback *callback);
-bool jak_archive_stream_from_json(jak_memblock **stream, jak_error *err, const char *json_string, jak_packer_e compressor, enum jak_str_dict_tag dictionary, size_t num_async_dic_threads, bool read_optimized, bool bake_id_index, jak_archive_callback *callback);
+bool jak_archive_from_json(jak_archive *out, const char *file, jak_error *err, const char *json_string, jak_packer_e compressor, jak_str_dict_tag_e dictionary, size_t num_async_dic_threads, bool read_optimized, bool bake_jak_string_id_index, jak_archive_callback *callback);
+bool jak_archive_stream_from_json(jak_memblock **stream, jak_error *err, const char *json_string, jak_packer_e compressor, jak_str_dict_tag_e dictionary, size_t num_async_dic_threads, bool read_optimized, bool bake_id_index, jak_archive_callback *callback);
 bool jak_archive_from_model(jak_memblock **stream, jak_error *err, jak_column_doc *model, jak_packer_e compressor, bool bake_jak_string_id_index, jak_archive_callback *callback);
 bool jak_archive_write(FILE *file, const jak_memblock *stream);
 bool jak_archive_load(jak_memblock **stream, FILE *file);

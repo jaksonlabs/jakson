@@ -38,11 +38,11 @@
         result;                                                                         \
 })
 
-bool jak_carbon_media_write(struct jak_memfile *dst, jak_carbon_field_type_e type)
+bool jak_carbon_media_write(jak_memfile *dst, jak_carbon_field_type_e type)
 {
         JAK_ERROR_IF_NULL(dst);
         jak_media_type t = type;
-        memfile_write(dst, &t, sizeof(jak_media_type));
+        jak_memfile_write(dst, &t, sizeof(jak_media_type));
         return true;
 }
 

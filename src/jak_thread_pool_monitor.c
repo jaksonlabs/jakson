@@ -20,7 +20,7 @@
 #include <jak_stdinc.h>
 #include <jak_thread_pool.h>
 
-struct thread_pool_stats thread_pool_get_stats(struct thread_pool *pool)
+jak_thread_pool_stats jak_thread_pool_get_stats(jak_thread_pool *pool)
 {
         // In case no tasks care completed, no averages can be calculated
         if (pool->statistics->task_complete_count) {
@@ -31,18 +31,18 @@ struct thread_pool_stats thread_pool_get_stats(struct thread_pool *pool)
         return *pool->statistics;
 }
 
-struct thread_stats thread_pool_get_thread_stats(struct thread_pool *pool, size_t id)
+jak_thread_stats jak_thread_pool_get_thread_stats(jak_thread_pool *pool, size_t id)
 {
-        struct thread_stats *thread_stats = pool->thread_infos[id]->statistics;
+        jak_thread_stats *thread_stats = pool->thread_infos[id]->statistics;
 
         // busy_time = running_time - idle_time
         struct timespec current;
         clock_gettime(CLOCK_MONOTONIC, &current);
-        thread_stats->busy_time = __get_time_diff(&thread_stats->creation_time, &current) - thread_stats->idle_time;
+        thread_stats->busy_time = __jak_get_time_diff(&thread_stats->creation_time, &current) - thread_stats->idle_time;
         return *thread_stats;
 }
 
-double thread_pool_get_time_working(struct thread_pool *pool)
+double jak_thread_pool_get_time_working(jak_thread_pool *pool)
 {
         struct timespec end;
 
@@ -50,7 +50,7 @@ double thread_pool_get_time_working(struct thread_pool *pool)
         double avg = 0.f;
         for (size_t i = 0; i < pool->size; ++i) {
                 struct timespec begin = pool->thread_infos[i]->statistics->creation_time;
-                double t = __get_time_diff(&begin, &end);
+                double t = __jak_get_time_diff(&begin, &end);
                 avg += t / (t + pool->thread_infos[i]->statistics->idle_time);
         }
         return avg / pool->size;

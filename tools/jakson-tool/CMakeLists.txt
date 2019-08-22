@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(ark-carbon C)
+project(jakson-tool C)
 
 file(GLOB_RECURSE CMDOPT_HEADER_FILES ${CMAKE_SOURCE_DIR}/include/cmdopt/*.h )
 file(GLOB_RECURSE CMDOPT_SOURCE_FILES ${CMAKE_SOURCE_DIR}/src/cmdopt/*.c )
@@ -11,8 +11,8 @@ set(TOOL_SOURCES
         modules.h
         modules.c ../../src/jak_utils_numbers.c)
 
-add_executable(ark-carbon main.c ${TOOL_SOURCES})
-target_link_libraries(ark-carbon PUBLIC ${LIBS} PRIVATE ark-sources)
+add_executable(jakson-tool main.c ${TOOL_SOURCES})
+target_link_libraries(jakson-tool PUBLIC ${LIBS} PRIVATE jakson-sources)
 
-install(TARGETS ark-carbon
+install(TARGETS jakson-tool
         RUNTIME DESTINATION bin)

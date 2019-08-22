@@ -6,9 +6,9 @@
 #define DEFINE_UINTVAR_STREAM_POINT_TEST(test_name, value, expected_bytes)     \
 TEST(VarUintTest, ReadWrite##test_name) {                               \
         char dst[10];                                                   \
-        jak_u8 nbytes = uintvar_stream_write(&dst, value);                         \
+        jak_u8 nbytes = jak_uintvar_stream_write(&dst, value);                         \
         ASSERT_TRUE(nbytes == expected_bytes);                          \
-        jak_u64 read_value = uintvar_stream_read(&nbytes, &dst);                   \
+        jak_u64 read_value = jak_uintvar_stream_read(&nbytes, &dst);                   \
         ASSERT_TRUE(nbytes == expected_bytes);                          \
         ASSERT_TRUE(read_value == value);                               \
 }
@@ -48,8 +48,8 @@ TEST(VarUintTest, ReadWriteRandValuesEncoding) {
         for (unsigned i = 0; i < 10000; i++) {
                 jak_u64 in_value = rand();
                 in_value = (in_value << 32) | rand();
-                uintvar_stream_write(&dst, in_value);
-                jak_u64 out_value = uintvar_stream_read(NULL, &dst);
+                jak_uintvar_stream_write(&dst, in_value);
+                jak_u64 out_value = jak_uintvar_stream_read(NULL, &dst);
                 ASSERT_EQ(in_value, out_value);
         }
 }

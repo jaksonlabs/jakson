@@ -31,13 +31,13 @@
 JAK_BEGIN_DECL
 
 typedef struct jak_carbon_object_it {
-        struct jak_memfile memfile;
+        jak_memfile memfile;
         jak_error err;
 
         jak_offset_t object_contents_off;
         bool object_end_reached;
 
-        struct jak_vector ofType(jak_offset_t) history;
+        jak_vector ofType(jak_offset_t) history;
 
         struct {
                 struct {
@@ -56,7 +56,7 @@ typedef struct jak_carbon_object_it {
         jak_i64 mod_size;
 } jak_carbon_object_it;
 
-bool jak_carbon_object_it_create(jak_carbon_object_it *it, struct jak_memfile *memfile, jak_error *err, jak_offset_t payload_start);
+bool jak_carbon_object_it_create(jak_carbon_object_it *it, jak_memfile *memfile, jak_error *err, jak_offset_t payload_start);
 bool jak_carbon_object_it_copy(jak_carbon_object_it *dst, jak_carbon_object_it *src);
 bool jak_carbon_object_it_clone(jak_carbon_object_it *dst, jak_carbon_object_it *src);
 bool jak_carbon_object_it_drop(jak_carbon_object_it *it);
@@ -67,7 +67,7 @@ bool jak_carbon_object_it_has_next(jak_carbon_object_it *it);
 bool jak_carbon_object_it_fast_forward(jak_carbon_object_it *it);
 bool jak_carbon_object_it_prev(jak_carbon_object_it *it);
 
-jak_offset_t jak_carbon_object_it_memfile_pos(jak_carbon_object_it *it);
+jak_offset_t jak_carbon_object_it_jak_memfile_pos(jak_carbon_object_it *it);
 bool jak_carbon_object_it_tell(jak_offset_t *key_off, jak_offset_t *value_off, jak_carbon_object_it *it);
 
 const char *jak_carbon_object_it_prop_name(jak_u64 *key_len, jak_carbon_object_it *it);

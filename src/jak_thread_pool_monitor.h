@@ -29,13 +29,13 @@ JAK_BEGIN_DECL
 #include "jak_thread_pool.h"
 
 // Returns the average fraction of time the active threads have been working.
-double thread_pool_get_time_working(struct thread_pool *pool);
+double jak_thread_pool_get_time_working(jak_thread_pool *pool);
 
 // Fill all stats of the passed thread pool instance
-struct thread_pool_stats thread_pool_get_stats(struct thread_pool *pool);
+jak_thread_pool_stats jak_thread_pool_get_stats(jak_thread_pool *pool);
 
 // Fill all stats of the thread matching the given id in the thread pool
-struct thread_stats thread_pool_get_thread_stats(struct thread_pool *pool, size_t id);
+jak_thread_stats jak_thread_pool_get_thread_stats(jak_thread_pool *pool, size_t id);
 
 JAK_END_DECL
 

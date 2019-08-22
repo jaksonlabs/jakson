@@ -23,7 +23,7 @@
 #include <jak_carbon_prop.h>
 #include "jak_carbon_object_it.h"
 
-bool jak_carbon_object_it_create(jak_carbon_object_it *it, struct jak_memfile *memfile, jak_error *err,
+bool jak_carbon_object_it_create(jak_carbon_object_it *it, jak_memfile *memfile, jak_error *err,
                              jak_offset_t payload_start)
 {
         JAK_ERROR_IF_NULL(it);
@@ -37,14 +37,14 @@ bool jak_carbon_object_it_create(jak_carbon_object_it *it, struct jak_memfile *m
         jak_spinlock_init(&it->lock);
         jak_error_init(&it->err);
 
-        vec_create(&it->history, NULL, sizeof(jak_offset_t), 40);
+        jak_vector_create(&it->history, NULL, sizeof(jak_offset_t), 40);
 
-        memfile_open(&it->memfile, memfile->memblock, memfile->mode);
-        memfile_seek(&it->memfile, payload_start);
+        jak_memfile_open(&it->memfile, memfile->memblock, memfile->mode);
+        jak_memfile_seek(&it->memfile, payload_start);
 
-        JAK_ERROR_IF(memfile_remain_size(&it->memfile) < sizeof(jak_u8), err, JAK_ERR_CORRUPTED);
+        JAK_ERROR_IF(jak_memfile_remain_size(&it->memfile) < sizeof(jak_u8), err, JAK_ERR_CORRUPTED);
 
-        jak_u8 marker = *memfile_read(&it->memfile, sizeof(jak_u8));
+        jak_u8 marker = *jak_memfile_read(&it->memfile, sizeof(jak_u8));
         JAK_ERROR_IF_WDETAILS(marker != JAK_CARBON_MARKER_OBJECT_BEGIN, err, JAK_ERR_ILLEGALOP,
                               "object begin marker ('{') not found");
 
@@ -69,13 +69,13 @@ bool jak_carbon_object_it_clone(jak_carbon_object_it *dst, jak_carbon_object_it 
 {
         JAK_ERROR_IF_NULL(dst);
         JAK_ERROR_IF_NULL(src);
-        memfile_clone(&dst->memfile, &src->memfile);
+        jak_memfile_clone(&dst->memfile, &src->memfile);
         dst->object_contents_off = src->object_contents_off;
         jak_spinlock_init(&dst->lock);
         jak_error_cpy(&dst->err, &src->err);
         dst->mod_size = src->mod_size;
         dst->object_end_reached = src->object_end_reached;
-        vec_cpy(&dst->history, &src->history);
+        jak_vector_cpy(&dst->history, &src->history);
         dst->field.key.name_len = src->field.key.name_len;
         dst->field.key.name = src->field.key.name;
         dst->field.key.offset = src->field.key.offset;
@@ -88,23 +88,23 @@ bool jak_carbon_object_it_drop(jak_carbon_object_it *it)
 {
         jak_carbon_int_field_auto_close(&it->field.value.data);
         jak_carbon_int_field_access_drop(&it->field.value.data);
-        vec_drop(&it->history);
+        jak_vector_drop(&it->history);
         return true;
 }
 
 bool jak_carbon_object_it_rewind(jak_carbon_object_it *it)
 {
         JAK_ERROR_IF_NULL(it);
-        JAK_ERROR_IF(it->object_contents_off >= memfile_size(&it->memfile), &it->err, JAK_ERR_OUTOFBOUNDS);
+        JAK_ERROR_IF(it->object_contents_off >= jak_memfile_size(&it->memfile), &it->err, JAK_ERR_OUTOFBOUNDS);
         jak_carbon_int_history_clear(&it->history);
-        return memfile_seek(&it->memfile, it->object_contents_off);
+        return jak_memfile_seek(&it->memfile, it->object_contents_off);
 }
 
 bool jak_carbon_object_it_next(jak_carbon_object_it *it)
 {
         JAK_ERROR_IF_NULL(it);
         bool is_empty_slot;
-        jak_offset_t last_off = memfile_tell(&it->memfile);
+        jak_offset_t last_off = jak_memfile_tell(&it->memfile);
         jak_carbon_int_field_access_drop(&it->field.value.data);
         if (jak_carbon_int_object_it_next(&is_empty_slot, &it->object_end_reached, it)) {
                 jak_carbon_int_history_push(&it->history, last_off);
@@ -114,12 +114,12 @@ bool jak_carbon_object_it_next(jak_carbon_object_it *it)
                 if (!it->object_end_reached) {
                         JAK_ERROR_IF(!is_empty_slot, &it->err, JAK_ERR_CORRUPTED);
 
-                        while (*memfile_peek(&it->memfile, 1) == 0) {
-                                memfile_skip(&it->memfile, 1);
+                        while (*jak_memfile_peek(&it->memfile, 1) == 0) {
+                                jak_memfile_skip(&it->memfile, 1);
                         }
                 }
 
-                JAK_ASSERT(*memfile_peek(&it->memfile, sizeof(char)) == JAK_CARBON_MARKER_OBJECT_END);
+                JAK_ASSERT(*jak_memfile_peek(&it->memfile, sizeof(char)) == JAK_CARBON_MARKER_OBJECT_END);
                 return false;
         }
 }
@@ -136,17 +136,17 @@ bool jak_carbon_object_it_prev(jak_carbon_object_it *it)
         JAK_ERROR_IF_NULL(it);
         if (jak_carbon_int_history_has(&it->history)) {
                 jak_offset_t prev_off = jak_carbon_int_history_pop(&it->history);
-                memfile_seek(&it->memfile, prev_off);
+                jak_memfile_seek(&it->memfile, prev_off);
                 return jak_carbon_int_object_it_refresh(NULL, NULL, it);
         } else {
                 return false;
         }
 }
 
-jak_offset_t jak_carbon_object_it_memfile_pos(jak_carbon_object_it *it)
+jak_offset_t jak_carbon_object_it_jak_memfile_pos(jak_carbon_object_it *it)
 {
         JAK_ERROR_IF_NULL(it)
-        return memfile_tell(&it->memfile);
+        return jak_memfile_tell(&it->memfile);
 }
 
 bool jak_carbon_object_it_tell(jak_offset_t *key_off, jak_offset_t *value_off, jak_carbon_object_it *it)
@@ -183,7 +183,7 @@ bool jak_carbon_object_it_remove(jak_carbon_object_it *it)
         jak_carbon_field_type_e type;
         if (jak_carbon_object_it_prop_type(&type, it)) {
                 jak_offset_t prop_off = jak_carbon_int_history_pop(&it->history);
-                memfile_seek(&it->memfile, prop_off);
+                jak_memfile_seek(&it->memfile, prop_off);
                 it->mod_size -= prop_remove(it, type);
                 return true;
         } else {
@@ -309,7 +309,7 @@ bool jak_carbon_object_it_fast_forward(jak_carbon_object_it *it)
         JAK_ERROR_IF_NULL(it);
         while (jak_carbon_object_it_next(it)) {}
 
-        JAK_ASSERT(*memfile_peek(&it->memfile, sizeof(jak_u8)) == JAK_CARBON_MARKER_OBJECT_END);
-        memfile_skip(&it->memfile, sizeof(jak_u8));
+        JAK_ASSERT(*jak_memfile_peek(&it->memfile, sizeof(jak_u8)) == JAK_CARBON_MARKER_OBJECT_END);
+        jak_memfile_skip(&it->memfile, sizeof(jak_u8));
         return true;
 }

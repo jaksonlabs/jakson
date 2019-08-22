@@ -29,7 +29,7 @@ bool jak_opt_manager_create(jak_command_opt_mgr *manager, char *module_name, cha
         manager->module_desc = module_desc ? strdup(module_desc) : NULL;
         manager->policy = policy;
         manager->fallback = fallback;
-        JAK_CHECK_SUCCESS(vec_create(&manager->groups, NULL, sizeof(jak_command_opt_group), 5));
+        JAK_CHECK_SUCCESS(jak_vector_create(&manager->groups, NULL, sizeof(jak_command_opt_group), 5));
         return true;
 }
 
@@ -37,18 +37,18 @@ bool jak_opt_manager_drop(jak_command_opt_mgr *manager)
 {
         JAK_ERROR_IF_NULL(manager);
         for (size_t i = 0; i < manager->groups.num_elems; i++) {
-                jak_command_opt_group *cmdGroup = vec_get(&manager->groups, i, jak_command_opt_group);
+                jak_command_opt_group *cmdGroup = JAK_VECTOR_GET(&manager->groups, i, jak_command_opt_group);
                 for (size_t j = 0; j < cmdGroup->cmd_options.num_elems; j++) {
-                        jak_command_opt *option = vec_get(&cmdGroup->cmd_options, j, jak_command_opt);
+                        jak_command_opt *option = JAK_VECTOR_GET(&cmdGroup->cmd_options, j, jak_command_opt);
                         free(option->opt_name);
                         free(option->opt_desc);
                         free(option->opt_manfile);
                 }
-                JAK_CHECK_SUCCESS(vec_drop(&cmdGroup->cmd_options));
+                JAK_CHECK_SUCCESS(jak_vector_drop(&cmdGroup->cmd_options));
                 free(cmdGroup->desc);
         }
 
-        JAK_CHECK_SUCCESS(vec_drop(&manager->groups));
+        JAK_CHECK_SUCCESS(jak_vector_drop(&manager->groups));
         free(manager->module_name);
         if (manager->module_desc) {
                 free(manager->module_desc);
@@ -86,9 +86,9 @@ bool jak_opt_manager_create_group(jak_command_opt_group **group, const char *des
         JAK_ERROR_IF_NULL(group)
         JAK_ERROR_IF_NULL(desc)
         JAK_ERROR_IF_NULL(manager)
-        jak_command_opt_group *cmdGroup = vec_new_and_get(&manager->groups, jak_command_opt_group);
+        jak_command_opt_group *cmdGroup = JAK_VECTOR_NEW_AND_GET(&manager->groups, jak_command_opt_group);
         cmdGroup->desc = strdup(desc);
-        JAK_CHECK_SUCCESS(vec_create(&cmdGroup->cmd_options, NULL, sizeof(jak_command_opt), 10));
+        JAK_CHECK_SUCCESS(jak_vector_create(&cmdGroup->cmd_options, NULL, sizeof(jak_command_opt), 10));
         *group = cmdGroup;
         return true;
 }
@@ -102,7 +102,7 @@ bool opt_group_add_cmd(jak_command_opt_group *group, const char *opt_name, char 
         JAK_ERROR_IF_NULL(opt_manfile)
         JAK_ERROR_IF_NULL(callback)
 
-        jak_command_opt *command = vec_new_and_get(&group->cmd_options, jak_command_opt);
+        jak_command_opt *command = JAK_VECTOR_NEW_AND_GET(&group->cmd_options, jak_command_opt);
         command->opt_desc = strdup(opt_desc);
         command->opt_manfile = strdup(opt_manfile);
         command->opt_name = strdup(opt_name);
@@ -129,10 +129,10 @@ bool jak_opt_manager_show_help(FILE *file, jak_command_opt_mgr *manager)
                 }
                 fprintf(file, "These are common commands used in various situations:\n\n");
                 for (size_t i = 0; i < manager->groups.num_elems; i++) {
-                        jak_command_opt_group *cmdGroup = vec_get(&manager->groups, i, jak_command_opt_group);
+                        jak_command_opt_group *cmdGroup = JAK_VECTOR_GET(&manager->groups, i, jak_command_opt_group);
                         fprintf(file, "%s\n", cmdGroup->desc);
                         for (size_t j = 0; j < cmdGroup->cmd_options.num_elems; j++) {
-                                jak_command_opt *option = vec_get(&cmdGroup->cmd_options, j, jak_command_opt);
+                                jak_command_opt *option = JAK_VECTOR_GET(&cmdGroup->cmd_options, j, jak_command_opt);
                                 fprintf(file, "   %-15s%s\n", option->opt_name, option->opt_desc);
                         }
                         fprintf(file, "\n");
@@ -158,9 +158,9 @@ bool jak_opt_manager_show_help(FILE *file, jak_command_opt_mgr *manager)
 static jak_command_opt *option_by_name(jak_command_opt_mgr *manager, const char *name)
 {
         for (size_t i = 0; i < manager->groups.num_elems; i++) {
-                jak_command_opt_group *cmdGroup = vec_get(&manager->groups, i, jak_command_opt_group);
+                jak_command_opt_group *cmdGroup = JAK_VECTOR_GET(&manager->groups, i, jak_command_opt_group);
                 for (size_t j = 0; j < cmdGroup->cmd_options.num_elems; j++) {
-                        jak_command_opt *option = vec_get(&cmdGroup->cmd_options, j, jak_command_opt);
+                        jak_command_opt *option = JAK_VECTOR_GET(&cmdGroup->cmd_options, j, jak_command_opt);
                         if (strcmp(option->opt_name, name) == 0) {
                                 return option;
                         }

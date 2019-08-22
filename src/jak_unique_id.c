@@ -110,7 +110,7 @@ bool jak_unique_id_create(jak_uid_t *out)
         JAK_ERROR_PRINT_IF(!capacity_left, JAK_ERR_THREADOOOBJIDS)
         if (JAK_LIKELY(capacity_left)) {
                 union global_id internal =
-                        {.global_wallclock  = time_now_wallclock(),
+                        {.global_wallclock  = jak_wallclock(),
                                 .global_build_date = global_build_date_bit,
                                 .global_build_path = global_build_path_bit,
                                 .process_id        = process_local_id,

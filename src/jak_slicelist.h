@@ -98,10 +98,10 @@ typedef struct jak_slice_list {
         jak_allocator alloc;
         jak_spinlock lock;
 
-        struct jak_vector ofType(jak_slice) slices;
-        struct jak_vector ofType(jak_slice_descriptor) descriptors;
-        struct jak_vector ofType(jak_bloomfilter) filters;
-        struct jak_vector ofType(jak_hash_bounds) bounds;
+        jak_vector ofType(jak_slice) slices;
+        jak_vector ofType(jak_slice_descriptor) descriptors;
+        jak_vector ofType(jak_bloomfilter) filters;
+        jak_vector ofType(jak_hash_bounds) bounds;
 
         jak_u32 appender_idx;
         jak_error err;

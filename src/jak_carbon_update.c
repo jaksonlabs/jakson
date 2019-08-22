@@ -331,14 +331,14 @@ bool jak_carbon_update_set_float(jak_carbon_revise *context, const char *path, f
 
 bool jak_carbon_update_set_unsigned(jak_carbon_revise *context, const char *path, jak_u64 value)
 {
-        switch (number_min_type_unsigned(value)) {
-                case NUMBER_U8:
+        switch (jak_number_min_type_unsigned(value)) {
+                case JAK_NUMBER_U8:
                         return jak_carbon_update_set_u8(context, path, (jak_u8) value);
-                case NUMBER_U16:
+                case JAK_NUMBER_U16:
                         return jak_carbon_update_set_u16(context, path, (jak_u16) value);
-                case NUMBER_U32:
+                case JAK_NUMBER_U32:
                         return jak_carbon_update_set_u32(context, path, (jak_u32) value);
-                case NUMBER_U64:
+                case JAK_NUMBER_U64:
                         return jak_carbon_update_set_u64(context, path, (jak_u64) value);
                 default: JAK_ERROR(&context->err, JAK_ERR_INTERNALERR);
                         return false;
@@ -347,14 +347,14 @@ bool jak_carbon_update_set_unsigned(jak_carbon_revise *context, const char *path
 
 bool jak_carbon_update_set_signed(jak_carbon_revise *context, const char *path, jak_i64 value)
 {
-        switch (number_min_type_signed(value)) {
-                case NUMBER_I8:
+        switch (jak_number_min_type_signed(value)) {
+                case JAK_NUMBER_I8:
                         return jak_carbon_update_set_i8(context, path, (jak_i8) value);
-                case NUMBER_I16:
+                case JAK_NUMBER_I16:
                         return jak_carbon_update_set_i16(context, path, (jak_i16) value);
-                case NUMBER_I32:
+                case JAK_NUMBER_I32:
                         return jak_carbon_update_set_i32(context, path, (jak_i32) value);
-                case NUMBER_I64:
+                case JAK_NUMBER_I64:
                         return jak_carbon_update_set_i64(context, path, (jak_i64) value);
                 default: JAK_ERROR(&context->err, JAK_ERR_INTERNALERR);
                         return false;
@@ -502,14 +502,14 @@ bool jak_carbon_update_set_float_compiled(jak_carbon_revise *context, const jak_
 bool jak_carbon_update_set_unsigned_compiled(jak_carbon_revise *context, const jak_carbon_dot_path *path,
                                          jak_u64 value)
 {
-        switch (number_min_type_unsigned(value)) {
-                case NUMBER_U8:
+        switch (jak_number_min_type_unsigned(value)) {
+                case JAK_NUMBER_U8:
                         return jak_carbon_update_set_u8_compiled(context, path, (jak_u8) value);
-                case NUMBER_U16:
+                case JAK_NUMBER_U16:
                         return jak_carbon_update_set_u16_compiled(context, path, (jak_u16) value);
-                case NUMBER_U32:
+                case JAK_NUMBER_U32:
                         return jak_carbon_update_set_u32_compiled(context, path, (jak_u32) value);
-                case NUMBER_U64:
+                case JAK_NUMBER_U64:
                         return jak_carbon_update_set_u64_compiled(context, path, (jak_u64) value);
                 default: JAK_ERROR(&context->err, JAK_ERR_INTERNALERR);
                         return false;
@@ -519,14 +519,14 @@ bool jak_carbon_update_set_unsigned_compiled(jak_carbon_revise *context, const j
 bool jak_carbon_update_set_signed_compiled(jak_carbon_revise *context, const jak_carbon_dot_path *path,
                                        jak_i64 value)
 {
-        switch (number_min_type_signed(value)) {
-                case NUMBER_I8:
+        switch (jak_number_min_type_signed(value)) {
+                case JAK_NUMBER_I8:
                         return jak_carbon_update_set_i8_compiled(context, path, (jak_i8) value);
-                case NUMBER_I16:
+                case JAK_NUMBER_I16:
                         return jak_carbon_update_set_i16_compiled(context, path, (jak_i16) value);
-                case NUMBER_I32:
+                case JAK_NUMBER_I32:
                         return jak_carbon_update_set_i32_compiled(context, path, (jak_i32) value);
-                case NUMBER_I64:
+                case JAK_NUMBER_I64:
                         return jak_carbon_update_set_i64_compiled(context, path, (jak_i64) value);
                 default: JAK_ERROR(&context->err, JAK_ERR_INTERNALERR);
                         return false;

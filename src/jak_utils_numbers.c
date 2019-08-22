@@ -17,33 +17,33 @@
 
 #include <jak_utils_numbers.h>
 
-enum number_min_type number_min_type_unsigned(jak_u64 value)
+jak_number_min_type_e jak_number_min_type_unsigned(jak_u64 value)
 {
         if (value <= JAK_CARBON_U8_MAX) {
-                return NUMBER_U8;
+                return JAK_NUMBER_U8;
         } else if (value <= JAK_CARBON_U16_MAX) {
-                return NUMBER_U16;
+                return JAK_NUMBER_U16;
         } else if (value <= JAK_CARBON_U32_MAX) {
-                return NUMBER_U32;
+                return JAK_NUMBER_U32;
         } else if (value <= JAK_CARBON_U64_MAX) {
-                return NUMBER_U64;
+                return JAK_NUMBER_U64;
         } else {
-                return NUMBER_UNKNOWN;
+                return JAK_NUMBER_UNKNOWN;
         }
 }
 
-enum number_min_type number_min_type_signed(jak_i64 value)
+jak_number_min_type_e jak_number_min_type_signed(jak_i64 value)
 {
         if (value >= JAK_CARBON_I8_MIN && value <= JAK_CARBON_I8_MAX) {
-                return NUMBER_I8;
+                return JAK_NUMBER_I8;
         } else if (value >= JAK_CARBON_I16_MIN && value <= JAK_CARBON_I16_MAX) {
-                return NUMBER_I16;
+                return JAK_NUMBER_I16;
         } else if (value >= JAK_CARBON_I32_MIN && value <= JAK_CARBON_I32_MAX) {
-                return NUMBER_I32;
+                return JAK_NUMBER_I32;
         } else if (value >= JAK_CARBON_I64_MIN && value <= JAK_CARBON_I64_MAX) {
-                return NUMBER_I64;
+                return JAK_NUMBER_I64;
         } else {
-                return NUMBER_UNKNOWN;
+                return JAK_NUMBER_UNKNOWN;
         }
 }
 

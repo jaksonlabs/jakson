@@ -16,8 +16,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef JAK_CARBON_UINTVAR_MARKER_H
-#define JAK_CARBON_UINTVAR_MARKER_H
+#ifndef JAK_UINTVAR_MARKER_H
+#define JAK_UINTVAR_MARKER_H
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  includes
@@ -56,8 +56,8 @@
  *          - ... if speed matters, use fast-types of the C library (e.g., <code>uint_fast32_t</code>)
  *          - ... if space matters, use fix-types of the C library (e.g., <code>uint32_t</code>)
  *      - if variable-length types are a good choice, and...
- *          - ... if space shall be minimized in exchange of read/write performance, use <code>uintvar_stream_t</code>
- *          - ... if read/write performance shall be maximized in exchange of space, use <code>uintvar_marker_t</code>
+ *          - ... if space shall be minimized in exchange of read/write performance, use <code>jak_uintvar_stream_t</code>
+ *          - ... if read/write performance shall be maximized in exchange of space, use <code>jak_uintvar_marker_t</code>
  */
 
 JAK_BEGIN_DECL
@@ -67,26 +67,21 @@ JAK_BEGIN_DECL
 #define UINT_VAR_MARKER_32 'i'
 #define UINT_VAR_MARKER_64 'l'
 
-typedef void *uintvar_marker_t;
+typedef void *jak_uintvar_marker_t;
 
-enum uintvar_marker_type {
-        UINTVAR_8,
-        UINTVAR_16,
-        UINTVAR_32,
-        UINTVAR_64
-};
+typedef enum jak_uintvar_marker {
+        JAK_UINTVAR_8,
+        JAK_UINTVAR_16,
+        JAK_UINTVAR_32,
+        JAK_UINTVAR_64
+} jak_uintvar_marker_e;
 
-bool uintvar_marker_write(uintvar_marker_t dst, jak_u64 value);
-
-jak_u64 uintvar_marker_read(jak_u8 *nbytes_read, uintvar_marker_t src);
-
-enum uintvar_marker_type uintvar_marker_type_for(jak_u64 value);
-
-bool uintvar_marker_type(const void *data);
-
-size_t uintvar_marker_sizeof(uintvar_marker_t value);
-
-size_t uintvar_marker_required_size(jak_u64 value);
+bool jak_uintvar_marker_write(jak_uintvar_marker_t dst, jak_u64 value);
+jak_u64 jak_uintvar_marker_read(jak_u8 *nbytes_read, jak_uintvar_marker_t src);
+jak_uintvar_marker_e jak_uintvar_marker_type_for(jak_u64 value);
+bool jak_uintvar_marker_type(const void *data);
+size_t jak_uintvar_marker_sizeof(jak_uintvar_marker_t value);
+size_t jak_uintvar_marker_required_size(jak_u64 value);
 
 JAK_END_DECL
 

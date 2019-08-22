@@ -24,7 +24,7 @@
 
 #define extract_data(x, byte_shift)     (MASK_BLOCK_DATA & (MASK_LAST_BYTE & (x >> byte_shift)))
 
-jak_u8 uintvar_stream_write(uintvar_stream_t dst, jak_u64 value)
+jak_u8 jak_uintvar_stream_write(jak_uintvar_stream_t dst, jak_u64 value)
 {
         if (JAK_LIKELY(dst != NULL)) {
                 jak_u8 num_bytes = 0;
@@ -43,7 +43,7 @@ jak_u8 uintvar_stream_write(uintvar_stream_t dst, jak_u64 value)
         }
 }
 
-jak_u64 uintvar_stream_read(jak_u8 *nbytes, uintvar_stream_t src)
+jak_u64 jak_uintvar_stream_read(jak_u8 *nbytes, jak_uintvar_stream_t src)
 {
         jak_u64 value = 0;
         bool has_next = true;

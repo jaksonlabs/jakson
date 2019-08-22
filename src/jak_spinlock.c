@@ -32,14 +32,14 @@ bool jak_spinlock_init(jak_spinlock *spinlock)
 
 bool jak_spinlock_acquire(jak_spinlock *spinlock)
 {
-        timestamp_t begin = time_now_wallclock();
+        jak_timestamp begin = jak_wallclock();
         JAK_ERROR_IF_NULL(spinlock)
         if (!pthread_equal(spinlock->owner, pthread_self())) {
                 while (atomic_flag_test_and_set(&spinlock->lock)) {}
                 /** remeber the thread that aquires this lock */
                 spinlock->owner = pthread_self();
         }
-        timestamp_t end = time_now_wallclock();
+        jak_timestamp end = jak_wallclock();
         float duration = (end - begin) / 1000.0f;
         if (duration > 0.01f) {
                 JAK_WARN(SPINLOCK_TAG, "spin lock acquisition took exceptionally long: %f seconds", duration);

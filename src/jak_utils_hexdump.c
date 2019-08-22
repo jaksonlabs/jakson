@@ -18,7 +18,7 @@
 #include <ctype.h>
 #include <jak_utils_hexdump.h>
 
-bool hexdump(jak_string *dst, const void *base, jak_u64 nbytes)
+bool jak_hexdump(jak_string *dst, const void *base, jak_u64 nbytes)
 {
         JAK_ERROR_IF_NULL(dst);
         JAK_ERROR_IF_NULL(base);
@@ -89,12 +89,12 @@ bool hexdump(jak_string *dst, const void *base, jak_u64 nbytes)
         return true;
 }
 
-bool hexdump_print(FILE *file, const void *base, jak_u64 nbytes)
+bool jak_hexdump_print(FILE *file, const void *base, jak_u64 nbytes)
 {
         bool status;
         jak_string sb;
         jak_string_create(&sb);
-        if ((status = hexdump(&sb, base, nbytes))) {
+        if ((status = jak_hexdump(&sb, base, nbytes))) {
                 fprintf(file, "%s", jak_string_cstr(&sb));
         }
         jak_string_drop(&sb);

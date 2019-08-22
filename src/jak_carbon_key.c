@@ -18,45 +18,45 @@
 #include <jak_carbon_key.h>
 #include <jak_carbon_string.h>
 
-static void write_nokey(struct jak_memfile *file)
+static void write_nokey(jak_memfile *file)
 {
         jak_u8 marker = JAK_CARBON_MARKER_KEY_NOKEY;
-        memfile_write(file, &marker, sizeof(jak_u8));
+        jak_memfile_write(file, &marker, sizeof(jak_u8));
 }
 
-static void write_autokey(struct jak_memfile *file)
+static void write_autokey(jak_memfile *file)
 {
         jak_u8 marker = JAK_CARBON_MARKER_KEY_AUTOKEY;
         jak_uid_t key = 0;
-        memfile_write(file, &marker, sizeof(jak_u8));
-        memfile_write(file, &key, sizeof(jak_uid_t));
+        jak_memfile_write(file, &marker, sizeof(jak_u8));
+        jak_memfile_write(file, &key, sizeof(jak_uid_t));
 }
 
-static void write_ukey(struct jak_memfile *file)
+static void write_ukey(jak_memfile *file)
 {
         jak_u8 marker = JAK_CARBON_MARKER_KEY_UKEY;
         jak_u64 key = 0;
-        memfile_write(file, &marker, sizeof(jak_u8));
-        memfile_write(file, &key, sizeof(jak_u64));
+        jak_memfile_write(file, &marker, sizeof(jak_u8));
+        jak_memfile_write(file, &key, sizeof(jak_u64));
 }
 
-static void write_ikey(struct jak_memfile *file)
+static void write_ikey(jak_memfile *file)
 {
         jak_u8 marker = JAK_CARBON_MARKER_KEY_IKEY;
         jak_i64 key = 0;
-        memfile_write(file, &marker, sizeof(jak_u8));
-        memfile_write(file, &key, sizeof(jak_u64));
+        jak_memfile_write(file, &marker, sizeof(jak_u8));
+        jak_memfile_write(file, &key, sizeof(jak_u64));
 }
 
-static void write_skey(struct jak_memfile *file)
+static void write_skey(jak_memfile *file)
 {
         jak_u8 marker = JAK_CARBON_MARKER_KEY_SKEY;
         const char *key = "";
-        memfile_write(file, &marker, sizeof(jak_u8));
+        jak_memfile_write(file, &marker, sizeof(jak_u8));
         jak_carbon_jak_string_write(file, key);
 }
 
-bool jak_carbon_key_create(struct jak_memfile *file, jak_carbon_key_e type, jak_error *err)
+bool jak_carbon_key_create(jak_memfile *file, jak_carbon_key_e type, jak_error *err)
 {
         JAK_ERROR_IF_NULL(file)
 
@@ -83,14 +83,14 @@ bool jak_carbon_key_create(struct jak_memfile *file, jak_carbon_key_e type, jak_
         return true;
 }
 
-bool jak_carbon_key_skip(jak_carbon_key_e *out, struct jak_memfile *file)
+bool jak_carbon_key_skip(jak_carbon_key_e *out, jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(file)
         jak_carbon_key_read(NULL, out, file);
         return true;
 }
 
-bool jak_carbon_key_write_unsigned(struct jak_memfile *file, jak_u64 key)
+bool jak_carbon_key_write_unsigned(jak_memfile *file, jak_u64 key)
 {
         JAK_ERROR_IF_NULL(file)
 
@@ -98,7 +98,7 @@ bool jak_carbon_key_write_unsigned(struct jak_memfile *file, jak_u64 key)
 
         jak_carbon_key_read_type(&key_type, file);
         if (jak_carbon_key_is_unsigned(key_type)) {
-                memfile_write(file, &key, sizeof(jak_u64));
+                jak_memfile_write(file, &key, sizeof(jak_u64));
                 return true;
         } else {
                 JAK_ERROR(&file->err, JAK_ERR_TYPEMISMATCH)
@@ -106,7 +106,7 @@ bool jak_carbon_key_write_unsigned(struct jak_memfile *file, jak_u64 key)
         }
 }
 
-bool jak_carbon_key_write_signed(struct jak_memfile *file, jak_i64 key)
+bool jak_carbon_key_write_signed(jak_memfile *file, jak_i64 key)
 {
         JAK_ERROR_IF_NULL(file)
 
@@ -114,7 +114,7 @@ bool jak_carbon_key_write_signed(struct jak_memfile *file, jak_i64 key)
 
         jak_carbon_key_read_type(&key_type, file);
         if (jak_carbon_key_is_signed(key_type)) {
-                memfile_write(file, &key, sizeof(jak_i64));
+                jak_memfile_write(file, &key, sizeof(jak_i64));
                 return true;
         } else {
                 JAK_ERROR(&file->err, JAK_ERR_TYPEMISMATCH)
@@ -122,12 +122,12 @@ bool jak_carbon_key_write_signed(struct jak_memfile *file, jak_i64 key)
         }
 }
 
-bool jak_carbon_key_update_string(struct jak_memfile *file, const char *key)
+bool jak_carbon_key_update_string(jak_memfile *file, const char *key)
 {
         return jak_carbon_key_update_jak_string_wnchar(file, key, strlen(key));
 }
 
-bool jak_carbon_key_update_jak_string_wnchar(struct jak_memfile *file, const char *key, size_t length)
+bool jak_carbon_key_update_jak_string_wnchar(jak_memfile *file, const char *key, size_t length)
 {
         JAK_ERROR_IF_NULL(file)
         JAK_DECLARE_AND_INIT(jak_carbon_key_e, key_type)
@@ -141,7 +141,7 @@ bool jak_carbon_key_update_jak_string_wnchar(struct jak_memfile *file, const cha
         }
 }
 
-bool jak_carbon_key_write_string(struct jak_memfile *file, const char *key)
+bool jak_carbon_key_write_string(jak_memfile *file, const char *key)
 {
         JAK_ERROR_IF_NULL(file)
 
@@ -157,7 +157,7 @@ bool jak_carbon_key_write_string(struct jak_memfile *file, const char *key)
         }
 }
 
-bool jak_carbon_key_read_type(jak_carbon_key_e *out, struct jak_memfile *file)
+bool jak_carbon_key_read_type(jak_carbon_key_e *out, jak_memfile *file)
 {
         jak_u8 marker = *JAK_MEMFILE_READ_TYPE(file, jak_u8);
 
@@ -187,7 +187,7 @@ bool jak_carbon_key_read_type(jak_carbon_key_e *out, struct jak_memfile *file)
         return true;
 }
 
-const void *jak_carbon_key_read(jak_u64 *len, jak_carbon_key_e *out, struct jak_memfile *file)
+const void *jak_carbon_key_read(jak_u64 *len, jak_carbon_key_e *out, jak_memfile *file)
 {
         jak_carbon_key_e key_type = 0;
         jak_carbon_key_read_type(&key_type, file);
