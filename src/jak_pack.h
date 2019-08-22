@@ -35,7 +35,7 @@ JAK_BEGIN_DECL
  * string table.
  */
 enum jak_packer_type {
-    PACK_NONE, PACK_HUFFMAN
+        PACK_NONE, PACK_HUFFMAN
 };
 
 /**
@@ -43,144 +43,146 @@ enum jak_packer_type {
  * CARBON archive.
  */
 struct jak_packer {
-    /** Tag identifying the implementation of this compressor */
-    enum jak_packer_type tag;
+        /** Tag identifying the implementation of this compressor */
+        enum jak_packer_type tag;
 
-    /** Implementation-specific storage */
-    void *extra;
+        /** Implementation-specific storage */
+        void *extra;
 
-    /**
-     * Constructor for implementation-dependent initialization of the compressor at hand.
-     *
-     * Depending on the implementation, the compressor might allocate dynamic memory for
-     * <code>extra</code> for book-keeping purposes.
-     *
-     * @param self A pointer to itself
-     * @return <b>true</b> in case of success, or <b>false</b> otherwise.
-     *
-     * @author Marcus Pinnecke
-     * @since 0.1.00.05
-     */
-    bool (*create)(struct jak_packer *self);
+        /**
+         * Constructor for implementation-dependent initialization of the compressor at hand.
+         *
+         * Depending on the implementation, the compressor might allocate dynamic memory for
+         * <code>extra</code> for book-keeping purposes.
+         *
+         * @param self A pointer to itself
+         * @return <b>true</b> in case of success, or <b>false</b> otherwise.
+         *
+         * @author Marcus Pinnecke
+         * @since 0.1.00.05
+         */
+        bool (*create)(struct jak_packer *self);
 
-    /**
-     * Destructor for implementation-dependent deinitialization of the compressor at hand.
-     *
-     * If the implementation acquired dynamic memory during a call to <code>create</code>,
-     * a call to this function frees up this memory.
-     *
-     * @param self A pointer to itself
-     * @return <b>true</b> in case of success, or <b>false</b> otherwise.
-     *
-     * @author Marcus Pinnecke
-     * @since 0.1.00.05
-     */
-    bool (*drop)(struct jak_packer *self);
+        /**
+         * Destructor for implementation-dependent deinitialization of the compressor at hand.
+         *
+         * If the implementation acquired dynamic memory during a call to <code>create</code>,
+         * a call to this function frees up this memory.
+         *
+         * @param self A pointer to itself
+         * @return <b>true</b> in case of success, or <b>false</b> otherwise.
+         *
+         * @author Marcus Pinnecke
+         * @since 0.1.00.05
+         */
+        bool (*drop)(struct jak_packer *self);
 
-    /**
-     * Perform a hard-copy of this compressor to dst
-     *
-     * @param self  A pointer to itself
-     * @param dst   A pointer to the copy target
-     *
-     * @return <b>true</b> in case of success, or <b>false</b> otherwise.
-     *
-     * @author Marcus Pinnecke
-     * @since 0.1.00.05
-     */
-    bool (*cpy)(const struct jak_packer *self, struct jak_packer *dst);
+        /**
+         * Perform a hard-copy of this compressor to dst
+         *
+         * @param self  A pointer to itself
+         * @param dst   A pointer to the copy target
+         *
+         * @return <b>true</b> in case of success, or <b>false</b> otherwise.
+         *
+         * @author Marcus Pinnecke
+         * @since 0.1.00.05
+         */
+        bool (*cpy)(const struct jak_packer *self, struct jak_packer *dst);
 
-    /**
-     * Function to construct and serialize an implementation-specific dictionary, book-keeping data, or extra data
-     * (e.g., a code table)
-     *
-     * Depending on the implementation, a set of book-keeping data must be managed for a compressor. For instance,
-     * in case of a huffman encoded this book-keeping is the code table that maps letters to prefix codes. This
-     * function is invoked before any string gets encoded, and implements a compressor-specific management and
-     * serialization of that book-keeping data. After internal construction of this book-keeping data,
-     * this data is serialized into the <code>dst</code> parameter.
-     *
-     * Reverse function of <code>read_extra</code>.
-     *
-     * @note single strings must not be encoded; this is is done when the framework invokes <code>encode_string</code>
-     *
-     * @param self A pointer to the compressor that is used; maybe accesses <code>extra</code>
-     * @param dst A memory file in which the book-keeping data (<code>extra</code>) for this compressor is serialized
-     * @param strings The set of all strings that should be encoded. Used for tweaking the compressor;
-     *                 <b>not</b> for serialization into <code>dst</code>
-     *
-     * @note strings in <code>strings</code> are unique (but not sorted)
-     *
-     * @author Marcus Pinnecke
-     * @since 0.1.00.05
-     * */
-    bool (*write_extra)(struct jak_packer *self, struct jak_memfile *dst,
-                        const struct jak_vector ofType (const char *) *strings);
+        /**
+         * Function to construct and serialize an implementation-specific dictionary, book-keeping data, or extra data
+         * (e.g., a code table)
+         *
+         * Depending on the implementation, a set of book-keeping data must be managed for a compressor. For instance,
+         * in case of a huffman encoded this book-keeping is the code table that maps letters to prefix codes. This
+         * function is invoked before any string gets encoded, and implements a compressor-specific management and
+         * serialization of that book-keeping data. After internal construction of this book-keeping data,
+         * this data is serialized into the <code>dst</code> parameter.
+         *
+         * Reverse function of <code>read_extra</code>.
+         *
+         * @note single strings must not be encoded; this is is done when the framework invokes <code>encode_string</code>
+         *
+         * @param self A pointer to the compressor that is used; maybe accesses <code>extra</code>
+         * @param dst A memory file in which the book-keeping data (<code>extra</code>) for this compressor is serialized
+         * @param strings The set of all strings that should be encoded. Used for tweaking the compressor;
+         *                 <b>not</b> for serialization into <code>dst</code>
+         *
+         * @note strings in <code>strings</code> are unique (but not sorted)
+         *
+         * @author Marcus Pinnecke
+         * @since 0.1.00.05
+         * */
+        bool (*write_extra)(struct jak_packer *self, struct jak_memfile *dst,
+                            const struct jak_vector ofType (const char *) *strings);
 
-    /**
-     * Function to reconstruct implementation-specific dictionary, book-keeping or extra data by deserialization (
-     * e.g., a code table)
-     *
-     * Reverse function of <code>write_extra</code>.
-     *
-     * @param self A pointer to the compressor that is used; maybe accesses <code>extra</code>
-     * @param src A file where the cursor is moved to the first byte of the extra field previously serialized with 'write_extra'
-     * @param nbytes Number of bytes written when 'write_extra' was called. Intended to read read to restore the extra field.
-     * @return The implementer must return <code>true</code> on success, and <code>false</code> otherwise.
-     */
-    bool (*read_extra)(struct jak_packer *self, FILE *src, size_t nbytes);
+        /**
+         * Function to reconstruct implementation-specific dictionary, book-keeping or extra data by deserialization (
+         * e.g., a code table)
+         *
+         * Reverse function of <code>write_extra</code>.
+         *
+         * @param self A pointer to the compressor that is used; maybe accesses <code>extra</code>
+         * @param src A file where the cursor is moved to the first byte of the extra field previously serialized with 'write_extra'
+         * @param nbytes Number of bytes written when 'write_extra' was called. Intended to read read to restore the extra field.
+         * @return The implementer must return <code>true</code> on success, and <code>false</code> otherwise.
+         */
+        bool (*read_extra)(struct jak_packer *self, FILE *src, size_t nbytes);
 
-    /**
-     * Encodes an input string and writes its encoded version into a memory file.
-     *
-     * @param self A pointer to the compressor that is used; maybe accesses <code>extra</code>
-     * @param dst A memory file in which the encoded string should be stored
-     * @param err An error information
-     * @param string The string that should be encoded
-     *
-     * @return <b>true</b> in case of success, or <b>false</b> otherwise.
-     *
-     * @author Marcus Pinnecke
-     * @since 0.1.00.05
-     */
-    bool (*encode_string)(struct jak_packer *self, struct jak_memfile *dst, struct jak_error *err, const char *string);
+        /**
+         * Encodes an input string and writes its encoded version into a memory file.
+         *
+         * @param self A pointer to the compressor that is used; maybe accesses <code>extra</code>
+         * @param dst A memory file in which the encoded string should be stored
+         * @param err An error information
+         * @param string The string that should be encoded
+         *
+         * @return <b>true</b> in case of success, or <b>false</b> otherwise.
+         *
+         * @author Marcus Pinnecke
+         * @since 0.1.00.05
+         */
+        bool
+        (*encode_string)(struct jak_packer *self, struct jak_memfile *dst, struct jak_error *err, const char *string);
 
-    bool (*decode_string)(struct jak_packer *self, char *dst, size_t strlen, FILE *src);
+        bool (*decode_string)(struct jak_packer *self, char *dst, size_t strlen, FILE *src);
 
-    /**
-     * Reads implementation-specific book-keeping, meta or extra data from the input memory file and
-     * prints its contents in a human-readable version to <code>file</code>
-     *
-     * @param self A pointer to the compressor that is used; potentially accessing <code>extra</code>
-     * @param file A file to which a human-readable version of <code>extra</code> is printed (if any)
-     * @param src A memory file which cursor is positioned at the begin of the serialized extra field. After
-     *            a call to this function, the memory file cursor must be positioned after the serialized extra
-     *            field (i.e., the entire entry must be read (if any))
-     *
-     * @return <b>true</b> in case of success, or <b>false</b> otherwise.
-     *
-     * @author Marcus Pinnecke
-     * @since 0.1.00.05
-     */
-    bool (*print_extra)(struct jak_packer *self, FILE *file, struct jak_memfile *src);
+        /**
+         * Reads implementation-specific book-keeping, meta or extra data from the input memory file and
+         * prints its contents in a human-readable version to <code>file</code>
+         *
+         * @param self A pointer to the compressor that is used; potentially accessing <code>extra</code>
+         * @param file A file to which a human-readable version of <code>extra</code> is printed (if any)
+         * @param src A memory file which cursor is positioned at the begin of the serialized extra field. After
+         *            a call to this function, the memory file cursor must be positioned after the serialized extra
+         *            field (i.e., the entire entry must be read (if any))
+         *
+         * @return <b>true</b> in case of success, or <b>false</b> otherwise.
+         *
+         * @author Marcus Pinnecke
+         * @since 0.1.00.05
+         */
+        bool (*print_extra)(struct jak_packer *self, FILE *file, struct jak_memfile *src);
 
-    /**
-     * Reads an implementation-specific encoded string from a memory file <code>src</code>, and prints
-     * the encoded string in a human-readable version to <code>file</code>
-     *
-     * @param self A pointer to the compressor that is used; potentially accessing <code>extra</code>
-     * @param file A file to which a human-readable version of the encoded string is printed.
-     * @param src A memory file which cursor is positioned at the begin of the encoded string. After a call
-     *            to this function, the memory file cursor must be positioned after the encoded string (i.e.,
-     *            the entire encoded string must be read)
-     * @param decompressed_strlen The length of the decoded string in number of characters
-     *
-     * @return <b>true</b> in case of success, or <b>false</b> otherwise.
-     *
-     * @author Marcus Pinnecke
-     * @since 0.1.00.05
-     */
-    bool (*print_encoded)(struct jak_packer *self, FILE *file, struct jak_memfile *src, jak_u32 decompressed_strlen);
+        /**
+         * Reads an implementation-specific encoded string from a memory file <code>src</code>, and prints
+         * the encoded string in a human-readable version to <code>file</code>
+         *
+         * @param self A pointer to the compressor that is used; potentially accessing <code>extra</code>
+         * @param file A file to which a human-readable version of the encoded string is printed.
+         * @param src A memory file which cursor is positioned at the begin of the encoded string. After a call
+         *            to this function, the memory file cursor must be positioned after the encoded string (i.e.,
+         *            the entire encoded string must be read)
+         * @param decompressed_strlen The length of the decoded string in number of characters
+         *
+         * @return <b>true</b> in case of success, or <b>false</b> otherwise.
+         *
+         * @author Marcus Pinnecke
+         * @since 0.1.00.05
+         */
+        bool
+        (*print_encoded)(struct jak_packer *self, FILE *file, struct jak_memfile *src, jak_u32 decompressed_strlen);
 
 };
 
@@ -216,13 +218,13 @@ static void pack_huffman_create(struct jak_packer *strategy)
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
 static struct {
-    enum jak_packer_type type;
+        enum jak_packer_type type;
 
-    const char *name;
+        const char *name;
 
-    void (*create)(struct jak_packer *strategy);
+        void (*create)(struct jak_packer *strategy);
 
-    jak_u8 flag_bit;
+        jak_u8 flag_bit;
 } compressor_strategy_register[] =
         {{.type = PACK_NONE, .name = "none", .create = pack_none_create, .flag_bit = 1 << 0},
          {.type = PACK_HUFFMAN, .name = "huffman", .create = pack_huffman_create, .flag_bit = 1 << 1}};

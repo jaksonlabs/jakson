@@ -40,7 +40,7 @@ bool jak_strid_iter_open(struct jak_strid_iter *it, struct jak_error *err, struc
 }
 
 bool jak_strid_iter_next(bool *success, struct jak_strid_info **info, struct jak_error *err, size_t *info_length,
-                     struct jak_strid_iter *it)
+                         struct jak_strid_iter *it)
 {
         JAK_ERROR_IF_NULL(info)
         JAK_ERROR_IF_NULL(info_length)

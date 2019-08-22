@@ -30,8 +30,8 @@
 JAK_BEGIN_DECL
 
 struct spinlock {
-    atomic_flag lock;
-    pthread_t owner;
+        atomic_flag lock;
+        pthread_t owner;
 };
 
 bool spin_init(struct spinlock *spinlock);

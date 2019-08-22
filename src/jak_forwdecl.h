@@ -15,39 +15,11 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef JAK_STRID_ITER_H
-#define JAK_STRID_ITER_H
+#ifndef JAK_FORWDECL_H
+#define JAK_FORWDECL_H
 
-// ---------------------------------------------------------------------------------------------------------------------
-//  includes
-// ---------------------------------------------------------------------------------------------------------------------
-
-#include <jak_stdinc.h>
-#include <jak_types.h>
-#include <jak_archive.h>
-
-JAK_BEGIN_DECL
-
-struct jak_strid_info {
-        jak_archive_field_sid_t id;
-        jak_u32 strlen;
-        jak_offset_t offset;
-};
-
-struct jak_strid_iter {
-        FILE *disk_file;
-        bool is_open;
-        jak_offset_t disk_offset;
-        struct jak_strid_info vector[100000];
-};
-
-bool jak_strid_iter_open(struct jak_strid_iter *it, struct jak_error *err, struct jak_archive *archive);
-
-bool jak_strid_iter_next(bool *success, struct jak_strid_info **info, struct jak_error *err, size_t *info_length,
-                         struct jak_strid_iter *it);
-
-bool jak_strid_iter_close(struct jak_strid_iter *it);
-
-JAK_END_DECL
+typedef struct jak_carbon jak_carbon;
+typedef struct jak_carbon_insert jak_carbon_insert;
+typedef struct jak_carbon_new jak_carbon_new;
 
 #endif

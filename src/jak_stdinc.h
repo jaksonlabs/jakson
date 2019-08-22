@@ -36,6 +36,8 @@
 #include <limits.h>
 #include <math.h>
 
+#include "jak_forwdecl.h"
+
 #ifndef __cplusplus
 
 # include <stdatomic.h>
@@ -72,24 +74,24 @@ typedef int64_t signed_offset_t;
 typedef unsigned char u_char;
 
 typedef enum jak_archive_field_type {
-    JAK_FIELD_NULL = 0,
-    JAK_FIELD_BOOLEAN = 1,
-    JAK_FIELD_INT8 = 2,
-    JAK_FIELD_INT16 = 3,
-    JAK_FIELD_INT32 = 4,
-    JAK_FIELD_INT64 = 5,
-    JAK_FIELD_UINT8 = 6,
-    JAK_FIELD_UINT16 = 7,
-    JAK_FIELD_UINT32 = 8,
-    JAK_FIELD_UINT64 = 9,
-    JAK_FIELD_FLOAT = 10,
-    JAK_FIELD_STRING = 11,
-    JAK_FIELD_OBJECT = 12
+        JAK_FIELD_NULL = 0,
+        JAK_FIELD_BOOLEAN = 1,
+        JAK_FIELD_INT8 = 2,
+        JAK_FIELD_INT16 = 3,
+        JAK_FIELD_INT32 = 4,
+        JAK_FIELD_INT64 = 5,
+        JAK_FIELD_UINT8 = 6,
+        JAK_FIELD_UINT16 = 7,
+        JAK_FIELD_UINT32 = 8,
+        JAK_FIELD_UINT64 = 9,
+        JAK_FIELD_FLOAT = 10,
+        JAK_FIELD_STRING = 11,
+        JAK_FIELD_OBJECT = 12
 } jak_archive_field_e;
 
 enum access_mode {
-    READ_WRITE,
-    READ_ONLY
+        READ_WRITE,
+        READ_ONLY
 };
 
 #define JAK_FUNC_UNUSED __attribute__((unused))

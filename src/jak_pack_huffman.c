@@ -22,9 +22,9 @@
 #include <jak_bitmap.h>
 
 struct huff_node {
-    struct huff_node *prev, *next, *left, *right;
-    jak_u64 freq;
-    unsigned char letter;
+        struct huff_node *prev, *next, *left, *right;
+        jak_u64 freq;
+        unsigned char letter;
 };
 
 static void huff_tree_create(struct jak_vector ofType(struct pack_huffman_entry) *table,
@@ -240,7 +240,7 @@ bool coding_huffman_read_entry(struct pack_huffman_info *info, struct jak_memfil
 }
 
 static const jak_u32 *get_num_used_blocks(jak_u16 *numUsedBlocks, struct pack_huffman_entry *entry, jak_u16 num_blocks,
-                                      const jak_u32 *blocks)
+                                          const jak_u32 *blocks)
 {
         for (entry->nblocks = 0; entry->nblocks < num_blocks; entry->nblocks++) {
                 const jak_u32 *block = blocks + entry->nblocks;

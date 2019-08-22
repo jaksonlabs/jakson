@@ -27,15 +27,15 @@
 JAK_BEGIN_DECL
 
 struct priority_queue_element_info {
-    size_t priority;
-    void *element;
+        size_t priority;
+        void *element;
 };
 
 struct jak_priority_queue {
-    struct priority_queue_element_info *data;
-    size_t num_elements;
-    size_t capacity;
-    pthread_mutex_t mutex;
+        struct priority_queue_element_info *data;
+        size_t num_elements;
+        size_t capacity;
+        pthread_mutex_t mutex;
 };
 
 void priority_queue_init(struct jak_priority_queue *queue);

@@ -157,7 +157,8 @@ bool pack_huffman_print_encoded(struct jak_packer *self, FILE *file, struct jak_
         return true;
 }
 
-bool pack_huffman_encode_string(struct jak_packer *self, struct jak_memfile *dst, struct jak_error *err, const char *string)
+bool
+pack_huffman_encode_string(struct jak_packer *self, struct jak_memfile *dst, struct jak_error *err, const char *string)
 {
         JAK_check_tag(self->tag, PACK_HUFFMAN);
 

@@ -37,30 +37,31 @@
 })
 
 
-jak_u64 carbon_get_or_default_unsigned(struct jak_carbon *doc, const char *path, jak_u64 default_val)
+jak_u64 carbon_get_or_default_unsigned(jak_carbon *doc, const char *path, jak_u64 default_val)
 {
         return get_or_default(doc, path, jak_u64, default_val, carbon_field_type_is_unsigned_integer,
                               carbon_find_result_unsigned);
 }
 
-jak_i64 carbon_get_or_default_signed(struct jak_carbon *doc, const char *path, jak_i64 default_val)
+jak_i64 carbon_get_or_default_signed(jak_carbon *doc, const char *path, jak_i64 default_val)
 {
         return get_or_default(doc, path, jak_i64, default_val, carbon_field_type_is_signed_integer,
                               carbon_find_result_signed);
 }
 
-float carbon_get_or_default_float(struct jak_carbon *doc, const char *path, float default_val)
+float carbon_get_or_default_float(jak_carbon *doc, const char *path, float default_val)
 {
         return get_or_default(doc, path, float, default_val, carbon_field_type_is_floating_number,
                               carbon_find_result_float);
 }
 
-bool carbon_get_or_default_boolean(struct jak_carbon *doc, const char *path, bool default_val)
+bool carbon_get_or_default_boolean(jak_carbon *doc, const char *path, bool default_val)
 {
         return get_or_default(doc, path, bool, default_val, carbon_field_type_is_boolean, carbon_find_result_boolean);
 }
 
-const char *carbon_get_or_default_string(jak_u64 *len_out, struct jak_carbon *doc, const char *path, const char *default_val)
+const char *
+carbon_get_or_default_string(jak_u64 *len_out, jak_carbon *doc, const char *path, const char *default_val)
 {
         struct jak_carbon_find find;
         enum carbon_field_type field_type;
@@ -79,7 +80,7 @@ const char *carbon_get_or_default_string(jak_u64 *len_out, struct jak_carbon *do
 }
 
 struct jak_carbon_binary *
-carbon_get_or_default_binary(struct jak_carbon *doc, const char *path, struct jak_carbon_binary *default_val)
+carbon_get_or_default_binary(jak_carbon *doc, const char *path, struct jak_carbon_binary *default_val)
 {
         struct jak_carbon_find find;
         enum carbon_field_type field_type;
@@ -96,7 +97,7 @@ carbon_get_or_default_binary(struct jak_carbon *doc, const char *path, struct ja
         return result;
 }
 
-struct jak_carbon_array_it *carbon_get_array_or_null(struct jak_carbon *doc, const char *path)
+struct jak_carbon_array_it *carbon_get_array_or_null(jak_carbon *doc, const char *path)
 {
         struct jak_carbon_find find;
         enum carbon_field_type field_type;
@@ -113,7 +114,7 @@ struct jak_carbon_array_it *carbon_get_array_or_null(struct jak_carbon *doc, con
         return result;
 }
 
-struct jak_carbon_column_it *carbon_get_column_or_null(struct jak_carbon *doc, const char *path)
+struct jak_carbon_column_it *carbon_get_column_or_null(jak_carbon *doc, const char *path)
 {
         struct jak_carbon_find find;
         enum carbon_field_type field_type;

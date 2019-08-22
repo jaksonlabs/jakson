@@ -68,40 +68,40 @@ DECLARE_PRINTER_FUNC(size_t)
  * An implementation of the concrete data type Vector, a resizeable dynamic array.
  */
 struct jak_vector {
-    /**
-    *  Memory allocator that is used to get memory for user data
-    */
-    struct jak_allocator *allocator;
+        /**
+        *  Memory allocator that is used to get memory for user data
+        */
+        struct jak_allocator *allocator;
 
-    /**
-     *  Fixed number of bytes for a single element that should be stored in the vector
-     */
-    size_t elem_size;
+        /**
+         *  Fixed number of bytes for a single element that should be stored in the vector
+         */
+        size_t elem_size;
 
-    /**
-     *  The number of elements currently stored in the vector
-     */
-    jak_u32 num_elems;
+        /**
+         *  The number of elements currently stored in the vector
+         */
+        jak_u32 num_elems;
 
-    /**
-     *  The number of elements for which currently memory is reserved
-     */
-    jak_u32 cap_elems;
+        /**
+         *  The number of elements for which currently memory is reserved
+         */
+        jak_u32 cap_elems;
 
-    /**
-    * The grow factor considered for resize operations
-    */
-    float grow_factor;
+        /**
+        * The grow factor considered for resize operations
+        */
+        float grow_factor;
 
-    /**
-     * A pointer to a memory address managed by 'allocator' that contains the user data
-     */
-    void *base;
+        /**
+         * A pointer to a memory address managed by 'allocator' that contains the user data
+         */
+        void *base;
 
-    /**
-     *  Error information
-     */
-    struct jak_error err;
+        /**
+         *  Error information
+         */
+        struct jak_error err;
 };
 
 /**

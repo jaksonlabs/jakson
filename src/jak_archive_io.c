@@ -24,10 +24,10 @@
 #include <jak_archive_io.h>
 
 struct jak_io_context {
-    struct jak_error err;
-    FILE *file;
-    struct spinlock lock;
-    jak_offset_t last_pos;
+        struct jak_error err;
+        FILE *file;
+        struct spinlock lock;
+        jak_offset_t last_pos;
 };
 
 bool jak_io_context_create(struct jak_io_context **context, struct jak_error *err, const char *file_path)

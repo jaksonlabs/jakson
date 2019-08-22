@@ -25,8 +25,8 @@
 #include "jak_json.h"
 
 static struct {
-    enum json_token_type token;
-    const char *string;
+        enum json_token_type token;
+        const char *string;
 } TOKEN_STRING[] = {{.token = OBJECT_OPEN, .string = "OBJECT_OPEN"},
                     {.token = OBJECT_CLOSE, .string = "OBJECT_CLOSE"},
                     {.token = LITERAL_STRING, .string = "JSON_TOKEN_STRING"},
@@ -42,8 +42,8 @@ static struct {
                     {.token = JSON_UNKNOWN, .string = "JSON_UNKNOWN"}};
 
 struct token_memory {
-    enum json_token_type type;
-    bool init;
+        enum json_token_type type;
+        bool init;
 };
 
 static int process_token(struct jak_error *err, struct jak_json_err *error_desc, const struct jak_json_token *token,
@@ -62,7 +62,9 @@ bool json_tokenizer_init(struct jak_json_tokenizer *tokenizer, const char *input
         return true;
 }
 
-static void parse_string_token(struct jak_json_tokenizer *tokenizer, char c, char delimiter, char delimiter2, char delimiter3, bool include_start, bool include_end)
+static void
+parse_string_token(struct jak_json_tokenizer *tokenizer, char c, char delimiter, char delimiter2, char delimiter3,
+                   bool include_start, bool include_end)
 {
         bool escapeQuote = false;
         tokenizer->token.type = LITERAL_STRING;
@@ -127,9 +129,9 @@ const struct jak_json_token *json_tokenizer_next(struct jak_json_tokenizer *toke
                         tokenizer->token.length = 1;
                         tokenizer->cursor++;
                 } else if (c != '"' && (isalpha(c) || c == '_') &&
-                        (strlen(tokenizer->cursor) >= 4 && (strncmp(tokenizer->cursor, "null", 4) != 0 &&
-                        strncmp(tokenizer->cursor, "true", 4) != 0)) &&
-                        (strlen(tokenizer->cursor) >= 5 && strncmp(tokenizer->cursor, "false", 5) != 0)) {
+                           (strlen(tokenizer->cursor) >= 4 && (strncmp(tokenizer->cursor, "null", 4) != 0 &&
+                                                               strncmp(tokenizer->cursor, "true", 4) != 0)) &&
+                           (strlen(tokenizer->cursor) >= 5 && strncmp(tokenizer->cursor, "false", 5) != 0)) {
                         parse_string_token(tokenizer, c, ' ', ':', ',', true, true);
                 } else if (c == '"') {
                         parse_string_token(tokenizer, c, '"', '"', '"', false, false);
@@ -269,7 +271,8 @@ bool json_parser_create(struct jak_json_parser *parser)
         return true;
 }
 
-bool json_parse(struct jak_json *json, struct jak_json_err *error_desc, struct jak_json_parser *parser, const char *input)
+bool
+json_parse(struct jak_json *json, struct jak_json_err *error_desc, struct jak_json_parser *parser, const char *input)
 {
         JAK_ERROR_IF_NULL(parser)
         JAK_ERROR_IF_NULL(input)
@@ -329,7 +332,7 @@ bool test_condition_value(struct jak_error *err, struct jak_json_node_value *val
                 case JSON_VALUE_OBJECT:
                         for (size_t i = 0; i < value->value.object->value->members.num_elems; i++) {
                                 struct jak_json_prop *member = vec_get(&value->value.object->value->members, i,
-                                                                   struct jak_json_prop);
+                                                                       struct jak_json_prop);
                                 if (!test_condition_value(err, &member->value.value)) {
                                         return false;
                                 }
@@ -340,7 +343,8 @@ bool test_condition_value(struct jak_error *err, struct jak_json_node_value *val
                         enum json_value_type value_type = JSON_VALUE_NULL;
 
                         for (size_t i = 0; i < elements->elements.num_elems; i++) {
-                                struct jak_json_element *element = vec_get(&elements->elements, i, struct jak_json_element);
+                                struct jak_json_element *element = vec_get(&elements->elements, i,
+                                                                           struct jak_json_element);
                                 value_type =
                                         ((i == 0 || value_type == JSON_VALUE_NULL) ? element->value.value_type
                                                                                    : value_type);
@@ -408,7 +412,8 @@ static struct jak_json_token get_token(struct jak_vector ofType(struct jak_json_
         return *(struct jak_json_token *) vec_at(token_stream, token_idx);
 }
 
-bool parse_members(struct jak_error *err, struct jak_json_members *members, struct jak_vector ofType(struct jak_json_token) *token_stream,
+bool parse_members(struct jak_error *err, struct jak_json_members *members,
+                   struct jak_vector ofType(struct jak_json_token) *token_stream,
                    size_t *token_idx)
 {
         vec_create(&members->members, NULL, sizeof(struct jak_json_prop), 20);
@@ -1077,12 +1082,12 @@ enum json_list_type json_fitting_type(enum json_list_type current, enum json_lis
                 return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
         }
         if (current == JSON_LIST_TYPE_EMPTY || current == JSON_LIST_TYPE_FIXED_BOOLEAN ||
-                to_add == JSON_LIST_TYPE_EMPTY || to_add == JSON_LIST_TYPE_FIXED_BOOLEAN) {
+            to_add == JSON_LIST_TYPE_EMPTY || to_add == JSON_LIST_TYPE_FIXED_BOOLEAN) {
                 if (current == to_add) {
                         return current;
                 } else {
                         if ((to_add == JSON_LIST_TYPE_FIXED_BOOLEAN && current == JSON_LIST_TYPE_FIXED_NULL) ||
-                                (to_add == JSON_LIST_TYPE_FIXED_NULL && current == JSON_LIST_TYPE_FIXED_BOOLEAN)) {
+                            (to_add == JSON_LIST_TYPE_FIXED_NULL && current == JSON_LIST_TYPE_FIXED_BOOLEAN)) {
                                 return JSON_LIST_TYPE_FIXED_BOOLEAN;
                         } else {
                                 if (to_add == JSON_LIST_TYPE_EMPTY) {
@@ -1316,8 +1321,7 @@ static enum json_list_type number_type_to_list_type(enum number_min_type type)
                         return JSON_LIST_TYPE_FIXED_I32;
                 case NUMBER_I64:
                         return JSON_LIST_TYPE_FIXED_I64;
-                default:
-                        error_print(JAK_ERR_UNSUPPORTEDTYPE)
+                default: error_print(JAK_ERR_UNSUPPORTEDTYPE)
                         return JSON_LIST_TYPE_EMPTY;
 
         }
@@ -1350,8 +1354,7 @@ bool json_array_get_type(enum json_list_type *type, const struct jak_json_array 
                                                 elem_type = number_type_to_list_type(number_min_type_signed(
                                                         elem->value.value.number->value.signed_integer));
                                                 break;
-                                        default:
-                                                error_print(JAK_ERR_UNSUPPORTEDTYPE);
+                                        default: error_print(JAK_ERR_UNSUPPORTEDTYPE);
                                                 continue;
                                 }
 
@@ -1374,12 +1377,11 @@ bool json_array_get_type(enum json_list_type *type, const struct jak_json_array 
                                         goto return_result;
                                 }
                                 break;
-                        default:
-                                error_print(JAK_ERR_UNSUPPORTEDTYPE);
+                        default: error_print(JAK_ERR_UNSUPPORTEDTYPE);
                                 break;
                 }
         }
-return_result:
+        return_result:
         *type = list_type;
         return true;
 

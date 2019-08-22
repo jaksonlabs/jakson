@@ -27,40 +27,40 @@
 
 JAK_BEGIN_DECL
 
-#define JAK_BLOOM_SET(filter, key, keySize)                 \
-({                                                          \
-    size_t nbits = jak_bitmap_nbits(filter);                    \
-    size_t b0 = JAK_HASH_ADDITIVE(keySize, key) % nbits;    \
-    size_t b1 = JAK_HASH_XOR(keySize, key) % nbits;         \
-    size_t b2 = JAK_HASH_ROT(keySize, key) % nbits;         \
-    size_t b3 = JAK_HASH_SAX(keySize, key) % nbits;         \
-    jak_bitmap_set(filter, b0, true);                           \
-    jak_bitmap_set(filter, b1, true);                           \
-    jak_bitmap_set(filter, b2, true);                           \
-    jak_bitmap_set(filter, b3, true);                           \
+#define JAK_BLOOM_SET(filter, key, key_size)                                                                           \
+({                                                                                                                     \
+    size_t nbits = jak_bitmap_nbits(filter);                                                                           \
+    size_t b0 = JAK_HASH_ADDITIVE(key_size, key) % nbits;                                                              \
+    size_t b1 = JAK_HASH_XOR(key_size, key) % nbits;                                                                   \
+    size_t b2 = JAK_HASH_ROT(key_size, key) % nbits;                                                                   \
+    size_t b3 = JAK_HASH_SAX(key_size, key) % nbits;                                                                   \
+    jak_bitmap_set(filter, b0, true);                                                                                  \
+    jak_bitmap_set(filter, b1, true);                                                                                  \
+    jak_bitmap_set(filter, b2, true);                                                                                  \
+    jak_bitmap_set(filter, b3, true);                                                                                  \
 })
 
-#define JAK_BLOOM_TEST(filter, key, keySize)                \
-({                                                          \
-    size_t nbits = jak_bitmap_nbits(filter);                    \
-    size_t b0 = JAK_HASH_ADDITIVE(keySize, key) % nbits;    \
-    size_t b1 = JAK_HASH_XOR(keySize, key) % nbits;         \
-    size_t b2 = JAK_HASH_ROT(keySize, key) % nbits;         \
-    size_t b3 = JAK_HASH_SAX(keySize, key) % nbits;         \
-    bool b0set = jak_bitmap_get(filter, b0);                    \
-    bool b1set = jak_bitmap_get(filter, b1);                    \
-    bool b2set = jak_bitmap_get(filter, b2);                    \
-    bool b3set = jak_bitmap_get(filter, b3);                    \
-    (b0set && b1set && b2set && b3set);                     \
+#define JAK_BLOOM_TEST(filter, key, key_size)                                                                          \
+({                                                                                                                     \
+    size_t nbits = jak_bitmap_nbits(filter);                                                                           \
+    size_t b0 = JAK_HASH_ADDITIVE(key_size, key) % nbits;                                                              \
+    size_t b1 = JAK_HASH_XOR(key_size, key) % nbits;                                                                   \
+    size_t b2 = JAK_HASH_ROT(key_size, key) % nbits;                                                                   \
+    size_t b3 = JAK_HASH_SAX(key_size, key) % nbits;                                                                   \
+    bool b0set = jak_bitmap_get(filter, b0);                                                                           \
+    bool b1set = jak_bitmap_get(filter, b1);                                                                           \
+    bool b2set = jak_bitmap_get(filter, b2);                                                                           \
+    bool b3set = jak_bitmap_get(filter, b3);                                                                           \
+    (b0set && b1set && b2set && b3set);                                                                                \
 })
 
-#define JAK_BLOOM_TEST_AND_SET(filter, key, keySize)        \
-({                                                          \
-    size_t nbits = jak_bitmap_nbits(filter);                    \
-    size_t b0 = JAK_HASH_ADDITIVE(keySize, key) % nbits;    \
-    size_t b1 = JAK_HASH_XOR(keySize, key) % nbits;         \
-    size_t b2 = JAK_HASH_ROT(keySize, key) % nbits;         \
-    size_t b3 = JAK_HASH_SAX(keySize, key) % nbits;         \
+#define JAK_BLOOM_TEST_AND_SET(filter, key, key_size)                                                                  \
+({                                                                                                                     \
+    size_t nbits = jak_bitmap_nbits(filter);                                                                           \
+    size_t b0 = JAK_HASH_ADDITIVE(key_size, key) % nbits;                                                              \
+    size_t b1 = JAK_HASH_XOR(key_size, key) % nbits;                                                                   \
+    size_t b2 = JAK_HASH_ROT(key_size, key) % nbits;         \
+    size_t b3 = JAK_HASH_SAX(key_size, key) % nbits;         \
     bool b0set = jak_bitmap_get(filter, b0);                    \
     bool b1set = jak_bitmap_get(filter, b1);                    \
     bool b2set = jak_bitmap_get(filter, b2);                    \
@@ -76,6 +76,7 @@ bool jak_bloom_create(struct jak_bitmap *filter, size_t size);
 bool jak_bloom_drop(struct jak_bitmap *filter);
 bool jak_bloom_clear(struct jak_bitmap *filter);
 size_t jak_bloom_nbits(struct jak_bitmap *filter);
+
 unsigned jak_bloom_nhashs();
 
 JAK_END_DECL

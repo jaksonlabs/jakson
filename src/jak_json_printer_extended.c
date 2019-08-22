@@ -30,8 +30,8 @@
 // ---------------------------------------------------------------------------------------------------------------------
 
 struct jak_json_extended_extra {
-    char *buffer;
-    size_t buffer_size;
+        char *buffer;
+        size_t buffer_size;
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -70,22 +70,22 @@ static void meta_data(struct printer *self, struct jak_string *builder,
         string_add(builder, "\"key\": {");
 
         switch (key_type) {
-                case CARBON_KEY_NOKEY:
+                case JAK_CARBON_KEY_NOKEY:
                         string_add(builder, "\"type\": \"nokey\", \"value\": null");
                         break;
-                case CARBON_KEY_AUTOKEY:
+                case JAK_CARBON_KEY_AUTOKEY:
                         string_add(builder, "\"type\": \"autokey\", \"value\": ");
                         string_add_u64(builder, *(jak_u64 *) key);
                         break;
-                case CARBON_KEY_UKEY:
+                case JAK_CARBON_KEY_UKEY:
                         string_add(builder, "\"type\": \"ukey\", \"value\": ");
                         string_add_u64(builder, *(jak_u64 *) key);
                         break;
-                case CARBON_KEY_IKEY:
+                case JAK_CARBON_KEY_IKEY:
                         string_add(builder, "\"type\": \"ikey\", \"value\": ");
                         string_add_u64(builder, *(jak_i64 *) key);
                         break;
-                case CARBON_KEY_SKEY:
+                case JAK_CARBON_KEY_SKEY:
                         string_add(builder, "\"type\": \"skey\", \"value\": ");
                         if (key_length > 0) {
                                 string_add(builder, "\"");
@@ -238,7 +238,7 @@ static void print_binary(struct printer *self, struct jak_string *builder, const
         base64_init_encodestate(&state);
 
         jak_u64 code_len = base64_encode_block(data_of(extra->buffer), binary->blob_len + 2,
-                                           code_of(extra->buffer, binary->blob_len), &state);
+                                               code_of(extra->buffer, binary->blob_len), &state);
         base64_encode_blockend(code_of(extra->buffer, binary->blob_len), &state);
         string_add_nchar(builder, code_of(extra->buffer, binary->blob_len), code_len);
 

@@ -30,31 +30,30 @@
 
 JAK_BEGIN_DECL
 
-struct jak_carbon_object_it
-{
-    struct jak_memfile memfile;
-    struct jak_error err;
+struct jak_carbon_object_it {
+        struct jak_memfile memfile;
+        struct jak_error err;
 
-    jak_offset_t object_contents_off;
-    bool object_end_reached;
+        jak_offset_t object_contents_off;
+        bool object_end_reached;
 
-    struct jak_vector ofType(jak_offset_t) history;
+        struct jak_vector ofType(jak_offset_t) history;
 
-    struct {
         struct {
-            jak_offset_t offset;
-            const char *name;
-            jak_u64 name_len;
-        } key;
-        struct {
-            jak_offset_t offset;
-            struct field_access data;
-        } value;
-    } field;
+                struct {
+                        jak_offset_t offset;
+                        const char *name;
+                        jak_u64 name_len;
+                } key;
+                struct {
+                        jak_offset_t offset;
+                        struct field_access data;
+                } value;
+        } field;
 
-    struct spinlock lock;
-    /* in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
-    jak_i64 mod_size;
+        struct spinlock lock;
+        /* in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
+        jak_i64 mod_size;
 };
 
 bool carbon_object_it_create(struct jak_carbon_object_it *it, struct jak_memfile *memfile, struct jak_error *err,
@@ -84,9 +83,9 @@ bool carbon_object_it_remove(struct jak_carbon_object_it *it);
 
 bool carbon_object_it_prop_type(enum carbon_field_type *type, struct jak_carbon_object_it *it);
 
-bool carbon_object_it_insert_begin(struct jak_carbon_insert *inserter, struct jak_carbon_object_it *it);
+bool carbon_object_it_insert_begin(jak_carbon_insert *inserter, struct jak_carbon_object_it *it);
 
-bool carbon_object_it_insert_end(struct jak_carbon_insert *inserter);
+bool carbon_object_it_insert_end(jak_carbon_insert *inserter);
 
 bool carbon_object_it_lock(struct jak_carbon_object_it *it);
 

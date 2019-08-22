@@ -35,84 +35,87 @@ JAK_BEGIN_DECL
 struct jak_archive_query; /* forwarded from 'types-query.h' */
 
 struct jak_archive {
-    struct jak_archive_info info;
-    char *disk_file_path;
-    struct jak_string_table string_table;
-    struct jak_record_table record_table;
-    struct jak_error err;
-    struct jak_sid_to_offset *query_index_string_id_to_offset;
-    struct jak_string_cache *string_id_cache;
-    struct jak_archive_query *default_query;
+        struct jak_archive_info info;
+        char *disk_file_path;
+        struct jak_string_table string_table;
+        struct jak_record_table record_table;
+        struct jak_error err;
+        struct jak_sid_to_offset *query_index_string_id_to_offset;
+        struct jak_string_cache *string_id_cache;
+        struct jak_archive_query *default_query;
 };
 
 struct jak_archive_callback {
-    void (*begin_create_from_model)();
+        void (*begin_create_from_model)();
 
-    void (*end_create_from_model)();
+        void (*end_create_from_model)();
 
-    void (*begin_create_from_json)();
+        void (*begin_create_from_json)();
 
-    void (*end_create_from_json)();
+        void (*end_create_from_json)();
 
-    void (*begin_jak_archive_stream_from_json)();
+        void (*begin_jak_archive_stream_from_json)();
 
-    void (*end_jak_archive_stream_from_json)();
+        void (*end_jak_archive_stream_from_json)();
 
-    void (*begin_write_archive_file_to_disk)();
+        void (*begin_write_archive_file_to_disk)();
 
-    void (*end_write_archive_file_to_disk)();
+        void (*end_write_archive_file_to_disk)();
 
-    void (*begin_load_archive)();
+        void (*begin_load_archive)();
 
-    void (*end_load_archive)();
+        void (*end_load_archive)();
 
-    void (*begin_setup_string_dictionary)();
+        void (*begin_setup_string_dictionary)();
 
-    void (*end_setup_string_dictionary)();
+        void (*end_setup_string_dictionary)();
 
-    void (*begin_parse_json)();
+        void (*begin_parse_json)();
 
-    void (*end_parse_json)();
+        void (*end_parse_json)();
 
-    void (*begin_test_json)();
+        void (*begin_test_json)();
 
-    void (*end_test_json)();
+        void (*end_test_json)();
 
-    void (*begin_import_json)();
+        void (*begin_import_json)();
 
-    void (*end_import_json)();
+        void (*end_import_json)();
 
-    void (*begin_cleanup)();
+        void (*begin_cleanup)();
 
-    void (*end_cleanup)();
+        void (*end_cleanup)();
 
-    void (*begin_write_string_table)();
+        void (*begin_write_string_table)();
 
-    void (*end_write_string_table)();
+        void (*end_write_string_table)();
 
-    void (*begin_write_record_table)();
+        void (*begin_write_record_table)();
 
-    void (*end_write_record_table)();
+        void (*end_write_record_table)();
 
-    void (*skip_string_id_index_baking)();
+        void (*skip_string_id_index_baking)();
 
-    void (*begin_string_id_index_baking)();
+        void (*begin_string_id_index_baking)();
 
-    void (*end_string_id_index_baking)();
+        void (*end_string_id_index_baking)();
 };
 
 bool jak_archive_from_json(struct jak_archive *out, const char *file, struct jak_error *err, const char *json_string,
-                       enum jak_packer_type compressor, enum jak_str_dict_tag dictionary, size_t num_async_dic_threads,
-                       bool read_optimized,
-                       bool bake_string_id_index, struct jak_archive_callback *callback);
+                           enum jak_packer_type compressor, enum jak_str_dict_tag dictionary,
+                           size_t num_async_dic_threads,
+                           bool read_optimized,
+                           bool bake_string_id_index, struct jak_archive_callback *callback);
 
 bool jak_archive_stream_from_json(struct jak_memblock **stream, struct jak_error *err, const char *json_string,
-                              enum jak_packer_type compressor, enum jak_str_dict_tag dictionary, size_t num_async_dic_threads,
-                              bool read_optimized,
-                              bool bake_id_index, struct jak_archive_callback *callback);
+                                  enum jak_packer_type compressor, enum jak_str_dict_tag dictionary,
+                                  size_t num_async_dic_threads,
+                                  bool read_optimized,
+                                  bool bake_id_index, struct jak_archive_callback *callback);
 
 bool jak_archive_from_model(struct jak_memblock **stream, struct jak_error *err, struct jak_column_doc *model,
-                        enum jak_packer_type compressor, bool bake_string_id_index, struct jak_archive_callback *callback);
+                            enum jak_packer_type compressor, bool bake_string_id_index,
+                            struct jak_archive_callback *callback);
 
 bool jak_archive_write(FILE *file, const struct jak_memblock *stream);
 

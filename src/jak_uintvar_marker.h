@@ -67,22 +67,25 @@ JAK_BEGIN_DECL
 #define UINT_VAR_MARKER_32 'i'
 #define UINT_VAR_MARKER_64 'l'
 
-typedef void * uintvar_marker_t;
+typedef void *uintvar_marker_t;
 
-enum uintvar_marker_type
-{
-    UINTVAR_8,
-    UINTVAR_16,
-    UINTVAR_32,
-    UINTVAR_64
+enum uintvar_marker_type {
+        UINTVAR_8,
+        UINTVAR_16,
+        UINTVAR_32,
+        UINTVAR_64
 };
 
 bool uintvar_marker_write(uintvar_marker_t dst, jak_u64 value);
+
 jak_u64 uintvar_marker_read(jak_u8 *nbytes_read, uintvar_marker_t src);
 
 enum uintvar_marker_type uintvar_marker_type_for(jak_u64 value);
+
 bool uintvar_marker_type(const void *data);
+
 size_t uintvar_marker_sizeof(uintvar_marker_t value);
+
 size_t uintvar_marker_required_size(jak_u64 value);
 
 JAK_END_DECL

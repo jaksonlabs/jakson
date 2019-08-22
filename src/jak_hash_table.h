@@ -29,10 +29,10 @@
 JAK_BEGIN_DECL
 
 struct hashtable_bucket {
-    bool in_use_flag;  /* flag indicating if bucket is in use */
-    jak_i32 displacement; /* difference between intended position during insert, and actual position in table */
-    jak_u32 num_probs;    /* number of probe calls to this bucket */
-    jak_u64 data_idx;      /* position of key element in owning struct hashtable structure */
+        bool in_use_flag;  /* flag indicating if bucket is in use */
+        jak_i32 displacement; /* difference between intended position during insert, and actual position in table */
+        jak_u32 num_probs;    /* number of probe calls to this bucket */
+        jak_u64 data_idx;      /* position of key element in owning struct hashtable structure */
 };
 
 /**
@@ -47,12 +47,12 @@ struct hashtable_bucket {
  * lock implementation.
  */
 struct hashtable {
-    struct jak_vector key_data;
-    struct jak_vector value_data;
-    struct jak_vector ofType(struct hashtable_bucket) table;
-    struct spinlock lock;
-    jak_u32 size;
-    struct jak_error err;
+        struct jak_vector key_data;
+        struct jak_vector value_data;
+        struct jak_vector ofType(struct hashtable_bucket) table;
+        struct spinlock lock;
+        jak_u32 size;
+        struct jak_error err;
 };
 
 JAK_DEFINE_GET_ERROR_FUNCTION(hashtable, struct hashtable, table);

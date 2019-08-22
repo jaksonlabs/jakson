@@ -29,51 +29,60 @@
 #define SMART_MAP_TAG "strhash-mem"
 
 struct bucket {
-    slice_list_t slice_list;
+        slice_list_t slice_list;
 };
 
 struct mem_extra {
-    struct jak_vector ofType(bucket) buckets;
+        struct jak_vector ofType(bucket) buckets;
 };
 
 static int this_drop(struct jak_str_hash *self);
 
-static int this_put_safe_bulk(struct jak_str_hash *self, char *const *keys, const jak_archive_field_sid_t *values, size_t num_pairs);
+static int this_put_safe_bulk(struct jak_str_hash *self, char *const *keys, const jak_archive_field_sid_t *values,
+                              size_t num_pairs);
 
-static int this_put_fast_bulk(struct jak_str_hash *self, char *const *keys, const jak_archive_field_sid_t *values, size_t num_pairs);
+static int this_put_fast_bulk(struct jak_str_hash *self, char *const *keys, const jak_archive_field_sid_t *values,
+                              size_t num_pairs);
 
 static int this_put_safe_exact(struct jak_str_hash *self, const char *key, jak_archive_field_sid_t value);
 
 static int this_put_fast_exact(struct jak_str_hash *self, const char *key, jak_archive_field_sid_t value);
 
-static int this_get_safe(struct jak_str_hash *self, jak_archive_field_sid_t **out, bool **found_mask, size_t *num_not_found,
-                         char *const *keys, size_t num_keys);
+static int
+this_get_safe(struct jak_str_hash *self, jak_archive_field_sid_t **out, bool **found_mask, size_t *num_not_found,
+              char *const *keys, size_t num_keys);
 
-static int this_get_safe_exact(struct jak_str_hash *self, jak_archive_field_sid_t *out, bool *found_mask, const char *key);
+static int
+this_get_safe_exact(struct jak_str_hash *self, jak_archive_field_sid_t *out, bool *found_mask, const char *key);
 
 static int this_get_fast(struct jak_str_hash *self, jak_archive_field_sid_t **out, char *const *keys, size_t num_keys);
 
-static int this_update_key_fast(struct jak_str_hash *self, const jak_archive_field_sid_t *values, char *const *keys, size_t num_keys);
+static int this_update_key_fast(struct jak_str_hash *self, const jak_archive_field_sid_t *values, char *const *keys,
+                                size_t num_keys);
 
 static int this_remove(struct jak_str_hash *self, char *const *keys, size_t num_keys);
 
 static int this_free(struct jak_str_hash *self, void *ptr);
 
 static int this_insert_bulk(struct jak_vector ofType(bucket) *buckets, char *const *restrict keys,
-                            const jak_archive_field_sid_t *restrict values, size_t *restrict bucket_idxs, size_t num_pairs,
+                            const jak_archive_field_sid_t *restrict values, size_t *restrict bucket_idxs,
+                            size_t num_pairs,
                             struct jak_allocator *alloc,
                             struct jak_str_hash_counters *counter);
 
-static int this_insert_exact(struct jak_vector ofType(bucket) *buckets, const char *restrict key, jak_archive_field_sid_t value,
-                             size_t bucket_idx, struct jak_allocator *alloc, struct jak_str_hash_counters *counter);
+static int
+this_insert_exact(struct jak_vector ofType(bucket) *buckets, const char *restrict key, jak_archive_field_sid_t value,
+                  size_t bucket_idx, struct jak_allocator *alloc, struct jak_str_hash_counters *counter);
 
-static int this_fetch_bulk(struct jak_vector ofType(bucket) *buckets, jak_archive_field_sid_t *values_out, bool *key_found_mask,
-                           size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
-                           struct jak_allocator *alloc,
-                           struct jak_str_hash_counters *counter);
+static int
+this_fetch_bulk(struct jak_vector ofType(bucket) *buckets, jak_archive_field_sid_t *values_out, bool *key_found_mask,
+                size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
+                struct jak_allocator *alloc,
+                struct jak_str_hash_counters *counter);
 
-static int this_fetch_single(struct jak_vector ofType(bucket) *buckets, jak_archive_field_sid_t *value_out, bool *key_found,
-                             const size_t bucket_idx, const char *key, struct jak_str_hash_counters *counter);
+static int
+this_fetch_single(struct jak_vector ofType(bucket) *buckets, jak_archive_field_sid_t *value_out, bool *key_found,
+                  const size_t bucket_idx, const char *key, struct jak_str_hash_counters *counter);
 
 static int this_create_extra(struct jak_str_hash *self, size_t num_buckets, size_t cap_buckets);
 
@@ -83,11 +92,13 @@ static int bucket_create(struct bucket *buckets, size_t num_buckets, size_t buck
 
 static int bucket_drop(struct bucket *buckets, size_t num_buckets, struct jak_allocator *alloc);
 
-static int bucket_insert(struct bucket *bucket, const char *restrict key, jak_archive_field_sid_t value, struct jak_allocator *alloc,
+static int bucket_insert(struct bucket *bucket, const char *restrict key, jak_archive_field_sid_t value,
+                         struct jak_allocator *alloc,
                          struct jak_str_hash_counters *counter);
 
-bool strhash_create_inmemory(struct jak_str_hash *jak_async_map_exec, const struct jak_allocator *alloc, size_t num_buckets,
-                             size_t cap_buckets)
+bool
+strhash_create_inmemory(struct jak_str_hash *jak_async_map_exec, const struct jak_allocator *alloc, size_t num_buckets,
+                        size_t cap_buckets)
 {
         JAK_check_success(jak_alloc_this_or_std(&jak_async_map_exec->allocator, alloc));
 
@@ -124,7 +135,8 @@ static int this_drop(struct jak_str_hash *self)
         return true;
 }
 
-static int this_put_safe_bulk(struct jak_str_hash *self, char *const *keys, const jak_archive_field_sid_t *values, size_t num_pairs)
+static int this_put_safe_bulk(struct jak_str_hash *self, char *const *keys, const jak_archive_field_sid_t *values,
+                              size_t num_pairs)
 {
         JAK_ASSERT(self->tag == MEMORY_RESIDENT);
         struct mem_extra *extra = this_get_exta(self);
@@ -178,15 +190,17 @@ static int this_put_fast_exact(struct jak_str_hash *self, const char *key, jak_a
         return this_put_safe_exact(self, key, value);
 }
 
-static int this_put_fast_bulk(struct jak_str_hash *self, char *const *keys, const jak_archive_field_sid_t *values, size_t num_pairs)
+static int this_put_fast_bulk(struct jak_str_hash *self, char *const *keys, const jak_archive_field_sid_t *values,
+                              size_t num_pairs)
 {
         return this_put_safe_bulk(self, keys, values, num_pairs);
 }
 
-static int this_fetch_bulk(struct jak_vector ofType(bucket) *buckets, jak_archive_field_sid_t *values_out, bool *key_found_mask,
-                           size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
-                           struct jak_allocator *alloc,
-                           struct jak_str_hash_counters *counter)
+static int
+this_fetch_bulk(struct jak_vector ofType(bucket) *buckets, jak_archive_field_sid_t *values_out, bool *key_found_mask,
+                size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
+                struct jak_allocator *alloc,
+                struct jak_str_hash_counters *counter)
 {
         JAK_UNUSED(counter);
         JAK_UNUSED(alloc);
@@ -216,8 +230,9 @@ static int this_fetch_bulk(struct jak_vector ofType(bucket) *buckets, jak_archiv
         return true;
 }
 
-static int this_fetch_single(struct jak_vector ofType(bucket) *buckets, jak_archive_field_sid_t *value_out, bool *key_found,
-                             const size_t bucket_idx, const char *key, struct jak_str_hash_counters *counter)
+static int
+this_fetch_single(struct jak_vector ofType(bucket) *buckets, jak_archive_field_sid_t *value_out, bool *key_found,
+                  const size_t bucket_idx, const char *key, struct jak_str_hash_counters *counter)
 {
         JAK_UNUSED(counter);
 
@@ -237,8 +252,9 @@ static int this_fetch_single(struct jak_vector ofType(bucket) *buckets, jak_arch
         return true;
 }
 
-static int this_get_safe(struct jak_str_hash *self, jak_archive_field_sid_t **out, bool **found_mask, size_t *num_not_found,
-                         char *const *keys, size_t num_keys)
+static int
+this_get_safe(struct jak_str_hash *self, jak_archive_field_sid_t **out, bool **found_mask, size_t *num_not_found,
+              char *const *keys, size_t num_keys)
 {
         JAK_ASSERT(self->tag == MEMORY_RESIDENT);
 
@@ -254,7 +270,8 @@ static int this_get_safe(struct jak_str_hash *self, jak_archive_field_sid_t **ou
 
         struct mem_extra *extra = this_get_exta(self);
         size_t *bucket_idxs = jak_alloc_malloc(&self->allocator, num_keys * sizeof(size_t));
-        jak_archive_field_sid_t *values_out = jak_alloc_malloc(&self->allocator, num_keys * sizeof(jak_archive_field_sid_t));
+        jak_archive_field_sid_t *values_out = jak_alloc_malloc(&self->allocator,
+                                                               num_keys * sizeof(jak_archive_field_sid_t));
         bool *found_mask_out = jak_alloc_malloc(&self->allocator, num_keys * sizeof(bool));
 
         JAK_ASSERT(bucket_idxs != NULL);
@@ -295,7 +312,8 @@ static int this_get_safe(struct jak_str_hash *self, jak_archive_field_sid_t **ou
         return true;
 }
 
-static int this_get_safe_exact(struct jak_str_hash *self, jak_archive_field_sid_t *out, bool *found_mask, const char *key)
+static int
+this_get_safe_exact(struct jak_str_hash *self, jak_archive_field_sid_t *out, bool *found_mask, const char *key)
 {
         JAK_ASSERT(self->tag == MEMORY_RESIDENT);
 
@@ -326,7 +344,8 @@ static int this_get_fast(struct jak_str_hash *self, jak_archive_field_sid_t **ou
         return status;
 }
 
-static int this_update_key_fast(struct jak_str_hash *self, const jak_archive_field_sid_t *values, char *const *keys, size_t num_keys)
+static int this_update_key_fast(struct jak_str_hash *self, const jak_archive_field_sid_t *values, char *const *keys,
+                                size_t num_keys)
 {
         JAK_UNUSED(self);
         JAK_UNUSED(values);
@@ -436,7 +455,8 @@ static int bucket_drop(struct bucket *buckets, size_t num_buckets, struct jak_al
         return true;
 }
 
-static int bucket_insert(struct bucket *bucket, const char *restrict key, jak_archive_field_sid_t value, struct jak_allocator *alloc,
+static int bucket_insert(struct bucket *bucket, const char *restrict key, jak_archive_field_sid_t value,
+                         struct jak_allocator *alloc,
                          struct jak_str_hash_counters *counter)
 {
         JAK_UNUSED(counter);
@@ -464,7 +484,8 @@ static int bucket_insert(struct bucket *bucket, const char *restrict key, jak_ar
 }
 
 static int this_insert_bulk(struct jak_vector ofType(bucket) *buckets, char *const *restrict keys,
-                            const jak_archive_field_sid_t *restrict values, size_t *restrict bucket_idxs, size_t num_pairs,
+                            const jak_archive_field_sid_t *restrict values, size_t *restrict bucket_idxs,
+                            size_t num_pairs,
                             struct jak_allocator *alloc,
                             struct jak_str_hash_counters *counter)
 {
@@ -487,8 +508,9 @@ static int this_insert_bulk(struct jak_vector ofType(bucket) *buckets, char *con
         return status;
 }
 
-static int this_insert_exact(struct jak_vector ofType(bucket) *buckets, const char *restrict key, jak_archive_field_sid_t value,
-                             size_t bucket_idx, struct jak_allocator *alloc, struct jak_str_hash_counters *counter)
+static int
+this_insert_exact(struct jak_vector ofType(bucket) *buckets, const char *restrict key, jak_archive_field_sid_t value,
+                  size_t bucket_idx, struct jak_allocator *alloc, struct jak_str_hash_counters *counter)
 {
         JAK_ERROR_IF_NULL(buckets)
         JAK_ERROR_IF_NULL(key)

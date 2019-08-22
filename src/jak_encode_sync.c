@@ -31,28 +31,31 @@
 #define STRING_DIC_SYNC_TAG "string-dic-sync"
 
 struct entry {
-    char *str;
-    bool in_use;
+        char *str;
+        bool in_use;
 };
 
 struct sync_extra {
-    struct jak_vector ofType(entry) contents;
-    struct jak_vector ofType(string_id_t_t) freelist;
-    struct jak_str_hash index;
-    struct spinlock lock;
+        struct jak_vector ofType(entry) contents;
+        struct jak_vector ofType(string_id_t_t) freelist;
+        struct jak_str_hash index;
+        struct spinlock lock;
 };
 
 static bool this_drop(struct jak_string_dict *self);
 
-static bool this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *const *strings, size_t num_strings,
-                        size_t num_threads);
+static bool
+this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *const *strings, size_t num_strings,
+            size_t num_threads);
 
 static bool this_remove(struct jak_string_dict *self, jak_archive_field_sid_t *strings, size_t num_strings);
 
-static bool this_locate_safe(struct jak_string_dict *self, jak_archive_field_sid_t **out, bool **found_mask, size_t *num_not_found,
-                             char *const *keys, size_t num_keys);
+static bool
+this_locate_safe(struct jak_string_dict *self, jak_archive_field_sid_t **out, bool **found_mask, size_t *num_not_found,
+                 char *const *keys, size_t num_keys);
 
-static bool this_locate_fast(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *const *keys, size_t num_keys);
+static bool
+this_locate_fast(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *const *keys, size_t num_keys);
 
 static char **this_extract(struct jak_string_dict *self, const jak_archive_field_sid_t *ids, size_t num_ids);
 
@@ -71,8 +74,9 @@ static void lock(struct jak_string_dict *self);
 
 static void unlock(struct jak_string_dict *self);
 
-static int create_extra(struct jak_string_dict *self, size_t capacity, size_t num_index_buckets, size_t num_index_bucket_cap,
-                        size_t num_threads);
+static int
+create_extra(struct jak_string_dict *self, size_t capacity, size_t num_index_buckets, size_t num_index_bucket_cap,
+             size_t num_threads);
 
 static struct sync_extra *this_extra(struct jak_string_dict *self);
 
@@ -80,8 +84,9 @@ static int freelist_pop(jak_archive_field_sid_t *out, struct jak_string_dict *se
 
 static int freelist_push(struct jak_string_dict *self, jak_archive_field_sid_t idx);
 
-int encode_sync_create(struct jak_string_dict *dic, size_t capacity, size_t num_indx_buckets, size_t num_index_bucket_cap,
-                       size_t num_threads, const struct jak_allocator *alloc)
+int
+encode_sync_create(struct jak_string_dict *dic, size_t capacity, size_t num_indx_buckets, size_t num_index_bucket_cap,
+                   size_t num_threads, const struct jak_allocator *alloc)
 {
         JAK_ERROR_IF_NULL(dic);
 
@@ -118,8 +123,9 @@ static void unlock(struct jak_string_dict *self)
         spin_release(&extra->lock);
 }
 
-static int create_extra(struct jak_string_dict *self, size_t capacity, size_t num_index_buckets, size_t num_index_bucket_cap,
-                        size_t num_threads)
+static int
+create_extra(struct jak_string_dict *self, size_t capacity, size_t num_index_buckets, size_t num_index_bucket_cap,
+             size_t num_threads)
 {
         self->extra = jak_alloc_malloc(&self->alloc, sizeof(struct sync_extra));
         struct sync_extra *extra = this_extra(self);
@@ -206,8 +212,9 @@ static bool this_drop(struct jak_string_dict *self)
         return true;
 }
 
-static bool this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *const *strings, size_t num_strings,
-                        size_t num_threads)
+static bool
+this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *const *strings, size_t num_strings,
+            size_t num_threads)
 {
         JAK_trace(STRING_DIC_SYNC_TAG, "local string dictionary insertion invoked for %zu strings", num_strings);
         timestamp_t begin = time_now_wallclock();
@@ -226,7 +233,8 @@ static bool this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **
         JAK_check_success(jak_alloc_this_or_std(&hashtable_alloc, &self->alloc));
 #endif
 
-        jak_archive_field_sid_t *ids_out = jak_alloc_malloc(&hashtable_alloc, num_strings * sizeof(jak_archive_field_sid_t));
+        jak_archive_field_sid_t *ids_out = jak_alloc_malloc(&hashtable_alloc,
+                                                            num_strings * sizeof(jak_archive_field_sid_t));
         bool *found_mask;
         jak_archive_field_sid_t *values;
         size_t num_not_found;
@@ -331,7 +339,8 @@ static bool this_remove(struct jak_string_dict *self, jak_archive_field_sid_t *s
 
         size_t num_strings_to_delete = 0;
         char **string_to_delete = jak_alloc_malloc(&self->alloc, num_strings * sizeof(char *));
-        jak_archive_field_sid_t *string_ids_to_delete = jak_alloc_malloc(&self->alloc, num_strings * sizeof(jak_archive_field_sid_t));
+        jak_archive_field_sid_t *string_ids_to_delete = jak_alloc_malloc(&self->alloc,
+                                                                         num_strings * sizeof(jak_archive_field_sid_t));
 
         /** remove strings from contents JAK_vector, and skip duplicates */
         for (size_t i = 0; i < num_strings; i++) {
@@ -363,8 +372,9 @@ static bool this_remove(struct jak_string_dict *self, jak_archive_field_sid_t *s
         return true;
 }
 
-static bool this_locate_safe(struct jak_string_dict *self, jak_archive_field_sid_t **out, bool **found_mask, size_t *num_not_found,
-                             char *const *keys, size_t num_keys)
+static bool
+this_locate_safe(struct jak_string_dict *self, jak_archive_field_sid_t **out, bool **found_mask, size_t *num_not_found,
+                 char *const *keys, size_t num_keys)
 {
         timestamp_t begin = time_now_wallclock();
         JAK_trace(STRING_DIC_SYNC_TAG, "'locate_safe' function invoked for %zu strings", num_keys)
@@ -390,7 +400,8 @@ static bool this_locate_safe(struct jak_string_dict *self, jak_archive_field_sid
         return status;
 }
 
-static bool this_locate_fast(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *const *keys, size_t num_keys)
+static bool
+this_locate_fast(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *const *keys, size_t num_keys)
 {
         JAK_check_tag(self->tag, SYNC)
 
@@ -431,8 +442,10 @@ static char **this_extract(struct jak_string_dict *self, const jak_archive_field
         for (size_t i = 0; i < num_ids; i++) {
                 jak_archive_field_sid_t jak_archive_field_sid_t = ids[i];
                 JAK_ASSERT(jak_archive_field_sid_t < vec_length(&extra->contents));
-                JAK_ASSERT(jak_archive_field_sid_t == JAK_NULL_ENCODED_STRING || entries[jak_archive_field_sid_t].in_use);
-                result[i] = jak_archive_field_sid_t != JAK_NULL_ENCODED_STRING ? entries[jak_archive_field_sid_t].str : JAK_NULL_TEXT;
+                JAK_ASSERT(
+                        jak_archive_field_sid_t == JAK_NULL_ENCODED_STRING || entries[jak_archive_field_sid_t].in_use);
+                result[i] = jak_archive_field_sid_t != JAK_NULL_ENCODED_STRING ? entries[jak_archive_field_sid_t].str
+                                                                               : JAK_NULL_TEXT;
         }
 
         unlock(self);

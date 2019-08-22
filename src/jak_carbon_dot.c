@@ -27,17 +27,17 @@
 #include <jak_string_utils.h>
 
 enum dot_token_type {
-    TOKEN_DOT,
-    TOKEN_STRING,
-    TOKEN_NUMBER,
-    TOKEN_UNKNOWN,
-    TOKEN_EOF
+        TOKEN_DOT,
+        TOKEN_STRING,
+        TOKEN_NUMBER,
+        TOKEN_UNKNOWN,
+        TOKEN_EOF
 };
 
 struct dot_token {
-    enum dot_token_type type;
-    const char *str;
-    jak_u32 len;
+        enum dot_token_type type;
+        const char *str;
+        jak_u32 len;
 };
 
 static const char *next_token(struct dot_token *token, const char *str)
@@ -131,7 +131,7 @@ bool carbon_dot_path_from_string(struct jak_carbon_dot_path *path, const char *p
         carbon_dot_path_create(path);
 
         enum path_entry {
-            DOT, ENTRY
+                DOT, ENTRY
         } expected_entry = ENTRY;
         path_string = next_token(&token, path_string);
         while (token.type != TOKEN_EOF) {
@@ -261,8 +261,10 @@ bool carbon_dot_path_idx_at(jak_u32 *idx, jak_u32 pos, const struct jak_carbon_d
 const char *carbon_dot_path_key_at(jak_u32 pos, const struct jak_carbon_dot_path *path)
 {
         JAK_ERROR_IF_NULL(path)
-        error_if_and_return(pos >= JAK_ARRAY_LENGTH(path->nodes), &((struct jak_carbon_dot_path *)path)->err, JAK_ERR_OUTOFBOUNDS, NULL);
-        error_if_and_return(path->nodes[pos].type != DOT_NODE_KEY_NAME, &((struct jak_carbon_dot_path *)path)->err, JAK_ERR_TYPEMISMATCH, NULL);
+        error_if_and_return(pos >= JAK_ARRAY_LENGTH(path->nodes), &((struct jak_carbon_dot_path *) path)->err,
+                            JAK_ERR_OUTOFBOUNDS, NULL);
+        error_if_and_return(path->nodes[pos].type != DOT_NODE_KEY_NAME, &((struct jak_carbon_dot_path *) path)->err,
+                            JAK_ERR_TYPEMISMATCH, NULL);
 
         return path->nodes[pos].identifier.string;
 }

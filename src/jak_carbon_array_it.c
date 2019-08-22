@@ -91,7 +91,7 @@ static bool update_in_place_constant(struct jak_carbon_array_it *it, enum carbon
                 memfile_seek(&it->memfile, datum);
                 memfile_write(&it->memfile, &value, sizeof(jak_u8));
         } else {
-                struct jak_carbon_insert ins;
+                jak_carbon_insert ins;
                 carbon_array_it_remove(it);
                 carbon_array_it_insert_begin(&ins, it);
 
@@ -441,14 +441,14 @@ struct jak_carbon_column_it *carbon_array_it_column_value(struct jak_carbon_arra
         return carbon_int_field_access_column_value(&it_in->field_access, &it_in->err);
 }
 
-bool carbon_array_it_insert_begin(struct jak_carbon_insert *inserter, struct jak_carbon_array_it *it)
+bool carbon_array_it_insert_begin(jak_carbon_insert *inserter, struct jak_carbon_array_it *it)
 {
         JAK_ERROR_IF_NULL(inserter)
         JAK_ERROR_IF_NULL(it)
         return carbon_int_insert_create_for_array(inserter, it);
 }
 
-bool carbon_array_it_insert_end(struct jak_carbon_insert *inserter)
+bool carbon_array_it_insert_end(jak_carbon_insert *inserter)
 {
         JAK_ERROR_IF_NULL(inserter)
         return carbon_insert_drop(inserter);

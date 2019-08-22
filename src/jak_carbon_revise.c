@@ -31,13 +31,13 @@ static bool internal_pack_object(struct jak_carbon_object_it *it);
 
 static bool internal_pack_column(struct jak_carbon_column_it *it);
 
-static bool internal_commit_update(struct jak_carbon *doc);
+static bool internal_commit_update(jak_carbon *doc);
 
-static bool carbon_header_rev_inc(struct jak_carbon *doc);
+static bool carbon_header_rev_inc(jak_carbon *doc);
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bool carbon_revise_try_begin(struct jak_carbon_revise *context, struct jak_carbon *revised_doc, struct jak_carbon *doc)
+bool carbon_revise_try_begin(struct jak_carbon_revise *context, jak_carbon *revised_doc, jak_carbon *doc)
 {
         JAK_ERROR_IF_NULL(context)
         JAK_ERROR_IF_NULL(doc)
@@ -48,7 +48,7 @@ bool carbon_revise_try_begin(struct jak_carbon_revise *context, struct jak_carbo
         }
 }
 
-bool carbon_revise_begin(struct jak_carbon_revise *context, struct jak_carbon *revised_doc, struct jak_carbon *original)
+bool carbon_revise_begin(struct jak_carbon_revise *context, jak_carbon *revised_doc, jak_carbon *original)
 {
         JAK_ERROR_IF_NULL(context)
         JAK_ERROR_IF_NULL(original)
@@ -59,7 +59,7 @@ bool carbon_revise_begin(struct jak_carbon_revise *context, struct jak_carbon *r
                 context->original = original;
                 context->revised_doc = revised_doc;
                 error_init(&context->err);
-                carbon_clone(context->revised_doc, context->original);
+                jak_carbon_clone(context->revised_doc, context->original);
                 return true;
         } else {
                 error(&original->err, JAK_ERR_OUTDATED)
@@ -68,7 +68,7 @@ bool carbon_revise_begin(struct jak_carbon_revise *context, struct jak_carbon *r
 }
 
 
-static void key_unsigned_set(struct jak_carbon *doc, jak_u64 key)
+static void key_unsigned_set(jak_carbon *doc, jak_u64 key)
 {
         JAK_ASSERT(doc);
         memfile_save_position(&doc->memfile);
@@ -79,7 +79,7 @@ static void key_unsigned_set(struct jak_carbon *doc, jak_u64 key)
         memfile_restore_position(&doc->memfile);
 }
 
-static void key_signed_set(struct jak_carbon *doc, jak_i64 key)
+static void key_signed_set(jak_carbon *doc, jak_i64 key)
 {
         JAK_ASSERT(doc);
         memfile_save_position(&doc->memfile);
@@ -90,7 +90,7 @@ static void key_signed_set(struct jak_carbon *doc, jak_i64 key)
         memfile_restore_position(&doc->memfile);
 }
 
-static void key_string_set(struct jak_carbon *doc, const char *key)
+static void key_string_set(jak_carbon *doc, const char *key)
 {
         JAK_ASSERT(doc);
         memfile_save_position(&doc->memfile);
@@ -104,9 +104,9 @@ static void key_string_set(struct jak_carbon *doc, const char *key)
 bool carbon_revise_key_generate(jak_global_id_t *out, struct jak_carbon_revise *context)
 {
         JAK_ERROR_IF_NULL(context);
-        enum carbon_key_type key_type;
-        carbon_key_type(&key_type, context->revised_doc);
-        if (key_type == CARBON_KEY_AUTOKEY) {
+        jak_carbon_key_e key_type;
+        jak_carbon_key_type(&key_type, context->revised_doc);
+        if (key_type == JAK_CARBON_KEY_AUTOKEY) {
                 jak_global_id_t oid;
                 global_id_create(&oid);
                 key_unsigned_set(context->revised_doc, oid);
@@ -121,9 +121,9 @@ bool carbon_revise_key_generate(jak_global_id_t *out, struct jak_carbon_revise *
 bool carbon_revise_key_set_unsigned(struct jak_carbon_revise *context, jak_u64 key_value)
 {
         JAK_ERROR_IF_NULL(context);
-        enum carbon_key_type key_type;
-        carbon_key_type(&key_type, context->revised_doc);
-        if (key_type == CARBON_KEY_UKEY) {
+        jak_carbon_key_e key_type;
+        jak_carbon_key_type(&key_type, context->revised_doc);
+        if (key_type == JAK_CARBON_KEY_UKEY) {
                 key_unsigned_set(context->revised_doc, key_value);
                 return true;
         } else {
@@ -135,9 +135,9 @@ bool carbon_revise_key_set_unsigned(struct jak_carbon_revise *context, jak_u64 k
 bool carbon_revise_key_set_signed(struct jak_carbon_revise *context, jak_i64 key_value)
 {
         JAK_ERROR_IF_NULL(context);
-        enum carbon_key_type key_type;
-        carbon_key_type(&key_type, context->revised_doc);
-        if (key_type == CARBON_KEY_IKEY) {
+        jak_carbon_key_e key_type;
+        jak_carbon_key_type(&key_type, context->revised_doc);
+        if (key_type == JAK_CARBON_KEY_IKEY) {
                 key_signed_set(context->revised_doc, key_value);
                 return true;
         } else {
@@ -149,9 +149,9 @@ bool carbon_revise_key_set_signed(struct jak_carbon_revise *context, jak_i64 key
 bool carbon_revise_key_set_string(struct jak_carbon_revise *context, const char *key_value)
 {
         JAK_ERROR_IF_NULL(context);
-        enum carbon_key_type key_type;
-        carbon_key_type(&key_type, context->revised_doc);
-        if (key_type == CARBON_KEY_SKEY) {
+        jak_carbon_key_e key_type;
+        jak_carbon_key_type(&key_type, context->revised_doc);
+        if (key_type == JAK_CARBON_KEY_SKEY) {
                 key_string_set(context->revised_doc, key_value);
                 return true;
         } else {
@@ -193,7 +193,7 @@ bool carbon_revise_find_close(struct jak_carbon_find *find)
         return carbon_find_drop(find);
 }
 
-bool carbon_revise_remove_one(const char *dot_path, struct jak_carbon *rev_doc, struct jak_carbon *doc)
+bool carbon_revise_remove_one(const char *dot_path, jak_carbon *rev_doc, jak_carbon *doc)
 {
         struct jak_carbon_revise revise;
         carbon_revise_begin(&revise, rev_doc, doc);
@@ -218,12 +218,12 @@ bool carbon_revise_remove(const char *dot_path, struct jak_carbon_revise *contex
                         result = false;
                 } else {
                         switch (eval.result.container_type) {
-                                case CARBON_ARRAY: {
+                                case JAK_CARBON_ARRAY: {
                                         struct jak_carbon_array_it *it = &eval.result.containers.array.it;
                                         result = carbon_array_it_remove(it);
                                 }
                                         break;
-                                case CARBON_COLUMN: {
+                                case JAK_CARBON_COLUMN: {
                                         struct jak_carbon_column_it *it = &eval.result.containers.column.it;
                                         jak_u32 elem_pos = eval.result.containers.column.elem_pos;
                                         result = carbon_column_it_remove(it, elem_pos);
@@ -269,7 +269,7 @@ bool carbon_revise_shrink(struct jak_carbon_revise *context)
         return true;
 }
 
-const struct jak_carbon *carbon_revise_end(struct jak_carbon_revise *context)
+const jak_carbon *carbon_revise_end(struct jak_carbon_revise *context)
 {
         if (JAK_LIKELY(context != NULL)) {
                 internal_commit_update(context->revised_doc);
@@ -290,7 +290,7 @@ bool carbon_revise_abort(struct jak_carbon_revise *context)
 {
         JAK_ERROR_IF_NULL(context)
 
-        carbon_drop(context->revised_doc);
+        jak_carbon_drop(context->revised_doc);
         context->original->versioning.is_latest = true;
         context->original->versioning.commit_lock = false;
         spin_release(&context->original->versioning.write_lock);
@@ -361,7 +361,7 @@ static bool internal_pack_array(struct jak_carbon_array_it *it)
                                                                sizeof(jak_u8));
                                         internal_pack_array(&nested_array_it);
                                         JAK_ASSERT(*memfile_peek(&nested_array_it.memfile, sizeof(char)) ==
-                                                       JAK_CARBON_MARKER_ARRAY_END);
+                                                   JAK_CARBON_MARKER_ARRAY_END);
                                         memfile_skip(&nested_array_it.memfile, sizeof(char));
                                         memfile_seek(&it->memfile, memfile_tell(&nested_array_it.memfile));
                                         carbon_array_it_drop(&nested_array_it);
@@ -389,7 +389,7 @@ static bool internal_pack_array(struct jak_carbon_array_it *it)
                                                                 sizeof(jak_u8));
                                         internal_pack_object(&nested_object_it);
                                         JAK_ASSERT(*memfile_peek(&nested_object_it.memfile, sizeof(char)) ==
-                                                       JAK_CARBON_MARKER_OBJECT_END);
+                                                   JAK_CARBON_MARKER_OBJECT_END);
                                         memfile_skip(&nested_object_it.memfile, sizeof(char));
                                         memfile_seek(&it->memfile, memfile_tell(&nested_object_it.memfile));
                                         carbon_object_it_drop(&nested_object_it);
@@ -469,7 +469,7 @@ static bool internal_pack_object(struct jak_carbon_object_it *it)
                                                                sizeof(jak_u8));
                                         internal_pack_array(&nested_array_it);
                                         JAK_ASSERT(*memfile_peek(&nested_array_it.memfile, sizeof(char)) ==
-                                                       JAK_CARBON_MARKER_ARRAY_END);
+                                                   JAK_CARBON_MARKER_ARRAY_END);
                                         memfile_skip(&nested_array_it.memfile, sizeof(char));
                                         memfile_seek(&it->memfile, memfile_tell(&nested_array_it.memfile));
                                         carbon_array_it_drop(&nested_array_it);
@@ -497,7 +497,7 @@ static bool internal_pack_object(struct jak_carbon_object_it *it)
                                                                 sizeof(jak_u8));
                                         internal_pack_object(&nested_object_it);
                                         JAK_ASSERT(*memfile_peek(&nested_object_it.memfile, sizeof(char)) ==
-                                                       JAK_CARBON_MARKER_OBJECT_END);
+                                                   JAK_CARBON_MARKER_OBJECT_END);
                                         memfile_skip(&nested_object_it.memfile, sizeof(char));
                                         memfile_seek(&it->memfile, memfile_tell(&nested_object_it.memfile));
                                         carbon_object_it_drop(&nested_object_it);
@@ -529,7 +529,8 @@ static bool internal_pack_column(struct jak_carbon_column_it *it)
 
                 memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
                 memfile_skip_uintvar_stream(&it->memfile); // skip num of elements counter
-                memfile_update_uintvar_stream(&it->memfile, it->column_num_elements); // update capacity counter to num elems
+                memfile_update_uintvar_stream(&it->memfile,
+                                              it->column_num_elements); // update capacity counter to num elems
 
                 memfile_skip(&it->memfile, payload_size);
 
@@ -539,23 +540,23 @@ static bool internal_pack_column(struct jak_carbon_column_it *it)
         }
 }
 
-static bool internal_commit_update(struct jak_carbon *doc)
+static bool internal_commit_update(jak_carbon *doc)
 {
         JAK_ASSERT(doc);
         return carbon_header_rev_inc(doc);
 }
 
-static bool carbon_header_rev_inc(struct jak_carbon *doc)
+static bool carbon_header_rev_inc(jak_carbon *doc)
 {
         JAK_ASSERT(doc);
 
-        enum carbon_key_type key_type;
+        jak_carbon_key_e key_type;
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
         carbon_key_read(NULL, &key_type, &doc->memfile);
-        if (carbon_has_key(key_type)) {
+        if (jak_carbon_has_key(key_type)) {
                 jak_u64 raw_data_len = 0;
-                const void *raw_data = carbon_raw_data(&raw_data_len, doc);
+                const void *raw_data = jak_carbon_raw_data(&raw_data_len, doc);
                 carbon_commit_hash_update(&doc->memfile, raw_data, raw_data_len);
         }
         memfile_restore_position(&doc->memfile);

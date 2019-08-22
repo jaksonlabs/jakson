@@ -30,25 +30,25 @@
 JAK_BEGIN_DECL
 
 struct jak_huffman {
-    struct jak_vector ofType(struct pack_huffman_entry) table;
-    struct jak_error err;
+        struct jak_vector ofType(struct pack_huffman_entry) table;
+        struct jak_error err;
 };
 
 struct pack_huffman_entry {
-    unsigned char letter;
-    jak_u32 *blocks;
-    jak_u16 nblocks;
+        unsigned char letter;
+        jak_u32 *blocks;
+        jak_u16 nblocks;
 };
 
 struct pack_huffman_info {
-    unsigned char letter;
-    jak_u8 nbytes_prefix;
-    char *prefix_code;
+        unsigned char letter;
+        jak_u8 nbytes_prefix;
+        char *prefix_code;
 };
 
 struct pack_huffman_str_info {
-    jak_u32 nbytes_encoded;
-    const char *encoded_bytes;
+        jak_u32 nbytes_encoded;
+        const char *encoded_bytes;
 };
 
 bool coding_huffman_create(struct jak_huffman *dic);

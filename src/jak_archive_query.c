@@ -25,14 +25,14 @@
 #include <jak_archive_query.h>
 
 struct jak_sid_to_offset_arg {
-    jak_offset_t offset;
-    jak_u32 strlen;
+        jak_offset_t offset;
+        jak_u32 strlen;
 };
 
 struct jak_sid_to_offset {
-    struct hashtable ofMapping(jak_archive_field_sid_t, struct jak_sid_to_offset_arg) mapping;
-    FILE *disk_file;
-    size_t disk_file_size;
+        struct hashtable ofMapping(jak_archive_field_sid_t, struct jak_sid_to_offset_arg) mapping;
+        FILE *disk_file;
+        size_t disk_file_size;
 
 };
 
@@ -79,7 +79,8 @@ bool jak_query_scan_strids(struct jak_strid_iter *it, struct jak_archive_query *
         return jak_strid_iter_open(it, &query->err, query->archive);
 }
 
-static bool index_string_id_to_offset_open_file(struct jak_sid_to_offset *index, struct jak_error *err, const char *file)
+static bool
+index_string_id_to_offset_open_file(struct jak_sid_to_offset *index, struct jak_error *err, const char *file)
 {
         index->disk_file = fopen(file, "r");
         if (!index->disk_file) {
@@ -156,7 +157,7 @@ bool jak_query_index_id_to_offset_serialize(FILE *file, struct jak_error *err, s
 }
 
 bool jak_query_index_id_to_offset_deserialize(struct jak_sid_to_offset **index, struct jak_error *err,
-                                          const char *file_path, jak_offset_t offset)
+                                              const char *file_path, jak_offset_t offset)
 {
         JAK_ERROR_IF_NULL(index)
         JAK_ERROR_IF_NULL(err)
@@ -264,7 +265,8 @@ static char *fetch_string_by_id_via_scan(struct jak_archive_query *query, jak_ar
         }
 }
 
-static char *fetch_string_by_id_via_index(struct jak_archive_query *query, struct jak_sid_to_offset *index, jak_archive_field_sid_t id)
+static char *fetch_string_by_id_via_index(struct jak_archive_query *query, struct jak_sid_to_offset *index,
+                                          jak_archive_field_sid_t id)
 {
         const struct jak_sid_to_offset_arg *args = hashtable_get_value(&index->mapping, &id);
         if (args) {
@@ -318,7 +320,7 @@ char *jak_query_fetch_string_by_id_nocache(struct jak_archive_query *query, jak_
 }
 
 char **jak_query_fetch_strings_by_offset(struct jak_archive_query *query, jak_offset_t *offs, jak_u32 *strlens,
-                                     size_t num_offs)
+                                         size_t num_offs)
 {
         JAK_ASSERT(query);
         JAK_ASSERT(offs);
@@ -379,7 +381,7 @@ char **jak_query_fetch_strings_by_offset(struct jak_archive_query *query, jak_of
 }
 
 jak_archive_field_sid_t *jak_query_find_ids(size_t *num_found, struct jak_archive_query *query,
-                            const struct jak_string_pred_t *pred, void *capture, jak_i64 limit)
+                                            const struct jak_string_pred_t *pred, void *capture, jak_i64 limit)
 {
         if (JAK_UNLIKELY(jak_string_pred_validate(&query->err, pred) == false)) {
                 return NULL;
@@ -484,12 +486,13 @@ jak_archive_field_sid_t *jak_query_find_ids(size_t *num_found, struct jak_archiv
                 }
 
                 char **strings = jak_query_fetch_strings_by_offset(query,
-                                                               str_offs,
-                                                               str_lens,
-                                                               step_len); // TODO: buffer + cleanup buffer
+                                                                   str_offs,
+                                                                   str_lens,
+                                                                   step_len); // TODO: buffer + cleanup buffer
 
                 if (JAK_UNLIKELY(
-                        jak_string_pred_eval(pred, idxs_matching, &num_matching, strings, step_len, capture) == false)) {
+                        jak_string_pred_eval(pred, idxs_matching, &num_matching, strings, step_len, capture) ==
+                        false)) {
                         error(&query->err, JAK_ERR_PREDEVAL_FAILED);
                         jak_strid_iter_close(&it);
                         goto cleanup_intermediate;
@@ -509,7 +512,8 @@ jak_archive_field_sid_t *jak_query_find_ids(size_t *num_found, struct jak_archiv
                         if (JAK_UNLIKELY(result_len > result_cap)) {
                                 result_cap = (result_len + 1) * 1.7f;
                                 if (JAK_UNLIKELY(
-                                        (tmp = realloc(result_ids, result_cap * sizeof(jak_archive_field_sid_t))) == NULL)) {
+                                        (tmp = realloc(result_ids, result_cap * sizeof(jak_archive_field_sid_t))) ==
+                                        NULL)) {
                                         jak_strid_iter_close(&it);
                                         goto cleanup_intermediate;
                                 } else {

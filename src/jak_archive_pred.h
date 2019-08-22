@@ -27,11 +27,12 @@
 JAK_BEGIN_DECL
 
 typedef bool
-(*jak_string_pred_func_t)(size_t *idxs_matching, size_t *num_matching, char **strings, size_t num_strings, void *capture);
+(*jak_string_pred_func_t)(size_t *idxs_matching, size_t *num_matching, char **strings, size_t num_strings,
+                          void *capture);
 
 struct jak_string_pred_t {
-    jak_string_pred_func_t func;
-    jak_i64 limit;
+        jak_string_pred_func_t func;
+        jak_i64 limit;
 };
 
 JAK_BUILT_IN(static bool) jak_string_pred_validate(struct jak_error *err, const struct jak_string_pred_t *pred)
@@ -42,7 +43,7 @@ JAK_BUILT_IN(static bool) jak_string_pred_validate(struct jak_error *err, const 
 }
 
 JAK_BUILT_IN(static bool) jak_string_pred_eval(const struct jak_string_pred_t *pred, size_t *idxs_matching,
-                                           size_t *num_matching, char **strings, size_t num_strings, void *capture)
+                                               size_t *num_matching, char **strings, size_t num_strings, void *capture)
 {
         JAK_ASSERT(pred);
         JAK_ASSERT(idxs_matching);

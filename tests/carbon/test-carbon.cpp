@@ -17,7 +17,7 @@
 #include <jak_carbon_path_index.h>
 
 TEST(CarbonTest, CreateCarbon) {
-        struct jak_carbon doc;
+        jak_carbon doc;
         jak_global_id_t oid;
         jak_u64 rev;
         struct jak_string builder;
@@ -25,86 +25,86 @@ TEST(CarbonTest, CreateCarbon) {
 
         string_create(&builder);
 
-        status = carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
+        status = jak_carbon_create_empty(&doc, JAK_CARBON_KEY_AUTOKEY);
         EXPECT_TRUE(status);
 
-        //carbon_hexdump_print(stderr, &doc);
+        //jak_carbon_hexdump_print(stderr, &doc);
 
-        status = carbon_key_unsigned_value(&oid, &doc);
+        status = jak_carbon_key_unsigned_value(&oid, &doc);
         EXPECT_TRUE(status);
         EXPECT_EQ(oid, 0);
 
-        status = carbon_commit_hash(&rev, &doc);
+        status = jak_carbon_commit_hash(&rev, &doc);
         EXPECT_TRUE(status);
         EXPECT_NE(rev, 0);
 
-        carbon_to_str(&builder, JSON_EXTENDED, &doc);
+        jak_carbon_to_str(&builder, JAK_JSON_EXTENDED, &doc);
         // printf("%s\n", string_builder_cstr(&builder));
         string_drop(&builder);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CreateCarbonRevisionNumberingNoKey) {
-        struct jak_carbon_new context;
-        struct jak_carbon doc, rev_doc;
+        jak_carbon_new context;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         jak_u64 commit_new, commit_mod;
 
-        carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
-        carbon_create_end(&context);
+        jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_create_end(&context);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_end(&revise);
 
         /* Commit hash value for records with 'nokey' option are always set to 0 (see specs) */
-        carbon_commit_hash(&commit_new, &doc);
-        carbon_commit_hash(&commit_mod, &rev_doc);
+        jak_carbon_commit_hash(&commit_new, &doc);
+        jak_carbon_commit_hash(&commit_mod, &rev_doc);
         ASSERT_EQ(commit_new, 0);
         ASSERT_EQ(commit_mod, 0);
         
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CreateCarbonRevisionNumberingWithKey) {
-        struct jak_carbon_new context;
-        struct jak_carbon doc, rev_doc;
+        jak_carbon_new context;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         jak_u64 commit_new, commit_mod, commit_mod_cmpr;
 
-        carbon_create_begin(&context, &doc, CARBON_KEY_AUTOKEY, JAK_CARBON_OPTIMIZE);
-        carbon_create_end(&context);
+        jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_AUTOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_create_end(&context);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_end(&revise);
 
         /* Commit hash value for records with no 'nokey' option shall be a (almost global) random number, and
          * a 64bit bernstein hash value of the original document after any modification (see specs) */
-        carbon_commit_hash(&commit_new, &doc);
-        carbon_commit_hash(&commit_mod, &rev_doc);
+        jak_carbon_commit_hash(&commit_new, &doc);
+        jak_carbon_commit_hash(&commit_mod, &rev_doc);
         ASSERT_NE(commit_new, 0);
         ASSERT_NE(commit_new, commit_mod);
 
         jak_u64 raw_data_len = 0;
-        const void *raw_data = carbon_raw_data(&raw_data_len, &doc);
+        const void *raw_data = jak_carbon_raw_data(&raw_data_len, &doc);
         carbon_commit_hash_compute(&commit_mod_cmpr, raw_data, raw_data_len);
 
         ASSERT_EQ(commit_mod, commit_mod_cmpr);
 }
 
 TEST(CarbonTest, CreateCarbonRevisionNumbering) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         jak_u64 rev;
         struct jak_string builder;
         bool status;
 
         string_create(&builder);
 
-        status = carbon_create_empty(&doc, CARBON_KEY_NOKEY);
+        status = jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
         EXPECT_TRUE(status);
 
-        status = carbon_commit_hash(&rev, &doc);
+        status = jak_carbon_commit_hash(&rev, &doc);
         EXPECT_TRUE(status);
         EXPECT_EQ(rev, 0);
 
@@ -112,40 +112,40 @@ TEST(CarbonTest, CreateCarbonRevisionNumbering) {
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_end(&revise);
 
-        status = carbon_commit_hash(&rev, &doc);
+        status = jak_carbon_commit_hash(&rev, &doc);
         EXPECT_TRUE(status);
         EXPECT_EQ(rev, 0);
 
-        status = carbon_commit_hash(&rev, &rev_doc);
+        status = jak_carbon_commit_hash(&rev, &rev_doc);
         EXPECT_TRUE(status);
         EXPECT_EQ(rev, 0);
 
-        status = carbon_is_up_to_date(&doc);
+        status = jak_carbon_is_up_to_date(&doc);
         EXPECT_FALSE(status);
 
-        status = carbon_is_up_to_date(&rev_doc);
+        status = jak_carbon_is_up_to_date(&rev_doc);
         EXPECT_TRUE(status);
 
-        carbon_to_str(&builder, JSON_EXTENDED, &doc);
+        jak_carbon_to_str(&builder, JAK_JSON_EXTENDED, &doc);
         // printf("%s\n", string_builder_cstr(&builder));
         string_drop(&builder);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CreateCarbonRevisionAbort) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         jak_u64 rev;
         struct jak_string builder;
         bool status;
 
         string_create(&builder);
 
-        status = carbon_create_empty(&doc, CARBON_KEY_NOKEY);
+        status = jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
         EXPECT_TRUE(status);
 
-        status = carbon_commit_hash(&rev, &doc);
+        status = jak_carbon_commit_hash(&rev, &doc);
         EXPECT_TRUE(status);
         EXPECT_EQ(rev, 0);
 
@@ -153,90 +153,90 @@ TEST(CarbonTest, CreateCarbonRevisionAbort) {
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_abort(&revise);
 
-        status = carbon_commit_hash(&rev, &doc);
+        status = jak_carbon_commit_hash(&rev, &doc);
         EXPECT_TRUE(status);
         EXPECT_EQ(rev, 0);
 
-        carbon_to_str(&builder, JSON_EXTENDED, &doc);
+        jak_carbon_to_str(&builder, JAK_JSON_EXTENDED, &doc);
         // printf("%s\n", string_builder_cstr(&builder));
         string_drop(&builder);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CreateCarbonRevisionAsyncReading) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         jak_u64 rev;
         struct jak_string builder;
         bool status;
 
         string_create(&builder);
 
-        status = carbon_create_empty(&doc, CARBON_KEY_NOKEY);
+        status = jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
         EXPECT_TRUE(status);
 
-        status = carbon_commit_hash(&rev, &doc);
+        status = jak_carbon_commit_hash(&rev, &doc);
         EXPECT_TRUE(status);
         EXPECT_EQ(rev, 0);
 
         struct jak_carbon_revise revise;
         carbon_revise_begin(&revise, &rev_doc, &doc);
 
-        status = carbon_commit_hash(&rev, &doc);
+        status = jak_carbon_commit_hash(&rev, &doc);
         EXPECT_TRUE(status);
         EXPECT_EQ(rev, 0);
 
         carbon_revise_end(&revise);
 
-        status = carbon_commit_hash(&rev, &doc);
+        status = jak_carbon_commit_hash(&rev, &doc);
         EXPECT_TRUE(status);
         EXPECT_EQ(rev, 0);
 
-        carbon_to_str(&builder, JSON_EXTENDED, &doc);
+        jak_carbon_to_str(&builder, JAK_JSON_EXTENDED, &doc);
         // printf("%s\n", string_builder_cstr(&builder));
         string_drop(&builder);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, ModifyCarbonObjectId) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         jak_global_id_t oid;
         jak_global_id_t new_oid;
         struct jak_carbon_revise revise;
         jak_u64 commit_hash_old, commit_hash_new;
 
-        carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
+        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_AUTOKEY);
 
-        carbon_key_unsigned_value(&oid, &doc);
+        jak_carbon_key_unsigned_value(&oid, &doc);
         EXPECT_EQ(oid, 0);
 
-        carbon_commit_hash(&commit_hash_old, &doc);
+        jak_carbon_commit_hash(&commit_hash_old, &doc);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_key_generate(&new_oid, &revise);
         EXPECT_NE(oid, new_oid);
         carbon_revise_end(&revise);
 
-        carbon_commit_hash(&commit_hash_new, &rev_doc);
+        jak_carbon_commit_hash(&commit_hash_new, &rev_doc);
         EXPECT_NE(commit_hash_old, commit_hash_new);
 
-        carbon_key_unsigned_value(&oid, &rev_doc);
+        jak_carbon_key_unsigned_value(&oid, &rev_doc);
         EXPECT_EQ(oid, new_oid);
 
-        // carbon_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonArrayIteratorOpenAfterNew) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
 
-        carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
+        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_AUTOKEY);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_key_generate(NULL, &revise);
@@ -246,20 +246,20 @@ TEST(CarbonTest, CarbonArrayIteratorOpenAfterNew) {
         carbon_revise_end(&revise);
         carbon_array_it_drop(&it);
 
-        // carbon_print(stdout, &rev_doc);
-        //carbon_hexdump_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonArrayIteratorInsertNullAfterNew) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
 
-        carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
+        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_AUTOKEY);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
@@ -270,27 +270,27 @@ TEST(CarbonTest, CarbonArrayIteratorInsertNullAfterNew) {
         carbon_revise_end(&revise);
         carbon_array_it_drop(&it);
 
-        // carbon_print(stdout, &rev_doc);
-        //carbon_hexdump_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
 
-        carbon_create_empty(&doc, CARBON_KEY_NOKEY);
+        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
         carbon_array_it_insert_begin(&inserter, &it);
         for (jak_i32 i = 0; i < 10; i++) {
                 // fprintf(stdout, "before:\n");
-                //carbon_hexdump_print(stdout, &rev_doc);
+                //jak_carbon_hexdump_print(stdout, &rev_doc);
                 bool status;
                 if (i % 3 == 0) {
                         status = carbon_insert_null(&inserter);
@@ -301,27 +301,27 @@ TEST(CarbonTest, CarbonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
                 }
                 ASSERT_TRUE(status);
                 // fprintf(stdout, "after:\n");
-                //carbon_hexdump_print(stdout, &rev_doc);
+                //jak_carbon_hexdump_print(stdout, &rev_doc);
                 // fprintf(stdout, "\n\n");
         }
         carbon_insert_drop(&inserter);
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        // carbon_print(stdout, &rev_doc);
-        //carbon_hexdump_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonArrayIteratorOverwriteLiterals) {
-        struct jak_carbon doc, rev_doc, rev_doc2;
+        jak_carbon doc, rev_doc, rev_doc2;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
 
-        carbon_create_empty(&doc, CARBON_KEY_NOKEY);
+        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
@@ -349,20 +349,20 @@ TEST(CarbonTest, CarbonArrayIteratorOverwriteLiterals) {
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        // carbon_print(stdout, &rev_doc2);
+        // jak_carbon_print(stdout, &rev_doc2);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
-        carbon_drop(&rev_doc2);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
+        jak_carbon_drop(&rev_doc2);
 }
 
 TEST(CarbonTest, CarbonArrayIteratorOverwriteLiteralsWithDocOverflow) {
-        struct jak_carbon doc, rev_doc, rev_doc2;
+        jak_carbon doc, rev_doc, rev_doc2;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
@@ -376,7 +376,7 @@ TEST(CarbonTest, CarbonArrayIteratorOverwriteLiteralsWithDocOverflow) {
                         carbon_insert_false(&inserter);
                 }
                // fprintf(stdout, "after initial push:\n");
-               // //carbon_hexdump_print(stdout, &rev_doc);
+               // //jak_carbon_hexdump_print(stdout, &rev_doc);
         }
         carbon_insert_drop(&inserter);
         carbon_array_it_drop(&it);
@@ -387,27 +387,27 @@ TEST(CarbonTest, CarbonArrayIteratorOverwriteLiteralsWithDocOverflow) {
         carbon_array_it_insert_begin(&inserter, &it);
         for (jak_i32 i = 0; i < 2; i++) {
                 // fprintf(stdout, "before:\n");
-                //carbon_hexdump_print(stdout, &rev_doc2);
+                //jak_carbon_hexdump_print(stdout, &rev_doc2);
                 carbon_insert_true(&inserter);
                 // fprintf(stdout, "after:\n");
-                //carbon_hexdump_print(stdout, &rev_doc2);
+                //jak_carbon_hexdump_print(stdout, &rev_doc2);
         }
         carbon_insert_drop(&inserter);
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
-        // carbon_print(stdout, &rev_doc2);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
-        carbon_drop(&rev_doc2);
+        // jak_carbon_print(stdout, &rev_doc2);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
+        jak_carbon_drop(&rev_doc2);
 }
 
 TEST(CarbonTest, CarbonArrayIteratorUnsignedAndConstants) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
@@ -430,25 +430,25 @@ TEST(CarbonTest, CarbonArrayIteratorUnsignedAndConstants) {
                         carbon_insert_float(&inserter, rand_value);
                 }
                 //fprintf(stdout, "after initial push:\n");
-                ////carbon_hexdump_print(stdout, &rev_doc);
+                ////jak_carbon_hexdump_print(stdout, &rev_doc);
         }
         carbon_insert_drop(&inserter);
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        // carbon_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonArrayIteratorStrings) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
@@ -464,25 +464,25 @@ TEST(CarbonTest, CarbonArrayIteratorStrings) {
                 buffer[strlen - 1] = '\0';
                 carbon_insert_string(&inserter, buffer);
                 //fprintf(stdout, "after initial push:\n");
-                ////carbon_hexdump_print(stdout, &rev_doc);
+                ////jak_carbon_hexdump_print(stdout, &rev_doc);
         }
         carbon_insert_drop(&inserter);
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        // carbon_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonInsertMimeTypedBlob) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
@@ -495,19 +495,19 @@ TEST(CarbonTest, CarbonInsertMimeTypedBlob) {
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        // carbon_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonInsertCustomTypedBlob) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
@@ -515,24 +515,24 @@ TEST(CarbonTest, CarbonInsertCustomTypedBlob) {
         const char *data = "{ \"Message\": \"Hello World\" }";
         bool status = carbon_insert_binary(&inserter, data, strlen(data), NULL, "my data");
         ASSERT_TRUE(status);
-        ////carbon_hexdump_print(stdout, &rev_doc);
+        ////jak_carbon_hexdump_print(stdout, &rev_doc);
         carbon_insert_drop(&inserter);
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        // carbon_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonInsertTwoMimeTypedBlob) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
@@ -543,24 +543,24 @@ TEST(CarbonTest, CarbonInsertTwoMimeTypedBlob) {
         ASSERT_TRUE(status);
         status = carbon_insert_binary(&inserter, data2, strlen(data2), "txt", NULL);
         ASSERT_TRUE(status);
-        ////carbon_hexdump_print(stdout, &rev_doc);
+        ////jak_carbon_hexdump_print(stdout, &rev_doc);
         carbon_insert_drop(&inserter);
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        // carbon_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonInsertMimeTypedBlobsWithOverflow) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
@@ -572,25 +572,25 @@ TEST(CarbonTest, CarbonInsertMimeTypedBlobsWithOverflow) {
                         strlen(i % 2 == 0 ? data1 : data2), "json", NULL);
                 ASSERT_TRUE(status);
         }
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
 
         carbon_insert_drop(&inserter);
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        // carbon_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonInsertMixedTypedBlobsWithOverflow) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
@@ -602,55 +602,55 @@ TEST(CarbonTest, CarbonInsertMixedTypedBlobsWithOverflow) {
                         strlen(i % 2 == 0 ? data1 : data2), i % 3 == 0 ? "json" : NULL, i % 5 == 0 ? "user/app" : NULL);
                 ASSERT_TRUE(status);
         }
-        ////carbon_hexdump_print(stdout, &rev_doc);
+        ////jak_carbon_hexdump_print(stdout, &rev_doc);
         carbon_insert_drop(&inserter);
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        //carbon_print(stdout, &rev_doc);
+        //jak_carbon_print(stdout, &rev_doc);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonInsertArrayWithNoOverflow) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
         struct jak_carbon_insert_array_state array_state;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
         carbon_array_it_insert_begin(&inserter, &it);
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
 
-        struct jak_carbon_insert *nested_inserter = carbon_insert_array_begin(&array_state, &inserter, 10);
+        jak_carbon_insert *nested_inserter = carbon_insert_array_begin(&array_state, &inserter, 10);
         ASSERT_TRUE(nested_inserter != NULL);
         carbon_insert_array_end(&array_state);
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
         carbon_insert_drop(&inserter);
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        //carbon_hexdump_print(stdout, &rev_doc);
-        // carbon_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonInsertValuesIntoNestedArrayWithNoOverflow) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
         struct jak_carbon_insert_array_state array_state;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
@@ -660,7 +660,7 @@ TEST(CarbonTest, CarbonInsertValuesIntoNestedArrayWithNoOverflow) {
         carbon_insert_null(&inserter);
         carbon_insert_null(&inserter);
 
-        struct jak_carbon_insert *nested_inserter = carbon_insert_array_begin(&array_state, &inserter, 10);
+        jak_carbon_insert *nested_inserter = carbon_insert_array_begin(&array_state, &inserter, 10);
         ASSERT_TRUE(nested_inserter != NULL);
         carbon_insert_true(nested_inserter);
         carbon_insert_true(nested_inserter);
@@ -672,25 +672,25 @@ TEST(CarbonTest, CarbonInsertValuesIntoNestedArrayWithNoOverflow) {
         carbon_insert_false(&inserter);
 
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
         carbon_insert_drop(&inserter);
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        // carbon_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonInsert2xNestedArrayWithNoOverflow) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
         struct jak_carbon_insert_array_state array_state_l1, array_state_l2;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
@@ -700,13 +700,13 @@ TEST(CarbonTest, CarbonInsert2xNestedArrayWithNoOverflow) {
         carbon_insert_null(&inserter);
         carbon_insert_null(&inserter);
 
-        struct jak_carbon_insert *nested_inserter_l1 = carbon_insert_array_begin(&array_state_l1, &inserter, 10);
+        jak_carbon_insert *nested_inserter_l1 = carbon_insert_array_begin(&array_state_l1, &inserter, 10);
         ASSERT_TRUE(nested_inserter_l1 != NULL);
         carbon_insert_true(nested_inserter_l1);
         carbon_insert_true(nested_inserter_l1);
         carbon_insert_true(nested_inserter_l1);
 
-        struct jak_carbon_insert *nested_inserter_l2 = carbon_insert_array_begin(&array_state_l2, nested_inserter_l1, 10);
+        jak_carbon_insert *nested_inserter_l2 = carbon_insert_array_begin(&array_state_l2, nested_inserter_l1, 10);
         ASSERT_TRUE(nested_inserter_l2 != NULL);
         carbon_insert_true(nested_inserter_l2);
         carbon_insert_false(nested_inserter_l2);
@@ -720,25 +720,25 @@ TEST(CarbonTest, CarbonInsert2xNestedArrayWithNoOverflow) {
         carbon_insert_false(&inserter);
 
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
         carbon_insert_drop(&inserter);
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        // carbon_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonInsertXxNestedArrayWithoutOverflow) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
         struct jak_carbon_insert_array_state array_state_l1;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
@@ -749,7 +749,7 @@ TEST(CarbonTest, CarbonInsertXxNestedArrayWithoutOverflow) {
         carbon_insert_null(&inserter);
 
         for (int i = 0; i < 10; i++) {
-                struct jak_carbon_insert *nested_inserter_l1 = carbon_insert_array_begin(&array_state_l1, &inserter, 10);
+                jak_carbon_insert *nested_inserter_l1 = carbon_insert_array_begin(&array_state_l1, &inserter, 10);
                 ASSERT_TRUE(nested_inserter_l1 != NULL);
                 carbon_insert_true(nested_inserter_l1);
                 carbon_insert_true(nested_inserter_l1);
@@ -761,52 +761,52 @@ TEST(CarbonTest, CarbonInsertXxNestedArrayWithoutOverflow) {
         carbon_insert_false(&inserter);
         carbon_insert_false(&inserter);
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
         carbon_insert_drop(&inserter);
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        //carbon_print(stdout, &rev_doc);
+        //jak_carbon_print(stdout, &rev_doc);
         struct jak_string sb;
         string_create(&sb);
-        carbon_to_str(&sb, JSON_EXTENDED, &rev_doc);
+        jak_carbon_to_str(&sb, JAK_JSON_EXTENDED, &rev_doc);
         ASSERT_TRUE(0 == strcmp(string_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [null, null, null, [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], false, false, false]}"));
         string_drop(&sb);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonInsertXxNestedArrayWithOverflow) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
         struct jak_carbon_insert_array_state array_state_l1;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
         carbon_array_it_insert_begin(&inserter, &it);
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
         // printf("\n");
 
         carbon_insert_null(&inserter);
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
         // printf("\n");
 
         carbon_insert_null(&inserter);
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
         // printf("\n");
 
         carbon_insert_null(&inserter);
 
         for (int i = 0; i < 10; i++) {
-                struct jak_carbon_insert *nested_inserter_l1 = carbon_insert_array_begin(&array_state_l1, &inserter, 1);
+                jak_carbon_insert *nested_inserter_l1 = carbon_insert_array_begin(&array_state_l1, &inserter, 1);
                 ASSERT_TRUE(nested_inserter_l1 != NULL);
                 carbon_insert_true(nested_inserter_l1);
                 carbon_insert_true(nested_inserter_l1);
@@ -822,33 +822,33 @@ TEST(CarbonTest, CarbonInsertXxNestedArrayWithOverflow) {
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        // carbon_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
         struct jak_string sb;
         string_create(&sb);
-        carbon_to_str(&sb, JSON_EXTENDED, &rev_doc);
+        jak_carbon_to_str(&sb, JAK_JSON_EXTENDED, &rev_doc);
         ASSERT_TRUE(0 == strcmp(string_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [null, null, null, [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], [true, true, true], false, false, false]}"));
         string_drop(&sb);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonInsertInsertColumnWithoutOverflow) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
         struct jak_carbon_insert_column_state column_state;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
         carbon_array_it_insert_begin(&inserter, &it);
 
-        struct jak_carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U8, 10);
+        jak_carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U8, 10);
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
 
         ASSERT_TRUE(nested_inserter_l1 != NULL);
         carbon_insert_u8(nested_inserter_l1, 1);
@@ -860,33 +860,33 @@ TEST(CarbonTest, CarbonInsertInsertColumnWithoutOverflow) {
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
 
-        // carbon_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
         struct jak_string sb;
         string_create(&sb);
-        carbon_to_str(&sb, JSON_EXTENDED, &rev_doc);
+        jak_carbon_to_str(&sb, JAK_JSON_EXTENDED, &rev_doc);
         ASSERT_TRUE(0 == strcmp(string_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[1, 2, 3]]}"));
         string_drop(&sb);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonInsertInsertColumnNumbersWithoutOverflow) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
         struct jak_carbon_insert_column_state column_state;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
         carbon_array_it_insert_begin(&inserter, &it);
 
-        struct jak_carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U8, 10);
+        jak_carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U8, 10);
 
         ASSERT_TRUE(nested_inserter_l1 != NULL);
         carbon_insert_u8(nested_inserter_l1, 42);
@@ -898,33 +898,33 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersWithoutOverflow) {
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
 
-        // carbon_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
         struct jak_string sb;
         string_create(&sb);
-        carbon_to_str(&sb, JSON_EXTENDED, &rev_doc);
+        jak_carbon_to_str(&sb, JAK_JSON_EXTENDED, &rev_doc);
         ASSERT_TRUE(0 == strcmp(string_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[42, 43, 44]]}"));
         string_drop(&sb);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonInsertInsertColumnNumbersZeroWithoutOverflow) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
         struct jak_carbon_insert_column_state column_state;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
         carbon_array_it_insert_begin(&inserter, &it);
 
-        struct jak_carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U8, 10);
+        jak_carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U8, 10);
 
         ASSERT_TRUE(nested_inserter_l1 != NULL);
         carbon_insert_u8(nested_inserter_l1, 0);
@@ -936,28 +936,28 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersZeroWithoutOverflow) {
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
 
-        // carbon_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
         struct jak_string sb;
         string_create(&sb);
-        carbon_to_str(&sb, JSON_EXTENDED, &rev_doc);
+        jak_carbon_to_str(&sb, JAK_JSON_EXTENDED, &rev_doc);
         ASSERT_TRUE(0 == strcmp(string_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[0, 0, 0]]}"));
         string_drop(&sb);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonInsertInsertMultileTypedColumnsWithoutOverflow) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
         struct jak_carbon_insert_column_state column_state;
-        struct jak_carbon_insert *ins;
+        jak_carbon_insert *ins;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
@@ -1039,34 +1039,34 @@ TEST(CarbonTest, CarbonInsertInsertMultileTypedColumnsWithoutOverflow) {
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
 
-        //carbon_print(stdout, &rev_doc);
+        //jak_carbon_print(stdout, &rev_doc);
         struct jak_string sb;
         string_create(&sb);
-        carbon_to_str(&sb, JSON_EXTENDED, &rev_doc);
+        jak_carbon_to_str(&sb, JAK_JSON_EXTENDED, &rev_doc);
         //string_builder_print(&sb);
         ASSERT_TRUE(0 == strcmp(string_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[1, 2, 3], [true, true, true], [false, false, false], [1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12], [-1, -2, -3], [-4, -5, -6], [-7, -8, -9], [-10, -11, -12], [42.00, 21.00, 23.42]]}"));
         string_drop(&sb);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonInsertInsertColumnNumbersZeroWithOverflow) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
         struct jak_carbon_insert_column_state column_state;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,16, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,16, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
         carbon_array_it_insert_begin(&inserter, &it);
 
-        struct jak_carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U8, 1);
+        jak_carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U8, 1);
 
         ASSERT_TRUE(nested_inserter_l1 != NULL);
         carbon_insert_u8(nested_inserter_l1, 1);
@@ -1078,35 +1078,35 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersZeroWithOverflow) {
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
 
         // printf("Carbon DOC PRINT:");
-        // carbon_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
         // fflush(stdout);
         struct jak_string sb;
         string_create(&sb);
-        carbon_to_str(&sb, JSON_EXTENDED, &rev_doc);
+        jak_carbon_to_str(&sb, JAK_JSON_EXTENDED, &rev_doc);
         ASSERT_TRUE(0 == strcmp(string_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[1, 2, 3]]}"));
         string_drop(&sb);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonInsertInsertColumnNumbersWithHighOverflow) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
         struct jak_carbon_insert_column_state column_state;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,16, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,16, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
         carbon_array_it_insert_begin(&inserter, &it);
 
-        struct jak_carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U32, 1);
+        jak_carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U32, 1);
 
         ASSERT_TRUE(nested_inserter_l1 != NULL);
         for (jak_u32 i = 0; i < 100; i++) {
@@ -1121,36 +1121,36 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersWithHighOverflow) {
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
 
         // printf("Carbon DOC PRINT:");
-        // carbon_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
         // fflush(stdout);
         struct jak_string sb;
         string_create(&sb);
-        carbon_to_str(&sb, JSON_EXTENDED, &rev_doc);
+        jak_carbon_to_str(&sb, JAK_JSON_EXTENDED, &rev_doc);
         ASSERT_TRUE(0 == strcmp(string_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10, 10, 10, 11, 11, 11, 12, 12, 12, 13, 13, 13, 14, 14, 14, 15, 15, 15, 16, 16, 16, 17, 17, 17, 18, 18, 18, 19, 19, 19, 20, 20, 20, 21, 21, 21, 22, 22, 22, 23, 23, 23, 24, 24, 24, 25, 25, 25, 26, 26, 26, 27, 27, 27, 28, 28, 28, 29, 29, 29, 30, 30, 30, 31, 31, 31, 32, 32, 32, 33, 33, 33, 34, 34, 34, 35, 35, 35, 36, 36, 36, 37, 37, 37, 38, 38, 38, 39, 39, 39, 40, 40, 40, 41, 41, 41, 42, 42, 42, 43, 43, 43, 44, 44, 44, 45, 45, 45, 46, 46, 46, 47, 47, 47, 48, 48, 48, 49, 49, 49, 50, 50, 50, 51, 51, 51, 52, 52, 52, 53, 53, 53, 54, 54, 54, 55, 55, 55, 56, 56, 56, 57, 57, 57, 58, 58, 58, 59, 59, 59, 60, 60, 60, 61, 61, 61, 62, 62, 62, 63, 63, 63, 64, 64, 64, 65, 65, 65, 66, 66, 66, 67, 67, 67, 68, 68, 68, 69, 69, 69, 70, 70, 70, 71, 71, 71, 72, 72, 72, 73, 73, 73, 74, 74, 74, 75, 75, 75, 76, 76, 76, 77, 77, 77, 78, 78, 78, 79, 79, 79, 80, 80, 80, 81, 81, 81, 82, 82, 82, 83, 83, 83, 84, 84, 84, 85, 85, 85, 86, 86, 86, 87, 87, 87, 88, 88, 88, 89, 89, 89, 90, 90, 90, 91, 91, 91, 92, 92, 92, 93, 93, 93, 94, 94, 94, 95, 95, 95, 96, 96, 96, 97, 97, 97, 98, 98, 98, 99, 99, 99]]}"));
         string_drop(&sb);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonInsertInsertMultipleColumnsNumbersWithHighOverflow) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
         struct jak_carbon_insert_column_state column_state;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,16, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,16, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
         carbon_array_it_insert_begin(&inserter, &it);
 
         for (jak_u32 k = 0; k < 3; k++) {
-                struct jak_carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U32, 1);
+                jak_carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U32, 1);
 
                 ASSERT_TRUE(nested_inserter_l1 != NULL);
                 for (jak_u32 i = 0; i < 4; i++) {
@@ -1166,30 +1166,30 @@ TEST(CarbonTest, CarbonInsertInsertMultipleColumnsNumbersWithHighOverflow) {
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        ////carbon_hexdump_print(stdout, &rev_doc);
+        ////jak_carbon_hexdump_print(stdout, &rev_doc);
 
         // printf("Carbon DOC PRINT:");
-        // carbon_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
         // fflush(stdout);
         struct jak_string sb;
         string_create(&sb);
-        carbon_to_str(&sb, JSON_EXTENDED, &rev_doc);
+        jak_carbon_to_str(&sb, JAK_JSON_EXTENDED, &rev_doc);
         ASSERT_TRUE(0 == strcmp(string_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[97, 97, 97, 98, 98, 98, 99, 99, 99, 100, 100, 100], [97, 97, 97, 98, 98, 98, 99, 99, 99, 100, 100, 100], [97, 97, 97, 98, 98, 98, 99, 99, 99, 100, 100, 100]]}"));
         string_drop(&sb);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonInsertNullTest) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
         struct jak_carbon_insert_column_state column_state;
-        struct jak_carbon_insert *ins;
+        jak_carbon_insert *ins;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
@@ -1271,28 +1271,28 @@ TEST(CarbonTest, CarbonInsertNullTest) {
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
 
-        // carbon_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
         struct jak_string sb;
         string_create(&sb);
-        carbon_to_str(&sb, JSON_EXTENDED, &rev_doc);
+        jak_carbon_to_str(&sb, JAK_JSON_EXTENDED, &rev_doc);
         ASSERT_TRUE(0 == strcmp(string_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[1, 2, 3], [true, true, true], [false, false, false], [1, null, 3], [4, null, 6], [7, null, 9], [10, null, 12], [-1, null, -3], [-4, null, -6], [-7, null, -9], [-10, null, -12], [42.00, null, 23.42]]}"));
         string_drop(&sb);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonShrinkColumnListTest) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
         struct jak_carbon_insert_column_state column_state;
-        struct jak_carbon_insert *ins;
+        jak_carbon_insert *ins;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
@@ -1364,36 +1364,36 @@ TEST(CarbonTest, CarbonShrinkColumnListTest) {
         carbon_insert_i64(ins, 16);
         carbon_insert_column_end(&column_state);
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
         carbon_revise_shrink(&revise);
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
 
         carbon_insert_drop(&inserter);
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
 
-        // carbon_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
         struct jak_string sb;
         string_create(&sb);
-        carbon_to_str(&sb, JSON_EXTENDED, &rev_doc);
+        jak_carbon_to_str(&sb, JAK_JSON_EXTENDED, &rev_doc);
         ASSERT_TRUE(0 == strcmp(string_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[1, 2, 3], [true, true, true], [false, false, false], [1, null, 2], [3, null, 4], [5, null, 6], [7, null, 8], [9, null, 10], [11, null, 12], [13, null, 14], [15, null, 16]]}"));
         string_drop(&sb);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonShrinkArrayListTest) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
         struct jak_carbon_insert_array_state array_state;
-        struct jak_carbon_insert *ins;
+        jak_carbon_insert *ins;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
@@ -1417,36 +1417,36 @@ TEST(CarbonTest, CarbonShrinkArrayListTest) {
         carbon_insert_u8(ins, 7);
         carbon_insert_array_end(&array_state);
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
         carbon_revise_shrink(&revise);
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
 
         carbon_insert_drop(&inserter);
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
 
-        // carbon_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
         struct jak_string sb;
         string_create(&sb);
-        carbon_to_str(&sb, JSON_EXTENDED, &rev_doc);
+        jak_carbon_to_str(&sb, JAK_JSON_EXTENDED, &rev_doc);
         ASSERT_TRUE(0 == strcmp(string_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[1, 1, 1], [2, 3, 4], [5, 6, 7]]}"));
         string_drop(&sb);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonShrinkNestedArrayListTest) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
         struct jak_carbon_insert_array_state array_state, nested_array_state;
-        struct jak_carbon_insert *ins, *nested_ins;
+        jak_carbon_insert *ins, *nested_ins;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
@@ -1492,37 +1492,37 @@ TEST(CarbonTest, CarbonShrinkNestedArrayListTest) {
         carbon_insert_array_end(&nested_array_state);
         carbon_insert_array_end(&array_state);
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
         carbon_revise_shrink(&revise);
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
 
         carbon_insert_drop(&inserter);
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
 
-        // carbon_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
         struct jak_string sb;
         string_create(&sb);
-        carbon_to_str(&sb, JSON_EXTENDED, &rev_doc);
+        jak_carbon_to_str(&sb, JAK_JSON_EXTENDED, &rev_doc);
         ASSERT_TRUE(0 == strcmp(string_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[[\"Hello\", \"World\"], 1, 1, 1], [2, [\"Hello\", \"World\"], 3, 4], [5, 6, [\"Hello\", \"World\"], 7], [8, 9, 10, [\"Hello\", \"World\"]]]}"));
         string_drop(&sb);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonShrinkNestedArrayListAndColumnListTest) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
         struct jak_carbon_insert_column_state column_state;
         struct jak_carbon_insert_array_state array_state, nested_array_state;
-        struct jak_carbon_insert *ins, *nested_ins, *column_ins;
+        jak_carbon_insert *ins, *nested_ins, *column_ins;
 
-        carbon_create_empty_ex(&doc, CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
@@ -1554,21 +1554,21 @@ TEST(CarbonTest, CarbonShrinkNestedArrayListAndColumnListTest) {
                 carbon_insert_u8(ins, 1);
         carbon_insert_array_end(&array_state);
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
         carbon_revise_shrink(&revise);
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
 
         carbon_insert_drop(&inserter);
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
 
-        // carbon_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
 
         struct jak_string sb;
         string_create(&sb);
-        carbon_to_str(&sb, JSON_EXTENDED, &rev_doc);
+        jak_carbon_to_str(&sb, JAK_JSON_EXTENDED, &rev_doc);
 
         // fprintf(stdout, "IST  %s\n", string_builder_cstr(&sb));
         // fprintf(stdout, "SOLL {\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [4223, [[88, 89, 90], [\"Hello\", [65, 66, 67], \"World\"], 1, 1, [23, 24, 25], 1]]}\n");
@@ -1576,8 +1576,8 @@ TEST(CarbonTest, CarbonShrinkNestedArrayListAndColumnListTest) {
         ASSERT_TRUE(0 == strcmp(string_cstr(&sb), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [4223, [[88, 89, 90], [\"Hello\", [65, 66, 67], \"World\"], 1, 1, [23, 24, 25], 1]]}"));
         string_drop(&sb);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonDotNotation) {
@@ -1688,14 +1688,14 @@ TEST(CarbonTest, CarbonDotNotationParsing) {
 }
 
 TEST(CarbonTest, CarbonFind) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert ins;
+        jak_carbon_insert ins;
         struct jak_carbon_find finder;
         jak_u64 result_unsigned;
         enum carbon_field_type type;
-        carbon_create_empty(&doc, CARBON_KEY_NOKEY);
+        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
 
@@ -1759,22 +1759,22 @@ TEST(CarbonTest, CarbonFind) {
                 carbon_find_close(&finder);
         }
 
-        // carbon_print(stdout, &rev_doc);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonFindTypes) {
-        struct jak_carbon doc, rev_doc;
+        jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter, *ins, *nested_ins, *column_ins;
+        jak_carbon_insert inserter, *ins, *nested_ins, *column_ins;
         struct jak_carbon_insert_column_state column_state;
         struct jak_carbon_insert_array_state array_state, nested_array_state;
         struct jak_carbon_find finder;
         jak_u64 result_unsigned;
         enum carbon_field_type type;
-        carbon_create_empty(&doc, CARBON_KEY_NOKEY);
+        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
@@ -1809,7 +1809,7 @@ TEST(CarbonTest, CarbonFindTypes) {
         carbon_revise_shrink(&revise);
 
 
-        //carbon_print(stdout, &rev_doc);
+        //jak_carbon_print(stdout, &rev_doc);
 
         {
                 carbon_find_open(&finder, "0", &rev_doc);
@@ -2073,23 +2073,23 @@ TEST(CarbonTest, CarbonFindTypes) {
         carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
-        //carbon_hexdump_print(stdout, &rev_doc);
+        //jak_carbon_hexdump_print(stdout, &rev_doc);
 
-        carbon_drop(&rev_doc);
-        carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonUpdateU8Simple)
 {
-        struct jak_carbon doc, rev_doc, rev_doc2, rev_doc3, rev_doc4;
+        jak_carbon doc, rev_doc, rev_doc2, rev_doc3, rev_doc4;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
         struct jak_string sb;
         const char *json;
 
         string_create(&sb);
-        carbon_create_empty(&doc, CARBON_KEY_NOKEY);
+        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2104,7 +2104,7 @@ TEST(CarbonTest, CarbonUpdateU8Simple)
         carbon_revise_end(&revise);
 
 
-        json = carbon_to_json_extended(&sb, &rev_doc);
+        json = jak_carbon_to_json_extended(&sb, &rev_doc);
         // printf("JSON (rev1): %s\n", json);
 
         // -------------------------------------------------------------------------------------------------------------
@@ -2120,7 +2120,7 @@ TEST(CarbonTest, CarbonUpdateU8Simple)
         carbon_revise_end(&revise);
 
 
-        json = carbon_to_json_extended(&sb, &rev_doc2);
+        json = jak_carbon_to_json_extended(&sb, &rev_doc2);
         // printf("JSON (rev2): %s\n", json);
         ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [89]}") == 0);
 
@@ -2139,7 +2139,7 @@ TEST(CarbonTest, CarbonUpdateU8Simple)
         carbon_revise_end(&revise);
 
 
-        json = carbon_to_json_extended(&sb, &rev_doc3);
+        json = jak_carbon_to_json_extended(&sb, &rev_doc3);
         // printf("JSON (rev3): %s\n", json);
         ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [65, 66, 67]}") == 0);
 
@@ -2158,7 +2158,7 @@ TEST(CarbonTest, CarbonUpdateU8Simple)
         carbon_revise_end(&revise);
 
 
-        json = carbon_to_json_extended(&sb, &rev_doc4);
+        json = jak_carbon_to_json_extended(&sb, &rev_doc4);
         // printf("JSON (rev4): %s\n", json);
         ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, 2, 3]}") == 0);
 
@@ -2166,24 +2166,24 @@ TEST(CarbonTest, CarbonUpdateU8Simple)
 
         string_drop(&sb);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
-        carbon_drop(&rev_doc2);
-        carbon_drop(&rev_doc3);
-        carbon_drop(&rev_doc4);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
+        jak_carbon_drop(&rev_doc2);
+        jak_carbon_drop(&rev_doc3);
+        jak_carbon_drop(&rev_doc4);
 }
 
 TEST(CarbonTest, CarbonUpdateMixedFixedTypesSimple)
 {
-        struct jak_carbon doc, rev_doc, rev_doc2;
+        jak_carbon doc, rev_doc, rev_doc2;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
         struct jak_string sb;
         const char *json;
 
         string_create(&sb);
-        carbon_create_empty(&doc, CARBON_KEY_NOKEY);
+        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2200,7 +2200,7 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesSimple)
         carbon_revise_end(&revise);
 
 
-        json = carbon_to_json_extended(&sb, &rev_doc);
+        json = jak_carbon_to_json_extended(&sb, &rev_doc);
         // printf("JSON (rev1): %s\n", json);
         ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, -42, 23.00]}") == 0);
 
@@ -2217,7 +2217,7 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesSimple)
         carbon_revise_end(&revise);
 
 
-        json = carbon_to_json_extended(&sb, &rev_doc2);
+        json = jak_carbon_to_json_extended(&sb, &rev_doc2);
         // printf("JSON (rev2): %s\n", json);
         ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, 1024, 23.00]}") == 0);
 
@@ -2235,16 +2235,16 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesSimple)
 
         string_drop(&sb);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
-        carbon_drop(&rev_doc2);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
+        jak_carbon_drop(&rev_doc2);
 
 }
 
 TEST(CarbonTest, CarbonRemoveConstantsToEmpty)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -2252,14 +2252,14 @@ TEST(CarbonTest, CarbonRemoveConstantsToEmpty)
         string_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         carbon_insert_null(ins);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -2273,7 +2273,7 @@ TEST(CarbonTest, CarbonRemoveConstantsToEmpty)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2284,16 +2284,16 @@ TEST(CarbonTest, CarbonRemoveConstantsToEmpty)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": []}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonRemoveFirstConstants)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -2301,15 +2301,15 @@ TEST(CarbonTest, CarbonRemoveFirstConstants)
         string_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         carbon_insert_true(ins);
         carbon_insert_false(ins);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -2326,7 +2326,7 @@ TEST(CarbonTest, CarbonRemoveFirstConstants)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2337,16 +2337,16 @@ TEST(CarbonTest, CarbonRemoveFirstConstants)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [false]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonRemoveLastConstants)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -2354,15 +2354,15 @@ TEST(CarbonTest, CarbonRemoveLastConstants)
         string_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         carbon_insert_true(ins);
         carbon_insert_false(ins);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -2378,7 +2378,7 @@ TEST(CarbonTest, CarbonRemoveLastConstants)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2389,16 +2389,16 @@ TEST(CarbonTest, CarbonRemoveLastConstants)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [true]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonRemoveMiddleConstants)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -2406,16 +2406,16 @@ TEST(CarbonTest, CarbonRemoveMiddleConstants)
         string_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         carbon_insert_true(ins);
         carbon_insert_null(ins);
         carbon_insert_false(ins);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -2436,7 +2436,7 @@ TEST(CarbonTest, CarbonRemoveMiddleConstants)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2446,16 +2446,16 @@ TEST(CarbonTest, CarbonRemoveMiddleConstants)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [true, false]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonRemoveNumberToEmpty)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -2463,14 +2463,14 @@ TEST(CarbonTest, CarbonRemoveNumberToEmpty)
         string_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         carbon_insert_u8(ins, 42);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -2484,7 +2484,7 @@ TEST(CarbonTest, CarbonRemoveNumberToEmpty)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2495,16 +2495,16 @@ TEST(CarbonTest, CarbonRemoveNumberToEmpty)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": []}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonRemoveFirstNumber)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -2512,15 +2512,15 @@ TEST(CarbonTest, CarbonRemoveFirstNumber)
         string_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         carbon_insert_u8(ins, 42);
         carbon_insert_u32(ins, 23);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -2537,7 +2537,7 @@ TEST(CarbonTest, CarbonRemoveFirstNumber)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2548,16 +2548,16 @@ TEST(CarbonTest, CarbonRemoveFirstNumber)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [23]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonRemoveLastNumber)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -2565,15 +2565,15 @@ TEST(CarbonTest, CarbonRemoveLastNumber)
         string_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         carbon_insert_u8(ins, 42);
         carbon_insert_u32(ins, 23);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -2589,7 +2589,7 @@ TEST(CarbonTest, CarbonRemoveLastNumber)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2600,16 +2600,16 @@ TEST(CarbonTest, CarbonRemoveLastNumber)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [42]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonRemoveMiddleNumber)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -2617,16 +2617,16 @@ TEST(CarbonTest, CarbonRemoveMiddleNumber)
         string_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         carbon_insert_u8(ins, 42);
         carbon_insert_u16(ins, 21);
         carbon_insert_u32(ins, 23);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -2647,7 +2647,7 @@ TEST(CarbonTest, CarbonRemoveMiddleNumber)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2657,8 +2657,8 @@ TEST(CarbonTest, CarbonRemoveMiddleNumber)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [42, 23]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
@@ -2666,8 +2666,8 @@ TEST(CarbonTest, CarbonRemoveMiddleNumber)
 
 TEST(CarbonTest, CarbonRemoveStringToEmpty)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -2675,14 +2675,14 @@ TEST(CarbonTest, CarbonRemoveStringToEmpty)
         string_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         carbon_insert_string(ins, "Hello");
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -2696,7 +2696,7 @@ TEST(CarbonTest, CarbonRemoveStringToEmpty)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2707,16 +2707,16 @@ TEST(CarbonTest, CarbonRemoveStringToEmpty)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": []}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonRemoveFirstString)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -2724,15 +2724,15 @@ TEST(CarbonTest, CarbonRemoveFirstString)
         string_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         carbon_insert_string(ins, "Hello");
         carbon_insert_string(ins, "World");
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -2749,7 +2749,7 @@ TEST(CarbonTest, CarbonRemoveFirstString)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2760,16 +2760,16 @@ TEST(CarbonTest, CarbonRemoveFirstString)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [\"World\"]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonRemoveLastString)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -2777,15 +2777,15 @@ TEST(CarbonTest, CarbonRemoveLastString)
         string_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         carbon_insert_string(ins, "Hello");
         carbon_insert_string(ins, "World");
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -2801,7 +2801,7 @@ TEST(CarbonTest, CarbonRemoveLastString)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2812,16 +2812,16 @@ TEST(CarbonTest, CarbonRemoveLastString)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [\"Hello\"]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonRemoveMiddleString)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -2829,16 +2829,16 @@ TEST(CarbonTest, CarbonRemoveMiddleString)
         string_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         carbon_insert_string(ins, "Plato");
         carbon_insert_string(ins, "Kant");
         carbon_insert_string(ins, "Nietzsche");
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -2859,7 +2859,7 @@ TEST(CarbonTest, CarbonRemoveMiddleString)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2869,8 +2869,8 @@ TEST(CarbonTest, CarbonRemoveMiddleString)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [\"Plato\", \"Nietzsche\"]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
@@ -2881,8 +2881,8 @@ TEST(CarbonTest, CarbonRemoveMiddleString)
 
 TEST(CarbonTest, CarbonRemoveBinaryToEmpty)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -2890,15 +2890,15 @@ TEST(CarbonTest, CarbonRemoveBinaryToEmpty)
         string_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         const char *data = "This report, by its very length, defends itself against the risk of being read.";
         carbon_insert_binary(ins, data, strlen(data), "txt", NULL);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -2912,7 +2912,7 @@ TEST(CarbonTest, CarbonRemoveBinaryToEmpty)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2923,16 +2923,16 @@ TEST(CarbonTest, CarbonRemoveBinaryToEmpty)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": []}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonRemoveFirstBinary)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -2940,7 +2940,7 @@ TEST(CarbonTest, CarbonRemoveFirstBinary)
         string_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
         carbon_insert_binary(ins, data1, strlen(data1), "txt", NULL);
@@ -2948,10 +2948,10 @@ TEST(CarbonTest, CarbonRemoveFirstBinary)
         const char *data2 = "{\"key\": \"value\"}";
         carbon_insert_binary(ins, data2, strlen(data2), "json", NULL);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -2968,7 +2968,7 @@ TEST(CarbonTest, CarbonRemoveFirstBinary)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2979,16 +2979,16 @@ TEST(CarbonTest, CarbonRemoveFirstBinary)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{ \"type\": \"application/json\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonRemoveLastBinary)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -2996,7 +2996,7 @@ TEST(CarbonTest, CarbonRemoveLastBinary)
         string_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
         carbon_insert_binary(ins, data1, strlen(data1), "txt", NULL);
@@ -3004,10 +3004,10 @@ TEST(CarbonTest, CarbonRemoveLastBinary)
         const char *data2 = "{\"key\": \"value\"}";
         carbon_insert_binary(ins, data2, strlen(data2), "json", NULL);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -3023,7 +3023,7 @@ TEST(CarbonTest, CarbonRemoveLastBinary)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -3034,16 +3034,16 @@ TEST(CarbonTest, CarbonRemoveLastBinary)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonRemoveMiddleBinary)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -3051,7 +3051,7 @@ TEST(CarbonTest, CarbonRemoveMiddleBinary)
         string_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
         carbon_insert_binary(ins, data1, strlen(data1), "txt", NULL);
@@ -3062,10 +3062,10 @@ TEST(CarbonTest, CarbonRemoveMiddleBinary)
         const char *data3 = "<html><body><p>The quick brown fox jumps over the lazy dog</p></body></html>";
         carbon_insert_binary(ins, data3, strlen(data3), "html", NULL);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -3086,7 +3086,7 @@ TEST(CarbonTest, CarbonRemoveMiddleBinary)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -3096,8 +3096,8 @@ TEST(CarbonTest, CarbonRemoveMiddleBinary)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"text/html\", \"encoding\": \"base64\", \"binary-string\": \"PGh0bWw+PGJvZHk+PHA+VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZzwvcD48L2JvZHk+PC9odG1sPgAA\" }]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
@@ -3114,8 +3114,8 @@ TEST(CarbonTest, CarbonRemoveMiddleBinary)
 
 TEST(CarbonTest, CarbonRemoveCustomBinaryToEmpty)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -3123,17 +3123,17 @@ TEST(CarbonTest, CarbonRemoveCustomBinaryToEmpty)
         string_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         const char *data = "ABC";
         carbon_insert_binary(ins, data, strlen(data), NULL, "123");
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
-        //carbon_hexdump_print(stdout, &doc);
+        //jak_carbon_hexdump_print(stdout, &doc);
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -3147,7 +3147,7 @@ TEST(CarbonTest, CarbonRemoveCustomBinaryToEmpty)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -3158,16 +3158,16 @@ TEST(CarbonTest, CarbonRemoveCustomBinaryToEmpty)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": []}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonRemoveFirstCustomBinary)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -3175,7 +3175,7 @@ TEST(CarbonTest, CarbonRemoveFirstCustomBinary)
         string_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
         carbon_insert_binary(ins, data1, strlen(data1), NULL, "my-fancy-format");
@@ -3183,10 +3183,10 @@ TEST(CarbonTest, CarbonRemoveFirstCustomBinary)
         const char *data2 = "{\"key\": \"value\"}";
         carbon_insert_binary(ins, data2, strlen(data2), NULL, "application/something-json-like");
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -3203,7 +3203,7 @@ TEST(CarbonTest, CarbonRemoveFirstCustomBinary)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -3214,16 +3214,16 @@ TEST(CarbonTest, CarbonRemoveFirstCustomBinary)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{ \"type\": \"application/something-json-like\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonRemoveLastCustomBinary)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -3231,7 +3231,7 @@ TEST(CarbonTest, CarbonRemoveLastCustomBinary)
         string_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
         carbon_insert_binary(ins, data1, strlen(data1), NULL, "my-fancy-format");
@@ -3239,10 +3239,10 @@ TEST(CarbonTest, CarbonRemoveLastCustomBinary)
         const char *data2 = "{\"key\": \"value\"}";
         carbon_insert_binary(ins, data2, strlen(data2), NULL, "application/something-json-like");
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -3258,7 +3258,7 @@ TEST(CarbonTest, CarbonRemoveLastCustomBinary)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -3269,16 +3269,16 @@ TEST(CarbonTest, CarbonRemoveLastCustomBinary)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{ \"type\": \"my-fancy-format\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonRemoveMiddleCustomBinary)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -3286,7 +3286,7 @@ TEST(CarbonTest, CarbonRemoveMiddleCustomBinary)
         string_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
         carbon_insert_binary(ins, data1, strlen(data1), NULL, "my-fancy-format");
@@ -3297,10 +3297,10 @@ TEST(CarbonTest, CarbonRemoveMiddleCustomBinary)
         const char *data3 = "<html><body><p>The quick brown fox jumps over the lazy dog</p></body></html>";
         carbon_insert_binary(ins, data3, strlen(data3), NULL, "my-other-nonstandard-format");
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -3321,7 +3321,7 @@ TEST(CarbonTest, CarbonRemoveMiddleCustomBinary)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -3331,8 +3331,8 @@ TEST(CarbonTest, CarbonRemoveMiddleCustomBinary)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{ \"type\": \"my-fancy-format\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"my-other-nonstandard-format\", \"encoding\": \"base64\", \"binary-string\": \"PGh0bWw+PGJvZHk+PHA+VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZzwvcD48L2JvZHk+PC9odG1sPgAA\" }]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
@@ -3348,18 +3348,18 @@ TEST(CarbonTest, CarbonRemoveMiddleCustomBinary)
 
 TEST(CarbonTest, CarbonRemoveArrayToEmpty)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
         struct jak_carbon_insert_array_state state;
-        struct jak_carbon_insert *array_ins;
+        jak_carbon_insert *array_ins;
         bool has_next;
         string_create(&sb);
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         array_ins = carbon_insert_array_begin(&state, ins, 10);
         carbon_insert_u8(array_ins, 1);
@@ -3367,12 +3367,12 @@ TEST(CarbonTest, CarbonRemoveArrayToEmpty)
         carbon_insert_u8(array_ins, 3);
         carbon_insert_array_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
-        //carbon_hexdump_print(stdout, &doc);
+        //jak_carbon_hexdump_print(stdout, &doc);
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -3386,7 +3386,7 @@ TEST(CarbonTest, CarbonRemoveArrayToEmpty)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -3397,16 +3397,16 @@ TEST(CarbonTest, CarbonRemoveArrayToEmpty)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": []}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonRemoveFirstArray)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -3414,10 +3414,10 @@ TEST(CarbonTest, CarbonRemoveFirstArray)
         string_create(&sb);
 
         struct jak_carbon_insert_array_state state;
-        struct jak_carbon_insert *array_ins;
+        jak_carbon_insert *array_ins;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         array_ins = carbon_insert_array_begin(&state, ins, 10);
         carbon_insert_u8(array_ins, 1);
@@ -3431,10 +3431,10 @@ TEST(CarbonTest, CarbonRemoveFirstArray)
         carbon_insert_u8(array_ins, 6);
         carbon_insert_array_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -3451,7 +3451,7 @@ TEST(CarbonTest, CarbonRemoveFirstArray)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -3462,16 +3462,16 @@ TEST(CarbonTest, CarbonRemoveFirstArray)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[4, 5, 6]]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonRemoveLastArray)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -3479,10 +3479,10 @@ TEST(CarbonTest, CarbonRemoveLastArray)
         string_create(&sb);
 
         struct jak_carbon_insert_array_state state;
-        struct jak_carbon_insert *array_ins;
+        jak_carbon_insert *array_ins;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         array_ins = carbon_insert_array_begin(&state, ins, 10);
         carbon_insert_u8(array_ins, 1);
@@ -3496,10 +3496,10 @@ TEST(CarbonTest, CarbonRemoveLastArray)
         carbon_insert_u8(array_ins, 6);
         carbon_insert_array_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -3515,7 +3515,7 @@ TEST(CarbonTest, CarbonRemoveLastArray)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -3526,16 +3526,16 @@ TEST(CarbonTest, CarbonRemoveLastArray)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[1, 2, 3]]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonRemoveMiddleArray)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -3543,10 +3543,10 @@ TEST(CarbonTest, CarbonRemoveMiddleArray)
         string_create(&sb);
 
         struct jak_carbon_insert_array_state state;
-        struct jak_carbon_insert *array_ins;
+        jak_carbon_insert *array_ins;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         array_ins = carbon_insert_array_begin(&state, ins, 10);
         carbon_insert_u8(array_ins, 1);
@@ -3566,10 +3566,10 @@ TEST(CarbonTest, CarbonRemoveMiddleArray)
         carbon_insert_u8(array_ins, 9);
         carbon_insert_array_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
         carbon_revise_begin(&revise, &rev_doc, &doc);
@@ -3590,7 +3590,7 @@ TEST(CarbonTest, CarbonRemoveMiddleArray)
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -3600,16 +3600,16 @@ TEST(CarbonTest, CarbonRemoveMiddleArray)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[1, 2, 3], [7, 8, 9]]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonColumnRemoveTest)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -3619,10 +3619,10 @@ TEST(CarbonTest, CarbonColumnRemoveTest)
         const jak_u16 *values;
 
         struct jak_carbon_insert_column_state state;
-        struct jak_carbon_insert *array_ins;
+        jak_carbon_insert *array_ins;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         array_ins = carbon_insert_column_begin(&state, ins, CARBON_COLUMN_TYPE_U16, 10);
         carbon_insert_u16(array_ins, 1);
@@ -3630,10 +3630,10 @@ TEST(CarbonTest, CarbonColumnRemoveTest)
         carbon_insert_u16(array_ins, 3);
         carbon_insert_column_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -3657,7 +3657,7 @@ TEST(CarbonTest, CarbonColumnRemoveTest)
         ASSERT_EQ(values[0], 1);
         ASSERT_EQ(values[1], 3);
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         status = carbon_column_it_remove(cit, 0);
         ASSERT_TRUE(status);
@@ -3667,7 +3667,7 @@ TEST(CarbonTest, CarbonColumnRemoveTest)
         values = carbon_column_it_u16_values(&num_elems, cit);
         ASSERT_EQ(values[0], 3);
 
-        char *json_3 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_3 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         status = carbon_column_it_remove(cit, 0);
         ASSERT_TRUE(status);
@@ -3675,7 +3675,7 @@ TEST(CarbonTest, CarbonColumnRemoveTest)
         ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_COLUMN_U16);
         ASSERT_EQ(num_elems, 0);
 
-        char *json_4 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_4 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         carbon_revise_iterator_close(&rev_it);
         carbon_revise_end(&revise);
@@ -3694,8 +3694,8 @@ TEST(CarbonTest, CarbonColumnRemoveTest)
         ASSERT_TRUE(strcmp(json_4, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[]]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
         free(json_3);
@@ -3704,18 +3704,18 @@ TEST(CarbonTest, CarbonColumnRemoveTest)
 
 TEST(CarbonTest, CarbonRemoveComplexTest)
 {
-        struct jak_carbon doc, rev_doc, rev_doc2, rev_doc3, rev_doc4, rev_doc5, rev_doc6, rev_doc7, rev_doc8, rev_doc9,
+        jak_carbon doc, rev_doc, rev_doc2, rev_doc3, rev_doc4, rev_doc5, rev_doc6, rev_doc7, rev_doc8, rev_doc9,
                 rev_doc10, rev_doc11, rev_doc12, rev_doc13, rev_doc14;
-        struct jak_carbon_new context;
+        jak_carbon_new context;
         struct jak_string sb;
         string_create(&sb);
 
         struct jak_carbon_insert_array_state state, state2, state3;
         struct jak_carbon_insert_column_state cstate;
-        struct jak_carbon_insert *array_ins, *array_ins2, *array_ins3, *column_ins;
+        jak_carbon_insert *array_ins, *array_ins2, *array_ins3, *column_ins;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
         carbon_insert_u8(ins, 1);
         carbon_insert_string(ins, "Hello");
@@ -3759,40 +3759,40 @@ TEST(CarbonTest, CarbonRemoveComplexTest)
         carbon_insert_array_end(&state2);
         carbon_insert_array_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
         ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, \"Hello\", 2, 3, 3, \"World\", [], [4, \"Fox!\", 6], [[], [4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
         carbon_revise_remove_one("3", &rev_doc, &doc);
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, \"Hello\", 2, 3, \"World\", [], [4, \"Fox!\", 6], [[], [4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
         carbon_revise_remove_one("5", &rev_doc2, &rev_doc);
-        char *json_3 = strdup(carbon_to_json_extended(&sb, &rev_doc2));
+        char *json_3 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc2));
         ASSERT_TRUE(strcmp(json_3, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, \"Hello\", 2, 3, \"World\", [4, \"Fox!\", 6], [[], [4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
         carbon_revise_remove_one("5.1", &rev_doc3, &rev_doc2);
-        char *json_4 = strdup(carbon_to_json_extended(&sb, &rev_doc3));
+        char *json_4 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc3));
         ASSERT_TRUE(strcmp(json_4, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, \"Hello\", 2, 3, \"World\", [4, 6], [[], [4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
         carbon_revise_remove_one("6.0", &rev_doc4, &rev_doc3);
-        char *json_5 = strdup(carbon_to_json_extended(&sb, &rev_doc4));
+        char *json_5 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc4));
         ASSERT_TRUE(strcmp(json_5, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, \"Hello\", 2, 3, \"World\", [4, 6], [[4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
         carbon_revise_remove_one("5", &rev_doc5, &rev_doc4);
-        char *json_6 = strdup(carbon_to_json_extended(&sb, &rev_doc5));
+        char *json_6 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc5));
         ASSERT_TRUE(strcmp(json_6, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, \"Hello\", 2, 3, \"World\", [[4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
@@ -3802,54 +3802,54 @@ TEST(CarbonTest, CarbonRemoveComplexTest)
         carbon_revise_remove_one("0", &rev_doc8, &rev_doc7);
         carbon_revise_remove_one("1", &rev_doc9, &rev_doc8);
         carbon_revise_remove_one("0", &rev_doc10, &rev_doc9);
-        char *json_11 = strdup(carbon_to_json_extended(&sb, &rev_doc10));
+        char *json_11 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc10));
         ASSERT_TRUE(strcmp(json_11, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[[4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
         carbon_revise_remove_one("0.2.2.0", &rev_doc11, &rev_doc10);
 
-        char *json_12 = strdup(carbon_to_json_extended(&sb, &rev_doc11));
+        char *json_12 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc11));
         ASSERT_TRUE(strcmp(json_12, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[[4], null, [\"Dog!\", [], [], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
         carbon_revise_remove_one("0.2.2", &rev_doc12, &rev_doc11);
 
-        char *json_13 = strdup(carbon_to_json_extended(&sb, &rev_doc12));
+        char *json_13 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc12));
         ASSERT_TRUE(strcmp(json_13, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[[4], null, [\"Dog!\", [], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
         carbon_revise_remove_one("0.2", &rev_doc13, &rev_doc12);
 
-        char *json_14 = strdup(carbon_to_json_extended(&sb, &rev_doc13));
+        char *json_14 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc13));
         ASSERT_TRUE(strcmp(json_14, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[[4], null]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
         carbon_revise_remove_one("0", &rev_doc14, &rev_doc13);
 
-        char *json_15 = strdup(carbon_to_json_extended(&sb, &rev_doc14));
+        char *json_15 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc14));
         ASSERT_TRUE(strcmp(json_15, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": []}") == 0);
 
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
-        carbon_drop(&rev_doc2);
-        carbon_drop(&rev_doc3);
-        carbon_drop(&rev_doc4);
-        carbon_drop(&rev_doc5);
-        carbon_drop(&rev_doc6);
-        carbon_drop(&rev_doc7);
-        carbon_drop(&rev_doc8);
-        carbon_drop(&rev_doc9);
-        carbon_drop(&rev_doc10);
-        carbon_drop(&rev_doc11);
-        carbon_drop(&rev_doc12);
-        carbon_drop(&rev_doc13);
-        carbon_drop(&rev_doc14);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
+        jak_carbon_drop(&rev_doc2);
+        jak_carbon_drop(&rev_doc3);
+        jak_carbon_drop(&rev_doc4);
+        jak_carbon_drop(&rev_doc5);
+        jak_carbon_drop(&rev_doc6);
+        jak_carbon_drop(&rev_doc7);
+        jak_carbon_drop(&rev_doc8);
+        jak_carbon_drop(&rev_doc9);
+        jak_carbon_drop(&rev_doc10);
+        jak_carbon_drop(&rev_doc11);
+        jak_carbon_drop(&rev_doc12);
+        jak_carbon_drop(&rev_doc13);
+        jak_carbon_drop(&rev_doc14);
         free(json_1);
         free(json_2);
         free(json_3);
@@ -3865,15 +3865,15 @@ TEST(CarbonTest, CarbonRemoveComplexTest)
 
 TEST(CarbonTest, CarbonUpdateMixedFixedTypesTypeChangeSimple)
 {
-        struct jak_carbon doc, rev_doc, rev_doc2;
+        jak_carbon doc, rev_doc, rev_doc2;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it it;
-        struct jak_carbon_insert inserter;
+        jak_carbon_insert inserter;
         struct jak_string sb;
         const char *json;
 
         string_create(&sb);
-        carbon_create_empty(&doc, CARBON_KEY_NOKEY);
+        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -3890,7 +3890,7 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesTypeChangeSimple)
         carbon_revise_end(&revise);
 
 
-        json = carbon_to_json_extended(&sb, &rev_doc);
+        json = jak_carbon_to_json_extended(&sb, &rev_doc);
         ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, -42, 23.00]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
@@ -3900,168 +3900,168 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesTypeChangeSimple)
         carbon_revise_end(&revise);
 
 
-        json = carbon_to_json_extended(&sb, &rev_doc2);
+        json = jak_carbon_to_json_extended(&sb, &rev_doc2);
         ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, 1024, 23.00]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
         string_drop(&sb);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
-        carbon_drop(&rev_doc2);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
+        jak_carbon_drop(&rev_doc2);
 }
 
 
 TEST(CarbonTest, CarbonShrinkIssueFix)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
         carbon_insert_string(ins, "Hello");
         carbon_insert_string(ins, "World");
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [\"Hello\", \"World\"]}") == 0);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [\"Hello\", \"World\"]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonKeyTypeNoKey)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
         carbon_insert_string(ins, "Hello");
         carbon_insert_string(ins, "World");
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [\"Hello\", \"World\"]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [\"Hello\", \"World\"]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonKeyTypeNoKeyNoRevInc)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         jak_u64 rev_old, rev_new;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
         carbon_insert_string(ins, "Hello");
         carbon_insert_string(ins, "World");
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_commit_hash(&rev_old, &doc);
+        jak_carbon_commit_hash(&rev_old, &doc);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_end(&revise);
 
-        carbon_commit_hash(&rev_new, &rev_doc);
+        jak_carbon_commit_hash(&rev_new, &rev_doc);
 
         ASSERT_EQ(rev_old, 0);
         ASSERT_EQ(rev_new, rev_old);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonKeyTypeAutoKey)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
         carbon_insert_string(ins, "Hello");
         carbon_insert_string(ins, "World");
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [\"Hello\", \"World\"]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [\"Hello\", \"World\"]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonKeyTypeAutoKeyRevInc)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         jak_u64 rev_old, rev_new;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
         carbon_insert_string(ins, "Hello");
         carbon_insert_string(ins, "World");
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_commit_hash(&rev_old, &doc);
+        jak_carbon_commit_hash(&rev_old, &doc);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_end(&revise);
 
-        carbon_commit_hash(&rev_new, &rev_doc);
+        jak_carbon_commit_hash(&rev_new, &rev_doc);
 
         ASSERT_EQ(rev_old, rev_new);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonKeyTypeAutoKeyUpdate)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         jak_global_id_t id, id_read;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_AUTOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_AUTOKEY, JAK_CARBON_OPTIMIZE);
 
         carbon_insert_string(ins, "Hello");
         carbon_insert_string(ins, "World");
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -4070,20 +4070,20 @@ TEST(CarbonTest, CarbonKeyTypeAutoKeyUpdate)
         carbon_revise_key_generate(&id, &revise);
         carbon_revise_end(&revise);
 
-        carbon_key_unsigned_value(&id_read, &rev_doc);
+        jak_carbon_key_unsigned_value(&id_read, &rev_doc);
         ASSERT_NE(id, 0);
         ASSERT_EQ(id, id_read);
 
-        // carbon_print(stdout, &rev_doc);
+        // jak_carbon_print(stdout, &rev_doc);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonKeyTypeUnsignedKeyUpdate)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_string sb;
 
@@ -4092,12 +4092,12 @@ TEST(CarbonTest, CarbonKeyTypeUnsignedKeyUpdate)
         jak_u64 id_read;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_UKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_UKEY, JAK_CARBON_OPTIMIZE);
 
         carbon_insert_string(ins, "Hello");
         carbon_insert_string(ins, "World");
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -4106,18 +4106,18 @@ TEST(CarbonTest, CarbonKeyTypeUnsignedKeyUpdate)
         carbon_revise_key_set_unsigned(&revise, 42);
         carbon_revise_end(&revise);
 
-        carbon_key_unsigned_value(&id_read, &rev_doc);
+        jak_carbon_key_unsigned_value(&id_read, &rev_doc);
         ASSERT_EQ(id_read, 42);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         string_drop(&sb);
 }
 
 TEST(CarbonTest, CarbonKeyTypeSignedKeyUpdate)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_string sb;
 
@@ -4126,12 +4126,12 @@ TEST(CarbonTest, CarbonKeyTypeSignedKeyUpdate)
         jak_i64 id_read;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_IKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_IKEY, JAK_CARBON_OPTIMIZE);
 
         carbon_insert_string(ins, "Hello");
         carbon_insert_string(ins, "World");
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -4140,18 +4140,18 @@ TEST(CarbonTest, CarbonKeyTypeSignedKeyUpdate)
         carbon_revise_key_set_signed(&revise, 42);
         carbon_revise_end(&revise);
 
-        carbon_key_signed_value(&id_read, &rev_doc);
+        jak_carbon_key_signed_value(&id_read, &rev_doc);
         ASSERT_EQ(id_read, 42);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         string_drop(&sb);
 }
 
 TEST(CarbonTest, CarbonKeyTypeStringKeyUpdate)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_string sb;
 
@@ -4160,12 +4160,12 @@ TEST(CarbonTest, CarbonKeyTypeStringKeyUpdate)
         jak_u64 key_len;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_SKEY, JAK_CARBON_OPTIMIZE);
 
         carbon_insert_string(ins, "Hello");
         carbon_insert_string(ins, "World");
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -4173,70 +4173,70 @@ TEST(CarbonTest, CarbonKeyTypeStringKeyUpdate)
         carbon_revise_key_set_string(&revise, "my_unique_id");
         carbon_revise_end(&revise);
 
-        const char *key = carbon_key_string_value(&key_len, &rev_doc);
+        const char *key = jak_carbon_key_string_value(&key_len, &rev_doc);
         ASSERT_TRUE(strncmp(key, "my_unique_id", strlen("my_unique_id")) == 0);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         string_drop(&sb);
 }
 
 TEST(CarbonTest, CarbonKeyTypeUnsignedKey)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_UKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_UKEY, JAK_CARBON_OPTIMIZE);
 
         carbon_insert_string(ins, "Hello");
         carbon_insert_string(ins, "World");
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
-        enum carbon_key_type key_type;
-        carbon_key_type(&key_type, &doc);
-        ASSERT_EQ(key_type, CARBON_KEY_UKEY);
+        jak_carbon_key_e key_type;
+        jak_carbon_key_type(&key_type, &doc);
+        ASSERT_EQ(key_type, JAK_CARBON_KEY_UKEY);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonKeyTypeSignedKeyRevInc)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         jak_u64 rev_old, rev_new;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_IKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_IKEY, JAK_CARBON_OPTIMIZE);
 
         carbon_insert_string(ins, "Hello");
         carbon_insert_string(ins, "World");
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_u64 test_max = 10000;
 
-        struct jak_vector ofType(struct jak_carbon) files;
-        vec_create(&files, NULL, sizeof(struct jak_carbon), test_max);
-        struct jak_carbon* old_f = &doc;
+        struct jak_vector ofType(jak_carbon) files;
+        vec_create(&files, NULL, sizeof(jak_carbon), test_max);
+        jak_carbon* old_f = &doc;
 
 
         for (unsigned i = 0; i < test_max; i++) {
 
-                carbon_commit_hash(&rev_old, old_f);
+                jak_carbon_commit_hash(&rev_old, old_f);
 
-                struct jak_carbon* new_f = vec_new_and_get(&files, struct jak_carbon);
+                jak_carbon* new_f = vec_new_and_get(&files, jak_carbon);
 
                 carbon_revise_begin(&revise, new_f, old_f);
                 carbon_revise_end(&revise);
 
-                carbon_commit_hash(&rev_new, new_f);
+                jak_carbon_commit_hash(&rev_new, new_f);
 
                 ASSERT_NE(rev_old, rev_new);
 
@@ -4248,784 +4248,784 @@ TEST(CarbonTest, CarbonKeyTypeSignedKeyRevInc)
 
 TEST(CarbonTest, CarbonKeyTypeUnsignedKeyRevInc)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         jak_u64 rev_old, rev_new;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_UKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_UKEY, JAK_CARBON_OPTIMIZE);
 
         carbon_insert_string(ins, "Hello");
         carbon_insert_string(ins, "World");
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_commit_hash(&rev_old, &doc);
+        jak_carbon_commit_hash(&rev_old, &doc);
 
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_end(&revise);
 
-        carbon_commit_hash(&rev_new, &rev_doc);
+        jak_carbon_commit_hash(&rev_new, &rev_doc);
 
         ASSERT_NE(rev_old, rev_new);
 
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
 }
 
 TEST(CarbonTest, CarbonKeyTypeSignedKey)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_IKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_IKEY, JAK_CARBON_OPTIMIZE);
 
         carbon_insert_string(ins, "Hello");
         carbon_insert_string(ins, "World");
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
-        enum carbon_key_type key_type;
-        carbon_key_type(&key_type, &doc);
-        ASSERT_EQ(key_type, CARBON_KEY_IKEY);
+        jak_carbon_key_e key_type;
+        jak_carbon_key_type(&key_type, &doc);
+        ASSERT_EQ(key_type, JAK_CARBON_KEY_IKEY);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonKeyTypeStringKey)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
         carbon_insert_string(ins, "Hello");
         carbon_insert_string(ins, "World");
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [\"Hello\", \"World\"]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [\"Hello\", \"World\"]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertEmpty)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
         carbon_insert_object_begin(&state, ins, 1024);
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertNull)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
         carbon_insert_prop_null(obj_ins, "My Key");
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": null}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": null}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertMultipleNulls)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
         carbon_insert_prop_null(obj_ins, "My Key 1");
         carbon_insert_prop_null(obj_ins, "My Key 2");
         carbon_insert_prop_null(obj_ins, "My Key 3");
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key 1\": null, \"My Key 2\": null, \"My Key 3\": null}]}") == 0);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key 1\": null, \"My Key 2\": null, \"My Key 3\": null}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertU8)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
         carbon_insert_prop_u8(obj_ins, "My Key", 123);
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": 123}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": 123}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertMultipleU8s)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
         carbon_insert_prop_u8(obj_ins, "My Key 1", 1);
         carbon_insert_prop_u8(obj_ins, "My Key 2", 2);
         carbon_insert_prop_u8(obj_ins, "My Key 3", 3);
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key 1\": 1, \"My Key 2\": 2, \"My Key 3\": 3}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key 1\": 1, \"My Key 2\": 2, \"My Key 3\": 3}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertU16)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
         carbon_insert_prop_u16(obj_ins, "My Key", 123);
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": 123}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": 123}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertMultipleU16s)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
         carbon_insert_prop_u16(obj_ins, "My Key 1", 1);
         carbon_insert_prop_u16(obj_ins, "My Key 2", 2);
         carbon_insert_prop_u16(obj_ins, "My Key 3", 3);
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key 1\": 1, \"My Key 2\": 2, \"My Key 3\": 3}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key 1\": 1, \"My Key 2\": 2, \"My Key 3\": 3}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertU32)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
         carbon_insert_prop_u32(obj_ins, "My Key", 123);
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": 123}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": 123}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertMultipleU32s)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
         carbon_insert_prop_u32(obj_ins, "My Key 1", 1);
         carbon_insert_prop_u32(obj_ins, "My Key 2", 2);
         carbon_insert_prop_u32(obj_ins, "My Key 3", 3);
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key 1\": 1, \"My Key 2\": 2, \"My Key 3\": 3}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key 1\": 1, \"My Key 2\": 2, \"My Key 3\": 3}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertU64)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
         carbon_insert_prop_u64(obj_ins, "My Key", 123);
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": 123}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": 123}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertMultipleU64s)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
         carbon_insert_prop_u64(obj_ins, "My Key 1", 1);
         carbon_insert_prop_u64(obj_ins, "My Key 2", 2);
         carbon_insert_prop_u64(obj_ins, "My Key 3", 3);
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        //carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key 1\": 1, \"My Key 2\": 2, \"My Key 3\": 3}]}") == 0);
+        //jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key 1\": 1, \"My Key 2\": 2, \"My Key 3\": 3}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertI8)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
         carbon_insert_prop_i8(obj_ins, "My Key", -123);
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": -123}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": -123}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertMultipleI8s)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
         carbon_insert_prop_i8(obj_ins, "My Key 1", -1);
         carbon_insert_prop_i8(obj_ins, "My Key 2", -2);
         carbon_insert_prop_i8(obj_ins, "My Key 3", -3);
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key 1\": -1, \"My Key 2\": -2, \"My Key 3\": -3}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key 1\": -1, \"My Key 2\": -2, \"My Key 3\": -3}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertI16)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
         carbon_insert_prop_i16(obj_ins, "My Key", -123);
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": -123}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": -123}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertMultipleI16s)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
         carbon_insert_prop_i16(obj_ins, "My Key 1", -1);
         carbon_insert_prop_i16(obj_ins, "My Key 2", -2);
         carbon_insert_prop_i16(obj_ins, "My Key 3", -3);
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key 1\": -1, \"My Key 2\": -2, \"My Key 3\": -3}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key 1\": -1, \"My Key 2\": -2, \"My Key 3\": -3}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertI32)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
         carbon_insert_prop_i32(obj_ins, "My Key", -123);
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": -123}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": -123}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertMultipleI32s)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
         carbon_insert_prop_i32(obj_ins, "My Key 1", -1);
         carbon_insert_prop_i32(obj_ins, "My Key 2", -2);
         carbon_insert_prop_i32(obj_ins, "My Key 3", -3);
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key 1\": -1, \"My Key 2\": -2, \"My Key 3\": -3}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key 1\": -1, \"My Key 2\": -2, \"My Key 3\": -3}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertI64)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
         carbon_insert_prop_i64(obj_ins, "My Key", -123);
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": -123}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": -123}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertMultipleI64s)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
         carbon_insert_prop_i64(obj_ins, "My Key 1", -1);
         carbon_insert_prop_i64(obj_ins, "My Key 2", -2);
         carbon_insert_prop_i64(obj_ins, "My Key 3", -3);
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key 1\": -1, \"My Key 2\": -2, \"My Key 3\": -3}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key 1\": -1, \"My Key 2\": -2, \"My Key 3\": -3}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertFloat)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
         carbon_insert_prop_float(obj_ins, "My Key", -123.32);
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": -123.32}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": -123.32}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertMultipleFloats)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
         carbon_insert_prop_float(obj_ins, "My Key 1", -1.23);
         carbon_insert_prop_float(obj_ins, "My Key 2", -2.42);
         carbon_insert_prop_float(obj_ins, "My Key 3", 3.21);
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key 1\": -1.23, \"My Key 2\": -2.42, \"My Key 3\": 3.21}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key 1\": -1.23, \"My Key 2\": -2.42, \"My Key 3\": 3.21}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertTrue)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
         carbon_insert_prop_true(obj_ins, "My Key");
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": true}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": true}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertFalse)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
         carbon_insert_prop_false(obj_ins, "My Key");
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": false}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key\": false}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertMultipleBooleans)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
         carbon_insert_prop_true(obj_ins, "My Key 1");
         carbon_insert_prop_false(obj_ins, "My Key 2");
         carbon_insert_prop_true(obj_ins, "My Key 3");
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key 1\": true, \"My Key 2\": false, \"My Key 3\": true}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"My Key 1\": true, \"My Key 2\": false, \"My Key 3\": true}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertMixed)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
         carbon_insert_prop_true(obj_ins, "k1");
         carbon_insert_prop_false(obj_ins, "k2");
         carbon_insert_prop_null(obj_ins, "k3");
@@ -5041,61 +5041,61 @@ TEST(CarbonTest, CarbonObjectInsertMixed)
 
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"k1\": true, \"k2\": false, \"k3\": null, \"k4\": 1, \"k5\": 2, \"k6\": 3, \"k7\": 4, \"k8\": -1, \"k9\": -2, \"k10\": -3, \"k11\": -4, \"k12\": 42.23}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"k1\": true, \"k2\": false, \"k3\": null, \"k4\": 1, \"k5\": 2, \"k6\": 3, \"k7\": 4, \"k8\": -1, \"k9\": -2, \"k10\": -3, \"k11\": -4, \"k12\": 42.23}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertString)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
 
         carbon_insert_prop_string(obj_ins, "hello", "world");
 
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"hello\": \"world\"}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"hello\": \"world\"}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertMultipleString)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
 
         carbon_insert_prop_string(obj_ins, "k1", "v1");
         carbon_insert_prop_string(obj_ins, "hello", "world");
@@ -5103,31 +5103,31 @@ TEST(CarbonTest, CarbonObjectInsertMultipleString)
 
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"k1\": \"v1\", \"hello\": \"world\", \"k3\": \"there\"}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"k1\": \"v1\", \"hello\": \"world\", \"k3\": \"there\"}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertMultipleStringMixedTypes)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
 
         carbon_insert_prop_false(obj_ins, "k2");
         carbon_insert_prop_null(obj_ins, "k3");
@@ -5148,61 +5148,61 @@ TEST(CarbonTest, CarbonObjectInsertMultipleStringMixedTypes)
 
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"k2\": false, \"k3\": null, \"k4\": 1, \"s1\": \"v1\", \"k5\": 2, \"s2-longer\": \"world\", \"k6\": 3, \"k7\": 4, \"k8\": -1, \"s3\": \"there\", \"k9\": -2, \"k10\": -3, \"k11\": -4, \"k12\": 42.23, \"k1\": true}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"k2\": false, \"k3\": null, \"k4\": 1, \"s1\": \"v1\", \"k5\": 2, \"s2-longer\": \"world\", \"k6\": 3, \"k7\": 4, \"k8\": -1, \"s3\": \"there\", \"k9\": -2, \"k10\": -3, \"k11\": -4, \"k12\": 42.23, \"k1\": true}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertBinary)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
 
         carbon_insert_prop_binary(obj_ins, "my binary", "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
 
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"my binary\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"my binary\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertMultipleBinariesMixedTypes)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
 
         carbon_insert_prop_float(obj_ins, "k12", 42.23);
         carbon_insert_prop_true(obj_ins, "k1");
@@ -5225,31 +5225,31 @@ TEST(CarbonTest, CarbonObjectInsertMultipleBinariesMixedTypes)
 
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"k12\": 42.23, \"k1\": true, \"b1\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==sbG8AA\" }, \"my binary\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"LAAA\" }, \"k2\": false, \"k3\": null, \"k4\": 1, \"s1\": \"v1\", \"k5\": 2, \"b2\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==ybGQAA\" }, \"s2-longer\": \"world\", \"k6\": 3, \"k7\": 4, \"k8\": -1, \"s3\": \"there\", \"k9\": -2, \"k10\": -3, \"k11\": -4}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"k12\": 42.23, \"k1\": true, \"b1\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==sbG8AA\" }, \"my binary\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"LAAA\" }, \"k2\": false, \"k3\": null, \"k4\": 1, \"s1\": \"v1\", \"k5\": 2, \"b2\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==ybGQAA\" }, \"s2-longer\": \"world\", \"k6\": 3, \"k7\": 4, \"k8\": -1, \"s3\": \"there\", \"k9\": -2, \"k10\": -3, \"k11\": -4}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertMultipleBinaries)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
 
         carbon_insert_prop_binary(obj_ins, "b1", "Hello", strlen("Hello"), "txt", NULL);
         carbon_insert_prop_binary(obj_ins, "my binary", ",", strlen(","), "txt", NULL);
@@ -5257,63 +5257,63 @@ TEST(CarbonTest, CarbonObjectInsertMultipleBinaries)
 
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"b1\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==sbG8AA\" }, \"my binary\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"LAAA\" }, \"b2\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==ybGQAA\" }}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"b1\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==sbG8AA\" }, \"my binary\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"LAAA\" }, \"b2\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==ybGQAA\" }}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertObjectEmpty)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state, nested;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
 
         carbon_insert_prop_object_begin(&nested, obj_ins, "my nested", 200);
         carbon_insert_prop_object_end(&nested);
 
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"my nested\": {}}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"my nested\": {}}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertObjectMixedMxed)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state, nested;
 
         // -------------------------------------------------------------------------------------------------------------
 
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
 
         carbon_insert_prop_float(obj_ins, "1", 42.23);
         carbon_insert_prop_true(obj_ins, "2");
@@ -5322,7 +5322,7 @@ TEST(CarbonTest, CarbonObjectInsertObjectMixedMxed)
         carbon_insert_prop_binary(obj_ins, "5", "World", strlen("World"), "txt", NULL);
         carbon_insert_prop_string(obj_ins, "6", "world");
 
-        struct jak_carbon_insert *nested_obj_ins = carbon_insert_prop_object_begin(&nested, obj_ins, "my nested", 200);
+        jak_carbon_insert *nested_obj_ins = carbon_insert_prop_object_begin(&nested, obj_ins, "my nested", 200);
 
         carbon_insert_prop_false(nested_obj_ins, "7");
         carbon_insert_prop_null(nested_obj_ins, "8");
@@ -5342,74 +5342,74 @@ TEST(CarbonTest, CarbonObjectInsertObjectMixedMxed)
 
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"1\": 42.23, \"2\": true, \"3\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==sbG8AA\" }, \"4\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"LAAA\" }, \"5\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==ybGQAA\" }, \"6\": \"world\", \"my nested\": {\"7\": false, \"8\": null, \"9\": 1, \"10\": \"v1\", \"11\": 2}, \"12\": 3, \"13\": 4, \"14\": -1, \"15\": \"there\", \"16\": -2, \"17\": -3, \"18\": -4}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"1\": 42.23, \"2\": true, \"3\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==sbG8AA\" }, \"4\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"LAAA\" }, \"5\": { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"A==ybGQAA\" }, \"6\": \"world\", \"my nested\": {\"7\": false, \"8\": null, \"9\": 1, \"10\": \"v1\", \"11\": 2}, \"12\": 3, \"13\": 4, \"14\": -1, \"15\": \"there\", \"16\": -2, \"17\": -3, \"18\": -4}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertArrayEmpty)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
         struct jak_carbon_insert_array_state array_state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
 
         carbon_insert_prop_array_begin(&array_state, obj_ins, "my array", 200);
         carbon_insert_prop_array_end(&array_state);
 
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"my array\": []}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"my array\": []}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertArrayData)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
         struct jak_carbon_insert_array_state array_state, nested_array_state;
         struct jak_carbon_insert_column_state column_state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
 
-        struct jak_carbon_insert *nested_array_ins = carbon_insert_prop_array_begin(&array_state, obj_ins, "my array", 200);
+        jak_carbon_insert *nested_array_ins = carbon_insert_prop_array_begin(&array_state, obj_ins, "my array", 200);
 
-        struct jak_carbon_insert *column_ins = carbon_insert_column_begin(&column_state, nested_array_ins, CARBON_COLUMN_TYPE_U32, 10);
+        jak_carbon_insert *column_ins = carbon_insert_column_begin(&column_state, nested_array_ins, CARBON_COLUMN_TYPE_U32, 10);
         carbon_insert_u32(column_ins, 'X');
         carbon_insert_u32(column_ins, 'Y');
         carbon_insert_u32(column_ins, 'Z');
         carbon_insert_column_end(&column_state);
-        struct jak_carbon_insert *nested_ins = carbon_insert_array_begin(&nested_array_state, nested_array_ins, 10);
+        jak_carbon_insert *nested_ins = carbon_insert_array_begin(&nested_array_state, nested_array_ins, 10);
         carbon_insert_string(nested_ins, "Hello");
         column_ins = carbon_insert_column_begin(&column_state, nested_ins, CARBON_COLUMN_TYPE_U32, 10);
         carbon_insert_u32(column_ins, 'A');
@@ -5431,34 +5431,34 @@ TEST(CarbonTest, CarbonObjectInsertArrayData)
 
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"my array\": [[88, 89, 90], [\"Hello\", [65, 66, 67], \"World\"], 1, 1, [23, 24, 25], 1]}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"my array\": [[88, 89, 90], [\"Hello\", [65, 66, 67], \"World\"], 1, 1, [23, 24, 25], 1]}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonObjectInsertColumnNonEmpty)
 {
-        struct jak_carbon doc;
-        struct jak_carbon_new context;
+        jak_carbon doc;
+        jak_carbon_new context;
         struct jak_carbon_insert_object_state state;
         struct jak_carbon_insert_column_state column_state;
 
         // -------------------------------------------------------------------------------------------------------------
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
 
-        struct jak_carbon_insert *nested_column_ins = carbon_insert_prop_column_begin(&column_state, obj_ins, "my column", CARBON_COLUMN_TYPE_U16, 200);
+        jak_carbon_insert *nested_column_ins = carbon_insert_prop_column_begin(&column_state, obj_ins, "my column", CARBON_COLUMN_TYPE_U16, 200);
         carbon_insert_u16(nested_column_ins, 1);
         carbon_insert_u16(nested_column_ins, 2);
         carbon_insert_u16(nested_column_ins, 3);
@@ -5466,30 +5466,30 @@ TEST(CarbonTest, CarbonObjectInsertColumnNonEmpty)
 
         carbon_insert_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         // -------------------------------------------------------------------------------------------------------------
 
         struct jak_string sb;
         string_create(&sb);
 
-        // carbon_print(stdout, &doc);
-        ASSERT_TRUE(strcmp(carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"my column\": [1, 2, 3]}]}") == 0);
+        // jak_carbon_print(stdout, &doc);
+        ASSERT_TRUE(strcmp(jak_carbon_to_json_extended(&sb, &doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"my column\": [1, 2, 3]}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
-//static void create_nested_doc(struct jak_carbon *rev_doc)
+//static void create_nested_doc(jak_carbon *rev_doc)
 //{
-//        struct jak_carbon doc;
+//        jak_carbon doc;
 //        struct jak_carbon_revise revise;
 //        struct jak_carbon_array_it it;
-//        struct jak_carbon_insert nested_ins, *array_ins, *col_ins, *nested_array_ins;
+//        jak_carbon_insert nested_ins, *array_ins, *col_ins, *nested_array_ins;
 //        struct jak_carbon_insert_array_state array_state, nested_array_state;
 //        struct jak_carbon_insert_column_state column_state;
 //
-//        carbon_create_empty(&doc, CARBON_KEY_NOKEY);
+//        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
 //        carbon_revise_begin(&revise, rev_doc, &doc);
 //        carbon_revise_iterator_open(&it, &revise);
 //
@@ -5593,8 +5593,8 @@ TEST(CarbonTest, CarbonObjectInsertColumnNonEmpty)
 
 TEST(CarbonTest, CarbonObjectRemoveTest)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -5604,9 +5604,9 @@ TEST(CarbonTest, CarbonObjectRemoveTest)
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
 
         carbon_insert_prop_false(nested_obj_ins, "1");
         carbon_insert_prop_null(nested_obj_ins, "2");
@@ -5636,10 +5636,10 @@ TEST(CarbonTest, CarbonObjectRemoveTest)
 
         carbon_insert_prop_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -5667,7 +5667,7 @@ TEST(CarbonTest, CarbonObjectRemoveTest)
         carbon_revise_iterator_close(&rev_it);
         carbon_revise_end(&revise);
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -5675,16 +5675,16 @@ TEST(CarbonTest, CarbonObjectRemoveTest)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": []}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonObjectRemoveSkipOneTest)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -5694,9 +5694,9 @@ TEST(CarbonTest, CarbonObjectRemoveSkipOneTest)
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
 
         carbon_insert_prop_false(nested_obj_ins, "1");
         carbon_insert_prop_null(nested_obj_ins, "2");
@@ -5726,10 +5726,10 @@ TEST(CarbonTest, CarbonObjectRemoveSkipOneTest)
 
         carbon_insert_prop_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -5756,7 +5756,7 @@ TEST(CarbonTest, CarbonObjectRemoveSkipOneTest)
         carbon_revise_iterator_close(&rev_it);
         carbon_revise_end(&revise);
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -5764,16 +5764,16 @@ TEST(CarbonTest, CarbonObjectRemoveSkipOneTest)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"1\": false, \"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonObjectInsertPropDuringIt)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -5782,12 +5782,12 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringIt)
         jak_u64 key_len;
 
         struct jak_carbon_insert_object_state state;
-        struct jak_carbon_insert nested_ins;
+        jak_carbon_insert nested_ins;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
 
         carbon_insert_prop_false(nested_obj_ins, "1");
         carbon_insert_prop_null(nested_obj_ins, "2");
@@ -5797,10 +5797,10 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringIt)
 
         carbon_insert_prop_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -5834,7 +5834,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringIt)
         carbon_revise_iterator_close(&rev_it);
         carbon_revise_end(&revise);
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
         //printf("\n%s\n", json_2);
 
         // -------------------------------------------------------------------------------------------------------------
@@ -5843,16 +5843,16 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringIt)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"Hello Long Key\": \"Hello Long Value\", \"1\": false, \"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex1)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -5860,12 +5860,12 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex1)
         string_create(&sb);
 
         struct jak_carbon_insert_object_state state;
-        struct jak_carbon_insert nested_ins;
+        jak_carbon_insert nested_ins;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
 
         carbon_insert_prop_false(nested_obj_ins, "1");
         carbon_insert_prop_null(nested_obj_ins, "2");
@@ -5875,10 +5875,10 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex1)
 
         carbon_insert_prop_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -5910,7 +5910,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex1)
         carbon_revise_iterator_close(&rev_it);
         carbon_revise_end(&revise);
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -5918,16 +5918,16 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex1)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"1\": false, \"Hello Long Key\": \"Hello Long Value\", \"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex2)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -5935,12 +5935,12 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex2)
         string_create(&sb);
 
         struct jak_carbon_insert_object_state state;
-        struct jak_carbon_insert nested_ins;
+        jak_carbon_insert nested_ins;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
 
         carbon_insert_prop_false(nested_obj_ins, "1");
         carbon_insert_prop_null(nested_obj_ins, "2");
@@ -5950,10 +5950,10 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex2)
 
         carbon_insert_prop_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -5985,7 +5985,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex2)
         carbon_revise_iterator_close(&rev_it);
         carbon_revise_end(&revise);
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -5993,16 +5993,16 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex2)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"1\": false, \"2\": null, \"Hello Long Key\": \"Hello Long Value\", \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex3)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -6010,12 +6010,12 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex3)
         string_create(&sb);
 
         struct jak_carbon_insert_object_state state;
-        struct jak_carbon_insert nested_ins;
+        jak_carbon_insert nested_ins;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
 
         carbon_insert_prop_false(nested_obj_ins, "1");
         carbon_insert_prop_null(nested_obj_ins, "2");
@@ -6025,10 +6025,10 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex3)
 
         carbon_insert_prop_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6061,7 +6061,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex3)
         carbon_revise_iterator_close(&rev_it);
         carbon_revise_end(&revise);
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6069,16 +6069,16 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex3)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"1\": false, \"2\": null, \"3\": 1, \"Hello Long Key\": \"Hello Long Value\", \"4\": \"v1\", \"5\": 2}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex4)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -6086,12 +6086,12 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex4)
         string_create(&sb);
 
         struct jak_carbon_insert_object_state state;
-        struct jak_carbon_insert nested_ins;
+        jak_carbon_insert nested_ins;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
 
         carbon_insert_prop_false(nested_obj_ins, "1");
         carbon_insert_prop_null(nested_obj_ins, "2");
@@ -6101,10 +6101,10 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex4)
 
         carbon_insert_prop_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6138,7 +6138,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex4)
         carbon_revise_iterator_close(&rev_it);
         carbon_revise_end(&revise);
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6146,16 +6146,16 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex4)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"1\": false, \"2\": null, \"3\": 1, \"4\": \"v1\", \"Hello Long Key\": \"Hello Long Value\", \"5\": 2}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex5)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -6163,12 +6163,12 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex5)
         string_create(&sb);
 
         struct jak_carbon_insert_object_state state;
-        struct jak_carbon_insert nested_ins;
+        jak_carbon_insert nested_ins;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
 
         carbon_insert_prop_false(nested_obj_ins, "1");
         carbon_insert_prop_null(nested_obj_ins, "2");
@@ -6178,10 +6178,10 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex5)
 
         carbon_insert_prop_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6216,7 +6216,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex5)
         carbon_revise_iterator_close(&rev_it);
         carbon_revise_end(&revise);
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6224,16 +6224,16 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex5)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"1\": false, \"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2, \"Hello Long Key\": \"Hello Long Value\"}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonObjectRemovePropByKey)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -6244,9 +6244,9 @@ TEST(CarbonTest, CarbonObjectRemovePropByKey)
         struct jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
 
         carbon_insert_prop_false(nested_obj_ins, "1");
         carbon_insert_prop_null(nested_obj_ins, "2");
@@ -6256,10 +6256,10 @@ TEST(CarbonTest, CarbonObjectRemovePropByKey)
 
         carbon_insert_prop_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6290,7 +6290,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKey)
         carbon_revise_iterator_close(&rev_it);
         carbon_revise_end(&revise);
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6298,16 +6298,16 @@ TEST(CarbonTest, CarbonObjectRemovePropByKey)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectNonEmpty)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -6319,11 +6319,11 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectNonEmpty)
         struct jak_carbon_insert_object_state nested_obj;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
 
-        struct jak_carbon_insert *nested_nested_obj_ins = carbon_insert_prop_object_begin(&nested_obj, nested_obj_ins, "1", 100);
+        jak_carbon_insert *nested_nested_obj_ins = carbon_insert_prop_object_begin(&nested_obj, nested_obj_ins, "1", 100);
         carbon_insert_prop_null(nested_nested_obj_ins, "2");
         carbon_insert_prop_u8(nested_nested_obj_ins, "3", 1);
         carbon_insert_prop_string(nested_nested_obj_ins, "4", "v1");
@@ -6337,10 +6337,10 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectNonEmpty)
 
         carbon_insert_prop_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6371,7 +6371,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectNonEmpty)
         carbon_revise_iterator_close(&rev_it);
         carbon_revise_end(&revise);
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6379,16 +6379,16 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectNonEmpty)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"6\": null, \"7\": 1, \"8\": \"v1\", \"9\": 2}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayEmpty)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -6400,9 +6400,9 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayEmpty)
         struct jak_carbon_insert_array_state nested_arr;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
 
         carbon_insert_prop_array_begin(&nested_arr, nested_obj_ins, "1", 100);
 
@@ -6415,10 +6415,10 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayEmpty)
 
         carbon_insert_prop_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6449,7 +6449,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayEmpty)
         carbon_revise_iterator_close(&rev_it);
         carbon_revise_end(&revise);
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6459,16 +6459,16 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayEmpty)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayNonEmpty)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -6480,11 +6480,11 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayNonEmpty)
         struct jak_carbon_insert_array_state nested_arr;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
 
-        struct jak_carbon_insert *nested_arr_it = carbon_insert_prop_array_begin(&nested_arr, nested_obj_ins, "1", 100);
+        jak_carbon_insert *nested_arr_it = carbon_insert_prop_array_begin(&nested_arr, nested_obj_ins, "1", 100);
         carbon_insert_null(nested_arr_it);
         carbon_insert_u8(nested_arr_it, 1);
         carbon_insert_string(nested_arr_it, "v1");
@@ -6498,10 +6498,10 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayNonEmpty)
 
         carbon_insert_prop_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6532,7 +6532,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayNonEmpty)
         carbon_revise_iterator_close(&rev_it);
         carbon_revise_end(&revise);
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6540,16 +6540,16 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayNonEmpty)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeColumnEmpty)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -6561,9 +6561,9 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeColumnEmpty)
         struct jak_carbon_insert_column_state nested_col;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
 
         carbon_insert_prop_column_begin(&nested_col, nested_obj_ins, "1", CARBON_COLUMN_TYPE_U32, 100);
 
@@ -6576,10 +6576,10 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeColumnEmpty)
 
         carbon_insert_prop_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6610,7 +6610,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeColumnEmpty)
         carbon_revise_iterator_close(&rev_it);
         carbon_revise_end(&revise);
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6618,16 +6618,16 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeColumnEmpty)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
 
 TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectEmpty)
 {
-        struct jak_carbon doc, rev_doc;
-        struct jak_carbon_new context;
+        jak_carbon doc, rev_doc;
+        jak_carbon_new context;
         struct jak_carbon_revise revise;
         struct jak_carbon_array_it rev_it;
         struct jak_string sb;
@@ -6639,9 +6639,9 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectEmpty)
         struct jak_carbon_insert_object_state nested_obj;
 
         // -------------------------------------------------------------------------------------------------------------
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        struct jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
 
         carbon_insert_prop_object_begin(&nested_obj, nested_obj_ins, "1", 100);
         carbon_insert_prop_object_end(&nested_obj);
@@ -6653,10 +6653,10 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectEmpty)
 
         carbon_insert_prop_object_end(&state);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
 
-        char *json_1 = strdup(carbon_to_json_extended(&sb, &doc));
+        char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6687,7 +6687,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectEmpty)
         carbon_revise_iterator_close(&rev_it);
         carbon_revise_end(&revise);
 
-        char *json_2 = strdup(carbon_to_json_extended(&sb, &rev_doc));
+        char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6695,8 +6695,8 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectEmpty)
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"2\": null, \"3\": 1, \"4\": \"v1\", \"5\": 2}]}") == 0);
 
         string_drop(&sb);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         free(json_1);
         free(json_2);
 }
@@ -6826,8 +6826,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        // printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        // printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_null("0.1", &rev_doc, &doc); // replaces true with null
@@ -6835,8 +6835,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        // printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        // printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, null, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_null("0.2", &rev_doc, &doc); // replaces false with null
@@ -6844,8 +6844,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        // printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        // printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, null, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_null("0.3", &rev_doc, &doc); // replaces u8 (8) with null
@@ -6853,8 +6853,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        // printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        // printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, false, null, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_null("0.4", &rev_doc, &doc); // replaces i16 (-16) with null
@@ -6862,8 +6862,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        // printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        // printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, false, 8, null, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_null("0.5", &rev_doc, &doc); // replaces string with null
@@ -6871,8 +6871,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        // printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        // printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, false, 8, -16, null, { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_null("0.6", &rev_doc, &doc); // replaces binary string with null
@@ -6880,8 +6880,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        // printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        // printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", null, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_null("0.7", &rev_doc, &doc); // replaces custom binary with null
@@ -6889,8 +6889,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        // printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        // printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, null, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_null("0.8", &rev_doc, &doc); // replaces column ([32, 33, 34, 35]) with null
@@ -6898,8 +6898,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        // printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        // printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, null, [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_null("0.8.0", &rev_doc, &doc); // replaces element in column with null value (special case) --> [NULL, 33, 34, 35]
@@ -6907,8 +6907,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        // printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        // printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [null, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_null("0.9", &rev_doc, &doc); // replaces empty array with null
@@ -6916,8 +6916,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        // printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        // printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], null, [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_null("0.10", &rev_doc, &doc); // replaces complex array with null
@@ -6925,8 +6925,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        // printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        // printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], null], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_null("0", &rev_doc, &doc); // replaces 1st outermost array with null
@@ -6934,8 +6934,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        // printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        // printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [null, [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_null("1", &rev_doc, &doc); // replaces 2nd outermost array with null
@@ -6943,8 +6943,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        // printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        // printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], null]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        // -------------------------------------------------------------------------------------------------------------
 //        // Update to true
@@ -6956,8 +6956,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        // printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        // printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[true, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_true("0.1", &rev_doc, &doc); // replaces true with true
@@ -6965,8 +6965,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        // printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        // printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_true("0.2", &rev_doc, &doc); // replaces false with true
@@ -6974,8 +6974,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        // printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        // printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, true, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_true("0.3", &rev_doc, &doc); // replaces u8 (8) with true
@@ -6983,8 +6983,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        // printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        // printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, false, true, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_true("0.4", &rev_doc, &doc); // replaces i16 (-16) with true
@@ -6992,8 +6992,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        // printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        // printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, false, 8, true, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_true("0.5", &rev_doc, &doc); // replaces string with true
@@ -7001,8 +7001,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        // printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        // printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, false, 8, -16, true, { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_true("0.6", &rev_doc, &doc); // replaces binary string with true
@@ -7010,8 +7010,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        // printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        // printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", true, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_true("0.7", &rev_doc, &doc); // replaces custom binary with true
@@ -7019,8 +7019,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        // printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        // printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, true, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_true("0.8", &rev_doc, &doc); // replaces column ([32, 33, 34, 35]) with true
@@ -7028,8 +7028,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        // printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        // printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, true, [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 
 //        create_nested_doc(&doc);
 //        // ??????
@@ -7038,8 +7038,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [true, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_true("0.9", &rev_doc, &doc); // replaces empty array with true
@@ -7047,8 +7047,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], true, [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_true("0.10", &rev_doc, &doc); // replaces complex array with true
@@ -7056,8 +7056,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], true], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_true("0", &rev_doc, &doc); // replaces 1st outermost array with true
@@ -7065,8 +7065,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [true, [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 //
 //        create_nested_doc(&doc);
 //        status = carbon_update_one_set_true("1", &rev_doc, &doc); // replaces 2nd outermost array with true
@@ -7074,8 +7074,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 //        printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
 //        printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
 //        ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], true]}") == 0);
-//        carbon_drop(&doc);
-//        carbon_drop(&rev_doc);
+//        jak_carbon_drop(&doc);
+//        jak_carbon_drop(&rev_doc);
 
         /*
         create_nested_doc(&doc);
@@ -7084,8 +7084,8 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
         printf("built:  \t'%s'\n", carbon_to_json(&sb, &doc));
         printf("altered:\t'%s'\n", carbon_to_json(&sb, &rev_doc));
         ASSERT_TRUE(strcmp(carbon_to_json(&sb, &rev_doc), "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35], [], [null, true, false, 8, -16, \"Hello, World!\", { \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"TXkgUGxhaW4tVGV4dAAA\" }, { \"type\": \"own\", \"encoding\": \"base64\", \"binary-string\": \"TXkgT3duIEZvcm1hdAAA\" }, [32, 33, 34, 35]]]]}") == 0);
-        carbon_drop(&doc);
-        carbon_drop(&rev_doc);
+        jak_carbon_drop(&doc);
+        jak_carbon_drop(&rev_doc);
         */
 
 
@@ -7206,22 +7206,22 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 
 TEST(CarbonTest, CarbonFromEmptyJson)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
 
         json_in = "{}";
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
-        json_out_extended = carbon_to_json_extended_dup(&doc);
-        json_out_compact = carbon_to_json_compact_dup(&doc);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
+        json_out_extended = jak_carbon_to_json_extended_dup(&doc);
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);
 
         //printf("INS:\t%s\n", json_in);
         //printf("EXT:\t%s\n", json_out_extended);
         //printf("SRT:\t%s\n", json_out_compact);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
         ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{}]}") == 0);
@@ -7232,22 +7232,22 @@ TEST(CarbonTest, CarbonFromEmptyJson)
 
 TEST(CarbonTest, CarbonFromEmptyArray)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
 
         json_in = "[]";
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
-        json_out_extended = carbon_to_json_extended_dup(&doc);
-        json_out_compact = carbon_to_json_compact_dup(&doc);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
+        json_out_extended = jak_carbon_to_json_extended_dup(&doc);
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);
 
 //        printf("INS:\t%s\n", json_in);
 //        printf("EXT:\t%s\n", json_out_extended);
 //        printf("SRT:\t%s\n", json_out_compact);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, "{}") == 0);
         ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": []}") == 0);
@@ -7258,7 +7258,7 @@ TEST(CarbonTest, CarbonFromEmptyArray)
 
 TEST(CarbonTest, CarbonFromJsonNull)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
@@ -7266,15 +7266,15 @@ TEST(CarbonTest, CarbonFromJsonNull)
 
         json_in = "null";
 
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [null]}'
-        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be 'null'
+        json_out_extended = jak_carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [null]}'
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);    // shall be 'null'
 
         //printf("EXT:\t%s\n", json_out_extended);
         //printf("SRT:\t%s\n", json_out_compact);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
         ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [null]}") == 0);
@@ -7285,7 +7285,7 @@ TEST(CarbonTest, CarbonFromJsonNull)
 
 TEST(CarbonTest, CarbonFromJsonTrue)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
@@ -7293,15 +7293,15 @@ TEST(CarbonTest, CarbonFromJsonTrue)
 
         json_in = "true";
 
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [true]}'
-        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be 'true'
+        json_out_extended = jak_carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [true]}'
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);    // shall be 'true'
 
         //printf("EXT:\t%s\n", json_out_extended);
         //printf("SRT:\t%s\n", json_out_compact);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
         ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [true]}") == 0);
@@ -7312,7 +7312,7 @@ TEST(CarbonTest, CarbonFromJsonTrue)
 
 TEST(CarbonTest, CarbonFromJsonFalse)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
@@ -7320,15 +7320,15 @@ TEST(CarbonTest, CarbonFromJsonFalse)
 
         json_in = "false";
 
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [false]}'
-        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be 'false'
+        json_out_extended = jak_carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [false]}'
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);    // shall be 'false'
 
         //printf("EXT:\t%s\n", json_out_extended);
         //printf("SRT:\t%s\n", json_out_compact);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
         ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [false]}") == 0);
@@ -7339,7 +7339,7 @@ TEST(CarbonTest, CarbonFromJsonFalse)
 
 TEST(CarbonTest, CarbonFromJsonNumberSigned)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
@@ -7347,15 +7347,15 @@ TEST(CarbonTest, CarbonFromJsonNumberSigned)
 
         json_in = "42";
 
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [42]}'
-        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '42'
+        json_out_extended = jak_carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [42]}'
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);    // shall be '42'
 
         //printf("EXT:\t%s\n", json_out_extended);
         //printf("SRT:\t%s\n", json_out_compact);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
         ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [42]}") == 0);
@@ -7366,7 +7366,7 @@ TEST(CarbonTest, CarbonFromJsonNumberSigned)
 
 TEST(CarbonTest, CarbonFromJsonNumberUnsigned)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
@@ -7374,15 +7374,15 @@ TEST(CarbonTest, CarbonFromJsonNumberUnsigned)
 
         json_in = "-42";
 
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [-42]}'
-        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '-42'
+        json_out_extended = jak_carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [-42]}'
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);    // shall be '-42'
 
         //printf("EXT:\t%s\n", json_out_extended);
         //printf("SRT:\t%s\n", json_out_compact);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
         ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [-42]}") == 0);
@@ -7393,7 +7393,7 @@ TEST(CarbonTest, CarbonFromJsonNumberUnsigned)
 
 TEST(CarbonTest, CarbonFromJsonNumberFloat)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
@@ -7401,15 +7401,15 @@ TEST(CarbonTest, CarbonFromJsonNumberFloat)
 
         json_in = "-42.23";
 
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [-42.23]}'
-        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '-42.23'
+        json_out_extended = jak_carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [-42.23]}'
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);    // shall be '-42.23'
 
         //printf("EXT:\t%s\n", json_out_extended);
         //printf("SRT:\t%s\n", json_out_compact);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
         ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [-42.23]}") == 0);
@@ -7420,7 +7420,7 @@ TEST(CarbonTest, CarbonFromJsonNumberFloat)
 
 TEST(CarbonTest, CarbonFromJsonString)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
@@ -7428,15 +7428,15 @@ TEST(CarbonTest, CarbonFromJsonString)
 
         json_in = "\"Hello, World!\"";
 
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": ["Hello, World!"]}'
-        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '"Hello, World!"'
+        json_out_extended = jak_carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": ["Hello, World!"]}'
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);    // shall be '"Hello, World!"'
 
         //printf("EXT:\t%s\n", json_out_extended);
         //printf("SRT:\t%s\n", json_out_compact);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
         ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [\"Hello, World!\"]}") == 0);
@@ -7447,7 +7447,7 @@ TEST(CarbonTest, CarbonFromJsonString)
 
 TEST(CarbonTest, CarbonFromJsonObjectSingle)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
@@ -7455,15 +7455,15 @@ TEST(CarbonTest, CarbonFromJsonObjectSingle)
 
         json_in = "{\"k\": \"v\"}";
 
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{"k":"v"}]}'
-        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '{"k":"v"}'
+        json_out_extended = jak_carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{"k":"v"}]}'
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);    // shall be '{"k":"v"}'
 
         //printf("EXT:\t%s\n", json_out_extended);
         //printf("SRT:\t%s\n", json_out_compact);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
         ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"k\": \"v\"}]}") == 0);
@@ -7475,7 +7475,7 @@ TEST(CarbonTest, CarbonFromJsonObjectSingle)
 
 TEST(CarbonTest, CarbonFromJsonObjectEmptyArrayProp)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
@@ -7483,15 +7483,15 @@ TEST(CarbonTest, CarbonFromJsonObjectEmptyArrayProp)
 
         json_in = "{\"k\": []}";
 
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{"k":[]}]}'
-        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '{"k":[]}'
+        json_out_extended = jak_carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{"k":[]}]}'
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);    // shall be '{"k":[]}'
 
         //printf("EXT:\t%s\n", json_out_extended);
         //printf("SRT:\t%s\n", json_out_compact);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
         ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"k\": []}]}") == 0);
@@ -7502,7 +7502,7 @@ TEST(CarbonTest, CarbonFromJsonObjectEmptyArrayProp)
 
 TEST(CarbonTest, CarbonFromJsonObjectEmptyObjectProp)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
@@ -7510,15 +7510,15 @@ TEST(CarbonTest, CarbonFromJsonObjectEmptyObjectProp)
 
         json_in = "{\"k\": {}}";
 
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{"k":{}}]}'
-        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '{"k":{}}'
+        json_out_extended = jak_carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{"k":{}}]}'
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);    // shall be '{"k":{}}'
 
         //printf("EXT:\t%s\n", json_out_extended);
         //printf("SRT:\t%s\n", json_out_compact);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
         ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"k\": {}}]}") == 0);
@@ -7529,7 +7529,7 @@ TEST(CarbonTest, CarbonFromJsonObjectEmptyObjectProp)
 
 TEST(CarbonTest, CarbonFromJsonObjectTrueProp)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
@@ -7537,15 +7537,15 @@ TEST(CarbonTest, CarbonFromJsonObjectTrueProp)
 
         json_in = "{\"k\": true}";
 
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{"k":true}]}'
-        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '{"k":true}'
+        json_out_extended = jak_carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{"k":true}]}'
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);    // shall be '{"k":true}'
 
         //printf("EXT:\t%s\n", json_out_extended);
         //printf("SRT:\t%s\n", json_out_compact);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
         ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"k\": true}]}") == 0);
@@ -7556,7 +7556,7 @@ TEST(CarbonTest, CarbonFromJsonObjectTrueProp)
 
 TEST(CarbonTest, CarbonFromJsonObjectFalseProp)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
@@ -7564,15 +7564,15 @@ TEST(CarbonTest, CarbonFromJsonObjectFalseProp)
 
         json_in = "{\"k\": false}";
 
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{"k":false}]}'
-        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '{"k":false}'
+        json_out_extended = jak_carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{"k":false}]}'
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);    // shall be '{"k":false}'
 
         //printf("EXT:\t%s\n", json_out_extended);
         //printf("SRT:\t%s\n", json_out_compact);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
         ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"k\": false}]}") == 0);
@@ -7583,7 +7583,7 @@ TEST(CarbonTest, CarbonFromJsonObjectFalseProp)
 
 TEST(CarbonTest, CarbonFromJsonObjectNullProp)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
@@ -7591,15 +7591,15 @@ TEST(CarbonTest, CarbonFromJsonObjectNullProp)
 
         json_in = "{\"k\": null}";
 
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{"k":null}]}'
-        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '{"k":null}'
+        json_out_extended = jak_carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{"k":null}]}'
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);    // shall be '{"k":null}'
 
         //printf("EXT:\t%s\n", json_out_extended);
         //printf("SRT:\t%s\n", json_out_compact);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
         ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"k\": null}]}") == 0);
@@ -7610,7 +7610,7 @@ TEST(CarbonTest, CarbonFromJsonObjectNullProp)
 
 TEST(CarbonTest, CarbonFromJsonObjectUnsignedProp)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
@@ -7618,15 +7618,15 @@ TEST(CarbonTest, CarbonFromJsonObjectUnsignedProp)
 
         json_in = "{\"k\": 42}";
 
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{"k":42}]}'
-        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '{"k":42}'
+        json_out_extended = jak_carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{"k":42}]}'
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);    // shall be '{"k":42}'
 
         //printf("EXT:\t%s\n", json_out_extended);
         //printf("SRT:\t%s\n", json_out_compact);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
         ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"k\": 42}]}") == 0);
@@ -7637,7 +7637,7 @@ TEST(CarbonTest, CarbonFromJsonObjectUnsignedProp)
 
 TEST(CarbonTest, CarbonFromJsonObjectSignedProp)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
@@ -7645,15 +7645,15 @@ TEST(CarbonTest, CarbonFromJsonObjectSignedProp)
 
         json_in = "{\"k\": -42}";
 
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{"k":-42}]}'
-        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '{"k":-42}'
+        json_out_extended = jak_carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{"k":-42}]}'
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);    // shall be '{"k":-42}'
 
         //printf("EXT:\t%s\n", json_out_extended);
         //printf("SRT:\t%s\n", json_out_compact);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
         ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"k\": -42}]}") == 0);
@@ -7664,7 +7664,7 @@ TEST(CarbonTest, CarbonFromJsonObjectSignedProp)
 
 TEST(CarbonTest, CarbonFromJsonObjectFloatProp)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
@@ -7672,15 +7672,15 @@ TEST(CarbonTest, CarbonFromJsonObjectFloatProp)
 
         json_in = "{\"k\": -42.23}";
 
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{"k":-42.23}]}'
-        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '{"k":-42.23}'
+        json_out_extended = jak_carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{"k":-42.23}]}'
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);    // shall be '{"k":-42.23}'
 
         //printf("EXT:\t%s\n", json_out_extended);
         //printf("SRT:\t%s\n", json_out_compact);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
         ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"k\": -42.23}]}") == 0);
@@ -7691,7 +7691,7 @@ TEST(CarbonTest, CarbonFromJsonObjectFloatProp)
 
 TEST(CarbonTest, CarbonFromJsonColumnNumber)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
@@ -7699,11 +7699,11 @@ TEST(CarbonTest, CarbonFromJsonColumnNumber)
 
         json_in = "{\"x\": [1, 2, 3]}";
 
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
         struct jak_carbon_array_it it;
         enum carbon_field_type field_type;
-        carbon_iterator_open(&it, &doc);
+        jak_carbon_iterator_open(&it, &doc);
         ASSERT_TRUE(carbon_array_it_next(&it));
         carbon_array_it_field_type(&field_type, &it);
         ASSERT_TRUE(field_type == CARBON_JAK_FIELD_TYPE_OBJECT);
@@ -7713,15 +7713,15 @@ TEST(CarbonTest, CarbonFromJsonColumnNumber)
         ASSERT_TRUE(carbon_field_type_is_column(field_type));
         ASSERT_TRUE(field_type == CARBON_JAK_FIELD_TYPE_COLUMN_U8);
         carbon_object_it_drop(oit);
-        carbon_iterator_close(&it);
+        jak_carbon_iterator_close(&it);
 
-        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{\"x\": [1, 2, 3]}}'
-        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '[1, 2, 3]'
+        json_out_extended = jak_carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{\"x\": [1, 2, 3]}}'
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);    // shall be '[1, 2, 3]'
 
         //printf("EXT:\t%s\n", json_out_extended);
         //printf("SRT:\t%s\n", json_out_compact);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
         ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"x\": [1, 2, 3]}]}") == 0);
@@ -7732,7 +7732,7 @@ TEST(CarbonTest, CarbonFromJsonColumnNumber)
 
 TEST(CarbonTest, CarbonFromJsonColumnNullableNumber)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
@@ -7740,11 +7740,11 @@ TEST(CarbonTest, CarbonFromJsonColumnNullableNumber)
 
         json_in = "{\"x\": [1, null, 3]}";
 
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
         struct jak_carbon_array_it it;
         enum carbon_field_type field_type;
-        carbon_iterator_open(&it, &doc);
+        jak_carbon_iterator_open(&it, &doc);
         ASSERT_TRUE(carbon_array_it_next(&it));
         carbon_array_it_field_type(&field_type, &it);
         ASSERT_TRUE(field_type == CARBON_JAK_FIELD_TYPE_OBJECT);
@@ -7754,16 +7754,16 @@ TEST(CarbonTest, CarbonFromJsonColumnNullableNumber)
         ASSERT_TRUE(carbon_field_type_is_column(field_type));
         ASSERT_TRUE(field_type == CARBON_JAK_FIELD_TYPE_COLUMN_U8);
         carbon_object_it_drop(oit);
-        carbon_iterator_close(&it);
+        jak_carbon_iterator_close(&it);
 
-        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{"x": [1, null, 3]}]}'
-        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '{"x": [1, null, 3]}'
+        json_out_extended = jak_carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{"x": [1, null, 3]}]}'
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);    // shall be '{"x": [1, null, 3]}'
 
         //printf("INS:\t%s\n", json_in);
         //printf("EXT:\t%s\n", json_out_extended);
         //printf("SRT:\t%s\n", json_out_compact);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
         ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{\"x\": [1, null, 3]}]}") == 0);
@@ -7774,7 +7774,7 @@ TEST(CarbonTest, CarbonFromJsonColumnNullableNumber)
 
 TEST(CarbonTest, CarbonFromJsonNonColumn)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
@@ -7782,24 +7782,24 @@ TEST(CarbonTest, CarbonFromJsonNonColumn)
 
         json_in = "[1, null, 3, \"a\"]";
 
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
         struct jak_carbon_array_it it;
         enum carbon_field_type field_type;
-        carbon_iterator_open(&it, &doc);
+        jak_carbon_iterator_open(&it, &doc);
         ASSERT_TRUE(carbon_array_it_next(&it));
         carbon_array_it_field_type(&field_type, &it);
         ASSERT_TRUE(carbon_field_type_is_number(field_type));
-        carbon_iterator_close(&it);
+        jak_carbon_iterator_close(&it);
 
-        json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [1, null, 3, \"a\"]}'
-        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '[1, null, 3, \"a\"]'
+        json_out_extended = jak_carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [1, null, 3, \"a\"]}'
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);    // shall be '[1, null, 3, \"a\"]'
 
         //printf("INS:\t%s\n", json_in);
         //printf("EXT:\t%s\n", json_out_extended);
         //printf("SRT:\t%s\n", json_out_compact);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
         ASSERT_TRUE(strcmp(json_out_extended, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, null, 3, \"a\"]}") == 0);
@@ -7810,27 +7810,27 @@ TEST(CarbonTest, CarbonFromJsonNonColumn)
 
 TEST(CarbonTest, CarbonColumnOptimizeFix)
 {
-        struct jak_carbon_new context;
-        struct jak_carbon doc;
+        jak_carbon_new context;
+        jak_carbon doc;
         struct jak_carbon_insert_column_state state_out;
 
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
-        struct jak_carbon_insert *cins = carbon_insert_column_begin(&state_out, ins, CARBON_COLUMN_TYPE_U8, 4);
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
+        jak_carbon_insert *cins = carbon_insert_column_begin(&state_out, ins, CARBON_COLUMN_TYPE_U8, 4);
         carbon_insert_u8(cins, 3);
         carbon_insert_u8(cins, 4);
         carbon_insert_u8(cins, 5);
         carbon_insert_column_end(&state_out);
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
-        char *json = carbon_to_json_compact_dup(&doc);
+        char *json = jak_carbon_to_json_compact_dup(&doc);
         ASSERT_TRUE(strcmp(json, "[3, 4, 5]") == 0);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
         free(json);
 }
 
 TEST(CarbonTest, CarbonFromJsonExample)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
@@ -7839,32 +7839,32 @@ TEST(CarbonTest, CarbonFromJsonExample)
         /* example json taken from 'https://json.org/example.html' */
         json_in = "{\"web-app\": {\"servlet\": [{\"servlet-name\": \"cofaxCDS\", \"servlet-class\": \"org.cofax.cds.CDSServlet\", \"init-param\": {\"configGlossary: installationAt\": \"Philadelphia, PA\", \"configGlossary: adminEmail\": \"ksm@pobox.com\", \"configGlossary: poweredBy\": \"Cofax\", \"configGlossary: poweredByIcon\": \"/images/cofax.gif\", \"configGlossary: staticPath\": \"/content/static\", \"templateProcessorClass\": \"org.cofax.WysiwygTemplate\", \"templateLoaderClass\": \"org.cofax.FilesTemplateLoader\", \"templatePath\": \"templates\", \"templateOverridePath\": \"\", \"defaultListTemplate\": \"listTemplate.htm\", \"defaultFileTemplate\": \"articleTemplate.htm\", \"useJSP\": false, \"jspListTemplate\": \"listTemplate.jsp\", \"jspFileTemplate\": \"articleTemplate.jsp\", \"cachePackageTagsTrack\": 200, \"cachePackageTagsStore\": 200, \"cachePackageTagsRefresh\": 60, \"cacheTemplatesTrack\": 100, \"cacheTemplatesStore\": 50, \"cacheTemplatesRefresh\": 15, \"cachePagesTrack\": 200, \"cachePagesStore\": 100, \"cachePagesRefresh\": 10, \"cachePagesDirtyRead\": 10, \"searchEngineListTemplate\": \"forSearchEnginesList.htm\", \"searchEngineFileTemplate\": \"forSearchEngines.htm\", \"searchEngineRobotsDb\": \"WEB-INF/robots.db\", \"useDataStore\": true, \"dataStoreClass\": \"org.cofax.SqlDataStore\", \"redirectionClass\": \"org.cofax.SqlRedirection\", \"dataStoreName\": \"cofax\", \"dataStoreDriver\": \"com.microsoft.jdbc.sqlserver.SQLServerDriver\", \"dataStoreUrl\": \"jdbc: microsoft: sqlserver: //LOCALHOST: 1433;DatabaseName=goon\", \"dataStoreUser\": \"sa\", \"dataStorePassword\": \"dataStoreTestQuery\", \"dataStoreTestQuery\": \"SET NOCOUNT ON;select test='test';\", \"dataStoreLogFile\": \"/usr/local/tomcat/logs/datastore.log\", \"dataStoreInitConns\": 10, \"dataStoreMaxConns\": 100, \"dataStoreConnUsageLimit\": 100, \"dataStoreLogLevel\": \"debug\", \"maxUrlLength\": 500}}, {\"servlet-name\": \"cofaxEmail\", \"servlet-class\": \"org.cofax.cds.EmailServlet\", \"init-param\": {\"mailHost\": \"mail1\", \"mailHostOverride\": \"mail2\"}}, {\"servlet-name\": \"cofaxAdmin\", \"servlet-class\": \"org.cofax.cds.AdminServlet\"}, {\"servlet-name\": \"fileServlet\", \"servlet-class\": \"org.cofax.cds.FileServlet\"}, {\"servlet-name\": \"cofaxTools\", \"servlet-class\": \"org.cofax.cms.CofaxToolsServlet\", \"init-param\": {\"templatePath\": \"toolstemplates/\", \"log\": 1, \"logLocation\": \"/usr/local/tomcat/logs/CofaxTools.log\", \"logMaxSize\": \"\", \"dataLog\": 1, \"dataLogLocation\": \"/usr/local/tomcat/logs/dataLog.log\", \"dataLogMaxSize\": \"\", \"removePageCache\": \"/content/admin/remove?cache=pages&id=\", \"removeTemplateCache\": \"/content/admin/remove?cache=templates&id=\", \"fileTransferFolder\": \"/usr/local/tomcat/webapps/content/fileTransferFolder\", \"lookInContext\": 1, \"adminGroupID\": 4, \"betaServer\": true}}], \"servlet-mapping\": {\"cofaxCDS\": \"/\", \"cofaxEmail\": \"/cofaxutil/aemail/*\", \"cofaxAdmin\": \"/admin/*\", \"fileServlet\": \"/static/*\", \"cofaxTools\": \"/tools/*\"}, \"taglib\": {\"taglib-uri\": \"cofax.tld\", \"taglib-location\": \"/WEB-INF/tlds/cofax.tld\"}}}";
 
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
         jak_u32 max = 10000;
         timestamp_t t1 = time_now_wallclock();
         for (jak_u32 i = 0; i < max; i++) {
-                struct jak_carbon d;
-                carbon_from_json(&d, json_in, CARBON_KEY_NOKEY, NULL, &err);
-                carbon_drop(&d);
+                jak_carbon d;
+                jak_carbon_from_json(&d, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
+                jak_carbon_drop(&d);
         }
         timestamp_t t2 = time_now_wallclock();
         printf("%.2fmsec/opp, %.4f ops/sec\n", (t2-t1)/(float)max, 1.0f/((t2-t1)/(float)max/1000.0f));
 
 
-        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '[1, null, 3, \"a\"]'
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);    // shall be '[1, null, 3, \"a\"]'
 
         //printf("INS:\t%s\n", json_in);
         //printf("SRT:\t%s\n", json_out_compact);
 
-        //carbon_hexdump_print(stdout, &doc);
+        //jak_carbon_hexdump_print(stdout, &doc);
         //jak_u64 carbon_len = 0;
-        //carbon_raw_data(&carbon_len, &doc);
+        //jak_carbon_raw_data(&carbon_len, &doc);
         //printf("INS len: %zu\n", strlen(json_in));
         //printf("SRT len: %zu\n", carbon_len);
         //printf("%0.2f%% space saving\n", 100 * (1 - (carbon_len / (float) strlen(json_in))));
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
 
@@ -7873,7 +7873,7 @@ TEST(CarbonTest, CarbonFromJsonExample)
 
 TEST(CarbonTest, CarbonFromJsonUnitArrayPrimitive)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
@@ -7881,14 +7881,14 @@ TEST(CarbonTest, CarbonFromJsonUnitArrayPrimitive)
 
         json_in = "{\"x\": [1]}";
 
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '{"x":[1]}'
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);    // shall be '{"x":[1]}'
 
         //printf("INS:\t%s\n", json_in);
         //printf("SRT:\t%s\n", json_out_compact);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
 
@@ -7897,7 +7897,7 @@ TEST(CarbonTest, CarbonFromJsonUnitArrayPrimitive)
 
 TEST(CarbonTest, CarbonFromJsonUnitArrayObject)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in;
@@ -7905,14 +7905,14 @@ TEST(CarbonTest, CarbonFromJsonUnitArrayObject)
 
         json_in = "{\"x\": [{\"y\": 1}]}";
 
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-        json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '{"x":[{"y":1}]}'
+        json_out_compact = jak_carbon_to_json_compact_dup(&doc);    // shall be '{"x":[{"y":1}]}'
 
         //printf("INS:\t%s\n", json_in);
         //printf("SRT:\t%s\n", json_out_compact);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         ASSERT_TRUE(strcmp(json_out_compact, json_in) == 0);
 
@@ -7921,19 +7921,19 @@ TEST(CarbonTest, CarbonFromJsonUnitArrayObject)
 
 TEST(CarbonTest, CarbonFromJsonSimpleExample)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json_in = "{\"k\": {\"x\": [1,2,3], \"y\": \"z\"}}";
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
-        //carbon_hexdump_print(stdout, &doc);
-        //carbon_print(stdout, &doc);
-        carbon_drop(&doc);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
+        //jak_carbon_hexdump_print(stdout, &doc);
+        //jak_carbon_print(stdout, &doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonFromJsonFromExcerpt)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         /* the working directory must be 'tests/carbon' to find this file */
@@ -7942,31 +7942,31 @@ TEST(CarbonTest, CarbonFromJsonFromExcerpt)
         int json_in_len = lseek(fd, 0, SEEK_END);
         const char *json_in = (const char *) mmap(0, json_in_len, PROT_READ, MAP_PRIVATE, fd, 0);
 
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
         jak_u64 carbon_out_len = 0;
-        carbon_raw_data(&carbon_out_len, &doc);
+        jak_carbon_raw_data(&carbon_out_len, &doc);
 
         ASSERT_LT(carbon_out_len, json_in_len);
         //printf("%0.2f%% space saving\n", 100 * (1 - (carbon_out_len / (float) json_in_len)));
 
-        char *json_out = carbon_to_json_compact_dup(&doc);
+        char *json_out = jak_carbon_to_json_compact_dup(&doc);
         ASSERT_TRUE(strcmp(json_in, json_out) == 0);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
         free(json_out);
 }
 
 TEST(CarbonTest, CarbonResolveDotPathForObjects)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
         struct jak_carbon_find find;
         enum carbon_field_type result_type;
         jak_u64 number;
 
         const char *json_in = "{\"a\": 1, \"b\": {\"c\": [1,2,3], \"d\": [\"Hello\", \"World\"], \"e\": [4], \"f\": [\"!\"], \"the key\": \"x\"}}";
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
         ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
         ASSERT_TRUE(carbon_find_has_result(&find));
@@ -8094,17 +8094,17 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
         ASSERT_TRUE(strncmp(carbon_find_result_string(&number, &find), "x", number) == 0);
         ASSERT_TRUE(carbon_find_close(&find));
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonResolveDotPathForObjectsBench)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
         struct jak_carbon_find find;
 
         const char *json_in = "{\"a\": 1, \"b\": {\"c\": [1,2,3], \"d\": [\"Hello\", \"World\"], \"e\": [4], \"f\": [\"!\"], \"the key\": \"x\"}}";
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
         struct jak_carbon_dot_path path1, path2, path3, path4, path5, path6, path7, path8, path9, path10, path11, path12,
                 path13, path14, path15, path16, path17, path18, path19, path20, path21;
@@ -8243,18 +8243,18 @@ TEST(CarbonTest, CarbonResolveDotPathForObjectsBench)
         carbon_dot_path_drop(&path20);
         carbon_dot_path_drop(&path21);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonFromJsonShortenedDotPath)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_carbon_find find;
         enum carbon_field_type result_type;
         struct jak_error err;
 
         const char *json_in = "{\"x\": \"y\"}";
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
         /* without shortened dot path rule, the json object as given is embedded in an record container (aka array)
          * such that the object must be referenced by its index in the record container (i.e., 0) */
@@ -8271,10 +8271,10 @@ TEST(CarbonTest, CarbonFromJsonShortenedDotPath)
         ASSERT_EQ(result_type, CARBON_JAK_FIELD_TYPE_STRING);
         carbon_find_close(&find);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         json_in = "[{\"x\": \"y\"},{\"x\": [{\"z\": 42}]}]";
-        carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
         /* The shortened dot path rule does not apply here since the user input is an array  */
         carbon_find_open(&find, "0.x", &doc);
@@ -8302,167 +8302,167 @@ TEST(CarbonTest, CarbonFromJsonShortenedDotPath)
         ASSERT_FALSE(carbon_find_has_result(&find));
         carbon_find_close(&find);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonFindPrint)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
         struct jak_carbon_find find;
         char *result;
 
-        carbon_from_json(&doc, "8", CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, "8", JAK_CARBON_KEY_NOKEY, NULL, &err);
         ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
         result = carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "8") == 0);
         carbon_find_close(&find);
         free(result);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
-        carbon_from_json(&doc, "-8", CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, "-8", JAK_CARBON_KEY_NOKEY, NULL, &err);
         ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
         result = carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "-8") == 0);
         carbon_find_close(&find);
         free(result);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
-        carbon_from_json(&doc, "\"A\"", CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, "\"A\"", JAK_CARBON_KEY_NOKEY, NULL, &err);
         ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
         result = carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "\"A\"") == 0);
         carbon_find_close(&find);
         free(result);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
-        carbon_from_json(&doc, "32.4", CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, "32.4", JAK_CARBON_KEY_NOKEY, NULL, &err);
         ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
         result = carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "32.40") == 0);
         carbon_find_close(&find);
         free(result);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
-        carbon_from_json(&doc, "null", CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, "null", JAK_CARBON_KEY_NOKEY, NULL, &err);
         ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
         result = carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "null") == 0);
         carbon_find_close(&find);
         free(result);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
-        carbon_from_json(&doc, "true", CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, "true", JAK_CARBON_KEY_NOKEY, NULL, &err);
         ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
         result = carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "true") == 0);
         carbon_find_close(&find);
         free(result);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
-        carbon_from_json(&doc, "false", CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, "false", JAK_CARBON_KEY_NOKEY, NULL, &err);
         ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
         result = carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "false") == 0);
         carbon_find_close(&find);
         free(result);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
-        carbon_from_json(&doc, "[1, 2, 3, null]", CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, "[1, 2, 3, null]", JAK_CARBON_KEY_NOKEY, NULL, &err);
         ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
         result = carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "1") == 0);
         carbon_find_close(&find);
         free(result);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
-        carbon_from_json(&doc, "[1, 2, 3, null]", CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, "[1, 2, 3, null]", JAK_CARBON_KEY_NOKEY, NULL, &err);
         ASSERT_TRUE(carbon_find_open(&find, "1", &doc));
         result = carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "2") == 0);
         carbon_find_close(&find);
         free(result);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
-        carbon_from_json(&doc, "[1, 2, 3, null]", CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, "[1, 2, 3, null]", JAK_CARBON_KEY_NOKEY, NULL, &err);
         ASSERT_TRUE(carbon_find_open(&find, "2", &doc));
         result = carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "3") == 0);
         carbon_find_close(&find);
         free(result);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
-        carbon_from_json(&doc, "[1, 2, 3, null]", CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, "[1, 2, 3, null]", JAK_CARBON_KEY_NOKEY, NULL, &err);
         ASSERT_TRUE(carbon_find_open(&find, "3", &doc));
         result = carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "null") == 0);
         carbon_find_close(&find);
         free(result);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
-        carbon_from_json(&doc, "[1, 2, 3, null]", CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, "[1, 2, 3, null]", JAK_CARBON_KEY_NOKEY, NULL, &err);
         ASSERT_TRUE(carbon_find_open(&find, "4", &doc));
         result = carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "_nil") == 0);
         carbon_find_close(&find);
         free(result);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
-        carbon_from_json(&doc, "[\"A\", \"B\", \"C\", null]", CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, "[\"A\", \"B\", \"C\", null]", JAK_CARBON_KEY_NOKEY, NULL, &err);
         ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
         result = carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "\"A\"") == 0);
         carbon_find_close(&find);
         free(result);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
-        carbon_from_json(&doc, "[\"A\", \"B\", \"C\", null]", CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, "[\"A\", \"B\", \"C\", null]", JAK_CARBON_KEY_NOKEY, NULL, &err);
         ASSERT_TRUE(carbon_find_open(&find, "1", &doc));
         result = carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "\"B\"") == 0);
         carbon_find_close(&find);
         free(result);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
-        carbon_from_json(&doc, "[\"A\", \"B\", \"C\", null]", CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, "[\"A\", \"B\", \"C\", null]", JAK_CARBON_KEY_NOKEY, NULL, &err);
         ASSERT_TRUE(carbon_find_open(&find, "2", &doc));
         result = carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "\"C\"") == 0);
         carbon_find_close(&find);
         free(result);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
-        carbon_from_json(&doc, "[\"A\", \"B\", \"C\", null]", CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, "[\"A\", \"B\", \"C\", null]", JAK_CARBON_KEY_NOKEY, NULL, &err);
         ASSERT_TRUE(carbon_find_open(&find, "3", &doc));
         result = carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "null") == 0);
         carbon_find_close(&find);
         free(result);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
-        carbon_from_json(&doc, "\"Hello, World!\"", CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, "\"Hello, World!\"", JAK_CARBON_KEY_NOKEY, NULL, &err);
         ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
         result = carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "\"Hello, World!\"") == 0);
         carbon_find_close(&find);
         free(result);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
-        carbon_from_json(&doc, "{}", CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, "{}", JAK_CARBON_KEY_NOKEY, NULL, &err);
         ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
         result = carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "{}") == 0);
         carbon_find_close(&find);
         free(result);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
-        carbon_from_json(&doc, "[]", CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, "[]", JAK_CARBON_KEY_NOKEY, NULL, &err);
         ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
         result = carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "_nil") == 0);
         carbon_find_close(&find);
         free(result);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 
         const char *complex = "{\n"
                               "   \"m\": {\n"
@@ -8497,7 +8497,7 @@ TEST(CarbonTest, CarbonFindPrint)
                               "      }\n"
                               "}";
 
-        carbon_from_json(&doc, complex, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, complex, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
         ASSERT_TRUE(carbon_find_open(&find, "m", &doc));
         result = carbon_find_result_to_json_compact_dup(&find);
@@ -8619,19 +8619,19 @@ TEST(CarbonTest, CarbonFindPrint)
         carbon_find_close(&find);
         free(result);
         
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CarbonFindPrintExamples)
 {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
         struct jak_carbon_find find;
         struct jak_string result;
 
         const char *json = "{\"x\": {\"y\": [{\"z\": 23}, {\"z\": null}]} }";
 
-        carbon_from_json(&doc, json, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json, JAK_CARBON_KEY_NOKEY, NULL, &err);
         string_create(&result);
 
         printf("input: '%s'\n", json);
@@ -8661,17 +8661,17 @@ TEST(CarbonTest, CarbonFindPrintExamples)
         carbon_find_close(&find);
 
         string_drop(&result);
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, ParseBooleanArray) {
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
         struct jak_carbon_find find;
         enum carbon_field_type type;
         const char *json = "[{\"col\": [true, null, false]}]";
 
-        carbon_from_json(&doc, json, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
         ASSERT_TRUE(carbon_find_open(&find, "0.col", &doc));
         ASSERT_TRUE(carbon_find_has_result(&find));
@@ -8697,12 +8697,12 @@ TEST(CarbonTest, ParseBooleanArray) {
         ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_FALSE);
         carbon_find_close(&find);
 
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, PathIndex) {
         struct jak_carbon_path_index index;
-        struct jak_carbon doc;
+        jak_carbon doc;
         struct jak_error err;
 
         const char *json = "[\n"
@@ -8725,19 +8725,19 @@ TEST(CarbonTest, PathIndex) {
 //        int json_in_len = lseek(fd, 0, SEEK_END);
 //        const char *json = (const char *) mmap(0, json_in_len, PROT_READ, MAP_PRIVATE, fd, 0);
 
-        carbon_from_json(&doc, json, CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, json, JAK_CARBON_KEY_NOKEY, NULL, &err);
         carbon_path_index_create(&index, &doc);
         carbon_path_index_print(stdout, &index);
-        carbon_hexdump_print(stdout, &doc);
+        jak_carbon_hexdump_print(stdout, &doc);
         carbon_path_index_hexdump(stdout, &index);
 
-        struct jak_carbon path_carbon;
+        jak_carbon path_carbon;
         carbon_path_index_to_carbon(&path_carbon, &index);
-        carbon_print(stdout, JSON_COMPACT, &path_carbon);
-        carbon_drop(&path_carbon);
+        jak_carbon_print(stdout, JAK_JSON_COMPACT, &path_carbon);
+        jak_carbon_drop(&path_carbon);
 
         ASSERT_TRUE(carbon_path_index_indexes_doc(&index, &doc));
-        carbon_drop(&doc);
+        jak_carbon_drop(&doc);
 }
 
 TEST(CarbonTest, CommitHashStr) {

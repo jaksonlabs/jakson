@@ -277,14 +277,14 @@ struct jak_carbon_column_it *carbon_object_it_column_value(struct jak_carbon_obj
         return carbon_int_field_access_column_value(&it_in->field.value.data, &it_in->err);
 }
 
-bool carbon_object_it_insert_begin(struct jak_carbon_insert *inserter, struct jak_carbon_object_it *it)
+bool carbon_object_it_insert_begin(jak_carbon_insert *inserter, struct jak_carbon_object_it *it)
 {
         JAK_ERROR_IF_NULL(inserter)
         JAK_ERROR_IF_NULL(it)
         return carbon_int_insert_create_for_object(inserter, it);
 }
 
-bool carbon_object_it_insert_end(struct jak_carbon_insert *inserter)
+bool carbon_object_it_insert_end(jak_carbon_insert *inserter)
 {
         JAK_ERROR_IF_NULL(inserter)
         return carbon_insert_drop(inserter);

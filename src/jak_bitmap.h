@@ -28,8 +28,8 @@
 JAK_BEGIN_DECL
 
 struct jak_bitmap {
-    struct jak_vector ofType(jak_u64) data;
-    jak_u16 num_bits;
+        struct jak_vector ofType(jak_u64) data;
+        jak_u16 num_bits;
 };
 
 bool jak_bitmap_create(struct jak_bitmap *bitmap, jak_u16 num_bits);

@@ -41,40 +41,40 @@ JAK_BEGIN_DECL
     jak_alloc_free(alloc, name)
 
 struct jak_allocator {
-    /**
-     *  Implementation-specific data (private fields etc.)
-     *  This pointer may point to NULL.
-     */
-    void *extra;
+        /**
+         *  Implementation-specific data (private fields etc.)
+         *  This pointer may point to NULL.
+         */
+        void *extra;
 
-    /**
-     *  Error information
-     */
-    struct jak_error err;
+        /**
+         *  Error information
+         */
+        struct jak_error err;
 
-    /**
-     *  Implementation to call memory allocation.
-     */
-    void *(*malloc)(struct jak_allocator *self, size_t size);
+        /**
+         *  Implementation to call memory allocation.
+         */
+        void *(*malloc)(struct jak_allocator *self, size_t size);
 
-    /**
-     *  Implementation to call memory re-allocation.
-     */
-    void *(*realloc)(struct jak_allocator *self, void *ptr, size_t size);
+        /**
+         *  Implementation to call memory re-allocation.
+         */
+        void *(*realloc)(struct jak_allocator *self, void *ptr, size_t size);
 
-    /**
-     *  Implementation to call freeing up memory.
-     *  Depending on the strategy, freeing up memory might be lazy.
-     */
-    void (*free)(struct jak_allocator *self, void *ptr);
+        /**
+         *  Implementation to call freeing up memory.
+         *  Depending on the strategy, freeing up memory might be lazy.
+         */
+        void (*free)(struct jak_allocator *self, void *ptr);
 
-    /**
-     *  Perform a deep copy of this allocator including implementation-specific data stored in 'extra'
-     *
-     * @param dst non-null target in which 'self' should be cloned
-     * @param self non-null source which should be clones in 'dst'
-     */
-    void (*clone)(struct jak_allocator *dst, const struct jak_allocator *self);
+        /**
+         *  Perform a deep copy of this allocator including implementation-specific data stored in 'extra'
+         *
+         * @param dst non-null target in which 'self' should be cloned
+         * @param self non-null source which should be clones in 'dst'
+         */
+        void (*clone)(struct jak_allocator *dst, const struct jak_allocator *self);
 };
 
 /**

@@ -26,34 +26,34 @@
 #include <jak_vector.h>
 
 struct cmdopt {
-    char *opt_name;
+        char *opt_name;
 
-    char *opt_desc;
+        char *opt_desc;
 
-    char *opt_manfile;
+        char *opt_manfile;
 
-    int (*callback)(int argc, char **argv, FILE *file);
+        int (*callback)(int argc, char **argv, FILE *file);
 };
 
 struct cmdopt_group {
-    struct jak_vector ofType(struct cmdopt) cmd_options;
-    char *desc;
+        struct jak_vector ofType(struct cmdopt) cmd_options;
+        char *desc;
 };
 
 enum mod_arg_policy {
-    JAK_MOD_ARG_REQUIRED, JAK_MOD_ARG_NOT_REQUIRED, JAK_MOD_ARG_MAYBE_REQUIRED,
+        JAK_MOD_ARG_REQUIRED, JAK_MOD_ARG_NOT_REQUIRED, JAK_MOD_ARG_MAYBE_REQUIRED,
 };
 
 struct cmdopt_mgr {
-    struct jak_vector ofType(struct cmdopt_group) groups;
+        struct jak_vector ofType(struct cmdopt_group) groups;
 
-    enum mod_arg_policy policy;
+        enum mod_arg_policy policy;
 
-    bool (*fallback)(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager);
+        bool (*fallback)(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager);
 
-    char *module_name;
+        char *module_name;
 
-    char *module_desc;
+        char *module_desc;
 };
 
 bool opt_mgr_create(struct cmdopt_mgr *manager, char *module_name, char *module_desc,

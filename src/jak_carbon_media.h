@@ -33,8 +33,8 @@ JAK_BEGIN_DECL
 typedef jak_u8 media_type_t; /* byte to determine type at hand (e.g., JSON array, string, null, ...) */
 
 static struct mime_type {
-    const char *type;
-    const char *ext;
+        const char *type;
+        const char *ext;
 
 } mime_type_register[] = { /* the entries in this list must be sorted by extension! */
         {"application/vnd.lotus-1-2-3",                                               "123"},

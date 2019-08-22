@@ -29,8 +29,8 @@
 // ---------------------------------------------------------------------------------------------------------------------
 
 struct extra {
-    char *buffer;
-    size_t buffer_size;
+        char *buffer;
+        size_t buffer_size;
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -41,8 +41,8 @@ struct extra {
 // ---------------------------------------------------------------------------------------------------------------------
 
 struct jak_json_compact_extra {
-    char *buffer;
-    size_t buffer_size;
+        char *buffer;
+        size_t buffer_size;
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -195,7 +195,7 @@ static void print_binary(struct printer *self, struct jak_string *builder, const
         base64_init_encodestate(&state);
 
         jak_u64 code_len = base64_encode_block(data_of(extra->buffer), binary->blob_len + 2,
-                                           code_of(extra->buffer, binary->blob_len), &state);
+                                               code_of(extra->buffer, binary->blob_len), &state);
         base64_encode_blockend(code_of(extra->buffer, binary->blob_len), &state);
         string_add_nchar(builder, code_of(extra->buffer, binary->blob_len), code_len);
 

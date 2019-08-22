@@ -56,68 +56,68 @@ bool jak_gather_adr(void *dst, const void *src, size_t src_width, const size_t *
                     enum jak_threading_hint hint, uint_fast16_t num_threads);
 
 bool jak_scatter(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
-                      enum jak_threading_hint hint, uint_fast16_t num_threads);
+                 enum jak_threading_hint hint, uint_fast16_t num_threads);
 
 bool jak_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
-                      const size_t *src_idx, size_t idxLen, enum jak_threading_hint hint);
+                 const size_t *src_idx, size_t idxLen, enum jak_threading_hint hint);
 
 bool jak_filter_early(void *result, size_t *result_size, const void *src, size_t width, size_t len,
-                           jak_pred_func_t pred, void *args, enum jak_threading_hint hint,
-                           uint_fast16_t num_threads);
+                      jak_pred_func_t pred, void *args, enum jak_threading_hint hint,
+                      uint_fast16_t num_threads);
 
 bool jak_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
-                          jak_pred_func_t pred, void *args, enum jak_threading_hint hint, size_t num_threads);
+                     jak_pred_func_t pred, void *args, enum jak_threading_hint hint, size_t num_threads);
 
 bool jak_sync_for(const void *base, size_t width, size_t len, jak_for_body_func_t f,
-                             void *args);
+                  void *args);
 
 bool jak_async_for(const void *base, size_t width, size_t len, jak_for_body_func_t f,
-                           void *args, uint_fast16_t num_threads);
+                   void *args, uint_fast16_t num_threads);
 
 bool jak_async_map_exec(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
-                       jak_map_body_func_t f, void *args, enum jak_threading_hint hint, uint_fast16_t num_threads);
+                        jak_map_body_func_t f, void *args, enum jak_threading_hint hint, uint_fast16_t num_threads);
 
 bool jak_sync_gather(void *dst, const void *src, size_t width, const size_t *idx,
-                                size_t dst_src_len);
+                     size_t dst_src_len);
 
 bool jak_async_gather(void *dst, const void *src, size_t width, const size_t *idx, size_t dst_src_len,
-                              uint_fast16_t num_threads);
+                      uint_fast16_t num_threads);
 
 bool jak_sync_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx,
-                                    size_t num);
+                         size_t num);
 
 bool jak_int_async_gather_adr_func(void *dst, const void *src, size_t src_width, const size_t *idx,
-                                       size_t num, uint_fast16_t num_threads);
+                                   size_t num, uint_fast16_t num_threads);
 
 bool jak_sync_scatter(void *dst, const void *src, size_t width, const size_t *idx,
-                                      size_t num);
+                      size_t num);
 
 bool jak_sync_scatter_func(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
-                                    uint_fast16_t num_threads);
+                           uint_fast16_t num_threads);
 
 bool jak_sync_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
-                                 const size_t *src_idx, size_t idx_len);
+                      const size_t *src_idx, size_t idx_len);
 
 bool jak_async_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
-                               const size_t *src_idx, size_t idx_len);
+                       const size_t *src_idx, size_t idx_len);
 
 bool jak_async_filter_early(void *result, size_t *result_size, const void *src, size_t width,
-                                      size_t len, jak_pred_func_t pred, void *args);
+                            size_t len, jak_pred_func_t pred, void *args);
 
 bool jak_int_async_filter_early(void *result, size_t *result_size, const void *src, size_t width,
-                                    size_t len, jak_pred_func_t pred, void *args, uint_fast16_t num_threads);
+                                size_t len, jak_pred_func_t pred, void *args, uint_fast16_t num_threads);
 
 bool jak_int_sync_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width,
-                                     size_t len, jak_pred_func_t pred, void *args);
+                              size_t len, jak_pred_func_t pred, void *args);
 
 bool jak_async_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
-                                   jak_pred_func_t pred, void *args, size_t num_threads);
+                           jak_pred_func_t pred, void *args, size_t num_threads);
 
 bool jak_for(const void *base, size_t width, size_t len, jak_for_body_func_t f, void *args,
              enum jak_threading_hint hint, uint_fast16_t num_threads)
 {
         JAK_ASYNC_MATCH(jak_sync_for(base, width, len, f, args),
-                       jak_async_for(base, width, len, f, args, num_threads))
+                        jak_async_for(base, width, len, f, args, num_threads))
 }
 
 bool jak_map(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
@@ -130,47 +130,47 @@ bool jak_gather(void *dst, const void *src, size_t width, const size_t *idx, siz
                 enum jak_threading_hint hint, uint_fast16_t num_threads)
 {
         JAK_ASYNC_MATCH(jak_sync_gather(dst, src, width, idx, dst_src_len),
-                       jak_async_gather(dst, src, width, idx, dst_src_len, num_threads))
+                        jak_async_gather(dst, src, width, idx, dst_src_len, num_threads))
 }
 
 bool jak_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx, size_t num,
                     enum jak_threading_hint hint, uint_fast16_t num_threads)
 {
         JAK_ASYNC_MATCH(jak_sync_gather_adr(dst, src, src_width, idx, num),
-                       jak_int_async_gather_adr_func(dst, src, src_width, idx, num, num_threads))
+                        jak_int_async_gather_adr_func(dst, src, src_width, idx, num, num_threads))
 }
 
 bool jak_scatter(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
-                      enum jak_threading_hint hint, uint_fast16_t num_threads)
+                 enum jak_threading_hint hint, uint_fast16_t num_threads)
 {
         JAK_ASYNC_MATCH(jak_sync_scatter(dst, src, width, idx, num),
-                       jak_sync_scatter_func(dst, src, width, idx, num, num_threads))
+                        jak_sync_scatter_func(dst, src, width, idx, num, num_threads))
 }
 
 bool jak_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
-                      const size_t *src_idx, size_t idx_len, enum jak_threading_hint hint)
+                 const size_t *src_idx, size_t idx_len, enum jak_threading_hint hint)
 {
         JAK_ASYNC_MATCH(jak_sync_shuffle(dst, src, width, dst_idx, src_idx, idx_len),
-                       jak_async_shuffle(dst, src, width, dst_idx, src_idx, idx_len))
+                        jak_async_shuffle(dst, src, width, dst_idx, src_idx, idx_len))
 }
 
 bool jak_filter_early(void *result, size_t *result_size, const void *src, size_t width, size_t len,
-                           jak_pred_func_t pred, void *args, enum jak_threading_hint hint,
-                           uint_fast16_t num_threads)
+                      jak_pred_func_t pred, void *args, enum jak_threading_hint hint,
+                      uint_fast16_t num_threads)
 {
         JAK_ASYNC_MATCH(jak_async_filter_early(result, result_size, src, width, len, pred, args),
-                       jak_int_async_filter_early(result, result_size, src, width, len, pred, args, num_threads))
+                        jak_int_async_filter_early(result, result_size, src, width, len, pred, args, num_threads))
 }
 
 bool jak_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
-                          jak_pred_func_t pred, void *args, enum jak_threading_hint hint, size_t num_threads)
+                     jak_pred_func_t pred, void *args, enum jak_threading_hint hint, size_t num_threads)
 {
         JAK_ASYNC_MATCH(jak_int_sync_filter_late(pos, num_pos, src, width, len, pred, args),
-                       jak_async_filter_late(pos, num_pos, src, width, len, pred, args, num_threads))
+                        jak_async_filter_late(pos, num_pos, src, width, len, pred, args, num_threads))
 }
 
 bool jak_sync_for(const void *base, size_t width, size_t len, jak_for_body_func_t f,
-                             void *args)
+                  void *args)
 {
         JAK_ERROR_IF_NULL(base)
         JAK_ERROR_IF_NULL(width)
@@ -180,7 +180,7 @@ bool jak_sync_for(const void *base, size_t width, size_t len, jak_for_body_func_
 }
 
 bool jak_async_for(const void *base, size_t width, size_t len, jak_for_body_func_t f,
-                           void *args, uint_fast16_t num_threads)
+                   void *args, uint_fast16_t num_threads)
 {
         JAK_ERROR_IF_NULL(base)
         JAK_ERROR_IF_NULL(width)
@@ -238,7 +238,7 @@ void jak_map_proxy(const void *src, size_t src_width, size_t len, void *args, ja
 }
 
 bool jak_async_map_exec(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
-                       jak_map_body_func_t f, void *args, enum jak_threading_hint hint, uint_fast16_t num_threads)
+                        jak_map_body_func_t f, void *args, enum jak_threading_hint hint, uint_fast16_t num_threads)
 {
         JAK_ERROR_IF_NULL(src)
         JAK_ERROR_IF_NULL(src_width)
@@ -278,7 +278,7 @@ void jak_int_async_gather(const void *start, size_t width, size_t len, void *arg
 }
 
 bool jak_sync_gather(void *dst, const void *src, size_t width, const size_t *idx,
-                                size_t dst_src_len)
+                     size_t dst_src_len)
 {
         JAK_ERROR_IF_NULL(dst)
         JAK_ERROR_IF_NULL(src)
@@ -306,7 +306,7 @@ bool jak_sync_gather(void *dst, const void *src, size_t width, const size_t *idx
 }
 
 bool jak_async_gather(void *dst, const void *src, size_t width, const size_t *idx,
-                              size_t dst_src_len, uint_fast16_t num_threads)
+                      size_t dst_src_len, uint_fast16_t num_threads)
 {
         JAK_ERROR_IF_NULL(dst)
         JAK_ERROR_IF_NULL(src)
@@ -322,7 +322,7 @@ bool jak_async_gather(void *dst, const void *src, size_t width, const size_t *id
 }
 
 bool jak_sync_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx,
-                                    size_t num)
+                         size_t num)
 {
         JAK_ERROR_IF_NULL(dst)
         JAK_ERROR_IF_NULL(src)
@@ -375,7 +375,7 @@ void jak_async_gather_adr_func(const void *start, size_t width, size_t len, void
 }
 
 bool jak_int_async_gather_adr_func(void *dst, const void *src, size_t src_width, const size_t *idx,
-                                       size_t num, uint_fast16_t num_threads)
+                                   size_t num, uint_fast16_t num_threads)
 {
         JAK_ERROR_IF_NULL(dst)
         JAK_ERROR_IF_NULL(src)
@@ -416,7 +416,7 @@ void jak_async_scatter(const void *start, size_t width, size_t len, void *args, 
 }
 
 bool jak_sync_scatter(void *dst, const void *src, size_t width, const size_t *idx,
-                                      size_t num)
+                      size_t num)
 {
         JAK_ERROR_IF_NULL(dst)
         JAK_ERROR_IF_NULL(src)
@@ -439,7 +439,7 @@ bool jak_sync_scatter(void *dst, const void *src, size_t width, const size_t *id
 }
 
 bool jak_sync_scatter_func(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
-                                    uint_fast16_t num_threads)
+                           uint_fast16_t num_threads)
 {
         JAK_ERROR_IF_NULL(dst)
         JAK_ERROR_IF_NULL(src)
@@ -455,7 +455,7 @@ bool jak_sync_scatter_func(void *dst, const void *src, size_t width, const size_
 }
 
 bool jak_sync_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
-                                 const size_t *src_idx, size_t idx_len)
+                      const size_t *src_idx, size_t idx_len)
 {
         JAK_ERROR_IF_NULL(dst)
         JAK_ERROR_IF_NULL(src)
@@ -483,7 +483,7 @@ bool jak_sync_shuffle(void *dst, const void *src, size_t width, const size_t *ds
 }
 
 bool jak_async_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
-                               const size_t *src_idx, size_t idx_len)
+                       const size_t *src_idx, size_t idx_len)
 {
         JAK_UNUSED(dst);
         JAK_UNUSED(src);
@@ -495,8 +495,8 @@ bool jak_async_shuffle(void *dst, const void *src, size_t width, const size_t *d
 }
 
 bool jak_int_sync_filter_late(size_t *positions, size_t *num_positions, const void *source,
-                                     size_t width, size_t length, jak_pred_func_t predicate,
-                                     void *arguments)
+                              size_t width, size_t length, jak_pred_func_t predicate,
+                              void *arguments)
 {
         JAK_ERROR_IF_NULL(positions);
         JAK_ERROR_IF_NULL(num_positions);
@@ -524,7 +524,7 @@ void *jak_int_sync_filter_procy_func(void *args)
 }
 
 bool jak_async_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
-                                   jak_pred_func_t pred, void *args, size_t num_threads)
+                           jak_pred_func_t pred, void *args, size_t num_threads)
 {
         JAK_ERROR_IF_NULL(pos);
         JAK_ERROR_IF_NULL(num_pos);
@@ -540,7 +540,7 @@ bool jak_async_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t
         uint_fast16_t num_thread = num_threads + 1; /** +1 since one is this thread */
 
         pthread_t threads[num_threads];
-        struct jak_filter_arg  thread_args[num_thread];
+        struct jak_filter_arg thread_args[num_thread];
 
         register size_t chunk_len = len / num_thread;
         size_t chunk_len_remain = len % num_thread;
@@ -553,7 +553,7 @@ bool jak_async_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t
         /** run f on NTHREADS_FOR additional threads */
         if (JAK_LIKELY(chunk_len > 0)) {
                 for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
-                        struct jak_filter_arg  *arg = thread_args + tid;
+                        struct jak_filter_arg *arg = thread_args + tid;
                         arg->num_positions = 0;
                         arg->src_positions = JAK_MALLOC(chunk_len * sizeof(size_t));
                         arg->position_offset_to_add = tid * chunk_len;
@@ -586,7 +586,7 @@ bool jak_async_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t
         if (JAK_LIKELY(chunk_len > 0)) {
                 for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
                         pthread_join(threads[tid], NULL);
-                        const struct jak_filter_arg  *thread_arg = (thread_args + tid);
+                        const struct jak_filter_arg *thread_arg = (thread_args + tid);
                         if (thread_arg->num_positions > 0) {
                                 memcpy(pos + total_num_matching_positions,
                                        thread_arg->src_positions,
@@ -609,7 +609,7 @@ bool jak_async_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t
 }
 
 bool jak_async_filter_early(void *result, size_t *result_size, const void *src, size_t width,
-                                      size_t len, jak_pred_func_t pred, void *args)
+                            size_t len, jak_pred_func_t pred, void *args)
 {
         JAK_ERROR_IF_NULL(result);
         JAK_ERROR_IF_NULL(result_size);
@@ -632,7 +632,7 @@ bool jak_async_filter_early(void *result, size_t *result_size, const void *src, 
 }
 
 bool jak_int_async_filter_early(void *result, size_t *result_size, const void *src, size_t width,
-                                    size_t len, jak_pred_func_t pred, void *args, uint_fast16_t num_threads)
+                                size_t len, jak_pred_func_t pred, void *args, uint_fast16_t num_threads)
 {
         JAK_ERROR_IF_NULL(result);
         JAK_ERROR_IF_NULL(result_size);
@@ -644,7 +644,7 @@ bool jak_int_async_filter_early(void *result, size_t *result_size, const void *s
         uint_fast16_t num_thread = num_threads + 1; /** +1 since one is this thread */
 
         pthread_t threads[num_threads];
-        struct jak_filter_arg  thread_args[num_thread];
+        struct jak_filter_arg thread_args[num_thread];
 
         register size_t chunk_len = len / num_thread;
         size_t chunk_len_remain = len % num_thread;
@@ -656,7 +656,7 @@ bool jak_int_async_filter_early(void *result, size_t *result_size, const void *s
 
         /** run f on NTHREADS_FOR additional threads */
         for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
-                struct jak_filter_arg  *arg = thread_args + tid;
+                struct jak_filter_arg *arg = thread_args + tid;
                 arg->num_positions = 0;
                 arg->src_positions = JAK_MALLOC(chunk_len * sizeof(size_t));
                 arg->position_offset_to_add = tid * chunk_len;
@@ -688,13 +688,13 @@ bool jak_int_async_filter_early(void *result, size_t *result_size, const void *s
 
         for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
                 pthread_join(threads[tid], NULL);
-                const struct jak_filter_arg  *thread_arg = (thread_args + tid);
+                const struct jak_filter_arg *thread_arg = (thread_args + tid);
                 total_num_matching_positions += thread_arg->num_positions;
                 JAK_PREFETCH_READ(thread_arg->src_positions);
         }
 
         for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
-                const struct jak_filter_arg  *thread_arg = (thread_args + tid);
+                const struct jak_filter_arg *thread_arg = (thread_args + tid);
 
                 if (JAK_LIKELY(thread_arg->num_positions > 0)) {
                         jak_gather(result + partial_num_matching_positions * width,

@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef JAK_CARBON_KEY_H
-#define JAK_CARBON_KEY_H
+#ifndef JAK_JAK_CARBON_KEY_H
+#define JAK_JAK_CARBON_KEY_H
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  includes
@@ -29,11 +29,11 @@
 
 JAK_BEGIN_DECL
 
-bool carbon_key_create(struct jak_memfile *file, enum carbon_key_type type, struct jak_error *err);
+bool carbon_key_create(struct jak_memfile *file, jak_carbon_key_e type, struct jak_error *err);
 
-bool carbon_key_skip(enum carbon_key_type *out, struct jak_memfile *file);
+bool carbon_key_skip(jak_carbon_key_e *out, struct jak_memfile *file);
 
-bool carbon_key_read_type(enum carbon_key_type *out, struct jak_memfile *file);
+bool carbon_key_read_type(jak_carbon_key_e *out, struct jak_memfile *file);
 
 bool carbon_key_write_unsigned(struct jak_memfile *file, jak_u64 key);
 
@@ -45,9 +45,9 @@ bool carbon_key_update_string(struct jak_memfile *file, const char *key);
 
 bool carbon_key_update_string_wnchar(struct jak_memfile *file, const char *key, size_t length);
 
-const void *carbon_key_read(jak_u64 *len, enum carbon_key_type *out, struct jak_memfile *file);
+const void *carbon_key_read(jak_u64 *len, jak_carbon_key_e *out, struct jak_memfile *file);
 
-const char *carbon_key_type_str(enum carbon_key_type type);
+const char *carbon_key_type_str(jak_carbon_key_e type);
 
 JAK_END_DECL
 

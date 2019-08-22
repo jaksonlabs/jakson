@@ -32,45 +32,43 @@
 
 JAK_BEGIN_DECL
 
-struct jak_carbon; /* forwarded from carbon.h */
-struct jak_carbon_insert; /* forwarded from carbon-literal-inserter.h */
 struct jak_carbon_column_it; /* forwarded from carbon-column-it.h */
 
 struct field_access {
-    enum carbon_field_type it_field_type;
+        enum carbon_field_type it_field_type;
 
-    const void *it_field_data;
-    jak_u64 it_field_len;
+        const void *it_field_data;
+        jak_u64 it_field_len;
 
-    const char *it_mime_type;
-    jak_u64 it_mime_type_strlen;
+        const char *it_mime_type;
+        jak_u64 it_mime_type_strlen;
 
-    bool nested_array_it_is_created;
-    bool nested_array_it_accessed;
+        bool nested_array_it_is_created;
+        bool nested_array_it_accessed;
 
-    bool nested_object_it_is_created;
-    bool nested_object_it_accessed;
+        bool nested_object_it_is_created;
+        bool nested_object_it_accessed;
 
-    bool nested_column_it_is_created;
+        bool nested_column_it_is_created;
 
-    struct jak_carbon_array_it *nested_array_it;
-    struct jak_carbon_column_it *nested_column_it;
-    struct jak_carbon_object_it *nested_object_it;
+        struct jak_carbon_array_it *nested_array_it;
+        struct jak_carbon_column_it *nested_column_it;
+        struct jak_carbon_object_it *nested_object_it;
 };
 
 struct jak_carbon_array_it {
-    struct jak_memfile memfile;
-    jak_offset_t payload_start;
-    struct spinlock lock;
-    struct jak_error err;
+        struct jak_memfile memfile;
+        jak_offset_t payload_start;
+        struct spinlock lock;
+        struct jak_error err;
 
-    /* in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
-    jak_i64 mod_size;
-    bool array_end_reached;
+        /* in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
+        jak_i64 mod_size;
+        bool array_end_reached;
 
-    struct jak_vector ofType(jak_offset_t) history;
-    struct field_access field_access;
-    jak_offset_t field_offset;
+        struct jak_vector ofType(jak_offset_t) history;
+        struct field_access field_access;
+        jak_offset_t field_offset;
 };
 
 JAK_DEFINE_ERROR_GETTER(jak_carbon_array_it);
@@ -197,9 +195,9 @@ struct jak_carbon_column_it *carbon_array_it_column_value(struct jak_carbon_arra
 /**
  * Inserts a new element at the current position of the iterator.
  */
-bool carbon_array_it_insert_begin(struct jak_carbon_insert *inserter, struct jak_carbon_array_it *it);
+bool carbon_array_it_insert_begin(jak_carbon_insert *inserter, struct jak_carbon_array_it *it);
 
-bool carbon_array_it_insert_end(struct jak_carbon_insert *inserter);
+bool carbon_array_it_insert_end(jak_carbon_insert *inserter);
 
 bool carbon_array_it_remove(struct jak_carbon_array_it *it);
 

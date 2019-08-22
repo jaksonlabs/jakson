@@ -48,153 +48,153 @@ struct jak_json_prop;
 struct jak_json_elements;
 
 enum json_token_type {
-    OBJECT_OPEN,
-    OBJECT_CLOSE,
-    LITERAL_STRING,
-    LITERAL_INT,
-    LITERAL_FLOAT,
-    LITERAL_TRUE,
-    LITERAL_FALSE,
-    LITERAL_NULL,
-    COMMA,
-    ASSIGN,
-    ARRAY_OPEN,
-    ARRAY_CLOSE,
-    JSON_UNKNOWN
+        OBJECT_OPEN,
+        OBJECT_CLOSE,
+        LITERAL_STRING,
+        LITERAL_INT,
+        LITERAL_FLOAT,
+        LITERAL_TRUE,
+        LITERAL_FALSE,
+        LITERAL_NULL,
+        COMMA,
+        ASSIGN,
+        ARRAY_OPEN,
+        ARRAY_CLOSE,
+        JSON_UNKNOWN
 };
 
 struct jak_json_token {
-    enum json_token_type type;
-    const char *string;
-    unsigned line;
-    unsigned column;
-    unsigned length;
+        enum json_token_type type;
+        const char *string;
+        unsigned line;
+        unsigned column;
+        unsigned length;
 };
 
 struct jak_json_err {
-    const struct jak_json_token *token;
-    const char *token_type_str;
-    const char *msg;
+        const struct jak_json_token *token;
+        const char *token_type_str;
+        const char *msg;
 };
 
 struct jak_json_tokenizer {
-    const char *cursor;
-    struct jak_json_token token;
-    struct jak_error err;
+        const char *cursor;
+        struct jak_json_token token;
+        struct jak_error err;
 };
 
 struct jak_json_parser {
-    struct jak_json_tokenizer tokenizer;
-    struct jak_error err;
+        struct jak_json_tokenizer tokenizer;
+        struct jak_error err;
 };
 
 enum json_parent {
-    JSON_PARENT_OBJECT, JSON_PARENT_MEMBER, JSON_PARENT_ELEMENTS
+        JSON_PARENT_OBJECT, JSON_PARENT_MEMBER, JSON_PARENT_ELEMENTS
 };
 
 enum json_value_type {
-    JSON_VALUE_OBJECT,
-    JSON_VALUE_ARRAY,
-    JSON_VALUE_STRING,
-    JSON_VALUE_NUMBER,
-    JSON_VALUE_TRUE,
-    JSON_VALUE_FALSE,
-    JSON_VALUE_NULL
+        JSON_VALUE_OBJECT,
+        JSON_VALUE_ARRAY,
+        JSON_VALUE_STRING,
+        JSON_VALUE_NUMBER,
+        JSON_VALUE_TRUE,
+        JSON_VALUE_FALSE,
+        JSON_VALUE_NULL
 };
 
 enum json_list_type {
-    JSON_LIST_TYPE_EMPTY,
-    JSON_LIST_TYPE_VARIABLE_OR_NESTED,
-    JSON_LIST_TYPE_FIXED_U8,
-    JSON_LIST_TYPE_FIXED_U16,
-    JSON_LIST_TYPE_FIXED_U32,
-    JSON_LIST_TYPE_FIXED_U64,
-    JSON_LIST_TYPE_FIXED_I8,
-    JSON_LIST_TYPE_FIXED_I16,
-    JSON_LIST_TYPE_FIXED_I32,
-    JSON_LIST_TYPE_FIXED_I64,
-    JSON_LIST_TYPE_FIXED_FLOAT,
-    JSON_LIST_TYPE_FIXED_NULL,
-    JSON_LIST_TYPE_FIXED_BOOLEAN
+        JSON_LIST_TYPE_EMPTY,
+        JSON_LIST_TYPE_VARIABLE_OR_NESTED,
+        JSON_LIST_TYPE_FIXED_U8,
+        JSON_LIST_TYPE_FIXED_U16,
+        JSON_LIST_TYPE_FIXED_U32,
+        JSON_LIST_TYPE_FIXED_U64,
+        JSON_LIST_TYPE_FIXED_I8,
+        JSON_LIST_TYPE_FIXED_I16,
+        JSON_LIST_TYPE_FIXED_I32,
+        JSON_LIST_TYPE_FIXED_I64,
+        JSON_LIST_TYPE_FIXED_FLOAT,
+        JSON_LIST_TYPE_FIXED_NULL,
+        JSON_LIST_TYPE_FIXED_BOOLEAN
 };
 
 struct jak_json {
-    struct jak_json_element *element;
-    struct jak_error err;
+        struct jak_json_element *element;
+        struct jak_error err;
 };
 
 struct jak_json_node_value {
-    struct jak_json_element *parent;
+        struct jak_json_element *parent;
 
-    enum json_value_type value_type;
+        enum json_value_type value_type;
 
-    union {
-        struct jak_json_object_t *object;
-        struct jak_json_array *array;
-        struct jak_json_string *string;
-        struct jak_json_number *number;
-        void *ptr;
-    } value;
+        union {
+                struct jak_json_object_t *object;
+                struct jak_json_array *array;
+                struct jak_json_string *string;
+                struct jak_json_number *number;
+                void *ptr;
+        } value;
 };
 
 struct jak_json_object_t {
-    struct jak_json_node_value *parent;
-    struct jak_json_members *value;
+        struct jak_json_node_value *parent;
+        struct jak_json_members *value;
 };
 
 struct jak_json_element {
-    enum json_parent parent_type;
+        enum json_parent parent_type;
 
-    union {
-        struct jak_json *json;
-        struct jak_json_prop *member;
-        struct jak_json_elements *elements;
-        void *ptr;
-    } parent;
+        union {
+                struct jak_json *json;
+                struct jak_json_prop *member;
+                struct jak_json_elements *elements;
+                void *ptr;
+        } parent;
 
-    struct jak_json_node_value value;
+        struct jak_json_node_value value;
 
 };
 
 struct jak_json_string {
-    struct jak_json_prop *parent;
-    char *value;
+        struct jak_json_prop *parent;
+        char *value;
 };
 
 struct jak_json_prop {
-    struct jak_json_members *parent;
-    struct jak_json_string key;
-    struct jak_json_element value;
+        struct jak_json_members *parent;
+        struct jak_json_string key;
+        struct jak_json_element value;
 };
 
 struct jak_json_members {
-    struct jak_json_object_t *parent;
-    struct jak_vector ofType(struct jak_json_prop) members;
+        struct jak_json_object_t *parent;
+        struct jak_vector ofType(struct jak_json_prop) members;
 };
 
 struct jak_json_elements {
-    struct jak_json_array *parent;
-            struct jak_vector ofType(struct jak_json_element) elements;
+        struct jak_json_array *parent;
+        struct jak_vector ofType(struct jak_json_element) elements;
 };
 
 struct jak_json_array {
-    struct jak_json_node_value *parent;
-    struct jak_json_elements elements;
+        struct jak_json_node_value *parent;
+        struct jak_json_elements elements;
 };
 
 enum json_number_type {
-    JSON_NUMBER_FLOAT, JSON_NUMBER_UNSIGNED, JSON_NUMBER_SIGNED
+        JSON_NUMBER_FLOAT, JSON_NUMBER_UNSIGNED, JSON_NUMBER_SIGNED
 };
 
 struct jak_json_number {
-    struct jak_json_node_value *parent;
-    enum json_number_type value_type;
+        struct jak_json_node_value *parent;
+        enum json_number_type value_type;
 
-    union {
-        float float_number;
-        jak_i64 signed_integer;
-        jak_u64 unsigned_integer;
-    } value;
+        union {
+                float float_number;
+                jak_i64 signed_integer;
+                jak_u64 unsigned_integer;
+        } value;
 };
 
 bool json_tokenizer_init(struct jak_json_tokenizer *tokenizer, const char *input);

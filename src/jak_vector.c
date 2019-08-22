@@ -80,11 +80,11 @@ bool vec_create(struct jak_vector *out, const struct jak_allocator *alloc, size_
 }
 
 struct vector_serialize_header {
-    char marker;
-    jak_u32 elem_size;
-    jak_u32 num_elems;
-    jak_u32 cap_elems;
-    float grow_factor;
+        char marker;
+        jak_u32 elem_size;
+        jak_u32 num_elems;
+        jak_u32 cap_elems;
+        float grow_factor;
 };
 
 bool vec_serialize(FILE *file, struct jak_vector *vec)
@@ -221,7 +221,7 @@ const void *vec_pop(struct jak_vector *vec)
 {
         void *result;
         if (JAK_LIKELY((result = (vec ? (vec->num_elems > 0 ? vec->base + (vec->num_elems - 1) * vec->elem_size : NULL)
-                                  : NULL)) != NULL)) {
+                                      : NULL)) != NULL)) {
                 vec->num_elems--;
         }
         return result;

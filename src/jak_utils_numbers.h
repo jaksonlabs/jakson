@@ -24,17 +24,16 @@
 
 #include <jak_types.h>
 
-enum number_min_type
-{
-    NUMBER_U8,
-    NUMBER_U16,
-    NUMBER_U32,
-    NUMBER_U64,
-    NUMBER_I8,
-    NUMBER_I16,
-    NUMBER_I32,
-    NUMBER_I64,
-    NUMBER_UNKNOWN
+enum number_min_type {
+        NUMBER_U8,
+        NUMBER_U16,
+        NUMBER_U32,
+        NUMBER_U64,
+        NUMBER_I8,
+        NUMBER_I16,
+        NUMBER_I32,
+        NUMBER_I64,
+        NUMBER_UNKNOWN
 };
 
 enum number_min_type number_min_type_unsigned(jak_u64 value);

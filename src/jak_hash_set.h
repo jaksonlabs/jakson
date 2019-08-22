@@ -29,9 +29,9 @@
 JAK_BEGIN_DECL
 
 struct hashset_bucket {
-    bool in_use_flag;  /* flag indicating if bucket is in use */
-    jak_i32 displacement; /* difference between intended position during insert, and actual position in table */
-    jak_u64 key_idx;      /* position of key element in owning struct hashset structure */
+        bool in_use_flag;  /* flag indicating if bucket is in use */
+        jak_i32 displacement; /* difference between intended position during insert, and actual position in table */
+        jak_u64 key_idx;      /* position of key element in owning struct hashset structure */
 };
 
 /**
@@ -46,11 +46,11 @@ struct hashset_bucket {
  * lock implementation.
  */
 struct hashset {
-    struct jak_vector key_data;
-    struct jak_vector ofType(struct hashset_bucket) table;
-    struct spinlock lock;
-    jak_u32 size;
-    struct jak_error err;
+        struct jak_vector key_data;
+        struct jak_vector ofType(struct hashset_bucket) table;
+        struct spinlock lock;
+        jak_u32 size;
+        struct jak_error err;
 };
 
 JAK_DEFINE_GET_ERROR_FUNCTION(hashset, struct hashset, set);

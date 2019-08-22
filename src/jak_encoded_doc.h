@@ -31,71 +31,73 @@
 JAK_BEGIN_DECL
 
 union encoded_doc_value {
-    jak_archive_field_i8_t int8;
-    jak_archive_field_i16_t int16;
-    jak_archive_field_i32_t int32;
-    jak_archive_field_i64_t int64;
-    jak_archive_field_u8_t uint8;
-    jak_archive_field_u16_t uint16;
-    jak_archive_field_u32_t uint32;
-    jak_archive_field_u64_t uint64;
-    jak_archive_field_number_t number;
-    jak_archive_field_boolean_t boolean;
-    jak_archive_field_sid_t string;
-    jak_global_id_t object;
-    jak_u32 null;
+        jak_archive_field_i8_t int8;
+        jak_archive_field_i16_t int16;
+        jak_archive_field_i32_t int32;
+        jak_archive_field_i64_t int64;
+        jak_archive_field_u8_t uint8;
+        jak_archive_field_u16_t uint16;
+        jak_archive_field_u32_t uint32;
+        jak_archive_field_u64_t uint64;
+        jak_archive_field_number_t number;
+        jak_archive_field_boolean_t boolean;
+        jak_archive_field_sid_t string;
+        jak_global_id_t object;
+        jak_u32 null;
 };
 
 enum encoded_doc_string_type {
-    STRING_ENCODED, STRING_DECODED,
+        STRING_ENCODED, STRING_DECODED,
 };
 
 enum encoded_doc_value_type {
-    VALUE_BUILTIN, VALUE_DECODED_STRING,
+        VALUE_BUILTIN, VALUE_DECODED_STRING,
 };
 
 struct jak_encoded_doc_prop_header {
-    struct jak_encoded_doc *context;
+        struct jak_encoded_doc *context;
 
-    enum encoded_doc_string_type key_type;
-    union {
-        jak_archive_field_sid_t key_id;
-        char *key_str;
-    } key;
+        enum encoded_doc_string_type key_type;
+        union {
+                jak_archive_field_sid_t key_id;
+                char *key_str;
+        } key;
 
-    enum encoded_doc_value_type value_type;
-    enum jak_archive_field_type type;
+        enum encoded_doc_value_type value_type;
+        enum jak_archive_field_type type;
 
 };
 
 struct jak_encoded_doc_prop {
-    struct jak_encoded_doc_prop_header header;
+        struct jak_encoded_doc_prop_header header;
 
-    union {
-        union encoded_doc_value builtin;
-        char *string;
-    } value;
+        union {
+                union encoded_doc_value builtin;
+                char *string;
+        } value;
 };
 
 struct jak_encoded_doc_prop_array {
-    struct jak_encoded_doc_prop_header header;
-    struct jak_vector ofType(union encoded_doc_value) values;
+        struct jak_encoded_doc_prop_header header;
+        struct jak_vector ofType(union encoded_doc_value) values;
 };
 
 struct jak_encoded_doc {
-    struct jak_encoded_doc_list *context;
-    jak_global_id_t object_id;
-    struct jak_vector ofType(struct jak_encoded_doc_prop) props;
-    struct jak_vector ofType(struct jak_encoded_doc_prop_array) props_arrays;
-    struct hashtable ofMapping(jak_archive_field_sid_t, jak_u32) prop_array_index; /* maps key to index in prop arrays */
-    struct jak_error err;
+        struct jak_encoded_doc_list *context;
+        jak_global_id_t object_id;
+        struct jak_vector ofType(struct jak_encoded_doc_prop) props;
+        struct jak_vector ofType(struct jak_encoded_doc_prop_array) props_arrays;
+        struct hashtable ofMapping(jak_archive_field_sid_t,
+                                   jak_u32) prop_array_index; /* maps key to index in prop arrays */
+        struct jak_error err;
 };
 
 struct jak_encoded_doc_list {
-    struct jak_archive *archive;
-    struct jak_vector ofType(struct jak_encoded_doc) flat_object_collection;   /* list of objects; also nested ones */
-    struct hashtable ofMapping(object_id_t, jak_u32) index;   /* maps oid to index in collection */
-    struct jak_error err;
+        struct jak_archive *archive;
+        struct jak_vector ofType(
+                struct jak_encoded_doc) flat_object_collection;   /* list of objects; also nested ones */
+        struct hashtable ofMapping(object_id_t, jak_u32) index;   /* maps oid to index in collection */
+        struct jak_error err;
 };
 
 bool encoded_doc_collection_create(struct jak_encoded_doc_list *collection, struct jak_error *err,
@@ -169,7 +171,8 @@ bool encoded_doc_add_prop_null(struct jak_encoded_doc *doc, jak_archive_field_si
 
 bool encoded_doc_add_prop_null_decoded(struct jak_encoded_doc *doc, const char *key);
 
-bool encoded_doc_add_prop_object(struct jak_encoded_doc *doc, jak_archive_field_sid_t key, struct jak_encoded_doc *value);
+bool
+encoded_doc_add_prop_object(struct jak_encoded_doc *doc, jak_archive_field_sid_t key, struct jak_encoded_doc *value);
 
 bool encoded_doc_add_prop_object_decoded(struct jak_encoded_doc *doc, const char *key,
                                          struct jak_encoded_doc *value);

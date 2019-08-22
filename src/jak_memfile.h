@@ -30,14 +30,14 @@
 JAK_BEGIN_DECL
 
 struct jak_memfile {
-    struct jak_memblock *memblock;
-    jak_offset_t pos;
-    jak_offset_t saved_pos[10];
-    jak_i8 saved_pos_ptr;
-    bool bit_mode;
-    size_t current_read_bit, current_write_bit, bytes_completed;
-    enum access_mode mode;
-    struct jak_error err;
+        struct jak_memblock *memblock;
+        jak_offset_t pos;
+        jak_offset_t saved_pos[10];
+        jak_i8 saved_pos_ptr;
+        bool bit_mode;
+        size_t current_read_bit, current_write_bit, bytes_completed;
+        enum access_mode mode;
+        struct jak_error err;
 };
 
 #define JAK_MEMFILE_PEEK(file, type)                                                                                   \

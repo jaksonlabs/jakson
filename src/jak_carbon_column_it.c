@@ -90,7 +90,7 @@ bool carbon_column_it_clone(struct jak_carbon_column_it *dst, struct jak_carbon_
         return true;
 }
 
-bool carbon_column_it_insert(struct jak_carbon_insert *inserter, struct jak_carbon_column_it *it)
+bool carbon_column_it_insert(jak_carbon_insert *inserter, struct jak_carbon_column_it *it)
 {
         JAK_ERROR_IF_NULL(inserter)
         JAK_ERROR_IF_NULL(it)
@@ -175,8 +175,7 @@ bool carbon_column_it_value_is_null(struct jak_carbon_column_it *it, jak_u32 pos
                         return is_null_float(carbon_column_it_float_values(NULL, it)[pos]);
                 case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN:
                         return is_null_boolean(carbon_column_it_boolean_values(NULL, it)[pos]);
-                default:
-                        error(&it->err, JAK_ERR_UNSUPPCONTAINER)
+                default: error(&it->err, JAK_ERR_UNSUPPCONTAINER)
                         return false;
         }
 }
@@ -397,7 +396,7 @@ for (jak_u32 i = 0; i < num_values; i++) {                                      
 static bool rewrite_column_to_array(struct jak_carbon_column_it *it)
 {
         struct jak_carbon_array_it array_it;
-        struct jak_carbon_insert array_ins;
+        jak_carbon_insert array_ins;
 
         memfile_save_position(&it->memfile);
 

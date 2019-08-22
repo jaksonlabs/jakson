@@ -42,11 +42,12 @@ JAK_DEFINE_ERROR_GETTER(jak_carbon_revise)
  * @return <code>false</code> in case of an already running revision. Otherwise returns value of
  *                            <code>carbon_revise_begin</code>
  */
-bool carbon_revise_try_begin(struct jak_carbon_revise *context, struct jak_carbon *revised_doc, struct jak_carbon *doc);
+bool carbon_revise_try_begin(struct jak_carbon_revise *context, jak_carbon *revised_doc, jak_carbon *doc);
 
-bool carbon_revise_begin(struct jak_carbon_revise *context, struct jak_carbon *revised_doc, struct jak_carbon *original);
+bool
+carbon_revise_begin(struct jak_carbon_revise *context, jak_carbon *revised_doc, jak_carbon *original);
 
-const struct jak_carbon *carbon_revise_end(struct jak_carbon_revise *context);
+const jak_carbon *carbon_revise_end(struct jak_carbon_revise *context);
 
 bool carbon_revise_key_generate(jak_global_id_t *out, struct jak_carbon_revise *context);
 
@@ -66,7 +67,7 @@ bool carbon_revise_find_close(struct jak_carbon_find *find);
 
 bool carbon_revise_remove(const char *dot_path, struct jak_carbon_revise *context);
 
-bool carbon_revise_remove_one(const char *dot_path, struct jak_carbon *rev_doc, struct jak_carbon *doc);
+bool carbon_revise_remove_one(const char *dot_path, jak_carbon *rev_doc, jak_carbon *doc);
 
 bool carbon_revise_pack(struct jak_carbon_revise *context);
 

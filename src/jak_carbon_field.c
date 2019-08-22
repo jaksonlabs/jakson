@@ -82,7 +82,8 @@ const char *carbon_field_type_str(struct jak_error *err, enum carbon_field_type 
                 case CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM:
                 case CARBON_JAK_FIELD_TYPE_BINARY:
                         return JAK_CARBON_JAK_FIELD_TYPE_BINARY_STR;
-                default: if (err) {
+                default:
+                        if (err) {
                                 error(err, JAK_ERR_NOTFOUND);
                         }
                         return NULL;
@@ -416,7 +417,8 @@ enum carbon_field_type carbon_field_type_for_column(enum carbon_column_type type
         }
 }
 
-enum carbon_field_type carbon_field_type_column_entry_to_regular_type(enum carbon_field_type type, bool is_null, bool is_true)
+enum carbon_field_type
+carbon_field_type_column_entry_to_regular_type(enum carbon_field_type type, bool is_null, bool is_true)
 {
         if (is_null) {
                 return CARBON_JAK_FIELD_TYPE_NULL;

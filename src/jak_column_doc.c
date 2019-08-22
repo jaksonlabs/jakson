@@ -21,14 +21,17 @@
 #include <jak_column_doc.h>
 #include <jak_doc.h>
 
-static void setup_object(struct jak_column_doc_obj *model, struct jak_column_doc *parent, jak_archive_field_sid_t key, size_t idx);
+static void
+setup_object(struct jak_column_doc_obj *model, struct jak_column_doc *parent, jak_archive_field_sid_t key, size_t idx);
 
 static bool object_put(struct jak_column_doc_obj *model, struct jak_error *err, const struct jak_doc_entries *entry,
                        struct jak_string_dict *dic);
 
-static bool import_object(struct jak_column_doc_obj *dst, struct jak_error *err, const struct jak_doc_obj *doc, struct jak_string_dict *dic);
+static bool import_object(struct jak_column_doc_obj *dst, struct jak_error *err, const struct jak_doc_obj *doc,
+                          struct jak_string_dict *dic);
 
-static bool print_object(FILE *file, struct jak_error *err, const struct jak_column_doc_obj *object, struct jak_string_dict *dic);
+static bool
+print_object(FILE *file, struct jak_error *err, const struct jak_column_doc_obj *object, struct jak_string_dict *dic);
 
 static const char *get_type_name(struct jak_error *err, jak_archive_field_e type);
 
@@ -38,10 +41,13 @@ static struct jak_column_doc_column *object_array_key_columns_find_or_new(
         struct jak_vector ofType(struct jak_column_doc_group) *columns, jak_archive_field_sid_t array_key,
         jak_archive_field_sid_t nested_object_entry_key, jak_archive_field_e nested_object_entry_type);
 
-static bool object_array_key_column_push(struct jak_column_doc_column *col, struct jak_error *err, const struct jak_doc_entries *entry,
-                                         jak_u32 array_idx, struct jak_string_dict *dic, struct jak_column_doc_obj *model);
+static bool object_array_key_column_push(struct jak_column_doc_column *col, struct jak_error *err,
+                                         const struct jak_doc_entries *entry,
+                                         jak_u32 array_idx, struct jak_string_dict *dic,
+                                         struct jak_column_doc_obj *model);
 
-bool columndoc_create(struct jak_column_doc *columndoc, struct jak_error *err, const struct jak_doc *doc, const struct jak_doc_bulk *bulk,
+bool columndoc_create(struct jak_column_doc *columndoc, struct jak_error *err, const struct jak_doc *doc,
+                      const struct jak_doc_bulk *bulk,
                       const struct jak_doc_entries *entries, struct jak_string_dict *dic)
 {
         JAK_ERROR_IF_NULL(columndoc)
@@ -325,7 +331,8 @@ bool columndoc_free(struct jak_column_doc *doc)
     fprintf(file, "}, ");                                                                                              \
 }
 
-static void print_primitive_null(FILE *file, const char *type_name, const struct jak_vector ofType(jak_archive_field_sid_t) *key_vector,
+static void print_primitive_null(FILE *file, const char *type_name,
+                                 const struct jak_vector ofType(jak_archive_field_sid_t) *key_vector,
                                  struct jak_string_dict *dic)
 {
         PRINT_PRIMITIVE_KEY_PART(file, type_name, key_vector, dic, "")
@@ -423,8 +430,9 @@ static bool print_primitive_objects(FILE *file, struct jak_error *err, const cha
     fprintf(file, "}, ");                                                                                              \
 }
 
-static void print_array_null(FILE *file, const char *type_name, const struct jak_vector ofType(jak_archive_field_sid_t) *key_vector,
-                             const struct jak_vector ofType(jak_u16) *value_vector, struct jak_string_dict *dic)
+static void
+print_array_null(FILE *file, const char *type_name, const struct jak_vector ofType(jak_archive_field_sid_t) *key_vector,
+                 const struct jak_vector ofType(jak_u16) *value_vector, struct jak_string_dict *dic)
 {
         fprintf(file, "\"%s\": { ", type_name);
         if (!vec_is_empty((key_vector))) {
@@ -452,9 +460,10 @@ static void print_array_null(FILE *file, const char *type_name, const struct jak
         fprintf(file, "}, ");
 }
 
-static void print_array_strings(FILE *file, const char *type_name, const struct jak_vector ofType(jak_archive_field_sid_t) *key_vector,
+static void print_array_strings(FILE *file, const char *type_name,
+                                const struct jak_vector ofType(jak_archive_field_sid_t) *key_vector,
                                 const struct jak_vector ofType(Vector
-                                                                   ofType(jak_archive_field_sid_t)) *value_vector,
+                                                                       ofType(jak_archive_field_sid_t)) *value_vector,
                                 struct jak_string_dict *dic)
 {
         fprintf(file, "\"%s\": { ", type_name);
@@ -475,7 +484,8 @@ static void print_array_strings(FILE *file, const char *type_name, const struct 
                 fprintf(file, "],");
                 fprintf(file, "\"Values\": [ ");
                 for (size_t i = 0; i < (value_vector)->num_elems; i++) {
-                        const struct jak_vector ofType(jak_archive_field_sid_t) *values = vec_get(value_vector, i, struct jak_vector);
+                        const struct jak_vector ofType(jak_archive_field_sid_t) *values = vec_get(value_vector, i,
+                                                                                                  struct jak_vector);
                         fprintf(file, "[");
                         for (size_t j = 0; j < values->num_elems; j++) {
                                 jak_archive_field_sid_t value = *vec_get(values, j, jak_archive_field_sid_t);
@@ -487,7 +497,8 @@ static void print_array_strings(FILE *file, const char *type_name, const struct 
                 fprintf(file, "], ");
                 fprintf(file, "\"Values Decoded\": [ ");
                 for (size_t i = 0; i < (value_vector)->num_elems; i++) {
-                        const struct jak_vector ofType(jak_archive_field_sid_t) *values = vec_get(value_vector, i, struct jak_vector);
+                        const struct jak_vector ofType(jak_archive_field_sid_t) *values = vec_get(value_vector, i,
+                                                                                                  struct jak_vector);
                         fprintf(file, "[");
                         for (size_t j = 0; j < values->num_elems; j++) {
                                 jak_archive_field_sid_t value = *vec_get(values, j, jak_archive_field_sid_t);
@@ -547,7 +558,8 @@ static void print_primitive_strings(FILE *file, const char *type_name,
 }
 
 static bool print_array_objects(FILE *file, struct jak_error *err, const char *type_name,
-                                const struct jak_vector ofType(struct jak_column_doc_group) *key_columns, struct jak_string_dict *dic)
+                                const struct jak_vector ofType(struct jak_column_doc_group) *key_columns,
+                                struct jak_string_dict *dic)
 {
         fprintf(file, "\"%s\": {", type_name);
         fprintf(file, "\"Keys\": [");
@@ -577,7 +589,8 @@ static bool print_array_objects(FILE *file, struct jak_error *err, const char *t
                 for (size_t columnIdx = 0; columnIdx < arrayKeyColumns->columns.num_elems; columnIdx++) {
                         fprintf(file, "{");
                         const struct jak_column_doc_column
-                                *columnTable = vec_get(&arrayKeyColumns->columns, columnIdx, struct jak_column_doc_column);
+                                *columnTable = vec_get(&arrayKeyColumns->columns, columnIdx,
+                                                       struct jak_column_doc_column);
                         char **decColumnKeyName = strdic_extract(dic, &columnTable->key_name, 1);
 
                         const char *column_type_name = get_type_name(err, columnTable->type);
@@ -611,26 +624,35 @@ static bool print_array_objects(FILE *file, struct jak_error *err, const char *t
                                                 fprintf(file, "%s", column->num_elems > 1 ? "]" : "");
                                         }
                                                 break;
-                                        case JAK_FIELD_INT8: PRINT_COLUMN(file, columnTable, array_idx, jak_archive_field_i8_t, "%d")
+                                        case JAK_FIELD_INT8: PRINT_COLUMN(file, columnTable, array_idx,
+                                                                          jak_archive_field_i8_t, "%d")
                                                 break;
-                                        case JAK_FIELD_INT16: PRINT_COLUMN(file, columnTable, array_idx, jak_archive_field_i16_t, "%d")
+                                        case JAK_FIELD_INT16: PRINT_COLUMN(file, columnTable, array_idx,
+                                                                           jak_archive_field_i16_t, "%d")
                                                 break;
-                                        case JAK_FIELD_INT32: PRINT_COLUMN(file, columnTable, array_idx, jak_archive_field_i32_t, "%d")
+                                        case JAK_FIELD_INT32: PRINT_COLUMN(file, columnTable, array_idx,
+                                                                           jak_archive_field_i32_t, "%d")
                                                 break;
-                                        case JAK_FIELD_INT64: PRINT_COLUMN(file, columnTable, array_idx, jak_archive_field_i64_t, "%"
-                                                PRIi64)
+                                        case JAK_FIELD_INT64: PRINT_COLUMN(file, columnTable, array_idx,
+                                                                           jak_archive_field_i64_t, "%"
+                                                                                   PRIi64)
                                                 break;
-                                        case JAK_FIELD_UINT8: PRINT_COLUMN(file, columnTable, array_idx, jak_archive_field_u8_t, "%d")
+                                        case JAK_FIELD_UINT8: PRINT_COLUMN(file, columnTable, array_idx,
+                                                                           jak_archive_field_u8_t, "%d")
                                                 break;
-                                        case JAK_FIELD_UINT16: PRINT_COLUMN(file, columnTable, array_idx, jak_archive_field_u16_t, "%d")
+                                        case JAK_FIELD_UINT16: PRINT_COLUMN(file, columnTable, array_idx,
+                                                                            jak_archive_field_u16_t, "%d")
                                                 break;
-                                        case JAK_FIELD_UINT32: PRINT_COLUMN(file, columnTable, array_idx, jak_archive_field_u32_t, "%d")
+                                        case JAK_FIELD_UINT32: PRINT_COLUMN(file, columnTable, array_idx,
+                                                                            jak_archive_field_u32_t, "%d")
                                                 break;
-                                        case JAK_FIELD_UINT64: PRINT_COLUMN(file, columnTable, array_idx, jak_archive_field_u64_t, "%"
-                                                PRIu64)
+                                        case JAK_FIELD_UINT64: PRINT_COLUMN(file, columnTable, array_idx,
+                                                                            jak_archive_field_u64_t, "%"
+                                                                                    PRIu64)
                                                 break;
-                                        case JAK_FIELD_FLOAT: PRINT_COLUMN(file, columnTable, array_idx, jak_archive_field_number_t,
-                                                                       "%f")
+                                        case JAK_FIELD_FLOAT: PRINT_COLUMN(file, columnTable, array_idx,
+                                                                           jak_archive_field_number_t,
+                                                                           "%f")
                                                 break;
                                         case JAK_FIELD_STRING: {
                                                 const struct jak_vector
@@ -638,7 +660,8 @@ static bool print_array_objects(FILE *file, struct jak_error *err, const char *t
                                                                           struct jak_vector);
                                                 fprintf(file, "%s", column->num_elems > 1 ? "[" : "");
                                                 for (size_t i = 0; i < column->num_elems; i++) {
-                                                        jak_archive_field_sid_t encodedString = *vec_get(column, i, jak_archive_field_sid_t);
+                                                        jak_archive_field_sid_t encodedString = *vec_get(column, i,
+                                                                                                         jak_archive_field_sid_t);
                                                         char **decodedString = strdic_extract(dic, &encodedString, 1);
                                                         fprintf(file,
                                                                 "{\"Encoded\": %"PRIu64", \"Decoded\": \"%s\"}",
@@ -694,7 +717,8 @@ static bool print_array_objects(FILE *file, struct jak_error *err, const char *t
         return true;
 }
 
-static bool print_object(FILE *file, struct jak_error *err, const struct jak_column_doc_obj *object, struct jak_string_dict *dic)
+static bool
+print_object(FILE *file, struct jak_error *err, const struct jak_column_doc_obj *object, struct jak_string_dict *dic)
 {
         char **parentKey = strdic_extract(dic, &object->parent_key, 1);
         fprintf(file, "{ ");
@@ -809,8 +833,9 @@ static bool print_object(FILE *file, struct jak_error *err, const struct jak_col
                     jak_archive_field_u32_t,
                     "%d",
                     (value != JAK_NULL_UINT32));
-        PRINT_ARRAY(file, "UInt64", object->uint64_array_prop_keys, object->ui64_array_prop_vals, jak_archive_field_u64_t, "%"
-                PRIu64, (value != JAK_NULL_UINT64));
+        PRINT_ARRAY(file, "UInt64", object->uint64_array_prop_keys, object->ui64_array_prop_vals,
+                    jak_archive_field_u64_t, "%"
+                            PRIu64, (value != JAK_NULL_UINT64));
         PRINT_ARRAY(file,
                     "Int8",
                     object->int8_array_prop_keys,
@@ -832,8 +857,9 @@ static bool print_object(FILE *file, struct jak_error *err, const struct jak_col
                     jak_archive_field_i32_t,
                     "%d",
                     (value != JAK_NULL_INT32));
-        PRINT_ARRAY(file, "Int64", object->int64_array_prop_keys, object->int64_array_prop_vals, jak_archive_field_i64_t, "%"
-                PRIi64, (value != JAK_NULL_INT64));
+        PRINT_ARRAY(file, "Int64", object->int64_array_prop_keys, object->int64_array_prop_vals,
+                    jak_archive_field_i64_t, "%"
+                            PRIi64, (value != JAK_NULL_INT64));
         PRINT_ARRAY(file,
                     "Real",
                     object->float_array_prop_keys,
@@ -877,7 +903,8 @@ static void object_array_key_columns_drop(struct jak_vector ofType(struct jak_co
                 struct jak_column_doc_group *array_columns = vec_get(columns, i, struct jak_column_doc_group);
                 for (size_t j = 0; j < array_columns->columns.num_elems; j++) {
 
-                        struct jak_column_doc_column *column = vec_get(&array_columns->columns, j, struct jak_column_doc_column);
+                        struct jak_column_doc_column *column = vec_get(&array_columns->columns, j,
+                                                                       struct jak_column_doc_column);
 
                         struct jak_vector ofType(jak_u32) *array_indices = &column->array_positions;
                         struct jak_vector ofType(struct jak_vector ofType(<T>)) *values_for_indicies = &column->values;
@@ -982,8 +1009,10 @@ static struct jak_column_doc_column *object_array_key_columns_find_or_new(
         return new_column;
 }
 
-static bool object_array_key_column_push(struct jak_column_doc_column *col, struct jak_error *err, const struct jak_doc_entries *entry,
-                                         jak_u32 array_idx, struct jak_string_dict *dic, struct jak_column_doc_obj *model)
+static bool object_array_key_column_push(struct jak_column_doc_column *col, struct jak_error *err,
+                                         const struct jak_doc_entries *entry,
+                                         jak_u32 array_idx, struct jak_string_dict *dic,
+                                         struct jak_column_doc_obj *model)
 {
         JAK_ASSERT(col->type == entry->type);
 
@@ -1052,7 +1081,8 @@ static bool object_array_key_column_push(struct jak_column_doc_column *col, stru
         return true;
 }
 
-static void setup_object(struct jak_column_doc_obj *model, struct jak_column_doc *parent, jak_archive_field_sid_t key, size_t idx)
+static void
+setup_object(struct jak_column_doc_obj *model, struct jak_column_doc *parent, jak_archive_field_sid_t key, size_t idx)
 {
         model->parent = parent;
         model->parent_key = key;
@@ -1139,8 +1169,9 @@ static void setup_object(struct jak_column_doc_obj *model, struct jak_column_doc
         object_array_key_columns_create(&model->obj_array_props);
 }
 
-static bool object_put_primitive(struct jak_column_doc_obj *columndoc, struct jak_error *err, const struct jak_doc_entries *entry,
-                                 struct jak_string_dict *dic, const jak_archive_field_sid_t *key_id)
+static bool
+object_put_primitive(struct jak_column_doc_obj *columndoc, struct jak_error *err, const struct jak_doc_entries *entry,
+                     struct jak_string_dict *dic, const jak_archive_field_sid_t *key_id)
 {
         switch (entry->type) {
                 case JAK_FIELD_NULL:
@@ -1213,7 +1244,8 @@ static bool object_put_primitive(struct jak_column_doc_obj *columndoc, struct ja
 }
 
 static void object_push_array(struct jak_vector ofType(Vector
-                                                           ofType( < T >)) *values, size_t TSize, jak_u32 num_elements,
+                                                               ofType( < T >)) *values, size_t TSize,
+                              jak_u32 num_elements,
                               const void *data, jak_archive_field_sid_t key_id,
                               struct jak_vector ofType(jak_archive_field_sid_t) *key_vector)
 {
@@ -1226,8 +1258,9 @@ static void object_push_array(struct jak_vector ofType(Vector
         vec_push(key_vector, &key_id, 1);
 }
 
-static bool object_put_array(struct jak_column_doc_obj *model, struct jak_error *err, const struct jak_doc_entries *entry,
-                             struct jak_string_dict *dic, const jak_archive_field_sid_t *key_id)
+static bool
+object_put_array(struct jak_column_doc_obj *model, struct jak_error *err, const struct jak_doc_entries *entry,
+                 struct jak_string_dict *dic, const jak_archive_field_sid_t *key_id)
 {
         JAK_UNUSED(dic);
         jak_u32 num_elements = (jak_u32) vec_length(&entry->values);
@@ -1334,7 +1367,8 @@ static bool object_put_array(struct jak_column_doc_obj *model, struct jak_error 
                 case JAK_FIELD_OBJECT: {
                         jak_archive_field_sid_t *nested_object_key_name;
                         for (jak_u32 array_idx = 0; array_idx < num_elements; array_idx++) {
-                                const struct jak_doc_obj *object = vec_get(&entry->values, array_idx, struct jak_doc_obj);
+                                const struct jak_doc_obj *object = vec_get(&entry->values, array_idx,
+                                                                           struct jak_doc_obj);
                                 for (size_t pair_idx = 0; pair_idx < object->entries.num_elems; pair_idx++) {
                                         const struct jak_doc_entries
                                                 *pair = vec_get(&object->entries, pair_idx, struct jak_doc_entries);
@@ -1367,7 +1401,7 @@ static bool object_put(struct jak_column_doc_obj *model, struct jak_error *err, 
 {
         jak_archive_field_sid_t *key_id;
         enum EntryType {
-            ENTRY_TYPE_NULL, ENTRY_TYPE_PRIMITIVE, ENTRY_TYPE_ARRAY
+                ENTRY_TYPE_NULL, ENTRY_TYPE_PRIMITIVE, ENTRY_TYPE_ARRAY
         } entryType;
 
         strdic_locate_fast(&key_id, dic, (char *const *) &entry->key, 1);
@@ -1398,7 +1432,8 @@ static bool object_put(struct jak_column_doc_obj *model, struct jak_error *err, 
         return true;
 }
 
-static bool import_object(struct jak_column_doc_obj *dst, struct jak_error *err, const struct jak_doc_obj *doc, struct jak_string_dict *dic)
+static bool import_object(struct jak_column_doc_obj *dst, struct jak_error *err, const struct jak_doc_obj *doc,
+                          struct jak_string_dict *dic)
 {
         const struct jak_vector ofType(struct jak_doc_entries) *objectEntries = doc_get_entries(doc);
         const struct jak_doc_entries *entries = vec_all(objectEntries, struct jak_doc_entries);

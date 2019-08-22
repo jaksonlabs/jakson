@@ -49,46 +49,46 @@ JAK_BEGIN_DECL
 typedef void (*task_routine)(void *routine);
 
 struct thread_task {
-    void *args;
-    pthread_attr_t *attr;
-    task_routine routine;
-    size_t group_id;
-    size_t priority;
-    struct task_stats statistics;
+        void *args;
+        pthread_attr_t *attr;
+        task_routine routine;
+        size_t group_id;
+        size_t priority;
+        struct task_stats statistics;
 };
 
 struct thread_info;
 
 struct task_state {
-    atomic_int task_count; // remaining tasks in this group
-    unsigned generation;
+        atomic_int task_count; // remaining tasks in this group
+        unsigned generation;
 };
 
 struct task_handle {
-    size_t index;
-    unsigned generation;
+        size_t index;
+        unsigned generation;
 };
 
 struct thread_pool {
-    char *name;
-    pthread_t *pool;
-    struct jak_priority_queue waiting_tasks;
-    struct task_state *task_group_states;
-    size_t task_state_capacity; // number of tasks that can be tracked
-    size_t size;
-    size_t capacity;
-    struct thread_info **thread_infos;
-    struct thread_task **thread_tasks;
-    struct thread_pool_stats *statistics;
-    int enable_monitoring;
+        char *name;
+        pthread_t *pool;
+        struct jak_priority_queue waiting_tasks;
+        struct task_state *task_group_states;
+        size_t task_state_capacity; // number of tasks that can be tracked
+        size_t size;
+        size_t capacity;
+        struct thread_info **thread_infos;
+        struct thread_task **thread_tasks;
+        struct thread_pool_stats *statistics;
+        int enable_monitoring;
 };
 
 struct thread_info {
-    char name[12];
-    struct thread_pool *pool;
-    size_t id;
-    atomic_int status;
-    struct thread_stats *statistics;
+        char name[12];
+        struct thread_pool *pool;
+        size_t id;
+        atomic_int status;
+        struct thread_stats *statistics;
 };
 
 struct thread_pool *thread_pool_create(size_t num_threads, int enable_monitoring);

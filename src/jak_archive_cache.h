@@ -29,9 +29,9 @@
 JAK_BEGIN_DECL
 
 struct jak_sid_cache_stats {
-    size_t num_hits;
-    size_t num_misses;
-    size_t num_evicted;
+        size_t num_hits;
+        size_t num_misses;
+        size_t num_evicted;
 };
 
 bool jak_string_id_cache_create_lru(struct jak_string_cache **cache, struct jak_archive *archive);

@@ -18,10 +18,10 @@
 #include <jak_memblock.h>
 
 struct jak_memblock {
-    jak_offset_t blockLength;
-    jak_offset_t last_byte;
-    void *base;
-    struct jak_error err;
+        jak_offset_t blockLength;
+        jak_offset_t last_byte;
+        void *base;
+        struct jak_error err;
 };
 
 bool memblock_create(struct jak_memblock **block, size_t size)

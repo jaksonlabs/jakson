@@ -27,32 +27,33 @@
 #include <jak_utils_numbers.h>
 
 #define check_type_if_container_is_column(inserter, expected)                                                          \
-if (JAK_UNLIKELY(inserter->context_type == CARBON_COLUMN && inserter->context.column->type != expected)) {                 \
+if (JAK_UNLIKELY(inserter->context_type == JAK_CARBON_COLUMN && inserter->context.column->type != expected)) {                 \
         error_with_details(&inserter->err, JAK_ERR_TYPEMISMATCH, "Element type does not match container type");        \
 }
 
 #define check_type_range_if_container_is_column(inserter, expected1, expected2, expected3)                             \
-if (JAK_UNLIKELY(inserter->context_type == CARBON_COLUMN && inserter->context.column->type != expected1 &&                 \
+if (JAK_UNLIKELY(inserter->context_type == JAK_CARBON_COLUMN && inserter->context.column->type != expected1 &&                 \
         inserter->context.column->type != expected2 && inserter->context.column->type != expected3)) {                 \
         error_with_details(&inserter->err, JAK_ERR_TYPEMISMATCH, "Element type does not match container type");        \
 }
 
-static bool write_field_data(struct jak_carbon_insert *inserter, jak_u8 field_type_marker, const void *base, jak_u64 nbytes);
+static bool
+write_field_data(jak_carbon_insert *inserter, jak_u8 field_type_marker, const void *base, jak_u64 nbytes);
 
-static bool push_in_column(struct jak_carbon_insert *inserter, const void *base, enum carbon_field_type type);
+static bool push_in_column(jak_carbon_insert *inserter, const void *base, enum carbon_field_type type);
 
-static bool push_media_type_for_array(struct jak_carbon_insert *inserter, enum carbon_field_type type);
+static bool push_media_type_for_array(jak_carbon_insert *inserter, enum carbon_field_type type);
 
-static void internal_create(struct jak_carbon_insert *inserter, struct jak_memfile *src, jak_offset_t pos);
+static void internal_create(jak_carbon_insert *inserter, struct jak_memfile *src, jak_offset_t pos);
 
-static void write_binary_blob(struct jak_carbon_insert *inserter, const void *value, size_t nbytes);
+static void write_binary_blob(jak_carbon_insert *inserter, const void *value, size_t nbytes);
 
-bool carbon_int_insert_create_for_array(struct jak_carbon_insert *inserter, struct jak_carbon_array_it *context)
+bool carbon_int_insert_create_for_array(jak_carbon_insert *inserter, struct jak_carbon_array_it *context)
 {
         JAK_ERROR_IF_NULL(inserter)
         JAK_ERROR_IF_NULL(context)
         carbon_array_it_lock(context);
-        inserter->context_type = CARBON_ARRAY;
+        inserter->context_type = JAK_CARBON_ARRAY;
         inserter->context.array = context;
         inserter->position = 0;
 
@@ -67,23 +68,23 @@ bool carbon_int_insert_create_for_array(struct jak_carbon_insert *inserter, stru
         return true;
 }
 
-bool carbon_int_insert_create_for_column(struct jak_carbon_insert *inserter, struct jak_carbon_column_it *context)
+bool carbon_int_insert_create_for_column(jak_carbon_insert *inserter, struct jak_carbon_column_it *context)
 {
         JAK_ERROR_IF_NULL(inserter)
         JAK_ERROR_IF_NULL(context)
         carbon_column_it_lock(context);
-        inserter->context_type = CARBON_COLUMN;
+        inserter->context_type = JAK_CARBON_COLUMN;
         inserter->context.column = context;
         internal_create(inserter, &context->memfile, memfile_tell(&context->memfile));
         return true;
 }
 
-bool carbon_int_insert_create_for_object(struct jak_carbon_insert *inserter, struct jak_carbon_object_it *context)
+bool carbon_int_insert_create_for_object(jak_carbon_insert *inserter, struct jak_carbon_object_it *context)
 {
         JAK_ERROR_IF_NULL(inserter)
         JAK_ERROR_IF_NULL(context)
         carbon_object_it_lock(context);
-        inserter->context_type = CARBON_OBJECT;
+        inserter->context_type = JAK_CARBON_OBJECT;
         inserter->context.object = context;
 
         jak_offset_t pos;
@@ -97,26 +98,26 @@ bool carbon_int_insert_create_for_object(struct jak_carbon_insert *inserter, str
         return true;
 }
 
-bool carbon_insert_null(struct jak_carbon_insert *inserter)
+bool carbon_insert_null(jak_carbon_insert *inserter)
 {
-        if (JAK_UNLIKELY(inserter->context_type == CARBON_COLUMN &&
-                             inserter->context.column->type != CARBON_JAK_FIELD_TYPE_COLUMN_U8 &&
-                             inserter->context.column->type != CARBON_JAK_FIELD_TYPE_COLUMN_U16 &&
-                             inserter->context.column->type != CARBON_JAK_FIELD_TYPE_COLUMN_U32 &&
-                             inserter->context.column->type != CARBON_JAK_FIELD_TYPE_COLUMN_U64 &&
-                             inserter->context.column->type != CARBON_JAK_FIELD_TYPE_COLUMN_I8 &&
-                             inserter->context.column->type != CARBON_JAK_FIELD_TYPE_COLUMN_I16 &&
-                             inserter->context.column->type != CARBON_JAK_FIELD_TYPE_COLUMN_I32 &&
-                             inserter->context.column->type != CARBON_JAK_FIELD_TYPE_COLUMN_I64 &&
-                             inserter->context.column->type != CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT &&
-                             inserter->context.column->type != CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN)) {
+        if (JAK_UNLIKELY(inserter->context_type == JAK_CARBON_COLUMN &&
+                         inserter->context.column->type != CARBON_JAK_FIELD_TYPE_COLUMN_U8 &&
+                         inserter->context.column->type != CARBON_JAK_FIELD_TYPE_COLUMN_U16 &&
+                         inserter->context.column->type != CARBON_JAK_FIELD_TYPE_COLUMN_U32 &&
+                         inserter->context.column->type != CARBON_JAK_FIELD_TYPE_COLUMN_U64 &&
+                         inserter->context.column->type != CARBON_JAK_FIELD_TYPE_COLUMN_I8 &&
+                         inserter->context.column->type != CARBON_JAK_FIELD_TYPE_COLUMN_I16 &&
+                         inserter->context.column->type != CARBON_JAK_FIELD_TYPE_COLUMN_I32 &&
+                         inserter->context.column->type != CARBON_JAK_FIELD_TYPE_COLUMN_I64 &&
+                         inserter->context.column->type != CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT &&
+                         inserter->context.column->type != CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN)) {
                 error_with_details(&inserter->err, JAK_ERR_TYPEMISMATCH, "Element type does not match container type");
         }
 
         switch (inserter->context_type) {
-                case CARBON_ARRAY:
+                case JAK_CARBON_ARRAY:
                         return push_media_type_for_array(inserter, CARBON_JAK_FIELD_TYPE_NULL);
-                case CARBON_COLUMN: {
+                case JAK_CARBON_COLUMN: {
                         switch (inserter->context.column->type) {
                                 case CARBON_JAK_FIELD_TYPE_COLUMN_U8: {
                                         jak_u8 value = U8_NULL;
@@ -177,13 +178,13 @@ bool carbon_insert_null(struct jak_carbon_insert *inserter)
         }
 }
 
-bool carbon_insert_true(struct jak_carbon_insert *inserter)
+bool carbon_insert_true(jak_carbon_insert *inserter)
 {
         check_type_if_container_is_column(inserter, CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN);
         switch (inserter->context_type) {
-                case CARBON_ARRAY:
+                case JAK_CARBON_ARRAY:
                         return push_media_type_for_array(inserter, CARBON_JAK_FIELD_TYPE_TRUE);
-                case CARBON_COLUMN: {
+                case JAK_CARBON_COLUMN: {
                         jak_u8 value = JAK_CARBON_BOOLEAN_COLUMN_TRUE;
                         return push_in_column(inserter, &value, CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN);
                 }
@@ -192,13 +193,13 @@ bool carbon_insert_true(struct jak_carbon_insert *inserter)
         }
 }
 
-bool carbon_insert_false(struct jak_carbon_insert *inserter)
+bool carbon_insert_false(jak_carbon_insert *inserter)
 {
         check_type_if_container_is_column(inserter, CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN);
         switch (inserter->context_type) {
-                case CARBON_ARRAY:
+                case JAK_CARBON_ARRAY:
                         return push_media_type_for_array(inserter, CARBON_JAK_FIELD_TYPE_FALSE);
-                case CARBON_COLUMN: {
+                case JAK_CARBON_COLUMN: {
                         jak_u8 value = JAK_CARBON_BOOLEAN_COLUMN_FALSE;
                         return push_in_column(inserter, &value, CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN);
                 }
@@ -207,14 +208,14 @@ bool carbon_insert_false(struct jak_carbon_insert *inserter)
         }
 }
 
-bool carbon_insert_u8(struct jak_carbon_insert *inserter, jak_u8 value)
+bool carbon_insert_u8(jak_carbon_insert *inserter, jak_u8 value)
 {
         check_type_if_container_is_column(inserter, CARBON_JAK_FIELD_TYPE_COLUMN_U8);
         switch (inserter->context_type) {
-                case CARBON_ARRAY:
+                case JAK_CARBON_ARRAY:
                         write_field_data(inserter, CARBON_JAK_FIELD_TYPE_NUMBER_U8, &value, sizeof(jak_u8));
                         break;
-                case CARBON_COLUMN:
+                case JAK_CARBON_COLUMN:
                         push_in_column(inserter, &value, CARBON_JAK_FIELD_TYPE_COLUMN_U8);
                         break;
                 default: error(&inserter->err, JAK_ERR_INTERNALERR);
@@ -223,14 +224,14 @@ bool carbon_insert_u8(struct jak_carbon_insert *inserter, jak_u8 value)
         return true;
 }
 
-bool carbon_insert_u16(struct jak_carbon_insert *inserter, jak_u16 value)
+bool carbon_insert_u16(jak_carbon_insert *inserter, jak_u16 value)
 {
         check_type_if_container_is_column(inserter, CARBON_JAK_FIELD_TYPE_COLUMN_U16);
         switch (inserter->context_type) {
-                case CARBON_ARRAY:
+                case JAK_CARBON_ARRAY:
                         write_field_data(inserter, CARBON_JAK_FIELD_TYPE_NUMBER_U16, &value, sizeof(jak_u16));
                         break;
-                case CARBON_COLUMN:
+                case JAK_CARBON_COLUMN:
                         push_in_column(inserter, &value, CARBON_JAK_FIELD_TYPE_COLUMN_U16);
                         break;
                 default: error(&inserter->err, JAK_ERR_INTERNALERR);
@@ -239,14 +240,14 @@ bool carbon_insert_u16(struct jak_carbon_insert *inserter, jak_u16 value)
         return true;
 }
 
-bool carbon_insert_u32(struct jak_carbon_insert *inserter, jak_u32 value)
+bool carbon_insert_u32(jak_carbon_insert *inserter, jak_u32 value)
 {
         check_type_if_container_is_column(inserter, CARBON_JAK_FIELD_TYPE_COLUMN_U32);
         switch (inserter->context_type) {
-                case CARBON_ARRAY:
+                case JAK_CARBON_ARRAY:
                         write_field_data(inserter, CARBON_JAK_FIELD_TYPE_NUMBER_U32, &value, sizeof(jak_u32));
                         break;
-                case CARBON_COLUMN:
+                case JAK_CARBON_COLUMN:
                         push_in_column(inserter, &value, CARBON_JAK_FIELD_TYPE_COLUMN_U32);
                         break;
                 default: error(&inserter->err, JAK_ERR_INTERNALERR);
@@ -255,14 +256,14 @@ bool carbon_insert_u32(struct jak_carbon_insert *inserter, jak_u32 value)
         return true;
 }
 
-bool carbon_insert_u64(struct jak_carbon_insert *inserter, jak_u64 value)
+bool carbon_insert_u64(jak_carbon_insert *inserter, jak_u64 value)
 {
         check_type_if_container_is_column(inserter, CARBON_JAK_FIELD_TYPE_COLUMN_U64);
         switch (inserter->context_type) {
-                case CARBON_ARRAY:
+                case JAK_CARBON_ARRAY:
                         write_field_data(inserter, CARBON_JAK_FIELD_TYPE_NUMBER_U64, &value, sizeof(jak_u64));
                         break;
-                case CARBON_COLUMN:
+                case JAK_CARBON_COLUMN:
                         push_in_column(inserter, &value, CARBON_JAK_FIELD_TYPE_COLUMN_U64);
                         break;
                 default: error(&inserter->err, JAK_ERR_INTERNALERR);
@@ -271,14 +272,14 @@ bool carbon_insert_u64(struct jak_carbon_insert *inserter, jak_u64 value)
         return true;
 }
 
-bool carbon_insert_i8(struct jak_carbon_insert *inserter, jak_i8 value)
+bool carbon_insert_i8(jak_carbon_insert *inserter, jak_i8 value)
 {
         check_type_if_container_is_column(inserter, CARBON_JAK_FIELD_TYPE_COLUMN_I8);
         switch (inserter->context_type) {
-                case CARBON_ARRAY:
+                case JAK_CARBON_ARRAY:
                         write_field_data(inserter, CARBON_JAK_FIELD_TYPE_NUMBER_I8, &value, sizeof(jak_i8));
                         break;
-                case CARBON_COLUMN:
+                case JAK_CARBON_COLUMN:
                         push_in_column(inserter, &value, CARBON_JAK_FIELD_TYPE_COLUMN_I8);
                         break;
                 default: error(&inserter->err, JAK_ERR_INTERNALERR);
@@ -287,14 +288,14 @@ bool carbon_insert_i8(struct jak_carbon_insert *inserter, jak_i8 value)
         return true;
 }
 
-bool carbon_insert_i16(struct jak_carbon_insert *inserter, jak_i16 value)
+bool carbon_insert_i16(jak_carbon_insert *inserter, jak_i16 value)
 {
         check_type_if_container_is_column(inserter, CARBON_JAK_FIELD_TYPE_COLUMN_I16);
         switch (inserter->context_type) {
-                case CARBON_ARRAY:
+                case JAK_CARBON_ARRAY:
                         write_field_data(inserter, CARBON_JAK_FIELD_TYPE_NUMBER_I16, &value, sizeof(jak_i16));
                         break;
-                case CARBON_COLUMN:
+                case JAK_CARBON_COLUMN:
                         push_in_column(inserter, &value, CARBON_JAK_FIELD_TYPE_COLUMN_I16);
                         break;
                 default: error(&inserter->err, JAK_ERR_INTERNALERR);
@@ -303,14 +304,14 @@ bool carbon_insert_i16(struct jak_carbon_insert *inserter, jak_i16 value)
         return true;
 }
 
-bool carbon_insert_i32(struct jak_carbon_insert *inserter, jak_i32 value)
+bool carbon_insert_i32(jak_carbon_insert *inserter, jak_i32 value)
 {
         check_type_if_container_is_column(inserter, CARBON_JAK_FIELD_TYPE_COLUMN_I32);
         switch (inserter->context_type) {
-                case CARBON_ARRAY:
+                case JAK_CARBON_ARRAY:
                         write_field_data(inserter, CARBON_JAK_FIELD_TYPE_NUMBER_I32, &value, sizeof(jak_i32));
                         break;
-                case CARBON_COLUMN:
+                case JAK_CARBON_COLUMN:
                         push_in_column(inserter, &value, CARBON_JAK_FIELD_TYPE_COLUMN_I32);
                         break;
                 default: error(&inserter->err, JAK_ERR_INTERNALERR);
@@ -319,14 +320,14 @@ bool carbon_insert_i32(struct jak_carbon_insert *inserter, jak_i32 value)
         return true;
 }
 
-bool carbon_insert_i64(struct jak_carbon_insert *inserter, jak_i64 value)
+bool carbon_insert_i64(jak_carbon_insert *inserter, jak_i64 value)
 {
         check_type_if_container_is_column(inserter, CARBON_JAK_FIELD_TYPE_COLUMN_I64);
         switch (inserter->context_type) {
-                case CARBON_ARRAY:
+                case JAK_CARBON_ARRAY:
                         write_field_data(inserter, CARBON_JAK_FIELD_TYPE_NUMBER_I64, &value, sizeof(jak_i64));
                         break;
-                case CARBON_COLUMN:
+                case JAK_CARBON_COLUMN:
                         push_in_column(inserter, &value, CARBON_JAK_FIELD_TYPE_COLUMN_I64);
                         break;
                 default: error(&inserter->err, JAK_ERR_INTERNALERR);
@@ -335,9 +336,9 @@ bool carbon_insert_i64(struct jak_carbon_insert *inserter, jak_i64 value)
         return true;
 }
 
-bool carbon_insert_unsigned(struct jak_carbon_insert *inserter, jak_u64 value)
+bool carbon_insert_unsigned(jak_carbon_insert *inserter, jak_u64 value)
 {
-        error_if(inserter->context_type == CARBON_COLUMN, &inserter->err, JAK_ERR_INSERT_TOO_DANGEROUS)
+        error_if(inserter->context_type == JAK_CARBON_COLUMN, &inserter->err, JAK_ERR_INSERT_TOO_DANGEROUS)
 
         switch (number_min_type_signed(value)) {
                 case NUMBER_I8:
@@ -348,15 +349,14 @@ bool carbon_insert_unsigned(struct jak_carbon_insert *inserter, jak_u64 value)
                         return carbon_insert_u32(inserter, (jak_u32) value);
                 case NUMBER_I64:
                         return carbon_insert_u64(inserter, (jak_u64) value);
-                default:
-                        error(&inserter->err, JAK_ERR_INTERNALERR);
+                default: error(&inserter->err, JAK_ERR_INTERNALERR);
                         return false;
         }
 }
 
-bool carbon_insert_signed(struct jak_carbon_insert *inserter, jak_i64 value)
+bool carbon_insert_signed(jak_carbon_insert *inserter, jak_i64 value)
 {
-        error_if(inserter->context_type == CARBON_COLUMN, &inserter->err, JAK_ERR_INSERT_TOO_DANGEROUS)
+        error_if(inserter->context_type == JAK_CARBON_COLUMN, &inserter->err, JAK_ERR_INSERT_TOO_DANGEROUS)
 
         switch (number_min_type_signed(value)) {
                 case NUMBER_I8:
@@ -367,21 +367,20 @@ bool carbon_insert_signed(struct jak_carbon_insert *inserter, jak_i64 value)
                         return carbon_insert_i32(inserter, (jak_i32) value);
                 case NUMBER_I64:
                         return carbon_insert_i64(inserter, (jak_i64) value);
-                default:
-                        error(&inserter->err, JAK_ERR_INTERNALERR);
+                default: error(&inserter->err, JAK_ERR_INTERNALERR);
                         return false;
         }
 }
 
-bool carbon_insert_float(struct jak_carbon_insert *inserter, float value)
+bool carbon_insert_float(jak_carbon_insert *inserter, float value)
 {
         JAK_ERROR_IF_NULL(inserter)
         check_type_if_container_is_column(inserter, CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT);
         switch (inserter->context_type) {
-                case CARBON_ARRAY:
+                case JAK_CARBON_ARRAY:
                         write_field_data(inserter, CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT, &value, sizeof(float));
                         break;
-                case CARBON_COLUMN:
+                case JAK_CARBON_COLUMN:
                         push_in_column(inserter, &value, CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT);
                         break;
                 default: error(&inserter->err, JAK_ERR_INTERNALERR);
@@ -390,21 +389,21 @@ bool carbon_insert_float(struct jak_carbon_insert *inserter, float value)
         return true;
 }
 
-bool carbon_insert_string(struct jak_carbon_insert *inserter, const char *value)
+bool carbon_insert_string(jak_carbon_insert *inserter, const char *value)
 {
         return carbon_insert_nchar(inserter, value, strlen(value));
 }
 
-bool carbon_insert_nchar(struct jak_carbon_insert *inserter, const char *value, jak_u64 value_len)
+bool carbon_insert_nchar(jak_carbon_insert *inserter, const char *value, jak_u64 value_len)
 {
         JAK_UNUSED(inserter);
         JAK_UNUSED(value);
-        error_if(inserter->context_type != CARBON_ARRAY, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != JAK_CARBON_ARRAY, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
 
         return carbon_string_nchar_write(&inserter->memfile, value, value_len);
 }
 
-static void insert_binary(struct jak_carbon_insert *inserter, const void *value, size_t nbytes,
+static void insert_binary(jak_carbon_insert *inserter, const void *value, size_t nbytes,
                           const char *file_ext, const char *user_type)
 {
         if (user_type && strlen(user_type) > 0) {
@@ -438,20 +437,20 @@ static void insert_binary(struct jak_carbon_insert *inserter, const void *value,
         }
 }
 
-bool carbon_insert_binary(struct jak_carbon_insert *inserter, const void *value, size_t nbytes,
+bool carbon_insert_binary(jak_carbon_insert *inserter, const void *value, size_t nbytes,
                           const char *file_ext, const char *user_type)
 {
         JAK_ERROR_IF_NULL(inserter)
         JAK_ERROR_IF_NULL(value)
-        error_if(inserter->context_type != CARBON_ARRAY, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != JAK_CARBON_ARRAY, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
 
         insert_binary(inserter, value, nbytes, file_ext, user_type);
 
         return true;
 }
 
-struct jak_carbon_insert *carbon_insert_object_begin(struct jak_carbon_insert_object_state *out,
-                                                 struct jak_carbon_insert *inserter, jak_u64 object_capacity)
+jak_carbon_insert *carbon_insert_object_begin(struct jak_carbon_insert_object_state *out,
+                                                     jak_carbon_insert *inserter, jak_u64 object_capacity)
 {
         JAK_ERROR_IF_NULL(out)
         JAK_ERROR_IF_NULL(inserter)
@@ -503,8 +502,8 @@ bool carbon_insert_object_end(struct jak_carbon_insert_object_state *state)
         return true;
 }
 
-struct jak_carbon_insert *carbon_insert_array_begin(struct jak_carbon_insert_array_state *state_out,
-                                                struct jak_carbon_insert *inserter_in, jak_u64 array_capacity)
+jak_carbon_insert *carbon_insert_array_begin(struct jak_carbon_insert_array_state *state_out,
+                                                    jak_carbon_insert *inserter_in, jak_u64 array_capacity)
 {
         error_if_and_return(!state_out, &inserter_in->err, JAK_ERR_NULLPTR, NULL);
         if (!inserter_in) {
@@ -512,7 +511,7 @@ struct jak_carbon_insert *carbon_insert_array_begin(struct jak_carbon_insert_arr
                 return false;
         }
 
-        error_if(inserter_in->context_type != CARBON_ARRAY && inserter_in->context_type != CARBON_OBJECT,
+        error_if(inserter_in->context_type != JAK_CARBON_ARRAY && inserter_in->context_type != JAK_CARBON_OBJECT,
                  &inserter_in->err, JAK_ERR_UNSUPPCONTAINER);
 
         *state_out = (struct jak_carbon_insert_array_state) {
@@ -552,13 +551,14 @@ bool carbon_insert_array_end(struct jak_carbon_insert_array_state *state_in)
         return true;
 }
 
-struct jak_carbon_insert *carbon_insert_column_begin(struct jak_carbon_insert_column_state *state_out,
-                                                 struct jak_carbon_insert *inserter_in, enum carbon_column_type type,
-                                                 jak_u64 column_capacity)
+jak_carbon_insert *carbon_insert_column_begin(struct jak_carbon_insert_column_state *state_out,
+                                                     jak_carbon_insert *inserter_in,
+                                                     enum carbon_column_type type,
+                                                     jak_u64 column_capacity)
 {
         error_if_and_return(!state_out, &inserter_in->err, JAK_ERR_NULLPTR, NULL);
         error_if_and_return(!inserter_in, &inserter_in->err, JAK_ERR_NULLPTR, NULL);
-        error_if(inserter_in->context_type != CARBON_ARRAY && inserter_in->context_type != CARBON_OBJECT,
+        error_if(inserter_in->context_type != JAK_CARBON_ARRAY && inserter_in->context_type != JAK_CARBON_OBJECT,
                  &inserter_in->err, JAK_ERR_UNSUPPCONTAINER);
 
         enum carbon_field_type field_type = carbon_field_type_for_column(type);
@@ -598,19 +598,19 @@ bool carbon_insert_column_end(struct jak_carbon_insert_column_state *state_in)
         return true;
 }
 
-static void inserter_refresh_mod_size(struct jak_carbon_insert *inserter, jak_i64 mod_size)
+static void inserter_refresh_mod_size(jak_carbon_insert *inserter, jak_i64 mod_size)
 {
         JAK_ASSERT(mod_size > 0);
 
         jak_i64 *target = NULL;
         switch (inserter->context_type) {
-                case CARBON_OBJECT:
+                case JAK_CARBON_OBJECT:
                         target = &inserter->context.object->mod_size;
                         break;
-                case CARBON_ARRAY:
+                case JAK_CARBON_ARRAY:
                         target = &inserter->context.array->mod_size;
                         break;
-                case CARBON_COLUMN:
+                case JAK_CARBON_COLUMN:
                         target = &inserter->context.column->mod_size;
                         break;
                 default: error_print(JAK_ERR_UNSUPPCONTAINER);
@@ -618,9 +618,9 @@ static void inserter_refresh_mod_size(struct jak_carbon_insert *inserter, jak_i6
         *target += mod_size;
 }
 
-bool carbon_insert_prop_null(struct jak_carbon_insert *inserter, const char *key)
+bool carbon_insert_prop_null(jak_carbon_insert *inserter, const char *key)
 {
-        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
         push_media_type_for_array(inserter, CARBON_JAK_FIELD_TYPE_NULL);
@@ -629,9 +629,9 @@ bool carbon_insert_prop_null(struct jak_carbon_insert *inserter, const char *key
         return true;
 }
 
-bool carbon_insert_prop_true(struct jak_carbon_insert *inserter, const char *key)
+bool carbon_insert_prop_true(jak_carbon_insert *inserter, const char *key)
 {
-        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
         push_media_type_for_array(inserter, CARBON_JAK_FIELD_TYPE_TRUE);
@@ -640,9 +640,9 @@ bool carbon_insert_prop_true(struct jak_carbon_insert *inserter, const char *key
         return true;
 }
 
-bool carbon_insert_prop_false(struct jak_carbon_insert *inserter, const char *key)
+bool carbon_insert_prop_false(jak_carbon_insert *inserter, const char *key)
 {
-        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
         push_media_type_for_array(inserter, CARBON_JAK_FIELD_TYPE_FALSE);
@@ -651,9 +651,9 @@ bool carbon_insert_prop_false(struct jak_carbon_insert *inserter, const char *ke
         return true;
 }
 
-bool carbon_insert_prop_u8(struct jak_carbon_insert *inserter, const char *key, jak_u8 value)
+bool carbon_insert_prop_u8(jak_carbon_insert *inserter, const char *key, jak_u8 value)
 {
-        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
         write_field_data(inserter, CARBON_JAK_FIELD_TYPE_NUMBER_U8, &value, sizeof(jak_u8));
@@ -662,9 +662,9 @@ bool carbon_insert_prop_u8(struct jak_carbon_insert *inserter, const char *key, 
         return true;
 }
 
-bool carbon_insert_prop_u16(struct jak_carbon_insert *inserter, const char *key, jak_u16 value)
+bool carbon_insert_prop_u16(jak_carbon_insert *inserter, const char *key, jak_u16 value)
 {
-        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
         write_field_data(inserter, CARBON_JAK_FIELD_TYPE_NUMBER_U16, &value, sizeof(jak_u16));
@@ -673,9 +673,9 @@ bool carbon_insert_prop_u16(struct jak_carbon_insert *inserter, const char *key,
         return true;
 }
 
-bool carbon_insert_prop_u32(struct jak_carbon_insert *inserter, const char *key, jak_u32 value)
+bool carbon_insert_prop_u32(jak_carbon_insert *inserter, const char *key, jak_u32 value)
 {
-        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
         write_field_data(inserter, CARBON_JAK_FIELD_TYPE_NUMBER_U32, &value, sizeof(jak_u32));
@@ -684,9 +684,9 @@ bool carbon_insert_prop_u32(struct jak_carbon_insert *inserter, const char *key,
         return true;
 }
 
-bool carbon_insert_prop_u64(struct jak_carbon_insert *inserter, const char *key, jak_u64 value)
+bool carbon_insert_prop_u64(jak_carbon_insert *inserter, const char *key, jak_u64 value)
 {
-        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
         write_field_data(inserter, CARBON_JAK_FIELD_TYPE_NUMBER_U64, &value, sizeof(jak_u64));
@@ -695,9 +695,9 @@ bool carbon_insert_prop_u64(struct jak_carbon_insert *inserter, const char *key,
         return true;
 }
 
-bool carbon_insert_prop_i8(struct jak_carbon_insert *inserter, const char *key, jak_i8 value)
+bool carbon_insert_prop_i8(jak_carbon_insert *inserter, const char *key, jak_i8 value)
 {
-        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
         write_field_data(inserter, CARBON_JAK_FIELD_TYPE_NUMBER_I8, &value, sizeof(jak_i8));
@@ -706,9 +706,9 @@ bool carbon_insert_prop_i8(struct jak_carbon_insert *inserter, const char *key, 
         return true;
 }
 
-bool carbon_insert_prop_i16(struct jak_carbon_insert *inserter, const char *key, jak_i16 value)
+bool carbon_insert_prop_i16(jak_carbon_insert *inserter, const char *key, jak_i16 value)
 {
-        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
         write_field_data(inserter, CARBON_JAK_FIELD_TYPE_NUMBER_I16, &value, sizeof(jak_i16));
@@ -717,9 +717,9 @@ bool carbon_insert_prop_i16(struct jak_carbon_insert *inserter, const char *key,
         return true;
 }
 
-bool carbon_insert_prop_i32(struct jak_carbon_insert *inserter, const char *key, jak_i32 value)
+bool carbon_insert_prop_i32(jak_carbon_insert *inserter, const char *key, jak_i32 value)
 {
-        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
         write_field_data(inserter, CARBON_JAK_FIELD_TYPE_NUMBER_I32, &value, sizeof(jak_i32));
@@ -728,9 +728,9 @@ bool carbon_insert_prop_i32(struct jak_carbon_insert *inserter, const char *key,
         return true;
 }
 
-bool carbon_insert_prop_i64(struct jak_carbon_insert *inserter, const char *key, jak_i64 value)
+bool carbon_insert_prop_i64(jak_carbon_insert *inserter, const char *key, jak_i64 value)
 {
-        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
         write_field_data(inserter, CARBON_JAK_FIELD_TYPE_NUMBER_I64, &value, sizeof(jak_i64));
@@ -739,9 +739,9 @@ bool carbon_insert_prop_i64(struct jak_carbon_insert *inserter, const char *key,
         return true;
 }
 
-bool carbon_insert_prop_unsigned(struct jak_carbon_insert *inserter, const char *key, jak_u64 value)
+bool carbon_insert_prop_unsigned(jak_carbon_insert *inserter, const char *key, jak_u64 value)
 {
-        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER)
+        error_if(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER)
 
         switch (number_min_type_unsigned(value)) {
                 case NUMBER_U8:
@@ -752,15 +752,14 @@ bool carbon_insert_prop_unsigned(struct jak_carbon_insert *inserter, const char 
                         return carbon_insert_prop_u32(inserter, key, (jak_u32) value);
                 case NUMBER_U64:
                         return carbon_insert_prop_u64(inserter, key, (jak_u64) value);
-                default:
-                error(&inserter->err, JAK_ERR_INTERNALERR);
+                default: error(&inserter->err, JAK_ERR_INTERNALERR);
                         return false;
         }
 }
 
-bool carbon_insert_prop_signed(struct jak_carbon_insert *inserter, const char *key, jak_i64 value)
+bool carbon_insert_prop_signed(jak_carbon_insert *inserter, const char *key, jak_i64 value)
 {
-        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER)
+        error_if(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER)
 
         switch (number_min_type_signed(value)) {
                 case NUMBER_I8:
@@ -771,15 +770,14 @@ bool carbon_insert_prop_signed(struct jak_carbon_insert *inserter, const char *k
                         return carbon_insert_prop_i32(inserter, key, (jak_i32) value);
                 case NUMBER_I64:
                         return carbon_insert_prop_i64(inserter, key, (jak_i64) value);
-                default:
-                        error(&inserter->err, JAK_ERR_INTERNALERR);
+                default: error(&inserter->err, JAK_ERR_INTERNALERR);
                         return false;
         }
 }
 
-bool carbon_insert_prop_float(struct jak_carbon_insert *inserter, const char *key, float value)
+bool carbon_insert_prop_float(jak_carbon_insert *inserter, const char *key, float value)
 {
-        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
         write_field_data(inserter, CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT, &value, sizeof(float));
@@ -788,14 +786,14 @@ bool carbon_insert_prop_float(struct jak_carbon_insert *inserter, const char *ke
         return true;
 }
 
-bool carbon_insert_prop_string(struct jak_carbon_insert *inserter, const char *key, const char *value)
+bool carbon_insert_prop_string(jak_carbon_insert *inserter, const char *key, const char *value)
 {
         return carbon_insert_prop_nchar(inserter, key, value, strlen(value));
 }
 
-bool carbon_insert_prop_nchar(struct jak_carbon_insert *inserter, const char *key, const char *value, jak_u64 value_len)
+bool carbon_insert_prop_nchar(jak_carbon_insert *inserter, const char *key, const char *value, jak_u64 value_len)
 {
-        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
         carbon_string_nchar_write(&inserter->memfile, value, value_len);
@@ -804,10 +802,10 @@ bool carbon_insert_prop_nchar(struct jak_carbon_insert *inserter, const char *ke
         return true;
 }
 
-bool carbon_insert_prop_binary(struct jak_carbon_insert *inserter, const char *key, const void *value,
+bool carbon_insert_prop_binary(jak_carbon_insert *inserter, const char *key, const void *value,
                                size_t nbytes, const char *file_ext, const char *user_type)
 {
-        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
         insert_binary(inserter, value, nbytes, file_ext, user_type);
@@ -816,11 +814,11 @@ bool carbon_insert_prop_binary(struct jak_carbon_insert *inserter, const char *k
         return true;
 }
 
-struct jak_carbon_insert *carbon_insert_prop_object_begin(struct jak_carbon_insert_object_state *out,
-                                                      struct jak_carbon_insert *inserter, const char *key,
-                                                      jak_u64 object_capacity)
+jak_carbon_insert *carbon_insert_prop_object_begin(struct jak_carbon_insert_object_state *out,
+                                                          jak_carbon_insert *inserter, const char *key,
+                                                          jak_u64 object_capacity)
 {
-        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter->memfile, key);
         return carbon_insert_object_begin(out, inserter, object_capacity);
 }
@@ -831,11 +829,11 @@ jak_u64 carbon_insert_prop_object_end(struct jak_carbon_insert_object_state *sta
         return state->object_end - state->object_begin;
 }
 
-struct jak_carbon_insert *carbon_insert_prop_array_begin(struct jak_carbon_insert_array_state *state,
-                                                     struct jak_carbon_insert *inserter, const char *key,
-                                                     jak_u64 array_capacity)
+jak_carbon_insert *carbon_insert_prop_array_begin(struct jak_carbon_insert_array_state *state,
+                                                         jak_carbon_insert *inserter, const char *key,
+                                                         jak_u64 array_capacity)
 {
-        error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
+        error_if(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter->memfile, key);
         return carbon_insert_array_begin(state, inserter, array_capacity);
 }
@@ -846,11 +844,11 @@ jak_u64 carbon_insert_prop_array_end(struct jak_carbon_insert_array_state *state
         return state->array_end - state->array_begin;
 }
 
-struct jak_carbon_insert *carbon_insert_prop_column_begin(struct jak_carbon_insert_column_state *state_out,
-                                                      struct jak_carbon_insert *inserter_in, const char *key,
-                                                      enum carbon_column_type type, jak_u64 column_capacity)
+jak_carbon_insert *carbon_insert_prop_column_begin(struct jak_carbon_insert_column_state *state_out,
+                                                          jak_carbon_insert *inserter_in, const char *key,
+                                                          enum carbon_column_type type, jak_u64 column_capacity)
 {
-        error_if(inserter_in->context_type != CARBON_OBJECT, &inserter_in->err, JAK_ERR_UNSUPPCONTAINER);
+        error_if(inserter_in->context_type != JAK_CARBON_OBJECT, &inserter_in->err, JAK_ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter_in->memfile, key);
         return carbon_insert_column_begin(state_out, inserter_in, type, column_capacity);
 }
@@ -861,14 +859,14 @@ jak_u64 carbon_insert_prop_column_end(struct jak_carbon_insert_column_state *sta
         return state_in->column_end - state_in->column_begin;
 }
 
-bool carbon_insert_drop(struct jak_carbon_insert *inserter)
+bool carbon_insert_drop(jak_carbon_insert *inserter)
 {
         JAK_ERROR_IF_NULL(inserter)
-        if (inserter->context_type == CARBON_ARRAY) {
+        if (inserter->context_type == JAK_CARBON_ARRAY) {
                 carbon_array_it_unlock(inserter->context.array);
-        } else if (inserter->context_type == CARBON_COLUMN) {
+        } else if (inserter->context_type == JAK_CARBON_COLUMN) {
                 carbon_column_it_unlock(inserter->context.column);
-        } else if (inserter->context_type == CARBON_OBJECT) {
+        } else if (inserter->context_type == JAK_CARBON_OBJECT) {
                 carbon_object_it_unlock(inserter->context.object);
         } else {
                 error(&inserter->err, JAK_ERR_INTERNALERR);
@@ -877,18 +875,19 @@ bool carbon_insert_drop(struct jak_carbon_insert *inserter)
         return true;
 }
 
-static bool write_field_data(struct jak_carbon_insert *inserter, jak_u8 field_type_marker, const void *base, jak_u64 nbytes)
+static bool
+write_field_data(jak_carbon_insert *inserter, jak_u8 field_type_marker, const void *base, jak_u64 nbytes)
 {
-        JAK_ASSERT(inserter->context_type == CARBON_ARRAY || inserter->context_type == CARBON_OBJECT);
+        JAK_ASSERT(inserter->context_type == JAK_CARBON_ARRAY || inserter->context_type == JAK_CARBON_OBJECT);
 
         memfile_ensure_space(&inserter->memfile, sizeof(jak_u8) + nbytes);
         memfile_write(&inserter->memfile, &field_type_marker, sizeof(jak_u8));
         return memfile_write(&inserter->memfile, base, nbytes);
 }
 
-static bool push_in_column(struct jak_carbon_insert *inserter, const void *base, enum carbon_field_type type)
+static bool push_in_column(jak_carbon_insert *inserter, const void *base, enum carbon_field_type type)
 {
-        JAK_ASSERT(inserter->context_type == CARBON_COLUMN);
+        JAK_ASSERT(inserter->context_type == JAK_CARBON_COLUMN);
 
         size_t type_size = carbon_int_get_type_value_size(type);
 
@@ -929,13 +928,13 @@ static bool push_in_column(struct jak_carbon_insert *inserter, const void *base,
         return true;
 }
 
-static bool push_media_type_for_array(struct jak_carbon_insert *inserter, enum carbon_field_type type)
+static bool push_media_type_for_array(jak_carbon_insert *inserter, enum carbon_field_type type)
 {
         memfile_ensure_space(&inserter->memfile, sizeof(media_type_t));
         return carbon_media_write(&inserter->memfile, type);
 }
 
-static void internal_create(struct jak_carbon_insert *inserter, struct jak_memfile *src, jak_offset_t pos)
+static void internal_create(jak_carbon_insert *inserter, struct jak_memfile *src, jak_offset_t pos)
 {
         memfile_clone(&inserter->memfile, src);
         error_init(&inserter->err);
@@ -943,7 +942,7 @@ static void internal_create(struct jak_carbon_insert *inserter, struct jak_memfi
         memfile_seek(&inserter->memfile, inserter->position);
 }
 
-static void write_binary_blob(struct jak_carbon_insert *inserter, const void *value, size_t nbytes)
+static void write_binary_blob(jak_carbon_insert *inserter, const void *value, size_t nbytes)
 {
         /* write blob length */
         memfile_write_uintvar_stream(NULL, &inserter->memfile, nbytes);

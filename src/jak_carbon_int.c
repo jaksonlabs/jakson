@@ -41,11 +41,12 @@ static bool array_it_next_no_load(bool *is_empty_slot, bool *is_array_end, struc
 
 static bool object_it_next_no_load(bool *is_empty_slot, bool *is_array_end, struct jak_carbon_object_it *it);
 
-static void int_carbon_from_json_elem(struct jak_carbon_insert *ins, const struct jak_json_element *elem, bool is_root);
+static void int_carbon_from_json_elem(jak_carbon_insert *ins, const struct jak_json_element *elem, bool is_root);
 
-static void int_insert_prop_object(struct jak_carbon_insert *oins, struct jak_json_object_t *obj);
+static void int_insert_prop_object(jak_carbon_insert *oins, struct jak_json_object_t *obj);
 
-static void insert_embedded_container(struct jak_memfile *memfile, jak_u8 begin_marker, jak_u8 end_marker, jak_u8 capacity)
+static void
+insert_embedded_container(struct jak_memfile *memfile, jak_u8 begin_marker, jak_u8 end_marker, jak_u8 capacity)
 {
         memfile_ensure_space(memfile, sizeof(jak_u8));
         marker_insert(memfile, begin_marker);
@@ -412,16 +413,16 @@ jak_offset_t carbon_int_column_get_payload_off(struct jak_carbon_column_it *it)
         return result;
 }
 
-jak_offset_t carbon_int_payload_after_header(struct jak_carbon *doc)
+jak_offset_t carbon_int_payload_after_header(jak_carbon *doc)
 {
         jak_offset_t result = 0;
-        enum carbon_key_type key_type;
+        jak_carbon_key_e key_type;
 
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
 
         if (JAK_LIKELY(carbon_key_skip(&key_type, &doc->memfile))) {
-                if (key_type != CARBON_KEY_NOKEY) {
+                if (key_type != JAK_CARBON_KEY_NOKEY) {
                         carbon_commit_hash_skip(&doc->memfile);
                 }
                 result = memfile_tell(&doc->memfile);
@@ -432,17 +433,17 @@ jak_offset_t carbon_int_payload_after_header(struct jak_carbon *doc)
         return result;
 }
 
-jak_u64 carbon_int_header_get_commit_hash(struct jak_carbon *doc)
+jak_u64 carbon_int_header_get_commit_hash(jak_carbon *doc)
 {
         JAK_ASSERT(doc);
         jak_u64 rev = 0;
-        enum carbon_key_type key_type;
+        jak_carbon_key_e key_type;
 
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
 
         carbon_key_skip(&key_type, &doc->memfile);
-        if (key_type != CARBON_KEY_NOKEY) {
+        if (key_type != JAK_CARBON_KEY_NOKEY) {
                 carbon_commit_hash_read(&rev, &doc->memfile);
         }
 
@@ -678,7 +679,8 @@ bool carbon_int_field_access_i64_value(jak_i64 *value, struct field_access *fiel
         return true;
 }
 
-bool carbon_int_field_access_float_value(bool *is_null_in, float *value, struct field_access *field, struct jak_error *err)
+bool
+carbon_int_field_access_float_value(bool *is_null_in, float *value, struct field_access *field, struct jak_error *err)
 {
         JAK_ERROR_IF_NULL(field)
         error_if(field->it_field_type != CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT, err, JAK_ERR_TYPEMISMATCH);
@@ -689,7 +691,8 @@ bool carbon_int_field_access_float_value(bool *is_null_in, float *value, struct 
         return true;
 }
 
-bool carbon_int_field_access_signed_value(bool *is_null_in, jak_i64 *value, struct field_access *field, struct jak_error *err)
+bool carbon_int_field_access_signed_value(bool *is_null_in, jak_i64 *value, struct field_access *field,
+                                          struct jak_error *err)
 {
         JAK_ERROR_IF_NULL(field)
         switch (field->it_field_type) {
@@ -727,7 +730,8 @@ bool carbon_int_field_access_signed_value(bool *is_null_in, jak_i64 *value, stru
         return true;
 }
 
-bool carbon_int_field_access_unsigned_value(bool *is_null_in, jak_u64 *value, struct field_access *field, struct jak_error *err)
+bool carbon_int_field_access_unsigned_value(bool *is_null_in, jak_u64 *value, struct field_access *field,
+                                            struct jak_error *err)
 {
         JAK_ERROR_IF_NULL(field)
         switch (field->it_field_type) {
@@ -774,7 +778,8 @@ const char *carbon_int_field_access_string_value(jak_u64 *strlen, struct field_a
         return field->it_field_data;
 }
 
-bool carbon_int_field_access_binary_value(struct jak_carbon_binary *out, struct field_access *field, struct jak_error *err)
+bool
+carbon_int_field_access_binary_value(struct jak_carbon_binary *out, struct field_access *field, struct jak_error *err)
 {
         JAK_ERROR_IF_NULL(out)
         JAK_ERROR_IF_NULL(field)
@@ -946,11 +951,11 @@ bool carbon_int_field_remove(struct jak_memfile *memfile, struct jak_error *err,
         return true;
 }
 
-static void int_insert_array_array(struct jak_carbon_insert *array_ins, struct jak_json_array *array)
+static void int_insert_array_array(jak_carbon_insert *array_ins, struct jak_json_array *array)
 {
         struct jak_carbon_insert_array_state state;
-        struct jak_carbon_insert *sub_ins = carbon_insert_array_begin(&state, array_ins,
-                array->elements.elements.num_elems * 256);
+        jak_carbon_insert *sub_ins = carbon_insert_array_begin(&state, array_ins,
+                                                                      array->elements.elements.num_elems * 256);
         for (jak_u32 i = 0; i < array->elements.elements.num_elems; i++) {
                 const struct jak_json_element *elem = vec_get(&array->elements.elements, i, struct jak_json_element);
                 int_carbon_from_json_elem(sub_ins, elem, false);
@@ -958,12 +963,12 @@ static void int_insert_array_array(struct jak_carbon_insert *array_ins, struct j
         carbon_insert_array_end(&state);
 }
 
-static void int_insert_array_string(struct jak_carbon_insert *array_ins, struct jak_json_string *string)
+static void int_insert_array_string(jak_carbon_insert *array_ins, struct jak_json_string *string)
 {
         carbon_insert_string(array_ins, string->value);
 }
 
-static void int_insert_array_number(struct jak_carbon_insert *array_ins, struct jak_json_number *number)
+static void int_insert_array_number(jak_carbon_insert *array_ins, struct jak_json_number *number)
 {
         switch (number->value_type) {
                 case JSON_NUMBER_FLOAT:
@@ -975,38 +980,39 @@ static void int_insert_array_number(struct jak_carbon_insert *array_ins, struct 
                 case JSON_NUMBER_SIGNED:
                         carbon_insert_signed(array_ins, number->value.signed_integer);
                         break;
-                default:
-                        error_print(JAK_ERR_UNSUPPORTEDTYPE)
+                default: error_print(JAK_ERR_UNSUPPORTEDTYPE)
         }
 }
 
-static void int_insert_array_true(struct jak_carbon_insert *array_ins)
+static void int_insert_array_true(jak_carbon_insert *array_ins)
 {
         carbon_insert_true(array_ins);
 }
 
-static void int_insert_array_false(struct jak_carbon_insert *array_ins)
+static void int_insert_array_false(jak_carbon_insert *array_ins)
 {
         carbon_insert_false(array_ins);
 }
 
-static void int_insert_array_null(struct jak_carbon_insert *array_ins)
+static void int_insert_array_null(jak_carbon_insert *array_ins)
 {
         carbon_insert_null(array_ins);
 }
 
-static void int_insert_array_elements(struct jak_carbon_insert *array_ins, struct jak_json_array *array)
+static void int_insert_array_elements(jak_carbon_insert *array_ins, struct jak_json_array *array)
 {
         for (jak_u32 i = 0; i < array->elements.elements.num_elems; i++) {
                 struct jak_json_element *elem = vec_get(&array->elements.elements, i, struct jak_json_element);
-                switch(elem->value.value_type) {
+                switch (elem->value.value_type) {
                         case JSON_VALUE_OBJECT: {
                                 struct jak_carbon_insert_object_state state;
-                                struct jak_carbon_insert *sub_obj = carbon_insert_object_begin(&state, array_ins,
-                                        elem->value.value.object->value->members.num_elems * 256);
+                                jak_carbon_insert *sub_obj = carbon_insert_object_begin(&state, array_ins,
+                                                                                               elem->value.value.object->value->members.num_elems *
+                                                                                               256);
                                 int_insert_prop_object(sub_obj, elem->value.value.object);
                                 carbon_insert_object_end(&state);
-                        } break;
+                        }
+                                break;
                         case JSON_VALUE_ARRAY:
                                 int_insert_array_array(array_ins, elem->value.value.array);
                                 break;
@@ -1025,8 +1031,7 @@ static void int_insert_array_elements(struct jak_carbon_insert *array_ins, struc
                         case JSON_VALUE_NULL:
                                 int_insert_array_null(array_ins);
                                 break;
-                        default:
-                                error_print(JAK_ERR_UNSUPPORTEDTYPE)
+                        default: error_print(JAK_ERR_UNSUPPORTEDTYPE)
                                 break;
                 }
         }
@@ -1050,7 +1055,7 @@ static void int_insert_array_elements(struct jak_carbon_insert *array_ins, struc
         struct jak_carbon_insert_column_state state;                                                                       \
         jak_u64 approx_cap_nbytes = elem->value.value.array->elements.elements.num_elems *                                 \
                                 carbon_int_get_type_value_size(field_type);                                            \
-        struct jak_carbon_insert *cins = carbon_insert_column_begin(&state, ins,                                           \
+        jak_carbon_insert *cins = carbon_insert_column_begin(&state, ins,                                           \
                                                                 column_type, approx_cap_nbytes);                       \
         for (jak_u32 k = 0; k < elem->value.value.array->elements.elements.num_elems; k++) {                               \
                 struct jak_json_element *array_elem = vec_get(&elem->value.value.array->elements.elements,                 \
@@ -1069,7 +1074,7 @@ static void int_insert_array_elements(struct jak_carbon_insert *array_ins, struc
         struct jak_carbon_insert_column_state state;                                                                       \
         jak_u64 approx_cap_nbytes = prop->value.value.value.array->elements.elements.num_elems *                                 \
                                 carbon_int_get_type_value_size(field_type);                                            \
-        struct jak_carbon_insert *cins = carbon_insert_prop_column_begin(&state, ins, key,                                          \
+        jak_carbon_insert *cins = carbon_insert_prop_column_begin(&state, ins, key,                                          \
                                                                 column_type, approx_cap_nbytes);                       \
         for (jak_u32 k = 0; k < prop->value.value.value.array->elements.elements.num_elems; k++) {                               \
                 struct jak_json_element *array_elem = vec_get(&prop->value.value.value.array->elements.elements,                 \
@@ -1083,18 +1088,21 @@ static void int_insert_array_elements(struct jak_carbon_insert *array_ins, struc
         carbon_insert_prop_column_end(&state);                                                                              \
 })
 
-static void int_insert_prop_object(struct jak_carbon_insert *oins, struct jak_json_object_t *obj)
+static void int_insert_prop_object(jak_carbon_insert *oins, struct jak_json_object_t *obj)
 {
         for (jak_u32 i = 0; i < obj->value->members.num_elems; i++) {
                 struct jak_json_prop *prop = vec_get(&obj->value->members, i, struct jak_json_prop);
                 switch (prop->value.value.value_type) {
                         case JSON_VALUE_OBJECT: {
                                 struct jak_carbon_insert_object_state state;
-                                struct jak_carbon_insert *sub_obj = carbon_insert_prop_object_begin(&state, oins,
-                                        prop->key.value, prop->value.value.value.object->value->members.num_elems * 256);
+                                jak_carbon_insert *sub_obj = carbon_insert_prop_object_begin(&state, oins,
+                                                                                                    prop->key.value,
+                                                                                                    prop->value.value.value.object->value->members.num_elems *
+                                                                                                    256);
                                 int_insert_prop_object(sub_obj, prop->value.value.value.object);
                                 carbon_insert_prop_object_end(&state);
-                        } break;
+                        }
+                                break;
                         case JSON_VALUE_ARRAY: {
                                 enum json_list_type type;
                                 json_array_get_type(&type, prop->value.value.value.array);
@@ -1103,77 +1111,96 @@ static void int_insert_prop_object(struct jak_carbon_insert *oins, struct jak_js
                                                 struct jak_carbon_insert_array_state state;
                                                 carbon_insert_prop_array_begin(&state, oins, prop->key.value, 0);
                                                 carbon_insert_prop_array_end(&state);
-                                        } break;
+                                        }
+                                                break;
                                         case JSON_LIST_TYPE_VARIABLE_OR_NESTED: {
                                                 struct jak_carbon_insert_array_state state;
-                                                jak_u64 approx_cap_nbytes = prop->value.value.value.array->elements.elements.num_elems * 256;
-                                                struct jak_carbon_insert *array_ins = carbon_insert_prop_array_begin(&state, oins,
-                                                                                         prop->key.value, approx_cap_nbytes);
+                                                jak_u64 approx_cap_nbytes =
+                                                        prop->value.value.value.array->elements.elements.num_elems *
+                                                        256;
+                                                jak_carbon_insert *array_ins = carbon_insert_prop_array_begin(
+                                                        &state, oins,
+                                                        prop->key.value, approx_cap_nbytes);
                                                 int_insert_array_elements(array_ins, prop->value.value.value.array);
                                                 carbon_insert_prop_array_end(&state);
-                                        } break;
+                                        }
+                                                break;
                                         case JSON_LIST_TYPE_FIXED_U8:
                                                 prop_insert_into_column(oins, prop, prop->key.value,
-                                                        CARBON_JAK_FIELD_TYPE_NUMBER_U8, CARBON_COLUMN_TYPE_U8,
-                                                        u8, unsigned_integer);
+                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_U8,
+                                                                        CARBON_COLUMN_TYPE_U8,
+                                                                        u8, unsigned_integer);
                                                 break;
                                         case JSON_LIST_TYPE_FIXED_U16:
                                                 prop_insert_into_column(oins, prop, prop->key.value,
-                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_U16, CARBON_COLUMN_TYPE_U16,
+                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_U16,
+                                                                        CARBON_COLUMN_TYPE_U16,
                                                                         u16, unsigned_integer);
                                                 break;
                                         case JSON_LIST_TYPE_FIXED_U32:
                                                 prop_insert_into_column(oins, prop, prop->key.value,
-                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_U32, CARBON_COLUMN_TYPE_U32,
+                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_U32,
+                                                                        CARBON_COLUMN_TYPE_U32,
                                                                         u32, unsigned_integer);
                                                 break;
                                         case JSON_LIST_TYPE_FIXED_U64:
                                                 prop_insert_into_column(oins, prop, prop->key.value,
-                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_U64, CARBON_COLUMN_TYPE_U64,
+                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_U64,
+                                                                        CARBON_COLUMN_TYPE_U64,
                                                                         u64, unsigned_integer);
                                                 break;
                                         case JSON_LIST_TYPE_FIXED_I8:
                                                 prop_insert_into_column(oins, prop, prop->key.value,
-                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_I8, CARBON_COLUMN_TYPE_I8,
+                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_I8,
+                                                                        CARBON_COLUMN_TYPE_I8,
                                                                         i8, signed_integer);
                                                 break;
                                         case JSON_LIST_TYPE_FIXED_I16:
                                                 prop_insert_into_column(oins, prop, prop->key.value,
-                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_I16, CARBON_COLUMN_TYPE_I16,
+                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_I16,
+                                                                        CARBON_COLUMN_TYPE_I16,
                                                                         i16, signed_integer);
                                                 break;
                                         case JSON_LIST_TYPE_FIXED_I32:
                                                 prop_insert_into_column(oins, prop, prop->key.value,
-                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_I32, CARBON_COLUMN_TYPE_I32,
+                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_I32,
+                                                                        CARBON_COLUMN_TYPE_I32,
                                                                         i32, signed_integer);
                                                 break;
                                         case JSON_LIST_TYPE_FIXED_I64:
                                                 prop_insert_into_column(oins, prop, prop->key.value,
-                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_I64, CARBON_COLUMN_TYPE_I64,
+                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_I64,
+                                                                        CARBON_COLUMN_TYPE_I64,
                                                                         i64, signed_integer);
                                                 break;
                                         case JSON_LIST_TYPE_FIXED_FLOAT:
                                                 prop_insert_into_column(oins, prop, prop->key.value,
-                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT, CARBON_COLUMN_TYPE_FLOAT,
+                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT,
+                                                                        CARBON_COLUMN_TYPE_FLOAT,
                                                                         float, float_number);
                                                 break;
                                         case JSON_LIST_TYPE_FIXED_NULL: {
                                                 struct jak_carbon_insert_array_state state;
                                                 jak_u64 approx_cap_nbytes = prop->value.value.value.array->elements.elements.num_elems;
-                                                struct jak_carbon_insert *array_ins = carbon_insert_prop_array_begin(&state, oins, prop->key.value,
-                                                                                                            approx_cap_nbytes);
-                                                for (jak_u32 k = 0; k < prop->value.value.value.array->elements.elements.num_elems; k++) {
+                                                jak_carbon_insert *array_ins = carbon_insert_prop_array_begin(
+                                                        &state, oins, prop->key.value,
+                                                        approx_cap_nbytes);
+                                                for (jak_u32 k = 0; k <
+                                                                    prop->value.value.value.array->elements.elements.num_elems; k++) {
                                                         carbon_insert_null(array_ins);
                                                 }
                                                 carbon_insert_prop_array_end(&state);
-                                        } break;
+                                        }
+                                                break;
                                         case JSON_LIST_TYPE_FIXED_BOOLEAN: {
                                                 struct jak_carbon_insert_column_state state;
                                                 jak_u64 cap_nbytes = prop->value.value.value.array->elements.elements.num_elems;
-                                                struct jak_carbon_insert *array_ins = carbon_insert_prop_column_begin(&state, oins,
-                                                                                                             prop->key.value,
-                                                                                                             CARBON_COLUMN_TYPE_BOOLEAN, cap_nbytes);
-                                                for (jak_u32 k = 0; k < prop->value.value.value.array->elements.elements.num_elems; k++) {
+                                                jak_carbon_insert *array_ins = carbon_insert_prop_column_begin(
+                                                        &state, oins,
+                                                        prop->key.value,
+                                                        CARBON_COLUMN_TYPE_BOOLEAN, cap_nbytes);
+                                                for (jak_u32 k = 0; k <
+                                                                    prop->value.value.value.array->elements.elements.num_elems; k++) {
                                                         struct jak_json_element *array_elem = vec_get(
                                                                 &prop->value.value.value.array->elements.elements, k,
                                                                 struct jak_json_element);
@@ -1188,12 +1215,13 @@ static void int_insert_prop_object(struct jak_carbon_insert *oins, struct jak_js
                                                         }
                                                 }
                                                 carbon_insert_prop_column_end(&state);
-                                        } break;
-                                        default:
-                                                error_print(JAK_ERR_UNSUPPORTEDTYPE)
+                                        }
+                                                break;
+                                        default: error_print(JAK_ERR_UNSUPPORTEDTYPE)
                                                 break;
                                 }
-                        } break;
+                        }
+                                break;
                         case JSON_VALUE_STRING:
                                 carbon_insert_prop_string(oins, prop->key.value, prop->value.value.value.string->value);
                                 break;
@@ -1201,18 +1229,17 @@ static void int_insert_prop_object(struct jak_carbon_insert *oins, struct jak_js
                                 switch (prop->value.value.value.number->value_type) {
                                         case JSON_NUMBER_FLOAT:
                                                 carbon_insert_prop_float(oins, prop->key.value,
-                                                        prop->value.value.value.number->value.float_number);
+                                                                         prop->value.value.value.number->value.float_number);
                                                 break;
                                         case JSON_NUMBER_UNSIGNED:
                                                 carbon_insert_prop_unsigned(oins, prop->key.value,
-                                                                         prop->value.value.value.number->value.unsigned_integer);
+                                                                            prop->value.value.value.number->value.unsigned_integer);
                                                 break;
                                         case JSON_NUMBER_SIGNED:
                                                 carbon_insert_prop_signed(oins, prop->key.value,
-                                                                         prop->value.value.value.number->value.signed_integer);
+                                                                          prop->value.value.value.number->value.signed_integer);
                                                 break;
-                                        default:
-                                                error_print(JAK_ERR_UNSUPPORTEDTYPE);
+                                        default: error_print(JAK_ERR_UNSUPPORTEDTYPE);
                                                 break;
                                 }
                                 break;
@@ -1225,25 +1252,25 @@ static void int_insert_prop_object(struct jak_carbon_insert *oins, struct jak_js
                         case JSON_VALUE_NULL:
                                 carbon_insert_prop_null(oins, prop->key.value);
                                 break;
-                        default:
-                                error_print(JAK_ERR_UNSUPPORTEDTYPE)
+                        default: error_print(JAK_ERR_UNSUPPORTEDTYPE)
                                 break;
                 }
         }
 }
 
-static void int_carbon_from_json_elem(struct jak_carbon_insert *ins, const struct jak_json_element *elem, bool is_root)
+static void int_carbon_from_json_elem(jak_carbon_insert *ins, const struct jak_json_element *elem, bool is_root)
 {
         switch (elem->value.value_type) {
                 case JSON_VALUE_OBJECT: {
                         struct jak_carbon_insert_object_state state;
-                        struct jak_carbon_insert *oins = carbon_insert_object_begin(&state, ins,
-                                elem->value.value.object->value->members.num_elems * 256);
+                        jak_carbon_insert *oins = carbon_insert_object_begin(&state, ins,
+                                                                                    elem->value.value.object->value->members.num_elems *
+                                                                                    256);
                         int_insert_prop_object(oins, elem->value.value.object);
                         carbon_insert_object_end(&state);
-                } break;
-                case JSON_VALUE_ARRAY:
-                {
+                }
+                        break;
+                case JSON_VALUE_ARRAY: {
                         enum json_list_type type;
                         json_array_get_type(&type, elem->value.value.array);
                         switch (type) {
@@ -1255,19 +1282,23 @@ static void int_carbon_from_json_elem(struct jak_carbon_insert *ins, const struc
                                                 carbon_insert_array_begin(&state, ins, 0);
                                                 carbon_insert_array_end(&state);
                                         }
-                                } break;
+                                }
+                                        break;
                                 case JSON_LIST_TYPE_VARIABLE_OR_NESTED: {
-                                        jak_u64 approx_cap_nbytes = elem->value.value.array->elements.elements.num_elems * 256;
+                                        jak_u64 approx_cap_nbytes =
+                                                elem->value.value.array->elements.elements.num_elems * 256;
                                         if (is_root) {
                                                 int_insert_array_elements(ins, elem->value.value.array);
                                         } else {
                                                 struct jak_carbon_insert_array_state state;
-                                                struct jak_carbon_insert *array_ins = carbon_insert_array_begin(&state, ins,
-                                                                                                            approx_cap_nbytes);
+                                                jak_carbon_insert *array_ins = carbon_insert_array_begin(&state,
+                                                                                                                ins,
+                                                                                                                approx_cap_nbytes);
                                                 int_insert_array_elements(array_ins, elem->value.value.array);
                                                 carbon_insert_array_end(&state);
                                         }
-                                } break;
+                                }
+                                        break;
                                 case JSON_LIST_TYPE_FIXED_U8:
                                         if (is_root) {
                                                 insert_into_array(ins, elem, unsigned, unsigned_integer)
@@ -1276,7 +1307,7 @@ static void int_carbon_from_json_elem(struct jak_carbon_insert *ins, const struc
                                                                    CARBON_COLUMN_TYPE_U8,
                                                                    u8, unsigned_integer);
                                         }
-                                break;
+                                        break;
                                 case JSON_LIST_TYPE_FIXED_U16:
                                         if (is_root) {
                                                 insert_into_array(ins, elem, unsigned, unsigned_integer)
@@ -1285,7 +1316,7 @@ static void int_carbon_from_json_elem(struct jak_carbon_insert *ins, const struc
                                                                    CARBON_COLUMN_TYPE_U16,
                                                                    u16, unsigned_integer);
                                         }
-                                break;
+                                        break;
                                 case JSON_LIST_TYPE_FIXED_U32:
                                         if (is_root) {
                                                 insert_into_array(ins, elem, unsigned, unsigned_integer)
@@ -1294,7 +1325,7 @@ static void int_carbon_from_json_elem(struct jak_carbon_insert *ins, const struc
                                                                    CARBON_COLUMN_TYPE_U32,
                                                                    u32, unsigned_integer);
                                         }
-                                break;
+                                        break;
                                 case JSON_LIST_TYPE_FIXED_U64:
                                         if (is_root) {
                                                 insert_into_array(ins, elem, unsigned, unsigned_integer)
@@ -1303,7 +1334,7 @@ static void int_carbon_from_json_elem(struct jak_carbon_insert *ins, const struc
                                                                    CARBON_COLUMN_TYPE_U64,
                                                                    u64, unsigned_integer);
                                         }
-                                break;
+                                        break;
                                 case JSON_LIST_TYPE_FIXED_I8:
                                         if (is_root) {
                                                 insert_into_array(ins, elem, signed, signed_integer)
@@ -1312,7 +1343,7 @@ static void int_carbon_from_json_elem(struct jak_carbon_insert *ins, const struc
                                                                    CARBON_COLUMN_TYPE_I8,
                                                                    i8, signed_integer);
                                         }
-                                break;
+                                        break;
                                 case JSON_LIST_TYPE_FIXED_I16:
                                         if (is_root) {
                                                 insert_into_array(ins, elem, signed, signed_integer)
@@ -1321,7 +1352,7 @@ static void int_carbon_from_json_elem(struct jak_carbon_insert *ins, const struc
                                                                    CARBON_COLUMN_TYPE_I16,
                                                                    u16, signed_integer);
                                         }
-                                break;
+                                        break;
                                 case JSON_LIST_TYPE_FIXED_I32:
                                         if (is_root) {
                                                 insert_into_array(ins, elem, signed, signed_integer)
@@ -1330,7 +1361,7 @@ static void int_carbon_from_json_elem(struct jak_carbon_insert *ins, const struc
                                                                    CARBON_COLUMN_TYPE_I32,
                                                                    u32, signed_integer);
                                         }
-                                break;
+                                        break;
                                 case JSON_LIST_TYPE_FIXED_I64:
                                         if (is_root) {
                                                 insert_into_array(ins, elem, signed, signed_integer)
@@ -1339,7 +1370,7 @@ static void int_carbon_from_json_elem(struct jak_carbon_insert *ins, const struc
                                                                    CARBON_COLUMN_TYPE_I64,
                                                                    u64, signed_integer);
                                         }
-                                break;
+                                        break;
                                 case JSON_LIST_TYPE_FIXED_FLOAT:
                                         if (is_root) {
                                                 insert_into_array(ins, elem, float, float_number)
@@ -1348,26 +1379,31 @@ static void int_carbon_from_json_elem(struct jak_carbon_insert *ins, const struc
                                                                    CARBON_COLUMN_TYPE_FLOAT,
                                                                    float, float_number);
                                         }
-                                break;
+                                        break;
                                 case JSON_LIST_TYPE_FIXED_NULL: {
                                         jak_u64 approx_cap_nbytes = elem->value.value.array->elements.elements.num_elems;
                                         if (is_root) {
-                                                for (jak_u32 i = 0; i < elem->value.value.array->elements.elements.num_elems; i++) {
+                                                for (jak_u32 i = 0;
+                                                     i < elem->value.value.array->elements.elements.num_elems; i++) {
                                                         carbon_insert_null(ins);
                                                 }
                                         } else {
                                                 struct jak_carbon_insert_array_state state;
-                                                struct jak_carbon_insert *array_ins = carbon_insert_array_begin(&state, ins,
-                                                                                                            approx_cap_nbytes);
-                                                for (jak_u32 i = 0; i < elem->value.value.array->elements.elements.num_elems; i++) {
+                                                jak_carbon_insert *array_ins = carbon_insert_array_begin(&state,
+                                                                                                                ins,
+                                                                                                                approx_cap_nbytes);
+                                                for (jak_u32 i = 0;
+                                                     i < elem->value.value.array->elements.elements.num_elems; i++) {
                                                         carbon_insert_null(array_ins);
                                                 }
                                                 carbon_insert_array_end(&state);
                                         }
-                                } break;
+                                }
+                                        break;
                                 case JSON_LIST_TYPE_FIXED_BOOLEAN: {
                                         if (is_root) {
-                                                for (jak_u32 i = 0; i < elem->value.value.array->elements.elements.num_elems; i++) {
+                                                for (jak_u32 i = 0;
+                                                     i < elem->value.value.array->elements.elements.num_elems; i++) {
                                                         struct jak_json_element *array_elem = vec_get(
                                                                 &elem->value.value.array->elements.elements, i,
                                                                 struct jak_json_element);
@@ -1384,9 +1420,12 @@ static void int_carbon_from_json_elem(struct jak_carbon_insert *ins, const struc
                                         } else {
                                                 struct jak_carbon_insert_column_state state;
                                                 jak_u64 cap_nbytes = elem->value.value.array->elements.elements.num_elems;
-                                                struct jak_carbon_insert *array_ins = carbon_insert_column_begin(&state, ins,
-                                                                                                             CARBON_COLUMN_TYPE_BOOLEAN, cap_nbytes);
-                                                for (jak_u32 i = 0; i < elem->value.value.array->elements.elements.num_elems; i++) {
+                                                jak_carbon_insert *array_ins = carbon_insert_column_begin(&state,
+                                                                                                                 ins,
+                                                                                                                 CARBON_COLUMN_TYPE_BOOLEAN,
+                                                                                                                 cap_nbytes);
+                                                for (jak_u32 i = 0;
+                                                     i < elem->value.value.array->elements.elements.num_elems; i++) {
                                                         struct jak_json_element *array_elem = vec_get(
                                                                 &elem->value.value.array->elements.elements, i,
                                                                 struct jak_json_element);
@@ -1402,12 +1441,13 @@ static void int_carbon_from_json_elem(struct jak_carbon_insert *ins, const struc
                                                 }
                                                 carbon_insert_column_end(&state);
                                         }
-                                } break;
-                                default:
-                                        error_print(JAK_ERR_UNSUPPORTEDTYPE)
+                                }
+                                        break;
+                                default: error_print(JAK_ERR_UNSUPPORTEDTYPE)
                                         break;
                         }
-                } break;
+                }
+                        break;
                 case JSON_VALUE_STRING:
                         carbon_insert_string(ins, elem->value.value.string->value);
                         break;
@@ -1422,8 +1462,7 @@ static void int_carbon_from_json_elem(struct jak_carbon_insert *ins, const struc
                                 case JSON_NUMBER_SIGNED:
                                         carbon_insert_signed(ins, elem->value.value.number->value.signed_integer);
                                         break;
-                                default:
-                                        error_print(JAK_ERR_UNSUPPORTEDTYPE)
+                                default: error_print(JAK_ERR_UNSUPPORTEDTYPE)
                                         break;
                         }
                         break;
@@ -1436,23 +1475,22 @@ static void int_carbon_from_json_elem(struct jak_carbon_insert *ins, const struc
                 case JSON_VALUE_NULL:
                         carbon_insert_null(ins);
                         break;
-                default:
-                        error_print(JAK_ERR_UNSUPPORTEDTYPE)
+                default: error_print(JAK_ERR_UNSUPPORTEDTYPE)
                         break;
         }
 }
 
-bool carbon_int_from_json(struct jak_carbon *doc, const struct jak_json *data,
-                          enum carbon_key_type key_type, const void *primary_key, int mode)
+bool carbon_int_from_json(jak_carbon *doc, const struct jak_json *data,
+                          jak_carbon_key_e key_type, const void *primary_key, int mode)
 {
         JAK_UNUSED(data)
         JAK_UNUSED(primary_key)
 
-        struct jak_carbon_new context;
-        struct jak_carbon_insert *ins = carbon_create_begin(&context, doc, key_type, mode);
+        jak_carbon_new context;
+        jak_carbon_insert *ins = jak_carbon_create_begin(&context, doc, key_type, mode);
         int_carbon_from_json_elem(ins, data->element, true);
 
-        carbon_create_end(&context);
+        jak_carbon_create_end(&context);
 
         return true;
 }

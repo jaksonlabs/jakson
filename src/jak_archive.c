@@ -128,10 +128,12 @@
 
 static jak_offset_t skip_record_header(struct jak_memfile *memfile);
 
-static void update_record_header(struct jak_memfile *memfile, jak_offset_t root_object_header_offset, struct jak_column_doc *model,
-                                 jak_u64 record_size);
+static void
+update_record_header(struct jak_memfile *memfile, jak_offset_t root_object_header_offset, struct jak_column_doc *model,
+                     jak_u64 record_size);
 
-static bool __serialize(jak_offset_t *offset, struct jak_error *err, struct jak_memfile *memfile, struct jak_column_doc_obj *columndoc,
+static bool __serialize(jak_offset_t *offset, struct jak_error *err, struct jak_memfile *memfile,
+                        struct jak_column_doc_obj *columndoc,
                         jak_offset_t root_object_header_offset);
 
 static union jak_object_flags *get_flags(union jak_object_flags *flags, struct jak_column_doc_obj *columndoc);
@@ -146,9 +148,10 @@ static bool serialize_string_dic(struct jak_memfile *memfile, struct jak_error *
 static bool print_archive_from_memfile(FILE *file, struct jak_error *err, struct jak_memfile *memfile);
 
 bool jak_archive_from_json(struct jak_archive *out, const char *file, struct jak_error *err, const char *json_string,
-                       enum jak_packer_type compressor, enum jak_str_dict_tag dictionary, size_t num_async_dic_threads,
-                       bool read_optimized,
-                       bool bake_string_id_index, struct jak_archive_callback *callback)
+                           enum jak_packer_type compressor, enum jak_str_dict_tag dictionary,
+                           size_t num_async_dic_threads,
+                           bool read_optimized,
+                           bool bake_string_id_index, struct jak_archive_callback *callback)
 {
         JAK_ERROR_IF_NULL(out);
         JAK_ERROR_IF_NULL(file);
@@ -161,14 +164,14 @@ bool jak_archive_from_json(struct jak_archive *out, const char *file, struct jak
         FILE *out_file;
 
         if (!jak_archive_stream_from_json(&stream,
-                                      err,
-                                      json_string,
-                                      compressor,
-                                      dictionary,
-                                      num_async_dic_threads,
-                                      read_optimized,
-                                      bake_string_id_index,
-                                      callback)) {
+                                          err,
+                                          json_string,
+                                          compressor,
+                                          dictionary,
+                                          num_async_dic_threads,
+                                          read_optimized,
+                                          bake_string_id_index,
+                                          callback)) {
                 return false;
         }
 
@@ -208,9 +211,10 @@ bool jak_archive_from_json(struct jak_archive *out, const char *file, struct jak
 }
 
 bool jak_archive_stream_from_json(struct jak_memblock **stream, struct jak_error *err, const char *json_string,
-                              enum jak_packer_type compressor, enum jak_str_dict_tag dictionary, size_t num_async_dic_threads,
-                              bool read_optimized,
-                              bool bake_id_index, struct jak_archive_callback *callback)
+                                  enum jak_packer_type compressor, enum jak_str_dict_tag dictionary,
+                                  size_t num_async_dic_threads,
+                                  bool read_optimized,
+                                  bool bake_id_index, struct jak_archive_callback *callback)
 {
         JAK_ERROR_IF_NULL(stream);
         JAK_ERROR_IF_NULL(err);
@@ -373,8 +377,9 @@ static bool run_string_id_baking(struct jak_error *err, struct jak_memblock **st
         return true;
 }
 
-bool jak_archive_from_model(struct jak_memblock **stream, struct jak_error *err, struct jak_column_doc *model, enum jak_packer_type compressor,
-                        bool bake_string_id_index, struct jak_archive_callback *callback)
+bool jak_archive_from_model(struct jak_memblock **stream, struct jak_error *err, struct jak_column_doc *model,
+                            enum jak_packer_type compressor,
+                            bool bake_string_id_index, struct jak_archive_callback *callback)
 {
         JAK_ERROR_IF_NULL(model)
         JAK_ERROR_IF_NULL(stream)
@@ -455,7 +460,8 @@ bool jak_archive_print(FILE *file, struct jak_error *err, struct jak_memblock *s
         struct jak_memfile memfile;
         memfile_open(&memfile, stream, READ_ONLY);
         if (memfile_size(&memfile)
-            < sizeof(struct jak_archive_header) + sizeof(struct jak_string_table_header) + sizeof(struct jak_object_header)) {
+            < sizeof(struct jak_archive_header) + sizeof(struct jak_string_table_header) +
+              sizeof(struct jak_object_header)) {
                 error(err, JAK_ERR_NOCARBONSTREAM);
                 return false;
         } else {
@@ -506,7 +512,8 @@ static const char *array_value_type_to_string(struct jak_error *err, jak_archive
         }
 }
 
-static void write_primitive_key_column(struct jak_memfile *memfile, struct jak_vector ofType(jak_archive_field_sid_t) *keys)
+static void
+write_primitive_key_column(struct jak_memfile *memfile, struct jak_vector ofType(jak_archive_field_sid_t) *keys)
 {
         jak_archive_field_sid_t *string_ids = vec_all(keys, jak_archive_field_sid_t);
         memfile_write(memfile, string_ids, keys->num_elems * sizeof(jak_archive_field_sid_t));
@@ -519,7 +526,8 @@ static jak_offset_t skip_var_value_offset_column(struct jak_memfile *memfile, si
         return result;
 }
 
-static void write_var_value_offset_column(struct jak_memfile *file, jak_offset_t where, jak_offset_t after, const jak_offset_t *values,
+static void write_var_value_offset_column(struct jak_memfile *file, jak_offset_t where, jak_offset_t after,
+                                          const jak_offset_t *values,
                                           size_t n)
 {
         memfile_seek(file, where);
@@ -527,8 +535,9 @@ static void write_var_value_offset_column(struct jak_memfile *file, jak_offset_t
         memfile_seek(file, after);
 }
 
-static bool write_primitive_fixed_value_column(struct jak_memfile *memfile, struct jak_error *err, jak_archive_field_e type,
-                                               struct jak_vector ofType(T) *values_vec)
+static bool
+write_primitive_fixed_value_column(struct jak_memfile *memfile, struct jak_error *err, jak_archive_field_e type,
+                                   struct jak_vector ofType(T) *values_vec)
 {
         JAK_ASSERT (type != JAK_FIELD_OBJECT); /** use 'write_primitive_var_value_column' instead */
 
@@ -564,8 +573,8 @@ static bool write_primitive_fixed_value_column(struct jak_memfile *memfile, stru
 }
 
 static jak_offset_t *__write_primitive_column(struct jak_memfile *memfile, struct jak_error *err,
-                                          struct jak_vector ofType(struct jak_column_doc_obj) *values_vec,
-                                          jak_offset_t root_offset)
+                                              struct jak_vector ofType(struct jak_column_doc_obj) *values_vec,
+                                              jak_offset_t root_offset)
 {
         jak_offset_t *result = JAK_MALLOC(values_vec->num_elems * sizeof(jak_offset_t));
         struct jak_column_doc_obj *mapped = vec_all(values_vec, struct jak_column_doc_obj);
@@ -648,7 +657,8 @@ static bool write_array_value_column(struct jak_memfile *memfile, struct jak_err
 }
 
 static bool write_array_prop(jak_offset_t *offset, struct jak_error *err, struct jak_memfile *memfile,
-                             struct jak_vector ofType(jak_archive_field_sid_t) *keys, jak_archive_field_e type, struct jak_vector ofType(...) *values,
+                             struct jak_vector ofType(jak_archive_field_sid_t) *keys, jak_archive_field_e type,
+                             struct jak_vector ofType(...) *values,
                              jak_offset_t root_object_header_offset)
 {
         JAK_ASSERT(keys->num_elems == values->num_elems);
@@ -791,7 +801,8 @@ static bool write_array_props(struct jak_memfile *memfile, struct jak_error *err
 /** Fixed-length property lists; value position can be determined by size of value and position of key in key column.
  * In contrast, variable-length property list require an additional offset column (see 'write_var_props') */
 static bool write_fixed_props(jak_offset_t *offset, struct jak_error *err, struct jak_memfile *memfile,
-                              struct jak_vector ofType(jak_archive_field_sid_t) *keys, jak_archive_field_e type, struct jak_vector ofType(T) *values)
+                              struct jak_vector ofType(jak_archive_field_sid_t) *keys, jak_archive_field_e type,
+                              struct jak_vector ofType(T) *values)
 {
         JAK_ASSERT(!values || keys->num_elems == values->num_elems);
         JAK_ASSERT(type != JAK_FIELD_OBJECT); /** use 'write_var_props' instead */
@@ -835,7 +846,8 @@ static bool write_var_props(jak_offset_t *offset, struct jak_error *err, struct 
 
                 write_primitive_key_column(memfile, keys);
                 jak_offset_t value_offset = skip_var_value_offset_column(memfile, keys->num_elems);
-                jak_offset_t *value_offsets = __write_primitive_column(memfile, err, objects, root_object_header_offset);
+                jak_offset_t *value_offsets = __write_primitive_column(memfile, err, objects,
+                                                                       root_object_header_offset);
                 if (!value_offsets) {
                         return false;
                 }
@@ -850,8 +862,9 @@ static bool write_var_props(jak_offset_t *offset, struct jak_error *err, struct 
         return true;
 }
 
-static bool write_primitive_props(struct jak_memfile *memfile, struct jak_error *err, struct jak_column_doc_obj *columndoc,
-                                  struct jak_archive_prop_offs *offsets, jak_offset_t root_object_header_offset)
+static bool
+write_primitive_props(struct jak_memfile *memfile, struct jak_error *err, struct jak_column_doc_obj *columndoc,
+                      struct jak_archive_prop_offs *offsets, jak_offset_t root_object_header_offset)
 {
         if (!write_fixed_props(&offsets->nulls, err, memfile, &columndoc->null_prop_keys, JAK_FIELD_NULL, NULL)) {
                 return false;
@@ -1057,7 +1070,8 @@ static bool write_object_array_props(struct jak_memfile *memfile, struct jak_err
                 memfile_write(memfile, &header, sizeof(struct jak_object_array_header));
 
                 for (size_t i = 0; i < object_key_columns->num_elems; i++) {
-                        struct jak_column_doc_group *column_group = vec_get(object_key_columns, i, struct jak_column_doc_group);
+                        struct jak_column_doc_group *column_group = vec_get(object_key_columns, i,
+                                                                            struct jak_column_doc_group);
                         memfile_write(memfile, &column_group->key, sizeof(jak_archive_field_sid_t));
                 }
 
@@ -1066,7 +1080,8 @@ static bool write_object_array_props(struct jak_memfile *memfile, struct jak_err
                 memfile_skip(memfile, object_key_columns->num_elems * sizeof(jak_offset_t));
 
                 for (size_t i = 0; i < object_key_columns->num_elems; i++) {
-                        struct jak_column_doc_group *column_group = vec_get(object_key_columns, i, struct jak_column_doc_group);
+                        struct jak_column_doc_group *column_group = vec_get(object_key_columns, i,
+                                                                            struct jak_column_doc_group);
                         jak_offset_t this_column_offset_relative = memfile_tell(memfile) - root_object_header_offset;
 
                         /* write an object-id for each position number */
@@ -1129,8 +1144,9 @@ static jak_offset_t skip_record_header(struct jak_memfile *memfile)
         return offset;
 }
 
-static void update_record_header(struct jak_memfile *memfile, jak_offset_t root_object_header_offset, struct jak_column_doc *model,
-                                 jak_u64 record_size)
+static void
+update_record_header(struct jak_memfile *memfile, jak_offset_t root_object_header_offset, struct jak_column_doc *model,
+                     jak_u64 record_size)
 {
         struct jak_record_flags flags = {.bits.is_sorted = model->read_optimized};
         struct jak_record_header
@@ -1310,7 +1326,8 @@ static void prop_offsets_skip_write(struct jak_memfile *memfile, const union jak
         memfile_skip(memfile, num_skip_offset_bytes * sizeof(jak_offset_t));
 }
 
-static bool __serialize(jak_offset_t *offset, struct jak_error *err, struct jak_memfile *memfile, struct jak_column_doc_obj *columndoc,
+static bool __serialize(jak_offset_t *offset, struct jak_error *err, struct jak_memfile *memfile,
+                        struct jak_column_doc_obj *columndoc,
                         jak_offset_t root_object_header_offset)
 {
         union jak_object_flags flags;
@@ -1351,7 +1368,8 @@ static bool __serialize(jak_offset_t *offset, struct jak_error *err, struct jak_
         }
 
         struct jak_object_header header =
-                {.marker = marker_symbols[JAK_MARKER_TYPE_OBJECT_BEGIN].symbol, .oid = oid, .flags = flags_to_int32(&flags),
+                {.marker = marker_symbols[JAK_MARKER_TYPE_OBJECT_BEGIN].symbol, .oid = oid, .flags = flags_to_int32(
+                        &flags),
 
                 };
 
@@ -1494,7 +1512,8 @@ static void update_file_header(struct jak_memfile *memfile, jak_offset_t record_
         memfile_seek(memfile, current_pos);
 }
 
-static bool print_column_form_memfile(FILE *file, struct jak_error *err, struct jak_memfile *memfile, unsigned nesting_level)
+static bool
+print_column_form_memfile(FILE *file, struct jak_error *err, struct jak_memfile *memfile, unsigned nesting_level)
 {
         jak_offset_t offset;
         memfile_get_offset(&offset, memfile);
@@ -1617,7 +1636,8 @@ static bool print_object_array_from_memfile(FILE *file, struct jak_error *err, s
         struct jak_object_array_header *header = JAK_MEMFILE_READ_TYPE(memfile, struct jak_object_array_header);
         if (header->marker != JAK_MARKER_SYMBOL_PROP_OBJECT_ARRAY) {
                 char buffer[256];
-                sprintf(buffer, "expected marker [%c] but found [%c]", JAK_MARKER_SYMBOL_PROP_OBJECT_ARRAY, header->marker);
+                sprintf(buffer, "expected marker [%c] but found [%c]", JAK_MARKER_SYMBOL_PROP_OBJECT_ARRAY,
+                        header->marker);
                 error_with_details(err, JAK_ERR_CORRUPTED, buffer);
                 return false;
         }
@@ -1663,7 +1683,8 @@ static bool print_object_array_from_memfile(FILE *file, struct jak_error *err, s
                         jak_column_group_header->num_columns,
                         jak_column_group_header->num_objects);
                 const jak_global_id_t
-                        *oids = JAK_MEMFILE_READ_TYPE_LIST(memfile, jak_global_id_t, jak_column_group_header->num_objects);
+                        *oids = JAK_MEMFILE_READ_TYPE_LIST(memfile, jak_global_id_t,
+                                                           jak_column_group_header->num_objects);
                 for (size_t k = 0; k < jak_column_group_header->num_objects; k++) {
                         fprintf(file, "%"PRIu64"%s", oids[k], k + 1 < jak_column_group_header->num_objects ? ", " : "");
                 }
@@ -1810,10 +1831,11 @@ bool print_object(FILE *file, struct jak_error *err, struct jak_memfile *memfile
 
                 switch (entryMarker) {
                         case JAK_MARKER_SYMBOL_PROP_NULL: {
-                                struct jak_prop_header *jak_prop_header = JAK_MEMFILE_READ_TYPE(memfile, struct jak_prop_header);
+                                struct jak_prop_header *jak_prop_header = JAK_MEMFILE_READ_TYPE(memfile,
+                                                                                                struct jak_prop_header);
                                 jak_archive_field_sid_t *keys = (jak_archive_field_sid_t *) JAK_MEMFILE_READ(memfile,
-                                                                                     jak_prop_header->num_entries *
-                                                                                     sizeof(jak_archive_field_sid_t));
+                                                                                                             jak_prop_header->num_entries *
+                                                                                                             sizeof(jak_archive_field_sid_t));
                                 fprintf(file, "0x%04x ", offset);
                                 INTENT_LINE(nesting_level)
                                 fprintf(file, "[marker: %c (null)] [nentries: %d] [", entryMarker,
@@ -1827,13 +1849,15 @@ bool print_object(FILE *file, struct jak_error *err, struct jak_memfile *memfile
                         }
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_BOOLEAN: {
-                                struct jak_prop_header *jak_prop_header = JAK_MEMFILE_READ_TYPE(memfile, struct jak_prop_header);
+                                struct jak_prop_header *jak_prop_header = JAK_MEMFILE_READ_TYPE(memfile,
+                                                                                                struct jak_prop_header);
                                 jak_archive_field_sid_t *keys = (jak_archive_field_sid_t *) JAK_MEMFILE_READ(memfile,
-                                                                                     jak_prop_header->num_entries *
-                                                                                     sizeof(jak_archive_field_sid_t));
-                                jak_archive_field_boolean_t *values = (jak_archive_field_boolean_t *) JAK_MEMFILE_READ(memfile,
-                                                                                               jak_prop_header->num_entries *
-                                                                                               sizeof(jak_archive_field_boolean_t));
+                                                                                                             jak_prop_header->num_entries *
+                                                                                                             sizeof(jak_archive_field_sid_t));
+                                jak_archive_field_boolean_t *values = (jak_archive_field_boolean_t *) JAK_MEMFILE_READ(
+                                        memfile,
+                                        jak_prop_header->num_entries *
+                                        sizeof(jak_archive_field_boolean_t));
                                 fprintf(file, "0x%04x ", offset);
                                 INTENT_LINE(nesting_level)
                                 fprintf(file, "[marker: %c (boolean)] [nentries: %d] [", entryMarker,
@@ -1853,88 +1877,88 @@ bool print_object(FILE *file, struct jak_error *err, struct jak_memfile *memfile
                         }
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_INT8: PRINT_SIMPLE_PROPS(file,
-                                                                         memfile,
-                                                                         memfile_tell(memfile),
-                                                                         nesting_level,
-                                                                         jak_archive_field_i8_t,
-                                                                         "Int8",
-                                                                         "%d");
+                                                                             memfile,
+                                                                             memfile_tell(memfile),
+                                                                             nesting_level,
+                                                                             jak_archive_field_i8_t,
+                                                                             "Int8",
+                                                                             "%d");
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_INT16: PRINT_SIMPLE_PROPS(file,
-                                                                          memfile,
-                                                                          memfile_tell(memfile),
-                                                                          nesting_level,
-                                                                          jak_archive_field_i16_t,
-                                                                          "Int16",
-                                                                          "%d");
+                                                                              memfile,
+                                                                              memfile_tell(memfile),
+                                                                              nesting_level,
+                                                                              jak_archive_field_i16_t,
+                                                                              "Int16",
+                                                                              "%d");
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_INT32: PRINT_SIMPLE_PROPS(file,
-                                                                          memfile,
-                                                                          memfile_tell(memfile),
-                                                                          nesting_level,
-                                                                          jak_archive_field_i32_t,
-                                                                          "Int32",
-                                                                          "%d");
+                                                                              memfile,
+                                                                              memfile_tell(memfile),
+                                                                              nesting_level,
+                                                                              jak_archive_field_i32_t,
+                                                                              "Int32",
+                                                                              "%d");
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_INT64: PRINT_SIMPLE_PROPS(file,
-                                                                          memfile,
-                                                                          memfile_tell(memfile),
-                                                                          nesting_level,
-                                                                          jak_archive_field_i64_t,
-                                                                          "Int64",
-                                                                          "%"
-                                                                                  PRIi64);
+                                                                              memfile,
+                                                                              memfile_tell(memfile),
+                                                                              nesting_level,
+                                                                              jak_archive_field_i64_t,
+                                                                              "Int64",
+                                                                              "%"
+                                                                                      PRIi64);
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_UINT8: PRINT_SIMPLE_PROPS(file,
-                                                                          memfile,
-                                                                          memfile_tell(memfile),
-                                                                          nesting_level,
-                                                                          jak_archive_field_u8_t,
-                                                                          "UInt8",
-                                                                          "%d");
+                                                                              memfile,
+                                                                              memfile_tell(memfile),
+                                                                              nesting_level,
+                                                                              jak_archive_field_u8_t,
+                                                                              "UInt8",
+                                                                              "%d");
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_UINT16: PRINT_SIMPLE_PROPS(file,
-                                                                           memfile,
-                                                                           memfile_tell(memfile),
-                                                                           nesting_level,
-                                                                           jak_archive_field_u16_t,
-                                                                           "UInt16",
-                                                                           "%d");
+                                                                               memfile,
+                                                                               memfile_tell(memfile),
+                                                                               nesting_level,
+                                                                               jak_archive_field_u16_t,
+                                                                               "UInt16",
+                                                                               "%d");
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_UINT32: PRINT_SIMPLE_PROPS(file,
-                                                                           memfile,
-                                                                           memfile_tell(memfile),
-                                                                           nesting_level,
-                                                                           jak_archive_field_u32_t,
-                                                                           "UInt32",
-                                                                           "%d");
+                                                                               memfile,
+                                                                               memfile_tell(memfile),
+                                                                               nesting_level,
+                                                                               jak_archive_field_u32_t,
+                                                                               "UInt32",
+                                                                               "%d");
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_UINT64: PRINT_SIMPLE_PROPS(file,
-                                                                           memfile,
-                                                                           memfile_tell(memfile),
-                                                                           nesting_level,
-                                                                           jak_archive_field_u64_t,
-                                                                           "UInt64",
-                                                                           "%"
-                                                                                   PRIu64);
+                                                                               memfile,
+                                                                               memfile_tell(memfile),
+                                                                               nesting_level,
+                                                                               jak_archive_field_u64_t,
+                                                                               "UInt64",
+                                                                               "%"
+                                                                                       PRIu64);
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_REAL: PRINT_SIMPLE_PROPS(file,
-                                                                         memfile,
-                                                                         memfile_tell(memfile),
-                                                                         nesting_level,
-                                                                         jak_archive_field_number_t,
-                                                                         "Float",
-                                                                         "%f");
+                                                                             memfile,
+                                                                             memfile_tell(memfile),
+                                                                             nesting_level,
+                                                                             jak_archive_field_number_t,
+                                                                             "Float",
+                                                                             "%f");
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_TEXT: PRINT_SIMPLE_PROPS(file,
-                                                                         memfile,
-                                                                         memfile_tell(memfile),
-                                                                         nesting_level,
-                                                                         jak_archive_field_sid_t,
-                                                                         "Text",
-                                                                         "%"
-                                                                                 PRIu64
-                                                                                 "");
+                                                                             memfile,
+                                                                             memfile_tell(memfile),
+                                                                             nesting_level,
+                                                                             jak_archive_field_sid_t,
+                                                                             "Text",
+                                                                             "%"
+                                                                                     PRIu64
+                                                                                     "");
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_OBJECT: {
                                 struct jak_var_prop prop;
@@ -1969,11 +1993,12 @@ bool print_object(FILE *file, struct jak_error *err, struct jak_memfile *memfile
                         }
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_NULL_ARRAY: {
-                                struct jak_prop_header *jak_prop_header = JAK_MEMFILE_READ_TYPE(memfile, struct jak_prop_header);
+                                struct jak_prop_header *jak_prop_header = JAK_MEMFILE_READ_TYPE(memfile,
+                                                                                                struct jak_prop_header);
 
                                 jak_archive_field_sid_t *keys = (jak_archive_field_sid_t *) JAK_MEMFILE_READ(memfile,
-                                                                                     jak_prop_header->num_entries *
-                                                                                     sizeof(jak_archive_field_sid_t));
+                                                                                                             jak_prop_header->num_entries *
+                                                                                                             sizeof(jak_archive_field_sid_t));
                                 jak_u32 *nullArrayLengths;
 
                                 fprintf(file, "0x%04x ", offset);
@@ -1990,7 +2015,8 @@ bool print_object(FILE *file, struct jak_error *err, struct jak_memfile *memfile
                                 fprintf(file, "] [");
 
                                 nullArrayLengths = (jak_u32 *) JAK_MEMFILE_READ(memfile,
-                                                                            jak_prop_header->num_entries * sizeof(jak_u32));
+                                                                                jak_prop_header->num_entries *
+                                                                                sizeof(jak_u32));
 
                                 for (jak_u32 i = 0; i < jak_prop_header->num_entries; i++) {
                                         fprintf(file,
@@ -2003,11 +2029,12 @@ bool print_object(FILE *file, struct jak_error *err, struct jak_memfile *memfile
                         }
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_BOOLEAN_ARRAY: {
-                                struct jak_prop_header *jak_prop_header = JAK_MEMFILE_READ_TYPE(memfile, struct jak_prop_header);
+                                struct jak_prop_header *jak_prop_header = JAK_MEMFILE_READ_TYPE(memfile,
+                                                                                                struct jak_prop_header);
 
                                 jak_archive_field_sid_t *keys = (jak_archive_field_sid_t *) JAK_MEMFILE_READ(memfile,
-                                                                                     jak_prop_header->num_entries *
-                                                                                     sizeof(jak_archive_field_sid_t));
+                                                                                                             jak_prop_header->num_entries *
+                                                                                                             sizeof(jak_archive_field_sid_t));
                                 jak_u32 *array_lengths;
 
                                 fprintf(file, "0x%04x ", offset);
@@ -2024,7 +2051,8 @@ bool print_object(FILE *file, struct jak_error *err, struct jak_memfile *memfile
                                 fprintf(file, "] [");
 
                                 array_lengths = (jak_u32 *) JAK_MEMFILE_READ(memfile,
-                                                                         jak_prop_header->num_entries * sizeof(jak_u32));
+                                                                             jak_prop_header->num_entries *
+                                                                             sizeof(jak_u32));
 
                                 for (jak_u32 i = 0; i < jak_prop_header->num_entries; i++) {
                                         fprintf(file,
@@ -2036,9 +2064,10 @@ bool print_object(FILE *file, struct jak_error *err, struct jak_memfile *memfile
                                 fprintf(file, "] [");
 
                                 for (jak_u32 array_idx = 0; array_idx < jak_prop_header->num_entries; array_idx++) {
-                                        jak_archive_field_boolean_t *values = (jak_archive_field_boolean_t *) JAK_MEMFILE_READ(memfile,
-                                                                                                       array_lengths[array_idx] *
-                                                                                                       sizeof(jak_archive_field_boolean_t));
+                                        jak_archive_field_boolean_t *values = (jak_archive_field_boolean_t *) JAK_MEMFILE_READ(
+                                                memfile,
+                                                array_lengths[array_idx] *
+                                                sizeof(jak_archive_field_boolean_t));
                                         fprintf(file, "[");
                                         for (jak_u32 i = 0; i < array_lengths[array_idx]; i++) {
                                                 fprintf(file,
@@ -2064,80 +2093,80 @@ bool print_object(FILE *file, struct jak_error *err, struct jak_memfile *memfile
                         }
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_INT16_ARRAY: PRINT_ARRAY_PROPS(memfile,
-                                                                               memfile_tell(memfile),
-                                                                               nesting_level,
-                                                                               entryMarker,
-                                                                               jak_archive_field_i16_t,
-                                                                               "Int16 Array",
-                                                                               "%d");
+                                                                                   memfile_tell(memfile),
+                                                                                   nesting_level,
+                                                                                   entryMarker,
+                                                                                   jak_archive_field_i16_t,
+                                                                                   "Int16 Array",
+                                                                                   "%d");
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_INT32_ARRAY: PRINT_ARRAY_PROPS(memfile,
-                                                                               memfile_tell(memfile),
-                                                                               nesting_level,
-                                                                               entryMarker,
-                                                                               jak_archive_field_i32_t,
-                                                                               "Int32 Array",
-                                                                               "%d");
+                                                                                   memfile_tell(memfile),
+                                                                                   nesting_level,
+                                                                                   entryMarker,
+                                                                                   jak_archive_field_i32_t,
+                                                                                   "Int32 Array",
+                                                                                   "%d");
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_INT64_ARRAY: PRINT_ARRAY_PROPS(memfile,
-                                                                               memfile_tell(memfile),
-                                                                               nesting_level,
-                                                                               entryMarker,
-                                                                               jak_archive_field_i64_t,
-                                                                               "Int64 Array",
-                                                                               "%"
-                                                                                       PRIi64);
+                                                                                   memfile_tell(memfile),
+                                                                                   nesting_level,
+                                                                                   entryMarker,
+                                                                                   jak_archive_field_i64_t,
+                                                                                   "Int64 Array",
+                                                                                   "%"
+                                                                                           PRIi64);
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_UINT8_ARRAY: PRINT_ARRAY_PROPS(memfile,
-                                                                               memfile_tell(memfile),
-                                                                               nesting_level,
-                                                                               entryMarker,
-                                                                               jak_archive_field_u8_t,
-                                                                               "UInt8 Array",
-                                                                               "%d");
+                                                                                   memfile_tell(memfile),
+                                                                                   nesting_level,
+                                                                                   entryMarker,
+                                                                                   jak_archive_field_u8_t,
+                                                                                   "UInt8 Array",
+                                                                                   "%d");
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_UINT16_ARRAY: PRINT_ARRAY_PROPS(memfile,
-                                                                                memfile_tell(memfile),
-                                                                                nesting_level,
-                                                                                entryMarker,
-                                                                                jak_archive_field_u16_t,
-                                                                                "UInt16 Array",
-                                                                                "%d");
+                                                                                    memfile_tell(memfile),
+                                                                                    nesting_level,
+                                                                                    entryMarker,
+                                                                                    jak_archive_field_u16_t,
+                                                                                    "UInt16 Array",
+                                                                                    "%d");
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_UINT32_ARRAY: PRINT_ARRAY_PROPS(memfile,
-                                                                                memfile_tell(memfile),
-                                                                                nesting_level,
-                                                                                entryMarker,
-                                                                                jak_archive_field_u32_t,
-                                                                                "UInt32 Array",
-                                                                                "%d");
+                                                                                    memfile_tell(memfile),
+                                                                                    nesting_level,
+                                                                                    entryMarker,
+                                                                                    jak_archive_field_u32_t,
+                                                                                    "UInt32 Array",
+                                                                                    "%d");
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_UINT64_ARRAY: PRINT_ARRAY_PROPS(memfile,
-                                                                                memfile_tell(memfile),
-                                                                                nesting_level,
-                                                                                entryMarker,
-                                                                                jak_archive_field_u64_t,
-                                                                                "UInt64 Array",
-                                                                                "%"
-                                                                                        PRIu64);
+                                                                                    memfile_tell(memfile),
+                                                                                    nesting_level,
+                                                                                    entryMarker,
+                                                                                    jak_archive_field_u64_t,
+                                                                                    "UInt64 Array",
+                                                                                    "%"
+                                                                                            PRIu64);
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_REAL_ARRAY: PRINT_ARRAY_PROPS(memfile,
-                                                                              memfile_tell(memfile),
-                                                                              nesting_level,
-                                                                              entryMarker,
-                                                                              jak_archive_field_number_t,
-                                                                              "Float Array",
-                                                                              "%f");
+                                                                                  memfile_tell(memfile),
+                                                                                  nesting_level,
+                                                                                  entryMarker,
+                                                                                  jak_archive_field_number_t,
+                                                                                  "Float Array",
+                                                                                  "%f");
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_TEXT_ARRAY: PRINT_ARRAY_PROPS(memfile,
-                                                                              memfile_tell(memfile),
-                                                                              nesting_level,
-                                                                              entryMarker,
-                                                                              jak_archive_field_sid_t,
-                                                                              "Text Array",
-                                                                              "%"
-                                                                                      PRIu64
-                                                                                      "");
+                                                                                  memfile_tell(memfile),
+                                                                                  nesting_level,
+                                                                                  entryMarker,
+                                                                                  jak_archive_field_sid_t,
+                                                                                  "Text Array",
+                                                                                  "%"
+                                                                                          PRIu64
+                                                                                          "");
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_OBJECT_ARRAY:
                                 if (!print_object_array_from_memfile(file, err, memfile, nesting_level)) {
@@ -2581,9 +2610,9 @@ static bool read_string_id_to_offset_index(struct jak_error *err, struct jak_arc
                                            jak_offset_t string_id_to_offset_index_offset)
 {
         return jak_query_index_id_to_offset_deserialize(&archive->query_index_string_id_to_offset,
-                                                    err,
-                                                    file_path,
-                                                    string_id_to_offset_index_offset);
+                                                        err,
+                                                        file_path,
+                                                        string_id_to_offset_index_offset);
 }
 
 

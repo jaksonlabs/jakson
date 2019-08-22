@@ -39,37 +39,37 @@ _Thread_local jak_u32 thread_local_counter_limit;
  * machines.
  */
 union global_id {
-    struct {
-        /* global */
-        jak_u64 global_wallclock
-                : 5;   /* increasing wall clock time (ms) */
-        jak_u64 global_build_date
-                : 1;   /* fix bit dependent on compilation time */
-        jak_u64 global_build_path
-                : 1;   /* fix bit dependent on compilation path */
+        struct {
+                /* global */
+                jak_u64 global_wallclock
+                        : 5;   /* increasing wall clock time (ms) */
+                jak_u64 global_build_date
+                        : 1;   /* fix bit dependent on compilation time */
+                jak_u64 global_build_path
+                        : 1;   /* fix bit dependent on compilation path */
 
-        /* per-process */
-        jak_u64 process_id
-                : 7;   /* fix id */
-        jak_u64 process_magic
-                : 2;   /* random fix value */
-        jak_u64 process_counter
-                : 8;   /* increasing counter */
+                /* per-process */
+                jak_u64 process_id
+                        : 7;   /* fix id */
+                jak_u64 process_magic
+                        : 2;   /* random fix value */
+                jak_u64 process_counter
+                        : 8;   /* increasing counter */
 
-        /* per-thread  */
-        jak_u64 thread_id
-                : 7;   /* fix id */
-        jak_u64 thread_magic
-                : 2;   /* random fix value */
-        jak_u64 thread_counter
-                : 29;  /* increasing counter (< 536mio ids per thread) */
+                /* per-thread  */
+                jak_u64 thread_id
+                        : 7;   /* fix id */
+                jak_u64 thread_magic
+                        : 2;   /* random fix value */
+                jak_u64 thread_counter
+                        : 29;  /* increasing counter (< 536mio ids per thread) */
 
-        /* per-call */
-        jak_u64 call_random
-                :  2;  /* random value */
-    };
+                /* per-call */
+                jak_u64 call_random
+                        :  2;  /* random value */
+        };
 
-    jak_u64 value;
+        jak_u64 value;
 };
 
 bool global_id_create(jak_global_id_t *out)
@@ -111,15 +111,15 @@ bool global_id_create(jak_global_id_t *out)
         if (JAK_LIKELY(capacity_left)) {
                 union global_id internal =
                         {.global_wallclock  = time_now_wallclock(),
-                         .global_build_date = global_build_date_bit,
-                         .global_build_path = global_build_path_bit,
-                         .process_id        = process_local_id,
-                         .process_magic     = process_magic,
-                         .process_counter   = process_counter++,
-                         .thread_id         = (jak_u64) thread_local_id,
-                         .thread_magic      = thread_local_magic,
-                         .thread_counter    = thread_local_counter++,
-                         .call_random       = rand()};
+                                .global_build_date = global_build_date_bit,
+                                .global_build_path = global_build_path_bit,
+                                .process_id        = process_local_id,
+                                .process_magic     = process_magic,
+                                .process_counter   = process_counter++,
+                                .thread_id         = (jak_u64) thread_local_id,
+                                .thread_magic      = thread_local_magic,
+                                .thread_counter    = thread_local_counter++,
+                                .call_random       = rand()};
                 *out = internal.value;
         } else {
                 *out = 0;

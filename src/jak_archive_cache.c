@@ -25,23 +25,23 @@
 #include <jak_archive_cache.h>
 
 struct cache_entry {
-    struct cache_entry *prev, *next;
-    jak_archive_field_sid_t id;
-    char *string;
+        struct cache_entry *prev, *next;
+        jak_archive_field_sid_t id;
+        char *string;
 };
 
 struct lru_list {
-    struct cache_entry *most_recent;
-    struct cache_entry *lest_recent;
-    struct cache_entry entries[1024];
+        struct cache_entry *most_recent;
+        struct cache_entry *lest_recent;
+        struct cache_entry entries[1024];
 };
 
 struct jak_string_cache {
-    struct jak_vector ofType(struct lru_list) list_entries;
-    struct jak_sid_cache_stats statistics;
-    struct jak_archive_query query;
-    struct jak_error err;
-    size_t capacity;
+        struct jak_vector ofType(struct lru_list) list_entries;
+        struct jak_sid_cache_stats statistics;
+        struct jak_archive_query query;
+        struct jak_error err;
+        size_t capacity;
 };
 
 static void init_list(struct lru_list *list)

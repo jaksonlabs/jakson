@@ -33,37 +33,35 @@
 
 JAK_BEGIN_DECL
 
-struct jak_carbon; /* forwarded from carbon.h */
-
 enum carbon_dot_node_type {
-    DOT_NODE_ARRAY_IDX,
-    DOT_NODE_KEY_NAME
+        DOT_NODE_ARRAY_IDX,
+        DOT_NODE_KEY_NAME
 };
 
 struct jak_carbon_dot_node {
-    enum carbon_dot_node_type type;
-    union {
-        char *string;
-        jak_u32 idx;
-    } identifier;
+        enum carbon_dot_node_type type;
+        union {
+                char *string;
+                jak_u32 idx;
+        } identifier;
 };
 
 struct jak_carbon_dot_path {
-    struct jak_carbon_dot_node nodes[256];
-    jak_u32 path_len;
-    struct jak_error err;
+        struct jak_carbon_dot_node nodes[256];
+        jak_u32 path_len;
+        struct jak_error err;
 };
 
 enum carbon_path_status {
-    CARBON_PATH_RESOLVED,
-    CARBON_PATH_EMPTY_DOC,
-    CARBON_PATH_NOSUCHINDEX,
-    CARBON_PATH_NOSUCHKEY,
-    CARBON_PATH_NOTTRAVERSABLE,
-    CARBON_PATH_NOCONTAINER,
-    CARBON_PATH_NOTANOBJECT,
-    CARBON_PATH_NONESTING,
-    CARBON_PATH_INTERNAL
+        CARBON_PATH_RESOLVED,
+        CARBON_PATH_EMPTY_DOC,
+        CARBON_PATH_NOSUCHINDEX,
+        CARBON_PATH_NOSUCHKEY,
+        CARBON_PATH_NOTTRAVERSABLE,
+        CARBON_PATH_NOCONTAINER,
+        CARBON_PATH_NOTANOBJECT,
+        CARBON_PATH_NONESTING,
+        CARBON_PATH_INTERNAL
 };
 
 JAK_DEFINE_ERROR_GETTER(jak_carbon_dot_path)

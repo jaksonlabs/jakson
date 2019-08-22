@@ -36,30 +36,31 @@ JAK_BEGIN_DECL
 //  types
 // ---------------------------------------------------------------------------------------------------------------------
 
-struct jak_carbon_path_index
-{
-    struct jak_memblock *memblock;
-    struct jak_memfile memfile;
-    struct jak_error err;
+struct jak_carbon_path_index {
+        struct jak_memblock *memblock;
+        struct jak_memfile memfile;
+        struct jak_error err;
 };
 
-struct jak_carbon_path_index_it
-{
-    struct jak_carbon *doc;
-    struct jak_memfile memfile;
-    struct jak_error err;
+struct jak_carbon_path_index_it {
+        jak_carbon *doc;
+        struct jak_memfile memfile;
+        struct jak_error err;
 
-    enum carbon_container_type container_type;
-    jak_u64 pos;
+        jak_carbon_container_e container_type;
+        jak_u64 pos;
 };
 
-enum path_index_node_type { PATH_ROOT, PATH_INDEX_PROP_KEY, PATH_INDEX_ARRAY_INDEX, PATH_INDEX_COLUMN_INDEX };
+enum path_index_node_type {
+        PATH_ROOT, PATH_INDEX_PROP_KEY, PATH_INDEX_ARRAY_INDEX, PATH_INDEX_COLUMN_INDEX
+};
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  construction and deconstruction
 // ---------------------------------------------------------------------------------------------------------------------
 
-bool carbon_path_index_create(struct jak_carbon_path_index *index, struct jak_carbon *doc);
+bool carbon_path_index_create(struct jak_carbon_path_index *index, jak_carbon *doc);
+
 bool carbon_path_index_drop(struct jak_carbon_path_index *index);
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -67,12 +68,18 @@ bool carbon_path_index_drop(struct jak_carbon_path_index *index);
 // ---------------------------------------------------------------------------------------------------------------------
 
 const void *carbon_path_index_raw_data(jak_u64 *size, struct jak_carbon_path_index *index);
+
 bool carbon_path_index_commit_hash(jak_u64 *commit_hash, struct jak_carbon_path_index *index);
-bool carbon_path_index_key_type(enum carbon_key_type *key_type, struct jak_carbon_path_index *index);
+
+bool carbon_path_index_key_type(jak_carbon_key_e *key_type, struct jak_carbon_path_index *index);
+
 bool carbon_path_index_key_unsigned_value(jak_u64 *key, struct jak_carbon_path_index *index);
+
 bool carbon_path_index_key_signed_value(jak_i64 *key, struct jak_carbon_path_index *index);
+
 const char *carbon_path_index_key_string_value(jak_u64 *str_len, struct jak_carbon_path_index *index);
-bool carbon_path_index_indexes_doc(struct jak_carbon_path_index *index, struct jak_carbon *doc);
+
+bool carbon_path_index_indexes_doc(struct jak_carbon_path_index *index, jak_carbon *doc);
 
 JAK_DEFINE_ERROR_GETTER(jak_carbon_path_index);
 
@@ -80,17 +87,23 @@ JAK_DEFINE_ERROR_GETTER(jak_carbon_path_index);
 //  index access and type information
 // ---------------------------------------------------------------------------------------------------------------------
 
-bool carbon_path_index_it_open(struct jak_carbon_path_index_it *it, struct jak_carbon_path_index *index, struct jak_carbon *doc);
-bool carbon_path_index_it_type(enum carbon_container_type *type, struct jak_carbon_path_index_it *it);
+bool carbon_path_index_it_open(struct jak_carbon_path_index_it *it, struct jak_carbon_path_index *index,
+                               jak_carbon *doc);
+
+bool carbon_path_index_it_type(jak_carbon_container_e *type, struct jak_carbon_path_index_it *it);
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  array and column container functions
 // ---------------------------------------------------------------------------------------------------------------------
 
 bool carbon_path_index_it_list_length(jak_u64 *key_len, struct jak_carbon_path_index_it *it);
+
 bool carbon_path_index_it_list_goto(jak_u64 pos, struct jak_carbon_path_index_it *it);
+
 bool carbon_path_index_it_list_pos(jak_u64 *pos, struct jak_carbon_path_index_it *it);
+
 bool carbon_path_index_it_list_can_enter(struct jak_carbon_path_index_it *it);
+
 bool carbon_path_index_it_list_enter(struct jak_carbon_path_index_it *it);
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -98,9 +111,13 @@ bool carbon_path_index_it_list_enter(struct jak_carbon_path_index_it *it);
 // ---------------------------------------------------------------------------------------------------------------------
 
 bool carbon_path_index_it_obj_num_props(jak_u64 *num_props, struct jak_carbon_path_index_it *it);
+
 bool carbon_path_index_it_obj_goto(const char *key_name, struct jak_carbon_path_index_it *it);
+
 const char *carbon_path_index_it_key_name(jak_u64 *name_len, struct jak_carbon_path_index_it *it);
+
 bool carbon_path_index_it_obj_can_enter(struct jak_carbon_path_index_it *it);
+
 bool carbon_path_index_it_obj_enter(struct jak_carbon_path_index_it *it);
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -108,30 +125,51 @@ bool carbon_path_index_it_obj_enter(struct jak_carbon_path_index_it *it);
 // ---------------------------------------------------------------------------------------------------------------------
 
 bool carbon_path_index_it_field_type(enum carbon_field_type *type, struct jak_carbon_path_index_it *it);
+
 bool carbon_path_index_it_field_u8_value(jak_u8 *value, struct jak_carbon_path_index_it *it);
+
 bool carbon_path_index_it_field_u16_value(jak_u16 *value, struct jak_carbon_path_index_it *it);
+
 bool carbon_path_index_it_field_u32_value(jak_u32 *value, struct jak_carbon_path_index_it *it);
+
 bool carbon_path_index_it_field_u64_value(jak_u64 *value, struct jak_carbon_path_index_it *it);
+
 bool carbon_path_index_it_field_i8_value(jak_i8 *value, struct jak_carbon_path_index_it *it);
+
 bool carbon_path_index_it_field_i16_value(jak_i16 *value, struct jak_carbon_path_index_it *it);
+
 bool carbon_path_index_it_field_i32_value(jak_i32 *value, struct jak_carbon_path_index_it *it);
+
 bool carbon_path_index_it_field_i64_value(jak_i64 *value, struct jak_carbon_path_index_it *it);
+
 bool carbon_path_index_it_field_float_value(bool *is_null_in, float *value, struct jak_carbon_path_index_it *it);
+
 bool carbon_path_index_it_field_signed_value(bool *is_null_in, jak_i64 *value, struct jak_carbon_path_index_it *it);
+
 bool carbon_path_index_it_field_unsigned_value(bool *is_null_in, jak_u64 *value, struct jak_carbon_path_index_it *it);
+
 const char *carbon_path_index_it_field_string_value(jak_u64 *strlen, struct jak_carbon_path_index_it *it);
+
 bool carbon_path_index_it_field_binary_value(struct jak_carbon_binary *out, struct jak_carbon_array_it *it);
+
 bool carbon_path_index_it_field_array_value(struct jak_carbon_array_it *it_out, struct jak_carbon_path_index_it *it_in);
-bool carbon_path_index_it_field_object_value(struct jak_carbon_object_it *it_out, struct jak_carbon_path_index_it *it_in);
-bool carbon_path_index_it_field_column_value(struct jak_carbon_column_it *it_out, struct jak_carbon_path_index_it *it_in);
+
+bool
+carbon_path_index_it_field_object_value(struct jak_carbon_object_it *it_out, struct jak_carbon_path_index_it *it_in);
+
+bool
+carbon_path_index_it_field_column_value(struct jak_carbon_column_it *it_out, struct jak_carbon_path_index_it *it_in);
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  diagnostics
 // ---------------------------------------------------------------------------------------------------------------------
 
 bool carbon_path_index_hexdump(FILE *file, struct jak_carbon_path_index *index);
-bool carbon_path_index_to_carbon(struct jak_carbon *doc, struct jak_carbon_path_index *index);
-const char*carbon_path_index_to_str(struct jak_string *str, struct jak_carbon_path_index *index);
+
+bool carbon_path_index_to_carbon(jak_carbon *doc, struct jak_carbon_path_index *index);
+
+const char *carbon_path_index_to_str(struct jak_string *str, struct jak_carbon_path_index *index);
+
 bool carbon_path_index_print(FILE *file, struct jak_carbon_path_index *index);
 
 JAK_END_DECL

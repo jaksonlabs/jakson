@@ -273,7 +273,8 @@ static void appenderNew(slice_list_t *list)
          * in bits minus the header for the struct jak_bitmap) along with the number of used hash functions (4), lead to that
          * probability. However, the reason a struct jak_bitmap is used is to skip slices whch definitively do NOT contain the
          * keys-values pair - and that still works ;) */
-        jak_bloom_create(&filter, (JAK_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE - sizeof(struct jak_bitmap)) * 8);
+        jak_bloom_create(&filter,
+                         (JAK_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE - sizeof(struct jak_bitmap)) * 8);
         vec_push(&list->filters, &filter, 1);
         HashBounds bounds = {.minHash        = (hash32_t) -1, .maxHash        = (hash32_t) 0};
         vec_push(&list->bounds, &bounds, 1);
@@ -303,7 +304,8 @@ static void appenderNew(slice_list_t *list)
                  (sizeof(slice_list_t) + list->slices.num_elems
                                          * (sizeof(Slice) + sizeof(SliceDescriptor) +
                                             (sizeof(jak_u32) * list->descriptors.num_elems)
-                                            + sizeof(struct jak_bitmap) + jak_bitmap_nbits(&filter) / 8 + sizeof(HashBounds))) /
+                                            + sizeof(struct jak_bitmap) + jak_bitmap_nbits(&filter) / 8 +
+                                            sizeof(HashBounds))) /
                  1024.0 / 1024.0);
 
         /** register new slice as the current appender */

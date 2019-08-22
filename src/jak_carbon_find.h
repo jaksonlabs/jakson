@@ -34,42 +34,43 @@
 JAK_BEGIN_DECL
 
 struct jak_carbon_find {
-    struct jak_carbon *doc;
-    enum carbon_field_type type;
-    struct jak_error err;
-    struct jak_carbon_path_evaluator path_evaluater;
+        jak_carbon *doc;
+        enum carbon_field_type type;
+        struct jak_error err;
+        struct jak_carbon_path_evaluator path_evaluater;
 
-    bool value_is_nulled;
+        bool value_is_nulled;
 
-    union {
-        struct jak_carbon_array_it *array_it;
-        struct jak_carbon_column_it *column_it;
-        struct jak_carbon_object_it *object_it;
-        bool boolean;
-        jak_u64 unsigned_number;
-        jak_i64 signed_number;
-        float float_number;
+        union {
+                struct jak_carbon_array_it *array_it;
+                struct jak_carbon_column_it *column_it;
+                struct jak_carbon_object_it *object_it;
+                bool boolean;
+                jak_u64 unsigned_number;
+                jak_i64 signed_number;
+                float float_number;
 
-        struct {
-            const char *base;
-            jak_u64 len;
-        } string;
+                struct {
+                        const char *base;
+                        jak_u64 len;
+                } string;
 
-        struct jak_carbon_binary binary;
-    } value;
+                struct jak_carbon_binary binary;
+        } value;
 };
 
 JAK_DEFINE_ERROR_GETTER(jak_carbon_find)
 
-bool carbon_find_open(struct jak_carbon_find *out, const char *dot_path, struct jak_carbon *doc);
+bool carbon_find_open(struct jak_carbon_find *out, const char *dot_path, jak_carbon *doc);
 
 bool carbon_find_close(struct jak_carbon_find *find);
 
-bool carbon_find_create(struct jak_carbon_find *find, struct jak_carbon_dot_path *path, struct jak_carbon *doc);
+bool carbon_find_create(struct jak_carbon_find *find, struct jak_carbon_dot_path *path, jak_carbon *doc);
 
 bool carbon_find_has_result(struct jak_carbon_find *find);
 
-const char *carbon_find_result_to_str(struct jak_string *dst_str, enum carbon_printer_impl print_type, struct jak_carbon_find *find);
+const char *carbon_find_result_to_str(struct jak_string *dst_str, jak_carbon_printer_impl_e print_type,
+                                      struct jak_carbon_find *find);
 
 const char *carbon_find_result_to_json_compact(struct jak_string *dst_str, struct jak_carbon_find *find);
 

@@ -186,10 +186,10 @@ static const char *const _err_str[] =
 static const int _nerr_str = JAK_ARRAY_LENGTH(_err_str);
 
 struct jak_error {
-    int code;
-    const char *file;
-    jak_u32 line;
-    char *details;
+        int code;
+        const char *file;
+        jak_u32 line;
+        char *details;
 };
 
 bool error_init(struct jak_error *err);

@@ -31,25 +31,22 @@
 
 JAK_BEGIN_DECL
 
-struct jak_carbon; /* forwarded from carbon.h */
-struct jak_carbon_insert; /* forwarded from carbon-literal-inserter.h */
-
 struct jak_carbon_column_it {
-    struct jak_memfile memfile;
+        struct jak_memfile memfile;
 
-    jak_offset_t num_and_capacity_start_offset;
-    jak_offset_t column_start_offset;
+        jak_offset_t num_and_capacity_start_offset;
+        jak_offset_t column_start_offset;
 
-    struct jak_error err;
-    enum carbon_field_type type;
+        struct jak_error err;
+        enum carbon_field_type type;
 
-    /* in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
-    jak_i64 mod_size;
+        /* in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
+        jak_i64 mod_size;
 
-    jak_u32 column_capacity;
-    jak_u32 column_num_elements;
+        jak_u32 column_capacity;
+        jak_u32 column_num_elements;
 
-    struct spinlock lock;
+        struct spinlock lock;
 };
 
 bool carbon_column_it_create(struct jak_carbon_column_it *it, struct jak_memfile *memfile, struct jak_error *err,
@@ -57,7 +54,7 @@ bool carbon_column_it_create(struct jak_carbon_column_it *it, struct jak_memfile
 
 bool carbon_column_it_clone(struct jak_carbon_column_it *dst, struct jak_carbon_column_it *src);
 
-bool carbon_column_it_insert(struct jak_carbon_insert *inserter, struct jak_carbon_column_it *it);
+bool carbon_column_it_insert(jak_carbon_insert *inserter, struct jak_carbon_column_it *it);
 
 bool carbon_column_it_fast_forward(struct jak_carbon_column_it *it);
 

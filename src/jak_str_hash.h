@@ -84,101 +84,106 @@ JAK_BEGIN_DECL
 struct jak_str_hash;
 
 enum strhash_tag {
-    MEMORY_RESIDENT
+        MEMORY_RESIDENT
 };
 
 struct jak_str_hash_counters {
-    size_t num_bucket_search_miss;
-    size_t num_bucket_search_hit;
-    size_t num_bucket_cache_search_miss;
-    size_t num_bucket_cache_search_hit;
+        size_t num_bucket_search_miss;
+        size_t num_bucket_search_hit;
+        size_t num_bucket_cache_search_miss;
+        size_t num_bucket_cache_search_hit;
 };
 
 struct jak_str_hash {
-    /**
-     * Implementation-specific values
-     */
-    void *extra;
+        /**
+         * Implementation-specific values
+         */
+        void *extra;
 
-    /**
-     * Implementation tag
-     */
-    enum strhash_tag tag;
+        /**
+         * Implementation tag
+         */
+        enum strhash_tag tag;
 
-    /**
-     * Statistics to lookup misses and hits
-     *
-     * <b>Note</b>: Implementation must maintain counters by itself
-     */
-    struct jak_str_hash_counters counters;
+        /**
+         * Statistics to lookup misses and hits
+         *
+         * <b>Note</b>: Implementation must maintain counters by itself
+         */
+        struct jak_str_hash_counters counters;
 
-    /**
-    *  Memory allocator that is used to get memory for user data
-    */
-    struct jak_allocator allocator;
+        /**
+        *  Memory allocator that is used to get memory for user data
+        */
+        struct jak_allocator allocator;
 
-    /**
-     *  Frees resources bound to <code>self</code> via the allocator specified by the constructor
-     */
-    int (*drop)(struct jak_str_hash *self);
+        /**
+         *  Frees resources bound to <code>self</code> via the allocator specified by the constructor
+         */
+        int (*drop)(struct jak_str_hash *self);
 
-    /**
-     * Put <code>num_pair</code> objects into this jak_async_map_exec maybe updating old objects with the same key.
-     */
-    int (*put_bulk_safe)(struct jak_str_hash *self, char *const *keys, const jak_archive_field_sid_t *values, size_t npairs);
+        /**
+         * Put <code>num_pair</code> objects into this jak_async_map_exec maybe updating old objects with the same key.
+         */
+        int (*put_bulk_safe)(struct jak_str_hash *self, char *const *keys, const jak_archive_field_sid_t *values,
+                             size_t npairs);
 
-    /**
-     * Put <code>num_pair</code> objects into this jak_async_map_exec maybe without checking for updates.
-     */
-    int (*put_bulk_fast)(struct jak_str_hash *self, char *const *keys, const jak_archive_field_sid_t *values, size_t npairs);
+        /**
+         * Put <code>num_pair</code> objects into this jak_async_map_exec maybe without checking for updates.
+         */
+        int (*put_bulk_fast)(struct jak_str_hash *self, char *const *keys, const jak_archive_field_sid_t *values,
+                             size_t npairs);
 
-    /**
-     * Same as 'put_safe_bulk' but specialized for a single element
-     */
-    int (*put_exact_safe)(struct jak_str_hash *self, const char *key, jak_archive_field_sid_t value);
+        /**
+         * Same as 'put_safe_bulk' but specialized for a single element
+         */
+        int (*put_exact_safe)(struct jak_str_hash *self, const char *key, jak_archive_field_sid_t value);
 
-    /**
-     * Same as 'put_fast_bulk' but specialized for a single element
-     */
-    int (*put_exact_fast)(struct jak_str_hash *self, const char *key, jak_archive_field_sid_t value);
+        /**
+         * Same as 'put_fast_bulk' but specialized for a single element
+         */
+        int (*put_exact_fast)(struct jak_str_hash *self, const char *key, jak_archive_field_sid_t value);
 
-    /**
-     * Get the values associated with <code>keys</code> in this jak_async_map_exec (if any).
-     */
-    int (*get_bulk_safe)(struct jak_str_hash *self, jak_archive_field_sid_t **out, bool **found_mask, size_t *nnot_found,
-                         char *const *keys, size_t nkeys);
+        /**
+         * Get the values associated with <code>keys</code> in this jak_async_map_exec (if any).
+         */
+        int (*get_bulk_safe)(struct jak_str_hash *self, jak_archive_field_sid_t **out, bool **found_mask,
+                             size_t *nnot_found,
+                             char *const *keys, size_t nkeys);
 
-    /**
-     * The same as 'get_safe_bulk' but optimized for a single element
-     */
-    int (*get_exact_safe)(struct jak_str_hash *self, jak_archive_field_sid_t *out, bool *found_mask, const char *key);
+        /**
+         * The same as 'get_safe_bulk' but optimized for a single element
+         */
+        int
+        (*get_exact_safe)(struct jak_str_hash *self, jak_archive_field_sid_t *out, bool *found_mask, const char *key);
 
-    /**
-     * Get the values associated with <code>keys</code> in this jak_async_map_exec. All keys <u>must</u> exist.
-     */
-    int (*get_fast)(struct jak_str_hash *self, jak_archive_field_sid_t **out, char *const *keys, size_t nkeys);
+        /**
+         * Get the values associated with <code>keys</code> in this jak_async_map_exec. All keys <u>must</u> exist.
+         */
+        int (*get_fast)(struct jak_str_hash *self, jak_archive_field_sid_t **out, char *const *keys, size_t nkeys);
 
-    /**
-     * Updates keys associated with <code>values</code> in this jak_async_map_exec. All values <u>must</u> exist, and the
-     * mapping between keys and values must be bidirectional.
-     */
-    int (*update_key_fast)(struct jak_str_hash *self, const jak_archive_field_sid_t *values, char *const *keys, size_t nkeys);
+        /**
+         * Updates keys associated with <code>values</code> in this jak_async_map_exec. All values <u>must</u> exist, and the
+         * mapping between keys and values must be bidirectional.
+         */
+        int (*update_key_fast)(struct jak_str_hash *self, const jak_archive_field_sid_t *values, char *const *keys,
+                               size_t nkeys);
 
-    /**
-     * Removes the objects with the gives keys from this jak_async_map_exec
-     */
-    int (*remove)(struct jak_str_hash *self, char *const *keys, size_t nkeys);
+        /**
+         * Removes the objects with the gives keys from this jak_async_map_exec
+         */
+        int (*remove)(struct jak_str_hash *self, char *const *keys, size_t nkeys);
 
-    /**
-     * Frees up allocated memory for <code>ptr</code> via the allocator in <code>jak_async_map_exec</code> that was specified
-     * by the call to <code>string_id_map_create</code>
-     */
-    int (*free)(struct jak_str_hash *self, void *ptr);
+        /**
+         * Frees up allocated memory for <code>ptr</code> via the allocator in <code>jak_async_map_exec</code> that was specified
+         * by the call to <code>string_id_map_create</code>
+         */
+        int (*free)(struct jak_str_hash *self, void *ptr);
 
-    /**
-     *  Error information
-     */
-    struct jak_error err;
+        /**
+         *  Error information
+         */
+        struct jak_error err;
 
 };
 
@@ -236,8 +241,9 @@ inline static int strhash_get_counters(struct jak_str_hash_counters *out, const 
  * @param num_pairs the number of pairs that are read via <code>keys</code> and <code>values</code>
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
-inline static int strhash_put_safe(struct jak_str_hash *jak_async_map_exec, char *const *keys, const jak_archive_field_sid_t *values,
-                                   size_t npairs)
+inline static int
+strhash_put_safe(struct jak_str_hash *jak_async_map_exec, char *const *keys, const jak_archive_field_sid_t *values,
+                 size_t npairs)
 {
         JAK_ERROR_IF_NULL(jak_async_map_exec);
         JAK_ERROR_IF_NULL(keys);
@@ -262,8 +268,9 @@ inline static int strhash_put_safe(struct jak_str_hash *jak_async_map_exec, char
  * @param num_pairs the number of pairs that are read via <code>keys</code> and <code>values</code>
  * @return <code>true</code> in case of success, otherwise a value indiciating the error.
  */
-inline static int strhash_put_bulk_fast(struct jak_str_hash *jak_async_map_exec, char *const *keys, const jak_archive_field_sid_t *values,
-                                        size_t npairs)
+inline static int
+strhash_put_bulk_fast(struct jak_str_hash *jak_async_map_exec, char *const *keys, const jak_archive_field_sid_t *values,
+                      size_t npairs)
 {
         JAK_ERROR_IF_NULL(jak_async_map_exec);
         JAK_ERROR_IF_NULL(keys);
@@ -276,7 +283,8 @@ inline static int strhash_put_bulk_fast(struct jak_str_hash *jak_async_map_exec,
 /**
  * Same as 'string_lookup_put_bulk' but specialized for a single pair
  */
-inline static int strhash_put_exact(struct jak_str_hash *jak_async_map_exec, const char *key, jak_archive_field_sid_t value)
+inline static int
+strhash_put_exact(struct jak_str_hash *jak_async_map_exec, const char *key, jak_archive_field_sid_t value)
 {
         JAK_ERROR_IF_NULL(jak_async_map_exec);
         JAK_ERROR_IF_NULL(key);
@@ -288,7 +296,8 @@ inline static int strhash_put_exact(struct jak_str_hash *jak_async_map_exec, con
 /**
  * Same as 'string_lookup_put_fast_bulk' but specialized for a single pair
  */
-inline static int strhash_put_exact_fast(struct jak_str_hash *jak_async_map_exec, const char *key, jak_archive_field_sid_t value)
+inline static int
+strhash_put_exact_fast(struct jak_str_hash *jak_async_map_exec, const char *key, jak_archive_field_sid_t value)
 {
         JAK_ERROR_IF_NULL(jak_async_map_exec);
         JAK_ERROR_IF_NULL(key);
@@ -343,8 +352,9 @@ inline static int strhash_get_bulk_safe(jak_archive_field_sid_t **out, bool **fo
         return result;
 }
 
-inline static int strhash_get_bulk_safe_exact(jak_archive_field_sid_t *out, bool *found, struct jak_str_hash *jak_async_map_exec,
-                                              const char *key)
+inline static int
+strhash_get_bulk_safe_exact(jak_archive_field_sid_t *out, bool *found, struct jak_str_hash *jak_async_map_exec,
+                            const char *key)
 {
         JAK_ERROR_IF_NULL(out);
         JAK_ERROR_IF_NULL(found);
@@ -375,8 +385,9 @@ inline static int strhash_get_bulk_safe_exact(jak_archive_field_sid_t *out, bool
  * @param num_keys the number of keys
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
-inline static int strhash_get_bulk_fast(jak_archive_field_sid_t **out, struct jak_str_hash *jak_async_map_exec, char *const *keys,
-                                        size_t nkeys)
+inline static int
+strhash_get_bulk_fast(jak_archive_field_sid_t **out, struct jak_str_hash *jak_async_map_exec, char *const *keys,
+                      size_t nkeys)
 {
         JAK_ERROR_IF_NULL(out);
         JAK_ERROR_IF_NULL(jak_async_map_exec);
@@ -401,8 +412,9 @@ inline static int strhash_get_bulk_fast(jak_archive_field_sid_t **out, struct ja
  * @param num_keys the number of keys
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
-inline static int strhash_update_fast(struct jak_str_hash *jak_async_map_exec, const jak_archive_field_sid_t *values, char *const *keys,
-                                      size_t nkeys)
+inline static int
+strhash_update_fast(struct jak_str_hash *jak_async_map_exec, const jak_archive_field_sid_t *values, char *const *keys,
+                    size_t nkeys)
 {
         JAK_ERROR_IF_NULL(jak_async_map_exec);
         JAK_ERROR_IF_NULL(keys);

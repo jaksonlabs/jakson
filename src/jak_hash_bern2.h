@@ -37,6 +37,6 @@ JAK_BEGIN_DECL
     hash;                                                                                                              \
 })
 
-        JAK_END_DECL
+JAK_END_DECL
 
 #endif

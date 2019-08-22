@@ -32,14 +32,14 @@
 #define TO_GIB(x)       (x/1024.0f/1024.0f/1024.0f)
 
 struct trace_stats {
-    size_t num_malloc_calls;
-    size_t num_realloc_calls;
-    size_t num_free_calls;
-    size_t total_size;
-    struct jak_vector ofType(size_t) *malloc_sizes;
-    struct spinlock *spinlock;
-    FILE *statistics_file;
-    timestamp_t startup_timestamp;
+        size_t num_malloc_calls;
+        size_t num_realloc_calls;
+        size_t num_free_calls;
+        size_t total_size;
+        struct jak_vector ofType(size_t) *malloc_sizes;
+        struct spinlock *spinlock;
+        FILE *statistics_file;
+        timestamp_t startup_timestamp;
 };
 
 #define DEFINE_PAGE_WITH_SIZE(x)                                                                                       \
@@ -142,9 +142,9 @@ DEFINE_PAGE_WITH_SIZE(549755813888)
     {x, page_##x##b_new}
 
 struct page_template_entry {
-    size_t size;
+        size_t size;
 
-    void *(*new_ptr_func)(size_t user_size);
+        void *(*new_ptr_func)(size_t user_size);
 } page_template_register[] = {
 
         REGISTER_PAGE(1), REGISTER_PAGE(2), REGISTER_PAGE(4), REGISTER_PAGE(8), REGISTER_PAGE(16), REGISTER_PAGE(32),
