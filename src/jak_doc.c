@@ -63,7 +63,7 @@ jak_doc_obj *jak_doc_bulk_new_obj(jak_doc *model)
 }
 
 bool jak_doc_bulk_get_dic_contents(struct jak_vector ofType (const char *) **strings,
-                               struct jak_vector ofType(jak_archive_field_sid_t) **string_ids,
+                               struct jak_vector ofType(jak_archive_field_sid_t) **jak_string_ids,
                                const jak_doc_bulk *context)
 {
         JAK_ERROR_IF_NULL(context)
@@ -71,14 +71,14 @@ bool jak_doc_bulk_get_dic_contents(struct jak_vector ofType (const char *) **str
         size_t num_distinct_values;
         strdic_num_distinct(&num_distinct_values, context->dic);
         struct jak_vector ofType (const char *) *result_strings = JAK_MALLOC(sizeof(struct jak_vector));
-        struct jak_vector ofType (jak_archive_field_sid_t) *resultstring_id_ts = JAK_MALLOC(sizeof(struct jak_vector));
+        struct jak_vector ofType (jak_archive_field_sid_t) *resultjak_string_id_ts = JAK_MALLOC(sizeof(struct jak_vector));
         vec_create(result_strings, NULL, sizeof(const char *), num_distinct_values);
-        vec_create(resultstring_id_ts, NULL, sizeof(jak_archive_field_sid_t), num_distinct_values);
+        vec_create(resultjak_string_id_ts, NULL, sizeof(jak_archive_field_sid_t), num_distinct_values);
 
-        int status = strdic_get_contents(result_strings, resultstring_id_ts, context->dic);
-        JAK_check_success(status);
+        int status = strdic_get_contents(result_strings, resultjak_string_id_ts, context->dic);
+        JAK_CHECK_SUCCESS(status);
         *strings = result_strings;
-        *string_ids = resultstring_id_ts;
+        *jak_string_ids = resultjak_string_id_ts;
 
         return status;
 }
@@ -303,7 +303,7 @@ value_type_for_json_number(bool *success, jak_error *err, const jak_json_number 
 }
 
 static void
-import_json_object_string_prop(jak_doc_obj *target, const char *key, const jak_json_string *string)
+import_json_object_jak_string_prop(jak_doc_obj *target, const char *key, const jak_json_string *string)
 {
         jak_doc_entries *entry;
         jak_doc_obj_add_key(&entry, target, key, JAK_FIELD_STRING);
@@ -626,7 +626,7 @@ import_json_object(jak_doc_obj *target, jak_error *err, const jak_json_object *j
                 jak_json_value_type_e value_type = member->value.value.value_type;
                 switch (value_type) {
                         case JAK_JSON_VALUE_STRING:
-                                import_json_object_string_prop(target, member->key.value,
+                                import_json_object_jak_string_prop(target, member->key.value,
                                                                member->value.value.value.string);
                                 break;
                         case JAK_JSON_VALUE_NUMBER:
@@ -785,7 +785,7 @@ JAK_DEFINE_TYPE_LQ_FUNC(field_u32_t)
 
 JAK_DEFINE_TYPE_LQ_FUNC(field_u64_t)
 
-static bool compare_encoded_string_less_eq_func(const void *lhs, const void *rhs, void *args)
+static bool compare_encoded_jak_string_less_eq_func(const void *lhs, const void *rhs, void *args)
 {
         struct jak_string_dict *dic = (struct jak_string_dict *) args;
         jak_archive_field_sid_t *a = (jak_archive_field_sid_t *) lhs;
@@ -845,7 +845,7 @@ JAK_DEFINE_ARRAY_TYPE_LQ_FUNC(field_u64_t)
 
 JAK_DEFINE_ARRAY_TYPE_LQ_FUNC(field_number_t)
 
-static bool compare_encoded_string_array_less_eq_func(const void *lhs, const void *rhs, void *args)
+static bool compare_encoded_jak_string_array_less_eq_func(const void *lhs, const void *rhs, void *args)
 {
         struct jak_string_dict *dic = (struct jak_string_dict *) args;
         struct jak_vector ofType(jak_archive_field_sid_t) *a = (struct jak_vector *) lhs;
@@ -929,7 +929,7 @@ static void sorted_nested_array_objects(jak_column_doc_obj *columndoc)
     }                                                                                                                  \
 }
 
-static void sort_meta_model_string_values(struct jak_vector ofType(jak_archive_field_sid_t) *key_vector,
+static void sort_meta_model_jak_string_values(struct jak_vector ofType(jak_archive_field_sid_t) *key_vector,
                                           struct jak_vector ofType(jak_archive_field_sid_t) *value_vector,
                                           struct jak_string_dict *dic)
 {
@@ -952,7 +952,7 @@ static void sort_meta_model_string_values(struct jak_vector ofType(jak_archive_f
                 sort_qsort_indicies_wargs(value_indicies,
                                           values,
                                           sizeof(jak_archive_field_sid_t),
-                                          compare_encoded_string_less_eq_func,
+                                          compare_encoded_jak_string_less_eq_func,
                                           num_elements,
                                           key_vector->allocator,
                                           dic);
@@ -1023,7 +1023,7 @@ static void sort_jak_columndoc_strings_arrays(struct jak_vector ofType(jak_archi
                 sort_qsort_indicies_wargs(value_indicies,
                                           values,
                                           sizeof(struct jak_vector),
-                                          compare_encoded_string_array_less_eq_func,
+                                          compare_encoded_jak_string_array_less_eq_func,
                                           num_elements,
                                           key_vector->allocator,
                                           dic);
@@ -1089,7 +1089,7 @@ static bool compare_column_less_eq_func(const void *lhs, const void *rhs, void *
         struct jak_vector ofType(<T>) *b = (struct jak_vector *) rhs;
         struct com_column_leq_arg *func_arg = (struct com_column_leq_arg *) args;
 
-        size_t max_num_elem = JAK_min(a->num_elems, b->num_elems);
+        size_t max_num_elem = JAK_MIN(a->num_elems, b->num_elems);
 
         switch (func_arg->value_type) {
                 case JAK_FIELD_NULL:
@@ -1271,8 +1271,8 @@ static void sort_jak_columndoc_values(jak_column_doc_obj *columndoc)
                                        columndoc->float_prop_vals,
                                        jak_archive_field_number_t,
                                        compare_field_number_t_leq);
-                sort_meta_model_string_values(&columndoc->string_prop_keys,
-                                              &columndoc->string_prop_vals,
+                sort_meta_model_jak_string_values(&columndoc->jak_string_prop_keys,
+                                              &columndoc->jak_string_prop_vals,
                                               columndoc->parent->dic);
 
                 SORT_META_MODEL_ARRAYS(columndoc->bool_array_prop_keys,
@@ -1305,8 +1305,8 @@ static void sort_jak_columndoc_values(jak_column_doc_obj *columndoc)
                 SORT_META_MODEL_ARRAYS(columndoc->float_array_prop_keys,
                                        columndoc->float_array_prop_vals,
                                        compare_field_number_t_array_leq);
-                sort_jak_columndoc_strings_arrays(&columndoc->string_array_prop_keys,
-                                              &columndoc->string_array_prop_vals,
+                sort_jak_columndoc_strings_arrays(&columndoc->jak_string_array_prop_keys,
+                                              &columndoc->jak_string_array_prop_vals,
                                               columndoc->parent->dic);
 
                 sort_jak_columndoc_column_arrays(columndoc);
@@ -1405,7 +1405,7 @@ static void create_typed_vector(jak_doc_entries *entry)
                         size = sizeof(jak_archive_field_number_t);
                         break;
                 case JAK_FIELD_STRING:
-                        size = sizeof(field_string_t);
+                        size = sizeof(field_jak_string_t);
                         break;
                 case JAK_FIELD_OBJECT:
                         size = sizeof(jak_doc_obj);
@@ -1557,7 +1557,7 @@ static bool print_value(FILE *file, jak_archive_field_e type, const struct jak_v
                         break;
                 case JAK_FIELD_STRING: {
                         for (size_t i = 0; i < num_values; i++) {
-                                field_string_t value = *(vec_get(values, i, field_string_t));
+                                field_jak_string_t value = *(vec_get(values, i, field_jak_string_t));
                                 if (value) {
                                         fprintf(file, "\"%s\"%s", value, i + 1 < num_values ? ", " : "");
                                 } else {

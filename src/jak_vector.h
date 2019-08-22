@@ -107,7 +107,7 @@ struct jak_vector {
 /**
  * Utility implementation of generic vector to specialize for type of 'char *'
  */
-typedef struct jak_vector ofType(const char *) string_vector_t;
+typedef struct jak_vector ofType(const char *) jak_string_vector_t;
 
 /**
  * Constructs a new vector for elements of size 'elem_size', reserving memory for 'cap_elems' elements using

@@ -53,7 +53,7 @@ static void write_skey(struct jak_memfile *file)
         jak_u8 marker = JAK_CARBON_MARKER_KEY_SKEY;
         const char *key = "";
         memfile_write(file, &marker, sizeof(jak_u8));
-        jak_carbon_string_write(file, key);
+        jak_carbon_jak_string_write(file, key);
 }
 
 bool jak_carbon_key_create(struct jak_memfile *file, jak_carbon_key_e type, jak_error *err)
@@ -77,7 +77,7 @@ bool jak_carbon_key_create(struct jak_memfile *file, jak_carbon_key_e type, jak_
                         write_skey(file);
                         break;
                 default:
-                        JAK_optional(err != NULL, JAK_ERROR(err, JAK_ERR_INTERNALERR))
+                        JAK_OPTIONAL(err != NULL, JAK_ERROR(err, JAK_ERR_INTERNALERR))
                         return false;
         }
         return true;
@@ -94,7 +94,7 @@ bool jak_carbon_key_write_unsigned(struct jak_memfile *file, jak_u64 key)
 {
         JAK_ERROR_IF_NULL(file)
 
-        JAK_declare_and_init(jak_carbon_key_e, key_type)
+        JAK_DECLARE_AND_INIT(jak_carbon_key_e, key_type)
 
         jak_carbon_key_read_type(&key_type, file);
         if (jak_carbon_key_is_unsigned(key_type)) {
@@ -110,7 +110,7 @@ bool jak_carbon_key_write_signed(struct jak_memfile *file, jak_i64 key)
 {
         JAK_ERROR_IF_NULL(file)
 
-        JAK_declare_and_init(jak_carbon_key_e, key_type)
+        JAK_DECLARE_AND_INIT(jak_carbon_key_e, key_type)
 
         jak_carbon_key_read_type(&key_type, file);
         if (jak_carbon_key_is_signed(key_type)) {
@@ -124,16 +124,16 @@ bool jak_carbon_key_write_signed(struct jak_memfile *file, jak_i64 key)
 
 bool jak_carbon_key_update_string(struct jak_memfile *file, const char *key)
 {
-        return jak_carbon_key_update_string_wnchar(file, key, strlen(key));
+        return jak_carbon_key_update_jak_string_wnchar(file, key, strlen(key));
 }
 
-bool jak_carbon_key_update_string_wnchar(struct jak_memfile *file, const char *key, size_t length)
+bool jak_carbon_key_update_jak_string_wnchar(struct jak_memfile *file, const char *key, size_t length)
 {
         JAK_ERROR_IF_NULL(file)
-        JAK_declare_and_init(jak_carbon_key_e, key_type)
+        JAK_DECLARE_AND_INIT(jak_carbon_key_e, key_type)
         jak_carbon_key_read_type(&key_type, file);
         if (jak_carbon_key_is_string(key_type)) {
-                jak_carbon_string_update_wnchar(file, key, length);
+                jak_carbon_jak_string_update_wnchar(file, key, length);
                 return true;
         } else {
                 JAK_ERROR(&file->err, JAK_ERR_TYPEMISMATCH)
@@ -145,11 +145,11 @@ bool jak_carbon_key_write_string(struct jak_memfile *file, const char *key)
 {
         JAK_ERROR_IF_NULL(file)
 
-        JAK_declare_and_init(jak_carbon_key_e, key_type)
+        JAK_DECLARE_AND_INIT(jak_carbon_key_e, key_type)
 
         jak_carbon_key_read_type(&key_type, file);
         if (jak_carbon_key_is_string(key_type)) {
-                jak_carbon_string_write(file, key);
+                jak_carbon_jak_string_write(file, key);
                 return true;
         } else {
                 JAK_ERROR(&file->err, JAK_ERR_TYPEMISMATCH)
@@ -167,19 +167,19 @@ bool jak_carbon_key_read_type(jak_carbon_key_e *out, struct jak_memfile *file)
 
         switch (marker) {
                 case JAK_CARBON_MARKER_KEY_NOKEY:
-                        JAK_optional_set(out, JAK_CARBON_KEY_NOKEY)
+                        JAK_OPTIONAL_SET(out, JAK_CARBON_KEY_NOKEY)
                         break;
                 case JAK_CARBON_MARKER_KEY_AUTOKEY:
-                        JAK_optional_set(out, JAK_CARBON_KEY_AUTOKEY)
+                        JAK_OPTIONAL_SET(out, JAK_CARBON_KEY_AUTOKEY)
                         break;
                 case JAK_CARBON_MARKER_KEY_UKEY:
-                        JAK_optional_set(out, JAK_CARBON_KEY_UKEY)
+                        JAK_OPTIONAL_SET(out, JAK_CARBON_KEY_UKEY)
                         break;
                 case JAK_CARBON_MARKER_KEY_IKEY:
-                        JAK_optional_set(out, JAK_CARBON_KEY_IKEY)
+                        JAK_OPTIONAL_SET(out, JAK_CARBON_KEY_IKEY)
                         break;
                 case JAK_CARBON_MARKER_KEY_SKEY:
-                        JAK_optional_set(out, JAK_CARBON_KEY_SKEY)
+                        JAK_OPTIONAL_SET(out, JAK_CARBON_KEY_SKEY)
                         break;
                 default: JAK_ERROR(&file->err, JAK_ERR_INTERNALERR)
                         return false;
@@ -192,23 +192,23 @@ const void *jak_carbon_key_read(jak_u64 *len, jak_carbon_key_e *out, struct jak_
         jak_carbon_key_e key_type = 0;
         jak_carbon_key_read_type(&key_type, file);
 
-        JAK_optional_set(out, key_type)
+        JAK_OPTIONAL_SET(out, key_type)
 
         switch (key_type) {
                 case JAK_CARBON_KEY_NOKEY:
-                        JAK_optional_set(len, 0)
+                        JAK_OPTIONAL_SET(len, 0)
                         return NULL;
                 case JAK_CARBON_KEY_AUTOKEY:
-                        JAK_optional_set(len, sizeof(jak_uid_t))
+                        JAK_OPTIONAL_SET(len, sizeof(jak_uid_t))
                         return JAK_MEMFILE_READ_TYPE(file, jak_uid_t);
                 case JAK_CARBON_KEY_UKEY:
-                        JAK_optional_set(len, sizeof(jak_u64))
+                        JAK_OPTIONAL_SET(len, sizeof(jak_u64))
                         return JAK_MEMFILE_READ_TYPE(file, jak_u64);
                 case JAK_CARBON_KEY_IKEY:
-                        JAK_optional_set(len, sizeof(jak_i64))
+                        JAK_OPTIONAL_SET(len, sizeof(jak_i64))
                         return JAK_MEMFILE_READ_TYPE(file, jak_i64);
                 case JAK_CARBON_KEY_SKEY:
-                        return jak_carbon_string_read(len, file);
+                        return jak_carbon_jak_string_read(len, file);
                 default: JAK_ERROR(&file->err, JAK_ERR_INTERNALERR)
                         return NULL;
         }

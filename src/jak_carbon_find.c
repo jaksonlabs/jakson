@@ -80,11 +80,11 @@ bool jak_carbon_find_create(jak_carbon_find *find, jak_carbon_dot_path *path, ja
         JAK_ERROR_IF_NULL(path)
         JAK_ERROR_IF_NULL(doc)
 
-        JAK_zero_memory(find, sizeof(jak_carbon_find));
+        JAK_ZERO_MEMORY(find, sizeof(jak_carbon_find));
         jak_error_init(&find->err);
         find->doc = doc;
 
-        JAK_check_success(jak_carbon_path_evaluator_begin(&find->path_evaluater, path, doc));
+        JAK_CHECK_SUCCESS(jak_carbon_path_evaluator_begin(&find->path_evaluater, path, doc));
         if (jak_carbon_path_evaluator_has_result(&find->path_evaluater)) {
                 switch (find->path_evaluater.result.container_type) {
                         case JAK_CARBON_ARRAY:
@@ -111,12 +111,12 @@ bool jak_carbon_find_has_result(jak_carbon_find *find)
 }
 
 const char *
-jak_carbon_find_result_to_str(struct jak_string *dst_str, jak_carbon_printer_impl_e print_type, jak_carbon_find *find)
+jak_carbon_find_result_to_str(jak_string *dst_str, jak_carbon_printer_impl_e print_type, jak_carbon_find *find)
 {
         JAK_ERROR_IF_NULL(dst_str)
         JAK_ERROR_IF_NULL(find)
 
-        string_clear(dst_str);
+        jak_string_clear(dst_str);
 
         jak_carbon_printer printer;
         jak_carbon_printer_by_type(&printer, print_type);
@@ -229,24 +229,24 @@ jak_carbon_find_result_to_str(struct jak_string *dst_str, jak_carbon_printer_imp
                 }
 
         } else {
-                string_add(dst_str, JAK_CARBON_NIL_STR);
+                jak_string_add(dst_str, JAK_CARBON_NIL_STR);
         }
         jak_carbon_printer_drop(&printer);
 
-        return string_cstr(dst_str);
+        return jak_string_cstr(dst_str);
 }
 
-const char *jak_carbon_find_result_to_json_compact(struct jak_string *dst_str, jak_carbon_find *find)
+const char *jak_carbon_find_result_to_json_compact(jak_string *dst_str, jak_carbon_find *find)
 {
         return jak_carbon_find_result_to_str(dst_str, JAK_JSON_COMPACT, find);
 }
 
 char *jak_carbon_find_result_to_json_compact_dup(jak_carbon_find *find)
 {
-        struct jak_string str;
-        string_create(&str);
+        jak_string str;
+        jak_string_create(&str);
         char *ret = strdup(jak_carbon_find_result_to_json_compact(&str, find));
-        string_drop(&str);
+        jak_string_drop(&str);
         return ret;
 }
 
@@ -381,7 +381,7 @@ static void result_from_array(jak_carbon_find *find, jak_carbon_array_it *it)
                         find->value.object_it = jak_carbon_array_it_object_value(it);
                         break;
                 case JAK_CARBON_FIELD_TYPE_STRING:
-                        find->value.string.base = jak_carbon_array_it_string_value(&find->value.string.len, it);
+                        find->value.string.base = jak_carbon_array_it_jak_string_value(&find->value.string.len, it);
                         break;
                 case JAK_CARBON_FIELD_TYPE_NUMBER_U8:
                 case JAK_CARBON_FIELD_TYPE_NUMBER_U16:
@@ -435,7 +435,7 @@ static void result_from_object(jak_carbon_find *find, jak_carbon_object_it *it)
                         find->value.object_it = jak_carbon_object_it_object_value(it);
                         break;
                 case JAK_CARBON_FIELD_TYPE_STRING:
-                        find->value.string.base = jak_carbon_object_it_string_value(&find->value.string.len, it);
+                        find->value.string.base = jak_carbon_object_it_jak_string_value(&find->value.string.len, it);
                         break;
                 case JAK_CARBON_FIELD_TYPE_NUMBER_U8:
                 case JAK_CARBON_FIELD_TYPE_NUMBER_U16:

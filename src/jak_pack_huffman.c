@@ -52,7 +52,7 @@ bool jak_coding_huffman_cpy(jak_huffman *dst, jak_huffman *src)
         }
 }
 
-bool jak_coding_huffman_build(jak_huffman *encoder, const string_vector_t *strings)
+bool jak_coding_huffman_build(jak_huffman *encoder, const jak_string_vector_t *strings)
 {
         JAK_ERROR_IF_NULL(encoder);
         JAK_ERROR_IF_NULL(strings);
@@ -62,12 +62,12 @@ bool jak_coding_huffman_build(jak_huffman *encoder, const string_vector_t *strin
         vec_enlarge_size_to_capacity(&frequencies);
 
         jak_u32 *freq_data = vec_all(&frequencies, jak_u32);
-        JAK_zero_memory(freq_data, UCHAR_MAX * sizeof(jak_u32));
+        JAK_ZERO_MEMORY(freq_data, UCHAR_MAX * sizeof(jak_u32));
 
         for (size_t i = 0; i < strings->num_elems; i++) {
                 const char *string = *vec_get(strings, i, const char *);
-                size_t string_length = strlen(string);
-                for (size_t k = 0; k < string_length; k++) {
+                size_t jak_string_length = strlen(string);
+                for (size_t k = 0; k < jak_string_length; k++) {
                         size_t c = (unsigned char) string[k];
                         freq_data[c]++;
                 }

@@ -24,7 +24,7 @@
 void jak_int_read_prop_offsets(jak_archive_prop_offs *prop_offsets, struct jak_memfile *memfile,
                                const jak_object_flags_u *flags)
 {
-        JAK_zero_memory(prop_offsets, sizeof(jak_archive_prop_offs));
+        JAK_ZERO_MEMORY(prop_offsets, sizeof(jak_archive_prop_offs));
         if (flags->bits.has_null_props) {
                 prop_offsets->nulls = *JAK_MEMFILE_READ_TYPE(memfile, jak_offset_t);
         }
@@ -58,7 +58,7 @@ void jak_int_read_prop_offsets(jak_archive_prop_offs *prop_offsets, struct jak_m
         if (flags->bits.has_float_props) {
                 prop_offsets->floats = *JAK_MEMFILE_READ_TYPE(memfile, jak_offset_t);
         }
-        if (flags->bits.has_string_props) {
+        if (flags->bits.has_jak_string_props) {
                 prop_offsets->strings = *JAK_MEMFILE_READ_TYPE(memfile, jak_offset_t);
         }
         if (flags->bits.has_object_props) {
@@ -97,8 +97,8 @@ void jak_int_read_prop_offsets(jak_archive_prop_offs *prop_offsets, struct jak_m
         if (flags->bits.has_float_array_props) {
                 prop_offsets->float_arrays = *JAK_MEMFILE_READ_TYPE(memfile, jak_offset_t);
         }
-        if (flags->bits.has_string_array_props) {
-                prop_offsets->string_arrays = *JAK_MEMFILE_READ_TYPE(memfile, jak_offset_t);
+        if (flags->bits.has_jak_string_array_props) {
+                prop_offsets->jak_string_arrays = *JAK_MEMFILE_READ_TYPE(memfile, jak_offset_t);
         }
         if (flags->bits.has_object_array_props) {
                 prop_offsets->object_arrays = *JAK_MEMFILE_READ_TYPE(memfile, jak_offset_t);

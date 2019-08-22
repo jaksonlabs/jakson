@@ -33,8 +33,6 @@ JAK_BEGIN_DECL
 JAK_FORWARD_STRUCT_DECL(StringDictionary)
 JAK_FORWARD_STRUCT_DECL(Vector)
 
-struct jak_str_hash_counters;
-
 enum jak_str_dict_tag {
         SYNC, ASYNC
 };
@@ -121,7 +119,7 @@ struct jak_string_dict {
         /**
          * Get internal statistic counters
          */
-        bool (*counters)(struct jak_string_dict *self, struct jak_str_hash_counters *counters);
+        bool (*counters)(struct jak_string_dict *self, jak_str_hash_counters *counters);
 
         /**
          * Returns number of distinct strings stored in the dictionary
@@ -132,7 +130,7 @@ struct jak_string_dict {
          * Returns all contained (unique) strings and their mapped (unique) ids
          */
         bool (*get_contents)(struct jak_string_dict *self, struct jak_vector ofType (char *) *strings,
-                             struct jak_vector ofType(jak_archive_field_sid_t) *string_ids);
+                             struct jak_vector ofType(jak_archive_field_sid_t) *jak_string_ids);
 };
 
 /**
@@ -168,7 +166,7 @@ static bool strdic_reset_counters(struct jak_string_dict *dic)
 }
 
 JAK_FUNC_UNUSED
-static bool strdic_get_counters(struct jak_str_hash_counters *counters, struct jak_string_dict *dic)
+static bool strdic_get_counters(jak_str_hash_counters *counters, struct jak_string_dict *dic)
 {
         JAK_ERROR_IF_NULL(dic);
         JAK_ASSERT(dic->counters);
@@ -238,14 +236,14 @@ static bool strdic_num_distinct(size_t *num, struct jak_string_dict *dic)
 
 JAK_FUNC_UNUSED
 static bool strdic_get_contents(struct jak_vector ofType (char *) *strings,
-                                struct jak_vector ofType(jak_archive_field_sid_t) *string_ids,
+                                struct jak_vector ofType(jak_archive_field_sid_t) *jak_string_ids,
                                 struct jak_string_dict *dic)
 {
         JAK_ERROR_IF_NULL(strings)
-        JAK_ERROR_IF_NULL(string_ids)
+        JAK_ERROR_IF_NULL(jak_string_ids)
         JAK_ERROR_IF_NULL(dic);
         JAK_ASSERT(dic->get_contents);
-        return dic->get_contents(dic, strings, string_ids);
+        return dic->get_contents(dic, strings, jak_string_ids);
 }
 
 JAK_END_DECL

@@ -57,7 +57,7 @@ typedef struct jak_field_access {
 typedef struct jak_carbon_array_it {
         struct jak_memfile memfile;
         jak_offset_t payload_start;
-        struct spinlock lock;
+        jak_spinlock lock;
         jak_error err;
 
         /* in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
@@ -146,7 +146,7 @@ bool jak_carbon_array_it_i64_value(jak_i64 *value, jak_carbon_array_it *it);
 bool jak_carbon_array_it_float_value(bool *is_null_in, float *value, jak_carbon_array_it *it);
 bool jak_carbon_array_it_signed_value(bool *is_null_in, jak_i64 *value, jak_carbon_array_it *it);
 bool jak_carbon_array_it_unsigned_value(bool *is_null_in, jak_u64 *value, jak_carbon_array_it *it);
-const char *jak_carbon_array_it_string_value(jak_u64 *strlen, jak_carbon_array_it *it);
+const char *jak_carbon_array_it_jak_string_value(jak_u64 *strlen, jak_carbon_array_it *it);
 bool jak_carbon_array_it_binary_value(jak_carbon_binary *out, jak_carbon_array_it *it);
 jak_carbon_array_it *jak_carbon_array_it_array_value(jak_carbon_array_it *it_in);
 jak_carbon_object_it *jak_carbon_array_it_object_value(jak_carbon_array_it *it_in);

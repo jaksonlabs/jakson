@@ -43,169 +43,169 @@ static void drop(jak_carbon_printer *self)
         free(self->extra);
 }
 
-static void obj_begin(jak_carbon_printer *self, struct jak_string *builder)
+static void obj_begin(jak_carbon_printer *self, jak_string *builder)
 {
         JAK_UNUSED(self);
-        string_add(builder, "{");
+        jak_string_add(builder, "{");
 }
 
-static void obj_end(jak_carbon_printer *self, struct jak_string *builder)
+static void obj_end(jak_carbon_printer *self, jak_string *builder)
 {
         JAK_UNUSED(self);
-        string_add(builder, "}");
+        jak_string_add(builder, "}");
 }
 
-static void meta_begin(jak_carbon_printer *self, struct jak_string *builder)
+static void meta_begin(jak_carbon_printer *self, jak_string *builder)
 {
         JAK_UNUSED(self);
-        string_add(builder, "\"meta\": {");
+        jak_string_add(builder, "\"meta\": {");
 }
 
-static void meta_data(jak_carbon_printer *self, struct jak_string *builder,
+static void meta_data(jak_carbon_printer *self, jak_string *builder,
                       int key_type, const void *key,
                       jak_u64 key_length, jak_u64 commit_hash)
 {
         JAK_UNUSED(self)
 
-        string_add(builder, "\"key\": {");
+        jak_string_add(builder, "\"key\": {");
 
         switch (key_type) {
                 case JAK_CARBON_KEY_NOKEY:
-                        string_add(builder, "\"type\": \"nokey\", \"value\": null");
+                        jak_string_add(builder, "\"type\": \"nokey\", \"value\": null");
                         break;
                 case JAK_CARBON_KEY_AUTOKEY:
-                        string_add(builder, "\"type\": \"autokey\", \"value\": ");
-                        string_add_u64(builder, *(jak_u64 *) key);
+                        jak_string_add(builder, "\"type\": \"autokey\", \"value\": ");
+                        jak_string_add_u64(builder, *(jak_u64 *) key);
                         break;
                 case JAK_CARBON_KEY_UKEY:
-                        string_add(builder, "\"type\": \"ukey\", \"value\": ");
-                        string_add_u64(builder, *(jak_u64 *) key);
+                        jak_string_add(builder, "\"type\": \"ukey\", \"value\": ");
+                        jak_string_add_u64(builder, *(jak_u64 *) key);
                         break;
                 case JAK_CARBON_KEY_IKEY:
-                        string_add(builder, "\"type\": \"ikey\", \"value\": ");
-                        string_add_u64(builder, *(jak_i64 *) key);
+                        jak_string_add(builder, "\"type\": \"ikey\", \"value\": ");
+                        jak_string_add_u64(builder, *(jak_i64 *) key);
                         break;
                 case JAK_CARBON_KEY_SKEY:
-                        string_add(builder, "\"type\": \"skey\", \"value\": ");
+                        jak_string_add(builder, "\"type\": \"skey\", \"value\": ");
                         if (key_length > 0) {
-                                string_add(builder, "\"");
-                                string_add_nchar(builder, key, key_length);
-                                string_add(builder, "\"");
+                                jak_string_add(builder, "\"");
+                                jak_string_add_nchar(builder, key, key_length);
+                                jak_string_add(builder, "\"");
                         } else {
-                                string_add(builder, "null");
+                                jak_string_add(builder, "null");
                         }
 
                         break;
                 default: JAK_ERROR_PRINT(JAK_ERR_INTERNALERR);
         }
-        string_add(builder, "}, \"commit\": ");
+        jak_string_add(builder, "}, \"commit\": ");
         if (commit_hash) {
-                string_add(builder, "\"");
+                jak_string_add(builder, "\"");
                 jak_carbon_commit_hash_append_to_str(builder, commit_hash);
-                string_add(builder, "\"");
+                jak_string_add(builder, "\"");
         } else {
-                string_add(builder, "null");
+                jak_string_add(builder, "null");
         }
 }
 
-static void meta_end(jak_carbon_printer *self, struct jak_string *builder)
+static void meta_end(jak_carbon_printer *self, jak_string *builder)
 {
         JAK_UNUSED(self);
-        string_add(builder, "}, ");
+        jak_string_add(builder, "}, ");
 }
 
-static void doc_begin(jak_carbon_printer *self, struct jak_string *builder)
+static void doc_begin(jak_carbon_printer *self, jak_string *builder)
 {
         JAK_UNUSED(self)
 
-        string_add(builder, "\"doc\": ");
+        jak_string_add(builder, "\"doc\": ");
 }
 
-static void doc_end(jak_carbon_printer *self, struct jak_string *builder)
+static void doc_end(jak_carbon_printer *self, jak_string *builder)
 {
         JAK_UNUSED(self);
         JAK_UNUSED(builder);
 }
 
-static void empty_record(jak_carbon_printer *self, struct jak_string *builder)
+static void empty_record(jak_carbon_printer *self, jak_string *builder)
 {
         JAK_UNUSED(self);
-        string_add(builder, "[]");
+        jak_string_add(builder, "[]");
 }
 
-static void array_begin(jak_carbon_printer *self, struct jak_string *builder)
+static void array_begin(jak_carbon_printer *self, jak_string *builder)
 {
         JAK_UNUSED(self);
-        string_add(builder, "[");
+        jak_string_add(builder, "[");
 }
 
-static void array_end(jak_carbon_printer *self, struct jak_string *builder)
+static void array_end(jak_carbon_printer *self, jak_string *builder)
 {
         JAK_UNUSED(self);
-        string_add(builder, "]");
+        jak_string_add(builder, "]");
 }
 
-static void const_null(jak_carbon_printer *self, struct jak_string *builder)
+static void const_null(jak_carbon_printer *self, jak_string *builder)
 {
         JAK_UNUSED(self);
-        string_add(builder, "null");
+        jak_string_add(builder, "null");
 }
 
-static void const_true(jak_carbon_printer *self, bool is_null, struct jak_string *builder)
+static void const_true(jak_carbon_printer *self, bool is_null, jak_string *builder)
 {
         JAK_UNUSED(self);
-        string_add(builder, is_null ? "null" : "true");
+        jak_string_add(builder, is_null ? "null" : "true");
 }
 
-static void const_false(jak_carbon_printer *self, bool is_null, struct jak_string *builder)
+static void const_false(jak_carbon_printer *self, bool is_null, jak_string *builder)
 {
         JAK_UNUSED(self);
-        string_add(builder, is_null ? "null" : "false");
+        jak_string_add(builder, is_null ? "null" : "false");
 }
 
-static void val_signed(jak_carbon_printer *self, struct jak_string *builder, const jak_i64 *value)
+static void val_signed(jak_carbon_printer *self, jak_string *builder, const jak_i64 *value)
 {
         JAK_UNUSED(self);
         if (JAK_LIKELY(value != NULL)) {
-                string_add_i64(builder, *value);
+                jak_string_add_i64(builder, *value);
         } else {
-                string_add(builder, NULL_STR);
+                jak_string_add(builder, NULL_STR);
         }
 
 }
 
-static void val_unsigned(jak_carbon_printer *self, struct jak_string *builder, const jak_u64 *value)
+static void val_unsigned(jak_carbon_printer *self, jak_string *builder, const jak_u64 *value)
 {
         JAK_UNUSED(self);
         if (JAK_LIKELY(value != NULL)) {
-                string_add_u64(builder, *value);
+                jak_string_add_u64(builder, *value);
         } else {
-                string_add(builder, NULL_STR);
+                jak_string_add(builder, NULL_STR);
         }
 }
 
-static void val_float(jak_carbon_printer *self, struct jak_string *builder, const float *value)
+static void val_float(jak_carbon_printer *self, jak_string *builder, const float *value)
 {
         JAK_UNUSED(self);
         if (JAK_LIKELY(value != NULL)) {
-                string_add_float(builder, *value);
+                jak_string_add_float(builder, *value);
         } else {
-                string_add(builder, NULL_STR);
+                jak_string_add(builder, NULL_STR);
         }
 }
 
-static void val_string(jak_carbon_printer *self, struct jak_string *builder, const char *value, jak_u64 strlen)
+static void val_string(jak_carbon_printer *self, jak_string *builder, const char *value, jak_u64 strlen)
 {
         JAK_UNUSED(self);
-        string_add_char(builder, '"');
-        string_add_nchar(builder, value, strlen);
-        string_add_char(builder, '"');
+        jak_string_add_char(builder, '"');
+        jak_string_add_nchar(builder, value, strlen);
+        jak_string_add_char(builder, '"');
 }
 
 #define code_of(x, data_len)      (x + data_len + 2)
 #define data_of(x)      (x)
 
-static void print_binary(jak_carbon_printer *self, struct jak_string *builder, const jak_carbon_binary *binary)
+static void print_binary(jak_carbon_printer *self, jak_string *builder, const jak_carbon_binary *binary)
 {
         /* base64 code will be written into the extra's buffer after a null-terminated copy of the binary data */
         struct jak_json_extended_extra *extra = (struct jak_json_extended_extra *) self->extra;
@@ -225,14 +225,14 @@ static void print_binary(jak_carbon_printer *self, struct jak_string *builder, c
         }
 
         JAK_ASSERT(extra->buffer_size >= required_buff_size);
-        JAK_zero_memory(extra->buffer, extra->buffer_size);
+        JAK_ZERO_MEMORY(extra->buffer, extra->buffer_size);
         /* copy binary data into buffer, and leave one (zero'd) byte free; null-termination is required by libb64 */
         memcpy(data_of(extra->buffer), binary->blob, binary->blob_len);
 
-        string_add(builder, "{ ");
-        string_add(builder, "\"type\": \"");
-        string_add_nchar(builder, binary->mime_type, binary->mime_type_strlen);
-        string_add(builder, "\", \"encoding\": \"base64\", \"binary-string\": \"");
+        jak_string_add(builder, "{ ");
+        jak_string_add(builder, "\"type\": \"");
+        jak_string_add_nchar(builder, binary->mime_type, binary->mime_type_strlen);
+        jak_string_add(builder, "\", \"encoding\": \"base64\", \"binary-string\": \"");
 
         base64_encodestate state;
         base64_init_encodestate(&state);
@@ -240,103 +240,103 @@ static void print_binary(jak_carbon_printer *self, struct jak_string *builder, c
         jak_u64 code_len = base64_encode_block(data_of(extra->buffer), binary->blob_len + 2,
                                                code_of(extra->buffer, binary->blob_len), &state);
         base64_encode_blockend(code_of(extra->buffer, binary->blob_len), &state);
-        string_add_nchar(builder, code_of(extra->buffer, binary->blob_len), code_len);
+        jak_string_add_nchar(builder, code_of(extra->buffer, binary->blob_len), code_len);
 
 
-        string_add(builder, "\" }");
+        jak_string_add(builder, "\" }");
 }
 
-static void val_binary(jak_carbon_printer *self, struct jak_string *builder, const jak_carbon_binary *binary)
+static void val_binary(jak_carbon_printer *self, jak_string *builder, const jak_carbon_binary *binary)
 {
         print_binary(self, builder, binary);
 }
 
-static void comma(jak_carbon_printer *self, struct jak_string *builder)
+static void comma(jak_carbon_printer *self, jak_string *builder)
 {
         JAK_UNUSED(self);
-        string_add(builder, ", ");
+        jak_string_add(builder, ", ");
 }
 
-static void print_key(struct jak_string *builder, const char *key_name, jak_u64 key_len)
+static void print_key(jak_string *builder, const char *key_name, jak_u64 key_len)
 {
-        string_add_char(builder, '"');
-        string_add_nchar(builder, key_name, key_len);
-        string_add(builder, "\": ");
+        jak_string_add_char(builder, '"');
+        jak_string_add_nchar(builder, key_name, key_len);
+        jak_string_add(builder, "\": ");
 }
 
-static void prop_null(jak_carbon_printer *self, struct jak_string *builder,
+static void prop_null(jak_carbon_printer *self, jak_string *builder,
                       const char *key_name, jak_u64 key_len)
 {
         JAK_UNUSED(self);
         print_key(builder, key_name, key_len);
-        string_add(builder, "null");
+        jak_string_add(builder, "null");
 }
 
-static void prop_true(jak_carbon_printer *self, struct jak_string *builder,
+static void prop_true(jak_carbon_printer *self, jak_string *builder,
                       const char *key_name, jak_u64 key_len)
 {
         JAK_UNUSED(self);
         print_key(builder, key_name, key_len);
-        string_add(builder, "true");
+        jak_string_add(builder, "true");
 }
 
-static void prop_false(jak_carbon_printer *self, struct jak_string *builder,
+static void prop_false(jak_carbon_printer *self, jak_string *builder,
                        const char *key_name, jak_u64 key_len)
 {
         JAK_UNUSED(self);
         print_key(builder, key_name, key_len);
-        string_add(builder, "false");
+        jak_string_add(builder, "false");
 }
 
-static void prop_signed(jak_carbon_printer *self, struct jak_string *builder,
+static void prop_signed(jak_carbon_printer *self, jak_string *builder,
                         const char *key_name, jak_u64 key_len, const jak_i64 *value)
 {
         JAK_UNUSED(self);
         print_key(builder, key_name, key_len);
-        string_add_i64(builder, *value);
+        jak_string_add_i64(builder, *value);
 }
 
-static void prop_unsigned(jak_carbon_printer *self, struct jak_string *builder,
+static void prop_unsigned(jak_carbon_printer *self, jak_string *builder,
                           const char *key_name, jak_u64 key_len, const jak_u64 *value)
 {
         JAK_UNUSED(self);
         print_key(builder, key_name, key_len);
-        string_add_u64(builder, *value);
+        jak_string_add_u64(builder, *value);
 }
 
-static void prop_float(jak_carbon_printer *self, struct jak_string *builder,
+static void prop_float(jak_carbon_printer *self, jak_string *builder,
                        const char *key_name, jak_u64 key_len, const float *value)
 {
         JAK_UNUSED(self);
         print_key(builder, key_name, key_len);
-        string_add_float(builder, *value);
+        jak_string_add_float(builder, *value);
 }
 
-static void prop_string(jak_carbon_printer *self, struct jak_string *builder,
+static void prop_string(jak_carbon_printer *self, jak_string *builder,
                         const char *key_name, jak_u64 key_len, const char *value, jak_u64 strlen)
 {
         JAK_UNUSED(self);
         print_key(builder, key_name, key_len);
-        string_add_char(builder, '"');
-        string_add_nchar(builder, value, strlen);
-        string_add_char(builder, '"');
+        jak_string_add_char(builder, '"');
+        jak_string_add_nchar(builder, value, strlen);
+        jak_string_add_char(builder, '"');
 }
 
-static void prop_binary(jak_carbon_printer *self, struct jak_string *builder,
+static void prop_binary(jak_carbon_printer *self, jak_string *builder,
                         const char *key_name, jak_u64 key_len, const jak_carbon_binary *binary)
 {
         print_key(builder, key_name, key_len);
         print_binary(self, builder, binary);
 }
 
-static void array_prop_name(jak_carbon_printer *self, struct jak_string *builder,
+static void array_prop_name(jak_carbon_printer *self, jak_string *builder,
                             const char *key_name, jak_u64 key_len)
 {
         JAK_UNUSED(self)
         print_key(builder, key_name, key_len);
 }
 
-static void obj_prop_name(jak_carbon_printer *self, struct jak_string *builder,
+static void obj_prop_name(jak_carbon_printer *self, jak_string *builder,
                           const char *key_name, jak_u64 key_len)
 {
         JAK_UNUSED(self)
@@ -400,7 +400,7 @@ bool jak_json_extended_printer_create(jak_carbon_printer *printer)
                 .buffer_size = INIT_BUFFER_LEN,
                 .buffer = JAK_MALLOC(INIT_BUFFER_LEN)
         };
-        JAK_zero_memory(extra->buffer, extra->buffer_size);
+        JAK_ZERO_MEMORY(extra->buffer, extra->buffer_size);
 
         return true;
 }

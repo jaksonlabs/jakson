@@ -52,7 +52,7 @@ bool sort_qsort_indicies(size_t *indices, const void *base, size_t width, less_e
                 }
         }
 
-        JAK_check_success(jak_alloc_free(alloc, stack));
+        JAK_CHECK_SUCCESS(jak_alloc_free(alloc, stack));
         return true;
 }
 
@@ -93,7 +93,7 @@ int sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width, l
                 }
         }
 
-        JAK_check_success(jak_alloc_free(alloc, stack));
+        JAK_CHECK_SUCCESS(jak_alloc_free(alloc, stack));
         return true;
 }
 

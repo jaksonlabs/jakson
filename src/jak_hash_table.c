@@ -32,14 +32,14 @@ bool jak_hashtable_create(jak_hashtable *map, jak_error *err, size_t key_size, s
 
         map->size = 0;
 
-        JAK_success_or_jump(vec_create(&map->key_data, NULL, key_size, capacity), error_handling);
-        JAK_success_or_jump(vec_create(&map->value_data, NULL, value_size, capacity), cleanup_key_data_and_error);
-        JAK_success_or_jump(vec_create(&map->table, NULL, sizeof(jak_hashtable_bucket), capacity),
+        JAK_SUCCESS_OR_JUMP(vec_create(&map->key_data, NULL, key_size, capacity), error_handling);
+        JAK_SUCCESS_OR_JUMP(vec_create(&map->value_data, NULL, value_size, capacity), cleanup_key_data_and_error);
+        JAK_SUCCESS_OR_JUMP(vec_create(&map->table, NULL, sizeof(jak_hashtable_bucket), capacity),
                             cleanup_value_key_data_and_error);
-        JAK_success_or_jump(vec_enlarge_size_to_capacity(&map->table), cleanup_key_value_table_and_error);
-        JAK_success_or_jump(vec_zero_memory(&map->table), cleanup_key_value_table_and_error);
-        JAK_success_or_jump(spin_init(&map->lock), cleanup_key_value_table_and_error);
-        JAK_success_or_jump(jak_error_init(&map->err), cleanup_key_value_table_and_error);
+        JAK_SUCCESS_OR_JUMP(vec_enlarge_size_to_capacity(&map->table), cleanup_key_value_table_and_error);
+        JAK_SUCCESS_OR_JUMP(vec_zero_memory(&map->table), cleanup_key_value_table_and_error);
+        JAK_SUCCESS_OR_JUMP(jak_spinlock_init(&map->lock), cleanup_key_value_table_and_error);
+        JAK_SUCCESS_OR_JUMP(jak_error_init(&map->err), cleanup_key_value_table_and_error);
 
         return true;
 
@@ -160,14 +160,14 @@ bool jak_hashtable_avg_displace(float *displace, const jak_hashtable *map)
 bool jak_hashtable_lock(jak_hashtable *map)
 {
         JAK_ERROR_IF_NULL(map)
-        //spin_acquire(&map->lock);
+        //jak_spinlock_acquire(&map->lock);
         return true;
 }
 
 bool jak_hashtable_unlock(jak_hashtable *map)
 {
         JAK_ERROR_IF_NULL(map)
-        //spin_release(&map->lock);
+        //jak_spinlock_release(&map->lock);
         return true;
 }
 
@@ -400,7 +400,7 @@ bool jak_hashtable_deserialize(jak_hashtable *table, jak_error *err, FILE *file)
                 goto error_handling;
         }
 
-        spin_init(&table->lock);
+        jak_spinlock_init(&table->lock);
         jak_error_init(&table->err);
         return true;
 

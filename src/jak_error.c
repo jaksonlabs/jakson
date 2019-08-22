@@ -89,14 +89,14 @@ bool jak_error_str(const char **errstr, const char **file, jak_u32 *line, bool *
 {
         if (err) {
                 if (err->code >= jak_global_nerr_str) {
-                        JAK_optional_set(errstr, JAK_ERRSTR_ILLEGAL_CODE)
+                        JAK_OPTIONAL_SET(errstr, JAK_ERRSTR_ILLEGAL_CODE)
                 } else {
-                        JAK_optional_set(errstr, jak_global_err_str[err->code])
+                        JAK_OPTIONAL_SET(errstr, jak_global_err_str[err->code])
                 }
-                JAK_optional_set(file, err->file)
-                JAK_optional_set(line, err->line)
-                JAK_optional_set(details, err->details != NULL);
-                JAK_optional_set(detailsstr, err->details)
+                JAK_OPTIONAL_SET(file, err->file)
+                JAK_OPTIONAL_SET(line, err->line)
+                JAK_OPTIONAL_SET(details, err->details != NULL);
+                JAK_OPTIONAL_SET(detailsstr, err->details)
                 return true;
         }
         return false;

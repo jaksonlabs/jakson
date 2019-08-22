@@ -55,7 +55,7 @@ bool jak_coding_huffman_create(jak_huffman *dic);
 bool jak_coding_huffman_cpy(jak_huffman *dst, jak_huffman *src);
 bool jak_coding_huffman_drop(jak_huffman *dic);
 
-bool jak_coding_huffman_build(jak_huffman *encoder, const string_vector_t *strings);
+bool jak_coding_huffman_build(jak_huffman *encoder, const jak_string_vector_t *strings);
 bool jak_coding_huffman_get_error(jak_error *err, const jak_huffman *dic);
 bool jak_coding_huffman_encode(struct jak_memfile *file, jak_huffman *dic, const char *string);
 bool jak_coding_huffman_read_string(jak_pack_huffman_str_info *info, struct jak_memfile *src);

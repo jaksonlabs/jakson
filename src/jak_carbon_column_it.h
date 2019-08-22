@@ -46,7 +46,7 @@ typedef struct jak_carbon_column_it {
         jak_u32 column_capacity;
         jak_u32 column_num_elements;
 
-        struct spinlock lock;
+        jak_spinlock lock;
 } jak_carbon_column_it;
 
 bool jak_carbon_column_it_create(jak_carbon_column_it *it, struct jak_memfile *memfile, jak_error *err, jak_offset_t column_start_offset);

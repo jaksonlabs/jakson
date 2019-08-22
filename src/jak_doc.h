@@ -61,7 +61,7 @@ bool jak_doc_bulk_print(FILE *file, jak_doc_bulk *bulk);
 
 jak_doc *jak_doc_bulk_new_doc(jak_doc_bulk *context, jak_archive_field_e type);
 jak_doc_obj *jak_doc_bulk_new_obj(jak_doc *model);
-bool jak_doc_bulk_get_dic_contents(struct jak_vector ofType (const char *) **strings, struct jak_vector ofType(jak_archive_field_sid_t) **string_ids, const jak_doc_bulk *context);
+bool jak_doc_bulk_get_dic_contents(struct jak_vector ofType (const char *) **strings, struct jak_vector ofType(jak_archive_field_sid_t) **jak_string_ids, const jak_doc_bulk *context);
 
 bool jak_doc_print(FILE *file, const jak_doc *doc);
 const struct jak_vector ofType(jak_doc_entries) *jak_doc_get_entries(const jak_doc_obj *model);

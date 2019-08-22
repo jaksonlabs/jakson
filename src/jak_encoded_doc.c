@@ -194,7 +194,7 @@ DECLARE_JAK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(jak_archive_field_boolean_t, JAK_
 
 DECLARE_JAK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(jak_archive_field_sid_t, JAK_FIELD_STRING, string)
 
-bool jak_encoded_doc_add_prop_string_decoded_string_value_decoded(jak_encoded_doc *doc, const char *key,
+bool jak_encoded_doc_add_prop_jak_string_decoded_jak_string_value_decoded(jak_encoded_doc *doc, const char *key,
                                                               const char *value)
 {
         JAK_ERROR_IF_NULL(doc)
@@ -516,7 +516,7 @@ static bool doc_print_pretty(FILE *file, jak_encoded_doc *doc, unsigned level)
                 jak_encoded_doc_prop *prop = vec_get(&doc->props, i, jak_encoded_doc_prop);
                 char *key_str = NULL;
                 if (prop->header.key_type == JAK_STRING_ENCODED) {
-                        key_str = jak_query_fetch_string_by_id(&query, prop->header.key.key_id);
+                        key_str = jak_query_fetch_jak_string_by_id(&query, prop->header.key.key_id);
                 } else {
                         key_str = strdup(prop->header.key.key_str);
                 }
@@ -556,7 +556,7 @@ static bool doc_print_pretty(FILE *file, jak_encoded_doc *doc, unsigned level)
                                 break;
                         case JAK_FIELD_STRING: {
                                 if (prop->header.value_type == JAK_VALUE_BUILTIN) {
-                                        char *value_str = jak_query_fetch_string_by_id(&query,
+                                        char *value_str = jak_query_fetch_jak_string_by_id(&query,
                                                                                        prop->value.builtin.string);
                                         fprintf(file, "\"%s\"", value_str);
                                         free(value_str);
@@ -589,7 +589,7 @@ static bool doc_print_pretty(FILE *file, jak_encoded_doc *doc, unsigned level)
                                                                   jak_encoded_doc_prop_array);
                 char *key_str = NULL;
                 if (prop->header.key_type == JAK_STRING_ENCODED) {
-                        key_str = jak_query_fetch_string_by_id(&query, prop->header.key.key_id);
+                        key_str = jak_query_fetch_jak_string_by_id(&query, prop->header.key.key_id);
                 } else {
                         key_str = strdup(prop->header.key.key_str);
                 }
@@ -743,7 +743,7 @@ static bool doc_print_pretty(FILE *file, jak_encoded_doc *doc, unsigned level)
                                         if (JAK_IS_NULL_STRING(value)) {
                                                 fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                         } else {
-                                                char *value_str = jak_query_fetch_string_by_id(&query, value);
+                                                char *value_str = jak_query_fetch_jak_string_by_id(&query, value);
                                                 fprintf(file,
                                                         "\"%s\"%s",
                                                         value_str,

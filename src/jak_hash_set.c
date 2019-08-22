@@ -30,13 +30,13 @@ bool jak_hashset_create(jak_hashset *map, jak_error *err, size_t key_size, size_
 
         map->size = 0;
 
-        JAK_success_or_jump(vec_create(&map->key_data, NULL, key_size, capacity), error_handling);
-        JAK_success_or_jump(vec_create(&map->table, NULL, sizeof(jak_hashset_bucket), capacity),
+        JAK_SUCCESS_OR_JUMP(vec_create(&map->key_data, NULL, key_size, capacity), error_handling);
+        JAK_SUCCESS_OR_JUMP(vec_create(&map->table, NULL, sizeof(jak_hashset_bucket), capacity),
                             cleanup_key_data_and_error);
-        JAK_success_or_jump(vec_enlarge_size_to_capacity(&map->table), cleanup_key_value_table_and_error);
-        JAK_success_or_jump(vec_zero_memory(&map->table), cleanup_key_value_table_and_error);
-        JAK_success_or_jump(spin_init(&map->lock), cleanup_key_value_table_and_error);
-        JAK_success_or_jump(jak_error_init(&map->err), cleanup_key_value_table_and_error);
+        JAK_SUCCESS_OR_JUMP(vec_enlarge_size_to_capacity(&map->table), cleanup_key_value_table_and_error);
+        JAK_SUCCESS_OR_JUMP(vec_zero_memory(&map->table), cleanup_key_value_table_and_error);
+        JAK_SUCCESS_OR_JUMP(jak_spinlock_init(&map->lock), cleanup_key_value_table_and_error);
+        JAK_SUCCESS_OR_JUMP(jak_error_init(&map->err), cleanup_key_value_table_and_error);
 
         return true;
 
@@ -157,14 +157,14 @@ bool jak_hashset_avg_displace(float *displace, const jak_hashset *map)
 bool jak_hashset_lock(jak_hashset *map)
 {
         JAK_ERROR_IF_NULL(map)
-        spin_acquire(&map->lock);
+        jak_spinlock_acquire(&map->lock);
         return true;
 }
 
 bool jak_hashset_unlock(jak_hashset *map)
 {
         JAK_ERROR_IF_NULL(map)
-        spin_release(&map->lock);
+        jak_spinlock_release(&map->lock);
         return true;
 }
 

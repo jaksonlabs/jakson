@@ -20,7 +20,7 @@
 
 #define SPINLOCK_TAG "spinlock"
 
-bool spin_init(struct spinlock *spinlock)
+bool jak_spinlock_init(jak_spinlock *spinlock)
 {
         JAK_ERROR_IF_NULL(spinlock)
         atomic_flag_clear(&spinlock->lock);
@@ -30,7 +30,7 @@ bool spin_init(struct spinlock *spinlock)
         return true;
 }
 
-bool spin_acquire(struct spinlock *spinlock)
+bool jak_spinlock_acquire(jak_spinlock *spinlock)
 {
         timestamp_t begin = time_now_wallclock();
         JAK_ERROR_IF_NULL(spinlock)
@@ -42,13 +42,13 @@ bool spin_acquire(struct spinlock *spinlock)
         timestamp_t end = time_now_wallclock();
         float duration = (end - begin) / 1000.0f;
         if (duration > 0.01f) {
-                JAK_warn(SPINLOCK_TAG, "spin lock acquisition took exceptionally long: %f seconds", duration);
+                JAK_WARN(SPINLOCK_TAG, "spin lock acquisition took exceptionally long: %f seconds", duration);
         }
 
         return true;
 }
 
-bool spin_release(struct spinlock *spinlock)
+bool jak_spinlock_release(jak_spinlock *spinlock)
 {
         JAK_ERROR_IF_NULL(spinlock)
         atomic_flag_clear(&spinlock->lock);

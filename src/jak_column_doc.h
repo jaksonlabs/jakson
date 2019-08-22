@@ -86,7 +86,7 @@ typedef struct jak_column_doc_obj {
         /** Inverted index of keys mapping to primitive uint64 number types (sorted by key) */
         struct jak_vector ofType(jak_archive_field_sid_t) uint64_prop_keys;
         /** Inverted index of keys mapping to primitive string types (sorted by key) */
-        struct jak_vector ofType(jak_archive_field_sid_t) string_prop_keys;
+        struct jak_vector ofType(jak_archive_field_sid_t) jak_string_prop_keys;
         /** Inverted index of keys mapping to primitive real types (sorted by key) */
         struct jak_vector ofType(jak_archive_field_sid_t) float_prop_keys;
         /** Inverted index of keys mapping to primitive null values (sorted by key) */
@@ -113,7 +113,7 @@ typedef struct jak_column_doc_obj {
         /** Inverted index of keys mapping to array of uint64 number types (sorted by key) */
         struct jak_vector ofType(jak_archive_field_sid_t) uint64_array_prop_keys;
         /** Inverted index of keys mapping array of string types (sorted by key) */
-        struct jak_vector ofType(jak_archive_field_sid_t) string_array_prop_keys;
+        struct jak_vector ofType(jak_archive_field_sid_t) jak_string_array_prop_keys;
         /** Inverted index of keys mapping array of real types (sorted by key) */
         struct jak_vector ofType(jak_archive_field_sid_t) float_array_prop_keys;
         /** Inverted index of keys mapping array of null value (sorted by key)s */
@@ -140,7 +140,7 @@ typedef struct jak_column_doc_obj {
         /** Primitive real number values associated to keys stored above (sorted by key) */
         struct jak_vector ofType(jak_archive_field_number_t) float_prop_vals;
         /** Primitive string number values associated to keys stored above (sorted by key) */
-        struct jak_vector ofType(jak_archive_field_sid_t) string_prop_vals;
+        struct jak_vector ofType(jak_archive_field_sid_t) jak_string_prop_vals;
 
         /** Array of boolean values associated to keys stored above (sorted by key) */
         struct jak_vector ofType(Vector) bool_array_prop_vals;
@@ -163,7 +163,7 @@ typedef struct jak_column_doc_obj {
         /** Array of real number values associated to keys stored above (sorted by key) */
         struct jak_vector ofType(Vector) float_array_prop_vals;
         /** Array of string number values associated to keys stored above (sorted by key) */
-        struct jak_vector ofType(Vector) string_array_prop_vals;
+        struct jak_vector ofType(Vector) jak_string_array_prop_vals;
         /** Array of null values associated to keys stored above (sorted by key). The number represents the
          * multiplicity of nulls for the associated key. */
         struct jak_vector ofType(jak_u16) null_array_prop_vals;
@@ -191,7 +191,7 @@ typedef struct jak_column_doc_obj {
         /** Index of primitive real number values associated to keys stored above (sorted by value) */
         struct jak_vector ofType(jak_u32) float_val_idxs;
         /** Index of primitive string number values associated to keys stored above (sorted by value) */
-        struct jak_vector ofType(jak_u32) string_val_idxs;
+        struct jak_vector ofType(jak_u32) jak_string_val_idxs;
 
         /** Index of array of boolean values associated to keys stored above (sorted by value) */
         struct jak_vector ofType(Vector) bool_array_idxs;
@@ -214,7 +214,7 @@ typedef struct jak_column_doc_obj {
         /** Index of array of real number values associated to keys stored above (sorted by value) */
         struct jak_vector ofType(Vector) float_array_idxs;
         /** Index of array of string number values associated to keys stored above (sorted by value) */
-        struct jak_vector ofType(Vector) string_array_idxs;
+        struct jak_vector ofType(Vector) jak_string_array_idxs;
 
         /** Array of objects associated to keys stored above (sorted by key) */
         struct jak_vector ofType(jak_column_doc_group) obj_array_props;

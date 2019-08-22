@@ -71,7 +71,7 @@ bool jak_carbon_path_index_commit_hash(jak_u64 *commit_hash, jak_carbon_path_ind
 bool jak_carbon_path_index_key_type(jak_carbon_key_e *key_type, jak_carbon_path_index *index);
 bool jak_carbon_path_index_key_unsigned_value(jak_u64 *key, jak_carbon_path_index *index);
 bool jak_carbon_path_index_key_signed_value(jak_i64 *key, jak_carbon_path_index *index);
-const char *jak_carbon_path_index_key_string_value(jak_u64 *str_len, jak_carbon_path_index *index);
+const char *jak_carbon_path_index_key_jak_string_value(jak_u64 *str_len, jak_carbon_path_index *index);
 bool jak_carbon_path_index_indexes_doc(jak_carbon_path_index *index, jak_carbon *doc);
 
 JAK_DEFINE_ERROR_GETTER(jak_carbon_path_index);
@@ -119,7 +119,7 @@ bool jak_carbon_path_index_it_field_i64_value(jak_i64 *value, jak_carbon_path_in
 bool jak_carbon_path_index_it_field_float_value(bool *is_null_in, float *value, jak_carbon_path_index_it *it);
 bool jak_carbon_path_index_it_field_signed_value(bool *is_null_in, jak_i64 *value, jak_carbon_path_index_it *it);
 bool jak_carbon_path_index_it_field_unsigned_value(bool *is_null_in, jak_u64 *value, jak_carbon_path_index_it *it);
-const char *jak_carbon_path_index_it_field_string_value(jak_u64 *strlen, jak_carbon_path_index_it *it);
+const char *jak_carbon_path_index_it_field_jak_string_value(jak_u64 *strlen, jak_carbon_path_index_it *it);
 bool jak_carbon_path_index_it_field_binary_value(jak_carbon_binary *out, jak_carbon_array_it *it);
 bool jak_carbon_path_index_it_field_array_value(jak_carbon_array_it *it_out, jak_carbon_path_index_it *it_in);
 bool jak_carbon_path_index_it_field_object_value(jak_carbon_object_it *it_out, jak_carbon_path_index_it *it_in);
@@ -131,7 +131,7 @@ bool jak_carbon_path_index_it_field_column_value(jak_carbon_column_it *it_out, j
 
 bool jak_carbon_path_index_hexdump(FILE *file, jak_carbon_path_index *index);
 bool jak_carbon_path_index_to_carbon(jak_carbon *doc, jak_carbon_path_index *index);
-const char *jak_carbon_path_index_to_str(struct jak_string *str, jak_carbon_path_index *index);
+const char *jak_carbon_path_index_to_str(jak_string *str, jak_carbon_path_index *index);
 bool jak_carbon_path_index_print(FILE *file, jak_carbon_path_index *index);
 
 JAK_END_DECL

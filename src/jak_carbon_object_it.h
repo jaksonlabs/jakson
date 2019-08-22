@@ -51,7 +51,7 @@ typedef struct jak_carbon_object_it {
                 } value;
         } field;
 
-        struct spinlock lock;
+        jak_spinlock lock;
         /* in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
         jak_i64 mod_size;
 } jak_carbon_object_it;
@@ -91,7 +91,7 @@ bool jak_carbon_object_it_i64_value(jak_i64 *value, jak_carbon_object_it *it);
 bool jak_carbon_object_it_float_value(bool *is_null_in, float *value, jak_carbon_object_it *it);
 bool jak_carbon_object_it_signed_value(bool *is_null_in, jak_i64 *value, jak_carbon_object_it *it);
 bool jak_carbon_object_it_unsigned_value(bool *is_null_in, jak_u64 *value, jak_carbon_object_it *it);
-const char *jak_carbon_object_it_string_value(jak_u64 *strlen, jak_carbon_object_it *it);
+const char *jak_carbon_object_it_jak_string_value(jak_u64 *strlen, jak_carbon_object_it *it);
 bool jak_carbon_object_it_binary_value(jak_carbon_binary *out, jak_carbon_object_it *it);
 jak_carbon_array_it *jak_carbon_object_it_array_value(jak_carbon_object_it *it_in);
 jak_carbon_object_it *jak_carbon_object_it_object_value(jak_carbon_object_it *it_in);

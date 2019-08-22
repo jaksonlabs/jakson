@@ -54,7 +54,7 @@ bool jak_carbon_revise_begin(jak_carbon_revise *context, jak_carbon *revised_doc
         JAK_ERROR_IF_NULL(original)
 
         if (JAK_LIKELY(original->versioning.is_latest)) {
-                spin_acquire(&original->versioning.write_lock);
+                jak_spinlock_acquire(&original->versioning.write_lock);
                 original->versioning.commit_lock = true;
                 context->original = original;
                 context->revised_doc = revised_doc;
@@ -90,7 +90,7 @@ static void key_signed_set(jak_carbon *doc, jak_i64 key)
         memfile_restore_position(&doc->memfile);
 }
 
-static void key_string_set(jak_carbon *doc, const char *key)
+static void key_jak_string_set(jak_carbon *doc, const char *key)
 {
         JAK_ASSERT(doc);
         memfile_save_position(&doc->memfile);
@@ -110,7 +110,7 @@ bool jak_carbon_revise_key_generate(jak_uid_t *out, jak_carbon_revise *context)
                 jak_uid_t oid;
                 jak_unique_id_create(&oid);
                 key_unsigned_set(context->revised_doc, oid);
-                JAK_optional_set(out, oid);
+                JAK_OPTIONAL_SET(out, oid);
                 return true;
         } else {
                 JAK_ERROR(&context->err, JAK_ERR_TYPEMISMATCH)
@@ -152,7 +152,7 @@ bool jak_carbon_revise_key_set_string(jak_carbon_revise *context, const char *ke
         jak_carbon_key_e key_type;
         jak_carbon_key_type(&key_type, context->revised_doc);
         if (key_type == JAK_CARBON_KEY_SKEY) {
-                key_string_set(context->revised_doc, key_value);
+                key_jak_string_set(context->revised_doc, key_value);
                 return true;
         } else {
                 JAK_ERROR(&context->err, JAK_ERR_TYPEMISMATCH)
@@ -165,7 +165,7 @@ bool jak_carbon_revise_iterator_open(jak_carbon_array_it *it, jak_carbon_revise 
         JAK_ERROR_IF_NULL(it);
         JAK_ERROR_IF_NULL(context);
         jak_offset_t payload_start = jak_carbon_int_payload_after_header(context->revised_doc);
-        JAK_ERROR_IF(context->revised_doc->memfile.mode != READ_WRITE, &context->original->err, JAK_ERR_INTERNALERR)
+        JAK_ERROR_IF(context->revised_doc->memfile.mode != JAK_READ_WRITE, &context->original->err, JAK_ERR_INTERNALERR)
         return jak_carbon_array_it_create(it, &context->revised_doc->memfile, &context->original->err, payload_start);
 }
 
@@ -277,7 +277,7 @@ const jak_carbon *jak_carbon_revise_end(jak_carbon_revise *context)
                 context->original->versioning.is_latest = false;
                 context->original->versioning.commit_lock = false;
 
-                spin_release(&context->original->versioning.write_lock);
+                jak_spinlock_release(&context->original->versioning.write_lock);
 
                 return context->revised_doc;
         } else {
@@ -293,7 +293,7 @@ bool jak_carbon_revise_abort(jak_carbon_revise *context)
         jak_carbon_drop(context->revised_doc);
         context->original->versioning.is_latest = true;
         context->original->versioning.commit_lock = false;
-        spin_release(&context->original->versioning.write_lock);
+        jak_spinlock_release(&context->original->versioning.write_lock);
 
         return true;
 }

@@ -36,7 +36,7 @@ bool jak_carbon_key_write_unsigned(struct jak_memfile *file, jak_u64 key);
 bool jak_carbon_key_write_signed(struct jak_memfile *file, jak_i64 key);
 bool jak_carbon_key_write_string(struct jak_memfile *file, const char *key);
 bool jak_carbon_key_update_string(struct jak_memfile *file, const char *key);
-bool jak_carbon_key_update_string_wnchar(struct jak_memfile *file, const char *key, size_t length);
+bool jak_carbon_key_update_jak_string_wnchar(struct jak_memfile *file, const char *key, size_t length);
 const void *jak_carbon_key_read(jak_u64 *len, jak_carbon_key_e *out, struct jak_memfile *file);
 const char *jak_carbon_key_type_str(jak_carbon_key_e type);
 

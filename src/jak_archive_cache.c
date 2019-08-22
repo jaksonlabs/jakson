@@ -74,11 +74,11 @@ bool jak_string_id_cache_create_lru_ex(struct jak_string_cache **cache, jak_arch
         jak_query_create(&result->query, archive);
         result->capacity = capacity;
 
-        size_t num_buckets = JAK_max(1, capacity);
+        size_t num_buckets = JAK_MAX(1, capacity);
         vec_create(&result->list_entries, NULL, sizeof(struct lru_list), num_buckets);
         for (size_t i = 0; i < num_buckets; i++) {
                 struct lru_list *list = vec_new_and_get(&result->list_entries, struct lru_list);
-                JAK_zero_memory(list, sizeof(struct lru_list));
+                JAK_ZERO_MEMORY(list, sizeof(struct lru_list));
                 init_list(list);
         }
 
@@ -139,7 +139,7 @@ char *jak_string_id_cache_get(struct jak_string_cache *cache, jak_archive_field_
                 }
                 cursor = cursor->next;
         }
-        char *result = jak_query_fetch_string_by_id_nocache(&cache->query, id);
+        char *result = jak_query_fetch_jak_string_by_id_nocache(&cache->query, id);
         JAK_ASSERT(result);
         if (list->lest_recent->string != NULL) {
                 cache->statistics.num_evicted++;
@@ -162,7 +162,7 @@ bool jak_string_id_cache_get_statistics(jak_sid_cache_stats *statistics, struct 
 bool jak_string_id_cache_reset_statistics(struct jak_string_cache *cache)
 {
         JAK_ERROR_IF_NULL(cache);
-        JAK_zero_memory(&cache->statistics, sizeof(jak_sid_cache_stats));
+        JAK_ZERO_MEMORY(&cache->statistics, sizeof(jak_sid_cache_stats));
         return true;
 }
 

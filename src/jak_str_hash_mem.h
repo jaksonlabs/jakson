@@ -28,8 +28,7 @@
 
 JAK_BEGIN_DECL
 
-bool strhash_create_inmemory(struct jak_str_hash *jak_async_map_exec, const jak_allocator *alloc,
-                             size_t num_buckets, size_t cap_buckets);
+bool jak_str_hash_create_inmemory(jak_str_hash *str_hash, const jak_allocator *alloc, size_t num_buckets, size_t cap_buckets);
 
 JAK_END_DECL
 

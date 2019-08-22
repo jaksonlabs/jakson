@@ -50,7 +50,7 @@ typedef struct jak_hashtable {
         struct jak_vector key_data;
         struct jak_vector value_data;
         struct jak_vector ofType(jak_hashtable_bucket) table;
-        struct spinlock lock;
+        jak_spinlock lock;
         jak_u32 size;
         jak_error err;
 } jak_hashtable;

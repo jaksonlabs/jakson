@@ -32,7 +32,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonString)
                                            JAK_PACK_NONE, SYNC, 0, read_optimized, false, NULL);
     ASSERT_TRUE(status);
     bool has_index;
-    jak_archive_has_query_index_string_id_to_offset(&has_index, &archive);
+    jak_archive_has_query_index_jak_string_id_to_offset(&has_index, &archive);
     ASSERT_TRUE(has_index == false);
 
     jak_archive_close(&archive);
@@ -52,7 +52,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonStringWithBakedStringIdIndex)
                                            JAK_PACK_NONE, SYNC, 0, read_optimized, true, NULL);
     ASSERT_TRUE(status);
     bool has_index;
-    jak_archive_has_query_index_string_id_to_offset(&has_index, &archive);
+    jak_archive_has_query_index_jak_string_id_to_offset(&has_index, &archive);
     ASSERT_TRUE(has_index == true);
 
     jak_archive_close(&archive);
@@ -140,10 +140,10 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
     ASSERT_TRUE(status);
 
     for (std::set<jak_archive_field_sid_t>::iterator it = all_str_ids.begin(); it != all_str_ids.end(); it++) {
-        jak_archive_field_sid_t string_id = *it;
-        char *string = jak_query_fetch_string_by_id(&query, string_id);
+        jak_archive_field_sid_t jak_string_id = *it;
+        char *string = jak_query_fetch_jak_string_by_id(&query, jak_string_id);
         ASSERT_TRUE(string != NULL);
-        printf("DecodeStringByIdFullScan: %" PRIu64 " -> '%s'\n", string_id, string);
+        printf("DecodeStringByIdFullScan: %" PRIu64 " -> '%s'\n", jak_string_id, string);
         free(string);
     }
 
@@ -222,7 +222,7 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateContains)
     ASSERT_TRUE(num_match == 4);
 
     for (size_t i = 0; i < num_match; i++) {
-        char *string = jak_query_fetch_string_by_id(&query, result[i]);
+        char *string = jak_query_fetch_jak_string_by_id(&query, result[i]);
         ASSERT_TRUE(string != NULL);
         printf("MATCHED CONTAINS %" PRIu64 " ('%s')\n", result[i], string);
         ASSERT_TRUE(strstr(string, needle) != NULL);
@@ -258,7 +258,7 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateEquals)
     ASSERT_TRUE(result != NULL);
 
     ASSERT_TRUE(num_match == 1);
-    char *string = jak_query_fetch_string_by_id(&query, result[0]);
+    char *string = jak_query_fetch_jak_string_by_id(&query, result[0]);
     ASSERT_TRUE(string != NULL);
     printf("MATCHED EQUALS %" PRIu64 " ('%s')\n", result[0], string);
     ASSERT_TRUE(strcmp(string, needle) == 0);

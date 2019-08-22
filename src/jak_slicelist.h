@@ -32,7 +32,7 @@
 
 JAK_BEGIN_DECL
 
-JAK_FORWARD_STRUCT_DECL(Slice)
+JAK_FORWARD_STRUCT_DECL(jak_slice)
 
 #ifndef JAK_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_NAME
 #define JAK_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_NAME "1 of 100 in CPU L1"
@@ -48,19 +48,17 @@ JAK_FORWARD_STRUCT_DECL(Slice)
 #define JAK_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE (32768/10)
 #endif
 
-#define SLICE_DATA_SIZE (JAK_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE - sizeof(slice_lookup_strat_e) - sizeof(jak_u32))
+#define SLICE_DATA_SIZE (JAK_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE - sizeof(jak_slice_lookup_strat_e) - sizeof(jak_u32))
 
 #define SLICE_KEY_COLUMN_MAX_ELEMS (SLICE_DATA_SIZE / 8 / 3) /** one array with elements of 64 bits each, 3 of them */
 
-typedef enum slice_lookup_strat_e {
-        SLICE_LOOKUP_SCAN, SLICE_LOOKUP_BESEARCH,
-} slice_lookup_strat_e;
+typedef enum jak_slice_lookup_strat_e {
+        JAK_SLICE_LOOKUP_SCAN, JAK_SLICE_LOOKUP_BESEARCH,
+} jak_slice_lookup_strat_e;
 
-typedef struct SliceDescriptor SliceDescriptor;
-
-typedef struct Slice {
+typedef struct jak_slice {
         /** Enumeration to determine which strategy for 'find' is currently applied */
-        slice_lookup_strat_e strat;
+        jak_slice_lookup_strat_e strat;
 
         /** Data stored inside this slice. By setting 'JAK_SLICE_LIST_CPU_L3_SIZE_IN_BYTE' statically to the target
          * CPU L3 size, it is intended that one entire 'JAK_slice_t' structure fits into the L3 cache of the CPU.
@@ -72,62 +70,56 @@ typedef struct Slice {
          * this does not steal an element from the domain of the used data type to encode 'not present' with a
          * particular values. However, a remove operation is expensive. */
         const char *key_column[SLICE_KEY_COLUMN_MAX_ELEMS];
-        hash32_t keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
-        jak_archive_field_sid_t string_id_tColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
+        hash32_t key_hash_column[SLICE_KEY_COLUMN_MAX_ELEMS];
+        jak_archive_field_sid_t jak_string_id_column[SLICE_KEY_COLUMN_MAX_ELEMS];
 
-        /** The number of elements stored in 'key_colum', 'key_hash_column', and 'string_id_column' */
+        /** The number of elements stored in 'key_colum', 'key_hash_column', and 'jak_string_id_column' */
         jak_u32 num_elems;
 
-        jak_u32 cacheIdx;
-} Slice;
+        jak_u32 cache_idx;
+} jak_slice;
 
-typedef struct JAK_hash_bounds_t {
+typedef struct jak_hash_bounds {
         /** Min and max values inside this slice. Used to skip the lookup in the per-slice jak_bitmap during search */
-        hash32_t minHash, maxHash;
-} HashBounds;
+        hash32_t min_hash, max_hash;
+} jak_hash_bounds;
 
-typedef struct SliceDescriptor {
+typedef struct jak_slice_descriptor {
         /** The number of reads to this slice including misses and hits. Along with 'num_reads_hit' used to determine
          * the order of this element w.r.t. to other elements in the list */
-        size_t numReadsAll;
+        size_t num_reads_all;
 
         /** The number of reads to this slice that lead to a search hit. See 'num_reads_all' for the purpose. */
-        size_t numReadsHit;
+        size_t num_reads_hit;
 
-} SliceDescriptor;
+} jak_slice_descriptor;
 
-typedef struct JAK_slice_list_t {
+typedef struct jak_slice_list {
         jak_allocator alloc;
-        struct spinlock lock;
+        jak_spinlock lock;
 
-        struct jak_vector ofType(JAK_slice_t) slices;
-        struct jak_vector ofType(JAK_slice_desc_t) descriptors;
-        struct jak_vector ofType(JAK_bloomfilter_t) filters;
-        struct jak_vector ofType(JAK_hash_bounds_t) bounds;
+        struct jak_vector ofType(jak_slice) slices;
+        struct jak_vector ofType(jak_slice_descriptor) descriptors;
+        struct jak_vector ofType(jak_bloomfilter) filters;
+        struct jak_vector ofType(jak_hash_bounds) bounds;
 
         jak_u32 appender_idx;
-
         jak_error err;
-} slice_list_t;
+} jak_slice_list_t;
 
-typedef struct JAK_slice_handle_t {
-        Slice *container;
+typedef struct jak_slice_handle {
+        jak_slice *container;
         const char *key;
         jak_archive_field_sid_t value;
         bool is_contained;
-} slice_handle_t;
+} jak_slice_handle;
 
-bool slice_list_create(slice_list_t *list, const jak_allocator *alloc, size_t sliceCapacity);
-
-bool SliceListDrop(slice_list_t *list);
-
-bool slice_list_lookup(slice_handle_t *handle, slice_list_t *list, const char *needle);
-
-bool SliceListIsEmpty(const slice_list_t *list);
-
-bool slice_list_insert(slice_list_t *list, char **strings, jak_archive_field_sid_t *ids, size_t npairs);
-
-bool SliceListRemove(slice_list_t *list, slice_handle_t *handle);
+bool jak_slice_list_create(jak_slice_list_t *list, const jak_allocator *alloc, size_t slice_capacity);
+bool jak_slice_list_drop(jak_slice_list_t *list);
+bool jak_slice_list_lookup(jak_slice_handle *handle, jak_slice_list_t *list, const char *needle);
+bool jak_slice_list_is_empty(const jak_slice_list_t *list);
+bool jak_slice_list_insert(jak_slice_list_t *list, char **strings, jak_archive_field_sid_t *ids, size_t npairs);
+bool jak_slice_list_remove(jak_slice_list_t *list, jak_slice_handle *handle);
 
 JAK_END_DECL
 

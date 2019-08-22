@@ -36,7 +36,7 @@ struct jak_memfile {
         jak_i8 saved_pos_ptr;
         bool bit_mode;
         size_t current_read_bit, current_write_bit, bytes_completed;
-        enum access_mode mode;
+        jak_access_mode_e mode;
         jak_error err;
 };
 
@@ -68,7 +68,7 @@ struct jak_memfile {
     offset;                                                                                                            \
 })
 
-bool memfile_open(struct jak_memfile *file, jak_memblock *block, enum access_mode mode);
+bool memfile_open(struct jak_memfile *file, jak_memblock *block, jak_access_mode_e mode);
 
 bool memfile_clone(struct jak_memfile *dst, struct jak_memfile *src);
 
@@ -151,7 +151,7 @@ bool memfile_end_bit_mode(size_t *num_bytes_written, struct jak_memfile *file);
 
 void *memfile_current_pos(struct jak_memfile *file, jak_offset_t nbytes);
 
-bool memfile_hexdump(struct jak_string *sb, struct jak_memfile *file);
+bool memfile_hexdump(jak_string *sb, struct jak_memfile *file);
 
 bool memfile_hexdump_printf(FILE *file, struct jak_memfile *memfile);
 

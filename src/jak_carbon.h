@@ -79,7 +79,7 @@ typedef struct jak_carbon {
         struct jak_memfile memfile;
 
         struct {
-                struct spinlock write_lock;
+                jak_spinlock write_lock;
                 bool commit_lock;
                 bool is_latest;
         } versioning;
@@ -219,7 +219,7 @@ bool jak_carbon_key_type(jak_carbon_key_e *out, jak_carbon *doc);
 const void *jak_carbon_key_raw_value(jak_u64 *len, jak_carbon_key_e *type, jak_carbon *doc);
 bool jak_carbon_key_signed_value(jak_i64 *key, jak_carbon *doc);
 bool jak_carbon_key_unsigned_value(jak_u64 *key, jak_carbon *doc);
-const char *jak_carbon_key_string_value(jak_u64 *len, jak_carbon *doc);
+const char *jak_carbon_key_jak_string_value(jak_u64 *len, jak_carbon *doc);
 bool jak_carbon_has_key(jak_carbon_key_e type);
 bool jak_carbon_key_is_unsigned(jak_carbon_key_e type);
 bool jak_carbon_key_is_signed(jak_carbon_key_e type);
@@ -227,9 +227,9 @@ bool jak_carbon_key_is_string(jak_carbon_key_e type);
 bool jak_carbon_clone(jak_carbon *clone, jak_carbon *doc);
 bool jak_carbon_commit_hash(jak_u64 *hash, jak_carbon *doc);
 
-bool jak_carbon_to_str(struct jak_string *dst, jak_carbon_printer_impl_e printer, jak_carbon *doc);
-const char *jak_carbon_to_json_extended(struct jak_string *dst, jak_carbon *doc);
-const char *jak_carbon_to_json_compact(struct jak_string *dst, jak_carbon *doc);
+bool jak_carbon_to_str(jak_string *dst, jak_carbon_printer_impl_e printer, jak_carbon *doc);
+const char *jak_carbon_to_json_extended(jak_string *dst, jak_carbon *doc);
+const char *jak_carbon_to_json_compact(jak_string *dst, jak_carbon *doc);
 char *jak_carbon_to_json_extended_dup(jak_carbon *doc);
 char *jak_carbon_to_json_compact_dup(jak_carbon *doc);
 bool jak_carbon_iterator_open(jak_carbon_array_it *it, jak_carbon *doc);

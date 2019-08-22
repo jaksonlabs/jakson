@@ -29,7 +29,7 @@ bool jak_memblock_create(jak_memblock **block, size_t size)
         JAK_ERROR_IF_NULL(block)
         JAK_ERROR_PRINT_IF(size == 0, JAK_ERR_ILLEGALARG)
         jak_memblock *result = JAK_MALLOC(sizeof(jak_memblock));
-        JAK_zero_memory(result, sizeof(jak_memblock));
+        JAK_ZERO_MEMORY(result, sizeof(jak_memblock));
         JAK_ERROR_IF_NULL(result)
         result->blockLength = size;
         result->last_byte = 0;
@@ -42,7 +42,7 @@ bool jak_memblock_create(jak_memblock **block, size_t size)
 bool jak_memblock_zero_out(jak_memblock *block)
 {
         JAK_ERROR_IF_NULL(block);
-        JAK_zero_memory(block->base, block->blockLength);
+        JAK_ZERO_MEMORY(block->base, block->blockLength);
         return true;
 }
 
@@ -97,7 +97,7 @@ bool jak_memblock_resize(jak_memblock *block, size_t size)
         JAK_ERROR_PRINT_IF(size == 0, JAK_ERR_ILLEGALARG)
         block->base = realloc(block->base, size);
         if (size > block->blockLength) {
-                JAK_zero_memory(block->base + block->blockLength, (size - block->blockLength));
+                JAK_ZERO_MEMORY(block->base + block->blockLength, (size - block->blockLength));
         }
         block->blockLength = size;
         return true;
@@ -109,7 +109,7 @@ bool jak_memblock_write(jak_memblock *block, jak_offset_t position, const char *
         JAK_ERROR_IF_NULL(data)
         if (JAK_LIKELY(position + nbytes < block->blockLength)) {
                 memcpy(block->base + position, data, nbytes);
-                block->last_byte = JAK_max(block->last_byte, position + nbytes);
+                block->last_byte = JAK_MAX(block->last_byte, position + nbytes);
                 return true;
         } else {
                 return false;
@@ -120,7 +120,7 @@ bool jak_memblock_cpy(jak_memblock **dst, jak_memblock *src)
 {
         JAK_ERROR_IF_NULL(dst)
         JAK_ERROR_IF_NULL(src)
-        JAK_check_success(jak_memblock_create(dst, src->blockLength));
+        JAK_CHECK_SUCCESS(jak_memblock_create(dst, src->blockLength));
         memcpy((*dst)->base, src->base, src->blockLength);
         JAK_ASSERT((*dst)->base);
         JAK_ASSERT((*dst)->blockLength == src->blockLength);
@@ -151,7 +151,7 @@ bool jak_memblock_move_left(jak_memblock *block, jak_offset_t where, size_t nbyt
                 memmove(block->base + where, block->base + where + nbytes, remainder);
                 JAK_ASSERT(block->last_byte >= nbytes);
                 block->last_byte -= nbytes;
-                JAK_zero_memory(block->base + block->blockLength - nbytes, nbytes)
+                JAK_ZERO_MEMORY(block->base + block->blockLength - nbytes, nbytes)
                 return true;
         } else {
                 return false;
@@ -170,14 +170,14 @@ bool jak_memblock_move_ex(jak_memblock *block, jak_offset_t where, size_t nbytes
                 block->base = realloc(block->base, new_length);
                 JAK_ERROR_IF(!block->base, &block->err, JAK_ERR_REALLOCERR);
                 if (zero_out) {
-                        JAK_zero_memory(block->base + block->blockLength, (new_length - block->blockLength));
+                        JAK_ZERO_MEMORY(block->base + block->blockLength, (new_length - block->blockLength));
                 }
                 block->blockLength = new_length;
         }
 
         memmove(block->base + where + nbytes, block->base + where, block->last_byte - where);
         if (zero_out) {
-                JAK_zero_memory(block->base + where, nbytes);
+                JAK_ZERO_MEMORY(block->base + where, nbytes);
         }
         block->last_byte += nbytes;
         return true;
@@ -195,6 +195,6 @@ bool memfile_update_last_byte(jak_memblock *block, size_t where)
 {
         JAK_ERROR_IF_NULL(block);
         JAK_ERROR_IF(where >= block->blockLength, &block->err, JAK_ERR_ILLEGALSTATE);
-        block->last_byte = JAK_max(block->last_byte, where);
+        block->last_byte = JAK_MAX(block->last_byte, where);
         return true;
 }

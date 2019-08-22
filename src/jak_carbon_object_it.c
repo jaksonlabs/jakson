@@ -34,7 +34,7 @@ bool jak_carbon_object_it_create(jak_carbon_object_it *it, struct jak_memfile *m
         it->mod_size = 0;
         it->object_end_reached = false;
 
-        spin_init(&it->lock);
+        jak_spinlock_init(&it->lock);
         jak_error_init(&it->err);
 
         vec_create(&it->history, NULL, sizeof(jak_offset_t), 40);
@@ -71,7 +71,7 @@ bool jak_carbon_object_it_clone(jak_carbon_object_it *dst, jak_carbon_object_it 
         JAK_ERROR_IF_NULL(src);
         memfile_clone(&dst->memfile, &src->memfile);
         dst->object_contents_off = src->object_contents_off;
-        spin_init(&dst->lock);
+        jak_spinlock_init(&dst->lock);
         jak_error_cpy(&dst->err, &src->err);
         dst->mod_size = src->mod_size;
         dst->object_end_reached = src->object_end_reached;
@@ -152,8 +152,8 @@ jak_offset_t jak_carbon_object_it_memfile_pos(jak_carbon_object_it *it)
 bool jak_carbon_object_it_tell(jak_offset_t *key_off, jak_offset_t *value_off, jak_carbon_object_it *it)
 {
         JAK_ERROR_IF_NULL(it)
-        JAK_optional_set(key_off, it->field.key.offset);
-        JAK_optional_set(value_off, it->field.value.offset);
+        JAK_OPTIONAL_SET(key_off, it->field.key.offset);
+        JAK_OPTIONAL_SET(value_off, it->field.value.offset);
         return true;
 }
 
@@ -168,7 +168,7 @@ const char *jak_carbon_object_it_prop_name(jak_u64 *key_len, jak_carbon_object_i
 static jak_i64 prop_remove(jak_carbon_object_it *it, jak_carbon_field_type_e type)
 {
         jak_i64 prop_size = jak_carbon_prop_size(&it->memfile);
-        jak_carbon_string_nomarker_remove(&it->memfile);
+        jak_carbon_jak_string_nomarker_remove(&it->memfile);
         if (jak_carbon_int_field_remove(&it->memfile, &it->err, type)) {
                 jak_carbon_int_object_it_refresh(NULL, NULL, it);
                 return prop_size;
@@ -252,9 +252,9 @@ bool jak_carbon_object_it_unsigned_value(bool *is_null_in, jak_u64 *value, jak_c
         return jak_carbon_int_field_access_unsigned_value(is_null_in, value, &it->field.value.data, &it->err);
 }
 
-const char *jak_carbon_object_it_string_value(jak_u64 *strlen, jak_carbon_object_it *it)
+const char *jak_carbon_object_it_jak_string_value(jak_u64 *strlen, jak_carbon_object_it *it)
 {
-        return jak_carbon_int_field_access_string_value(strlen, &it->field.value.data, &it->err);
+        return jak_carbon_int_field_access_jak_string_value(strlen, &it->field.value.data, &it->err);
 }
 
 bool jak_carbon_object_it_binary_value(jak_carbon_binary *out, jak_carbon_object_it *it)
@@ -293,14 +293,14 @@ bool jak_carbon_object_it_insert_end(jak_carbon_insert *inserter)
 bool jak_carbon_object_it_lock(jak_carbon_object_it *it)
 {
         JAK_ERROR_IF_NULL(it)
-        spin_acquire(&it->lock);
+        jak_spinlock_acquire(&it->lock);
         return true;
 }
 
 bool jak_carbon_object_it_unlock(jak_carbon_object_it *it)
 {
         JAK_ERROR_IF_NULL(it)
-        spin_release(&it->lock);
+        jak_spinlock_release(&it->lock);
         return true;
 }
 

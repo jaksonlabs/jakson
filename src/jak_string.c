@@ -18,12 +18,12 @@
 #include <inttypes.h>
 #include <jak_string.h>
 
-bool string_create(struct jak_string *builder)
+bool jak_string_create(jak_string *builder)
 {
-        return string_create_ex(builder, 1024);
+        return jak_string_create_ex(builder, 1024);
 }
 
-bool string_create_ex(struct jak_string *builder, size_t capacity)
+bool jak_string_create_ex(jak_string *builder, size_t capacity)
 {
         JAK_ERROR_IF_NULL(builder)
         JAK_ERROR_IF_NULL(capacity)
@@ -32,19 +32,19 @@ bool string_create_ex(struct jak_string *builder, size_t capacity)
         builder->end = 0;
         builder->data = JAK_MALLOC(capacity);
         JAK_ERROR_IF_AND_RETURN(!builder->data, &builder->err, JAK_ERR_MALLOCERR, false);
-        JAK_zero_memory(builder->data, builder->cap);
+        JAK_ZERO_MEMORY(builder->data, builder->cap);
         return true;
 }
 
-bool string_add(struct jak_string *builder, const char *str)
+bool jak_string_add(jak_string *builder, const char *str)
 {
         JAK_ERROR_IF_NULL(builder)
         JAK_ERROR_IF_NULL(str)
         jak_u64 len = strlen(str);
-        return string_add_nchar(builder, str, len);
+        return jak_string_add_nchar(builder, str, len);
 }
 
-bool string_add_nchar(struct jak_string *builder, const char *str, jak_u64 strlen)
+bool jak_string_add_nchar(jak_string *builder, const char *str, jak_u64 strlen)
 {
         JAK_ERROR_IF_NULL(builder)
         JAK_ERROR_IF_NULL(str)
@@ -54,7 +54,7 @@ bool string_add_nchar(struct jak_string *builder, const char *str, jak_u64 strle
                 size_t new_cap = (builder->end + strlen) * 1.7f;
                 builder->data = realloc(builder->data, new_cap);
                 JAK_ERROR_IF_AND_RETURN(!builder->data, &builder->err, JAK_ERR_REALLOCERR, false);
-                JAK_zero_memory(builder->data + builder->cap, (new_cap - builder->cap));
+                JAK_ZERO_MEMORY(builder->data + builder->cap, (new_cap - builder->cap));
                 builder->cap = new_cap;
         }
 
@@ -65,102 +65,102 @@ bool string_add_nchar(struct jak_string *builder, const char *str, jak_u64 strle
         return true;
 }
 
-bool string_add_char(struct jak_string *builder, char c)
+bool jak_string_add_char(jak_string *builder, char c)
 {
         JAK_ERROR_IF_NULL(builder)
         char buffer[2];
         sprintf(buffer, "%c", c);
-        return string_add(builder, buffer);
+        return jak_string_add(builder, buffer);
         return true;
 }
 
-bool string_add_u8(struct jak_string *builder, jak_u8 value)
+bool jak_string_add_u8(jak_string *builder, jak_u8 value)
 {
         char buffer[21];
-        JAK_zero_memory(buffer, JAK_ARRAY_LENGTH(buffer));
+        JAK_ZERO_MEMORY(buffer, JAK_ARRAY_LENGTH(buffer));
         sprintf(buffer, "%u", value);
-        return string_add(builder, buffer);
+        return jak_string_add(builder, buffer);
 }
 
-bool string_add_u16(struct jak_string *builder, jak_u16 value)
-{
-        char buffer[21];
-        sprintf(buffer, "%u", value);
-        return string_add(builder, buffer);
-}
-
-bool string_add_u32(struct jak_string *builder, jak_u32 value)
+bool jak_string_add_u16(jak_string *builder, jak_u16 value)
 {
         char buffer[21];
         sprintf(buffer, "%u", value);
-        return string_add(builder, buffer);
+        return jak_string_add(builder, buffer);
 }
 
-bool string_add_u64(struct jak_string *builder, jak_u64 value)
+bool jak_string_add_u32(jak_string *builder, jak_u32 value)
+{
+        char buffer[21];
+        sprintf(buffer, "%u", value);
+        return jak_string_add(builder, buffer);
+}
+
+bool jak_string_add_u64(jak_string *builder, jak_u64 value)
 {
         char buffer[21];
         sprintf(buffer, "%" PRIu64, value);
-        return string_add(builder, buffer);
+        return jak_string_add(builder, buffer);
 }
 
-bool string_add_i8(struct jak_string *builder, jak_i8 value)
+bool jak_string_add_i8(jak_string *builder, jak_i8 value)
 {
         char buffer[21];
         sprintf(buffer, "%d", value);
-        return string_add(builder, buffer);
+        return jak_string_add(builder, buffer);
 }
 
-bool string_add_i16(struct jak_string *builder, jak_i16 value)
+bool jak_string_add_i16(jak_string *builder, jak_i16 value)
 {
         char buffer[21];
         sprintf(buffer, "%d", value);
-        return string_add(builder, buffer);
+        return jak_string_add(builder, buffer);
 }
 
-bool string_add_i32(struct jak_string *builder, jak_i32 value)
+bool jak_string_add_i32(jak_string *builder, jak_i32 value)
 {
         char buffer[21];
         sprintf(buffer, "%d", value);
-        return string_add(builder, buffer);
+        return jak_string_add(builder, buffer);
 }
 
-bool string_add_i64(struct jak_string *builder, jak_i64 value)
+bool jak_string_add_i64(jak_string *builder, jak_i64 value)
 {
         char buffer[21];
         sprintf(buffer, "%" PRIi64, value);
-        return string_add(builder, buffer);
+        return jak_string_add(builder, buffer);
 }
 
-bool string_add_u64_as_hex(struct jak_string *builder, jak_u64 value)
+bool jak_string_add_u64_as_hex(jak_string *builder, jak_u64 value)
 {
         char buffer[17];
         sprintf(buffer, "%016"PRIx64, value);
-        return string_add(builder, buffer);
+        return jak_string_add(builder, buffer);
 }
 
-bool string_add_u64_as_hex_0x_prefix_compact(struct jak_string *builder, jak_u64 value)
+bool jak_string_add_u64_as_hex_0x_prefix_compact(jak_string *builder, jak_u64 value)
 {
         char buffer[17];
         sprintf(buffer, "0x%"PRIx64, value);
-        return string_add(builder, buffer);
+        return jak_string_add(builder, buffer);
 }
 
-bool string_add_float(struct jak_string *builder, float value)
+bool jak_string_add_float(jak_string *builder, float value)
 {
         char buffer[2046];
         sprintf(buffer, "%0.2f", value);
-        return string_add(builder, buffer);
+        return jak_string_add(builder, buffer);
 }
 
-bool string_clear(struct jak_string *builder)
+bool jak_string_clear(jak_string *builder)
 {
         JAK_ERROR_IF_NULL(builder)
-        JAK_zero_memory(builder->data, builder->cap);
+        JAK_ZERO_MEMORY(builder->data, builder->cap);
         builder->end = 0;
         return true;
 }
 
-bool string_ensure_capacity(struct jak_string *builder, jak_u64 cap)
+bool jak_string_ensure_capacity(jak_string *builder, jak_u64 cap)
 {
         JAK_ERROR_IF_NULL(builder)
         /* resize if needed */
@@ -168,39 +168,39 @@ bool string_ensure_capacity(struct jak_string *builder, jak_u64 cap)
                 size_t new_cap = cap * 1.7f;
                 builder->data = realloc(builder->data, new_cap);
                 JAK_ERROR_IF_AND_RETURN(!builder->data, &builder->err, JAK_ERR_REALLOCERR, false);
-                JAK_zero_memory(builder->data + builder->cap, (new_cap - builder->cap));
+                JAK_ZERO_MEMORY(builder->data + builder->cap, (new_cap - builder->cap));
                 builder->cap = new_cap;
         }
         return true;
 }
 
-size_t string_len(struct jak_string *builder)
+size_t jak_string_len(jak_string *builder)
 {
         JAK_ERROR_IF_NULL(builder)
         return builder->end;
 }
 
-bool string_drop(struct jak_string *builder)
+bool jak_string_drop(jak_string *builder)
 {
         JAK_ERROR_IF_NULL(builder)
         free(builder->data);
         return true;
 }
 
-bool string_print(struct jak_string *builder)
+bool jak_string_print(jak_string *builder)
 {
-        return string_fprint(stdout, builder);
+        return jak_string_fprint(stdout, builder);
 }
 
-bool string_fprint(FILE *file, struct jak_string *builder)
+bool jak_string_fprint(FILE *file, jak_string *builder)
 {
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(builder)
-        fprintf(file, "%s\n", string_cstr(builder));
+        fprintf(file, "%s\n", jak_string_cstr(builder));
         return true;
 }
 
-const char *string_cstr(struct jak_string *builder)
+const char *jak_string_cstr(jak_string *builder)
 {
         return builder->data;
 }

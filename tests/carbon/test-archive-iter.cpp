@@ -249,7 +249,7 @@ print_basic_fixed_types_array(jak_archive_value_vector *value_iter, jak_u32 idx)
         const jak_archive_field_sid_t *values = jak_archive_value_vector_get_string_arrays_at(&array_length, idx, value_iter);
         ASSERT_TRUE(values != NULL);
         ASSERT_TRUE(array_length != 0);
-        printf("\t\t{ type: string_array, values: [");
+        printf("\t\t{ type: jak_string_array, values: [");
         for (jak_u32 i = 0; i < array_length; i++)
         {
             printf("%" PRIu64 "%s", values[i], i + 1 < array_length ? ", " : "");

@@ -79,7 +79,7 @@ bool jak_carbon_dot_path_type_at(carbon_dot_node_e *type_out, jak_u32 pos, const
 bool jak_carbon_dot_path_idx_at(jak_u32 *idx, jak_u32 pos, const jak_carbon_dot_path *path);
 const char *jak_carbon_dot_path_key_at(jak_u32 pos, const jak_carbon_dot_path *path);
 
-bool jak_carbon_dot_path_to_str(struct jak_string *sb, jak_carbon_dot_path *path);
+bool jak_carbon_dot_path_to_str(jak_string *sb, jak_carbon_dot_path *path);
 bool jak_carbon_dot_path_fprint(FILE *file, jak_carbon_dot_path *path);
 bool jak_carbon_dot_path_print(jak_carbon_dot_path *path);
 

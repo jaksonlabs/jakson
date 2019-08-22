@@ -28,18 +28,18 @@
 
 JAK_BEGIN_DECL
 
-bool jak_carbon_string_write(struct jak_memfile *file, const char *string);
-bool jak_carbon_string_nchar_write(struct jak_memfile *file, const char *string, jak_u64 str_len);
-bool jak_carbon_string_nomarker_write(struct jak_memfile *file, const char *string);
-bool jak_carbon_string_nomarker_nchar_write(struct jak_memfile *file, const char *string, jak_u64 str_len);
-bool jak_carbon_string_nomarker_remove(struct jak_memfile *file);
-bool jak_carbon_string_remove(struct jak_memfile *file);
-bool jak_carbon_string_update(struct jak_memfile *file, const char *string);
-bool jak_carbon_string_update_wnchar(struct jak_memfile *file, const char *string, size_t str_len);
-bool jak_carbon_string_skip(struct jak_memfile *file);
-bool jak_carbon_string_nomarker_skip(struct jak_memfile *file);
-const char *jak_carbon_string_read(jak_u64 *len, struct jak_memfile *file);
-const char *jak_carbon_string_nomarker_read(jak_u64 *len, struct jak_memfile *file);
+bool jak_carbon_jak_string_write(struct jak_memfile *file, const char *string);
+bool jak_carbon_jak_string_nchar_write(struct jak_memfile *file, const char *string, jak_u64 str_len);
+bool jak_carbon_jak_string_nomarker_write(struct jak_memfile *file, const char *string);
+bool jak_carbon_jak_string_nomarker_nchar_write(struct jak_memfile *file, const char *string, jak_u64 str_len);
+bool jak_carbon_jak_string_nomarker_remove(struct jak_memfile *file);
+bool jak_carbon_jak_string_remove(struct jak_memfile *file);
+bool jak_carbon_jak_string_update(struct jak_memfile *file, const char *string);
+bool jak_carbon_jak_string_update_wnchar(struct jak_memfile *file, const char *string, size_t str_len);
+bool jak_carbon_jak_string_skip(struct jak_memfile *file);
+bool jak_carbon_jak_string_nomarker_skip(struct jak_memfile *file);
+const char *jak_carbon_jak_string_read(jak_u64 *len, struct jak_memfile *file);
+const char *jak_carbon_jak_string_nomarker_read(jak_u64 *len, struct jak_memfile *file);
 
 JAK_END_DECL
 

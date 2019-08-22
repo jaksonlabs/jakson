@@ -29,13 +29,13 @@ bool jak_strid_iter_open(jak_strid_iter *it, jak_error *err, jak_archive *archiv
         memset(&it->vector, 0, sizeof(it->vector));
         it->disk_file = fopen(archive->disk_file_path, "r");
         if (!it->disk_file) {
-                JAK_optional(err, JAK_ERROR(err, JAK_ERR_FOPEN_FAILED))
+                JAK_OPTIONAL(err, JAK_ERROR(err, JAK_ERR_FOPEN_FAILED))
                 it->is_open = false;
                 return false;
         }
-        fseek(it->disk_file, archive->string_table.first_entry_off, SEEK_SET);
+        fseek(it->disk_file, archive->jak_string_table.first_entry_off, SEEK_SET);
         it->is_open = true;
-        it->disk_offset = archive->string_table.first_entry_off;
+        it->disk_offset = archive->jak_string_table.first_entry_off;
         return true;
 }
 
@@ -57,13 +57,13 @@ bool jak_strid_iter_next(bool *success, jak_strid_info **info, jak_error *err, s
                                 return false;
                         }
                         if (num_read != 1) {
-                                JAK_optional(err, JAK_ERROR(err, JAK_ERR_FREAD_FAILED))
+                                JAK_OPTIONAL(err, JAK_ERROR(err, JAK_ERR_FREAD_FAILED))
                                 *success = false;
                                 return false;
                         } else {
-                                it->vector[vec_pos].id = header.string_id;
+                                it->vector[vec_pos].id = header.jak_string_id;
                                 it->vector[vec_pos].offset = ftell(it->disk_file);
-                                it->vector[vec_pos].strlen = header.string_len;
+                                it->vector[vec_pos].strlen = header.jak_string_len;
                                 it->disk_offset = header.next_entry_off;
                                 vec_pos++;
                         }

@@ -34,7 +34,7 @@ typedef struct __attribute__((packed)) jak_archive_header {
         char magic[9];
         jak_u8 version;
         jak_offset_t root_object_header_offset;
-        jak_offset_t string_id_to_offset_index_offset;
+        jak_offset_t jak_string_id_to_offset_index_offset;
 } jak_archive_header;
 
 typedef struct __attribute__((packed)) jak_record_header {
@@ -114,7 +114,7 @@ typedef union jak_object_flags {
                         : 1;
                 jak_u32 has_float_props
                         : 1;
-                jak_u32 has_string_props
+                jak_u32 has_jak_string_props
                         : 1;
                 jak_u32 has_object_props
                         : 1;
@@ -140,7 +140,7 @@ typedef union jak_object_flags {
                         : 1;
                 jak_u32 has_float_array_props
                         : 1;
-                jak_u32 has_string_array_props
+                jak_u32 has_jak_string_array_props
                         : 1;
                 jak_u32 has_object_array_props
                         : 1;
@@ -185,7 +185,7 @@ typedef struct jak_archive_prop_offs {
         jak_offset_t uint32_arrays;
         jak_offset_t uint64_arrays;
         jak_offset_t float_arrays;
-        jak_offset_t string_arrays;
+        jak_offset_t jak_string_arrays;
         jak_offset_t object_arrays;
 } jak_archive_prop_offs;
 
@@ -368,17 +368,17 @@ typedef struct jak_record_table {
 } jak_record_table;
 
 typedef struct jak_archive_info {
-        size_t string_table_size;
+        size_t jak_string_table_size;
         size_t record_table_size;
-        size_t string_id_index_size;
+        size_t jak_string_id_index_size;
         jak_u32 num_embeddded_strings;
 } jak_archive_info;
 
 typedef struct __attribute__((packed)) jak_string_entry_header {
         char marker;
         jak_offset_t next_entry_off;
-        jak_archive_field_sid_t string_id;
-        jak_u32 string_len;
+        jak_archive_field_sid_t jak_string_id;
+        jak_u32 jak_string_len;
 } jak_string_entry_header;
 
 void jak_int_read_prop_offsets(jak_archive_prop_offs *prop_offsets, struct jak_memfile *memfile, const jak_object_flags_u *flags);

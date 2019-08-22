@@ -48,7 +48,7 @@ typedef union jak_encoded_doc_value {
 
 typedef enum jak_encoded_doc_string {
         JAK_STRING_ENCODED, JAK_STRING_DECODED,
-} jak_encoded_doc_string_e;
+} jak_encoded_doc_jak_string_e;
 
 typedef enum jak_encoded_doc_value_e {
         JAK_VALUE_BUILTIN, JAK_VALUE_DECODED_STRING,
@@ -57,7 +57,7 @@ typedef enum jak_encoded_doc_value_e {
 typedef struct jak_encoded_doc_prop_header {
         jak_encoded_doc *context;
 
-        jak_encoded_doc_string_e key_type;
+        jak_encoded_doc_jak_string_e key_type;
         union {
                 jak_archive_field_sid_t key_id;
                 char *key_str;
@@ -134,7 +134,7 @@ JAK_DEFINE_ENCODED_DOC_ADD_PROP_BASIC_DECODED(number, jak_archive_field_number_t
 JAK_DEFINE_ENCODED_DOC_ADD_PROP_BASIC_DECODED(boolean, jak_archive_field_boolean_t)
 JAK_DEFINE_ENCODED_DOC_ADD_PROP_BASIC_DECODED(string, jak_archive_field_sid_t)
 
-bool jak_encoded_doc_add_prop_string_decoded_string_value_decoded(jak_encoded_doc *doc, const char *key, const char *value);
+bool jak_encoded_doc_add_prop_jak_string_decoded_jak_string_value_decoded(jak_encoded_doc *doc, const char *key, const char *value);
 bool jak_encoded_doc_add_prop_null(jak_encoded_doc *doc, jak_archive_field_sid_t key);
 bool jak_encoded_doc_add_prop_null_decoded(jak_encoded_doc *doc, const char *key);
 bool jak_encoded_doc_add_prop_object(jak_encoded_doc *doc, jak_archive_field_sid_t key, jak_encoded_doc *value);

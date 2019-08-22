@@ -45,7 +45,7 @@ bool jak_carbon_column_it_create(jak_carbon_column_it *it, struct jak_memfile *m
         it->mod_size = 0;
 
         jak_error_init(&it->err);
-        spin_init(&it->lock);
+        jak_spinlock_init(&it->lock);
         memfile_open(&it->memfile, memfile->memblock, memfile->mode);
         memfile_seek(&it->memfile, column_start_offset);
 
@@ -86,7 +86,7 @@ bool jak_carbon_column_it_clone(jak_carbon_column_it *dst, jak_carbon_column_it 
         dst->mod_size = src->mod_size;
         dst->column_capacity = src->column_capacity;
         dst->column_num_elements = src->column_num_elements;
-        spin_init(&dst->lock);
+        jak_spinlock_init(&dst->lock);
         return true;
 }
 
@@ -142,7 +142,7 @@ bool jak_carbon_column_it_values_info(jak_carbon_field_type_e *type, jak_u32 *nv
                 *nvalues = num_elements;
         }
 
-        JAK_optional_set(type, it->type);
+        JAK_OPTIONAL_SET(type, it->type);
 
         return true;
 }
@@ -190,8 +190,8 @@ const void *jak_carbon_column_it_values(jak_carbon_field_type_e *type, jak_u32 *
 
         const void *result = memfile_peek(&it->memfile, sizeof(void));
 
-        JAK_optional_set(type, it->type);
-        JAK_optional_set(nvalues, num_elements);
+        JAK_OPTIONAL_SET(type, it->type);
+        JAK_OPTIONAL_SET(nvalues, num_elements);
 
         jak_u32 skip = cap_elements * jak_carbon_int_get_type_value_size(it->type);
         memfile_seek(&it->memfile, payload_start + skip);
@@ -653,7 +653,7 @@ bool jak_carbon_column_it_update_set_float(jak_carbon_column_it *it, jak_u32 pos
 bool jak_carbon_column_it_lock(jak_carbon_column_it *it)
 {
         JAK_ERROR_IF_NULL(it);
-        spin_acquire(&it->lock);
+        jak_spinlock_acquire(&it->lock);
         return true;
 }
 
@@ -663,7 +663,7 @@ bool jak_carbon_column_it_lock(jak_carbon_column_it *it)
 bool jak_carbon_column_it_unlock(jak_carbon_column_it *it)
 {
         JAK_ERROR_IF_NULL(it);
-        spin_release(&it->lock);
+        jak_spinlock_release(&it->lock);
         return true;
 }
 

@@ -223,12 +223,12 @@ static void tracker_end_load_archive()
     JAK_CONSOLE_WRITELN(stdout, "%s", "  - Load archive from disk finished");
 }
 
-static void tracker_begin_setup_string_dictionary()
+static void tracker_begin_setup_jak_string_dictionary()
 {
     JAK_CONSOLE_WRITELN(stdout, "%s", "  - Setup string dictionary started");
 }
 
-static void tracker_end_setup_string_dictionary()
+static void tracker_end_setup_jak_string_dictionary()
 {
     JAK_CONSOLE_WRITELN(stdout, "%s", "  - Setup string dictionary finished");
 }
@@ -273,12 +273,12 @@ static void tracker_end_cleanup()
     JAK_CONSOLE_WRITELN(stdout, "%s", "  - Cleanup finished");
 }
 
-static void tracker_begin_write_string_table()
+static void tracker_begin_write_jak_string_table()
 {
     JAK_CONSOLE_WRITELN(stdout, "%s", "  - Writing string table started");
 }
 
-static void tracker_end_write_string_table()
+static void tracker_end_write_jak_string_table()
 {
     JAK_CONSOLE_WRITELN(stdout, "%s", "  - Writing string table finished");
 }
@@ -293,17 +293,17 @@ static void tracker_end_write_record_table()
     JAK_CONSOLE_WRITELN(stdout, "%s", "  - Writing record table finished");
 }
 
-static void tracker_skip_string_id_index_baking()
+static void tracker_skip_jak_string_id_index_baking()
 {
     JAK_CONSOLE_WRITELN(stdout, "%s", "  - Backing indexes skipped");
 }
 
-static void tracker_begin_string_id_index_baking()
+static void tracker_begin_jak_string_id_index_baking()
 {
     JAK_CONSOLE_WRITELN(stdout, "%s", "  - Backing string id to offset index started");
 }
 
-static void tracker_end_string_id_index_baking()
+static void tracker_end_jak_string_id_index_baking()
 {
     JAK_CONSOLE_WRITELN(stdout, "%s", "  - Backing string id to offset index finished");
 }
@@ -325,7 +325,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *
         bool flagBakeStringIdIndex = true;
         jak_packer_e compressor = JAK_PACK_NONE;
         enum jak_str_dict_tag dic_type = ASYNC;
-        int string_dic_async_nthreads = 8;
+        int jak_string_dic_async_nthreads = 8;
 
         int outputIdx = 0, inputIdx = 1;
         int i;
@@ -370,7 +370,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *
                     const char *nthreads_str = argv[i];
                     int nthreads_atoid = atoi(nthreads_str);
                     if (nthreads_atoid > 0) {
-                        string_dic_async_nthreads = nthreads_atoid;
+                        jak_string_dic_async_nthreads = nthreads_atoid;
                     } else {
                         JAK_CONSOLE_WRITE(file, "not a number or zero threads assigned: '%s'",
                                              nthreads_str);
@@ -441,8 +441,8 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *
         progress_tracker.end_write_archive_file_to_disk = tracker_end_write_archive_file_to_disk;
         progress_tracker.begin_load_archive = tracker_begin_load_archive;
         progress_tracker.end_load_archive = tracker_end_load_archive;
-        progress_tracker.begin_setup_string_dictionary = tracker_begin_setup_string_dictionary;
-        progress_tracker.end_setup_string_dictionary = tracker_end_setup_string_dictionary;
+        progress_tracker.begin_setup_jak_string_dictionary = tracker_begin_setup_jak_string_dictionary;
+        progress_tracker.end_setup_jak_string_dictionary = tracker_end_setup_jak_string_dictionary;
         progress_tracker.begin_parse_json = tracker_begin_parse_json;
         progress_tracker.end_parse_json = tracker_end_parse_json;
         progress_tracker.begin_test_json = tracker_begin_test_json;
@@ -451,16 +451,16 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *
         progress_tracker.end_import_json = tracker_end_import_json;
         progress_tracker.begin_cleanup = tracker_begin_cleanup;
         progress_tracker.end_cleanup = tracker_end_cleanup;
-        progress_tracker.begin_write_string_table = tracker_begin_write_string_table;
-        progress_tracker.end_write_string_table = tracker_end_write_string_table;
+        progress_tracker.begin_write_jak_string_table = tracker_begin_write_jak_string_table;
+        progress_tracker.end_write_jak_string_table = tracker_end_write_jak_string_table;
         progress_tracker.begin_write_record_table = tracker_begin_write_record_table;
         progress_tracker.end_write_record_table = tracker_end_write_record_table;
-        progress_tracker.skip_string_id_index_baking = tracker_skip_string_id_index_baking;
-        progress_tracker.begin_string_id_index_baking = tracker_begin_string_id_index_baking;
-        progress_tracker.end_string_id_index_baking = tracker_end_string_id_index_baking;
+        progress_tracker.skip_jak_string_id_index_baking = tracker_skip_jak_string_id_index_baking;
+        progress_tracker.begin_jak_string_id_index_baking = tracker_begin_jak_string_id_index_baking;
+        progress_tracker.end_jak_string_id_index_baking = tracker_end_jak_string_id_index_baking;
 
         if (!jak_archive_from_json(&archive, pathCarbonFileOut, &err, jsonContent,
-                                      compressor, dic_type, string_dic_async_nthreads, flagReadOptimized,
+                                      compressor, dic_type, jak_string_dic_async_nthreads, flagReadOptimized,
                                       flagBakeStringIdIndex, &progress_tracker)) {
             jak_error_print_and_abort(&err);
         } else {
@@ -574,9 +574,9 @@ bool moduleInspectInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr 
             fclose(f);
             printf("file:\t\t\t'%s'\n", pathCarbonFileIn);
             printf("file-size:\t\t%" PRIu64 " B\n", fileLength);
-            printf("string-table-size:\t%zu B\n", info.string_table_size);
+            printf("string-table-size:\t%zu B\n", info.jak_string_table_size);
             printf("record-table-size:\t%zu B\n", info.record_table_size);
-            printf("index-size:\t\t%zu B\n", info.string_id_index_size);
+            printf("index-size:\t\t%zu B\n", info.jak_string_id_index_size);
             printf("#-embedded-strings:\t%" PRIu32 "\n", info.num_embeddded_strings);
         }
     }

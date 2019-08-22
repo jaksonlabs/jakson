@@ -137,4 +137,17 @@ typedef struct jak_command_opt_mgr jak_command_opt_mgr;
 typedef struct jak_priority_queue_element_info jak_priority_queue_element_info;
 typedef struct jak_priority_queue jak_priority_queue;
 
+typedef struct jak_slice jak_slice;
+typedef struct jak_hash_bounds jak_hash_bounds;
+typedef struct jak_slice_descriptor jak_slice_descriptor;
+typedef struct jak_slice_list jak_slice_list;
+typedef struct jak_slice_handle jak_slice_handle;
+
+typedef struct jak_spinlock jak_spinlock;
+
+typedef struct jak_str_hash jak_str_hash;
+typedef struct jak_str_hash_counters jak_str_hash_counters;
+
+typedef struct jak_string jak_string;
+
 #endif

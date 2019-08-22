@@ -142,7 +142,7 @@ static void update_file_header(struct jak_memfile *memfile, jak_offset_t root_ob
 
 static void skip_file_header(struct jak_memfile *memfile);
 
-static bool serialize_string_dic(struct jak_memfile *memfile, jak_error *err, const jak_doc_bulk *context,
+static bool serialize_jak_string_dic(struct jak_memfile *memfile, jak_error *err, const jak_doc_bulk *context,
                                  jak_packer_e compressor);
 
 static bool print_archive_from_memfile(FILE *file, jak_error *err, struct jak_memfile *memfile);
@@ -151,14 +151,14 @@ bool jak_archive_from_json(jak_archive *out, const char *file, jak_error *err, c
                            jak_packer_e compressor, enum jak_str_dict_tag dictionary,
                            size_t num_async_dic_threads,
                            bool read_optimized,
-                           bool bake_string_id_index, jak_archive_callback *callback)
+                           bool bake_jak_string_id_index, jak_archive_callback *callback)
 {
         JAK_ERROR_IF_NULL(out);
         JAK_ERROR_IF_NULL(file);
         JAK_ERROR_IF_NULL(err);
         JAK_ERROR_IF_NULL(json_string);
 
-        JAK_optional_call(callback, begin_create_from_json);
+        JAK_OPTIONAL_CALL(callback, begin_create_from_json);
 
         jak_memblock *stream;
         FILE *out_file;
@@ -170,12 +170,12 @@ bool jak_archive_from_json(jak_archive *out, const char *file, jak_error *err, c
                                           dictionary,
                                           num_async_dic_threads,
                                           read_optimized,
-                                          bake_string_id_index,
+                                          bake_jak_string_id_index,
                                           callback)) {
                 return false;
         }
 
-        JAK_optional_call(callback, begin_write_archive_file_to_disk);
+        JAK_OPTIONAL_CALL(callback, begin_write_archive_file_to_disk);
 
         if ((out_file = fopen(file, "w")) == NULL) {
                 JAK_ERROR(err, JAK_ERR_FOPENWRITE);
@@ -192,20 +192,20 @@ bool jak_archive_from_json(jak_archive *out, const char *file, jak_error *err, c
 
         fclose(out_file);
 
-        JAK_optional_call(callback, end_write_archive_file_to_disk);
+        JAK_OPTIONAL_CALL(callback, end_write_archive_file_to_disk);
 
-        JAK_optional_call(callback, begin_load_archive);
+        JAK_OPTIONAL_CALL(callback, begin_load_archive);
 
         if (!jak_archive_open(out, file)) {
                 JAK_ERROR(err, JAK_ERR_ARCHIVEOPEN);
                 return false;
         }
 
-        JAK_optional_call(callback, end_load_archive);
+        JAK_OPTIONAL_CALL(callback, end_load_archive);
 
         jak_memblock_drop(stream);
 
-        JAK_optional_call(callback, end_create_from_json);
+        JAK_OPTIONAL_CALL(callback, end_create_from_json);
 
         return true;
 }
@@ -228,9 +228,9 @@ bool jak_archive_stream_from_json(jak_memblock **stream, jak_error *err, const c
         jak_column_doc *columndoc;
         jak_json jak_json;
 
-        JAK_optional_call(callback, begin_jak_archive_stream_from_json)
+        JAK_OPTIONAL_CALL(callback, begin_jak_archive_stream_from_json)
 
-        JAK_optional_call(callback, begin_setup_string_dictionary);
+        JAK_OPTIONAL_CALL(callback, begin_setup_jak_string_dictionary);
         if (dictionary == SYNC) {
                 jak_encode_sync_create(&dic, 1000, 1000, 1000, 0, NULL);
         } else if (dictionary == ASYNC) {
@@ -239,9 +239,9 @@ bool jak_archive_stream_from_json(jak_memblock **stream, jak_error *err, const c
                 JAK_ERROR(err, JAK_ERR_UNKNOWN_DIC_TYPE);
         }
 
-        JAK_optional_call(callback, end_setup_string_dictionary);
+        JAK_OPTIONAL_CALL(callback, end_setup_jak_string_dictionary);
 
-        JAK_optional_call(callback, begin_parse_json);
+        JAK_OPTIONAL_CALL(callback, begin_parse_json);
         jak_json_parser_create(&parser);
         if (!(jak_json_parse(&jak_json, &error_desc, &parser, json_string))) {
                 char buffer[2048];
@@ -259,15 +259,15 @@ bool jak_archive_stream_from_json(jak_memblock **stream, jak_error *err, const c
                 }
                 return false;
         }
-        JAK_optional_call(callback, end_parse_json);
+        JAK_OPTIONAL_CALL(callback, end_parse_json);
 
-        JAK_optional_call(callback, begin_test_json);
+        JAK_OPTIONAL_CALL(callback, begin_test_json);
         if (!jak_json_test(err, &jak_json)) {
                 return false;
         }
-        JAK_optional_call(callback, end_test_json);
+        JAK_OPTIONAL_CALL(callback, end_test_json);
 
-        JAK_optional_call(callback, begin_import_json);
+        JAK_OPTIONAL_CALL(callback, begin_import_json);
         if (!jak_doc_bulk_create(&bulk, &dic)) {
                 JAK_ERROR(err, JAK_ERR_BULKCREATEFAILED);
                 return false;
@@ -286,22 +286,22 @@ bool jak_archive_stream_from_json(jak_memblock **stream, jak_error *err, const c
                 return false;
         }
 
-        JAK_optional_call(callback, end_import_json);
+        JAK_OPTIONAL_CALL(callback, end_import_json);
 
-        JAK_optional_call(callback, begin_cleanup);
+        JAK_OPTIONAL_CALL(callback, begin_cleanup);
         strdic_drop(&dic);
         jak_doc_bulk_drop(&bulk);
         jak_doc_entries_drop(partition);
         jak_columndoc_free(columndoc);
         free(columndoc);
-        JAK_optional_call(callback, end_cleanup);
+        JAK_OPTIONAL_CALL(callback, end_cleanup);
 
-        JAK_optional_call(callback, end_jak_archive_stream_from_json)
+        JAK_OPTIONAL_CALL(callback, end_jak_archive_stream_from_json)
 
         return true;
 }
 
-static bool run_string_id_baking(jak_error *err, jak_memblock **stream)
+static bool run_jak_string_id_baking(jak_error *err, jak_memblock **stream)
 {
         jak_archive archive;
         char tmp_file_name[512];
@@ -333,7 +333,7 @@ static bool run_string_id_baking(jak_error *err, jak_memblock **stream)
         }
 
         bool has_index;
-        jak_archive_has_query_index_string_id_to_offset(&has_index, &archive);
+        jak_archive_has_query_index_jak_string_id_to_offset(&has_index, &archive);
         if (has_index) {
                 JAK_ERROR(err, JAK_ERR_INTERNALERR);
                 remove(tmp_file_name);
@@ -343,7 +343,7 @@ static bool run_string_id_baking(jak_error *err, jak_memblock **stream)
         struct jak_sid_to_offset *index;
         jak_archive_query query;
         jak_query_create(&query, &archive);
-        jak_query_create_index_string_id_to_offset(&index, &query);
+        jak_query_create_index_jak_string_id_to_offset(&index, &query);
         jak_query_drop(&query);
         jak_archive_close(&archive);
 
@@ -361,13 +361,13 @@ static bool run_string_id_baking(jak_error *err, jak_memblock **stream)
         jak_archive_header header;
         size_t nread = fread(&header, sizeof(jak_archive_header), 1, tmp_file);
         JAK_ERROR_IF(nread != 1, err, JAK_ERR_FREAD_FAILED);
-        header.string_id_to_offset_index_offset = index_pos;
+        header.jak_string_id_to_offset_index_offset = index_pos;
         fseek(tmp_file, 0, SEEK_SET);
         int nwrite = fwrite(&header, sizeof(jak_archive_header), 1, tmp_file);
         JAK_ERROR_IF(nwrite != 1, err, JAK_ERR_FWRITE_FAILED);
         fseek(tmp_file, 0, SEEK_SET);
 
-        jak_query_drop_index_string_id_to_offset(index);
+        jak_query_drop_index_jak_string_id_to_offset(index);
 
         jak_memblock_drop(*stream);
         jak_memblock_from_file(stream, tmp_file, file_length);
@@ -379,26 +379,26 @@ static bool run_string_id_baking(jak_error *err, jak_memblock **stream)
 
 bool jak_archive_from_model(jak_memblock **stream, jak_error *err, jak_column_doc *model,
                             jak_packer_e compressor,
-                            bool bake_string_id_index, jak_archive_callback *callback)
+                            bool bake_jak_string_id_index, jak_archive_callback *callback)
 {
         JAK_ERROR_IF_NULL(model)
         JAK_ERROR_IF_NULL(stream)
         JAK_ERROR_IF_NULL(err)
 
-        JAK_optional_call(callback, begin_create_from_model)
+        JAK_OPTIONAL_CALL(callback, begin_create_from_model)
 
         jak_memblock_create(stream, 1024 * 1024 * 1024);
         struct jak_memfile memfile;
-        memfile_open(&memfile, *stream, READ_WRITE);
+        memfile_open(&memfile, *stream, JAK_READ_WRITE);
 
-        JAK_optional_call(callback, begin_write_string_table);
+        JAK_OPTIONAL_CALL(callback, begin_write_jak_string_table);
         skip_file_header(&memfile);
-        if (!serialize_string_dic(&memfile, err, model->bulk, compressor)) {
+        if (!serialize_jak_string_dic(&memfile, err, model->bulk, compressor)) {
                 return false;
         }
-        JAK_optional_call(callback, end_write_string_table);
+        JAK_OPTIONAL_CALL(callback, end_write_jak_string_table);
 
-        JAK_optional_call(callback, begin_write_record_table);
+        JAK_OPTIONAL_CALL(callback, begin_write_record_table);
         jak_offset_t record_header_offset = skip_record_header(&memfile);
         update_file_header(&memfile, record_header_offset);
         jak_offset_t root_object_header_offset = memfile_tell(&memfile);
@@ -407,22 +407,22 @@ bool jak_archive_from_model(jak_memblock **stream, jak_error *err, jak_column_do
         }
         jak_u64 record_size = memfile_tell(&memfile) - (record_header_offset + sizeof(jak_record_header));
         update_record_header(&memfile, record_header_offset, model, record_size);
-        JAK_optional_call(callback, end_write_record_table);
+        JAK_OPTIONAL_CALL(callback, end_write_record_table);
 
         memfile_shrink(&memfile);
 
-        if (bake_string_id_index) {
+        if (bake_jak_string_id_index) {
                 /* create string id to offset index, and append it to the CARBON file */
-                JAK_optional_call(callback, begin_string_id_index_baking);
-                if (!run_string_id_baking(err, stream)) {
+                JAK_OPTIONAL_CALL(callback, begin_jak_string_id_index_baking);
+                if (!run_jak_string_id_baking(err, stream)) {
                         return false;
                 }
-                JAK_optional_call(callback, end_string_id_index_baking);
+                JAK_OPTIONAL_CALL(callback, end_jak_string_id_index_baking);
         } else {
-                JAK_optional_call(callback, skip_string_id_index_baking);
+                JAK_OPTIONAL_CALL(callback, skip_jak_string_id_index_baking);
         }
 
-        JAK_optional_call(callback, end_create_from_model)
+        JAK_OPTIONAL_CALL(callback, end_create_from_model)
 
         return true;
 }
@@ -458,7 +458,7 @@ bool jak_archive_load(jak_memblock **stream, FILE *file)
 bool jak_archive_print(FILE *file, jak_error *err, jak_memblock *stream)
 {
         struct jak_memfile memfile;
-        memfile_open(&memfile, stream, READ_ONLY);
+        memfile_open(&memfile, stream, JAK_READ_ONLY);
         if (memfile_size(&memfile)
             < sizeof(jak_archive_header) + sizeof(jak_string_table_header) +
               sizeof(jak_object_header)) {
@@ -515,8 +515,8 @@ static const char *array_value_type_to_string(jak_error *err, jak_archive_field_
 static void
 write_primitive_key_column(struct jak_memfile *memfile, struct jak_vector ofType(jak_archive_field_sid_t) *keys)
 {
-        jak_archive_field_sid_t *string_ids = vec_all(keys, jak_archive_field_sid_t);
-        memfile_write(memfile, string_ids, keys->num_elems * sizeof(jak_archive_field_sid_t));
+        jak_archive_field_sid_t *jak_string_ids = vec_all(keys, jak_archive_field_sid_t);
+        memfile_write(memfile, jak_string_ids, keys->num_elems * sizeof(jak_archive_field_sid_t));
 }
 
 static jak_offset_t skip_var_value_offset_column(struct jak_memfile *memfile, size_t num_keys)
@@ -786,12 +786,12 @@ static bool write_array_props(struct jak_memfile *memfile, jak_error *err, jak_c
                               root_object_header_offset)) {
                 return false;
         }
-        if (!write_array_prop(&offsets->string_arrays,
+        if (!write_array_prop(&offsets->jak_string_arrays,
                               err,
                               memfile,
-                              &columndoc->string_array_prop_keys,
+                              &columndoc->jak_string_array_prop_keys,
                               JAK_FIELD_STRING,
-                              &columndoc->string_array_prop_vals,
+                              &columndoc->jak_string_array_prop_vals,
                               root_object_header_offset)) {
                 return false;
         }
@@ -952,9 +952,9 @@ write_primitive_props(struct jak_memfile *memfile, jak_error *err, jak_column_do
         if (!write_fixed_props(&offsets->strings,
                                err,
                                memfile,
-                               &columndoc->string_prop_keys,
+                               &columndoc->jak_string_prop_keys,
                                JAK_FIELD_STRING,
-                               &columndoc->string_prop_vals)) {
+                               &columndoc->jak_string_prop_vals)) {
                 return false;
         }
         if (!write_var_props(&offsets->objects,
@@ -1091,7 +1091,7 @@ static bool write_object_array_props(struct jak_memfile *memfile, jak_error *err
                                         *column = vec_get(&column_group->columns, k, jak_column_doc_column);
                                 const jak_u32 *array_pos = vec_all(&column->array_positions, jak_u32);
                                 for (size_t m = 0; m < column->array_positions.num_elems; m++) {
-                                        max_pos = JAK_max(max_pos, array_pos[m]);
+                                        max_pos = JAK_MAX(max_pos, array_pos[m]);
                                 }
                         }
                         jak_column_group_header jak_column_group_header =
@@ -1194,7 +1194,7 @@ static void propOffsetsWrite(struct jak_memfile *memfile, const jak_object_flags
         if (flags->bits.has_float_props) {
                 memfile_write(memfile, &prop_offsets->floats, sizeof(jak_offset_t));
         }
-        if (flags->bits.has_string_props) {
+        if (flags->bits.has_jak_string_props) {
                 memfile_write(memfile, &prop_offsets->strings, sizeof(jak_offset_t));
         }
         if (flags->bits.has_object_props) {
@@ -1233,8 +1233,8 @@ static void propOffsetsWrite(struct jak_memfile *memfile, const jak_object_flags
         if (flags->bits.has_float_array_props) {
                 memfile_write(memfile, &prop_offsets->float_arrays, sizeof(jak_offset_t));
         }
-        if (flags->bits.has_string_array_props) {
-                memfile_write(memfile, &prop_offsets->string_arrays, sizeof(jak_offset_t));
+        if (flags->bits.has_jak_string_array_props) {
+                memfile_write(memfile, &prop_offsets->jak_string_arrays, sizeof(jak_offset_t));
         }
         if (flags->bits.has_object_array_props) {
                 memfile_write(memfile, &prop_offsets->object_arrays, sizeof(jak_offset_t));
@@ -1277,7 +1277,7 @@ static void prop_offsets_skip_write(struct jak_memfile *memfile, const jak_objec
         if (flags->bits.has_float_props) {
                 num_skip_offset_bytes++;
         }
-        if (flags->bits.has_string_props) {
+        if (flags->bits.has_jak_string_props) {
                 num_skip_offset_bytes++;
         }
         if (flags->bits.has_object_props) {
@@ -1316,7 +1316,7 @@ static void prop_offsets_skip_write(struct jak_memfile *memfile, const jak_objec
         if (flags->bits.has_float_array_props) {
                 num_skip_offset_bytes++;
         }
-        if (flags->bits.has_string_array_props) {
+        if (flags->bits.has_jak_string_array_props) {
                 num_skip_offset_bytes++;
         }
         if (flags->bits.has_object_array_props) {
@@ -1378,7 +1378,7 @@ static bool __serialize(jak_offset_t *offset, jak_error *err, struct jak_memfile
         propOffsetsWrite(memfile, &flags, &prop_offsets);
 
         memfile_seek(memfile, object_end_offset);
-        JAK_optional_set(offset, next_offset);
+        JAK_OPTIONAL_SET(offset, next_offset);
         return true;
 }
 
@@ -1428,7 +1428,7 @@ static char *record_header_flags_to_string(const jak_record_flags *flags)
         return string;
 }
 
-static bool serialize_string_dic(struct jak_memfile *memfile, jak_error *err, const jak_doc_bulk *context,
+static bool serialize_jak_string_dic(struct jak_memfile *memfile, jak_error *err, const jak_doc_bulk *context,
                                  jak_packer_e compressor)
 {
         jak_string_tab_flags_u flags;
@@ -1436,18 +1436,18 @@ static bool serialize_string_dic(struct jak_memfile *memfile, jak_error *err, co
         jak_string_table_header header;
 
         struct jak_vector ofType (const char *) *strings;
-        struct jak_vector ofType(jak_archive_field_sid_t) *string_ids;
+        struct jak_vector ofType(jak_archive_field_sid_t) *jak_string_ids;
 
-        jak_doc_bulk_get_dic_contents(&strings, &string_ids, context);
+        jak_doc_bulk_get_dic_contents(&strings, &jak_string_ids, context);
 
-        JAK_ASSERT(strings->num_elems == string_ids->num_elems);
+        JAK_ASSERT(strings->num_elems == jak_string_ids->num_elems);
 
         flags.value = 0;
         if (!jak_pack_by_type(err, &strategy, compressor)) {
                 return false;
         }
         jak_u8 flag_bit = jak_pack_flagbit_by_type(compressor);
-        JAK_set_bits(flags.value, flag_bit);
+        JAK_SET_BITS(flags.value, flag_bit);
 
         jak_offset_t header_pos = memfile_tell(memfile);
         memfile_skip(memfile, sizeof(jak_string_table_header));
@@ -1462,11 +1462,11 @@ static bool serialize_string_dic(struct jak_memfile *memfile, jak_error *err, co
                                                                                              - extra_begin_off)};
 
         for (size_t i = 0; i < strings->num_elems; i++) {
-                jak_archive_field_sid_t id = *vec_get(string_ids, i, jak_archive_field_sid_t);
+                jak_archive_field_sid_t id = *vec_get(jak_string_ids, i, jak_archive_field_sid_t);
                 const char *string = *vec_get(strings, i, char *);
 
                 jak_string_entry_header header = {.marker = jak_global_marker_symbols[JAK_MARKER_TYPE_EMBEDDED_UNCOMP_STR]
-                        .symbol, .next_entry_off = 0, .string_id = id, .string_len = strlen(string)};
+                        .symbol, .next_entry_off = 0, .jak_string_id = id, .jak_string_len = strlen(string)};
 
                 jak_offset_t header_pos_off = memfile_tell(memfile);
                 memfile_skip(memfile, sizeof(jak_string_entry_header));
@@ -1488,9 +1488,9 @@ static bool serialize_string_dic(struct jak_memfile *memfile, jak_error *err, co
         memfile_seek(memfile, continue_pos);
 
         vec_drop(strings);
-        vec_drop(string_ids);
+        vec_drop(jak_string_ids);
         free(strings);
-        free(string_ids);
+        free(jak_string_ids);
 
         return jak_pack_drop(err, &strategy);
 }
@@ -1507,7 +1507,7 @@ static void update_file_header(struct jak_memfile *memfile, jak_offset_t record_
         memfile_seek(memfile, 0);
         memcpy(&this_file_header.magic, JAK_CARBON_ARCHIVE_MAGIC, strlen(JAK_CARBON_ARCHIVE_MAGIC));
         this_file_header.root_object_header_offset = record_header_offset;
-        this_file_header.string_id_to_offset_index_offset = 0;
+        this_file_header.jak_string_id_to_offset_index_offset = 0;
         memfile_write(memfile, &this_file_header, sizeof(jak_archive_header));
         memfile_seek(memfile, current_pos);
 }
@@ -1647,8 +1647,8 @@ static bool print_object_array_from_memfile(FILE *file, jak_error *err, struct j
         fprintf(file, "[marker: %c (Object Array)] [nentries: %d] [", header->marker, header->num_entries);
 
         for (size_t i = 0; i < header->num_entries; i++) {
-                jak_archive_field_sid_t string_id = *JAK_MEMFILE_READ_TYPE(memfile, jak_archive_field_sid_t);
-                fprintf(file, "key: %"PRIu64"%s", string_id, i + 1 < header->num_entries ? ", " : "");
+                jak_archive_field_sid_t jak_string_id = *JAK_MEMFILE_READ_TYPE(memfile, jak_archive_field_sid_t);
+                fprintf(file, "key: %"PRIu64"%s", jak_string_id, i + 1 < header->num_entries ? ", " : "");
         }
         fprintf(file, "] [");
         for (size_t i = 0; i < header->num_entries; i++) {
@@ -1748,7 +1748,7 @@ static void print_prop_offsets(FILE *file, const jak_object_flags_u *flags,
         if (flags->bits.has_float_props) {
                 fprintf(file, " floats: 0x%04x", (unsigned) prop_offsets->floats);
         }
-        if (flags->bits.has_string_props) {
+        if (flags->bits.has_jak_string_props) {
                 fprintf(file, " texts: 0x%04x", (unsigned) prop_offsets->strings);
         }
         if (flags->bits.has_object_props) {
@@ -1787,8 +1787,8 @@ static void print_prop_offsets(FILE *file, const jak_object_flags_u *flags,
         if (flags->bits.has_float_array_props) {
                 fprintf(file, " floatArrays: 0x%04x", (unsigned) prop_offsets->float_arrays);
         }
-        if (flags->bits.has_string_array_props) {
-                fprintf(file, " textArrays: 0x%04x", (unsigned) prop_offsets->string_arrays);
+        if (flags->bits.has_jak_string_array_props) {
+                fprintf(file, " textArrays: 0x%04x", (unsigned) prop_offsets->jak_string_arrays);
         }
         if (flags->bits.has_object_array_props) {
                 fprintf(file, " objectArrays: 0x%04x", (unsigned) prop_offsets->object_arrays);
@@ -2250,7 +2250,7 @@ static bool print_header_from_memfile(FILE *file, jak_error *err, struct jak_mem
                 "[magic: " JAK_CARBON_ARCHIVE_MAGIC "] [version: %d] [recordOffset: 0x%04x] [string-id-offset-index: 0x%04x]\n",
                 header->version,
                 (unsigned) header->root_object_header_offset,
-                (unsigned) header->string_id_to_offset_index_offset);
+                (unsigned) header->jak_string_id_to_offset_index_offset);
         return true;
 }
 
@@ -2298,9 +2298,9 @@ static bool print_embedded_dic_from_memfile(FILE *file, jak_error *err, struct j
                         offset,
                         header.marker,
                         (size_t) header.next_entry_off,
-                        header.string_id,
-                        header.string_len);
-                jak_pack_print_encoded(err, &strategy, file, memfile, header.string_len);
+                        header.jak_string_id,
+                        header.jak_string_len);
+                jak_pack_print_encoded(err, &strategy, file, memfile, header.jak_string_len);
                 fprintf(file, "\n");
         }
 
@@ -2324,7 +2324,7 @@ static bool print_archive_from_memfile(FILE *file, jak_error *err, struct jak_me
 
 static jak_object_flags_u *get_flags(jak_object_flags_u *flags, jak_column_doc_obj *columndoc)
 {
-        JAK_zero_memory(flags, sizeof(jak_object_flags_u));
+        JAK_ZERO_MEMORY(flags, sizeof(jak_object_flags_u));
         flags->bits.has_null_props = (columndoc->null_prop_keys.num_elems > 0);
         flags->bits.has_bool_props = (columndoc->bool_prop_keys.num_elems > 0);
         flags->bits.has_int8_props = (columndoc->int8_prop_keys.num_elems > 0);
@@ -2336,7 +2336,7 @@ static jak_object_flags_u *get_flags(jak_object_flags_u *flags, jak_column_doc_o
         flags->bits.has_uint32_props = (columndoc->uin32_prop_keys.num_elems > 0);
         flags->bits.has_uint64_props = (columndoc->uint64_prop_keys.num_elems > 0);
         flags->bits.has_float_props = (columndoc->float_prop_keys.num_elems > 0);
-        flags->bits.has_string_props = (columndoc->string_prop_keys.num_elems > 0);
+        flags->bits.has_jak_string_props = (columndoc->jak_string_prop_keys.num_elems > 0);
         flags->bits.has_object_props = (columndoc->obj_prop_keys.num_elems > 0);
         flags->bits.has_null_array_props = (columndoc->null_array_prop_keys.num_elems > 0);
         flags->bits.has_bool_array_props = (columndoc->bool_array_prop_keys.num_elems > 0);
@@ -2349,7 +2349,7 @@ static jak_object_flags_u *get_flags(jak_object_flags_u *flags, jak_column_doc_o
         flags->bits.has_uint32_array_props = (columndoc->uint32_array_prop_keys.num_elems > 0);
         flags->bits.has_uint64_array_props = (columndoc->uint64_array_prop_keys.num_elems > 0);
         flags->bits.has_float_array_props = (columndoc->float_array_prop_keys.num_elems > 0);
-        flags->bits.has_string_array_props = (columndoc->string_array_prop_keys.num_elems > 0);
+        flags->bits.has_jak_string_array_props = (columndoc->jak_string_array_prop_keys.num_elems > 0);
         flags->bits.has_object_array_props = (columndoc->obj_array_props.num_elems > 0);
         //JAK_ASSERT(flags->value != 0);
         return flags;
@@ -2362,8 +2362,8 @@ static bool read_stringtable(jak_string_table *table, jak_error *err, FILE *disk
 static bool read_record(jak_record_header *header_read, jak_archive *archive, FILE *disk_file,
                         jak_offset_t record_header_offset);
 
-static bool read_string_id_to_offset_index(jak_error *err, jak_archive *archive, const char *file_path,
-                                           jak_offset_t string_id_to_offset_index_offset);
+static bool read_jak_string_id_to_offset_index(jak_error *err, jak_archive *archive, const char *file_path,
+                                           jak_offset_t jak_string_id_to_offset_index_offset);
 
 bool jak_archive_open(jak_archive *out, const char *file_path)
 {
@@ -2374,17 +2374,17 @@ bool jak_archive_open(jak_archive *out, const char *file_path)
         out->disk_file_path = strdup(file_path);
         disk_file = fopen(out->disk_file_path, "r");
         if (!disk_file) {
-                struct jak_string sb;
+                jak_string sb;
                 char cwd[PATH_MAX];
-                string_create(&sb);
+                jak_string_create(&sb);
 
-                string_add(&sb, "File '");
-                string_add(&sb, file_path);
-                string_add(&sb, "' not found in current working directory ('");
-                string_add(&sb, getcwd(cwd, sizeof(cwd)));
-                string_add(&sb, "')");
-                JAK_ERROR_WDETAILS(&out->err, JAK_ERR_FOPEN_FAILED, string_cstr(&sb));
-                string_drop(&sb);
+                jak_string_add(&sb, "File '");
+                jak_string_add(&sb, file_path);
+                jak_string_add(&sb, "' not found in current working directory ('");
+                jak_string_add(&sb, getcwd(cwd, sizeof(cwd)));
+                jak_string_add(&sb, "')");
+                JAK_ERROR_WDETAILS(&out->err, JAK_ERR_FOPEN_FAILED, jak_string_cstr(&sb));
+                jak_string_drop(&sb);
                 return false;
         } else {
                 jak_archive_header header;
@@ -2398,12 +2398,12 @@ bool jak_archive_open(jak_archive *out, const char *file_path)
                                 JAK_ERROR_PRINT(JAK_ERR_FORMATVERERR);
                                 return false;
                         } else {
-                                out->query_index_string_id_to_offset = NULL;
-                                out->string_id_cache = NULL;
+                                out->query_index_jak_string_id_to_offset = NULL;
+                                out->jak_string_id_cache = NULL;
 
                                 jak_record_header jak_record_header;
 
-                                if ((status = read_stringtable(&out->string_table, &out->err, disk_file)) != true) {
+                                if ((status = read_stringtable(&out->jak_string_table, &out->err, disk_file)) != true) {
                                         return status;
                                 }
                                 if ((status = read_record(&jak_record_header,
@@ -2413,12 +2413,12 @@ bool jak_archive_open(jak_archive *out, const char *file_path)
                                         return status;
                                 }
 
-                                if (header.string_id_to_offset_index_offset != 0) {
+                                if (header.jak_string_id_to_offset_index_offset != 0) {
                                         jak_error err;
-                                        if ((status = read_string_id_to_offset_index(&err,
+                                        if ((status = read_jak_string_id_to_offset_index(&err,
                                                                                      out,
                                                                                      file_path,
-                                                                                     header.string_id_to_offset_index_offset)) !=
+                                                                                     header.jak_string_id_to_offset_index_offset)) !=
                                             true) {
                                                 JAK_ERROR_PRINT(err.code);
                                                 return status;
@@ -2433,14 +2433,14 @@ bool jak_archive_open(jak_archive *out, const char *file_path)
 
                                 fclose(disk_file);
 
-                                size_t string_table_size = header.root_object_header_offset - data_start;
+                                size_t jak_string_table_size = header.root_object_header_offset - data_start;
                                 size_t record_table_size = jak_record_header.record_size;
-                                size_t string_id_index = file_size - header.string_id_to_offset_index_offset;
+                                size_t jak_string_id_index = file_size - header.jak_string_id_to_offset_index_offset;
 
-                                out->info.string_table_size = string_table_size;
+                                out->info.jak_string_table_size = jak_string_table_size;
                                 out->info.record_table_size = record_table_size;
-                                out->info.num_embeddded_strings = out->string_table.num_embeddded_strings;
-                                out->info.string_id_index_size = string_id_index;
+                                out->info.num_embeddded_strings = out->jak_string_table.num_embeddded_strings;
+                                out->info.jak_string_id_index_size = jak_string_id_index;
                                 out->default_query = JAK_MALLOC(sizeof(jak_archive_query));
                                 jak_query_create(out->default_query, out);
 
@@ -2463,7 +2463,7 @@ bool jak_archive_close(jak_archive *archive)
 {
         JAK_ERROR_IF_NULL(archive);
         jak_archive_drop_indexes(archive);
-        jak_archive_drop_query_string_id_cache(archive);
+        jak_archive_drop_query_jak_string_id_cache(archive);
         free(archive->disk_file_path);
         jak_memblock_drop(archive->record_table.record_db);
         jak_query_drop(archive->default_query);
@@ -2473,9 +2473,9 @@ bool jak_archive_close(jak_archive *archive)
 
 bool jak_archive_drop_indexes(jak_archive *archive)
 {
-        if (archive->query_index_string_id_to_offset) {
-                jak_query_drop_index_string_id_to_offset(archive->query_index_string_id_to_offset);
-                archive->query_index_string_id_to_offset = NULL;
+        if (archive->query_index_jak_string_id_to_offset) {
+                jak_query_drop_index_jak_string_id_to_offset(archive->query_index_jak_string_id_to_offset);
+                archive->query_index_jak_string_id_to_offset = NULL;
         }
         return true;
 }
@@ -2484,14 +2484,14 @@ bool jak_archive_query_run(jak_archive_query *query, jak_archive *archive)
 {
         if (jak_query_create(query, archive)) {
                 bool has_index = false;
-                jak_archive_has_query_index_string_id_to_offset(&has_index, archive);
+                jak_archive_has_query_index_jak_string_id_to_offset(&has_index, archive);
                 if (!has_index) {
-                        jak_query_create_index_string_id_to_offset(&archive->query_index_string_id_to_offset, query);
+                        jak_query_create_index_jak_string_id_to_offset(&archive->query_index_jak_string_id_to_offset, query);
                 }
                 bool has_cache = false;
-                jak_archive_hash_query_string_id_cache(&has_cache, archive);
+                jak_archive_hash_query_jak_string_id_cache(&has_cache, archive);
                 if (!has_cache) {
-                        jak_string_id_cache_create_lru(&archive->string_id_cache, archive);
+                        jak_string_id_cache_create_lru(&archive->jak_string_id_cache, archive);
                 }
                 return true;
         } else {
@@ -2499,35 +2499,35 @@ bool jak_archive_query_run(jak_archive_query *query, jak_archive *archive)
         }
 }
 
-bool jak_archive_has_query_index_string_id_to_offset(bool *state, jak_archive *archive)
+bool jak_archive_has_query_index_jak_string_id_to_offset(bool *state, jak_archive *archive)
 {
         JAK_ERROR_IF_NULL(state)
         JAK_ERROR_IF_NULL(archive)
-        *state = (archive->query_index_string_id_to_offset != NULL);
+        *state = (archive->query_index_jak_string_id_to_offset != NULL);
         return true;
 }
 
-bool jak_archive_hash_query_string_id_cache(bool *has_cache, jak_archive *archive)
+bool jak_archive_hash_query_jak_string_id_cache(bool *has_cache, jak_archive *archive)
 {
         JAK_ERROR_IF_NULL(has_cache)
         JAK_ERROR_IF_NULL(archive)
-        *has_cache = archive->string_id_cache != NULL;
+        *has_cache = archive->jak_string_id_cache != NULL;
         return true;
 }
 
-bool jak_archive_drop_query_string_id_cache(jak_archive *archive)
+bool jak_archive_drop_query_jak_string_id_cache(jak_archive *archive)
 {
         JAK_ERROR_IF_NULL(archive)
-        if (archive->string_id_cache) {
-                jak_string_id_cache_drop(archive->string_id_cache);
-                archive->string_id_cache = NULL;
+        if (archive->jak_string_id_cache) {
+                jak_string_id_cache_drop(archive->jak_string_id_cache);
+                archive->jak_string_id_cache = NULL;
         }
         return true;
 }
 
-struct jak_string_cache *jak_archive_get_query_string_id_cache(jak_archive *archive)
+struct jak_string_cache *jak_archive_get_query_jak_string_id_cache(jak_archive *archive)
 {
-        return archive->string_id_cache;
+        return archive->jak_string_id_cache;
 }
 
 jak_archive_query *jak_archive_query_default(jak_archive *archive)
@@ -2592,7 +2592,7 @@ static bool read_record(jak_record_header *header_read, jak_archive *archive, FI
                 }
 
                 struct jak_memfile memfile;
-                if (memfile_open(&memfile, archive->record_table.record_db, READ_ONLY) != true) {
+                if (memfile_open(&memfile, archive->record_table.record_db, JAK_READ_ONLY) != true) {
                         JAK_ERROR(&archive->err, JAK_ERR_CORRUPTED);
                         status = false;
                 }
@@ -2606,13 +2606,13 @@ static bool read_record(jak_record_header *header_read, jak_archive *archive, FI
         }
 }
 
-static bool read_string_id_to_offset_index(jak_error *err, jak_archive *archive, const char *file_path,
-                                           jak_offset_t string_id_to_offset_index_offset)
+static bool read_jak_string_id_to_offset_index(jak_error *err, jak_archive *archive, const char *file_path,
+                                           jak_offset_t jak_string_id_to_offset_index_offset)
 {
-        return jak_query_index_id_to_offset_deserialize(&archive->query_index_string_id_to_offset,
+        return jak_query_index_id_to_offset_deserialize(&archive->query_index_jak_string_id_to_offset,
                                                         err,
                                                         file_path,
-                                                        string_id_to_offset_index_offset);
+                                                        jak_string_id_to_offset_index_offset);
 }
 
 

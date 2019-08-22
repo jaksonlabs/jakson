@@ -37,7 +37,7 @@ struct trace_stats {
         size_t num_free_calls;
         size_t total_size;
         struct jak_vector ofType(size_t) *malloc_sizes;
-        struct spinlock *spinlock;
+        jak_spinlock *spinlock;
         FILE *statistics_file;
         timestamp_t startup_timestamp;
 };
@@ -186,8 +186,8 @@ static void invoke_clone(jak_allocator *dst, const jak_allocator *self);
 if (!global_trace_stats.malloc_sizes) {                                                                                \
     global_trace_stats.malloc_sizes = malloc(sizeof(struct jak_vector));                                                    \
     vec_create(global_trace_stats.malloc_sizes, &default_alloc, sizeof(size_t), 1000000);                       \
-    global_trace_stats.spinlock = jak_alloc_malloc(&default_alloc, sizeof(struct spinlock));                            \
-    spin_init(global_trace_stats.spinlock);                                                                 \
+    global_trace_stats.spinlock = jak_alloc_malloc(&default_alloc, sizeof(jak_spinlock));                            \
+    jak_spinlock_init(global_trace_stats.spinlock);                                                                 \
     global_trace_stats.statistics_file = fopen("trace-alloc-stats.csv", "a");                                          \
     fprintf(global_trace_stats.statistics_file,                                                                        \
             "system_time;num_alloc_calls;num_realloc_calls;num_free_calls;memory_in_use\n");                           \
@@ -226,7 +226,7 @@ static void *invoke_malloc(jak_allocator *self, size_t size)
 {
         JAK_UNUSED(self);
 
-        spin_acquire(global_trace_stats.spinlock);
+        jak_spinlock_acquire(global_trace_stats.spinlock);
 
         jak_allocator default_alloc;
         jak_alloc_create_std(&default_alloc);
@@ -260,7 +260,7 @@ static void *invoke_malloc(jak_allocator *self, size_t size)
 
         WRITE_STATS_FILE();
 
-        spin_release(global_trace_stats.spinlock);
+        jak_spinlock_release(global_trace_stats.spinlock);
 
         return result;
 }
@@ -269,7 +269,7 @@ static void *invoke_realloc(jak_allocator *self, void *ptr, size_t size)
 {
         JAK_UNUSED(self);
 
-        spin_acquire(global_trace_stats.spinlock);
+        jak_spinlock_acquire(global_trace_stats.spinlock);
 
         jak_allocator default_alloc;
         jak_alloc_create_std(&default_alloc);
@@ -293,13 +293,13 @@ static void *invoke_realloc(jak_allocator *self, void *ptr, size_t size)
 
         if (size <= page_capacity) {
                 *(size_t *) (ptr - 2 * sizeof(size_t)) = size;
-                spin_release(global_trace_stats.spinlock);
+                jak_spinlock_release(global_trace_stats.spinlock);
                 return ptr;
         } else {
                 void *page_ptr = ptr - 2 * sizeof(size_t);
                 free(page_ptr);
                 void *result = alloc_register(size);
-                spin_release(global_trace_stats.spinlock);
+                jak_spinlock_release(global_trace_stats.spinlock);
                 return result;
         }
 }
@@ -308,7 +308,7 @@ static void invoke_free(jak_allocator *self, void *ptr)
 {
         JAK_UNUSED(self);
 
-        spin_acquire(global_trace_stats.spinlock);
+        jak_spinlock_acquire(global_trace_stats.spinlock);
 
         jak_allocator default_alloc;
         jak_alloc_create_std(&default_alloc);
@@ -329,7 +329,7 @@ static void invoke_free(jak_allocator *self, void *ptr)
 
         free(page_ptr);
 
-        spin_release(global_trace_stats.spinlock);
+        jak_spinlock_release(global_trace_stats.spinlock);
 }
 
 static void invoke_clone(jak_allocator *dst, const jak_allocator *self)

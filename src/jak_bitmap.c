@@ -27,7 +27,7 @@ bool jak_bitmap_create(jak_bitmap *bitmap, jak_u16 num_bits)
 
         jak_allocator alloc;
         jak_alloc_create_std(&alloc);
-        vec_create(&bitmap->data, &alloc, sizeof(jak_u32), ceil(num_bits / (double) JAK_bit_num_of(jak_u32)));
+        vec_create(&bitmap->data, &alloc, sizeof(jak_u32), ceil(num_bits / (double) JAK_BIT_NUM_OF(jak_u32)));
         size_t cap = vec_capacity(&bitmap->data);
         jak_u32 zero = 0;
         vec_repeated_push(&bitmap->data, &zero, cap);
@@ -64,14 +64,14 @@ bool jak_bitmap_clear(jak_bitmap *bitset)
 bool jak_bitmap_set(jak_bitmap *bitset, jak_u16 bit_position, bool on)
 {
         JAK_ERROR_IF_NULL(bitset)
-        size_t block_pos = floor(bit_position / (double) JAK_bit_num_of(jak_u32));
-        size_t block_bit = bit_position % JAK_bit_num_of(jak_u32);
+        size_t block_pos = floor(bit_position / (double) JAK_BIT_NUM_OF(jak_u32));
+        size_t block_bit = bit_position % JAK_BIT_NUM_OF(jak_u32);
         jak_u32 block = *vec_get(&bitset->data, block_pos, jak_u32);
-        jak_u32 mask = JAK_set_bit(block_bit);
+        jak_u32 mask = JAK_SET_BIT(block_bit);
         if (on) {
-                JAK_set_bits(block, mask);
+                JAK_SET_BITS(block, mask);
         } else {
-                JAK_unset_bits(block, mask);
+                JAK_UNSET_BITS(block, mask);
         }
         vec_set(&bitset->data, block_pos, &block);
         return true;
@@ -80,10 +80,10 @@ bool jak_bitmap_set(jak_bitmap *bitset, jak_u16 bit_position, bool on)
 bool jak_bitmap_get(jak_bitmap *bitset, jak_u16 bit_position)
 {
         JAK_ERROR_IF_NULL(bitset)
-        size_t block_pos = floor(bit_position / (double) JAK_bit_num_of(jak_u32));
-        size_t block_bit = bit_position % JAK_bit_num_of(jak_u32);
+        size_t block_pos = floor(bit_position / (double) JAK_BIT_NUM_OF(jak_u32));
+        size_t block_bit = bit_position % JAK_BIT_NUM_OF(jak_u32);
         jak_u32 block = *vec_get(&bitset->data, block_pos, jak_u32);
-        jak_u32 mask = JAK_set_bit(block_bit);
+        jak_u32 mask = JAK_SET_BIT(block_bit);
         return ((mask & block) >> bit_position) == true;
 }
 

@@ -29,7 +29,7 @@ bool jak_opt_manager_create(jak_command_opt_mgr *manager, char *module_name, cha
         manager->module_desc = module_desc ? strdup(module_desc) : NULL;
         manager->policy = policy;
         manager->fallback = fallback;
-        JAK_check_success(vec_create(&manager->groups, NULL, sizeof(jak_command_opt_group), 5));
+        JAK_CHECK_SUCCESS(vec_create(&manager->groups, NULL, sizeof(jak_command_opt_group), 5));
         return true;
 }
 
@@ -44,11 +44,11 @@ bool jak_opt_manager_drop(jak_command_opt_mgr *manager)
                         free(option->opt_desc);
                         free(option->opt_manfile);
                 }
-                JAK_check_success(vec_drop(&cmdGroup->cmd_options));
+                JAK_CHECK_SUCCESS(vec_drop(&cmdGroup->cmd_options));
                 free(cmdGroup->desc);
         }
 
-        JAK_check_success(vec_drop(&manager->groups));
+        JAK_CHECK_SUCCESS(vec_drop(&manager->groups));
         free(manager->module_name);
         if (manager->module_desc) {
                 free(manager->module_desc);
@@ -88,7 +88,7 @@ bool jak_opt_manager_create_group(jak_command_opt_group **group, const char *des
         JAK_ERROR_IF_NULL(manager)
         jak_command_opt_group *cmdGroup = vec_new_and_get(&manager->groups, jak_command_opt_group);
         cmdGroup->desc = strdup(desc);
-        JAK_check_success(vec_create(&cmdGroup->cmd_options, NULL, sizeof(jak_command_opt), 10));
+        JAK_CHECK_SUCCESS(vec_create(&cmdGroup->cmd_options, NULL, sizeof(jak_command_opt), 10));
         *group = cmdGroup;
         return true;
 }

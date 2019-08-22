@@ -46,28 +46,28 @@ bool jak_carbon_printer_drop(jak_carbon_printer *printer)
         return true;
 }
 
-bool jak_carbon_printer_begin(jak_carbon_printer *printer, struct jak_string *str)
+bool jak_carbon_printer_begin(jak_carbon_printer *printer, jak_string *str)
 {
         JAK_ERROR_IF_NULL(printer->record_begin);
         printer->record_begin(printer, str);
         return true;
 }
 
-bool jak_carbon_printer_end(jak_carbon_printer *printer, struct jak_string *str)
+bool jak_carbon_printer_end(jak_carbon_printer *printer, jak_string *str)
 {
         JAK_ERROR_IF_NULL(printer->record_end);
         printer->record_end(printer, str);
         return true;
 }
 
-bool jak_carbon_printer_header_begin(jak_carbon_printer *printer, struct jak_string *str)
+bool jak_carbon_printer_header_begin(jak_carbon_printer *printer, jak_string *str)
 {
         JAK_ERROR_IF_NULL(printer->meta_begin);
         printer->meta_begin(printer, str);
         return true;
 }
 
-bool jak_carbon_printer_header_contents(jak_carbon_printer *printer, struct jak_string *str,
+bool jak_carbon_printer_header_contents(jak_carbon_printer *printer, jak_string *str,
                                     int key_type, const void *key, jak_u64 key_length,
                                     jak_u64 rev)
 {
@@ -76,112 +76,112 @@ bool jak_carbon_printer_header_contents(jak_carbon_printer *printer, struct jak_
         return true;
 }
 
-bool jak_carbon_printer_header_end(jak_carbon_printer *printer, struct jak_string *str)
+bool jak_carbon_printer_header_end(jak_carbon_printer *printer, jak_string *str)
 {
         JAK_ERROR_IF_NULL(printer->meta_end);
         printer->meta_end(printer, str);
         return true;
 }
 
-bool jak_carbon_printer_payload_begin(jak_carbon_printer *printer, struct jak_string *str)
+bool jak_carbon_printer_payload_begin(jak_carbon_printer *printer, jak_string *str)
 {
         JAK_ERROR_IF_NULL(printer->doc_begin);
         printer->doc_begin(printer, str);
         return true;
 }
 
-bool jak_carbon_printer_payload_end(jak_carbon_printer *printer, struct jak_string *str)
+bool jak_carbon_printer_payload_end(jak_carbon_printer *printer, jak_string *str)
 {
         JAK_ERROR_IF_NULL(printer->doc_end);
         printer->doc_end(printer, str);
         return true;
 }
 
-bool jak_carbon_printer_empty_record(jak_carbon_printer *printer, struct jak_string *str)
+bool jak_carbon_printer_empty_record(jak_carbon_printer *printer, jak_string *str)
 {
         JAK_ERROR_IF_NULL(printer->empty_record);
         printer->empty_record(printer, str);
         return true;
 }
 
-bool jak_carbon_printer_array_begin(jak_carbon_printer *printer, struct jak_string *str)
+bool jak_carbon_printer_array_begin(jak_carbon_printer *printer, jak_string *str)
 {
         JAK_ERROR_IF_NULL(printer->array_begin);
         printer->array_begin(printer, str);
         return true;
 }
 
-bool jak_carbon_printer_array_end(jak_carbon_printer *printer, struct jak_string *str)
+bool jak_carbon_printer_array_end(jak_carbon_printer *printer, jak_string *str)
 {
         JAK_ERROR_IF_NULL(printer->array_end);
         printer->array_end(printer, str);
         return true;
 }
 
-bool jak_carbon_printer_unit_array_begin(jak_carbon_printer *printer, struct jak_string *str)
+bool jak_carbon_printer_unit_array_begin(jak_carbon_printer *printer, jak_string *str)
 {
         JAK_ERROR_IF_NULL(printer->unit_array_begin);
         printer->unit_array_begin(printer, str);
         return true;
 }
 
-bool jak_carbon_printer_unit_array_end(jak_carbon_printer *printer, struct jak_string *str)
+bool jak_carbon_printer_unit_array_end(jak_carbon_printer *printer, jak_string *str)
 {
         JAK_ERROR_IF_NULL(printer->unit_array_end);
         printer->unit_array_end(printer, str);
         return true;
 }
 
-bool jak_carbon_printer_object_begin(jak_carbon_printer *printer, struct jak_string *str)
+bool jak_carbon_printer_object_begin(jak_carbon_printer *printer, jak_string *str)
 {
         JAK_ERROR_IF_NULL(printer->obj_begin);
         printer->obj_begin(printer, str);
         return true;
 }
 
-bool jak_carbon_printer_object_end(jak_carbon_printer *printer, struct jak_string *str)
+bool jak_carbon_printer_object_end(jak_carbon_printer *printer, jak_string *str)
 {
         JAK_ERROR_IF_NULL(printer->obj_end);
         printer->obj_end(printer, str);
         return true;
 }
 
-bool jak_carbon_printer_null(jak_carbon_printer *printer, struct jak_string *str)
+bool jak_carbon_printer_null(jak_carbon_printer *printer, jak_string *str)
 {
         JAK_ERROR_IF_NULL(printer->const_null);
         printer->const_null(printer, str);
         return true;
 }
 
-bool jak_carbon_printer_true(jak_carbon_printer *printer, bool is_null, struct jak_string *str)
+bool jak_carbon_printer_true(jak_carbon_printer *printer, bool is_null, jak_string *str)
 {
         JAK_ERROR_IF_NULL(printer->const_true);
         printer->const_true(printer, is_null, str);
         return true;
 }
 
-bool jak_carbon_printer_false(jak_carbon_printer *printer, bool is_null, struct jak_string *str)
+bool jak_carbon_printer_false(jak_carbon_printer *printer, bool is_null, jak_string *str)
 {
         JAK_ERROR_IF_NULL(printer->const_false);
         printer->const_false(printer, is_null, str);
         return true;
 }
 
-bool jak_carbon_printer_comma(jak_carbon_printer *printer, struct jak_string *str)
+bool jak_carbon_printer_comma(jak_carbon_printer *printer, jak_string *str)
 {
         JAK_ERROR_IF_NULL(printer->comma);
         printer->comma(printer, str);
         return true;
 }
 
-bool jak_carbon_printer_signed_nonull(jak_carbon_printer *printer, struct jak_string *str, const jak_i64 *value)
+bool jak_carbon_printer_signed_nonull(jak_carbon_printer *printer, jak_string *str, const jak_i64 *value)
 {
         JAK_ERROR_IF_NULL(printer->val_signed);
         printer->val_signed(printer, str, value);
         return true;
 }
 
-bool jak_carbon_printer_unsigned_nonull(jak_carbon_printer *printer, struct jak_string *str, const jak_u64 *value)
+bool jak_carbon_printer_unsigned_nonull(jak_carbon_printer *printer, jak_string *str, const jak_u64 *value)
 {
         JAK_ERROR_IF_NULL(printer->val_unsigned);
         printer->val_unsigned(printer, str, value);
@@ -202,68 +202,68 @@ bool jak_carbon_printer_unsigned_nonull(jak_carbon_printer *printer, struct jak_
         status;                                                                                                        \
 })
 
-bool jak_carbon_printer_u8_or_null(jak_carbon_printer *printer, struct jak_string *str, jak_u8 value)
+bool jak_carbon_printer_u8_or_null(jak_carbon_printer *printer, jak_string *str, jak_u8 value)
 {
         return delegate_print_call(printer, str, value, is_null_u8, jak_carbon_printer_unsigned_nonull, jak_u64);
 }
 
-bool jak_carbon_printer_u16_or_null(jak_carbon_printer *printer, struct jak_string *str, jak_u16 value)
+bool jak_carbon_printer_u16_or_null(jak_carbon_printer *printer, jak_string *str, jak_u16 value)
 {
         return delegate_print_call(printer, str, value, is_null_u16, jak_carbon_printer_unsigned_nonull, jak_u64);
 }
 
-bool jak_carbon_printer_u32_or_null(jak_carbon_printer *printer, struct jak_string *str, jak_u32 value)
+bool jak_carbon_printer_u32_or_null(jak_carbon_printer *printer, jak_string *str, jak_u32 value)
 {
         return delegate_print_call(printer, str, value, is_null_u32, jak_carbon_printer_unsigned_nonull, jak_u64);
 }
 
-bool jak_carbon_printer_u64_or_null(jak_carbon_printer *printer, struct jak_string *str, jak_u64 value)
+bool jak_carbon_printer_u64_or_null(jak_carbon_printer *printer, jak_string *str, jak_u64 value)
 {
         return delegate_print_call(printer, str, value, is_null_u64, jak_carbon_printer_unsigned_nonull, jak_u64);
 }
 
-bool jak_carbon_printer_i8_or_null(jak_carbon_printer *printer, struct jak_string *str, jak_i8 value)
+bool jak_carbon_printer_i8_or_null(jak_carbon_printer *printer, jak_string *str, jak_i8 value)
 {
         return delegate_print_call(printer, str, value, is_null_i8, jak_carbon_printer_signed_nonull, jak_i64);
 }
 
-bool jak_carbon_printer_i16_or_null(jak_carbon_printer *printer, struct jak_string *str, jak_i16 value)
+bool jak_carbon_printer_i16_or_null(jak_carbon_printer *printer, jak_string *str, jak_i16 value)
 {
         return delegate_print_call(printer, str, value, is_null_i16, jak_carbon_printer_signed_nonull, jak_i64);
 }
 
-bool jak_carbon_printer_i32_or_null(jak_carbon_printer *printer, struct jak_string *str, jak_i32 value)
+bool jak_carbon_printer_i32_or_null(jak_carbon_printer *printer, jak_string *str, jak_i32 value)
 {
         return delegate_print_call(printer, str, value, is_null_i32, jak_carbon_printer_signed_nonull, jak_i64);
 }
 
-bool jak_carbon_printer_i64_or_null(jak_carbon_printer *printer, struct jak_string *str, jak_i64 value)
+bool jak_carbon_printer_i64_or_null(jak_carbon_printer *printer, jak_string *str, jak_i64 value)
 {
         return delegate_print_call(printer, str, value, is_null_i64, jak_carbon_printer_signed_nonull, jak_i64);
 }
 
-bool jak_carbon_printer_float(jak_carbon_printer *printer, struct jak_string *str, const float *value)
+bool jak_carbon_printer_float(jak_carbon_printer *printer, jak_string *str, const float *value)
 {
         JAK_ERROR_IF_NULL(printer->val_float);
         printer->val_float(printer, str, value);
         return true;
 }
 
-bool jak_carbon_printer_string(jak_carbon_printer *printer, struct jak_string *str, const char *value, jak_u64 strlen)
+bool jak_carbon_printer_string(jak_carbon_printer *printer, jak_string *str, const char *value, jak_u64 strlen)
 {
         JAK_ERROR_IF_NULL(printer->val_string);
         printer->val_string(printer, str, value, strlen);
         return true;
 }
 
-bool jak_carbon_printer_binary(jak_carbon_printer *printer, struct jak_string *str, const jak_carbon_binary *binary)
+bool jak_carbon_printer_binary(jak_carbon_printer *printer, jak_string *str, const jak_carbon_binary *binary)
 {
         JAK_ERROR_IF_NULL(printer->val_binary);
         printer->val_binary(printer, str, binary);
         return true;
 }
 
-bool jak_carbon_printer_prop_null(jak_carbon_printer *printer, struct jak_string *str,
+bool jak_carbon_printer_prop_null(jak_carbon_printer *printer, jak_string *str,
                               const char *key_name, jak_u64 key_len)
 {
         JAK_ERROR_IF_NULL(printer->prop_null);
@@ -271,7 +271,7 @@ bool jak_carbon_printer_prop_null(jak_carbon_printer *printer, struct jak_string
         return true;
 }
 
-bool jak_carbon_printer_prop_true(jak_carbon_printer *printer, struct jak_string *str,
+bool jak_carbon_printer_prop_true(jak_carbon_printer *printer, jak_string *str,
                               const char *key_name, jak_u64 key_len)
 {
         JAK_ERROR_IF_NULL(printer->prop_true);
@@ -279,7 +279,7 @@ bool jak_carbon_printer_prop_true(jak_carbon_printer *printer, struct jak_string
         return true;
 }
 
-bool jak_carbon_printer_prop_false(jak_carbon_printer *printer, struct jak_string *str,
+bool jak_carbon_printer_prop_false(jak_carbon_printer *printer, jak_string *str,
                                const char *key_name, jak_u64 key_len)
 {
         JAK_ERROR_IF_NULL(printer->prop_false);
@@ -287,7 +287,7 @@ bool jak_carbon_printer_prop_false(jak_carbon_printer *printer, struct jak_strin
         return true;
 }
 
-bool jak_carbon_printer_prop_signed(jak_carbon_printer *printer, struct jak_string *str,
+bool jak_carbon_printer_prop_signed(jak_carbon_printer *printer, jak_string *str,
                                 const char *key_name, jak_u64 key_len, const jak_i64 *value)
 {
         JAK_ERROR_IF_NULL(printer->prop_signed);
@@ -295,7 +295,7 @@ bool jak_carbon_printer_prop_signed(jak_carbon_printer *printer, struct jak_stri
         return true;
 }
 
-bool jak_carbon_printer_prop_unsigned(jak_carbon_printer *printer, struct jak_string *str,
+bool jak_carbon_printer_prop_unsigned(jak_carbon_printer *printer, jak_string *str,
                                   const char *key_name, jak_u64 key_len, const jak_u64 *value)
 {
         JAK_ERROR_IF_NULL(printer->prop_unsigned);
@@ -303,7 +303,7 @@ bool jak_carbon_printer_prop_unsigned(jak_carbon_printer *printer, struct jak_st
         return true;
 }
 
-bool jak_carbon_printer_prop_float(jak_carbon_printer *printer, struct jak_string *str,
+bool jak_carbon_printer_prop_float(jak_carbon_printer *printer, jak_string *str,
                                const char *key_name, jak_u64 key_len, const float *value)
 {
         JAK_ERROR_IF_NULL(printer->prop_float);
@@ -311,7 +311,7 @@ bool jak_carbon_printer_prop_float(jak_carbon_printer *printer, struct jak_strin
         return true;
 }
 
-bool jak_carbon_printer_prop_string(jak_carbon_printer *printer, struct jak_string *str,
+bool jak_carbon_printer_prop_string(jak_carbon_printer *printer, jak_string *str,
                                 const char *key_name, jak_u64 key_len, const char *value, jak_u64 strlen)
 {
         JAK_ERROR_IF_NULL(printer->prop_string);
@@ -319,7 +319,7 @@ bool jak_carbon_printer_prop_string(jak_carbon_printer *printer, struct jak_stri
         return true;
 }
 
-bool jak_carbon_printer_prop_binary(jak_carbon_printer *printer, struct jak_string *str,
+bool jak_carbon_printer_prop_binary(jak_carbon_printer *printer, jak_string *str,
                                 const char *key_name, jak_u64 key_len, const jak_carbon_binary *binary)
 {
         JAK_ERROR_IF_NULL(printer->prop_binary);
@@ -327,7 +327,7 @@ bool jak_carbon_printer_prop_binary(jak_carbon_printer *printer, struct jak_stri
         return true;
 }
 
-bool jak_carbon_printer_array_prop_name(jak_carbon_printer *printer, struct jak_string *str,
+bool jak_carbon_printer_array_prop_name(jak_carbon_printer *printer, jak_string *str,
                                     const char *key_name, jak_u64 key_len)
 {
         JAK_ERROR_IF_NULL(printer->array_prop_name);
@@ -335,7 +335,7 @@ bool jak_carbon_printer_array_prop_name(jak_carbon_printer *printer, struct jak_
         return true;
 }
 
-bool jak_carbon_printer_column_prop_name(jak_carbon_printer *printer, struct jak_string *str,
+bool jak_carbon_printer_column_prop_name(jak_carbon_printer *printer, jak_string *str,
                                      const char *key_name, jak_u64 key_len)
 {
         JAK_ERROR_IF_NULL(printer->column_prop_name);
@@ -343,7 +343,7 @@ bool jak_carbon_printer_column_prop_name(jak_carbon_printer *printer, struct jak
         return true;
 }
 
-bool jak_carbon_printer_object_prop_name(jak_carbon_printer *printer, struct jak_string *str,
+bool jak_carbon_printer_object_prop_name(jak_carbon_printer *printer, jak_string *str,
                                      const char *key_name, jak_u64 key_len)
 {
         JAK_ERROR_IF_NULL(printer->obj_prop_name);
@@ -351,7 +351,7 @@ bool jak_carbon_printer_object_prop_name(jak_carbon_printer *printer, struct jak
         return true;
 }
 
-bool jak_carbon_printer_print_object(jak_carbon_object_it *it, jak_carbon_printer *printer, struct jak_string *builder)
+bool jak_carbon_printer_print_object(jak_carbon_object_it *it, jak_carbon_printer *printer, jak_string *builder)
 {
         JAK_ASSERT(it);
         JAK_ASSERT(printer);
@@ -412,7 +412,7 @@ bool jak_carbon_printer_print_object(jak_carbon_object_it *it, jak_carbon_printe
                                 break;
                         case JAK_CARBON_FIELD_TYPE_STRING: {
                                 jak_u64 strlen;
-                                const char *value = jak_carbon_object_it_string_value(&strlen, it);
+                                const char *value = jak_carbon_object_it_jak_string_value(&strlen, it);
                                 jak_carbon_printer_prop_string(printer, builder, key_name, key_len, value, strlen);
                         }
                                 break;
@@ -464,7 +464,7 @@ bool jak_carbon_printer_print_object(jak_carbon_object_it *it, jak_carbon_printe
         return true;
 }
 
-bool jak_carbon_printer_print_array(jak_carbon_array_it *it, jak_carbon_printer *printer, struct jak_string *builder,
+bool jak_carbon_printer_print_array(jak_carbon_array_it *it, jak_carbon_printer *printer, jak_string *builder,
                                 bool is_record_container)
 {
         JAK_ASSERT(it);
@@ -530,7 +530,7 @@ bool jak_carbon_printer_print_array(jak_carbon_array_it *it, jak_carbon_printer 
                                 break;
                         case JAK_CARBON_FIELD_TYPE_STRING: {
                                 jak_u64 strlen;
-                                const char *value = jak_carbon_array_it_string_value(&strlen, it);
+                                const char *value = jak_carbon_array_it_jak_string_value(&strlen, it);
                                 jak_carbon_printer_string(printer, builder, value, strlen);
                         }
                                 break;
@@ -593,7 +593,7 @@ bool jak_carbon_printer_print_array(jak_carbon_array_it *it, jak_carbon_printer 
         return true;
 }
 
-bool jak_carbon_printer_print_column(jak_carbon_column_it *it, jak_carbon_printer *printer, struct jak_string *builder)
+bool jak_carbon_printer_print_column(jak_carbon_column_it *it, jak_carbon_printer *printer, jak_string *builder)
 {
         JAK_ERROR_IF_NULL(it)
         JAK_ERROR_IF_NULL(printer)

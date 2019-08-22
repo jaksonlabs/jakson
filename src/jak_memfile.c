@@ -18,11 +18,11 @@
 #include <jak_memfile.h>
 #include <jak_uintvar_stream.h>
 
-bool memfile_open(struct jak_memfile *file, jak_memblock *block, enum access_mode mode)
+bool memfile_open(struct jak_memfile *file, jak_memblock *block, jak_access_mode_e mode)
 {
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(block)
-        JAK_zero_memory(file, sizeof(struct jak_memfile))
+        JAK_ZERO_MEMORY(file, sizeof(struct jak_memfile))
         file->memblock = block;
         file->pos = 0;
         file->bit_mode = false;
@@ -51,7 +51,7 @@ bool memfile_seek(struct jak_memfile *file, jak_offset_t pos)
         jak_offset_t file_size = 0;
         jak_memblock_size(&file_size, file->memblock);
         if (JAK_UNLIKELY(pos >= file_size)) {
-                if (file->mode == READ_WRITE) {
+                if (file->mode == JAK_READ_WRITE) {
                         jak_offset_t new_size = pos + 1;
                         jak_memblock_resize(file->memblock, new_size);
                 } else {
@@ -116,7 +116,7 @@ bool memfile_cut(struct jak_memfile *file, size_t how_many_bytes)
         if (how_many_bytes > 0 && block_size > how_many_bytes) {
                 size_t new_block_size = block_size - how_many_bytes;
                 jak_memblock_resize(file->memblock, new_block_size);
-                file->pos = JAK_min(file->pos, new_block_size);
+                file->pos = JAK_MIN(file->pos, new_block_size);
                 return true;
         } else {
                 JAK_ERROR(&file->err, JAK_ERR_ILLEGALARG);
@@ -133,7 +133,7 @@ size_t memfile_remain_size(struct jak_memfile *file)
 bool memfile_shrink(struct jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(file);
-        if (file->mode == READ_WRITE) {
+        if (file->mode == JAK_READ_WRITE) {
                 int status = jak_memblock_shrink(file->memblock);
                 jak_u64 size;
                 jak_memblock_size(&size, file->memblock);
@@ -180,7 +180,7 @@ bool memfile_skip(struct jak_memfile *file, signed_offset_t nbytes)
         jak_memblock_size(&file_size, file->memblock);
 
         if (JAK_UNLIKELY(required_size >= file_size)) {
-                if (file->mode == READ_WRITE) {
+                if (file->mode == JAK_READ_WRITE) {
                         jak_memblock_resize(file->memblock, required_size * 1.7f);
                 } else {
                         JAK_ERROR(&file->err, JAK_ERR_WRITEPROT);
@@ -214,7 +214,7 @@ bool memfile_write(struct jak_memfile *file, const void *data, jak_offset_t nbyt
 {
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(data)
-        if (file->mode == READ_WRITE) {
+        if (file->mode == JAK_READ_WRITE) {
                 if (JAK_LIKELY(nbytes != 0)) {
                         jak_offset_t file_size;
                         jak_memblock_size(&file_size, file->memblock);
@@ -249,7 +249,7 @@ bool memfile_write_zero(struct jak_memfile *file, size_t how_many)
 bool memfile_begin_bit_mode(struct jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(file);
-        if (file->mode == READ_WRITE) {
+        if (file->mode == JAK_READ_WRITE) {
                 file->bit_mode = true;
                 file->current_read_bit = file->current_write_bit = file->bytes_completed = 0;
                 file->bytes_completed = 0;
@@ -278,9 +278,9 @@ bool memfile_write_bit(struct jak_memfile *file, bool flag)
                         char byte = *memfile_read(file, sizeof(char));
                         char mask = 1 << file->current_write_bit;
                         if (flag) {
-                                JAK_set_bits(byte, mask);
+                                JAK_SET_BITS(byte, mask);
                         } else {
-                                JAK_unset_bits(byte, mask);
+                                JAK_UNSET_BITS(byte, mask);
                         }
                         memfile_seek(file, offset);
                         memfile_write(file, &byte, sizeof(char));
@@ -395,7 +395,7 @@ jak_u64 memfile_read_uintvar_stream(jak_u8 *nbytes, struct jak_memfile *memfile)
         jak_u8 nbytes_read;
         jak_u64 result = uintvar_stream_read(&nbytes_read, (uintvar_stream_t) memfile_peek(memfile, sizeof(char)));
         memfile_skip(memfile, nbytes_read);
-        JAK_optional_set(nbytes, nbytes_read);
+        JAK_OPTIONAL_SET(nbytes, nbytes_read);
         return result;
 }
 
@@ -421,7 +421,7 @@ jak_u64 memfile_write_uintvar_stream(jak_u64 *nbytes_moved, struct jak_memfile *
         uintvar_stream_t dst = (uintvar_stream_t) memfile_peek(memfile, sizeof(char));
         uintvar_stream_write(dst, value);
         memfile_skip(memfile, required_blocks);
-        JAK_optional_set(nbytes_moved, shift);
+        JAK_OPTIONAL_SET(nbytes_moved, shift);
         return required_blocks;
 }
 
@@ -481,7 +481,7 @@ bool memfile_end_bit_mode(size_t *num_bytes_written, struct jak_memfile *file)
                 memfile_skip(file, 1);
                 file->bytes_completed++;
         }
-        JAK_optional_set(num_bytes_written, file->bytes_completed);
+        JAK_OPTIONAL_SET(num_bytes_written, file->bytes_completed);
         file->current_write_bit = file->bytes_completed = 0;
         return true;
 }
@@ -493,7 +493,7 @@ void *memfile_current_pos(struct jak_memfile *file, jak_offset_t nbytes)
                 jak_memblock_size(&file_size, file->memblock);
                 jak_offset_t required_size = file->pos + nbytes;
                 if (JAK_UNLIKELY(file->pos + nbytes >= file_size)) {
-                        if (file->mode == READ_WRITE) {
+                        if (file->mode == JAK_READ_WRITE) {
                                 jak_memblock_resize(file->memblock, required_size * 1.7f);
                         } else {
                                 JAK_ERROR(&file->err, JAK_ERR_WRITEPROT);
@@ -507,7 +507,7 @@ void *memfile_current_pos(struct jak_memfile *file, jak_offset_t nbytes)
         }
 }
 
-bool memfile_hexdump(struct jak_string *sb, struct jak_memfile *file)
+bool memfile_hexdump(jak_string *sb, struct jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(sb);
         JAK_ERROR_IF_NULL(file);

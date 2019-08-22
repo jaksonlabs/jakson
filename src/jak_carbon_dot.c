@@ -117,7 +117,7 @@ bool jak_carbon_dot_path_create(jak_carbon_dot_path *path)
         JAK_ERROR_IF_NULL(path)
         jak_error_init(&path->err);
         path->path_len = 0;
-        JAK_zero_memory(&path->nodes, JAK_ARRAY_LENGTH(path->nodes) * sizeof(jak_carbon_dot_node));
+        JAK_ZERO_MEMORY(&path->nodes, JAK_ARRAY_LENGTH(path->nodes) * sizeof(jak_carbon_dot_node));
         return true;
 }
 
@@ -282,7 +282,7 @@ bool jak_carbon_dot_path_drop(jak_carbon_dot_path *path)
         return true;
 }
 
-bool jak_carbon_dot_path_to_str(struct jak_string *sb, jak_carbon_dot_path *path)
+bool jak_carbon_dot_path_to_str(jak_string *sb, jak_carbon_dot_path *path)
 {
         JAK_ERROR_IF_NULL(path)
         for (jak_u32 i = 0; i < path->path_len; i++) {
@@ -293,22 +293,22 @@ bool jak_carbon_dot_path_to_str(struct jak_string *sb, jak_carbon_dot_path *path
                                 bool quotes_required =
                                         empty_str || strings_contains_blank_char(node->identifier.string);
                                 if (quotes_required) {
-                                        string_add_char(sb, '"');
+                                        jak_string_add_char(sb, '"');
                                 }
                                 if (!empty_str) {
-                                        string_add(sb, node->identifier.string);
+                                        jak_string_add(sb, node->identifier.string);
                                 }
                                 if (quotes_required) {
-                                        string_add_char(sb, '"');
+                                        jak_string_add_char(sb, '"');
                                 }
                         }
                                 break;
                         case JAK_DOT_NODE_ARRAY_IDX:
-                                string_add_u32(sb, node->identifier.idx);
+                                jak_string_add_u32(sb, node->identifier.idx);
                                 break;
                 }
                 if (i + 1 < path->path_len) {
-                        string_add_char(sb, '.');
+                        jak_string_add_char(sb, '.');
                 }
         }
         return true;
@@ -318,11 +318,11 @@ bool jak_carbon_dot_path_fprint(FILE *file, jak_carbon_dot_path *path)
 {
         JAK_ERROR_IF_NULL(file);
         JAK_ERROR_IF_NULL(path);
-        struct jak_string sb;
-        string_create(&sb);
+        jak_string sb;
+        jak_string_create(&sb);
         jak_carbon_dot_path_to_str(&sb, path);
-        fprintf(file, "%s", string_cstr(&sb));
-        string_drop(&sb);
+        fprintf(file, "%s", jak_string_cstr(&sb));
+        jak_string_drop(&sb);
         return true;
 }
 

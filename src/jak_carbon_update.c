@@ -533,7 +533,7 @@ bool jak_carbon_update_set_signed_compiled(jak_carbon_revise *context, const jak
         }
 }
 
-bool jak_carbon_update_set_string_compiled(jak_carbon_revise *context, const jak_carbon_dot_path *path,
+bool jak_carbon_update_set_jak_string_compiled(jak_carbon_revise *context, const jak_carbon_dot_path *path,
                                        const char *value)
 {
         // TODO: Implement
@@ -825,10 +825,10 @@ bool carbon_update_one_set_signed_compiled(const jak_carbon_dot_path *path, jak_
         return revision_context_delegate_func(rev_doc, doc, jak_carbon_update_set_signed_compiled, path, value);
 }
 
-bool carbon_update_one_set_string_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc,
+bool carbon_update_one_set_jak_string_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc,
                                            jak_carbon *doc, const char *value)
 {
-        return revision_context_delegate_func(rev_doc, doc, jak_carbon_update_set_string_compiled, path, value);
+        return revision_context_delegate_func(rev_doc, doc, jak_carbon_update_set_jak_string_compiled, path, value);
 }
 
 bool carbon_update_one_set_binary_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc,

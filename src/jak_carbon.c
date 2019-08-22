@@ -109,14 +109,14 @@ bool jak_carbon_create_empty_ex(jak_carbon *doc, jak_carbon_key_e type, jak_u64 
 {
         JAK_ERROR_IF_NULL(doc);
 
-        doc_cap = JAK_max(MIN_DOC_CAPACITY, doc_cap);
+        doc_cap = JAK_MAX(MIN_DOC_CAPACITY, doc_cap);
 
         jak_error_init(&doc->err);
         jak_memblock_create(&doc->memblock, doc_cap);
         jak_memblock_zero_out(doc->memblock);
-        memfile_open(&doc->memfile, doc->memblock, READ_WRITE);
+        memfile_open(&doc->memfile, doc->memblock, JAK_READ_WRITE);
 
-        spin_init(&doc->versioning.write_lock);
+        jak_spinlock_init(&doc->versioning.write_lock);
 
         doc->versioning.commit_lock = false;
         doc->versioning.is_latest = true;
@@ -140,23 +140,23 @@ bool jak_carbon_from_json(jak_carbon *doc, const char *json, jak_carbon_key_e ty
         jak_json_parser_create(&parser);
 
         if (!(jak_json_parse(&data, &status, &parser, json))) {
-                struct jak_string sb;
-                string_create(&sb);
+                jak_string sb;
+                jak_string_create(&sb);
 
                 if (status.token) {
-                        string_add(&sb, status.msg);
-                        string_add(&sb, " but token ");
-                        string_add(&sb, status.token_type_str);
-                        string_add(&sb, " was found in line ");
-                        string_add_u32(&sb, status.token->line);
-                        string_add(&sb, " column ");
-                        string_add_u32(&sb, status.token->column);
+                        jak_string_add(&sb, status.msg);
+                        jak_string_add(&sb, " but token ");
+                        jak_string_add(&sb, status.token_type_str);
+                        jak_string_add(&sb, " was found in line ");
+                        jak_string_add_u32(&sb, status.token->line);
+                        jak_string_add(&sb, " column ");
+                        jak_string_add_u32(&sb, status.token->column);
                 } else {
-                        string_add(&sb, status.msg);
+                        jak_string_add(&sb, status.msg);
                 }
 
-                JAK_ERROR_WDETAILS(err, JAK_ERR_JSONPARSEERR, string_cstr(&sb));
-                string_drop(&sb);
+                JAK_ERROR_WDETAILS(err, JAK_ERR_JSONPARSEERR, jak_string_cstr(&sb));
+                jak_string_drop(&sb);
 
                 return false;
         } else {
@@ -239,7 +239,7 @@ bool jak_carbon_key_unsigned_value(jak_u64 *key, jak_carbon *doc)
         }
 }
 
-const char *jak_carbon_key_string_value(jak_u64 *len, jak_carbon *doc)
+const char *jak_carbon_key_jak_string_value(jak_u64 *len, jak_carbon *doc)
 {
         jak_carbon_key_e type;
         memfile_save_position(&doc->memfile);
@@ -278,11 +278,11 @@ bool jak_carbon_clone(jak_carbon *clone, jak_carbon *doc)
 {
         JAK_ERROR_IF_NULL(clone);
         JAK_ERROR_IF_NULL(doc);
-        JAK_check_success(jak_memblock_cpy(&clone->memblock, doc->memblock));
-        JAK_check_success(memfile_open(&clone->memfile, clone->memblock, READ_WRITE));
-        JAK_check_success(jak_error_init(&clone->err));
+        JAK_CHECK_SUCCESS(jak_memblock_cpy(&clone->memblock, doc->memblock));
+        JAK_CHECK_SUCCESS(memfile_open(&clone->memfile, clone->memblock, JAK_READ_WRITE));
+        JAK_CHECK_SUCCESS(jak_error_init(&clone->err));
 
-        spin_init(&clone->versioning.write_lock);
+        jak_spinlock_init(&clone->versioning.write_lock);
         clone->versioning.commit_lock = false;
         clone->versioning.is_latest = true;
 
@@ -296,22 +296,22 @@ bool jak_carbon_commit_hash(jak_u64 *hash, jak_carbon *doc)
         return true;
 }
 
-bool jak_carbon_to_str(struct jak_string *dst, jak_carbon_printer_impl_e printer, jak_carbon *doc)
+bool jak_carbon_to_str(jak_string *dst, jak_carbon_printer_impl_e printer, jak_carbon *doc)
 {
         JAK_ERROR_IF_NULL(doc);
 
         jak_carbon_printer p;
-        struct jak_string b;
+        jak_string b;
         jak_carbon_key_e key_type;
         jak_u64 key_len;
         jak_u64 rev;
 
-        string_clear(dst);
+        jak_string_clear(dst);
 
         memfile_save_position(&doc->memfile);
 
-        JAK_zero_memory(&p, sizeof(jak_carbon_printer));
-        string_create(&b);
+        JAK_ZERO_MEMORY(&p, sizeof(jak_carbon_printer));
+        jak_string_create(&b);
 
         jak_carbon_commit_hash(&rev, doc);
 
@@ -336,44 +336,44 @@ bool jak_carbon_to_str(struct jak_string *dst, jak_carbon_printer_impl_e printer
         jak_carbon_printer_end(&p, &b);
 
         jak_carbon_printer_drop(&p);
-        string_add(dst, string_cstr(&b));
-        string_drop(&b);
+        jak_string_add(dst, jak_string_cstr(&b));
+        jak_string_drop(&b);
 
         memfile_restore_position(&doc->memfile);
         return true;
 }
 
-const char *jak_carbon_to_json_extended(struct jak_string *dst, jak_carbon *doc)
+const char *jak_carbon_to_json_extended(jak_string *dst, jak_carbon *doc)
 {
         JAK_ERROR_IF_NULL(dst)
         JAK_ERROR_IF_NULL(doc)
         jak_carbon_to_str(dst, JAK_JSON_EXTENDED, doc);
-        return string_cstr(dst);
+        return jak_string_cstr(dst);
 }
 
-const char *jak_carbon_to_json_compact(struct jak_string *dst, jak_carbon *doc)
+const char *jak_carbon_to_json_compact(jak_string *dst, jak_carbon *doc)
 {
         JAK_ERROR_IF_NULL(dst)
         JAK_ERROR_IF_NULL(doc)
         jak_carbon_to_str(dst, JAK_JSON_COMPACT, doc);
-        return string_cstr(dst);
+        return jak_string_cstr(dst);
 }
 
 char *jak_carbon_to_json_extended_dup(jak_carbon *doc)
 {
-        struct jak_string sb;
-        string_create(&sb);
+        jak_string sb;
+        jak_string_create(&sb);
         char *result = strdup(jak_carbon_to_json_extended(&sb, doc));
-        string_drop(&sb);
+        jak_string_drop(&sb);
         return result;
 }
 
 char *jak_carbon_to_json_compact_dup(jak_carbon *doc)
 {
-        struct jak_string sb;
-        string_create(&sb);
+        jak_string sb;
+        jak_string_create(&sb);
         char *result = strdup(jak_carbon_to_json_compact(&sb, doc));
-        string_drop(&sb);
+        jak_string_drop(&sb);
         return result;
 }
 
@@ -398,11 +398,11 @@ bool jak_carbon_print(FILE *file, jak_carbon_printer_impl_e printer, jak_carbon 
         JAK_ERROR_IF_NULL(file);
         JAK_ERROR_IF_NULL(doc);
 
-        struct jak_string builder;
-        string_create(&builder);
+        jak_string builder;
+        jak_string_create(&builder);
         jak_carbon_to_str(&builder, printer, doc);
-        printf("%s\n", string_cstr(&builder));
-        string_drop(&builder);
+        printf("%s\n", jak_string_cstr(&builder));
+        jak_string_drop(&builder);
 
         return true;
 }

@@ -35,12 +35,12 @@ bool jak_carbon_path_evaluator_begin(jak_carbon_path_evaluator *eval, jak_carbon
         JAK_ERROR_IF_NULL(path)
         JAK_ERROR_IF_NULL(doc)
 
-        JAK_zero_memory(eval, sizeof(jak_carbon_path_evaluator));
+        JAK_ZERO_MEMORY(eval, sizeof(jak_carbon_path_evaluator));
         eval->doc = doc;
-        JAK_check_success(jak_error_init(&eval->err));
-        JAK_check_success(jak_carbon_iterator_open(&eval->root_it, eval->doc));
+        JAK_CHECK_SUCCESS(jak_error_init(&eval->err));
+        JAK_CHECK_SUCCESS(jak_carbon_iterator_open(&eval->root_it, eval->doc));
         eval->status = traverse_array(eval, path, 0, &eval->root_it, true);
-        JAK_check_success(jak_carbon_iterator_close(&eval->root_it));
+        JAK_CHECK_SUCCESS(jak_carbon_iterator_close(&eval->root_it));
         return true;
 }
 
@@ -52,10 +52,10 @@ bool jak_carbon_path_evaluator_begin_mutable(jak_carbon_path_evaluator *eval, co
         JAK_ERROR_IF_NULL(context)
 
         eval->doc = context->revised_doc;
-        JAK_check_success(jak_error_init(&eval->err));
-        JAK_check_success(jak_carbon_revise_iterator_open(&eval->root_it, context));
+        JAK_CHECK_SUCCESS(jak_error_init(&eval->err));
+        JAK_CHECK_SUCCESS(jak_carbon_revise_iterator_open(&eval->root_it, context));
         eval->status = traverse_array(eval, path, 0, &eval->root_it, true);
-        JAK_check_success(jak_carbon_iterator_close(&eval->root_it));
+        JAK_CHECK_SUCCESS(jak_carbon_iterator_close(&eval->root_it));
         return true;
 }
 

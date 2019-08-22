@@ -86,7 +86,7 @@ static void iterate_objects(jak_archive *archive, const jak_archive_field_sid_t 
                                               false,
                                               parent_key,
                                               parent_key_array_idx);
-                                JAK_optional_call(visitor,
+                                JAK_OPTIONAL_CALL(visitor,
                                                   after_object_visit,
                                                   archive,
                                                   path_stack,
@@ -96,7 +96,7 @@ static void iterate_objects(jak_archive *archive, const jak_archive_field_sid_t 
                                                   capture);
                         }
                 } else {
-                        JAK_optional_call(visitor, visit_root_object, archive, object_id, capture);
+                        JAK_OPTIONAL_CALL(visitor, visit_root_object, archive, object_id, capture);
                         iterate_props(archive,
                                       &prop_iter,
                                       path_stack,
@@ -126,14 +126,14 @@ static void iterate_objects(jak_archive *archive, const jak_archive_field_sid_t 
                 const built_in_type *values = jak_archive_value_vector_get_##name##_arrays_at(&array_length,        \
                                                                                              prop_idx,                 \
                                                                                              &value_iter);             \
-                JAK_optional_call(visitor, visit_enter_##name##_array_pair, archive, path_stack, this_object_oid, keys[prop_idx],      \
+                JAK_OPTIONAL_CALL(visitor, visit_enter_##name##_array_pair, archive, path_stack, this_object_oid, keys[prop_idx],      \
                               prop_idx, array_length, capture);                                                        \
-                JAK_optional_call(visitor, visit_##name##_array_pair, archive, path_stack, this_object_oid, keys[prop_idx],            \
+                JAK_OPTIONAL_CALL(visitor, visit_##name##_array_pair, archive, path_stack, this_object_oid, keys[prop_idx],            \
                               prop_idx, num_pairs, values, array_length, capture)                                      \
-                JAK_optional_call(visitor, visit_leave_##name##_array_pair, archive, path_stack, this_object_oid, prop_idx, num_pairs, \
+                JAK_OPTIONAL_CALL(visitor, visit_leave_##name##_array_pair, archive, path_stack, this_object_oid, prop_idx, num_pairs, \
                                                                         capture);                                      \
             }                                                                                                          \
-            JAK_optional_call(visitor, visit_leave_##name##_array_pairs, archive, path_stack, this_object_oid, capture);               \
+            JAK_OPTIONAL_CALL(visitor, visit_leave_##name##_array_pairs, archive, path_stack, this_object_oid, capture);               \
         }                                                                                                              \
     } else                                                                                                             \
     {                                                                                                                  \
@@ -147,7 +147,7 @@ static void iterate_objects(jak_archive *archive, const jak_archive_field_sid_t 
 #define SET_NESTED_ARRAY_SWITCH_CASE(name, built_in_type)                                                              \
 {                                                                                                                      \
     const built_in_type *values = jak_archive_column_entry_get_##name(&entry_length, &entry_iter);                  \
-    JAK_optional_call(visitor, visit_object_array_object_property_##name,                                                  \
+    JAK_OPTIONAL_CALL(visitor, visit_object_array_object_property_##name,                                                  \
                   archive, path_stack, this_object_oid, group_key, current_nested_object_id,                           \
                   current_column_name, values, entry_length, capture);                                                 \
 }
@@ -186,7 +186,7 @@ static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
                         jak_archive_value_vector_get_object_id(&this_object_oid, &value_iter);
 
                         for (jak_u32 i = 0; i < num_pairs; i++) {
-                                JAK_optional_call(visitor,
+                                JAK_OPTIONAL_CALL(visitor,
                                                   visit_object_property,
                                                   archive,
                                                   path_stack,
@@ -199,7 +199,7 @@ static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
                                 jak_path_entry e = {.key = keys[i], .idx = 666};
                                 vec_push(path_stack, &e, 1);
                                 //jak_archive_visitor_print_path(stderr, archive, path_stack);
-                                JAK_optional_call(visitor,
+                                JAK_OPTIONAL_CALL(visitor,
                                                   visit_object_array_prop,
                                                   archive,
                                                   path_stack,
@@ -211,7 +211,7 @@ static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
                         }
 
                         if (JAK_UNLIKELY(first_type_group)) {
-                                JAK_optional_call(visitor,
+                                JAK_OPTIONAL_CALL(visitor,
                                                   first_prop_type_group,
                                                   archive,
                                                   path_stack,
@@ -222,7 +222,7 @@ static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
                                                   num_pairs,
                                                   capture);
                         } else {
-                                JAK_optional_call(visitor,
+                                JAK_OPTIONAL_CALL(visitor,
                                                   next_prop_type_group,
                                                   archive,
                                                   path_stack,
@@ -266,7 +266,7 @@ static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
                                                                 jak_archive_value_vector_get_null_arrays(NULL,
                                                                                                          &value_iter);
                                                         for (jak_u32 prop_idx = 0; prop_idx < num_pairs; prop_idx++) {
-                                                                JAK_optional_call(visitor,
+                                                                JAK_OPTIONAL_CALL(visitor,
                                                                                   visit_enter_null_array_pair,
                                                                                   archive,
                                                                                   path_stack,
@@ -275,7 +275,7 @@ static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
                                                                                   prop_idx,
                                                                                   num_values[prop_idx],
                                                                                   capture);
-                                                                JAK_optional_call(visitor,
+                                                                JAK_OPTIONAL_CALL(visitor,
                                                                                   visit_null_array_pair,
                                                                                   archive,
                                                                                   path_stack,
@@ -285,7 +285,7 @@ static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
                                                                                   num_pairs,
                                                                                   num_values[prop_idx],
                                                                                   capture)
-                                                                JAK_optional_call(visitor,
+                                                                JAK_OPTIONAL_CALL(visitor,
                                                                                   visit_leave_null_array_pair,
                                                                                   archive,
                                                                                   path_stack,
@@ -294,7 +294,7 @@ static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
                                                                                   num_pairs,
                                                                                   capture);
                                                         }
-                                                        JAK_optional_call(visitor,
+                                                        JAK_OPTIONAL_CALL(visitor,
                                                                           visit_leave_int8_array_pairs,
                                                                           archive,
                                                                           path_stack,
@@ -345,7 +345,7 @@ static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
                         keys = jak_archive_collection_iter_get_keys(&num_column_groups, &collection_iter);
 
                         bool *skip_groups_by_key = JAK_MALLOC(num_column_groups * sizeof(bool));
-                        JAK_zero_memory(skip_groups_by_key, num_column_groups * sizeof(bool));
+                        JAK_ZERO_MEMORY(skip_groups_by_key, num_column_groups * sizeof(bool));
 
                         if (visitor->before_visit_object_array) {
                                 for (jak_u32 i = 0; i < num_column_groups; i++) {
@@ -378,7 +378,7 @@ static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
                                                 jak_archive_column_group_get_object_ids(&num_column_group_objs,
                                                                                         &group_iter);
                                         bool *skip_objects = JAK_MALLOC(num_column_group_objs * sizeof(bool));
-                                        JAK_zero_memory(skip_objects, num_column_group_objs * sizeof(bool));
+                                        JAK_ZERO_MEMORY(skip_objects, num_column_group_objs * sizeof(bool));
 
                                         if (visitor->before_visit_object_array_objects) {
                                                 visitor->before_visit_object_array_objects(skip_objects,
@@ -418,7 +418,7 @@ static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
                                                             /0/n_citation/0/
                                                          */
 
-                                                        JAK_optional_call(visitor,
+                                                        JAK_OPTIONAL_CALL(visitor,
                                                                           visit_object_array_prop,
                                                                           archive,
                                                                           path_stack,
@@ -667,9 +667,9 @@ bool jak_archive_visit_archive(jak_archive *archive, const jak_archive_visitor_d
 
         if (jak_archive_prop_iter_from_archive(&prop_iter, &archive->err, mask, archive)) {
                 vec_create(&path_stack, NULL, sizeof(jak_path_entry), 100);
-                JAK_optional_call(visitor, before_visit_starts, archive, capture);
+                JAK_OPTIONAL_CALL(visitor, before_visit_starts, archive, capture);
                 iterate_props(archive, &prop_iter, &path_stack, visitor, mask, capture, true, 0, 0);
-                JAK_optional_call(visitor, after_visit_ends, archive, capture);
+                JAK_OPTIONAL_CALL(visitor, after_visit_ends, archive, capture);
                 vec_drop(&path_stack);
                 return true;
         } else {
@@ -688,7 +688,7 @@ void jak_archive_visitor_path_to_string(char path_buffer[2048], jak_archive *arc
         for (jak_u32 i = 0; i < path_stack->num_elems; i++) {
                 const jak_path_entry *entry = vec_get(path_stack, i, jak_path_entry);
                 if (entry->key != 0) {
-                        char *key = jak_query_fetch_string_by_id(query, entry->key);
+                        char *key = jak_query_fetch_jak_string_by_id(query, entry->key);
                         size_t path_len = strlen(path_buffer);
                         sprintf(path_buffer + path_len, "%s%s", key, i + 1 < path_stack->num_elems ? ", " : "");
                         free(key);
@@ -710,7 +710,7 @@ bool jak_archive_visitor_print_path(FILE *file, jak_archive *archive,
         for (jak_u32 i = 0; i < path_stack->num_elems; i++) {
                 const jak_path_entry *entry = vec_get(path_stack, i, jak_path_entry);
                 if (entry->key != 0) {
-                        char *key = jak_query_fetch_string_by_id(query, entry->key);
+                        char *key = jak_query_fetch_jak_string_by_id(query, entry->key);
                         fprintf(file, "%s/", key);
                         free(key);
                 } else {
@@ -740,7 +740,7 @@ bool jak_archive_visitor_path_compare(const struct jak_vector ofType(jak_path_en
         for (jak_u32 i = 1; i < path->num_elems; i++) {
                 const jak_path_entry *entry = vec_get(path, i, jak_path_entry);
                 if (entry->key != 0) {
-                        char *key = jak_query_fetch_string_by_id(query, entry->key);
+                        char *key = jak_query_fetch_jak_string_by_id(query, entry->key);
                         size_t path_len = strlen(path_buffer);
                         sprintf(path_buffer + path_len, "%s/", key);
                         free(key);
@@ -748,7 +748,7 @@ bool jak_archive_visitor_path_compare(const struct jak_vector ofType(jak_path_en
         }
 
         if (group_name) {
-                char *key = jak_query_fetch_string_by_id(query, *group_name);
+                char *key = jak_query_fetch_jak_string_by_id(query, *group_name);
                 size_t path_len = strlen(path_buffer);
                 sprintf(path_buffer + path_len, "%s/", key);
                 free(key);

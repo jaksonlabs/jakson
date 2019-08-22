@@ -54,6 +54,6 @@ jak_u64 uintvar_stream_read(jak_u8 *nbytes, uintvar_stream_t src)
                 ndecoded++, it = *(char *) src) {}
 
 
-        JAK_optional_set(nbytes, ndecoded);
+        JAK_OPTIONAL_SET(nbytes, ndecoded);
         return value;
 }

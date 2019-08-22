@@ -79,21 +79,21 @@ bool jak_carbon_commit_hash_compute(jak_u64 *commit_hash, const void *base, jak_
         return true;
 }
 
-const char *jak_carbon_commit_hash_to_str(struct jak_string *dst, jak_u64 commit_hash)
+const char *jak_carbon_commit_hash_to_str(jak_string *dst, jak_u64 commit_hash)
 {
         if (dst) {
-                string_clear(dst);
-                string_add_u64_as_hex(dst, commit_hash);
-                return string_cstr(dst);
+                jak_string_clear(dst);
+                jak_string_add_u64_as_hex(dst, commit_hash);
+                return jak_string_cstr(dst);
         } else {
                 return NULL;
         }
 }
 
-bool jak_carbon_commit_hash_append_to_str(struct jak_string *dst, jak_u64 commit_hash)
+bool jak_carbon_commit_hash_append_to_str(jak_string *dst, jak_u64 commit_hash)
 {
         JAK_ERROR_IF_NULL(dst)
-        string_add_u64_as_hex(dst, commit_hash);
+        jak_string_add_u64_as_hex(dst, commit_hash);
         return true;
 }
 
@@ -104,13 +104,13 @@ jak_u64 jak_carbon_commit_hash_from_str(const char *commit_str, jak_error *err)
                 errno = 0;
                 jak_u64 ret = strtoull(commit_str, &illegal_char, 16);
                 if (ret == 0 && commit_str == illegal_char) {
-                        JAK_optional(err, JAK_ERROR(err, JAK_ERR_NONUMBER))
+                        JAK_OPTIONAL(err, JAK_ERROR(err, JAK_ERR_NONUMBER))
                         return 0;
                 } else if (ret == ULLONG_MAX && errno) {
-                        JAK_optional(err, JAK_ERROR(err, JAK_ERR_BUFFERTOOTINY))
+                        JAK_OPTIONAL(err, JAK_ERROR(err, JAK_ERR_BUFFERTOOTINY))
                         return 0;
                 } else if (*illegal_char) {
-                        JAK_optional(err, JAK_ERROR(err, JAK_ERR_TAILINGJUNK))
+                        JAK_OPTIONAL(err, JAK_ERROR(err, JAK_ERR_TAILINGJUNK))
                         return 0;
                 } else {
                         return ret;

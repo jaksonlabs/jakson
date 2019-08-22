@@ -67,8 +67,8 @@ bool jak_carbon_find_create(jak_carbon_find *find, jak_carbon_dot_path *path, ja
 bool jak_carbon_find_drop(jak_carbon_find *find);
 
 bool jak_carbon_find_has_result(jak_carbon_find *find);
-const char *jak_carbon_find_result_to_str(struct jak_string *dst_str, jak_carbon_printer_impl_e print_type, jak_carbon_find *find);
-const char *jak_carbon_find_result_to_json_compact(struct jak_string *dst_str, jak_carbon_find *find);
+const char *jak_carbon_find_result_to_str(jak_string *dst_str, jak_carbon_printer_impl_e print_type, jak_carbon_find *find);
+const char *jak_carbon_find_result_to_json_compact(jak_string *dst_str, jak_carbon_find *find);
 char *jak_carbon_find_result_to_json_compact_dup(jak_carbon_find *find);
 
 bool jak_carbon_find_result_type(jak_carbon_field_type_e *type, jak_carbon_find *find);

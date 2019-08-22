@@ -22,10 +22,10 @@ TEST(ConverterTest, PerformConversion)
         jak_encoded_doc_collection_print(stdout, &collection);
 
 
-        struct jak_string_cache *cache = jak_archive_get_query_string_id_cache(&archive);
+        struct jak_string_cache *cache = jak_archive_get_query_jak_string_id_cache(&archive);
         jak_sid_cache_stats statistics;
         jak_string_id_cache_get_statistics(&statistics, cache);
-        fprintf(stderr, "string_id_cache_info hits: %zu   misses: %zu   hit ratio: %.4f   num evicted: %zu\n",
+        fprintf(stderr, "jak_string_id_cache_info hits: %zu   misses: %zu   hit ratio: %.4f   num evicted: %zu\n",
                 statistics.num_hits, statistics.num_misses,
                 100.0f * statistics.num_hits / (float) (statistics.num_hits + statistics.num_misses),
                 statistics.num_evicted);

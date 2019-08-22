@@ -63,7 +63,7 @@ bool jak_json_tokenizer_init(jak_json_tokenizer *tokenizer, const char *input)
 }
 
 static void
-parse_string_token(jak_json_tokenizer *tokenizer, char c, char delimiter, char delimiter2, char delimiter3,
+parse_jak_string_token(jak_json_tokenizer *tokenizer, char c, char delimiter, char delimiter2, char delimiter3,
                    bool include_start, bool include_end)
 {
         bool escapeQuote = false;
@@ -132,9 +132,9 @@ const jak_json_token *json_tokenizer_next(jak_json_tokenizer *tokenizer)
                            (strlen(tokenizer->cursor) >= 4 && (strncmp(tokenizer->cursor, "null", 4) != 0 &&
                                                                strncmp(tokenizer->cursor, "true", 4) != 0)) &&
                            (strlen(tokenizer->cursor) >= 5 && strncmp(tokenizer->cursor, "false", 5) != 0)) {
-                        parse_string_token(tokenizer, c, ' ', ':', ',', true, true);
+                        parse_jak_string_token(tokenizer, c, ' ', ':', ',', true, true);
                 } else if (c == '"') {
-                        parse_string_token(tokenizer, c, '"', '"', '"', false, false);
+                        parse_jak_string_token(tokenizer, c, '"', '"', '"', false, false);
                 } else if (c == 't' || c == 'f' || c == 'n') {
                         const unsigned lenTrueNull = 4;
                         const unsigned lenFalse = 5;
@@ -251,7 +251,7 @@ static bool json_ast_node_object_print(FILE *file, jak_error *err, jak_json_obje
 
 static bool json_ast_node_array_print(FILE *file, jak_error *err, jak_json_array *array);
 
-static void json_ast_node_string_print(FILE *file, jak_json_string *string);
+static void json_ast_node_jak_string_print(FILE *file, jak_json_string *string);
 
 static bool json_ast_node_number_print(FILE *file, jak_error *err, jak_json_number *number);
 
@@ -281,7 +281,7 @@ jak_json_parse(jak_json *json, jak_json_err *error_desc, jak_json_parser *parser
         struct jak_vector ofType(jak_json_token) token_stream;
 
         jak_json retval;
-        JAK_zero_memory(&retval, sizeof(jak_json))
+        JAK_ZERO_MEMORY(&retval, sizeof(jak_json))
         retval.element = JAK_MALLOC(sizeof(jak_json_element));
         jak_error_init(&retval.err);
         const jak_json_token *token;
@@ -885,7 +885,7 @@ static bool json_ast_node_array_print(FILE *file, jak_error *err, jak_json_array
         return true;
 }
 
-static void json_ast_node_string_print(FILE *file, jak_json_string *string)
+static void json_ast_node_jak_string_print(FILE *file, jak_json_string *string)
 {
         fprintf(file, "\"%s\"", string->value);
 }
@@ -922,7 +922,7 @@ static bool json_ast_node_value_print(FILE *file, jak_error *err, jak_json_node_
                         }
                         break;
                 case JAK_JSON_VALUE_STRING:
-                        json_ast_node_string_print(file, value->value.string);
+                        json_ast_node_jak_string_print(file, value->value.string);
                         break;
                 case JAK_JSON_VALUE_NUMBER:
                         if (!json_ast_node_number_print(file, err, value->value.number)) {
@@ -1001,7 +1001,7 @@ static bool json_ast_node_array_drop(jak_json_array *array, jak_error *err)
         return json_ast_node_elements_drop(&array->elements, err);
 }
 
-static void json_ast_node_string_drop(jak_json_string *string)
+static void json_ast_node_jak_string_drop(jak_json_string *string)
 {
         free(string->value);
 }
@@ -1029,7 +1029,7 @@ static bool json_ast_node_value_drop(jak_json_node_value *value, jak_error *err)
                         }
                         break;
                 case JAK_JSON_VALUE_STRING:
-                        json_ast_node_string_drop(value->value.string);
+                        json_ast_node_jak_string_drop(value->value.string);
                         free(value->value.string);
                         break;
                 case JAK_JSON_VALUE_NUMBER:

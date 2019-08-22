@@ -238,7 +238,7 @@ bool vec_shrink(struct jak_vector *vec)
 {
         JAK_ERROR_IF_NULL(vec);
         if (vec->num_elems < vec->cap_elems) {
-                vec->cap_elems = JAK_max(1, vec->num_elems);
+                vec->cap_elems = JAK_MAX(1, vec->num_elems);
                 vec->base = jak_alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
         }
         return true;
@@ -261,7 +261,7 @@ bool vec_grow(size_t *numNewSlots, struct jak_vector *vec)
 bool vec_grow_to(struct jak_vector *vec, size_t capacity)
 {
         JAK_ERROR_IF_NULL(vec);
-        vec->cap_elems = JAK_max(vec->cap_elems, capacity);
+        vec->cap_elems = JAK_MAX(vec->cap_elems, capacity);
         vec->base = jak_alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
         return true;
 }
@@ -293,7 +293,7 @@ bool vec_enlarge_size_to_capacity(struct jak_vector *vec)
 bool vec_zero_memory(struct jak_vector *vec)
 {
         JAK_ERROR_IF_NULL(vec);
-        JAK_zero_memory(vec->base, vec->elem_size * vec->num_elems);
+        JAK_ZERO_MEMORY(vec->base, vec->elem_size * vec->num_elems);
         return true;
 }
 
@@ -302,7 +302,7 @@ bool vec_zero_memory_in_range(struct jak_vector *vec, size_t from, size_t to)
         JAK_ERROR_IF_NULL(vec);
         JAK_ASSERT(from < to);
         JAK_ASSERT(to <= vec->cap_elems);
-        JAK_zero_memory(vec->base + from * vec->elem_size, vec->elem_size * (to - from));
+        JAK_ZERO_MEMORY(vec->base + from * vec->elem_size, vec->elem_size * (to - from));
         return true;
 }
 
@@ -316,7 +316,7 @@ bool vec_set(struct jak_vector *vec, size_t pos, const void *data)
 
 bool vec_cpy(struct jak_vector *dst, const struct jak_vector *src)
 {
-        JAK_check_success(vec_create(dst, NULL, src->elem_size, src->num_elems));
+        JAK_CHECK_SUCCESS(vec_create(dst, NULL, src->elem_size, src->num_elems));
         dst->num_elems = src->num_elems;
         if (dst->num_elems > 0) {
                 memcpy(dst->base, src->base, src->elem_size * src->num_elems);
@@ -355,7 +355,7 @@ char *vector_string(const struct jak_vector ofType(T) *vec,
         jak_memblock *block;
         struct jak_memfile file;
         jak_memblock_create(&block, vec->num_elems * vec->elem_size);
-        memfile_open(&file, block, READ_WRITE);
+        memfile_open(&file, block, JAK_READ_WRITE);
         printerFunc(&file, vec->base, vec->num_elems);
         return jak_memblock_move_contents_and_drop(block);
 }

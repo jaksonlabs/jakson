@@ -125,7 +125,7 @@ bool jak_carbon_int_field_access_i64_value(jak_i64 *value, jak_field_access *fie
 bool jak_carbon_int_field_access_float_value(bool *is_null_in, float *value, jak_field_access *field, jak_error *err);
 bool jak_carbon_int_field_access_signed_value(bool *is_null_in, jak_i64 *value, jak_field_access *field, jak_error *err);
 bool jak_carbon_int_field_access_unsigned_value(bool *is_null_in, jak_u64 *value, jak_field_access *field, jak_error *err);
-const char *jak_carbon_int_field_access_string_value(jak_u64 *strlen, jak_field_access *field, jak_error *err);
+const char *jak_carbon_int_field_access_jak_string_value(jak_u64 *strlen, jak_field_access *field, jak_error *err);
 bool jak_carbon_int_field_access_binary_value(jak_carbon_binary *out, jak_field_access *field, jak_error *err);
 jak_carbon_array_it *jak_carbon_int_field_access_array_value(jak_field_access *field, jak_error *err);
 jak_carbon_object_it *jak_carbon_int_field_access_object_value(jak_field_access *field, jak_error *err);

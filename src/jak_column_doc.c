@@ -90,7 +90,7 @@ static void object_meta_model_free(jak_column_doc_obj *columndoc)
         vec_drop(&columndoc->uint16_prop_keys);
         vec_drop(&columndoc->uin32_prop_keys);
         vec_drop(&columndoc->uint64_prop_keys);
-        vec_drop(&columndoc->string_prop_keys);
+        vec_drop(&columndoc->jak_string_prop_keys);
         vec_drop(&columndoc->float_prop_keys);
         vec_drop(&columndoc->null_prop_keys);
         vec_drop(&columndoc->obj_prop_keys);
@@ -104,7 +104,7 @@ static void object_meta_model_free(jak_column_doc_obj *columndoc)
         vec_drop(&columndoc->uint16_array_prop_keys);
         vec_drop(&columndoc->uint32_array_prop_keys);
         vec_drop(&columndoc->uint64_array_prop_keys);
-        vec_drop(&columndoc->string_array_prop_keys);
+        vec_drop(&columndoc->jak_string_array_prop_keys);
         vec_drop(&columndoc->float_array_prop_keys);
         vec_drop(&columndoc->null_array_prop_keys);
 
@@ -118,7 +118,7 @@ static void object_meta_model_free(jak_column_doc_obj *columndoc)
         vec_drop(&columndoc->uint32_prop_vals);
         vec_drop(&columndoc->uint64_prop_vals);
         vec_drop(&columndoc->float_prop_vals);
-        vec_drop(&columndoc->string_prop_vals);
+        vec_drop(&columndoc->jak_string_prop_vals);
 
         for (size_t i = 0; i < columndoc->bool_array_prop_vals.num_elems; i++) {
                 struct jak_vector *vec = vec_get(&columndoc->bool_array_prop_vals, i, struct jak_vector);
@@ -180,11 +180,11 @@ static void object_meta_model_free(jak_column_doc_obj *columndoc)
         }
         vec_drop(&columndoc->float_array_prop_vals);
 
-        for (size_t i = 0; i < columndoc->string_array_prop_vals.num_elems; i++) {
-                struct jak_vector *vec = vec_get(&columndoc->string_array_prop_vals, i, struct jak_vector);
+        for (size_t i = 0; i < columndoc->jak_string_array_prop_vals.num_elems; i++) {
+                struct jak_vector *vec = vec_get(&columndoc->jak_string_array_prop_vals, i, struct jak_vector);
                 vec_drop(vec);
         }
-        vec_drop(&columndoc->string_array_prop_vals);
+        vec_drop(&columndoc->jak_string_array_prop_vals);
 
         vec_drop(&columndoc->null_array_prop_vals);
 
@@ -198,7 +198,7 @@ static void object_meta_model_free(jak_column_doc_obj *columndoc)
         vec_drop(&columndoc->uint32_val_idxs);
         vec_drop(&columndoc->uint64_val_idxs);
         vec_drop(&columndoc->float_val_idxs);
-        vec_drop(&columndoc->string_val_idxs);
+        vec_drop(&columndoc->jak_string_val_idxs);
 
         for (size_t i = 0; i < columndoc->bool_array_idxs.num_elems; i++) {
                 struct jak_vector *vec = vec_get(&columndoc->bool_array_idxs, i, struct jak_vector);
@@ -260,11 +260,11 @@ static void object_meta_model_free(jak_column_doc_obj *columndoc)
         }
         vec_drop(&columndoc->float_array_idxs);
 
-        for (size_t i = 0; i < columndoc->string_array_idxs.num_elems; i++) {
-                struct jak_vector *vec = vec_get(&columndoc->string_array_idxs, i, struct jak_vector);
+        for (size_t i = 0; i < columndoc->jak_string_array_idxs.num_elems; i++) {
+                struct jak_vector *vec = vec_get(&columndoc->jak_string_array_idxs, i, struct jak_vector);
                 vec_drop(vec);
         }
-        vec_drop(&columndoc->string_array_idxs);
+        vec_drop(&columndoc->jak_string_array_idxs);
 
         for (size_t i = 0; i < columndoc->obj_prop_vals.num_elems; i++) {
                 jak_column_doc_obj *object = vec_get(&columndoc->obj_prop_vals, i, jak_column_doc_obj);
@@ -288,14 +288,14 @@ bool jak_columndoc_free(jak_column_doc *doc)
     if(!vec_is_empty((key_vector))) {                                                                           \
         fprintf(file, "\"Keys\": [ ");                                                                                 \
         for (size_t i = 0; i < (key_vector)->num_elems; i++) {                                                         \
-            jak_archive_field_sid_t string_id = *vec_get((key_vector), i, jak_archive_field_sid_t);                    \
-            fprintf(file, "%"PRIu64"%s", string_id, i + 1 < (key_vector)->num_elems ? ", " : "");                      \
+            jak_archive_field_sid_t jak_string_id = *vec_get((key_vector), i, jak_archive_field_sid_t);                    \
+            fprintf(file, "%"PRIu64"%s", jak_string_id, i + 1 < (key_vector)->num_elems ? ", " : "");                      \
         }                                                                                                              \
         fprintf(file, "], ");                                                                                          \
         fprintf(file, "\"Keys Decoded\": [ ");                                                                         \
         for (size_t i = 0; i < (key_vector)->num_elems; i++) {                                                         \
-            jak_archive_field_sid_t string_id = *vec_get((key_vector), i, jak_archive_field_sid_t);                    \
-            char **encString = strdic_extract(dic, &string_id, 1);                                              \
+            jak_archive_field_sid_t jak_string_id = *vec_get((key_vector), i, jak_archive_field_sid_t);                    \
+            char **encString = strdic_extract(dic, &jak_string_id, 1);                                              \
             fprintf(file, "\"%s\"%s", encString[0], i + 1 < (key_vector)->num_elems ? ", " : "");                      \
             strdic_free(dic, encString);                                                                        \
         }                                                                                                              \
@@ -366,14 +366,14 @@ static bool print_primitive_objects(FILE *file, jak_error *err, const char *type
     if(!vec_is_empty((&key_vector))) {                                                                          \
         fprintf(file, "\"Keys\": [ ");                                                                                 \
         for (size_t i = 0; i < (&key_vector)->num_elems; i++) {                                                        \
-            jak_archive_field_sid_t string_id = *vec_get((&key_vector), i, jak_archive_field_sid_t);                   \
-            fprintf(file, "%"PRIu64"%s", string_id, i + 1 < (&key_vector)->num_elems ? ", " : "");                     \
+            jak_archive_field_sid_t jak_string_id = *vec_get((&key_vector), i, jak_archive_field_sid_t);                   \
+            fprintf(file, "%"PRIu64"%s", jak_string_id, i + 1 < (&key_vector)->num_elems ? ", " : "");                     \
         }                                                                                                              \
         fprintf(file, "], ");                                                                                          \
         fprintf(file, "\"Keys Decoded\": [ ");                                                                         \
         for (size_t i = 0; i < (&key_vector)->num_elems; i++) {                                                        \
-            jak_archive_field_sid_t string_id = *vec_get((&key_vector), i, jak_archive_field_sid_t);                   \
-            char **encString = strdic_extract(dic, &string_id, 1);                                              \
+            jak_archive_field_sid_t jak_string_id = *vec_get((&key_vector), i, jak_archive_field_sid_t);                   \
+            char **encString = strdic_extract(dic, &jak_string_id, 1);                                              \
             fprintf(file, "\"%s\"%s", encString[0], i + 1 < (&key_vector)->num_elems ? ", " : "");                     \
             strdic_free(dic, encString);                                                                        \
         }                                                                                                              \
@@ -403,14 +403,14 @@ static bool print_primitive_objects(FILE *file, jak_error *err, const char *type
     if(!vec_is_empty((&key_vector))) {                                                                          \
         fprintf(file, "\"Keys\": [ ");                                                                                 \
         for (size_t i = 0; i < (&key_vector)->num_elems; i++) {                                                        \
-            jak_archive_field_sid_t string_id = *vec_get((&key_vector), i, jak_archive_field_sid_t);                   \
-            fprintf(file, "%"PRIu64"%s", string_id, i + 1 < (&key_vector)->num_elems ? ", " : "");                     \
+            jak_archive_field_sid_t jak_string_id = *vec_get((&key_vector), i, jak_archive_field_sid_t);                   \
+            fprintf(file, "%"PRIu64"%s", jak_string_id, i + 1 < (&key_vector)->num_elems ? ", " : "");                     \
         }                                                                                                              \
         fprintf(file, "], ");                                                                                          \
         fprintf(file, "\"Keys Decoded\": [ ");                                                                         \
         for (size_t i = 0; i < (&key_vector)->num_elems; i++) {                                                        \
-            jak_archive_field_sid_t string_id = *vec_get((&key_vector), i, jak_archive_field_sid_t);                   \
-            char **encString = strdic_extract(dic, &string_id, 1);                                              \
+            jak_archive_field_sid_t jak_string_id = *vec_get((&key_vector), i, jak_archive_field_sid_t);                   \
+            char **encString = strdic_extract(dic, &jak_string_id, 1);                                              \
             fprintf(file, "\"%s\"%s", encString[0], i + 1 < (&key_vector)->num_elems ? ", " : "");                     \
             strdic_free(dic, encString);                                                                        \
         }                                                                                                              \
@@ -438,14 +438,14 @@ print_array_null(FILE *file, const char *type_name, const struct jak_vector ofTy
         if (!vec_is_empty((key_vector))) {
                 fprintf(file, "\"Keys\": [ ");
                 for (size_t i = 0; i < (key_vector)->num_elems; i++) {
-                        jak_archive_field_sid_t string_id = *vec_get((key_vector), i, jak_archive_field_sid_t);
-                        fprintf(file, "%"PRIu64"%s", string_id, i + 1 < (key_vector)->num_elems ? ", " : "");
+                        jak_archive_field_sid_t jak_string_id = *vec_get((key_vector), i, jak_archive_field_sid_t);
+                        fprintf(file, "%"PRIu64"%s", jak_string_id, i + 1 < (key_vector)->num_elems ? ", " : "");
                 }
                 fprintf(file, "], ");
                 fprintf(file, "\"Keys Decoded\": [ ");
                 for (size_t i = 0; i < (key_vector)->num_elems; i++) {
-                        jak_archive_field_sid_t string_id = *vec_get((key_vector), i, jak_archive_field_sid_t);
-                        char **encString = strdic_extract(dic, &string_id, 1);
+                        jak_archive_field_sid_t jak_string_id = *vec_get((key_vector), i, jak_archive_field_sid_t);
+                        char **encString = strdic_extract(dic, &jak_string_id, 1);
                         fprintf(file, "\"%s\"%s", encString[0], i + 1 < (key_vector)->num_elems ? ", " : "");
                         strdic_free(dic, encString);
                 }
@@ -470,14 +470,14 @@ static void print_array_strings(FILE *file, const char *type_name,
         if (!vec_is_empty((key_vector))) {
                 fprintf(file, "\"Keys\": [ ");
                 for (size_t i = 0; i < (key_vector)->num_elems; i++) {
-                        jak_archive_field_sid_t string_id = *vec_get((key_vector), i, jak_archive_field_sid_t);
-                        fprintf(file, "%"PRIu64"%s", string_id, i + 1 < (key_vector)->num_elems ? ", " : "");
+                        jak_archive_field_sid_t jak_string_id = *vec_get((key_vector), i, jak_archive_field_sid_t);
+                        fprintf(file, "%"PRIu64"%s", jak_string_id, i + 1 < (key_vector)->num_elems ? ", " : "");
                 }
                 fprintf(file, "], ");
                 fprintf(file, "\"Keys Decoded\": [ ");
                 for (size_t i = 0; i < (key_vector)->num_elems; i++) {
-                        jak_archive_field_sid_t string_id_t = *vec_get((key_vector), i, jak_archive_field_sid_t);
-                        char **encString = strdic_extract(dic, &string_id_t, 1);
+                        jak_archive_field_sid_t jak_string_id_t = *vec_get((key_vector), i, jak_archive_field_sid_t);
+                        char **encString = strdic_extract(dic, &jak_string_id_t, 1);
                         fprintf(file, "\"%s\"%s", encString[0], i + 1 < (key_vector)->num_elems ? ", " : "");
                         strdic_free(dic, encString);
                 }
@@ -529,14 +529,14 @@ static void print_primitive_strings(FILE *file, const char *type_name,
         if (!vec_is_empty((key_vector))) {
                 fprintf(file, "\"Values\": [ ");
                 for (size_t i = 0; i < (value_vector)->num_elems; i++) {
-                        jak_archive_field_sid_t string_id_t = *vec_get(value_vector, i, jak_archive_field_sid_t);
-                        fprintf(file, "%"PRIu64"%s", string_id_t, i + 1 < (value_vector)->num_elems ? ", " : "");
+                        jak_archive_field_sid_t jak_string_id_t = *vec_get(value_vector, i, jak_archive_field_sid_t);
+                        fprintf(file, "%"PRIu64"%s", jak_string_id_t, i + 1 < (value_vector)->num_elems ? ", " : "");
                 }
                 fprintf(file, "], ");
                 fprintf(file, "\"Values Decoded\": [ ");
                 for (size_t i = 0; i < (value_vector)->num_elems; i++) {
-                        jak_archive_field_sid_t string_id_t = *vec_get(value_vector, i, jak_archive_field_sid_t);
-                        char **values = strdic_extract(dic, &string_id_t, 1);
+                        jak_archive_field_sid_t jak_string_id_t = *vec_get(value_vector, i, jak_archive_field_sid_t);
+                        char **values = strdic_extract(dic, &jak_string_id_t, 1);
                         fprintf(file, "\"%s\"%s", *values, i + 1 < (value_vector)->num_elems ? ", " : "");
                         strdic_free(dic, values);
                 }
@@ -804,7 +804,7 @@ print_object(FILE *file, jak_error *err, const jak_column_doc_obj *object, struc
                                dic,
                                jak_archive_field_number_t,
                                "%f")
-        print_primitive_strings(file, "Strings", &object->string_prop_keys, &object->string_prop_vals, dic);
+        print_primitive_strings(file, "Strings", &object->jak_string_prop_keys, &object->jak_string_prop_vals, dic);
         print_primitive_null(file, "Null", &object->null_prop_keys, dic);
         if (print_primitive_objects(file, err, "Objects", &object->obj_prop_keys, &object->obj_prop_vals, dic)) {
                 return false;
@@ -867,7 +867,7 @@ print_object(FILE *file, jak_error *err, const jak_column_doc_obj *object, struc
                     jak_archive_field_number_t,
                     "%f",
                     (!isnan(value)));
-        print_array_strings(file, "Strings", &object->string_array_prop_keys, &object->string_array_prop_vals, dic);
+        print_array_strings(file, "Strings", &object->jak_string_array_prop_keys, &object->jak_string_array_prop_vals, dic);
         print_array_null(file, "Null", &object->null_array_prop_keys, &object->null_array_prop_vals, dic);
         if (!print_array_objects(file, err, "Objects", &object->obj_array_props, dic)) {
                 return false;
@@ -1049,10 +1049,10 @@ static bool object_array_key_column_push(jak_column_doc_column *col, jak_error *
                 case JAK_FIELD_STRING: {
                         JAK_ASSERT(!is_null_by_def);
                         char **strings = vec_all(&entry->values, char *);
-                        jak_archive_field_sid_t *string_ids;
-                        strdic_locate_fast(&string_ids, dic, (char *const *) strings, num_elements);
-                        vec_push(values_for_entry, string_ids, num_elements);
-                        strdic_free(dic, string_ids);
+                        jak_archive_field_sid_t *jak_string_ids;
+                        strdic_locate_fast(&jak_string_ids, dic, (char *const *) strings, num_elements);
+                        vec_push(values_for_entry, jak_string_ids, num_elements);
+                        strdic_free(dic, jak_string_ids);
                         //strdic_free(encode, strings);
                 }
                         break;
@@ -1097,7 +1097,7 @@ setup_object(jak_column_doc_obj *model, jak_column_doc *parent, jak_archive_fiel
         vec_create(&model->uint16_prop_keys, NULL, sizeof(jak_archive_field_sid_t), 10);
         vec_create(&model->uin32_prop_keys, NULL, sizeof(jak_archive_field_sid_t), 10);
         vec_create(&model->uint64_prop_keys, NULL, sizeof(jak_archive_field_sid_t), 10);
-        vec_create(&model->string_prop_keys, NULL, sizeof(jak_archive_field_sid_t), 50);
+        vec_create(&model->jak_string_prop_keys, NULL, sizeof(jak_archive_field_sid_t), 50);
         vec_create(&model->float_prop_keys, NULL, sizeof(jak_archive_field_sid_t), 10);
         vec_create(&model->null_prop_keys, NULL, sizeof(jak_archive_field_sid_t), 10);
         vec_create(&model->obj_prop_keys, NULL, sizeof(jak_archive_field_sid_t), 10);
@@ -1111,7 +1111,7 @@ setup_object(jak_column_doc_obj *model, jak_column_doc *parent, jak_archive_fiel
         vec_create(&model->uint16_array_prop_keys, NULL, sizeof(jak_archive_field_sid_t), 10);
         vec_create(&model->uint32_array_prop_keys, NULL, sizeof(jak_archive_field_sid_t), 10);
         vec_create(&model->uint64_array_prop_keys, NULL, sizeof(jak_archive_field_sid_t), 10);
-        vec_create(&model->string_array_prop_keys, NULL, sizeof(jak_archive_field_sid_t), 50);
+        vec_create(&model->jak_string_array_prop_keys, NULL, sizeof(jak_archive_field_sid_t), 50);
         vec_create(&model->float_array_prop_keys, NULL, sizeof(jak_archive_field_sid_t), 10);
         vec_create(&model->null_array_prop_keys, NULL, sizeof(jak_archive_field_sid_t), 10);
 
@@ -1125,7 +1125,7 @@ setup_object(jak_column_doc_obj *model, jak_column_doc *parent, jak_archive_fiel
         vec_create(&model->uint32_prop_vals, NULL, sizeof(jak_archive_field_u32_t), 10);
         vec_create(&model->uint64_prop_vals, NULL, sizeof(jak_archive_field_u64_t), 10);
         vec_create(&model->float_prop_vals, NULL, sizeof(jak_archive_field_number_t), 10);
-        vec_create(&model->string_prop_vals, NULL, sizeof(jak_archive_field_sid_t), 50);
+        vec_create(&model->jak_string_prop_vals, NULL, sizeof(jak_archive_field_sid_t), 50);
 
         vec_create(&model->bool_array_prop_vals, NULL, sizeof(struct jak_vector), 10);
         vec_create(&model->int8_array_prop_vals, NULL, sizeof(struct jak_vector), 10);
@@ -1137,7 +1137,7 @@ setup_object(jak_column_doc_obj *model, jak_column_doc *parent, jak_archive_fiel
         vec_create(&model->uint32_array_prop_vals, NULL, sizeof(struct jak_vector), 10);
         vec_create(&model->ui64_array_prop_vals, NULL, sizeof(struct jak_vector), 10);
         vec_create(&model->float_array_prop_vals, NULL, sizeof(struct jak_vector), 10);
-        vec_create(&model->string_array_prop_vals, NULL, sizeof(struct jak_vector), 50);
+        vec_create(&model->jak_string_array_prop_vals, NULL, sizeof(struct jak_vector), 50);
         vec_create(&model->null_array_prop_vals, NULL, sizeof(jak_u16), 10);
 
         vec_create(&model->bool_val_idxs, NULL, sizeof(jak_u32), 10);
@@ -1150,7 +1150,7 @@ setup_object(jak_column_doc_obj *model, jak_column_doc *parent, jak_archive_fiel
         vec_create(&model->uint32_val_idxs, NULL, sizeof(jak_u32), 10);
         vec_create(&model->uint64_val_idxs, NULL, sizeof(jak_u32), 10);
         vec_create(&model->float_val_idxs, NULL, sizeof(jak_u32), 10);
-        vec_create(&model->string_val_idxs, NULL, sizeof(jak_u32), 50);
+        vec_create(&model->jak_string_val_idxs, NULL, sizeof(jak_u32), 50);
 
         vec_create(&model->bool_array_idxs, NULL, sizeof(struct jak_vector), 10);
         vec_create(&model->int8_array_idxs, NULL, sizeof(struct jak_vector), 10);
@@ -1162,7 +1162,7 @@ setup_object(jak_column_doc_obj *model, jak_column_doc *parent, jak_archive_fiel
         vec_create(&model->uint32_array_idxs, NULL, sizeof(struct jak_vector), 10);
         vec_create(&model->uint64_array_idxs, NULL, sizeof(struct jak_vector), 10);
         vec_create(&model->float_array_idxs, NULL, sizeof(struct jak_vector), 10);
-        vec_create(&model->string_array_idxs, NULL, sizeof(struct jak_vector), 50);
+        vec_create(&model->jak_string_array_idxs, NULL, sizeof(struct jak_vector), 50);
 
         vec_create(&model->obj_prop_vals, NULL, sizeof(jak_column_doc_obj), 10);
 
@@ -1220,8 +1220,8 @@ object_put_primitive(jak_column_doc_obj *columndoc, jak_error *err, const jak_do
                 case JAK_FIELD_STRING: {
                         jak_archive_field_sid_t *value;
                         strdic_locate_fast(&value, dic, (char *const *) entry->values.base, 1);
-                        vec_push(&columndoc->string_prop_keys, key_id, 1);
-                        vec_push(&columndoc->string_prop_vals, value, 1);
+                        vec_push(&columndoc->jak_string_prop_keys, key_id, 1);
+                        vec_push(&columndoc->jak_string_prop_vals, value, 1);
                         strdic_free(dic, value);
                 }
                         break;
@@ -1353,15 +1353,15 @@ object_put_array(jak_column_doc_obj *model, jak_error *err, const jak_doc_entrie
                         break;
                 case JAK_FIELD_STRING: {
                         const char **strings = vec_all(&entry->values, const char *);
-                        jak_archive_field_sid_t *string_ids;
-                        strdic_locate_fast(&string_ids, dic, (char *const *) strings, num_elements);
-                        object_push_array(&model->string_array_prop_vals,
+                        jak_archive_field_sid_t *jak_string_ids;
+                        strdic_locate_fast(&jak_string_ids, dic, (char *const *) strings, num_elements);
+                        object_push_array(&model->jak_string_array_prop_vals,
                                           sizeof(jak_archive_field_sid_t),
                                           num_elements,
-                                          string_ids,
+                                          jak_string_ids,
                                           *key_id,
-                                          &model->string_array_prop_keys);
-                        strdic_free(dic, string_ids);
+                                          &model->jak_string_array_prop_keys);
+                        strdic_free(dic, jak_string_ids);
                 }
                         break;
                 case JAK_FIELD_OBJECT: {

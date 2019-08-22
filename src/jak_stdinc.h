@@ -58,7 +58,7 @@
 #define JAK_MALLOC(size)                \
 ({                                      \
         void *ptr = malloc(size);       \
-        JAK_zero_memory(ptr, size);     \
+        JAK_ZERO_MEMORY(ptr, size);     \
         ptr;                            \
 })
 
@@ -89,14 +89,14 @@ typedef enum jak_archive_field_type {
         JAK_FIELD_OBJECT = 12
 } jak_archive_field_e;
 
-enum access_mode {
-        READ_WRITE,
-        READ_ONLY
-};
+typedef enum jak_access_mode_e {
+        JAK_READ_WRITE,
+        JAK_READ_ONLY
+} jak_access_mode_e;
 
 #define JAK_FUNC_UNUSED __attribute__((unused))
 
-JAK_FUNC_UNUSED static const char *basic_type_to_json_type_str(enum jak_archive_field_type t)
+JAK_FUNC_UNUSED static const char *jak_basic_type_to_json_type_str(enum jak_archive_field_type t)
 {
         switch (t) {
                 case JAK_FIELD_INT8:
@@ -123,7 +123,7 @@ JAK_FUNC_UNUSED static const char *basic_type_to_json_type_str(enum jak_archive_
         }
 }
 
-JAK_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum jak_archive_field_type t)
+JAK_FUNC_UNUSED static const char *jak_basic_type_to_system_type_str(enum jak_archive_field_type t)
 {
         switch (t) {
                 case JAK_FIELD_INT8:
@@ -167,7 +167,7 @@ JAK_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum jak_archiv
 };
 
 #ifndef NDEBUG
-#define JAK_check_tag(is, expected)                                                                                 \
+#define JAK_CHECK_TAG(is, expected)                                                                                 \
 {                                                                                                                      \
     if (is != expected) {                                                                                              \
         JAK_ERROR_PRINT(JAK_ERR_ERRINTERNAL)                                                                     \
@@ -175,13 +175,13 @@ JAK_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum jak_archiv
     }                                                                                                                  \
 }
 #else
-#define JAK_check_tag(is, expected) { }
+#define JAK_CHECK_TAG(is, expected) { }
 #endif
 
 #if !defined(JAK_LOG_TRACE) || defined(NDEBUG)
-#define JAK_trace(tag, msg, ...) { }
+#define JAK_TRACE(tag, msg, ...) { }
 #else
-#define JAK_trace(tag, msg, ...)                                                                                    \
+#define JAK_TRACE(tag, msg, ...)                                                                                    \
 {                                                                                                                      \
     char buffer[1024];                                                                                                 \
     sprintf(buffer, "--%d-- [TRACE   : %-10s] %s\n", getpid(), tag, msg);                                              \
@@ -191,9 +191,9 @@ JAK_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum jak_archiv
 #endif
 
 #if !defined(JAK_LOG_INFO) || defined(NDEBUG)
-#define JAK_info(tag, msg, ...) { }
+#define JAK_INFO(tag, msg, ...) { }
 #else
-#define JAK_info(tag, msg, ...)                                                                                     \
+#define JAK_INFO(tag, msg, ...)                                                                                     \
 {                                                                                                                      \
     char buffer[1024];                                                                                                 \
     sprintf(buffer, "--%d-- [INFO    : %-10s] %s\n", getpid(), tag, msg);                                              \
@@ -203,10 +203,10 @@ JAK_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum jak_archiv
 #endif
 
 #if !defined(JAK_LOG_DEBUG) || defined(NDEBUG)
-#define JAK_debug(tag, msg, ...)                                                                                       \
+#define JAK_DEBUG(tag, msg, ...)                                                                                       \
 { }
 #else
-#define JAK_debug(tag, msg, ...)                                                                                    \
+#define JAK_DEBUG(tag, msg, ...)                                                                                    \
 {                                                                                                                      \
     char buffer[1024];                                                                                                 \
     sprintf(buffer, "--%d-- [DEBUG   : %-10s] %s\n", getpid(), tag, msg);                                              \
@@ -216,9 +216,9 @@ JAK_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum jak_archiv
 #endif
 
 #if !defined(JAK_LOG_WARN) || defined(NDEBUG)
-#define JAK_warn(tag, msg, ...) { }
+#define JAK_WARN(tag, msg, ...) { }
 #else
-#define JAK_warn(tag, msg, ...)                                                                                     \
+#define JAK_WARN(tag, msg, ...)                                                                                     \
     {                                                                                                                  \
         char buffer[1024];                                                                                             \
         sprintf(buffer, "--%d-- [WARNING: %-10s] %s\n", getpid(), tag, msg);                                           \
@@ -269,11 +269,11 @@ JAK_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum jak_archiv
 #define  JAK_MARKER_SYMBOL_HASHTABLE_HEADER    '#'
 #define  JAK_MARKER_SYMBOL_VECTOR_HEADER       '|'
 
-#define JAK_declare_and_init(type, name)                                                                               \
+#define JAK_DECLARE_AND_INIT(type, name)                                                                               \
         type name;                                                                                                     \
-        JAK_zero_memory(&name, sizeof(type));
+        JAK_ZERO_MEMORY(&name, sizeof(type));
 
-#define JAK_zero_memory(dst, len)                                                                                      \
+#define JAK_ZERO_MEMORY(dst, len)                                                                                      \
     memset((void *) dst, 0, len);
 
 #define JAK_cast(type, name, src)                                                                                      \
@@ -286,12 +286,12 @@ JAK_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum jak_archiv
 #define ofType(x) /** a convenience way to write types for generic containers; no effect than just a visual one */
 #define ofMapping(x, y) /** a convenience way to write types for generic containers; no effect than just a visual one */
 
-#define JAK_optional_call(x, func, ...) if((x) && (x)->func) { (x)->func(__VA_ARGS__); }
+#define JAK_OPTIONAL_CALL(x, func, ...) if((x) && (x)->func) { (x)->func(__VA_ARGS__); }
 
-#define JAK_max(a, b)                                                                                                  \
+#define JAK_MAX(a, b)                                                                                                  \
     ((b) > (a) ? (b) : (a))
 
-#define JAK_min(a, b)                                                                                                  \
+#define JAK_MIN(a, b)                                                                                                  \
     ((a) < (b) ? (a) : (b))
 
 #define JAK_ERROR_IF_NULL(x)                                                                                               \
@@ -305,14 +305,14 @@ JAK_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum jak_archiv
     }                                                                                                                  \
 }
 
-#define JAK_check_success(x)                                                                                           \
+#define JAK_CHECK_SUCCESS(x)                                                                                           \
 {                                                                                                                      \
     if (JAK_UNLIKELY(!x)) {                                                                                                \
         return x;                                                                                                      \
     }                                                                                                                  \
 }
 
-#define JAK_success_or_jump(expr, label)                                                                               \
+#define JAK_SUCCESS_OR_JUMP(expr, label)                                                                               \
 {                                                                                                                      \
     if (JAK_UNLIKELY(!expr)) {                                                                                             \
         goto label;                                                                                                    \
@@ -332,37 +332,37 @@ JAK_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum jak_archiv
 
 #define JAK_FORWARD_STRUCT_DECL(x) struct x;
 
-#define JAK_bit_num_of(x)             (sizeof(x) * 8)
-#define JAK_set_bit(n)                ( ((jak_u32) 1) << (n) )
-#define JAK_set_bits(x, mask)         ( x |=  (mask) )
-#define JAK_unset_bits(x, mask)       ( x &= ~(mask) )
-#define JAK_are_bits_set(mask, bit)   (((bit) & mask ) == (bit))
+#define JAK_BIT_NUM_OF(x)             (sizeof(x) * 8)
+#define JAK_SET_BIT(n)                ( ((jak_u32) 1) << (n) )
+#define JAK_SET_BITS(x, mask)         ( x |=  (mask) )
+#define JAK_UNSET_BITS(x, mask)       ( x &= ~(mask) )
+#define JAK_ARE_BITS_SET(mask, bit)   (((bit) & mask ) == (bit))
 
 #define JAK_ERROR_IF_NOT_IMPLEMENTED(err, x, func)                                                                         \
-    JAK_optional(x->func == NULL, JAK_ERROR(err, JAK_ERR_NOTIMPLEMENTED))
+    JAK_OPTIONAL(x->func == NULL, JAK_ERROR(err, JAK_ERR_NOTIMPLEMENTED))
 
-#define JAK_optional(expr, stmt)                                                                                       \
+#define JAK_OPTIONAL(expr, stmt)                                                                                       \
     if (expr) { stmt; }
 
-#define JAK_optional_set(x, y)                                                                                         \
-     JAK_optional(x, *x = y)
+#define JAK_OPTIONAL_SET(x, y)                                                                                         \
+     JAK_OPTIONAL(x, *x = y)
 
 #define JAK_OPTIONAL_SET_OR_ELSE(x, y, stmt)                                                                           \
     if (x) {                                                                                                           \
         *x = y;                                                                                                        \
     } else { stmt; }
 
-bool GlobalEnableConsoleOutput;
+bool jak_global_console_enable_output;
 
 #define JAK_CONSOLE_OUTPUT_ON()                                                                                        \
-    GlobalEnableConsoleOutput = true;
+    jak_global_console_enable_output = true;
 
 #define JAK_CONSOLE_OUTPUT_OFF()                                                                                       \
-    GlobalEnableConsoleOutput = false;
+    jak_global_console_enable_output = false;
 
 #define JAK_CONSOLE_WRITE(file, msg, ...)                                                                              \
 {                                                                                                                      \
-    if (GlobalEnableConsoleOutput) {                                                                                   \
+    if (jak_global_console_enable_output) {                                                                                   \
         pid_t pid = getpid();                                                                                          \
         char timeBuffer[2048];                                                                                         \
         char formatBuffer[2048];                                                                                       \
@@ -377,21 +377,21 @@ bool GlobalEnableConsoleOutput;
 
 #define JAK_CONSOLE_WRITE_ENDL(file)                                                                                   \
 {                                                                                                                      \
-    if (GlobalEnableConsoleOutput) {                                                                                   \
+    if (jak_global_console_enable_output) {                                                                                   \
         fprintf(file, "\n");                                                                                           \
     }                                                                                                                  \
 }
 
 #define JAK_CONSOLE_WRITE_CONT(file, msg, ...)                                                                         \
 {                                                                                                                      \
-    if (GlobalEnableConsoleOutput) {                                                                                   \
+    if (jak_global_console_enable_output) {                                                                                   \
         fprintf(file, msg, __VA_ARGS__);                                                                               \
     }                                                                                                                  \
 }
 
 #define JAK_CONSOLE_WRITELN(file, msg, ...)                                                                            \
 {                                                                                                                      \
-    if (GlobalEnableConsoleOutput) {                                                                                   \
+    if (jak_global_console_enable_output) {                                                                                   \
         JAK_CONSOLE_WRITE(file, msg, __VA_ARGS__)                                                                      \
         JAK_CONSOLE_WRITE_ENDL(file)                                                                                   \
         fflush(file);                                                                                                  \

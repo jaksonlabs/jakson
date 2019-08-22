@@ -29,16 +29,14 @@
 
 JAK_BEGIN_DECL
 
-struct spinlock {
+typedef struct jak_spinlock {
         atomic_flag lock;
         pthread_t owner;
-};
+} jak_spinlock;
 
-bool spin_init(struct spinlock *spinlock);
-
-bool spin_acquire(struct spinlock *spinlock);
-
-bool spin_release(struct spinlock *spinlock);
+bool jak_spinlock_init(jak_spinlock *spinlock);
+bool jak_spinlock_acquire(jak_spinlock *spinlock);
+bool jak_spinlock_release(jak_spinlock *spinlock);
 
 JAK_END_DECL
 

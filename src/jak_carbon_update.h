@@ -82,7 +82,7 @@ bool jak_carbon_update_set_i64_compiled(jak_carbon_revise *context, const jak_ca
 bool jak_carbon_update_set_float_compiled(jak_carbon_revise *context, const jak_carbon_dot_path *path, float value);
 bool jak_carbon_update_set_unsigned_compiled(jak_carbon_revise *context, const jak_carbon_dot_path *path, jak_u64 value);
 bool jak_carbon_update_set_signed_compiled(jak_carbon_revise *context, const jak_carbon_dot_path *path, jak_i64 value);
-bool jak_carbon_update_set_string_compiled(jak_carbon_revise *context, const jak_carbon_dot_path *path, const char *value);
+bool jak_carbon_update_set_jak_string_compiled(jak_carbon_revise *context, const jak_carbon_dot_path *path, const char *value);
 bool jak_carbon_update_set_binary_compiled(jak_carbon_revise *context, const jak_carbon_dot_path *path, const void *value, size_t nbytes, const char *file_ext, const char *user_type);
 jak_carbon_insert * jak_carbon_update_set_array_begin_compiled(jak_carbon_revise *context, const jak_carbon_dot_path *path, jak_carbon_insert_array_state *state_out, jak_u64 array_capacity);
 bool jak_carbon_update_set_array_end_compiled(jak_carbon_insert_array_state *state_in);
@@ -125,7 +125,7 @@ bool carbon_update_one_set_i64_compiled(const jak_carbon_dot_path *path, jak_car
 bool carbon_update_one_set_float_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc, jak_carbon *doc, float value);
 bool carbon_update_one_set_unsigned_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc, jak_carbon *doc, jak_u64 value);
 bool carbon_update_one_set_signed_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc, jak_carbon *doc, jak_i64 value);
-bool carbon_update_one_set_string_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc, jak_carbon *doc, const char *value);
+bool carbon_update_one_set_jak_string_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc, jak_carbon *doc, const char *value);
 bool carbon_update_one_set_binary_compiled(const jak_carbon_dot_path *path, jak_carbon *rev_doc, jak_carbon *doc, const void *value, size_t nbytes, const char *file_ext, const char *user_type);
 jak_carbon_insert *carbon_update_one_set_array_begin_compiled(jak_carbon_insert_array_state *state_out, const jak_carbon_dot_path *path, jak_carbon *rev_doc, jak_carbon *doc, jak_u64 array_capacity);
 bool carbon_update_one_set_array_end_compiled(jak_carbon_insert_array_state *state_in);

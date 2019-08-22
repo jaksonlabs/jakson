@@ -82,7 +82,7 @@ bool jak_carbon_int_insert_column(struct jak_memfile *memfile_in, jak_error *err
         JAK_ERROR_IF_NULL(memfile_in);
         JAK_ERROR_IF_NULL(err_in);
 
-        JAK_declare_and_init(jak_carbon_field_type_e, column_type)
+        JAK_DECLARE_AND_INIT(jak_carbon_field_type_e, column_type)
 
         switch (type) {
                 case JAK_CARBON_COLUMN_TYPE_BOOLEAN:
@@ -559,7 +559,7 @@ void jak_carbon_int_auto_close_nested_array_it(jak_field_access *field)
 {
         if (jak_carbon_int_field_access_array_it_opened(field)) {
                 jak_carbon_array_it_drop(field->nested_array_it);
-                JAK_zero_memory(field->nested_array_it, sizeof(jak_carbon_array_it));
+                JAK_ZERO_MEMORY(field->nested_array_it, sizeof(jak_carbon_array_it));
         }
 }
 
@@ -567,14 +567,14 @@ void jak_carbon_int_auto_close_nested_object_it(jak_field_access *field)
 {
         if (jak_carbon_int_field_access_object_it_opened(field)) {
                 jak_carbon_object_it_drop(field->nested_object_it);
-                JAK_zero_memory(field->nested_object_it, sizeof(jak_carbon_object_it));
+                JAK_ZERO_MEMORY(field->nested_object_it, sizeof(jak_carbon_object_it));
         }
 }
 
 void jak_carbon_int_auto_close_nested_column_it(jak_field_access *field)
 {
         if (jak_carbon_int_field_access_column_it_opened(field)) {
-                JAK_zero_memory(field->nested_column_it, sizeof(jak_carbon_column_it));
+                JAK_ZERO_MEMORY(field->nested_column_it, sizeof(jak_carbon_column_it));
         }
 }
 
@@ -685,8 +685,8 @@ jak_carbon_int_field_access_float_value(bool *is_null_in, float *value, jak_fiel
         JAK_ERROR_IF_NULL(field)
         JAK_ERROR_IF(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT, err, JAK_ERR_TYPEMISMATCH);
         float read_value = *(float *) field->it_field_data;
-        JAK_optional_set(value, read_value);
-        JAK_optional_set(is_null_in, is_null_float(read_value));
+        JAK_OPTIONAL_SET(value, read_value);
+        JAK_OPTIONAL_SET(is_null_in, is_null_float(read_value));
 
         return true;
 }
@@ -699,29 +699,29 @@ bool jak_carbon_int_field_access_signed_value(bool *is_null_in, jak_i64 *value, 
                 case JAK_CARBON_FIELD_TYPE_NUMBER_I8: {
                         jak_i8 read_value;
                         jak_carbon_int_field_access_i8_value(&read_value, field, err);
-                        JAK_optional_set(value, read_value);
-                        JAK_optional_set(is_null_in, is_null_i8(read_value));
+                        JAK_OPTIONAL_SET(value, read_value);
+                        JAK_OPTIONAL_SET(is_null_in, is_null_i8(read_value));
                 }
                         break;
                 case JAK_CARBON_FIELD_TYPE_NUMBER_I16: {
                         jak_i16 read_value;
                         jak_carbon_int_field_access_i16_value(&read_value, field, err);
-                        JAK_optional_set(value, read_value);
-                        JAK_optional_set(is_null_in, is_null_i16(read_value));
+                        JAK_OPTIONAL_SET(value, read_value);
+                        JAK_OPTIONAL_SET(is_null_in, is_null_i16(read_value));
                 }
                         break;
                 case JAK_CARBON_FIELD_TYPE_NUMBER_I32: {
                         jak_i32 read_value;
                         jak_carbon_int_field_access_i32_value(&read_value, field, err);
-                        JAK_optional_set(value, read_value);
-                        JAK_optional_set(is_null_in, is_null_i32(read_value));
+                        JAK_OPTIONAL_SET(value, read_value);
+                        JAK_OPTIONAL_SET(is_null_in, is_null_i32(read_value));
                 }
                         break;
                 case JAK_CARBON_FIELD_TYPE_NUMBER_I64: {
                         jak_i64 read_value;
                         jak_carbon_int_field_access_i64_value(&read_value, field, err);
-                        JAK_optional_set(value, read_value);
-                        JAK_optional_set(is_null_in, is_null_i64(read_value));
+                        JAK_OPTIONAL_SET(value, read_value);
+                        JAK_OPTIONAL_SET(is_null_in, is_null_i64(read_value));
                 }
                         break;
                 default: JAK_ERROR(err, JAK_ERR_TYPEMISMATCH);
@@ -738,29 +738,29 @@ bool jak_carbon_int_field_access_unsigned_value(bool *is_null_in, jak_u64 *value
                 case JAK_CARBON_FIELD_TYPE_NUMBER_U8: {
                         jak_u8 read_value;
                         jak_carbon_int_field_access_u8_value(&read_value, field, err);
-                        JAK_optional_set(value, read_value);
-                        JAK_optional_set(is_null_in, is_null_u8(read_value));
+                        JAK_OPTIONAL_SET(value, read_value);
+                        JAK_OPTIONAL_SET(is_null_in, is_null_u8(read_value));
                 }
                         break;
                 case JAK_CARBON_FIELD_TYPE_NUMBER_U16: {
                         jak_u16 read_value;
                         jak_carbon_int_field_access_u16_value(&read_value, field, err);
-                        JAK_optional_set(value, read_value);
-                        JAK_optional_set(is_null_in, is_null_u16(read_value));
+                        JAK_OPTIONAL_SET(value, read_value);
+                        JAK_OPTIONAL_SET(is_null_in, is_null_u16(read_value));
                 }
                         break;
                 case JAK_CARBON_FIELD_TYPE_NUMBER_U32: {
                         jak_u32 read_value;
                         jak_carbon_int_field_access_u32_value(&read_value, field, err);
-                        JAK_optional_set(value, read_value);
-                        JAK_optional_set(is_null_in, is_null_u32(read_value));
+                        JAK_OPTIONAL_SET(value, read_value);
+                        JAK_OPTIONAL_SET(is_null_in, is_null_u32(read_value));
                 }
                         break;
                 case JAK_CARBON_FIELD_TYPE_NUMBER_U64: {
                         jak_u64 read_value;
                         jak_carbon_int_field_access_u64_value(&read_value, field, err);
-                        JAK_optional_set(value, read_value);
-                        JAK_optional_set(is_null_in, is_null_u64(read_value));
+                        JAK_OPTIONAL_SET(value, read_value);
+                        JAK_OPTIONAL_SET(is_null_in, is_null_u64(read_value));
                 }
                         break;
                 default: JAK_ERROR(err, JAK_ERR_TYPEMISMATCH);
@@ -769,7 +769,7 @@ bool jak_carbon_int_field_access_unsigned_value(bool *is_null_in, jak_u64 *value
         return true;
 }
 
-const char *jak_carbon_int_field_access_string_value(jak_u64 *strlen, jak_field_access *field, jak_error *err)
+const char *jak_carbon_int_field_access_jak_string_value(jak_u64 *strlen, jak_field_access *field, jak_error *err)
 {
         JAK_ERROR_IF_NULL(strlen);
         JAK_ERROR_IF_AND_RETURN(field == NULL, err, JAK_ERR_NULLPTR, NULL);
@@ -1522,8 +1522,8 @@ static bool is_slot_occupied(bool *is_empty_slot, bool *is_end_reached, struct j
         JAK_ERROR_IF_NULL(file);
         char c = *memfile_peek(file, 1);
         bool is_empty = c == 0, is_end = c == end_marker;
-        JAK_optional_set(is_empty_slot, is_empty)
-        JAK_optional_set(is_end_reached, is_end)
+        JAK_OPTIONAL_SET(is_empty_slot, is_empty)
+        JAK_OPTIONAL_SET(is_end_reached, is_end)
         if (!is_empty && !is_end) {
                 return true;
         } else {
