@@ -55,6 +55,14 @@ ARK_BEGIN_DECL
  *               8 |     562949953421312 |    72057594037927935
  *               9 |   72057594037927936 |  9223372036854775807
  *              10 | 9223372036854775808 | 18446744073709551615
+ *
+  * Rule of thumb:
+ *      - if fixed-length types are a good choice, and...
+ *          - ... if speed matters, use fast-types of the C library (e.g., <code>uint_fast32_t</code>)
+ *          - ... if space matters, use fix-types of the C library (e.g., <code>uint32_t</code>)
+ *      - if variable-length types are a good choice, and...
+ *          - ... if space shall be minimized in exchange of read/write performance, use <code>uintvar_stream_t</code>
+ *          - ... if read/write performance shall be maximized in exchange of space, use <code>uintvar_marker_t</code>
  */
 
 typedef void *uintvar_stream_t;
