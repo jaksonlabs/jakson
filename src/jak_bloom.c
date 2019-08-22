@@ -21,27 +21,27 @@
 
 #include <jak_bloom.h>
 
-bool bloom_create(bloom_t *filter, size_t size)
+bool jak_bloom_create(struct jak_bitmap *filter, size_t size)
 {
-        return bitmap_create(filter, size);
+        return jak_bitmap_create(filter, size);
 }
 
-bool bloom_drop(bloom_t *filter)
+bool jak_bloom_drop(struct jak_bitmap *filter)
 {
-        return bitmap_drop(filter);
+        return jak_bitmap_drop(filter);
 }
 
-bool bloom_clear(bloom_t *filter)
+bool jak_bloom_clear(struct jak_bitmap *filter)
 {
-        return bitmap_clear(filter);
+        return jak_bitmap_clear(filter);
 }
 
-size_t bloom_nbits(bloom_t *filter)
+size_t jak_bloom_nbits(struct jak_bitmap *filter)
 {
-        return bitmap_nbits(filter);
+        return jak_bitmap_nbits(filter);
 }
 
-unsigned bloom_nhashs()
+unsigned jak_bloom_nhashs()
 {
         return 4;
 }

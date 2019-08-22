@@ -239,11 +239,11 @@ static bool this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **
         /** NOTE: palatalization of the call to this function decreases performance */
         strhash_get_bulk_safe(&values, &found_mask, &num_not_found, &extra->index, strings, num_strings);
 
-        /** OPTIMIZATION: use a bloom_t to check whether a string (which has not appeared in the
+        /** OPTIMIZATION: use a struct jak_bitmap to check whether a string (which has not appeared in the
          * dictionary before this batch but might occur multiple times in the current batch) was seen
          * before (with a slight prob. of doing too much work) */
-        bloom_t bloom_t;
-        bloom_create(&bloom_t, 22 * num_not_found);
+        struct jak_bitmap bitmap;
+        jak_bloom_create(&bitmap, 22 * num_not_found);
 
         /** copy string ids for already known strings to their result position resp. add those which are new */
         for (size_t i = 0; i < num_strings; i++) {
@@ -261,13 +261,13 @@ static bool this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **
                         bool found = false;
                         jak_archive_field_sid_t value;
 
-                        /** Query the bloom_t if the keys was already seend. If the filter returns "yes", a lookup
+                        /** Query the struct jak_bitmap if the keys was already seend. If the filter returns "yes", a lookup
                          * is requried since the filter maybe made a mistake. Of the filter returns "no", the
                          * keys is new for sure. In this case, one can skip the lookup into the buckets. */
                         size_t key_length = strlen(key);
                         hash32_t bloom_key = key_length > 0 ? JAK_HASH_FNV(strlen(key), key)
-                                                            : 0; /** using a hash of a keys instead of the string keys itself avoids reading the entire string for computing k hashes inside the bloom_t */
-                        if (JAK_BLOOM_TEST_AND_SET(&bloom_t, &bloom_key, sizeof(hash32_t))) {
+                                                            : 0; /** using a hash of a keys instead of the string keys itself avoids reading the entire string for computing k hashes inside the struct jak_bitmap */
+                        if (JAK_BLOOM_TEST_AND_SET(&bitmap, &bloom_key, sizeof(hash32_t))) {
                                 /** ensure that the string really was seen (due to collisions in the bloom filter the keys might not
                                  * been actually seen) */
 
@@ -306,7 +306,7 @@ static bool this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **
         /** cleanup */
         jak_alloc_free(&hashtable_alloc, found_mask);
         jak_alloc_free(&hashtable_alloc, values);
-        bloom_drop(&bloom_t);
+        jak_bloom_drop(&bitmap);
 
         unlock(self);
 

@@ -82,7 +82,7 @@ typedef struct Slice {
 } Slice;
 
 typedef struct JAK_hash_bounds_t {
-    /** Min and max values inside this slice. Used to skip the lookup in the per-slice bloom_t during search */
+    /** Min and max values inside this slice. Used to skip the lookup in the per-slice struct jak_bitmap during search */
     hash32_t minHash, maxHash;
 } HashBounds;
 

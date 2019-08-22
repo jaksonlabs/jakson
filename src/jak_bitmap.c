@@ -21,7 +21,7 @@
 
 #include <jak_bitmap.h>
 
-bool bitmap_create(struct jak_bitmap *bitmap, jak_u16 num_bits)
+bool jak_bitmap_create(struct jak_bitmap *bitmap, jak_u16 num_bits)
 {
         JAK_ERROR_IF_NULL(bitmap);
 
@@ -36,24 +36,24 @@ bool bitmap_create(struct jak_bitmap *bitmap, jak_u16 num_bits)
         return true;
 }
 
-bool bitmap_cpy(struct jak_bitmap *dst, const struct jak_bitmap *src)
+bool jak_bitmap_cpy(struct jak_bitmap *dst, const struct jak_bitmap *src)
 {
         dst->num_bits = src->num_bits;
         return vec_cpy(&dst->data, &src->data);
 }
 
-bool bitmap_drop(struct jak_bitmap *bitset)
+bool jak_bitmap_drop(struct jak_bitmap *bitset)
 {
         return vec_drop(&bitset->data);
 }
 
-size_t bitmap_nbits(const struct jak_bitmap *bitset)
+size_t jak_bitmap_nbits(const struct jak_bitmap *bitset)
 {
         JAK_ERROR_IF_NULL(bitset);
         return bitset->num_bits;
 }
 
-bool bitmap_clear(struct jak_bitmap *bitset)
+bool jak_bitmap_clear(struct jak_bitmap *bitset)
 {
         JAK_ERROR_IF_NULL(bitset);
         void *data = (void *) vec_data(&bitset->data);
@@ -61,7 +61,7 @@ bool bitmap_clear(struct jak_bitmap *bitset)
         return true;
 }
 
-bool bitmap_set(struct jak_bitmap *bitset, jak_u16 bit_position, bool on)
+bool jak_bitmap_set(struct jak_bitmap *bitset, jak_u16 bit_position, bool on)
 {
         JAK_ERROR_IF_NULL(bitset)
         size_t block_pos = floor(bit_position / (double) JAK_bit_num_of(jak_u32));
@@ -77,7 +77,7 @@ bool bitmap_set(struct jak_bitmap *bitset, jak_u16 bit_position, bool on)
         return true;
 }
 
-bool bitmap_get(struct jak_bitmap *bitset, jak_u16 bit_position)
+bool jak_bitmap_get(struct jak_bitmap *bitset, jak_u16 bit_position)
 {
         JAK_ERROR_IF_NULL(bitset)
         size_t block_pos = floor(bit_position / (double) JAK_bit_num_of(jak_u32));
@@ -87,17 +87,17 @@ bool bitmap_get(struct jak_bitmap *bitset, jak_u16 bit_position)
         return ((mask & block) >> bit_position) == true;
 }
 
-bool bitmap_lshift(struct jak_bitmap *map)
+bool jak_bitmap_lshift(struct jak_bitmap *map)
 {
         JAK_ERROR_IF_NULL(map)
         for (int i = map->num_bits - 1; i >= 0; i--) {
-                bool f = i > 0 ? bitmap_get(map, i - 1) : false;
-                bitmap_set(map, i, f);
+                bool f = i > 0 ? jak_bitmap_get(map, i - 1) : false;
+                jak_bitmap_set(map, i, f);
         }
         return true;
 }
 
-void bitmap_print_bits(FILE *file, jak_u32 n)
+void jak_bitmap_print_bits(FILE *file, jak_u32 n)
 {
         for (int i = 31; i >= 0; i--) {
                 jak_u32 mask = 1 << i;
@@ -106,7 +106,7 @@ void bitmap_print_bits(FILE *file, jak_u32 n)
         }
 }
 
-void bitmap_print_bits_in_char(FILE *file, char n)
+void jak_bitmap_print_bits_in_char(FILE *file, char n)
 {
         fprintf(file, "0b");
         for (int i = 7; i >= 0; i--) {
@@ -116,7 +116,7 @@ void bitmap_print_bits_in_char(FILE *file, char n)
         }
 }
 
-bool bitmap_blocks(jak_u32 **blocks, jak_u32 *num_blocks, const struct jak_bitmap *map)
+bool jak_bitmap_blocks(jak_u32 **blocks, jak_u32 *num_blocks, const struct jak_bitmap *map)
 {
         JAK_ERROR_IF_NULL(blocks)
         JAK_ERROR_IF_NULL(num_blocks)
@@ -133,13 +133,13 @@ bool bitmap_blocks(jak_u32 **blocks, jak_u32 *num_blocks, const struct jak_bitma
         return true;
 }
 
-bool bitmap_print(FILE *file, const struct jak_bitmap *map)
+bool jak_bitmap_print(FILE *file, const struct jak_bitmap *map)
 {
         JAK_ERROR_IF_NULL(map)
 
         jak_u32 *blocks, num_blocks;
 
-        bitmap_blocks(&blocks, &num_blocks, map);
+        jak_bitmap_blocks(&blocks, &num_blocks, map);
 
         for (jak_u32 i = 0; i < num_blocks; i++) {
                 fprintf(file, " %"PRIu32 " |", blocks[i]);
@@ -149,7 +149,7 @@ bool bitmap_print(FILE *file, const struct jak_bitmap *map)
 
         for (jak_i32 i = map->data.num_elems - 1; i >= 0; i--) {
                 jak_u32 block = *vec_get(&map->data, i, jak_u32);
-                bitmap_print_bits(stdout, block);
+                jak_bitmap_print_bits(stdout, block);
                 fprintf(file, " |");
         }
 

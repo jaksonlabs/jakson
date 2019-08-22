@@ -78,7 +78,7 @@ bool huffman_dump_dictionary(FILE *file, struct jak_memfile *memfile)
 
                 if (entry_info.nbytes_prefix > 0) {
                         for (jak_u16 i = 0; i < entry_info.nbytes_prefix; i++) {
-                                bitmap_print_bits_in_char(file, entry_info.prefix_code[i]);
+                                jak_bitmap_print_bits_in_char(file, entry_info.prefix_code[i]);
                                 fprintf(file, "%s", i + 1 < entry_info.nbytes_prefix ? ", " : "");
                         }
                 } else {
@@ -102,7 +102,7 @@ bool huffman_dump_string_table_entry(FILE *file, struct jak_memfile *memfile)
         fprintf(file, "[[nbytes_encoded: %d] [bytes: ", info.nbytes_encoded);
         for (size_t i = 0; i < info.nbytes_encoded; i++) {
                 char byte = info.encoded_bytes[i];
-                bitmap_print_bits_in_char(file, byte);
+                jak_bitmap_print_bits_in_char(file, byte);
                 fprintf(file, "%s", i + 1 < info.nbytes_encoded ? "," : "");
         }
         fprintf(file, "]\n");

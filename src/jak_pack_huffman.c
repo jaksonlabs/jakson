@@ -258,7 +258,7 @@ import_into_entry(struct pack_huffman_entry *entry, const struct huff_node *node
         entry->letter = node->letter;
         jak_u32 *blocks, num_blocks;
         const jak_u32 *used_blocks;
-        bitmap_blocks(&blocks, &num_blocks, map);
+        jak_bitmap_blocks(&blocks, &num_blocks, map);
         used_blocks = get_num_used_blocks(&entry->nblocks, entry, num_blocks, blocks);
         entry->blocks = JAK_MALLOC(entry->nblocks * sizeof(jak_u32));
         if (num_blocks > 0) {
@@ -333,19 +333,19 @@ static void assign_code(struct huff_node *node, const struct jak_bitmap *path,
         } else {
                 if (node->left) {
                         struct jak_bitmap left;
-                        bitmap_cpy(&left, path);
-                        bitmap_lshift(&left);
-                        bitmap_set(&left, 0, false);
+                        jak_bitmap_cpy(&left, path);
+                        jak_bitmap_lshift(&left);
+                        jak_bitmap_set(&left, 0, false);
                         assign_code(node->left, &left, table);
-                        bitmap_drop(&left);
+                        jak_bitmap_drop(&left);
                 }
                 if (node->right) {
                         struct jak_bitmap right;
-                        bitmap_cpy(&right, path);
-                        bitmap_lshift(&right);
-                        bitmap_set(&right, 0, true);
+                        jak_bitmap_cpy(&right, path);
+                        jak_bitmap_lshift(&right);
+                        jak_bitmap_set(&right, 0, true);
                         assign_code(node->right, &right, table);
-                        bitmap_drop(&right);
+                        jak_bitmap_drop(&right);
                 }
         }
 }
@@ -483,10 +483,10 @@ static void huff_tree_create(struct jak_vector ofType(struct pack_huffman_entry)
 #endif
 
         struct jak_bitmap root_path;
-        bitmap_create(&root_path, UCHAR_MAX);
-        bitmap_set(&root_path, 0, true);
+        jak_bitmap_create(&root_path, UCHAR_MAX);
+        jak_bitmap_set(&root_path, 0, true);
         assign_code(new_node, &root_path, table);
-        bitmap_drop(&root_path);
+        jak_bitmap_drop(&root_path);
 
         vec_drop(&candidates);
 }
