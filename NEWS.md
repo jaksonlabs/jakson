@@ -1,4 +1,6 @@
-## 0.5.00.01 [2019-XX-XX]
+## 0.5.00.03 [2019-XX-XX]
+
+## 0.5.00.02 [2019-08-23]
 - JSON parser for carbon files (see `carbon_from_json` in `carbon.h`)
 - Increase building times by sharing common sources in a static library
 - Dot path evaluation for objects (e.g., `0.x.5."my key"`) for carbon files
