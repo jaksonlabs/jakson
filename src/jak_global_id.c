@@ -72,7 +72,7 @@ union global_id {
     jak_u64 value;
 };
 
-bool global_id_create(global_id_t *out)
+bool global_id_create(jak_global_id_t *out)
 {
         assert(out);
 
@@ -127,70 +127,70 @@ bool global_id_create(global_id_t *out)
         return capacity_left;
 }
 
-bool global_id_get_global_wallclocktime(uint_fast8_t *out, global_id_t id)
+bool global_id_get_global_wallclocktime(uint_fast8_t *out, jak_global_id_t id)
 {
         error_if_null(out);
         *out = ((union global_id *) &id)->global_wallclock;
         return true;
 }
 
-bool global_id_get_global_build_path_bit(uint_fast8_t *out, global_id_t id)
+bool global_id_get_global_build_path_bit(uint_fast8_t *out, jak_global_id_t id)
 {
         error_if_null(out);
         *out = ((union global_id *) &id)->global_build_path;
         return true;
 }
 
-bool global_id_get_global_build_time_bit(uint_fast8_t *out, global_id_t id)
+bool global_id_get_global_build_time_bit(uint_fast8_t *out, jak_global_id_t id)
 {
         error_if_null(out);
         *out = ((union global_id *) &id)->global_build_date;
         return true;
 }
 
-bool global_id_get_process_id(uint_fast8_t *out, global_id_t id)
+bool global_id_get_process_id(uint_fast8_t *out, jak_global_id_t id)
 {
         error_if_null(out);
         *out = ((union global_id *) &id)->process_id;
         return true;
 }
 
-bool global_id_get_process_magic(uint_fast8_t *out, global_id_t id)
+bool global_id_get_process_magic(uint_fast8_t *out, jak_global_id_t id)
 {
         error_if_null(out);
         *out = ((union global_id *) &id)->process_magic;
         return true;
 }
 
-bool global_id_get_process_counter(uint_fast16_t *out, global_id_t id)
+bool global_id_get_process_counter(uint_fast16_t *out, jak_global_id_t id)
 {
         error_if_null(out);
         *out = ((union global_id *) &id)->process_counter;
         return true;
 }
 
-bool global_id_get_thread_id(uint_fast8_t *out, global_id_t id)
+bool global_id_get_thread_id(uint_fast8_t *out, jak_global_id_t id)
 {
         error_if_null(out);
         *out = ((union global_id *) &id)->thread_id;
         return true;
 }
 
-bool global_id_get_thread_magic(uint_fast8_t *out, global_id_t id)
+bool global_id_get_thread_magic(uint_fast8_t *out, jak_global_id_t id)
 {
         error_if_null(out);
         *out = ((union global_id *) &id)->thread_magic;
         return true;
 }
 
-bool global_id_get_thread_counter(uint_fast32_t *out, global_id_t id)
+bool global_id_get_thread_counter(uint_fast32_t *out, jak_global_id_t id)
 {
         error_if_null(out);
         *out = ((union global_id *) &id)->thread_counter;
         return true;
 }
 
-bool global_id_get_call_random(uint_fast8_t *out, global_id_t id)
+bool global_id_get_call_random(uint_fast8_t *out, jak_global_id_t id)
 {
         error_if_null(out);
         *out = ((union global_id *) &id)->call_random;

@@ -143,16 +143,16 @@ struct jak_string_cache *jak_archive_get_query_string_id_cache(struct jak_archiv
 struct jak_archive_query *jak_archive_query_default(struct jak_archive *archive);
 
 /**
- * Creates a new <code>struct io_context</code> to access the archives underlying file for unsafe operations.
+ * Creates a new <code>struct jak_io_context</code> to access the archives underlying file for unsafe operations.
  *
  * An unsafe operation directly seeks randomly in the underlying file. To avoid creation of multiple file
  * descriptors while at the same time allow to access unsafe operations in a multi-threading environment, an
- * <code>struct io_context</code> is used. Roughly, such a context is a regular FILE that is protected by a lock.
+ * <code>struct jak_io_context</code> is used. Roughly, such a context is a regular FILE that is protected by a lock.
  *
  * @param archive The archive
- * @return a heap-allocated instance of <code>struct io_context</code>, or NULL if not successful
+ * @return a heap-allocated instance of <code>struct jak_io_context</code>, or NULL if not successful
  */
-struct io_context *jak_archive_io_context_create(struct jak_archive *archive);
+struct jak_io_context *jak_archive_io_context_create(struct jak_archive *archive);
 
 JAK_END_DECL
 

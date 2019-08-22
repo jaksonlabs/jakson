@@ -18,7 +18,7 @@
 
 TEST(CarbonTest, CreateCarbon) {
         struct jak_carbon doc;
-        global_id_t oid;
+        jak_global_id_t oid;
         jak_u64 rev;
         struct jak_string builder;
         bool status;
@@ -202,8 +202,8 @@ TEST(CarbonTest, CreateCarbonRevisionAsyncReading) {
 
 TEST(CarbonTest, ModifyCarbonObjectId) {
         struct jak_carbon doc, rev_doc;
-        global_id_t oid;
-        global_id_t new_oid;
+        jak_global_id_t oid;
+        jak_global_id_t new_oid;
         struct jak_carbon_revise revise;
         jak_u64 commit_hash_old, commit_hash_new;
 
@@ -4053,7 +4053,7 @@ TEST(CarbonTest, CarbonKeyTypeAutoKeyUpdate)
         struct jak_carbon doc, rev_doc;
         struct jak_carbon_new context;
         struct jak_carbon_revise revise;
-        global_id_t id, id_read;
+        jak_global_id_t id, id_read;
 
         // -------------------------------------------------------------------------------------------------------------
         struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_AUTOKEY, JAK_CARBON_OPTIMIZE);

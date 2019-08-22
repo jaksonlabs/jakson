@@ -112,13 +112,13 @@ bool SliceListIsEmpty(const slice_list_t *list)
         return (vec_is_empty(&list->slices));
 }
 
-bool slice_list_insert(slice_list_t *list, char **strings, jak_field_sid *ids, size_t num_pairs)
+bool slice_list_insert(slice_list_t *list, char **strings, jak_archive_field_sid_t *ids, size_t num_pairs)
 {
         lock(list);
 
         while (num_pairs--) {
                 const char *key = *strings++;
-                jak_field_sid value = *ids++;
+                jak_archive_field_sid_t value = *ids++;
                 hash32_t keyHash = get_hashcode(key);
                 slice_handle_t handle;
                 int status;

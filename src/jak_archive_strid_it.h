@@ -29,7 +29,7 @@
 JAK_BEGIN_DECL
 
 struct strid_info {
-    jak_field_sid id;
+    jak_archive_field_sid_t id;
     jak_u32 strlen;
     jak_offset_t offset;
 };

@@ -48,7 +48,7 @@ bool carbon_revise_begin(struct jak_carbon_revise *context, struct jak_carbon *r
 
 const struct jak_carbon *carbon_revise_end(struct jak_carbon_revise *context);
 
-bool carbon_revise_key_generate(global_id_t *out, struct jak_carbon_revise *context);
+bool carbon_revise_key_generate(jak_global_id_t *out, struct jak_carbon_revise *context);
 
 bool carbon_revise_key_set_unsigned(struct jak_carbon_revise *context, jak_u64 key_value);
 

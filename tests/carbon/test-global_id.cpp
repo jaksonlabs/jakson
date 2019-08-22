@@ -4,16 +4,16 @@
 #include <jak_carbon.h>
 
 TEST(GlobalIdTest, CreateId) {
-    global_id_t id;
+    jak_global_id_t id;
     bool result = global_id_create(&id);
     EXPECT_TRUE(result);
     EXPECT_NE(id, 0);
 }
 
 TEST(GlobalIdTest, CreateUniqueIds) {
-    std::set<global_id_t> haystack;
+    std::set<jak_global_id_t> haystack;
     for (size_t i = 0; i < 1000000; i++) {
-        global_id_t id;
+        jak_global_id_t id;
         bool result = global_id_create(&id);
         if (!result) {
             printf("NO CAPACITY LEFT %zu\n", i);

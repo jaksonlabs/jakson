@@ -49,66 +49,66 @@ static bool init_object_from_memfile(struct jak_archive_object *obj, struct jak_
 #define STATE_AND_PROPERTY_EXISTS(state, property) \
     (iter->prop_cursor != state || iter->object.property != 0)
 
-inline static jak_offset_t offset_by_state(struct prop_iter *iter)
+inline static jak_offset_t offset_by_state(struct jak_prop_iter *iter)
 {
         switch (iter->prop_cursor) {
-                case PROP_ITER_NULLS:
+                case JAK_PROP_ITER_NULLS:
                         return iter->object.prop_offsets.nulls;
-                case PROP_ITER_BOOLS:
+                case JAK_PROP_ITER_BOOLS:
                         return iter->object.prop_offsets.bools;
-                case PROP_ITER_INT8S:
+                case JAK_PROP_ITER_INT8S:
                         return iter->object.prop_offsets.int8s;
-                case PROP_ITER_INT16S:
+                case JAK_PROP_ITER_INT16S:
                         return iter->object.prop_offsets.int16s;
-                case PROP_ITER_INT32S:
+                case JAK_PROP_ITER_INT32S:
                         return iter->object.prop_offsets.int32s;
-                case PROP_ITER_INT64S:
+                case JAK_PROP_ITER_INT64S:
                         return iter->object.prop_offsets.int64s;
-                case PROP_ITER_UINT8S:
+                case JAK_PROP_ITER_UINT8S:
                         return iter->object.prop_offsets.uint8s;
-                case PROP_ITER_UINT16S:
+                case JAK_PROP_ITER_UINT16S:
                         return iter->object.prop_offsets.uint16s;
-                case PROP_ITER_UINT32S:
+                case JAK_PROP_ITER_UINT32S:
                         return iter->object.prop_offsets.uint32s;
-                case PROP_ITER_UINT64S:
+                case JAK_PROP_ITER_UINT64S:
                         return iter->object.prop_offsets.uint64s;
-                case PROP_ITER_FLOATS:
+                case JAK_PROP_ITER_FLOATS:
                         return iter->object.prop_offsets.floats;
-                case PROP_ITER_STRINGS:
+                case JAK_PROP_ITER_STRINGS:
                         return iter->object.prop_offsets.strings;
-                case PROP_ITER_OBJECTS:
+                case JAK_PROP_ITER_OBJECTS:
                         return iter->object.prop_offsets.objects;
-                case PROP_ITER_NULL_ARRAYS:
+                case JAK_PROP_ITER_NULL_ARRAYS:
                         return iter->object.prop_offsets.null_arrays;
-                case PROP_ITER_BOOL_ARRAYS:
+                case JAK_PROP_ITER_BOOL_ARRAYS:
                         return iter->object.prop_offsets.bool_arrays;
-                case PROP_ITER_INT8_ARRAYS:
+                case JAK_PROP_ITER_INT8_ARRAYS:
                         return iter->object.prop_offsets.int8_arrays;
-                case PROP_ITER_INT16_ARRAYS:
+                case JAK_PROP_ITER_INT16_ARRAYS:
                         return iter->object.prop_offsets.int16_arrays;
-                case PROP_ITER_INT32_ARRAYS:
+                case JAK_PROP_ITER_INT32_ARRAYS:
                         return iter->object.prop_offsets.int32_arrays;
-                case PROP_ITER_INT64_ARRAYS:
+                case JAK_PROP_ITER_INT64_ARRAYS:
                         return iter->object.prop_offsets.int64_arrays;
-                case PROP_ITER_UINT8_ARRAYS:
+                case JAK_PROP_ITER_UINT8_ARRAYS:
                         return iter->object.prop_offsets.uint8_arrays;
-                case PROP_ITER_UINT16_ARRAYS:
+                case JAK_PROP_ITER_UINT16_ARRAYS:
                         return iter->object.prop_offsets.uint16_arrays;
-                case PROP_ITER_UINT32_ARRAYS:
+                case JAK_PROP_ITER_UINT32_ARRAYS:
                         return iter->object.prop_offsets.uint32_arrays;
-                case PROP_ITER_UINT64_ARRAYS:
+                case JAK_PROP_ITER_UINT64_ARRAYS:
                         return iter->object.prop_offsets.uint64_arrays;
-                case PROP_ITER_FLOAT_ARRAYS:
+                case JAK_PROP_ITER_FLOAT_ARRAYS:
                         return iter->object.prop_offsets.float_arrays;
-                case PROP_ITER_STRING_ARRAYS:
+                case JAK_PROP_ITER_STRING_ARRAYS:
                         return iter->object.prop_offsets.string_arrays;
-                case PROP_ITER_OBJECT_ARRAYS:
+                case JAK_PROP_ITER_OBJECT_ARRAYS:
                         return iter->object.prop_offsets.object_arrays;
                 default: print_error_and_die(JAK_ERR_INTERNALERR)
         }
 }
 
-static bool prop_iter_read_colum_entry(struct collection_iter_state *state, struct jak_memfile *memfile)
+static bool prop_iter_read_colum_entry(struct jak_collection_iter_state *state, struct jak_memfile *memfile)
 {
         assert(state->current_column_group.current_column.current_entry.idx
                < state->current_column_group.current_column.num_elem);
@@ -124,7 +124,7 @@ static bool prop_iter_read_colum_entry(struct collection_iter_state *state, stru
                < state->current_column_group.current_column.num_elem;
 }
 
-static bool prop_iter_read_column(struct collection_iter_state *state, struct jak_memfile *memfile)
+static bool prop_iter_read_column(struct jak_collection_iter_state *state, struct jak_memfile *memfile)
 {
         assert(state->current_column_group.current_column.idx < state->current_column_group.num_columns);
 
@@ -147,7 +147,7 @@ static bool prop_iter_read_column(struct collection_iter_state *state, struct ja
         return (++state->current_column_group.current_column.idx) < state->current_column_group.num_columns;
 }
 
-static bool collection_iter_read_next_column_group(struct collection_iter_state *state, struct jak_memfile *memfile)
+static bool collection_iter_read_next_column_group(struct jak_collection_iter_state *state, struct jak_memfile *memfile)
 {
         assert(state->current_column_group_idx < state->num_column_groups);
         memfile_seek(memfile, state->column_group_offsets[state->current_column_group_idx]);
@@ -155,43 +155,43 @@ static bool collection_iter_read_next_column_group(struct collection_iter_state 
         assert(header->marker == JAK_MARKER_SYMBOL_COLUMN_GROUP);
         state->current_column_group.num_columns = header->num_columns;
         state->current_column_group.num_objects = header->num_objects;
-        state->current_column_group.object_ids = JAK_MEMFILE_READ_TYPE_LIST(memfile, global_id_t, header->num_objects);
+        state->current_column_group.object_ids = JAK_MEMFILE_READ_TYPE_LIST(memfile, jak_global_id_t, header->num_objects);
         state->current_column_group.column_offs = JAK_MEMFILE_READ_TYPE_LIST(memfile, jak_offset_t, header->num_columns);
         state->current_column_group.current_column.idx = 0;
 
         return (++state->current_column_group_idx) < state->num_column_groups;
 }
 
-static void prop_iter_cursor_init(struct prop_iter *iter)
+static void prop_iter_cursor_init(struct jak_prop_iter *iter)
 {
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_NULLS, prop_offsets.nulls));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_BOOLS, prop_offsets.bools));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_INT8S, prop_offsets.int8s));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_INT16S, prop_offsets.int16s));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_INT32S, prop_offsets.int32s));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_INT64S, prop_offsets.int64s));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_UINT8S, prop_offsets.uint8s));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_UINT16S, prop_offsets.uint16s));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_UINT32S, prop_offsets.uint32s));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_UINT64S, prop_offsets.uint64s));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_FLOATS, prop_offsets.floats));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_STRINGS, prop_offsets.strings));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_OBJECTS, prop_offsets.objects));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_NULL_ARRAYS, prop_offsets.null_arrays));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_BOOL_ARRAYS, prop_offsets.bool_arrays));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_INT8_ARRAYS, prop_offsets.int8_arrays));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_INT16_ARRAYS, prop_offsets.int16_arrays));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_INT32_ARRAYS, prop_offsets.int32_arrays));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_INT64_ARRAYS, prop_offsets.int64_arrays));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_UINT8_ARRAYS, prop_offsets.uint8_arrays));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_UINT16_ARRAYS, prop_offsets.uint16_arrays));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_UINT32_ARRAYS, prop_offsets.uint32_arrays));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_UINT64_ARRAYS, prop_offsets.uint64_arrays));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_FLOAT_ARRAYS, prop_offsets.float_arrays));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_STRING_ARRAYS, prop_offsets.string_arrays));
-        assert(STATE_AND_PROPERTY_EXISTS(PROP_ITER_OBJECT_ARRAYS, prop_offsets.object_arrays));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_NULLS, prop_offsets.nulls));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_BOOLS, prop_offsets.bools));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_INT8S, prop_offsets.int8s));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_INT16S, prop_offsets.int16s));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_INT32S, prop_offsets.int32s));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_INT64S, prop_offsets.int64s));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_UINT8S, prop_offsets.uint8s));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_UINT16S, prop_offsets.uint16s));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_UINT32S, prop_offsets.uint32s));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_UINT64S, prop_offsets.uint64s));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_FLOATS, prop_offsets.floats));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_STRINGS, prop_offsets.strings));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_OBJECTS, prop_offsets.objects));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_NULL_ARRAYS, prop_offsets.null_arrays));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_BOOL_ARRAYS, prop_offsets.bool_arrays));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_INT8_ARRAYS, prop_offsets.int8_arrays));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_INT16_ARRAYS, prop_offsets.int16_arrays));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_INT32_ARRAYS, prop_offsets.int32_arrays));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_INT64_ARRAYS, prop_offsets.int64_arrays));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_UINT8_ARRAYS, prop_offsets.uint8_arrays));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_UINT16_ARRAYS, prop_offsets.uint16_arrays));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_UINT32_ARRAYS, prop_offsets.uint32_arrays));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_UINT64_ARRAYS, prop_offsets.uint64_arrays));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_FLOAT_ARRAYS, prop_offsets.float_arrays));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_STRING_ARRAYS, prop_offsets.string_arrays));
+        assert(STATE_AND_PROPERTY_EXISTS(JAK_PROP_ITER_OBJECT_ARRAYS, prop_offsets.object_arrays));
 
-        if (iter->mode == PROP_ITER_MODE_COLLECTION) {
+        if (iter->mode == JAK_PROP_ITER_MODE_COLLECTION) {
                 iter->mode_collection.collection_start_off = offset_by_state(iter);
                 memfile_seek(&iter->record_table_memfile, iter->mode_collection.collection_start_off);
                 const struct jak_object_array_header
@@ -199,7 +199,7 @@ static void prop_iter_cursor_init(struct prop_iter *iter)
                 iter->mode_collection.num_column_groups = header->num_entries;
                 iter->mode_collection.current_column_group_idx = 0;
                 iter->mode_collection.column_group_keys = JAK_MEMFILE_READ_TYPE_LIST(&iter->record_table_memfile,
-                                                                                     jak_field_sid,
+                                                                                     jak_archive_field_sid_t,
                                                                                      iter->mode_collection.num_column_groups);
                 iter->mode_collection.column_group_offsets = JAK_MEMFILE_READ_TYPE_LIST(&iter->record_table_memfile,
                                                                                         jak_offset_t,
@@ -227,151 +227,151 @@ static void prop_iter_cursor_init(struct prop_iter *iter)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 
-static enum prop_iter_state prop_iter_state_next(struct prop_iter *iter)
+static enum jak_prop_iter_state prop_iter_state_next(struct jak_prop_iter *iter)
 {
         switch (iter->prop_cursor) {
-                case PROP_ITER_INIT: SET_STATE_FOR_FALL_THROUGH(iter,
+                case JAK_PROP_ITER_INIT: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                 nulls,
                                                                 JAK_ARCHIVE_ITER_MASK_PRIMITIVES,
                                                                 JAK_ARCHIVE_ITER_MASK_NULL,
-                                                                PROP_ITER_NULLS)
-                case PROP_ITER_NULLS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                JAK_PROP_ITER_NULLS)
+                case JAK_PROP_ITER_NULLS: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                  bools,
                                                                  JAK_ARCHIVE_ITER_MASK_PRIMITIVES,
                                                                  JAK_ARCHIVE_ITER_MASK_BOOLEAN,
-                                                                 PROP_ITER_BOOLS)
-                case PROP_ITER_BOOLS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                 JAK_PROP_ITER_BOOLS)
+                case JAK_PROP_ITER_BOOLS: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                  int8s,
                                                                  JAK_ARCHIVE_ITER_MASK_PRIMITIVES,
                                                                  JAK_ARCHIVE_ITER_MASK_INT8,
-                                                                 PROP_ITER_INT8S)
-                case PROP_ITER_INT8S: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                 JAK_PROP_ITER_INT8S)
+                case JAK_PROP_ITER_INT8S: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                  int16s,
                                                                  JAK_ARCHIVE_ITER_MASK_PRIMITIVES,
                                                                  JAK_ARCHIVE_ITER_MASK_INT16,
-                                                                 PROP_ITER_INT16S)
-                case PROP_ITER_INT16S: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                 JAK_PROP_ITER_INT16S)
+                case JAK_PROP_ITER_INT16S: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                   int32s,
                                                                   JAK_ARCHIVE_ITER_MASK_PRIMITIVES,
                                                                   JAK_ARCHIVE_ITER_MASK_INT32,
-                                                                  PROP_ITER_INT32S)
-                case PROP_ITER_INT32S: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                  JAK_PROP_ITER_INT32S)
+                case JAK_PROP_ITER_INT32S: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                   int64s,
                                                                   JAK_ARCHIVE_ITER_MASK_PRIMITIVES,
                                                                   JAK_ARCHIVE_ITER_MASK_INT64,
-                                                                  PROP_ITER_INT64S)
-                case PROP_ITER_INT64S: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                  JAK_PROP_ITER_INT64S)
+                case JAK_PROP_ITER_INT64S: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                   uint8s,
                                                                   JAK_ARCHIVE_ITER_MASK_PRIMITIVES,
                                                                   JAK_ARCHIVE_ITER_MASK_UINT8,
-                                                                  PROP_ITER_UINT8S)
-                case PROP_ITER_UINT8S: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                  JAK_PROP_ITER_UINT8S)
+                case JAK_PROP_ITER_UINT8S: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                   uint16s,
                                                                   JAK_ARCHIVE_ITER_MASK_PRIMITIVES,
                                                                   JAK_ARCHIVE_ITER_MASK_UINT16,
-                                                                  PROP_ITER_UINT16S)
-                case PROP_ITER_UINT16S: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                  JAK_PROP_ITER_UINT16S)
+                case JAK_PROP_ITER_UINT16S: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                    uint32s,
                                                                    JAK_ARCHIVE_ITER_MASK_PRIMITIVES,
                                                                    JAK_ARCHIVE_ITER_MASK_UINT32,
-                                                                   PROP_ITER_UINT32S)
-                case PROP_ITER_UINT32S: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                   JAK_PROP_ITER_UINT32S)
+                case JAK_PROP_ITER_UINT32S: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                    uint64s,
                                                                    JAK_ARCHIVE_ITER_MASK_PRIMITIVES,
                                                                    JAK_ARCHIVE_ITER_MASK_UINT64,
-                                                                   PROP_ITER_UINT64S)
-                case PROP_ITER_UINT64S: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                   JAK_PROP_ITER_UINT64S)
+                case JAK_PROP_ITER_UINT64S: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                    floats,
                                                                    JAK_ARCHIVE_ITER_MASK_PRIMITIVES,
                                                                    JAK_ARCHIVE_ITER_MASK_NUMBER,
-                                                                   PROP_ITER_FLOATS)
-                case PROP_ITER_FLOATS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                   JAK_PROP_ITER_FLOATS)
+                case JAK_PROP_ITER_FLOATS: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                   strings,
                                                                   JAK_ARCHIVE_ITER_MASK_PRIMITIVES,
                                                                   JAK_ARCHIVE_ITER_MASK_STRING,
-                                                                  PROP_ITER_STRINGS)
-                case PROP_ITER_STRINGS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                  JAK_PROP_ITER_STRINGS)
+                case JAK_PROP_ITER_STRINGS: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                    objects,
                                                                    JAK_ARCHIVE_ITER_MASK_PRIMITIVES,
                                                                    JAK_ARCHIVE_ITER_MASK_OBJECT,
-                                                                   PROP_ITER_OBJECTS)
-                case PROP_ITER_OBJECTS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                   JAK_PROP_ITER_OBJECTS)
+                case JAK_PROP_ITER_OBJECTS: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                    null_arrays,
                                                                    JAK_ARCHIVE_ITER_MASK_ARRAYS,
                                                                    JAK_ARCHIVE_ITER_MASK_NULL,
-                                                                   PROP_ITER_NULL_ARRAYS)
-                case PROP_ITER_NULL_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                   JAK_PROP_ITER_NULL_ARRAYS)
+                case JAK_PROP_ITER_NULL_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                        bool_arrays,
                                                                        JAK_ARCHIVE_ITER_MASK_ARRAYS,
                                                                        JAK_ARCHIVE_ITER_MASK_BOOLEAN,
-                                                                       PROP_ITER_BOOL_ARRAYS)
-                case PROP_ITER_BOOL_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                       JAK_PROP_ITER_BOOL_ARRAYS)
+                case JAK_PROP_ITER_BOOL_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                        int8_arrays,
                                                                        JAK_ARCHIVE_ITER_MASK_ARRAYS,
                                                                        JAK_ARCHIVE_ITER_MASK_INT8,
-                                                                       PROP_ITER_INT8_ARRAYS)
-                case PROP_ITER_INT8_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                       JAK_PROP_ITER_INT8_ARRAYS)
+                case JAK_PROP_ITER_INT8_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                        int16_arrays,
                                                                        JAK_ARCHIVE_ITER_MASK_ARRAYS,
                                                                        JAK_ARCHIVE_ITER_MASK_INT16,
-                                                                       PROP_ITER_INT16_ARRAYS)
-                case PROP_ITER_INT16_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                       JAK_PROP_ITER_INT16_ARRAYS)
+                case JAK_PROP_ITER_INT16_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                         int32_arrays,
                                                                         JAK_ARCHIVE_ITER_MASK_ARRAYS,
                                                                         JAK_ARCHIVE_ITER_MASK_INT32,
-                                                                        PROP_ITER_INT32_ARRAYS)
-                case PROP_ITER_INT32_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                        JAK_PROP_ITER_INT32_ARRAYS)
+                case JAK_PROP_ITER_INT32_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                         int64_arrays,
                                                                         JAK_ARCHIVE_ITER_MASK_ARRAYS,
                                                                         JAK_ARCHIVE_ITER_MASK_INT64,
-                                                                        PROP_ITER_INT64_ARRAYS)
-                case PROP_ITER_INT64_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                        JAK_PROP_ITER_INT64_ARRAYS)
+                case JAK_PROP_ITER_INT64_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                         uint8_arrays,
                                                                         JAK_ARCHIVE_ITER_MASK_ARRAYS,
                                                                         JAK_ARCHIVE_ITER_MASK_UINT8,
-                                                                        PROP_ITER_UINT8_ARRAYS)
-                case PROP_ITER_UINT8_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                        JAK_PROP_ITER_UINT8_ARRAYS)
+                case JAK_PROP_ITER_UINT8_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                         uint16_arrays,
                                                                         JAK_ARCHIVE_ITER_MASK_ARRAYS,
                                                                         JAK_ARCHIVE_ITER_MASK_UINT16,
-                                                                        PROP_ITER_UINT16_ARRAYS)
-                case PROP_ITER_UINT16_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                        JAK_PROP_ITER_UINT16_ARRAYS)
+                case JAK_PROP_ITER_UINT16_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                          uint32_arrays,
                                                                          JAK_ARCHIVE_ITER_MASK_ARRAYS,
                                                                          JAK_ARCHIVE_ITER_MASK_UINT32,
-                                                                         PROP_ITER_UINT32_ARRAYS)
-                case PROP_ITER_UINT32_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                         JAK_PROP_ITER_UINT32_ARRAYS)
+                case JAK_PROP_ITER_UINT32_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                          uint64_arrays,
                                                                          JAK_ARCHIVE_ITER_MASK_ARRAYS,
                                                                          JAK_ARCHIVE_ITER_MASK_UINT64,
-                                                                         PROP_ITER_UINT64_ARRAYS)
-                case PROP_ITER_UINT64_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                         JAK_PROP_ITER_UINT64_ARRAYS)
+                case JAK_PROP_ITER_UINT64_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                          float_arrays,
                                                                          JAK_ARCHIVE_ITER_MASK_ARRAYS,
                                                                          JAK_ARCHIVE_ITER_MASK_NUMBER,
-                                                                         PROP_ITER_FLOAT_ARRAYS)
-                case PROP_ITER_FLOAT_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                         JAK_PROP_ITER_FLOAT_ARRAYS)
+                case JAK_PROP_ITER_FLOAT_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                         string_arrays,
                                                                         JAK_ARCHIVE_ITER_MASK_ARRAYS,
                                                                         JAK_ARCHIVE_ITER_MASK_STRING,
-                                                                        PROP_ITER_STRING_ARRAYS)
-                case PROP_ITER_STRING_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
+                                                                        JAK_PROP_ITER_STRING_ARRAYS)
+                case JAK_PROP_ITER_STRING_ARRAYS: SET_STATE_FOR_FALL_THROUGH(iter,
                                                                          object_arrays,
                                                                          JAK_ARCHIVE_ITER_MASK_ARRAYS,
                                                                          JAK_ARCHIVE_ITER_MASK_OBJECT,
-                                                                         PROP_ITER_OBJECT_ARRAYS)
-                case PROP_ITER_OBJECT_ARRAYS:
-                        iter->prop_cursor = PROP_ITER_DONE;
+                                                                         JAK_PROP_ITER_OBJECT_ARRAYS)
+                case JAK_PROP_ITER_OBJECT_ARRAYS:
+                        iter->prop_cursor = JAK_PROP_ITER_DONE;
                         break;
 
-                case PROP_ITER_DONE:
+                case JAK_PROP_ITER_DONE:
                         break;
                 default: print_error_and_die(JAK_ERR_INTERNALERR);
         }
 
-        iter->mode = iter->prop_cursor == PROP_ITER_OBJECT_ARRAYS ? PROP_ITER_MODE_COLLECTION : PROP_ITER_MODE_OBJECT;
+        iter->mode = iter->prop_cursor == JAK_PROP_ITER_OBJECT_ARRAYS ? JAK_PROP_ITER_MODE_COLLECTION : JAK_PROP_ITER_MODE_OBJECT;
 
-        if (iter->prop_cursor != PROP_ITER_DONE) {
+        if (iter->prop_cursor != JAK_PROP_ITER_DONE) {
                 prop_iter_cursor_init(iter);
         }
         return iter->prop_cursor;
@@ -379,13 +379,13 @@ static enum prop_iter_state prop_iter_state_next(struct prop_iter *iter)
 
 #pragma GCC diagnostic pop
 
-static void prop_iter_state_init(struct prop_iter *iter)
+static void prop_iter_state_init(struct jak_prop_iter *iter)
 {
-        iter->prop_cursor = PROP_ITER_INIT;
-        iter->mode = PROP_ITER_MODE_OBJECT;
+        iter->prop_cursor = JAK_PROP_ITER_INIT;
+        iter->mode = JAK_PROP_ITER_MODE_OBJECT;
 }
 
-static bool archive_prop_iter_from_memblock(struct prop_iter *iter, struct jak_error *err, jak_u16 mask,
+static bool archive_prop_iter_from_memblock(struct jak_prop_iter *iter, struct jak_error *err, jak_u16 mask,
                                             struct jak_memblock *memblock, jak_offset_t object_offset)
 {
         error_if_null(iter)
@@ -413,108 +413,108 @@ static bool archive_prop_iter_from_memblock(struct prop_iter *iter, struct jak_e
         return true;
 }
 
-bool archive_prop_iter_from_archive(struct prop_iter *iter, struct jak_error *err, jak_u16 mask,
+bool archive_prop_iter_from_archive(struct jak_prop_iter *iter, struct jak_error *err, jak_u16 mask,
                                     struct jak_archive *archive)
 {
         return archive_prop_iter_from_memblock(iter, err, mask, archive->record_table.record_db, 0);
 }
 
-bool archive_prop_iter_from_object(struct prop_iter *iter, jak_u16 mask, struct jak_error *err,
+bool archive_prop_iter_from_object(struct jak_prop_iter *iter, jak_u16 mask, struct jak_error *err,
                                    const struct jak_archive_object *obj)
 {
         return archive_prop_iter_from_memblock(iter, err, mask, obj->memfile.memblock, obj->offset);
 }
 
-static enum field_type get_basic_type(enum prop_iter_state state)
+static enum jak_archive_field_type get_basic_type(enum jak_prop_iter_state state)
 {
         switch (state) {
-                case PROP_ITER_NULLS:
-                case PROP_ITER_NULL_ARRAYS:
+                case JAK_PROP_ITER_NULLS:
+                case JAK_PROP_ITER_NULL_ARRAYS:
                         return JAK_FIELD_NULL;
-                case PROP_ITER_BOOLS:
-                case PROP_ITER_BOOL_ARRAYS:
+                case JAK_PROP_ITER_BOOLS:
+                case JAK_PROP_ITER_BOOL_ARRAYS:
                         return JAK_FIELD_BOOLEAN;
-                case PROP_ITER_INT8S:
-                case PROP_ITER_INT8_ARRAYS:
+                case JAK_PROP_ITER_INT8S:
+                case JAK_PROP_ITER_INT8_ARRAYS:
                         return JAK_FIELD_INT8;
-                case PROP_ITER_INT16S:
-                case PROP_ITER_INT16_ARRAYS:
+                case JAK_PROP_ITER_INT16S:
+                case JAK_PROP_ITER_INT16_ARRAYS:
                         return JAK_FIELD_INT16;
-                case PROP_ITER_INT32S:
-                case PROP_ITER_INT32_ARRAYS:
+                case JAK_PROP_ITER_INT32S:
+                case JAK_PROP_ITER_INT32_ARRAYS:
                         return JAK_FIELD_INT32;
-                case PROP_ITER_INT64S:
-                case PROP_ITER_INT64_ARRAYS:
+                case JAK_PROP_ITER_INT64S:
+                case JAK_PROP_ITER_INT64_ARRAYS:
                         return JAK_FIELD_INT64;
-                case PROP_ITER_UINT8S:
-                case PROP_ITER_UINT8_ARRAYS:
+                case JAK_PROP_ITER_UINT8S:
+                case JAK_PROP_ITER_UINT8_ARRAYS:
                         return JAK_FIELD_UINT8;
-                case PROP_ITER_UINT16S:
-                case PROP_ITER_UINT16_ARRAYS:
+                case JAK_PROP_ITER_UINT16S:
+                case JAK_PROP_ITER_UINT16_ARRAYS:
                         return JAK_FIELD_UINT16;
-                case PROP_ITER_UINT32S:
-                case PROP_ITER_UINT32_ARRAYS:
+                case JAK_PROP_ITER_UINT32S:
+                case JAK_PROP_ITER_UINT32_ARRAYS:
                         return JAK_FIELD_UINT32;
-                case PROP_ITER_UINT64S:
-                case PROP_ITER_UINT64_ARRAYS:
+                case JAK_PROP_ITER_UINT64S:
+                case JAK_PROP_ITER_UINT64_ARRAYS:
                         return JAK_FIELD_UINT64;
-                case PROP_ITER_FLOATS:
-                case PROP_ITER_FLOAT_ARRAYS:
+                case JAK_PROP_ITER_FLOATS:
+                case JAK_PROP_ITER_FLOAT_ARRAYS:
                         return JAK_FIELD_FLOAT;
-                case PROP_ITER_STRINGS:
-                case PROP_ITER_STRING_ARRAYS:
+                case JAK_PROP_ITER_STRINGS:
+                case JAK_PROP_ITER_STRING_ARRAYS:
                         return JAK_FIELD_STRING;
-                case PROP_ITER_OBJECTS:
-                case PROP_ITER_OBJECT_ARRAYS:
+                case JAK_PROP_ITER_OBJECTS:
+                case JAK_PROP_ITER_OBJECT_ARRAYS:
                         return JAK_FIELD_OBJECT;
                 default: print_error_and_die(JAK_ERR_INTERNALERR);
         }
 }
 
-static bool is_array_type(enum prop_iter_state state)
+static bool is_array_type(enum jak_prop_iter_state state)
 {
         switch (state) {
-                case PROP_ITER_NULLS:
-                case PROP_ITER_BOOLS:
-                case PROP_ITER_INT8S:
-                case PROP_ITER_INT16S:
-                case PROP_ITER_INT32S:
-                case PROP_ITER_INT64S:
-                case PROP_ITER_UINT8S:
-                case PROP_ITER_UINT16S:
-                case PROP_ITER_UINT32S:
-                case PROP_ITER_UINT64S:
-                case PROP_ITER_FLOATS:
-                case PROP_ITER_STRINGS:
-                case PROP_ITER_OBJECTS:
+                case JAK_PROP_ITER_NULLS:
+                case JAK_PROP_ITER_BOOLS:
+                case JAK_PROP_ITER_INT8S:
+                case JAK_PROP_ITER_INT16S:
+                case JAK_PROP_ITER_INT32S:
+                case JAK_PROP_ITER_INT64S:
+                case JAK_PROP_ITER_UINT8S:
+                case JAK_PROP_ITER_UINT16S:
+                case JAK_PROP_ITER_UINT32S:
+                case JAK_PROP_ITER_UINT64S:
+                case JAK_PROP_ITER_FLOATS:
+                case JAK_PROP_ITER_STRINGS:
+                case JAK_PROP_ITER_OBJECTS:
                         return false;
-                case PROP_ITER_NULL_ARRAYS:
-                case PROP_ITER_BOOL_ARRAYS:
-                case PROP_ITER_INT8_ARRAYS:
-                case PROP_ITER_INT16_ARRAYS:
-                case PROP_ITER_INT32_ARRAYS:
-                case PROP_ITER_INT64_ARRAYS:
-                case PROP_ITER_UINT8_ARRAYS:
-                case PROP_ITER_UINT16_ARRAYS:
-                case PROP_ITER_UINT32_ARRAYS:
-                case PROP_ITER_UINT64_ARRAYS:
-                case PROP_ITER_FLOAT_ARRAYS:
-                case PROP_ITER_STRING_ARRAYS:
-                case PROP_ITER_OBJECT_ARRAYS:
+                case JAK_PROP_ITER_NULL_ARRAYS:
+                case JAK_PROP_ITER_BOOL_ARRAYS:
+                case JAK_PROP_ITER_INT8_ARRAYS:
+                case JAK_PROP_ITER_INT16_ARRAYS:
+                case JAK_PROP_ITER_INT32_ARRAYS:
+                case JAK_PROP_ITER_INT64_ARRAYS:
+                case JAK_PROP_ITER_UINT8_ARRAYS:
+                case JAK_PROP_ITER_UINT16_ARRAYS:
+                case JAK_PROP_ITER_UINT32_ARRAYS:
+                case JAK_PROP_ITER_UINT64_ARRAYS:
+                case JAK_PROP_ITER_FLOAT_ARRAYS:
+                case JAK_PROP_ITER_STRING_ARRAYS:
+                case JAK_PROP_ITER_OBJECT_ARRAYS:
                         return true;
                 default: print_error_and_die(JAK_ERR_INTERNALERR);
         }
 }
 
-bool archive_prop_iter_next(enum prop_iter_mode *type, struct jak_archive_value_vector *value_vector,
-                            archive_collection_iter_t *collection_iter, struct prop_iter *prop_iter)
+bool archive_prop_iter_next(enum jak_prop_iter_mode *type, struct jak_archive_value_vector *value_vector,
+                            archive_collection_iter_t *collection_iter, struct jak_prop_iter *prop_iter)
 {
         error_if_null(type);
         error_if_null(prop_iter);
 
-        if (prop_iter->prop_cursor != PROP_ITER_DONE) {
+        if (prop_iter->prop_cursor != JAK_PROP_ITER_DONE) {
                 switch (prop_iter->mode) {
-                        case PROP_ITER_MODE_OBJECT: {
+                        case JAK_PROP_ITER_MODE_OBJECT: {
                                 value_vector->keys = prop_iter->mode_object.prop_group_header.keys;
 
                                 prop_iter->mode_object.type = get_basic_type(prop_iter->prop_cursor);
@@ -531,7 +531,7 @@ bool archive_prop_iter_next(enum prop_iter_mode *type, struct jak_archive_value_
                                 }
                         }
                                 break;
-                        case PROP_ITER_MODE_COLLECTION: {
+                        case JAK_PROP_ITER_MODE_COLLECTION: {
                                 collection_iter->state = prop_iter->mode_collection;
                                 memfile_open(&collection_iter->record_table_memfile,
                                              prop_iter->record_table_memfile.memblock,
@@ -550,7 +550,7 @@ bool archive_prop_iter_next(enum prop_iter_mode *type, struct jak_archive_value_
         }
 }
 
-const jak_field_sid *archive_collection_iter_get_keys(jak_u32 *num_keys, archive_collection_iter_t *iter)
+const jak_archive_field_sid_t *archive_collection_iter_get_keys(jak_u32 *num_keys, archive_collection_iter_t *iter)
 {
         if (num_keys && iter) {
                 *num_keys = iter->state.num_column_groups;
@@ -578,7 +578,7 @@ bool archive_collection_next_column_group(archive_column_group_iter_t *group_ite
         }
 }
 
-const global_id_t *archive_column_group_get_object_ids(jak_u32 *num_objects, archive_column_group_iter_t *iter)
+const jak_global_id_t *archive_column_group_get_object_ids(jak_u32 *num_objects, archive_column_group_iter_t *iter)
 {
         if (num_objects && iter) {
                 *num_objects = iter->state.current_column_group.num_objects;
@@ -605,7 +605,7 @@ bool archive_column_group_next_column(archive_column_iter_t *column_iter, archiv
         }
 }
 
-bool archive_column_get_name(jak_field_sid *name, enum field_type *type, archive_column_iter_t *column_iter)
+bool archive_column_get_name(jak_archive_field_sid_t *name, enum jak_archive_field_type *type, archive_column_iter_t *column_iter)
 {
         error_if_null(column_iter)
         JAK_optional_set(name, column_iter->state.current_column_group.current_column.name)
@@ -641,7 +641,7 @@ bool archive_column_next_entry(archive_column_entry_iter_t *entry_iter, archive_
         }
 }
 
-bool archive_column_entry_get_type(enum field_type *type, archive_column_entry_iter_t *entry)
+bool archive_column_entry_get_type(enum jak_archive_field_type *type, archive_column_entry_iter_t *entry)
 {
         error_if_null(type)
         error_if_null(entry)
@@ -668,29 +668,29 @@ archive_column_entry_get_##name(jak_u32 *array_length, archive_column_entry_iter
     }                                                                                                                  \
 }
 
-DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_i8_t, int8s, JAK_FIELD_INT8);
+DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_i8_t, int8s, JAK_FIELD_INT8);
 
-DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_i16_t, int16s, JAK_FIELD_INT16);
+DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_i16_t, int16s, JAK_FIELD_INT16);
 
-DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_i32_t, int32s, JAK_FIELD_INT32);
+DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_i32_t, int32s, JAK_FIELD_INT32);
 
-DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_i64_t, int64s, JAK_FIELD_INT64);
+DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_i64_t, int64s, JAK_FIELD_INT64);
 
-DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u8_t, uint8s, JAK_FIELD_UINT8);
+DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_u8_t, uint8s, JAK_FIELD_UINT8);
 
-DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u16_t, uint16s, JAK_FIELD_UINT16);
+DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_u16_t, uint16s, JAK_FIELD_UINT16);
 
-DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u32_t, uint32s, JAK_FIELD_UINT32);
+DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_u32_t, uint32s, JAK_FIELD_UINT32);
 
-DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u64_t, uint64s, JAK_FIELD_UINT64);
+DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_u64_t, uint64s, JAK_FIELD_UINT64);
 
-DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_field_sid, strings, JAK_FIELD_STRING);
+DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_sid_t, strings, JAK_FIELD_STRING);
 
-DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_number_t, numbers, JAK_FIELD_FLOAT);
+DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_number_t, numbers, JAK_FIELD_FLOAT);
 
-DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_boolean_t, booleans, JAK_FIELD_BOOLEAN);
+DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_boolean_t, booleans, JAK_FIELD_BOOLEAN);
 
-DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(field_u32_t, nulls, JAK_FIELD_NULL);
+DECLARE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_u32_t, nulls, JAK_FIELD_NULL);
 
 bool archive_column_entry_get_objects(struct column_object_iter *iter, archive_column_entry_iter_t *entry)
 {
@@ -729,7 +729,7 @@ const struct jak_archive_object *archive_column_entry_object_iter_next_object(st
         }
 }
 
-bool archive_object_get_object_id(global_id_t *id, const struct jak_archive_object *object)
+bool archive_object_get_object_id(jak_global_id_t *id, const struct jak_archive_object *object)
 {
         error_if_null(id)
         error_if_null(object)
@@ -737,7 +737,7 @@ bool archive_object_get_object_id(global_id_t *id, const struct jak_archive_obje
         return true;
 }
 
-bool archive_object_get_prop_iter(struct prop_iter *iter, const struct jak_archive_object *object)
+bool archive_object_get_prop_iter(struct jak_prop_iter *iter, const struct jak_archive_object *object)
 {
         // XXXX archive_prop_iter_from_object()
         JAK_UNUSED(iter);
@@ -745,7 +745,7 @@ bool archive_object_get_prop_iter(struct prop_iter *iter, const struct jak_archi
         return false;
 }
 
-bool archive_value_vector_get_object_id(global_id_t *id, const struct jak_archive_value_vector *iter)
+bool archive_value_vector_get_object_id(jak_global_id_t *id, const struct jak_archive_value_vector *iter)
 {
         error_if_null(id)
         error_if_null(iter)
@@ -753,7 +753,7 @@ bool archive_value_vector_get_object_id(global_id_t *id, const struct jak_archiv
         return true;
 }
 
-const jak_field_sid *archive_value_vector_get_keys(jak_u32 *num_keys, struct jak_archive_value_vector *iter)
+const jak_archive_field_sid_t *archive_value_vector_get_keys(jak_u32 *num_keys, struct jak_archive_value_vector *iter)
 {
         if (num_keys && iter) {
                 *num_keys = iter->value_max_idx;
@@ -776,39 +776,39 @@ static void value_vector_init_fixed_length_types_basic(struct jak_archive_value_
 
         switch (value->prop_type) {
                 case JAK_FIELD_INT8:
-                        value->data.basic.values.int8s = JAK_MEMFILE_PEEK(&value->record_table_memfile, field_i8_t);
+                        value->data.basic.values.int8s = JAK_MEMFILE_PEEK(&value->record_table_memfile, jak_archive_field_i8_t);
                         break;
                 case JAK_FIELD_INT16:
-                        value->data.basic.values.int16s = JAK_MEMFILE_PEEK(&value->record_table_memfile, field_i16_t);
+                        value->data.basic.values.int16s = JAK_MEMFILE_PEEK(&value->record_table_memfile, jak_archive_field_i16_t);
                         break;
                 case JAK_FIELD_INT32:
-                        value->data.basic.values.int32s = JAK_MEMFILE_PEEK(&value->record_table_memfile, field_i32_t);
+                        value->data.basic.values.int32s = JAK_MEMFILE_PEEK(&value->record_table_memfile, jak_archive_field_i32_t);
                         break;
                 case JAK_FIELD_INT64:
-                        value->data.basic.values.int64s = JAK_MEMFILE_PEEK(&value->record_table_memfile, field_i64_t);
+                        value->data.basic.values.int64s = JAK_MEMFILE_PEEK(&value->record_table_memfile, jak_archive_field_i64_t);
                         break;
                 case JAK_FIELD_UINT8:
-                        value->data.basic.values.uint8s = JAK_MEMFILE_PEEK(&value->record_table_memfile, field_u8_t);
+                        value->data.basic.values.uint8s = JAK_MEMFILE_PEEK(&value->record_table_memfile, jak_archive_field_u8_t);
                         break;
                 case JAK_FIELD_UINT16:
-                        value->data.basic.values.uint16s = JAK_MEMFILE_PEEK(&value->record_table_memfile, field_u16_t);
+                        value->data.basic.values.uint16s = JAK_MEMFILE_PEEK(&value->record_table_memfile, jak_archive_field_u16_t);
                         break;
                 case JAK_FIELD_UINT32:
-                        value->data.basic.values.uint32s = JAK_MEMFILE_PEEK(&value->record_table_memfile, field_u32_t);
+                        value->data.basic.values.uint32s = JAK_MEMFILE_PEEK(&value->record_table_memfile, jak_archive_field_u32_t);
                         break;
                 case JAK_FIELD_UINT64:
-                        value->data.basic.values.uint64s = JAK_MEMFILE_PEEK(&value->record_table_memfile, field_u64_t);
+                        value->data.basic.values.uint64s = JAK_MEMFILE_PEEK(&value->record_table_memfile, jak_archive_field_u64_t);
                         break;
                 case JAK_FIELD_FLOAT:
                         value->data.basic.values.numbers = JAK_MEMFILE_PEEK(&value->record_table_memfile,
-                                                                            field_number_t);
+                                                                            jak_archive_field_number_t);
                         break;
                 case JAK_FIELD_STRING:
-                        value->data.basic.values.strings = JAK_MEMFILE_PEEK(&value->record_table_memfile, jak_field_sid);
+                        value->data.basic.values.strings = JAK_MEMFILE_PEEK(&value->record_table_memfile, jak_archive_field_sid_t);
                         break;
                 case JAK_FIELD_BOOLEAN:
                         value->data.basic.values.booleans = JAK_MEMFILE_PEEK(&value->record_table_memfile,
-                                                                             field_boolean_t);
+                                                                             jak_archive_field_boolean_t);
                         break;
                 default: print_error_and_die(JAK_ERR_INTERNALERR);
         }
@@ -832,47 +832,47 @@ static void value_vector_init_fixed_length_types_non_null_arrays(struct jak_arch
         switch (value->prop_type) {
                 case JAK_FIELD_INT8:
                         value->data.arrays.values.int8s_base = JAK_MEMFILE_PEEK(&value->record_table_memfile,
-                                                                                field_i8_t);
+                                                                                jak_archive_field_i8_t);
                         break;
                 case JAK_FIELD_INT16:
                         value->data.arrays.values.int16s_base = JAK_MEMFILE_PEEK(&value->record_table_memfile,
-                                                                                 field_i16_t);
+                                                                                 jak_archive_field_i16_t);
                         break;
                 case JAK_FIELD_INT32:
                         value->data.arrays.values.int32s_base = JAK_MEMFILE_PEEK(&value->record_table_memfile,
-                                                                                 field_i32_t);
+                                                                                 jak_archive_field_i32_t);
                         break;
                 case JAK_FIELD_INT64:
                         value->data.arrays.values.int64s_base = JAK_MEMFILE_PEEK(&value->record_table_memfile,
-                                                                                 field_i64_t);
+                                                                                 jak_archive_field_i64_t);
                         break;
                 case JAK_FIELD_UINT8:
                         value->data.arrays.values.uint8s_base = JAK_MEMFILE_PEEK(&value->record_table_memfile,
-                                                                                 field_u8_t);
+                                                                                 jak_archive_field_u8_t);
                         break;
                 case JAK_FIELD_UINT16:
                         value->data.arrays.values.uint16s_base = JAK_MEMFILE_PEEK(&value->record_table_memfile,
-                                                                                  field_u16_t);
+                                                                                  jak_archive_field_u16_t);
                         break;
                 case JAK_FIELD_UINT32:
                         value->data.arrays.values.uint32s_base = JAK_MEMFILE_PEEK(&value->record_table_memfile,
-                                                                                  field_u32_t);
+                                                                                  jak_archive_field_u32_t);
                         break;
                 case JAK_FIELD_UINT64:
                         value->data.arrays.values.uint64s_base = JAK_MEMFILE_PEEK(&value->record_table_memfile,
-                                                                                  field_u64_t);
+                                                                                  jak_archive_field_u64_t);
                         break;
                 case JAK_FIELD_FLOAT:
                         value->data.arrays.values.numbers_base = JAK_MEMFILE_PEEK(&value->record_table_memfile,
-                                                                                  field_number_t);
+                                                                                  jak_archive_field_number_t);
                         break;
                 case JAK_FIELD_STRING:
                         value->data.arrays.values.strings_base = JAK_MEMFILE_PEEK(&value->record_table_memfile,
-                                                                                  jak_field_sid);
+                                                                                  jak_archive_field_sid_t);
                         break;
                 case JAK_FIELD_BOOLEAN:
                         value->data.arrays.values.booleans_base =
-                                JAK_MEMFILE_PEEK(&value->record_table_memfile, field_boolean_t);
+                                JAK_MEMFILE_PEEK(&value->record_table_memfile, jak_archive_field_boolean_t);
                         break;
                 default: print_error_and_die(JAK_ERR_INTERNALERR);
         }
@@ -897,12 +897,12 @@ static void value_vector_init_object(struct jak_archive_value_vector *value)
 }
 
 bool archive_value_vector_from_prop_iter(struct jak_archive_value_vector *value, struct jak_error *err,
-                                         struct prop_iter *prop_iter)
+                                         struct jak_prop_iter *prop_iter)
 {
         error_if_null(value);
         error_if_null(prop_iter);
 
-        error_if_and_return (prop_iter->mode != PROP_ITER_MODE_OBJECT,
+        error_if_and_return (prop_iter->mode != JAK_PROP_ITER_MODE_OBJECT,
                              &prop_iter->err,
                              JAK_ERR_ITER_OBJECT_NEEDED,
                              false)
@@ -954,7 +954,7 @@ bool archive_value_vector_from_prop_iter(struct jak_archive_value_vector *value,
         return true;
 }
 
-bool archive_value_vector_get_basic_type(enum field_type *type, const struct jak_archive_value_vector *value)
+bool archive_value_vector_get_basic_type(enum jak_archive_field_type *type, const struct jak_archive_value_vector *value)
 {
         error_if_null(type)
         error_if_null(value)
@@ -1071,29 +1071,29 @@ archive_value_vector_get_##names(jak_u32 *num_values, struct jak_archive_value_v
     }                                                                                                                  \
 }
 
-DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int8s, int8, field_i8_t, JAK_ERR_ITER_NOINT8)
+DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int8s, int8, jak_archive_field_i8_t, JAK_ERR_ITER_NOINT8)
 
-DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int16s, int16, field_i16_t, JAK_ERR_ITER_NOINT16)
+DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int16s, int16, jak_archive_field_i16_t, JAK_ERR_ITER_NOINT16)
 
-DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int32s, int32, field_i32_t, JAK_ERR_ITER_NOINT32)
+DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int32s, int32, jak_archive_field_i32_t, JAK_ERR_ITER_NOINT32)
 
-DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int64s, int64, field_i64_t, JAK_ERR_ITER_NOINT64)
+DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int64s, int64, jak_archive_field_i64_t, JAK_ERR_ITER_NOINT64)
 
-DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint8s, uint8, field_u8_t, JAK_ERR_ITER_NOUINT8)
+DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint8s, uint8, jak_archive_field_u8_t, JAK_ERR_ITER_NOUINT8)
 
-DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint16s, uint16, field_u16_t, JAK_ERR_ITER_NOUINT16)
+DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint16s, uint16, jak_archive_field_u16_t, JAK_ERR_ITER_NOUINT16)
 
-DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint32s, uint32, field_u32_t, JAK_ERR_ITER_NOUINT32)
+DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint32s, uint32, jak_archive_field_u32_t, JAK_ERR_ITER_NOUINT32)
 
-DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint64s, uint64, field_u64_t, JAK_ERR_ITER_NOUINT64)
+DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint64s, uint64, jak_archive_field_u64_t, JAK_ERR_ITER_NOUINT64)
 
-DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(strings, string, jak_field_sid, JAK_ERR_ITER_NOSTRING)
+DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(strings, string, jak_archive_field_sid_t, JAK_ERR_ITER_NOSTRING)
 
-DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(numbers, number, field_number_t, JAK_ERR_ITER_NONUMBER)
+DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(numbers, number, jak_archive_field_number_t, JAK_ERR_ITER_NONUMBER)
 
-DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(booleans, boolean, field_boolean_t, JAK_ERR_ITER_NOBOOL)
+DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(booleans, boolean, jak_archive_field_boolean_t, JAK_ERR_ITER_NOBOOL)
 
-const field_u32_t *archive_value_vector_get_null_arrays(jak_u32 *num_values, struct jak_archive_value_vector *value)
+const jak_archive_field_u32_t *archive_value_vector_get_null_arrays(jak_u32 *num_values, struct jak_archive_value_vector *value)
 {
         error_if_null(value)
 
@@ -1134,27 +1134,27 @@ archive_value_vector_get_##name##_arrays_at(jak_u32 *array_length, jak_u32 idx, 
     }                                                                                                                  \
 }
 
-DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int8, field_i8_t, int8s_base)
+DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int8, jak_archive_field_i8_t, int8s_base)
 
-DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int16, field_i16_t, int16s_base)
+DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int16, jak_archive_field_i16_t, int16s_base)
 
-DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int32, field_i32_t, int32s_base)
+DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int32, jak_archive_field_i32_t, int32s_base)
 
-DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int64, field_i64_t, int64s_base)
+DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int64, jak_archive_field_i64_t, int64s_base)
 
-DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint8, field_u8_t, uint8s_base)
+DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint8, jak_archive_field_u8_t, uint8s_base)
 
-DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint16, field_u16_t, uint16s_base)
+DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint16, jak_archive_field_u16_t, uint16s_base)
 
-DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint32, field_u32_t, uint32s_base)
+DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint32, jak_archive_field_u32_t, uint32s_base)
 
-DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint64, field_u64_t, uint64s_base)
+DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint64, jak_archive_field_u64_t, uint64s_base)
 
-DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(string, jak_field_sid, strings_base)
+DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(string, jak_archive_field_sid_t, strings_base)
 
-DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(number, field_number_t, numbers_base)
+DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(number, jak_archive_field_number_t, numbers_base)
 
-DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(boolean, field_boolean_t, booleans_base)
+DECLARE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(boolean, jak_archive_field_boolean_t, booleans_base)
 
 void int_reset_cabin_object_mem_file(struct jak_archive_object *object)
 {

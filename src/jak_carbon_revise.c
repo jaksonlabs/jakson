@@ -101,13 +101,13 @@ static void key_string_set(struct jak_carbon *doc, const char *key)
         memfile_restore_position(&doc->memfile);
 }
 
-bool carbon_revise_key_generate(global_id_t *out, struct jak_carbon_revise *context)
+bool carbon_revise_key_generate(jak_global_id_t *out, struct jak_carbon_revise *context)
 {
         error_if_null(context);
         enum carbon_key_type key_type;
         carbon_key_type(&key_type, context->revised_doc);
         if (key_type == CARBON_KEY_AUTOKEY) {
-                global_id_t oid;
+                jak_global_id_t oid;
                 global_id_create(&oid);
                 key_unsigned_set(context->revised_doc, oid);
                 JAK_optional_set(out, oid);

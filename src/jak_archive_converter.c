@@ -42,16 +42,16 @@ struct converter_capture {
 
 #define DECLARE_VISIT_BASIC_TYPE_PAIR(name, built_in_type)                                                             \
 static void                                                                                                            \
-visit_##name##_pairs (struct jak_archive *jak_archive, path_stack_t path_stack, global_id_t oid,                      \
-                  const jak_field_sid *keys, const built_in_type *values, jak_u32 num_pairs, void *capture)      \
+visit_##name##_pairs (struct jak_archive *jak_archive, path_stack_t path_stack, jak_global_id_t oid,                      \
+                  const jak_archive_field_sid_t *keys, const built_in_type *values, jak_u32 num_pairs, void *capture)      \
 {                                                                                                                      \
     IMPORT_BASIC_PAIR(name)                                                                                            \
 }
 
 #define DECLARE_VISIT_ARRAY_TYPE(name, built_in_type)                                                                  \
 static enum visit_policy                                                                                         \
-visit_enter_##name##_array_pairs(struct jak_archive *jak_archive, path_stack_t path, global_id_t id,                  \
-                                 const jak_field_sid *keys, jak_u32 num_pairs, void *capture)                    \
+visit_enter_##name##_array_pairs(struct jak_archive *jak_archive, path_stack_t path, jak_global_id_t id,                  \
+                                 const jak_archive_field_sid_t *keys, jak_u32 num_pairs, void *capture)                    \
 {                                                                                                                      \
     JAK_UNUSED(jak_archive);                                                                                            \
     JAK_UNUSED(path);                                                                                               \
@@ -73,8 +73,8 @@ visit_enter_##name##_array_pairs(struct jak_archive *jak_archive, path_stack_t p
 }                                                                                                                      \
                                                                                                                        \
 static void                                                                                                            \
-visit_##name##_array_pair(struct jak_archive *jak_archive, path_stack_t path, global_id_t id,                         \
-                          const jak_field_sid key, jak_u32 entry_idx, jak_u32 max_entries,                      \
+visit_##name##_array_pair(struct jak_archive *jak_archive, path_stack_t path, jak_global_id_t id,                         \
+                          const jak_archive_field_sid_t key, jak_u32 entry_idx, jak_u32 max_entries,                      \
                           const built_in_type *array, jak_u32 array_length, void *capture)                            \
 {                                                                                                                      \
     JAK_UNUSED(jak_archive);                                                                                            \
@@ -93,7 +93,7 @@ visit_##name##_array_pair(struct jak_archive *jak_archive, path_stack_t path, gl
 }                                                                                                                      \
 
 
-static void visit_root_object(struct jak_archive *archive, global_id_t id, void *capture)
+static void visit_root_object(struct jak_archive *archive, jak_global_id_t id, void *capture)
 {
         JAK_UNUSED(archive);
         assert(capture);
@@ -102,29 +102,29 @@ static void visit_root_object(struct jak_archive *archive, global_id_t id, void 
         encoded_doc_collection_get_or_append(extra->collection, id);
 }
 
-DECLARE_VISIT_BASIC_TYPE_PAIR(int8, field_i8_t)
+DECLARE_VISIT_BASIC_TYPE_PAIR(int8, jak_archive_field_i8_t)
 
-DECLARE_VISIT_BASIC_TYPE_PAIR(int16, field_i16_t)
+DECLARE_VISIT_BASIC_TYPE_PAIR(int16, jak_archive_field_i16_t)
 
-DECLARE_VISIT_BASIC_TYPE_PAIR(int32, field_i32_t)
+DECLARE_VISIT_BASIC_TYPE_PAIR(int32, jak_archive_field_i32_t)
 
-DECLARE_VISIT_BASIC_TYPE_PAIR(int64, field_i64_t)
+DECLARE_VISIT_BASIC_TYPE_PAIR(int64, jak_archive_field_i64_t)
 
-DECLARE_VISIT_BASIC_TYPE_PAIR(uint8, field_u8_t)
+DECLARE_VISIT_BASIC_TYPE_PAIR(uint8, jak_archive_field_u8_t)
 
-DECLARE_VISIT_BASIC_TYPE_PAIR(uint16, field_u16_t)
+DECLARE_VISIT_BASIC_TYPE_PAIR(uint16, jak_archive_field_u16_t)
 
-DECLARE_VISIT_BASIC_TYPE_PAIR(uint32, field_u32_t)
+DECLARE_VISIT_BASIC_TYPE_PAIR(uint32, jak_archive_field_u32_t)
 
-DECLARE_VISIT_BASIC_TYPE_PAIR(uint64, field_u64_t)
+DECLARE_VISIT_BASIC_TYPE_PAIR(uint64, jak_archive_field_u64_t)
 
-DECLARE_VISIT_BASIC_TYPE_PAIR(number, field_number_t)
+DECLARE_VISIT_BASIC_TYPE_PAIR(number, jak_archive_field_number_t)
 
-DECLARE_VISIT_BASIC_TYPE_PAIR(boolean, field_boolean_t)
+DECLARE_VISIT_BASIC_TYPE_PAIR(boolean, jak_archive_field_boolean_t)
 
-DECLARE_VISIT_BASIC_TYPE_PAIR(string, jak_field_sid)
+DECLARE_VISIT_BASIC_TYPE_PAIR(string, jak_archive_field_sid_t)
 
-static void visit_null_pairs(struct jak_archive *archive, path_stack_t path, global_id_t oid, const jak_field_sid *keys,
+static void visit_null_pairs(struct jak_archive *archive, path_stack_t path, jak_global_id_t oid, const jak_archive_field_sid_t *keys,
                              jak_u32 num_pairs, void *capture)
 {
         JAK_UNUSED(archive);
@@ -138,8 +138,8 @@ static void visit_null_pairs(struct jak_archive *archive, path_stack_t path, glo
         }
 }
 
-static enum visit_policy before_object_visit(struct jak_archive *archive, path_stack_t path_stack, global_id_t parent_id,
-                                             global_id_t value_id, jak_u32 object_idx, jak_u32 num_objects, jak_field_sid key,
+static enum visit_policy before_object_visit(struct jak_archive *archive, path_stack_t path_stack, jak_global_id_t parent_id,
+                                             jak_global_id_t value_id, jak_u32 object_idx, jak_u32 num_objects, jak_archive_field_sid_t key,
                                              void *capture)
 {
         JAK_UNUSED(archive);
@@ -157,30 +157,30 @@ static enum visit_policy before_object_visit(struct jak_archive *archive, path_s
         return VISIT_INCLUDE;
 }
 
-DECLARE_VISIT_ARRAY_TYPE(int8, field_i8_t)
+DECLARE_VISIT_ARRAY_TYPE(int8, jak_archive_field_i8_t)
 
-DECLARE_VISIT_ARRAY_TYPE(int16, field_i16_t)
+DECLARE_VISIT_ARRAY_TYPE(int16, jak_archive_field_i16_t)
 
-DECLARE_VISIT_ARRAY_TYPE(int32, field_i32_t)
+DECLARE_VISIT_ARRAY_TYPE(int32, jak_archive_field_i32_t)
 
-DECLARE_VISIT_ARRAY_TYPE(int64, field_i64_t)
+DECLARE_VISIT_ARRAY_TYPE(int64, jak_archive_field_i64_t)
 
-DECLARE_VISIT_ARRAY_TYPE(uint8, field_u8_t)
+DECLARE_VISIT_ARRAY_TYPE(uint8, jak_archive_field_u8_t)
 
-DECLARE_VISIT_ARRAY_TYPE(uint16, field_u16_t)
+DECLARE_VISIT_ARRAY_TYPE(uint16, jak_archive_field_u16_t)
 
-DECLARE_VISIT_ARRAY_TYPE(uint32, field_u32_t)
+DECLARE_VISIT_ARRAY_TYPE(uint32, jak_archive_field_u32_t)
 
-DECLARE_VISIT_ARRAY_TYPE(uint64, field_u64_t)
+DECLARE_VISIT_ARRAY_TYPE(uint64, jak_archive_field_u64_t)
 
-DECLARE_VISIT_ARRAY_TYPE(number, field_number_t)
+DECLARE_VISIT_ARRAY_TYPE(number, jak_archive_field_number_t)
 
-DECLARE_VISIT_ARRAY_TYPE(boolean, field_boolean_t)
+DECLARE_VISIT_ARRAY_TYPE(boolean, jak_archive_field_boolean_t)
 
-DECLARE_VISIT_ARRAY_TYPE(string, jak_field_sid)
+DECLARE_VISIT_ARRAY_TYPE(string, jak_archive_field_sid_t)
 
-static enum visit_policy visit_enter_null_array_pairs(struct jak_archive *archive, path_stack_t path, global_id_t id,
-                                                      const jak_field_sid *keys, jak_u32 num_pairs, void *capture)
+static enum visit_policy visit_enter_null_array_pairs(struct jak_archive *archive, path_stack_t path, jak_global_id_t id,
+                                                      const jak_archive_field_sid_t *keys, jak_u32 num_pairs, void *capture)
 {
         JAK_UNUSED(archive);
         JAK_UNUSED(path);
@@ -200,7 +200,7 @@ static enum visit_policy visit_enter_null_array_pairs(struct jak_archive *archiv
         return VISIT_INCLUDE;
 }
 
-static void visit_null_array_pair(struct jak_archive *archive, path_stack_t path, global_id_t id, const jak_field_sid key,
+static void visit_null_array_pair(struct jak_archive *archive, path_stack_t path, jak_global_id_t id, const jak_archive_field_sid_t key,
                                   jak_u32 entry_idx, jak_u32 max_entries, jak_u32 num_nulls, void *capture)
 {
         JAK_UNUSED(archive);
@@ -220,8 +220,8 @@ static void visit_null_array_pair(struct jak_archive *archive, path_stack_t path
 }
 
 static void before_visit_object_array_objects(bool *skip_group_object_ids, struct jak_archive *archive, path_stack_t path,
-                                              global_id_t parent_id, jak_field_sid key,
-                                              const global_id_t *group_object_ids, jak_u32 num_group_object_ids,
+                                              jak_global_id_t parent_id, jak_archive_field_sid_t key,
+                                              const jak_global_id_t *group_object_ids, jak_u32 num_group_object_ids,
                                               void *capture)
 {
         JAK_UNUSED(archive);
@@ -243,10 +243,10 @@ static void before_visit_object_array_objects(bool *skip_group_object_ids, struc
 #define DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(name, built_in_type)                                             \
 static void                                                                                                            \
 visit_object_array_object_property_##name(struct jak_archive *jak_archive, path_stack_t path,                                \
-                                           global_id_t parent_id,                                               \
-                                           jak_field_sid key,                                                     \
-                                           global_id_t nested_object_id,                                        \
-                                           jak_field_sid nested_key,                                              \
+                                           jak_global_id_t parent_id,                                               \
+                                           jak_archive_field_sid_t key,                                                     \
+                                           jak_global_id_t nested_object_id,                                        \
+                                           jak_archive_field_sid_t nested_key,                                              \
                                            const built_in_type *nested_values,                                         \
                                            jak_u32 num_nested_values, void *capture)                                  \
 {                                                                                                                      \
@@ -263,29 +263,29 @@ visit_object_array_object_property_##name(struct jak_archive *jak_archive, path_
         encoded_doc_array_push_##name(doc, nested_key, nested_values, num_nested_values);                           \
 }
 
-DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(int8, field_i8_t);
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(int8, jak_archive_field_i8_t);
 
-DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(int16, field_i16_t);
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(int16, jak_archive_field_i16_t);
 
-DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(int32, field_i32_t);
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(int32, jak_archive_field_i32_t);
 
-DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(int64, field_i64_t);
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(int64, jak_archive_field_i64_t);
 
-DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(uint8, field_u8_t);
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(uint8, jak_archive_field_u8_t);
 
-DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(uint16, field_u16_t);
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(uint16, jak_archive_field_u16_t);
 
-DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(uint32, field_u32_t);
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(uint32, jak_archive_field_u32_t);
 
-DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(uint64, field_u64_t);
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(uint64, jak_archive_field_u64_t);
 
-DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(number, field_number_t);
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(number, jak_archive_field_number_t);
 
-DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(string, jak_field_sid);
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(string, jak_archive_field_sid_t);
 
-DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(boolean, field_boolean_t);
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(boolean, jak_archive_field_boolean_t);
 
-DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(null, field_u32_t);
+DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP_HANDLER(null, jak_archive_field_u32_t);
 
 bool jak_archive_converter(struct jak_encoded_doc_list *collection, struct jak_archive *archive)
 {

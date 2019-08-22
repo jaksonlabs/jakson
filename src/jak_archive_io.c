@@ -23,20 +23,20 @@
 #include <jak_spinlock.h>
 #include <jak_archive_io.h>
 
-struct io_context {
+struct jak_io_context {
     struct jak_error err;
     FILE *file;
     struct spinlock lock;
     jak_offset_t last_pos;
 };
 
-bool io_context_create(struct io_context **context, struct jak_error *err, const char *file_path)
+bool jak_io_context_create(struct jak_io_context **context, struct jak_error *err, const char *file_path)
 {
         error_if_null(context);
         error_if_null(err);
         error_if_null(file_path);
 
-        struct io_context *result = JAK_MALLOC(sizeof(struct io_context));
+        struct jak_io_context *result = JAK_MALLOC(sizeof(struct jak_io_context));
 
         if (!result) {
                 error(err, JAK_ERR_MALLOCERR);
@@ -58,12 +58,12 @@ bool io_context_create(struct io_context **context, struct jak_error *err, const
         }
 }
 
-struct jak_error *io_context_get_error(struct io_context *context)
+struct jak_error *jak_io_context_get_error(struct jak_io_context *context)
 {
         return context ? &context->err : NULL;
 }
 
-FILE *io_context_lock_and_access(struct io_context *context)
+FILE *jak_io_context_lock_and_access(struct jak_io_context *context)
 {
         if (context) {
                 spin_acquire(&context->lock);
@@ -75,7 +75,7 @@ FILE *io_context_lock_and_access(struct io_context *context)
         }
 }
 
-bool io_context_unlock(struct io_context *context)
+bool jak_io_context_unlock(struct jak_io_context *context)
 {
         if (context) {
                 fseek(context->file, context->last_pos, SEEK_SET);
@@ -87,7 +87,7 @@ bool io_context_unlock(struct io_context *context)
         }
 }
 
-bool io_context_drop(struct io_context *context)
+bool jak_io_context_drop(struct jak_io_context *context)
 {
         error_if_null(context);
         JAK_optional(context->file != NULL, fclose(context->file);

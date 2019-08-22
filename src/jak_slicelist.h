@@ -73,7 +73,7 @@ typedef struct Slice {
      * particular values. However, a remove operation is expensive. */
     const char *key_column[SLICE_KEY_COLUMN_MAX_ELEMS];
     hash32_t keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
-    jak_field_sid string_id_tColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
+    jak_archive_field_sid_t string_id_tColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
 
     /** The number of elements stored in 'key_colum', 'key_hash_column', and 'string_id_column' */
     jak_u32 num_elems;
@@ -113,7 +113,7 @@ typedef struct JAK_slice_list_t {
 typedef struct JAK_slice_handle_t {
     Slice *container;
     const char *key;
-    jak_field_sid value;
+    jak_archive_field_sid_t value;
     bool is_contained;
 } slice_handle_t;
 
@@ -125,7 +125,7 @@ bool slice_list_lookup(slice_handle_t *handle, slice_list_t *list, const char *n
 
 bool SliceListIsEmpty(const slice_list_t *list);
 
-bool slice_list_insert(slice_list_t *list, char **strings, jak_field_sid *ids, size_t npairs);
+bool slice_list_insert(slice_list_t *list, char **strings, jak_archive_field_sid_t *ids, size_t npairs);
 
 bool SliceListRemove(slice_list_t *list, slice_handle_t *handle);
 

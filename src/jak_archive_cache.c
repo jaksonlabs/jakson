@@ -26,7 +26,7 @@
 
 struct cache_entry {
     struct cache_entry *prev, *next;
-    jak_field_sid id;
+    jak_archive_field_sid_t id;
     char *string;
 };
 
@@ -124,10 +124,10 @@ static void make_most_recent(struct lru_list *list, struct cache_entry *entry)
         }
 }
 
-char *jak_string_id_cache_get(struct jak_string_cache *cache, jak_field_sid id)
+char *jak_string_id_cache_get(struct jak_string_cache *cache, jak_archive_field_sid_t id)
 {
         error_if_null(cache)
-        hash32_t id_hash = JAK_HASH_BERNSTEIN(sizeof(jak_field_sid), &id);
+        hash32_t id_hash = JAK_HASH_BERNSTEIN(sizeof(jak_archive_field_sid_t), &id);
         size_t bucket_pos = id_hash % cache->list_entries.num_elems;
         struct lru_list *list = vec_get(&cache->list_entries, bucket_pos, struct lru_list);
         struct cache_entry *cursor = list->most_recent;

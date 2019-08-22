@@ -41,7 +41,7 @@ JAK_BEGIN_DECL
  */
 struct jak_column_doc_column {
     /** Key name */
-    jak_field_sid key_name;
+    jak_archive_field_sid_t key_name;
     /** Particular key type */
     jak_archive_field_e type;
     /** Positions of objects in the parent array that has this particular key name with this particular value type */
@@ -55,7 +55,7 @@ struct jak_column_doc_column {
 
 struct jak_column_doc_group {
     /** Key name */
-    jak_field_sid key;
+    jak_archive_field_sid_t key;
     /** Key columns as a decomposition of objects stored in that JSON-like array */
     struct vector ofType(struct jak_column_doc_column) columns;
 
@@ -65,84 +65,84 @@ struct jak_column_doc_obj {
     /** Parent document meta doc */
     struct jak_column_doc *parent;
     /** Key in parent document meta doc that maps to this one, or "/" if this is the top-level meta doc */
-    jak_field_sid parent_key;
+    jak_archive_field_sid_t parent_key;
     /** Index inside the array of this doc in its parents property, or 0 if this is not an array type or top-level */
     size_t index;
 
     /** Inverted index of keys mapping to primitive boolean types (sorted by key) */
-    struct vector ofType(jak_field_sid) bool_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) bool_prop_keys;
     /** Inverted index of keys mapping to primitive int8 number types (sorted by key) */
-    struct vector ofType(jak_field_sid) int8_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) int8_prop_keys;
     /** Inverted index of keys mapping to primitive int16 number types (sorted by key) */
-    struct vector ofType(jak_field_sid) int16_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) int16_prop_keys;
     /** Inverted index of keys mapping to primitive int32 number types (sorted by key) */
-    struct vector ofType(jak_field_sid) int32_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) int32_prop_keys;
     /** Inverted index of keys mapping to primitive int64 number types (sorted by key) */
-    struct vector ofType(jak_field_sid) int64_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) int64_prop_keys;
     /** Inverted index of keys mapping to primitive uint8 number types (sorted by key) */
-    struct vector ofType(jak_field_sid) uint8_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) uint8_prop_keys;
     /** Inverted index of keys mapping to primitive uint16 number types (sorted by key) */
-    struct vector ofType(jak_field_sid) uint16_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) uint16_prop_keys;
     /** Inverted index of keys mapping to primitive uint32 number types (sorted by key) */
-    struct vector ofType(jak_field_sid) uin32_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) uin32_prop_keys;
     /** Inverted index of keys mapping to primitive uint64 number types (sorted by key) */
-    struct vector ofType(jak_field_sid) uint64_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) uint64_prop_keys;
     /** Inverted index of keys mapping to primitive string types (sorted by key) */
-    struct vector ofType(jak_field_sid) string_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) string_prop_keys;
     /** Inverted index of keys mapping to primitive real types (sorted by key) */
-    struct vector ofType(jak_field_sid) float_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) float_prop_keys;
     /** Inverted index of keys mapping to primitive null values (sorted by key) */
-    struct vector ofType(jak_field_sid) null_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) null_prop_keys;
     /** Inverted index of keys mapping to exactly one nested object value (sorted by key) */
-    struct vector ofType(jak_field_sid) obj_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) obj_prop_keys;
 
     /** Inverted index of keys mapping to array of boolean types (sorted by key)*/
-    struct vector ofType(jak_field_sid) bool_array_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) bool_array_prop_keys;
     /** Inverted index of keys mapping to array of int8 number types (sorted by key)*/
-    struct vector ofType(jak_field_sid) int8_array_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) int8_array_prop_keys;
     /** Inverted index of keys mapping to array of int16 number types (sorted by key) */
-    struct vector ofType(jak_field_sid) int16_array_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) int16_array_prop_keys;
     /** Inverted index of keys mapping to array of int32 number types (sorted by key) */
-    struct vector ofType(jak_field_sid) int32_array_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) int32_array_prop_keys;
     /** Inverted index of keys mapping to array of int64 number types (sorted by key) */
-    struct vector ofType(jak_field_sid) int64_array_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) int64_array_prop_keys;
     /** Inverted index of keys mapping to array of uint8 number types (sorted by key) */
-    struct vector ofType(jak_field_sid) uint8_array_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) uint8_array_prop_keys;
     /** Inverted index of keys mapping to array of uint16 number types (sorted by key) */
-    struct vector ofType(jak_field_sid) uint16_array_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) uint16_array_prop_keys;
     /** Inverted index of keys mapping to array of uint32 number types (sorted by key) */
-    struct vector ofType(jak_field_sid) uint32_array_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) uint32_array_prop_keys;
     /** Inverted index of keys mapping to array of uint64 number types (sorted by key) */
-    struct vector ofType(jak_field_sid) uint64_array_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) uint64_array_prop_keys;
     /** Inverted index of keys mapping array of string types (sorted by key) */
-    struct vector ofType(jak_field_sid) string_array_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) string_array_prop_keys;
     /** Inverted index of keys mapping array of real types (sorted by key) */
-    struct vector ofType(jak_field_sid) float_array_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) float_array_prop_keys;
     /** Inverted index of keys mapping array of null value (sorted by key)s */
-    struct vector ofType(jak_field_sid) null_array_prop_keys;
+    struct vector ofType(jak_archive_field_sid_t) null_array_prop_keys;
 
     /** Primitive boolean values associated to keys stored above (sorted by key) */
     struct vector ofType(JAK_FIELD_BOOLEANean_t) bool_prop_vals;
     /** Primitive int8 number values associated to keys stored above (sorted by key) */
-    struct vector ofType(field_i8_t) int8_prop_vals;
+    struct vector ofType(jak_archive_field_i8_t) int8_prop_vals;
     /** Primitive int16 number values associated to keys stored above (sorted by key) */
-    struct vector ofType(field_i16_t) int16_prop_vals;
+    struct vector ofType(jak_archive_field_i16_t) int16_prop_vals;
     /** Primitive int32 number values associated to keys stored above (sorted by key) */
-    struct vector ofType(field_i32_t) int32_prop_vals;
+    struct vector ofType(jak_archive_field_i32_t) int32_prop_vals;
     /** Primitive int64 number values associated to keys stored above (sorted by key) */
-    struct vector ofType(field_i64_t) int64_prop_vals;
+    struct vector ofType(jak_archive_field_i64_t) int64_prop_vals;
     /** Primitive uint8 number values associated to keys stored above (sorted by key) */
-    struct vector ofType(field_u8_t) uint8_prop_vals;
+    struct vector ofType(jak_archive_field_u8_t) uint8_prop_vals;
     /** Primitive uint16 number values associated to keys stored above (sorted by key) */
-    struct vector ofType(field_u16_t) uint16_prop_vals;
+    struct vector ofType(jak_archive_field_u16_t) uint16_prop_vals;
     /** Primitive uint32 number values associated to keys stored above (sorted by key) */
-    struct vector ofType(field_u32_t) uint32_prop_vals;
+    struct vector ofType(jak_archive_field_u32_t) uint32_prop_vals;
     /** Primitive uint64 number values associated to keys stored above (sorted by key) */
-    struct vector ofType(field_u64_t) uint64_prop_vals;
+    struct vector ofType(jak_archive_field_u64_t) uint64_prop_vals;
     /** Primitive real number values associated to keys stored above (sorted by key) */
-    struct vector ofType(field_number_t) float_prop_vals;
+    struct vector ofType(jak_archive_field_number_t) float_prop_vals;
     /** Primitive string number values associated to keys stored above (sorted by key) */
-    struct vector ofType(jak_field_sid) string_prop_vals;
+    struct vector ofType(jak_archive_field_sid_t) string_prop_vals;
 
     /** Array of boolean values associated to keys stored above (sorted by key) */
     struct vector ofType(Vector) bool_array_prop_vals;

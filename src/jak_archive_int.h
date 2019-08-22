@@ -45,7 +45,7 @@ struct __attribute__((packed)) jak_record_header {
 
 struct __attribute__((packed)) jak_object_header {
     char marker;
-    global_id_t oid;
+    jak_global_id_t oid;
     jak_u32 flags;
 };
 
@@ -85,7 +85,7 @@ struct __attribute__((packed)) jak_column_group_header {
 
 struct __attribute__((packed)) jak_column_header {
     char marker;
-    jak_field_sid column_name;
+    jak_archive_field_sid_t column_name;
     char value_type;
     jak_u32 num_entries;
 };
@@ -191,33 +191,33 @@ struct jak_archive_prop_offs {
 
 struct jak_fixed_prop {
     struct jak_prop_header *header;
-    const jak_field_sid *keys;
+    const jak_archive_field_sid_t *keys;
     const void *values;
 };
 
 struct jak_table_prop {
     struct jak_prop_header *header;
-    const jak_field_sid *keys;
+    const jak_archive_field_sid_t *keys;
     const jak_offset_t *group_offs;
 };
 
 struct jak_var_prop {
     struct jak_prop_header *header;
-    const jak_field_sid *keys;
+    const jak_archive_field_sid_t *keys;
     const jak_offset_t *offsets;
     const void *values;
 };
 
 struct jak_array_prop  {
     struct jak_prop_header *header;
-    const jak_field_sid *keys;
+    const jak_archive_field_sid_t *keys;
     const jak_u32 *lengths;
     jak_offset_t values_begin;
 };
 
 struct jak_null_prop  {
     struct jak_prop_header *header;
-    const jak_field_sid *keys;
+    const jak_archive_field_sid_t *keys;
 };
 
 enum jak_archive_marker {
@@ -377,7 +377,7 @@ struct jak_archive_info {
 struct __attribute__((packed)) jak_string_entry_header {
     char marker;
     jak_offset_t next_entry_off;
-    jak_field_sid string_id;
+    jak_archive_field_sid_t string_id;
     jak_u32 string_len;
 };
 

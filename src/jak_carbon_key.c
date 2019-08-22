@@ -27,9 +27,9 @@ static void write_nokey(struct jak_memfile *file)
 static void write_autokey(struct jak_memfile *file)
 {
         jak_u8 marker = JAK_CARBON_MARKER_KEY_AUTOKEY;
-        global_id_t key = 0;
+        jak_global_id_t key = 0;
         memfile_write(file, &marker, sizeof(jak_u8));
-        memfile_write(file, &key, sizeof(global_id_t));
+        memfile_write(file, &key, sizeof(jak_global_id_t));
 }
 
 static void write_ukey(struct jak_memfile *file)
@@ -199,8 +199,8 @@ const void *carbon_key_read(jak_u64 *len, enum carbon_key_type *out, struct jak_
                         JAK_optional_set(len, 0)
                         return NULL;
                 case CARBON_KEY_AUTOKEY:
-                        JAK_optional_set(len, sizeof(global_id_t))
-                        return JAK_MEMFILE_READ_TYPE(file, global_id_t);
+                        JAK_optional_set(len, sizeof(jak_global_id_t))
+                        return JAK_MEMFILE_READ_TYPE(file, jak_global_id_t);
                 case CARBON_KEY_UKEY:
                         JAK_optional_set(len, sizeof(jak_u64))
                         return JAK_MEMFILE_READ_TYPE(file, jak_u64);

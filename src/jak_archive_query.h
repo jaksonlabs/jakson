@@ -32,7 +32,7 @@ JAK_BEGIN_DECL
 
 struct jak_archive_query {
     struct jak_archive *archive;
-    struct io_context *context;
+    struct jak_io_context *context;
     struct jak_error err;
 };
 
@@ -53,14 +53,14 @@ bool query_index_id_to_offset_serialize(FILE *file, struct jak_error *err, struc
 bool query_index_id_to_offset_deserialize(struct jak_sid_to_offset **index, struct jak_error *err,
                                           const char *file_path, jak_offset_t offset);
 
-char *query_fetch_string_by_id(struct jak_archive_query *query, jak_field_sid id);
+char *query_fetch_string_by_id(struct jak_archive_query *query, jak_archive_field_sid_t id);
 
-char *query_fetch_string_by_id_nocache(struct jak_archive_query *query, jak_field_sid id);
+char *query_fetch_string_by_id_nocache(struct jak_archive_query *query, jak_archive_field_sid_t id);
 
 char **query_fetch_strings_by_offset(struct jak_archive_query *query, jak_offset_t *offs, jak_u32 *strlens,
                                      size_t num_offs);
 
-jak_field_sid *query_find_ids(size_t *num_found, struct jak_archive_query *query,
+jak_archive_field_sid_t *query_find_ids(size_t *num_found, struct jak_archive_query *query,
                             const struct string_pred_t *pred, void *capture, jak_i64 limit);
 
 JAK_END_DECL

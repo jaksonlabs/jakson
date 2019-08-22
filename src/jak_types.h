@@ -80,28 +80,28 @@ typedef float jak_float;
 
 struct jak_doc_obj;
 
-typedef jak_u64 jak_field_sid;  /* string identifier, resolvable by a string dictionary */
+typedef jak_u64 jak_archive_field_sid_t;  /* string identifier, resolvable by a string dictionary */
 typedef char field_null_t;
 
-typedef jak_i8 field_boolean_t;
+typedef jak_i8 jak_archive_field_boolean_t;
 
-typedef jak_i8 field_i8_t;
+typedef jak_i8 jak_archive_field_i8_t;
 
-typedef jak_i16 field_i16_t;
+typedef jak_i16 jak_archive_field_i16_t;
 
-typedef jak_i32 field_i32_t;
+typedef jak_i32 jak_archive_field_i32_t;
 
-typedef jak_i64 field_i64_t;
+typedef jak_i64 jak_archive_field_i64_t;
 
-typedef jak_u8 field_u8_t;
+typedef jak_u8 jak_archive_field_u8_t;
 
-typedef jak_u16 field_u16_t;
+typedef jak_u16 jak_archive_field_u16_t;
 
-typedef jak_u32 field_u32_t;
+typedef jak_u32 jak_archive_field_u32_t;
 
-typedef jak_u64 field_u64_t;
+typedef jak_u64 jak_archive_field_u64_t;
 
-typedef float field_number_t;
+typedef float jak_archive_field_number_t;
 
 typedef const char *field_string_t;
 
@@ -161,37 +161,37 @@ typedef const char *field_string_t;
             value_size = sizeof(jak_u16);                                                                                  \
             break;                                                                                                     \
         case JAK_FIELD_BOOLEAN:                                                                                            \
-            value_size = sizeof(field_boolean_t);                                                                   \
+            value_size = sizeof(jak_archive_field_boolean_t);                                                                   \
             break;                                                                                                     \
         case JAK_FIELD_INT8:                                                                                               \
-            value_size = sizeof(field_i8_t);                                                                           \
+            value_size = sizeof(jak_archive_field_i8_t);                                                                           \
             break;                                                                                                     \
         case JAK_FIELD_INT16:                                                                                              \
-            value_size = sizeof(field_i16_t);                                                                          \
+            value_size = sizeof(jak_archive_field_i16_t);                                                                          \
             break;                                                                                                     \
         case JAK_FIELD_INT32:                                                                                              \
-            value_size = sizeof(field_i32_t);                                                                          \
+            value_size = sizeof(jak_archive_field_i32_t);                                                                          \
             break;                                                                                                     \
         case JAK_FIELD_INT64:                                                                                              \
-            value_size = sizeof(field_i64_t);                                                                          \
+            value_size = sizeof(jak_archive_field_i64_t);                                                                          \
             break;                                                                                                     \
         case JAK_FIELD_UINT8:                                                                                              \
-            value_size = sizeof(field_u8_t);                                                                           \
+            value_size = sizeof(jak_archive_field_u8_t);                                                                           \
             break;                                                                                                     \
         case JAK_FIELD_UINT16:                                                                                             \
-            value_size = sizeof(field_u16_t);                                                                          \
+            value_size = sizeof(jak_archive_field_u16_t);                                                                          \
             break;                                                                                                     \
         case JAK_FIELD_UINT32:                                                                                             \
-            value_size = sizeof(field_u32_t);                                                                          \
+            value_size = sizeof(jak_archive_field_u32_t);                                                                          \
             break;                                                                                                     \
         case JAK_FIELD_UINT64:                                                                                             \
-            value_size = sizeof(field_u64_t);                                                                          \
+            value_size = sizeof(jak_archive_field_u64_t);                                                                          \
             break;                                                                                                     \
         case JAK_FIELD_FLOAT:                                                                                              \
-            value_size = sizeof(field_number_t);                                                                       \
+            value_size = sizeof(jak_archive_field_number_t);                                                                       \
             break;                                                                                                     \
         case JAK_FIELD_STRING:                                                                                             \
-            value_size = sizeof(jak_field_sid);                                                                          \
+            value_size = sizeof(jak_archive_field_sid_t);                                                                          \
             break;                                                                                                     \
         case JAK_FIELD_OBJECT:                                                                                             \
             value_size = sizeof(struct jak_column_doc_obj);                                                                 \

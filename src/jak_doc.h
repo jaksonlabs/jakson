@@ -70,7 +70,7 @@ struct jak_doc *doc_bulk_new_doc(struct jak_doc_bulk *context, jak_archive_field
 struct jak_doc_obj *doc_bulk_new_obj(struct jak_doc *model);
 
 bool doc_bulk_get_dic_contents(struct vector ofType (const char *) **strings,
-                               struct vector ofType(jak_field_sid) **string_ids, const struct jak_doc_bulk *context);
+                               struct vector ofType(jak_archive_field_sid_t) **string_ids, const struct jak_doc_bulk *context);
 
 bool doc_print(FILE *file, const struct jak_doc *doc);
 

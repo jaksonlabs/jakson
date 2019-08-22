@@ -72,7 +72,7 @@ typedef int64_t signed_offset_t;
 
 typedef unsigned char u_char;
 
-typedef enum field_type {
+typedef enum jak_archive_field_type {
     JAK_FIELD_NULL = 0,
     JAK_FIELD_BOOLEAN = 1,
     JAK_FIELD_INT8 = 2,
@@ -95,7 +95,7 @@ enum access_mode {
 
 #define JAK_FUNC_UNUSED __attribute__((unused))
 
-JAK_FUNC_UNUSED static const char *basic_type_to_json_type_str(enum field_type t)
+JAK_FUNC_UNUSED static const char *basic_type_to_json_type_str(enum jak_archive_field_type t)
 {
         switch (t) {
                 case JAK_FIELD_INT8:
@@ -122,7 +122,7 @@ JAK_FUNC_UNUSED static const char *basic_type_to_json_type_str(enum field_type t
         }
 }
 
-JAK_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum field_type t)
+JAK_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum jak_archive_field_type t)
 {
         switch (t) {
                 case JAK_FIELD_INT8:
