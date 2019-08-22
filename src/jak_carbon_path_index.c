@@ -53,7 +53,7 @@ struct path_index_node {
                 } key;
         } entry;
 
-        carbon_field_type_e field_type;
+        jak_carbon_field_type_e field_type;
         jak_offset_t field_offset;
 
         struct jak_vector ofType(struct path_index_node) sub_entries;
@@ -137,7 +137,7 @@ static void path_index_node_new_object_prop(struct path_index_node *node, jak_of
         node->field_offset = value_off;
 }
 
-static void path_index_node_set_field_type(struct path_index_node *node, carbon_field_type_e field_type)
+static void path_index_node_set_field_type(struct path_index_node *node, jak_carbon_field_type_e field_type)
 {
         node->field_type = field_type;
 }
@@ -185,7 +185,7 @@ static void path_index_node_print_level(FILE *file, struct path_index_node *node
                         (unsigned) node->entry.key.offset);
         }
         if (node->type != PATH_ROOT) {
-                fprintf(file, "field(type: %s, offset: 0x%x)\n", carbon_field_type_str(NULL, node->field_type),
+                fprintf(file, "field(type: %s, offset: 0x%x)\n", jak_carbon_field_type_str(NULL, node->field_type),
                         (unsigned) node->field_offset);
         } else {
                 fprintf(file, "\n");
@@ -267,7 +267,7 @@ static void array_traverse(struct path_index_node *parent, jak_carbon_array_it *
 
 static void column_traverse(struct path_index_node *parent, jak_carbon_column_it *it)
 {
-        carbon_field_type_e column_type, entry_type;
+        jak_carbon_field_type_e column_type, entry_type;
         jak_u32 nvalues;
 
         jak_carbon_column_it_values_info(&column_type, &nvalues, it);
@@ -275,10 +275,10 @@ static void column_traverse(struct path_index_node *parent, jak_carbon_column_it
         for (jak_u32 i = 0; i < nvalues; i++) {
                 bool is_null = jak_carbon_column_it_value_is_null(it, i);
                 bool is_true = false;
-                if (column_type == CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN) {
+                if (column_type == JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN) {
                         is_true = jak_carbon_column_it_boolean_values(NULL, it)[i];
                 }
-                entry_type = carbon_field_type_column_entry_to_regular_type(column_type, is_null, is_true);
+                entry_type = jak_carbon_field_type_column_entry_to_regular_type(column_type, is_null, is_true);
                 jak_offset_t sub_elem_off = jak_carbon_column_it_tell(it, i);
 
                 struct path_index_node *node = path_index_node_add_column_elem(parent, i, sub_elem_off);
@@ -301,50 +301,50 @@ static void object_traverse(struct path_index_node *parent, struct jak_carbon_ob
 
 static void object_build_index(struct path_index_node *parent, struct jak_carbon_object_it *elem_it)
 {
-        carbon_field_type_e field_type;
+        jak_carbon_field_type_e field_type;
         carbon_object_it_prop_type(&field_type, elem_it);
         path_index_node_set_field_type(parent, field_type);
 
         switch (field_type) {
-                case CARBON_JAK_FIELD_TYPE_NULL:
-                case CARBON_JAK_FIELD_TYPE_TRUE:
-                case CARBON_JAK_FIELD_TYPE_FALSE:
-                case CARBON_JAK_FIELD_TYPE_STRING:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U8:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U16:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U32:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U64:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I8:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I16:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I32:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I64:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT:
-                case CARBON_JAK_FIELD_TYPE_BINARY:
-                case CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM:
+                case JAK_CARBON_FIELD_TYPE_NULL:
+                case JAK_CARBON_FIELD_TYPE_TRUE:
+                case JAK_CARBON_FIELD_TYPE_FALSE:
+                case JAK_CARBON_FIELD_TYPE_STRING:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U8:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U16:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U32:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U64:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I8:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I16:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I32:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I64:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT:
+                case JAK_CARBON_FIELD_TYPE_BINARY:
+                case JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM:
                         /* path ends here */
                         break;
-                case CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U8:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U16:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U32:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U64:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I8:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I16:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I32:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I64: {
+                case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U8:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U16:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U32:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U64:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I8:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I16:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I32:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I64: {
                         jak_carbon_column_it *it = carbon_object_it_column_value(elem_it);
                         column_traverse(parent, it);
 
                 }
                         break;
-                case CARBON_JAK_FIELD_TYPE_ARRAY: {
+                case JAK_CARBON_FIELD_TYPE_ARRAY: {
                         jak_carbon_array_it *it = carbon_object_it_array_value(elem_it);
                         array_traverse(parent, it);
                         jak_carbon_array_it_drop(it);
                 }
                         break;
-                case CARBON_JAK_FIELD_TYPE_OBJECT: {
+                case JAK_CARBON_FIELD_TYPE_OBJECT: {
                         struct jak_carbon_object_it *it = carbon_object_it_object_value(elem_it);
                         object_traverse(parent, it);
                         carbon_object_it_drop(it);
@@ -356,50 +356,50 @@ static void object_build_index(struct path_index_node *parent, struct jak_carbon
 
 static void array_build_index(struct path_index_node *parent, jak_carbon_array_it *elem_it)
 {
-        carbon_field_type_e field_type;
+        jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, elem_it);
         path_index_node_set_field_type(parent, field_type);
 
         switch (field_type) {
-                case CARBON_JAK_FIELD_TYPE_NULL:
-                case CARBON_JAK_FIELD_TYPE_TRUE:
-                case CARBON_JAK_FIELD_TYPE_FALSE:
-                case CARBON_JAK_FIELD_TYPE_STRING:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U8:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U16:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U32:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U64:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I8:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I16:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I32:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I64:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT:
-                case CARBON_JAK_FIELD_TYPE_BINARY:
-                case CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM:
+                case JAK_CARBON_FIELD_TYPE_NULL:
+                case JAK_CARBON_FIELD_TYPE_TRUE:
+                case JAK_CARBON_FIELD_TYPE_FALSE:
+                case JAK_CARBON_FIELD_TYPE_STRING:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U8:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U16:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U32:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U64:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I8:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I16:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I32:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I64:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT:
+                case JAK_CARBON_FIELD_TYPE_BINARY:
+                case JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM:
                         /* path ends here */
                         break;
-                case CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U8:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U16:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U32:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U64:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I8:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I16:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I32:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I64: {
+                case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U8:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U16:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U32:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U64:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I8:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I16:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I32:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I64: {
                         jak_carbon_column_it *it = jak_carbon_array_it_column_value(elem_it);
                         column_traverse(parent, it);
 
                 }
                         break;
-                case CARBON_JAK_FIELD_TYPE_ARRAY: {
+                case JAK_CARBON_FIELD_TYPE_ARRAY: {
                         jak_carbon_array_it *it = jak_carbon_array_it_array_value(elem_it);
                         array_traverse(parent, it);
                         jak_carbon_array_it_drop(it);
                 }
                         break;
-                case CARBON_JAK_FIELD_TYPE_OBJECT: {
+                case JAK_CARBON_FIELD_TYPE_OBJECT: {
                         struct jak_carbon_object_it *it = jak_carbon_array_it_object_value(elem_it);
                         object_traverse(parent, it);
                         carbon_object_it_drop(it);
@@ -412,8 +412,8 @@ static void array_build_index(struct path_index_node *parent, jak_carbon_array_i
 static void field_ref_write(struct jak_memfile *file, struct path_index_node *node)
 {
         memfile_write_byte(file, node->field_type);
-        if (node->field_type != CARBON_JAK_FIELD_TYPE_NULL && node->field_type != CARBON_JAK_FIELD_TYPE_TRUE &&
-            node->field_type != CARBON_JAK_FIELD_TYPE_FALSE) {
+        if (node->field_type != JAK_CARBON_FIELD_TYPE_NULL && node->field_type != JAK_CARBON_FIELD_TYPE_TRUE &&
+            node->field_type != JAK_CARBON_FIELD_TYPE_FALSE) {
                 /* only in case of field type that is not null, true, or false, there is more information behind
                  * the field offset */
                 memfile_write_uintvar_stream(NULL, file, node->field_offset);
@@ -446,36 +446,36 @@ static void container_contents_flat(struct jak_memfile *file, struct path_index_
 static void container_field_flat(struct jak_memfile *file, struct path_index_node *node)
 {
         switch (node->field_type) {
-                case CARBON_JAK_FIELD_TYPE_NULL:
-                case CARBON_JAK_FIELD_TYPE_TRUE:
-                case CARBON_JAK_FIELD_TYPE_FALSE:
-                case CARBON_JAK_FIELD_TYPE_STRING:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U8:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U16:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U32:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U64:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I8:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I16:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I32:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I64:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT:
-                case CARBON_JAK_FIELD_TYPE_BINARY:
-                case CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM:
+                case JAK_CARBON_FIELD_TYPE_NULL:
+                case JAK_CARBON_FIELD_TYPE_TRUE:
+                case JAK_CARBON_FIELD_TYPE_FALSE:
+                case JAK_CARBON_FIELD_TYPE_STRING:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U8:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U16:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U32:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U64:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I8:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I16:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I32:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I64:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT:
+                case JAK_CARBON_FIELD_TYPE_BINARY:
+                case JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM:
                         /* any path will end with this kind of field, and therefore no subsequent elements exists */
                         JAK_ASSERT(node->sub_entries.num_elems == 0);
                         break;
-                case CARBON_JAK_FIELD_TYPE_OBJECT:
-                case CARBON_JAK_FIELD_TYPE_ARRAY:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U8:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U16:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U32:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U64:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I8:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I16:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I32:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I64:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN:
+                case JAK_CARBON_FIELD_TYPE_OBJECT:
+                case JAK_CARBON_FIELD_TYPE_ARRAY:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U8:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U16:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U32:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U64:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I8:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I16:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I32:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I64:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
                         /* each of these field types allows for further path traversals, and therefore at least one
                          * subsequent path element must exist */
                         container_contents_flat(file, node);
@@ -547,12 +547,12 @@ static jak_u8 field_ref_into_carbon(jak_carbon_insert *ins, struct jak_carbon_pa
         if (is_root) {
                 carbon_insert_prop_null(ins, "container");
         } else {
-                carbon_insert_prop_string(ins, "container", carbon_field_type_str(NULL, field_type));
+                carbon_insert_prop_string(ins, "container", jak_carbon_field_type_str(NULL, field_type));
         }
 
 
-        if (field_type != CARBON_JAK_FIELD_TYPE_NULL && field_type != CARBON_JAK_FIELD_TYPE_TRUE &&
-            field_type != CARBON_JAK_FIELD_TYPE_FALSE) {
+        if (field_type != JAK_CARBON_FIELD_TYPE_NULL && field_type != JAK_CARBON_FIELD_TYPE_TRUE &&
+            field_type != JAK_CARBON_FIELD_TYPE_FALSE) {
                 /* only in case of field type that is not null, true, or false, there is more information behind
                  * the field offset */
                 jak_u64 field_offset = memfile_read_uintvar_stream(NULL, &index->memfile);
@@ -579,8 +579,8 @@ static jak_u8 field_ref_to_str(struct jak_string *str, struct jak_carbon_path_in
         string_add_char(str, field_type);
         string_add_char(str, ']');
 
-        if (field_type != CARBON_JAK_FIELD_TYPE_NULL && field_type != CARBON_JAK_FIELD_TYPE_TRUE &&
-            field_type != CARBON_JAK_FIELD_TYPE_FALSE) {
+        if (field_type != JAK_CARBON_FIELD_TYPE_NULL && field_type != JAK_CARBON_FIELD_TYPE_TRUE &&
+            field_type != JAK_CARBON_FIELD_TYPE_FALSE) {
                 /* only in case of field type that is not null, true, or false, there is more information behind
                  * the field offset */
                 jak_u64 field_offset = memfile_read_uintvar_stream(NULL, &index->memfile);
@@ -676,35 +676,35 @@ static void
 container_to_str(struct jak_string *str, struct jak_carbon_path_index *index, jak_u8 field_type, unsigned intent_level)
 {
         switch (field_type) {
-                case CARBON_JAK_FIELD_TYPE_NULL:
-                case CARBON_JAK_FIELD_TYPE_TRUE:
-                case CARBON_JAK_FIELD_TYPE_FALSE:
-                case CARBON_JAK_FIELD_TYPE_STRING:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U8:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U16:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U32:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U64:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I8:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I16:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I32:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I64:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT:
-                case CARBON_JAK_FIELD_TYPE_BINARY:
-                case CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM:
+                case JAK_CARBON_FIELD_TYPE_NULL:
+                case JAK_CARBON_FIELD_TYPE_TRUE:
+                case JAK_CARBON_FIELD_TYPE_FALSE:
+                case JAK_CARBON_FIELD_TYPE_STRING:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U8:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U16:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U32:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U64:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I8:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I16:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I32:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I64:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT:
+                case JAK_CARBON_FIELD_TYPE_BINARY:
+                case JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM:
                         /* nothing to do */
                         break;
-                case CARBON_JAK_FIELD_TYPE_OBJECT:
-                case CARBON_JAK_FIELD_TYPE_ARRAY:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U8:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U16:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U32:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U64:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I8:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I16:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I32:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I64:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN: {
+                case JAK_CARBON_FIELD_TYPE_OBJECT:
+                case JAK_CARBON_FIELD_TYPE_ARRAY:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U8:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U16:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U32:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U64:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I8:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I16:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I32:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I64:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
                         /* subsequent path elements to be printed */
                         container_contents_to_str(str, index, ++intent_level);
                 }
@@ -716,35 +716,35 @@ container_to_str(struct jak_string *str, struct jak_carbon_path_index *index, ja
 static void container_into_carbon(jak_carbon_insert *ins, struct jak_carbon_path_index *index, jak_u8 field_type)
 {
         switch (field_type) {
-                case CARBON_JAK_FIELD_TYPE_NULL:
-                case CARBON_JAK_FIELD_TYPE_TRUE:
-                case CARBON_JAK_FIELD_TYPE_FALSE:
-                case CARBON_JAK_FIELD_TYPE_STRING:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U8:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U16:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U32:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U64:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I8:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I16:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I32:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I64:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT:
-                case CARBON_JAK_FIELD_TYPE_BINARY:
-                case CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM:
+                case JAK_CARBON_FIELD_TYPE_NULL:
+                case JAK_CARBON_FIELD_TYPE_TRUE:
+                case JAK_CARBON_FIELD_TYPE_FALSE:
+                case JAK_CARBON_FIELD_TYPE_STRING:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U8:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U16:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U32:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U64:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I8:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I16:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I32:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I64:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT:
+                case JAK_CARBON_FIELD_TYPE_BINARY:
+                case JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM:
                         /* nothing to do */
                         break;
-                case CARBON_JAK_FIELD_TYPE_OBJECT:
-                case CARBON_JAK_FIELD_TYPE_ARRAY:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U8:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U16:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U32:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U64:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I8:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I16:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I32:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I64:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN: {
+                case JAK_CARBON_FIELD_TYPE_OBJECT:
+                case JAK_CARBON_FIELD_TYPE_ARRAY:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U8:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U16:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U32:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U64:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I8:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I16:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I32:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I64:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
                         /* subsequent path elements to be printed */
                         container_contents_into_carbon(ins, index);
                 }
@@ -1189,7 +1189,7 @@ bool carbon_path_index_it_open(struct jak_carbon_path_index_it *it, struct jak_c
 ////  field access
 //// ---------------------------------------------------------------------------------------------------------------------
 //
-//bool carbon_path_index_it_field_type(carbon_field_type_e *type, struct jak_carbon_path_index_it *it)
+//bool carbon_path_index_it_field_type(jak_carbon_field_type_e *type, struct jak_carbon_path_index_it *it)
 //{
 //
 //}

@@ -67,7 +67,7 @@ struct jak_carbon_insert_object_state {
 struct jak_carbon_insert_column_state {
         jak_carbon_insert *parent_inserter;
 
-        carbon_field_type_e type;
+        jak_carbon_field_type_e type;
         jak_carbon_column_it *nested_column;
         jak_carbon_insert nested_inserter;
 
@@ -78,18 +78,18 @@ bool carbon_int_insert_object(struct jak_memfile *memfile, size_t nbytes);
 
 bool carbon_int_insert_array(struct jak_memfile *memfile, size_t nbytes);
 
-bool carbon_int_insert_column(struct jak_memfile *memfile_in, struct jak_error *err_in, enum carbon_column_type type,
+bool carbon_int_insert_column(struct jak_memfile *memfile_in, struct jak_error *err_in, jak_carbon_column_type_e type,
                               size_t capactity);
 
 /**
  * Returns the number of bytes required to store a field type including its type marker in a byte sequence.
  */
-size_t carbon_int_get_type_size_encoded(carbon_field_type_e type);
+size_t carbon_int_get_type_size_encoded(jak_carbon_field_type_e type);
 
 /**
  * Returns the number of bytes required to store a field value of a particular type exclusing its type marker.
  */
-size_t carbon_int_get_type_value_size(carbon_field_type_e type);
+size_t carbon_int_get_type_value_size(jak_carbon_field_type_e type);
 
 bool carbon_int_array_it_next(bool *is_empty_slot, bool *is_array_end, jak_carbon_array_it *it);
 
@@ -149,7 +149,7 @@ void carbon_int_auto_close_nested_object_it(jak_field_access *field);
 
 void carbon_int_auto_close_nested_column_it(jak_field_access *field);
 
-bool carbon_int_field_access_field_type(carbon_field_type_e *type, jak_field_access *field);
+bool carbon_int_field_access_field_type(jak_carbon_field_type_e *type, jak_field_access *field);
 
 bool carbon_int_field_access_u8_value(jak_u8 *value, jak_field_access *field, struct jak_error *err);
 
@@ -187,7 +187,7 @@ struct jak_carbon_object_it *carbon_int_field_access_object_value(jak_field_acce
 
 jak_carbon_column_it *carbon_int_field_access_column_value(jak_field_access *field, struct jak_error *err);
 
-bool carbon_int_field_remove(struct jak_memfile *memfile, struct jak_error *err, carbon_field_type_e type);
+bool carbon_int_field_remove(struct jak_memfile *memfile, struct jak_error *err, jak_carbon_field_type_e type);
 
 /**
  * For <code>mode</code>, see <code>jak_carbon_create_begin</code>

@@ -334,27 +334,27 @@ static bool internal_pack_array(jak_carbon_array_it *it)
         /* shrink contained containers */
         {
                 while (jak_carbon_array_it_next(it)) {
-                        carbon_field_type_e type;
+                        jak_carbon_field_type_e type;
                         jak_carbon_array_it_field_type(&type, it);
                         switch (type) {
-                                case CARBON_JAK_FIELD_TYPE_NULL:
-                                case CARBON_JAK_FIELD_TYPE_TRUE:
-                                case CARBON_JAK_FIELD_TYPE_FALSE:
-                                case CARBON_JAK_FIELD_TYPE_STRING:
-                                case CARBON_JAK_FIELD_TYPE_NUMBER_U8:
-                                case CARBON_JAK_FIELD_TYPE_NUMBER_U16:
-                                case CARBON_JAK_FIELD_TYPE_NUMBER_U32:
-                                case CARBON_JAK_FIELD_TYPE_NUMBER_U64:
-                                case CARBON_JAK_FIELD_TYPE_NUMBER_I8:
-                                case CARBON_JAK_FIELD_TYPE_NUMBER_I16:
-                                case CARBON_JAK_FIELD_TYPE_NUMBER_I32:
-                                case CARBON_JAK_FIELD_TYPE_NUMBER_I64:
-                                case CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT:
-                                case CARBON_JAK_FIELD_TYPE_BINARY:
-                                case CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM:
+                                case JAK_CARBON_FIELD_TYPE_NULL:
+                                case JAK_CARBON_FIELD_TYPE_TRUE:
+                                case JAK_CARBON_FIELD_TYPE_FALSE:
+                                case JAK_CARBON_FIELD_TYPE_STRING:
+                                case JAK_CARBON_FIELD_TYPE_NUMBER_U8:
+                                case JAK_CARBON_FIELD_TYPE_NUMBER_U16:
+                                case JAK_CARBON_FIELD_TYPE_NUMBER_U32:
+                                case JAK_CARBON_FIELD_TYPE_NUMBER_U64:
+                                case JAK_CARBON_FIELD_TYPE_NUMBER_I8:
+                                case JAK_CARBON_FIELD_TYPE_NUMBER_I16:
+                                case JAK_CARBON_FIELD_TYPE_NUMBER_I32:
+                                case JAK_CARBON_FIELD_TYPE_NUMBER_I64:
+                                case JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT:
+                                case JAK_CARBON_FIELD_TYPE_BINARY:
+                                case JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM:
                                         /* nothing to shrink, because there are no padded zeros here */
                                         break;
-                                case CARBON_JAK_FIELD_TYPE_ARRAY: {
+                                case JAK_CARBON_FIELD_TYPE_ARRAY: {
                                         jak_carbon_array_it nested_array_it;
                                         jak_carbon_array_it_create(&nested_array_it, &it->memfile, &it->err,
                                                                it->field_access.nested_array_it->payload_start -
@@ -367,22 +367,22 @@ static bool internal_pack_array(jak_carbon_array_it *it)
                                         jak_carbon_array_it_drop(&nested_array_it);
                                 }
                                         break;
-                                case CARBON_JAK_FIELD_TYPE_COLUMN_U8:
-                                case CARBON_JAK_FIELD_TYPE_COLUMN_U16:
-                                case CARBON_JAK_FIELD_TYPE_COLUMN_U32:
-                                case CARBON_JAK_FIELD_TYPE_COLUMN_U64:
-                                case CARBON_JAK_FIELD_TYPE_COLUMN_I8:
-                                case CARBON_JAK_FIELD_TYPE_COLUMN_I16:
-                                case CARBON_JAK_FIELD_TYPE_COLUMN_I32:
-                                case CARBON_JAK_FIELD_TYPE_COLUMN_I64:
-                                case CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT:
-                                case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN:
+                                case JAK_CARBON_FIELD_TYPE_COLUMN_U8:
+                                case JAK_CARBON_FIELD_TYPE_COLUMN_U16:
+                                case JAK_CARBON_FIELD_TYPE_COLUMN_U32:
+                                case JAK_CARBON_FIELD_TYPE_COLUMN_U64:
+                                case JAK_CARBON_FIELD_TYPE_COLUMN_I8:
+                                case JAK_CARBON_FIELD_TYPE_COLUMN_I16:
+                                case JAK_CARBON_FIELD_TYPE_COLUMN_I32:
+                                case JAK_CARBON_FIELD_TYPE_COLUMN_I64:
+                                case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT:
+                                case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
                                         jak_carbon_column_it_rewind(it->field_access.nested_column_it);
                                         internal_pack_column(it->field_access.nested_column_it);
                                         memfile_seek(&it->memfile,
                                                      memfile_tell(&it->field_access.nested_column_it->memfile));
                                         break;
-                                case CARBON_JAK_FIELD_TYPE_OBJECT: {
+                                case JAK_CARBON_FIELD_TYPE_OBJECT: {
                                         struct jak_carbon_object_it nested_object_it;
                                         carbon_object_it_create(&nested_object_it, &it->memfile, &it->err,
                                                                 it->field_access.nested_object_it->object_contents_off -
@@ -442,27 +442,27 @@ static bool internal_pack_object(struct jak_carbon_object_it *it)
         /* shrink contained containers */
         {
                 while (carbon_object_it_next(it)) {
-                        carbon_field_type_e type;
+                        jak_carbon_field_type_e type;
                         carbon_object_it_prop_type(&type, it);
                         switch (type) {
-                                case CARBON_JAK_FIELD_TYPE_NULL:
-                                case CARBON_JAK_FIELD_TYPE_TRUE:
-                                case CARBON_JAK_FIELD_TYPE_FALSE:
-                                case CARBON_JAK_FIELD_TYPE_STRING:
-                                case CARBON_JAK_FIELD_TYPE_NUMBER_U8:
-                                case CARBON_JAK_FIELD_TYPE_NUMBER_U16:
-                                case CARBON_JAK_FIELD_TYPE_NUMBER_U32:
-                                case CARBON_JAK_FIELD_TYPE_NUMBER_U64:
-                                case CARBON_JAK_FIELD_TYPE_NUMBER_I8:
-                                case CARBON_JAK_FIELD_TYPE_NUMBER_I16:
-                                case CARBON_JAK_FIELD_TYPE_NUMBER_I32:
-                                case CARBON_JAK_FIELD_TYPE_NUMBER_I64:
-                                case CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT:
-                                case CARBON_JAK_FIELD_TYPE_BINARY:
-                                case CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM:
+                                case JAK_CARBON_FIELD_TYPE_NULL:
+                                case JAK_CARBON_FIELD_TYPE_TRUE:
+                                case JAK_CARBON_FIELD_TYPE_FALSE:
+                                case JAK_CARBON_FIELD_TYPE_STRING:
+                                case JAK_CARBON_FIELD_TYPE_NUMBER_U8:
+                                case JAK_CARBON_FIELD_TYPE_NUMBER_U16:
+                                case JAK_CARBON_FIELD_TYPE_NUMBER_U32:
+                                case JAK_CARBON_FIELD_TYPE_NUMBER_U64:
+                                case JAK_CARBON_FIELD_TYPE_NUMBER_I8:
+                                case JAK_CARBON_FIELD_TYPE_NUMBER_I16:
+                                case JAK_CARBON_FIELD_TYPE_NUMBER_I32:
+                                case JAK_CARBON_FIELD_TYPE_NUMBER_I64:
+                                case JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT:
+                                case JAK_CARBON_FIELD_TYPE_BINARY:
+                                case JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM:
                                         /* nothing to shrink, because there are no padded zeros here */
                                         break;
-                                case CARBON_JAK_FIELD_TYPE_ARRAY: {
+                                case JAK_CARBON_FIELD_TYPE_ARRAY: {
                                         jak_carbon_array_it nested_array_it;
                                         jak_carbon_array_it_create(&nested_array_it, &it->memfile, &it->err,
                                                                it->field.value.data.nested_array_it->payload_start -
@@ -475,22 +475,22 @@ static bool internal_pack_object(struct jak_carbon_object_it *it)
                                         jak_carbon_array_it_drop(&nested_array_it);
                                 }
                                         break;
-                                case CARBON_JAK_FIELD_TYPE_COLUMN_U8:
-                                case CARBON_JAK_FIELD_TYPE_COLUMN_U16:
-                                case CARBON_JAK_FIELD_TYPE_COLUMN_U32:
-                                case CARBON_JAK_FIELD_TYPE_COLUMN_U64:
-                                case CARBON_JAK_FIELD_TYPE_COLUMN_I8:
-                                case CARBON_JAK_FIELD_TYPE_COLUMN_I16:
-                                case CARBON_JAK_FIELD_TYPE_COLUMN_I32:
-                                case CARBON_JAK_FIELD_TYPE_COLUMN_I64:
-                                case CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT:
-                                case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN:
+                                case JAK_CARBON_FIELD_TYPE_COLUMN_U8:
+                                case JAK_CARBON_FIELD_TYPE_COLUMN_U16:
+                                case JAK_CARBON_FIELD_TYPE_COLUMN_U32:
+                                case JAK_CARBON_FIELD_TYPE_COLUMN_U64:
+                                case JAK_CARBON_FIELD_TYPE_COLUMN_I8:
+                                case JAK_CARBON_FIELD_TYPE_COLUMN_I16:
+                                case JAK_CARBON_FIELD_TYPE_COLUMN_I32:
+                                case JAK_CARBON_FIELD_TYPE_COLUMN_I64:
+                                case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT:
+                                case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
                                         jak_carbon_column_it_rewind(it->field.value.data.nested_column_it);
                                         internal_pack_column(it->field.value.data.nested_column_it);
                                         memfile_seek(&it->memfile,
                                                      memfile_tell(&it->field.value.data.nested_column_it->memfile));
                                         break;
-                                case CARBON_JAK_FIELD_TYPE_OBJECT: {
+                                case JAK_CARBON_FIELD_TYPE_OBJECT: {
                                         struct jak_carbon_object_it nested_object_it;
                                         carbon_object_it_create(&nested_object_it, &it->memfile, &it->err,
                                                                 it->field.value.data.nested_object_it->object_contents_off -

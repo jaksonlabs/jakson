@@ -76,44 +76,44 @@ bool carbon_int_insert_array(struct jak_memfile *memfile, size_t nbytes)
         return true;
 }
 
-bool carbon_int_insert_column(struct jak_memfile *memfile_in, struct jak_error *err_in, enum carbon_column_type type,
+bool carbon_int_insert_column(struct jak_memfile *memfile_in, struct jak_error *err_in, jak_carbon_column_type_e type,
                               size_t capactity)
 {
         JAK_ERROR_IF_NULL(memfile_in);
         JAK_ERROR_IF_NULL(err_in);
 
-        JAK_declare_and_init(carbon_field_type_e, column_type)
+        JAK_declare_and_init(jak_carbon_field_type_e, column_type)
 
         switch (type) {
-                case CARBON_COLUMN_TYPE_BOOLEAN:
-                        column_type = CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN;
+                case JAK_CARBON_COLUMN_TYPE_BOOLEAN:
+                        column_type = JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN;
                         break;
-                case CARBON_COLUMN_TYPE_U8:
-                        column_type = CARBON_JAK_FIELD_TYPE_COLUMN_U8;
+                case JAK_CARBON_COLUMN_TYPE_U8:
+                        column_type = JAK_CARBON_FIELD_TYPE_COLUMN_U8;
                         break;
-                case CARBON_COLUMN_TYPE_U16:
-                        column_type = CARBON_JAK_FIELD_TYPE_COLUMN_U16;
+                case JAK_CARBON_COLUMN_TYPE_U16:
+                        column_type = JAK_CARBON_FIELD_TYPE_COLUMN_U16;
                         break;
-                case CARBON_COLUMN_TYPE_U32:
-                        column_type = CARBON_JAK_FIELD_TYPE_COLUMN_U32;
+                case JAK_CARBON_COLUMN_TYPE_U32:
+                        column_type = JAK_CARBON_FIELD_TYPE_COLUMN_U32;
                         break;
-                case CARBON_COLUMN_TYPE_U64:
-                        column_type = CARBON_JAK_FIELD_TYPE_COLUMN_U64;
+                case JAK_CARBON_COLUMN_TYPE_U64:
+                        column_type = JAK_CARBON_FIELD_TYPE_COLUMN_U64;
                         break;
-                case CARBON_COLUMN_TYPE_I8:
-                        column_type = CARBON_JAK_FIELD_TYPE_COLUMN_I8;
+                case JAK_CARBON_COLUMN_TYPE_I8:
+                        column_type = JAK_CARBON_FIELD_TYPE_COLUMN_I8;
                         break;
-                case CARBON_COLUMN_TYPE_I16:
-                        column_type = CARBON_JAK_FIELD_TYPE_COLUMN_I16;
+                case JAK_CARBON_COLUMN_TYPE_I16:
+                        column_type = JAK_CARBON_FIELD_TYPE_COLUMN_I16;
                         break;
-                case CARBON_COLUMN_TYPE_I32:
-                        column_type = CARBON_JAK_FIELD_TYPE_COLUMN_I32;
+                case JAK_CARBON_COLUMN_TYPE_I32:
+                        column_type = JAK_CARBON_FIELD_TYPE_COLUMN_I32;
                         break;
-                case CARBON_COLUMN_TYPE_I64:
-                        column_type = CARBON_JAK_FIELD_TYPE_COLUMN_I64;
+                case JAK_CARBON_COLUMN_TYPE_I64:
+                        column_type = JAK_CARBON_FIELD_TYPE_COLUMN_I64;
                         break;
-                case CARBON_COLUMN_TYPE_FLOAT:
-                        column_type = CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT;
+                case JAK_CARBON_COLUMN_TYPE_FLOAT:
+                        column_type = JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT;
                         break;
                 default:
                         error_with_details(err_in, JAK_ERR_BADTYPE, "carbon column supports fixed-length types only")
@@ -141,32 +141,32 @@ bool carbon_int_insert_column(struct jak_memfile *memfile_in, struct jak_error *
         return true;
 }
 
-size_t carbon_int_get_type_size_encoded(carbon_field_type_e type)
+size_t carbon_int_get_type_size_encoded(jak_carbon_field_type_e type)
 {
         size_t type_size = sizeof(media_type_t); /* at least the media type marker is required */
         switch (type) {
-                case CARBON_JAK_FIELD_TYPE_NULL:
-                case CARBON_JAK_FIELD_TYPE_TRUE:
-                case CARBON_JAK_FIELD_TYPE_FALSE:
+                case JAK_CARBON_FIELD_TYPE_NULL:
+                case JAK_CARBON_FIELD_TYPE_TRUE:
+                case JAK_CARBON_FIELD_TYPE_FALSE:
                         /* only media type marker is required */
                         break;
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U8:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I8:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U8:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I8:
                         type_size += sizeof(jak_u8);
                         break;
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U16:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I16:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U16:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I16:
                         type_size += sizeof(jak_u16);
                         break;
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U32:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I32:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U32:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I32:
                         type_size += sizeof(jak_u32);
                         break;
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U64:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I64:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U64:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I64:
                         type_size += sizeof(jak_u64);
                         break;
-                case CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT:
                         type_size += sizeof(float);
                         break;
                 default: error_print(JAK_ERR_INTERNALERR);
@@ -175,36 +175,36 @@ size_t carbon_int_get_type_size_encoded(carbon_field_type_e type)
         return type_size;
 }
 
-size_t carbon_int_get_type_value_size(carbon_field_type_e type)
+size_t carbon_int_get_type_value_size(jak_carbon_field_type_e type)
 {
         switch (type) {
-                case CARBON_JAK_FIELD_TYPE_NULL:
-                case CARBON_JAK_FIELD_TYPE_TRUE:
-                case CARBON_JAK_FIELD_TYPE_FALSE:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN:
+                case JAK_CARBON_FIELD_TYPE_NULL:
+                case JAK_CARBON_FIELD_TYPE_TRUE:
+                case JAK_CARBON_FIELD_TYPE_FALSE:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
                         return sizeof(media_type_t); /* these constant values are determined by their media type markers */
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U8:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I8:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U8:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I8:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U8:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I8:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U8:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I8:
                         return sizeof(jak_u8);
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U16:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I16:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U16:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I16:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U16:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I16:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U16:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I16:
                         return sizeof(jak_u16);
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U32:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I32:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U32:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I32:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U32:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I32:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U32:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I32:
                         return sizeof(jak_u32);
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U64:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I64:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U64:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I64:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U64:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I64:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U64:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I64:
                         return sizeof(jak_u64);
-                case CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT:
                         return sizeof(float);
                 default: error_print(JAK_ERR_INTERNALERR);
                         return 0;
@@ -214,7 +214,7 @@ size_t carbon_int_get_type_value_size(carbon_field_type_e type)
 bool carbon_int_array_it_next(bool *is_empty_slot, bool *is_array_end, jak_carbon_array_it *it)
 {
         if (carbon_int_array_it_refresh(is_empty_slot, is_array_end, it)) {
-                carbon_field_skip(&it->memfile);
+                jak_carbon_field_skip(&it->memfile);
                 return true;
         } else {
                 return false;
@@ -262,7 +262,7 @@ bool carbon_int_object_it_prop_value_skip(struct jak_carbon_object_it *it)
 {
         JAK_ERROR_IF_NULL(it)
         memfile_seek(&it->memfile, it->field.value.offset);
-        return carbon_field_skip(&it->memfile);
+        return jak_carbon_field_skip(&it->memfile);
 }
 
 bool carbon_int_object_it_prop_skip(struct jak_carbon_object_it *it)
@@ -272,7 +272,7 @@ bool carbon_int_object_it_prop_skip(struct jak_carbon_object_it *it)
         it->field.key.name_len = memfile_read_uintvar_stream(NULL, &it->memfile);
         memfile_skip(&it->memfile, it->field.key.name_len);
 
-        return carbon_field_skip(&it->memfile);
+        return jak_carbon_field_skip(&it->memfile);
 }
 
 bool carbon_int_object_skip_contents(bool *is_empty_slot, bool *is_array_end, struct jak_carbon_object_it *it)
@@ -320,20 +320,20 @@ bool carbon_int_field_data_access(struct jak_memfile *file, struct jak_error *er
         memfile_skip(file, sizeof(media_type_t));
 
         switch (field_access->it_field_type) {
-                case CARBON_JAK_FIELD_TYPE_NULL:
-                case CARBON_JAK_FIELD_TYPE_TRUE:
-                case CARBON_JAK_FIELD_TYPE_FALSE:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U8:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U16:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U32:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U64:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I8:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I16:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I32:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I64:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT:
+                case JAK_CARBON_FIELD_TYPE_NULL:
+                case JAK_CARBON_FIELD_TYPE_TRUE:
+                case JAK_CARBON_FIELD_TYPE_FALSE:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U8:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U16:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U32:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U64:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I8:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I16:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I32:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I64:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT:
                         break;
-                case CARBON_JAK_FIELD_TYPE_STRING: {
+                case JAK_CARBON_FIELD_TYPE_STRING: {
                         jak_u8 nbytes;
                         uintvar_stream_t len = (uintvar_stream_t) memfile_peek(file, 1);
                         field_access->it_field_len = uintvar_stream_read(&nbytes, len);
@@ -341,7 +341,7 @@ bool carbon_int_field_data_access(struct jak_memfile *file, struct jak_error *er
                         memfile_skip(file, nbytes);
                 }
                         break;
-                case CARBON_JAK_FIELD_TYPE_BINARY: {
+                case JAK_CARBON_FIELD_TYPE_BINARY: {
                         /* read mime type with variable-length integer type */
                         jak_u64 mime_type_id = memfile_read_uintvar_stream(NULL, file);
 
@@ -354,7 +354,7 @@ bool carbon_int_field_data_access(struct jak_memfile *file, struct jak_error *er
                         /* the memfile points now to the actual blob data, which is used by the iterator to set the field */
                 }
                         break;
-                case CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM: {
+                case JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM: {
                         /* read mime type string */
                         field_access->it_mime_type_strlen = memfile_read_uintvar_stream(NULL, file);
                         field_access->it_mime_type = memfile_read(file, field_access->it_mime_type_strlen);
@@ -365,29 +365,29 @@ bool carbon_int_field_data_access(struct jak_memfile *file, struct jak_error *er
                         /* the memfile points now to the actual blob data, which is used by the iterator to set the field */
                 }
                         break;
-                case CARBON_JAK_FIELD_TYPE_ARRAY:
+                case JAK_CARBON_FIELD_TYPE_ARRAY:
                         carbon_int_field_access_create(field_access);
                         field_access->nested_array_it_is_created = true;
                         jak_carbon_array_it_create(field_access->nested_array_it, file, err,
                                                memfile_tell(file) - sizeof(jak_u8));
                         break;
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U8:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U16:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U32:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U64:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I8:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I16:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I32:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I64:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN: {
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U8:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U16:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U32:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U64:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I8:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I16:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I32:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I64:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
                         carbon_int_field_access_create(field_access);
                         field_access->nested_column_it_is_created = true;
                         jak_carbon_column_it_create(field_access->nested_column_it, file, err,
                                                 memfile_tell(file) - sizeof(jak_u8));
                 }
                         break;
-                case CARBON_JAK_FIELD_TYPE_OBJECT:
+                case JAK_CARBON_FIELD_TYPE_OBJECT:
                         carbon_int_field_access_create(field_access);
                         field_access->nested_object_it_is_created = true;
                         carbon_object_it_create(field_access->nested_object_it, file, err,
@@ -599,7 +599,7 @@ bool carbon_int_field_auto_close(jak_field_access *field)
         return true;
 }
 
-bool carbon_int_field_access_field_type(carbon_field_type_e *type, jak_field_access *field)
+bool carbon_int_field_access_field_type(jak_carbon_field_type_e *type, jak_field_access *field)
 {
         JAK_ERROR_IF_NULL(type)
         JAK_ERROR_IF_NULL(field)
@@ -611,7 +611,7 @@ bool carbon_int_field_access_u8_value(jak_u8 *value, jak_field_access *field, st
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
-        error_if(field->it_field_type != CARBON_JAK_FIELD_TYPE_NUMBER_U8, err, JAK_ERR_TYPEMISMATCH);
+        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_U8, err, JAK_ERR_TYPEMISMATCH);
         *value = *(jak_u8 *) field->it_field_data;
         return true;
 }
@@ -620,7 +620,7 @@ bool carbon_int_field_access_u16_value(jak_u16 *value, jak_field_access *field, 
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
-        error_if(field->it_field_type != CARBON_JAK_FIELD_TYPE_NUMBER_U16, err, JAK_ERR_TYPEMISMATCH);
+        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_U16, err, JAK_ERR_TYPEMISMATCH);
         *value = *(jak_u16 *) field->it_field_data;
         return true;
 }
@@ -629,7 +629,7 @@ bool carbon_int_field_access_u32_value(jak_u32 *value, jak_field_access *field, 
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
-        error_if(field->it_field_type != CARBON_JAK_FIELD_TYPE_NUMBER_U32, err, JAK_ERR_TYPEMISMATCH);
+        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_U32, err, JAK_ERR_TYPEMISMATCH);
         *value = *(jak_u32 *) field->it_field_data;
         return true;
 }
@@ -638,7 +638,7 @@ bool carbon_int_field_access_u64_value(jak_u64 *value, jak_field_access *field, 
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
-        error_if(field->it_field_type != CARBON_JAK_FIELD_TYPE_NUMBER_U64, err, JAK_ERR_TYPEMISMATCH);
+        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_U64, err, JAK_ERR_TYPEMISMATCH);
         *value = *(jak_u64 *) field->it_field_data;
         return true;
 }
@@ -647,7 +647,7 @@ bool carbon_int_field_access_i8_value(jak_i8 *value, jak_field_access *field, st
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
-        error_if(field->it_field_type != CARBON_JAK_FIELD_TYPE_NUMBER_I8, err, JAK_ERR_TYPEMISMATCH);
+        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_I8, err, JAK_ERR_TYPEMISMATCH);
         *value = *(jak_i8 *) field->it_field_data;
         return true;
 }
@@ -656,7 +656,7 @@ bool carbon_int_field_access_i16_value(jak_i16 *value, jak_field_access *field, 
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
-        error_if(field->it_field_type != CARBON_JAK_FIELD_TYPE_NUMBER_I16, err, JAK_ERR_TYPEMISMATCH);
+        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_I16, err, JAK_ERR_TYPEMISMATCH);
         *value = *(jak_i16 *) field->it_field_data;
         return true;
 }
@@ -665,7 +665,7 @@ bool carbon_int_field_access_i32_value(jak_i32 *value, jak_field_access *field, 
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
-        error_if(field->it_field_type != CARBON_JAK_FIELD_TYPE_NUMBER_I32, err, JAK_ERR_TYPEMISMATCH);
+        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_I32, err, JAK_ERR_TYPEMISMATCH);
         *value = *(jak_i32 *) field->it_field_data;
         return true;
 }
@@ -674,7 +674,7 @@ bool carbon_int_field_access_i64_value(jak_i64 *value, jak_field_access *field, 
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
-        error_if(field->it_field_type != CARBON_JAK_FIELD_TYPE_NUMBER_I64, err, JAK_ERR_TYPEMISMATCH);
+        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_I64, err, JAK_ERR_TYPEMISMATCH);
         *value = *(jak_i64 *) field->it_field_data;
         return true;
 }
@@ -683,7 +683,7 @@ bool
 carbon_int_field_access_float_value(bool *is_null_in, float *value, jak_field_access *field, struct jak_error *err)
 {
         JAK_ERROR_IF_NULL(field)
-        error_if(field->it_field_type != CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT, err, JAK_ERR_TYPEMISMATCH);
+        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT, err, JAK_ERR_TYPEMISMATCH);
         float read_value = *(float *) field->it_field_data;
         JAK_optional_set(value, read_value);
         JAK_optional_set(is_null_in, is_null_float(read_value));
@@ -696,28 +696,28 @@ bool carbon_int_field_access_signed_value(bool *is_null_in, jak_i64 *value, jak_
 {
         JAK_ERROR_IF_NULL(field)
         switch (field->it_field_type) {
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I8: {
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I8: {
                         jak_i8 read_value;
                         carbon_int_field_access_i8_value(&read_value, field, err);
                         JAK_optional_set(value, read_value);
                         JAK_optional_set(is_null_in, is_null_i8(read_value));
                 }
                         break;
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I16: {
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I16: {
                         jak_i16 read_value;
                         carbon_int_field_access_i16_value(&read_value, field, err);
                         JAK_optional_set(value, read_value);
                         JAK_optional_set(is_null_in, is_null_i16(read_value));
                 }
                         break;
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I32: {
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I32: {
                         jak_i32 read_value;
                         carbon_int_field_access_i32_value(&read_value, field, err);
                         JAK_optional_set(value, read_value);
                         JAK_optional_set(is_null_in, is_null_i32(read_value));
                 }
                         break;
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I64: {
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I64: {
                         jak_i64 read_value;
                         carbon_int_field_access_i64_value(&read_value, field, err);
                         JAK_optional_set(value, read_value);
@@ -735,28 +735,28 @@ bool carbon_int_field_access_unsigned_value(bool *is_null_in, jak_u64 *value, ja
 {
         JAK_ERROR_IF_NULL(field)
         switch (field->it_field_type) {
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U8: {
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U8: {
                         jak_u8 read_value;
                         carbon_int_field_access_u8_value(&read_value, field, err);
                         JAK_optional_set(value, read_value);
                         JAK_optional_set(is_null_in, is_null_u8(read_value));
                 }
                         break;
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U16: {
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U16: {
                         jak_u16 read_value;
                         carbon_int_field_access_u16_value(&read_value, field, err);
                         JAK_optional_set(value, read_value);
                         JAK_optional_set(is_null_in, is_null_u16(read_value));
                 }
                         break;
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U32: {
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U32: {
                         jak_u32 read_value;
                         carbon_int_field_access_u32_value(&read_value, field, err);
                         JAK_optional_set(value, read_value);
                         JAK_optional_set(is_null_in, is_null_u32(read_value));
                 }
                         break;
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U64: {
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U64: {
                         jak_u64 read_value;
                         carbon_int_field_access_u64_value(&read_value, field, err);
                         JAK_optional_set(value, read_value);
@@ -773,7 +773,7 @@ const char *carbon_int_field_access_string_value(jak_u64 *strlen, jak_field_acce
 {
         JAK_ERROR_IF_NULL(strlen);
         error_if_and_return(field == NULL, err, JAK_ERR_NULLPTR, NULL);
-        error_if(field->it_field_type != CARBON_JAK_FIELD_TYPE_STRING, err, JAK_ERR_TYPEMISMATCH);
+        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_STRING, err, JAK_ERR_TYPEMISMATCH);
         *strlen = field->it_field_len;
         return field->it_field_data;
 }
@@ -783,8 +783,8 @@ carbon_int_field_access_binary_value(struct jak_carbon_binary *out, jak_field_ac
 {
         JAK_ERROR_IF_NULL(out)
         JAK_ERROR_IF_NULL(field)
-        error_if(field->it_field_type != CARBON_JAK_FIELD_TYPE_BINARY &&
-                 field->it_field_type != CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM,
+        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_BINARY &&
+                 field->it_field_type != JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM,
                  err, JAK_ERR_TYPEMISMATCH);
         out->blob = field->it_field_data;
         out->blob_len = field->it_field_len;
@@ -796,7 +796,7 @@ carbon_int_field_access_binary_value(struct jak_carbon_binary *out, jak_field_ac
 jak_carbon_array_it *carbon_int_field_access_array_value(jak_field_access *field, struct jak_error *err)
 {
         error_print_if(!field, JAK_ERR_NULLPTR);
-        error_if(field->it_field_type != CARBON_JAK_FIELD_TYPE_ARRAY, err, JAK_ERR_TYPEMISMATCH);
+        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_ARRAY, err, JAK_ERR_TYPEMISMATCH);
         field->nested_array_it_accessed = true;
         return field->nested_array_it;
 }
@@ -804,7 +804,7 @@ jak_carbon_array_it *carbon_int_field_access_array_value(jak_field_access *field
 struct jak_carbon_object_it *carbon_int_field_access_object_value(jak_field_access *field, struct jak_error *err)
 {
         error_print_if(!field, JAK_ERR_NULLPTR);
-        error_if(field->it_field_type != CARBON_JAK_FIELD_TYPE_OBJECT, err, JAK_ERR_TYPEMISMATCH);
+        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_OBJECT, err, JAK_ERR_TYPEMISMATCH);
         field->nested_object_it_accessed = true;
         return field->nested_object_it;
 }
@@ -812,51 +812,51 @@ struct jak_carbon_object_it *carbon_int_field_access_object_value(jak_field_acce
 jak_carbon_column_it *carbon_int_field_access_column_value(jak_field_access *field, struct jak_error *err)
 {
         error_print_if(!field, JAK_ERR_NULLPTR);
-        error_if(field->it_field_type != CARBON_JAK_FIELD_TYPE_COLUMN_U8 &&
-                 field->it_field_type != CARBON_JAK_FIELD_TYPE_COLUMN_U16 &&
-                 field->it_field_type != CARBON_JAK_FIELD_TYPE_COLUMN_U32 &&
-                 field->it_field_type != CARBON_JAK_FIELD_TYPE_COLUMN_U64 &&
-                 field->it_field_type != CARBON_JAK_FIELD_TYPE_COLUMN_I8 &&
-                 field->it_field_type != CARBON_JAK_FIELD_TYPE_COLUMN_I16 &&
-                 field->it_field_type != CARBON_JAK_FIELD_TYPE_COLUMN_I32 &&
-                 field->it_field_type != CARBON_JAK_FIELD_TYPE_COLUMN_I64 &&
-                 field->it_field_type != CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT &&
-                 field->it_field_type != CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN, err, JAK_ERR_TYPEMISMATCH);
+        error_if(field->it_field_type != JAK_CARBON_FIELD_TYPE_COLUMN_U8 &&
+                 field->it_field_type != JAK_CARBON_FIELD_TYPE_COLUMN_U16 &&
+                 field->it_field_type != JAK_CARBON_FIELD_TYPE_COLUMN_U32 &&
+                 field->it_field_type != JAK_CARBON_FIELD_TYPE_COLUMN_U64 &&
+                 field->it_field_type != JAK_CARBON_FIELD_TYPE_COLUMN_I8 &&
+                 field->it_field_type != JAK_CARBON_FIELD_TYPE_COLUMN_I16 &&
+                 field->it_field_type != JAK_CARBON_FIELD_TYPE_COLUMN_I32 &&
+                 field->it_field_type != JAK_CARBON_FIELD_TYPE_COLUMN_I64 &&
+                 field->it_field_type != JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT &&
+                 field->it_field_type != JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN, err, JAK_ERR_TYPEMISMATCH);
         return field->nested_column_it;
 }
 
-bool carbon_int_field_remove(struct jak_memfile *memfile, struct jak_error *err, carbon_field_type_e type)
+bool carbon_int_field_remove(struct jak_memfile *memfile, struct jak_error *err, jak_carbon_field_type_e type)
 {
-        JAK_ASSERT((carbon_field_type_e) *memfile_peek(memfile, sizeof(jak_u8)) == type);
+        JAK_ASSERT((jak_carbon_field_type_e) *memfile_peek(memfile, sizeof(jak_u8)) == type);
         jak_offset_t start_off = memfile_tell(memfile);
         memfile_skip(memfile, sizeof(jak_u8));
         size_t rm_nbytes = sizeof(jak_u8); /* at least the type marker must be removed */
         switch (type) {
-                case CARBON_JAK_FIELD_TYPE_NULL:
-                case CARBON_JAK_FIELD_TYPE_TRUE:
-                case CARBON_JAK_FIELD_TYPE_FALSE:
+                case JAK_CARBON_FIELD_TYPE_NULL:
+                case JAK_CARBON_FIELD_TYPE_TRUE:
+                case JAK_CARBON_FIELD_TYPE_FALSE:
                         /* nothing to do */
                         break;
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U8:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I8:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U8:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I8:
                         rm_nbytes += sizeof(jak_u8);
                         break;
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U16:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I16:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U16:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I16:
                         rm_nbytes += sizeof(jak_u16);
                         break;
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U32:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I32:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U32:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I32:
                         rm_nbytes += sizeof(jak_u32);
                         break;
-                case CARBON_JAK_FIELD_TYPE_NUMBER_U64:
-                case CARBON_JAK_FIELD_TYPE_NUMBER_I64:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_U64:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_I64:
                         rm_nbytes += sizeof(jak_u64);
                         break;
-                case CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT:
+                case JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT:
                         rm_nbytes += sizeof(float);
                         break;
-                case CARBON_JAK_FIELD_TYPE_STRING: {
+                case JAK_CARBON_FIELD_TYPE_STRING: {
                         jak_u8 len_nbytes;  /* number of bytes used to store string length */
                         jak_u64 str_len; /* the number of characters of the string field */
 
@@ -865,7 +865,7 @@ bool carbon_int_field_remove(struct jak_memfile *memfile, struct jak_error *err,
                         rm_nbytes += len_nbytes + str_len;
                 }
                         break;
-                case CARBON_JAK_FIELD_TYPE_BINARY: {
+                case JAK_CARBON_FIELD_TYPE_BINARY: {
                         jak_u8 mime_type_nbytes; /* number of bytes for mime type */
                         jak_u8 blob_length_nbytes; /* number of bytes to store blob length */
                         jak_u64 blob_nbytes; /* number of bytes to store actual blob data */
@@ -879,7 +879,7 @@ bool carbon_int_field_remove(struct jak_memfile *memfile, struct jak_error *err,
                         rm_nbytes += mime_type_nbytes + blob_length_nbytes + blob_nbytes;
                 }
                         break;
-                case CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM: {
+                case JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM: {
                         jak_u8 custom_type_strlen_nbytes; /* number of bytes for type name string length info */
                         jak_u8 custom_type_strlen; /* number of characters to encode type name string */
                         jak_u8 blob_length_nbytes; /* number of bytes to store blob length */
@@ -895,7 +895,7 @@ bool carbon_int_field_remove(struct jak_memfile *memfile, struct jak_error *err,
                         rm_nbytes += custom_type_strlen_nbytes + custom_type_strlen + blob_length_nbytes + blob_nbytes;
                 }
                         break;
-                case CARBON_JAK_FIELD_TYPE_ARRAY: {
+                case JAK_CARBON_FIELD_TYPE_ARRAY: {
                         jak_carbon_array_it it;
 
                         jak_offset_t begin_off = memfile_tell(memfile);
@@ -908,16 +908,16 @@ bool carbon_int_field_remove(struct jak_memfile *memfile, struct jak_error *err,
                         rm_nbytes += (end_off - begin_off);
                 }
                         break;
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U8:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U16:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U32:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_U64:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I8:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I16:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I32:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_I64:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT:
-                case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN: {
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U8:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U16:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U32:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_U64:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I8:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I16:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I32:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_I64:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT:
+                case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
                         jak_carbon_column_it it;
 
                         jak_offset_t begin_off = memfile_tell(memfile);
@@ -929,7 +929,7 @@ bool carbon_int_field_remove(struct jak_memfile *memfile, struct jak_error *err,
                         rm_nbytes += (end_off - begin_off);
                 }
                         break;
-                case CARBON_JAK_FIELD_TYPE_OBJECT: {
+                case JAK_CARBON_FIELD_TYPE_OBJECT: {
                         struct jak_carbon_object_it it;
 
                         jak_offset_t begin_off = memfile_tell(memfile);
@@ -1127,56 +1127,56 @@ static void int_insert_prop_object(jak_carbon_insert *oins, struct jak_json_obje
                                                 break;
                                         case JSON_LIST_TYPE_FIXED_U8:
                                                 prop_insert_into_column(oins, prop, prop->key.value,
-                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_U8,
-                                                                        CARBON_COLUMN_TYPE_U8,
+                                                                        JAK_CARBON_FIELD_TYPE_NUMBER_U8,
+                                                                        JAK_CARBON_COLUMN_TYPE_U8,
                                                                         u8, unsigned_integer);
                                                 break;
                                         case JSON_LIST_TYPE_FIXED_U16:
                                                 prop_insert_into_column(oins, prop, prop->key.value,
-                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_U16,
-                                                                        CARBON_COLUMN_TYPE_U16,
+                                                                        JAK_CARBON_FIELD_TYPE_NUMBER_U16,
+                                                                        JAK_CARBON_COLUMN_TYPE_U16,
                                                                         u16, unsigned_integer);
                                                 break;
                                         case JSON_LIST_TYPE_FIXED_U32:
                                                 prop_insert_into_column(oins, prop, prop->key.value,
-                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_U32,
-                                                                        CARBON_COLUMN_TYPE_U32,
+                                                                        JAK_CARBON_FIELD_TYPE_NUMBER_U32,
+                                                                        JAK_CARBON_COLUMN_TYPE_U32,
                                                                         u32, unsigned_integer);
                                                 break;
                                         case JSON_LIST_TYPE_FIXED_U64:
                                                 prop_insert_into_column(oins, prop, prop->key.value,
-                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_U64,
-                                                                        CARBON_COLUMN_TYPE_U64,
+                                                                        JAK_CARBON_FIELD_TYPE_NUMBER_U64,
+                                                                        JAK_CARBON_COLUMN_TYPE_U64,
                                                                         u64, unsigned_integer);
                                                 break;
                                         case JSON_LIST_TYPE_FIXED_I8:
                                                 prop_insert_into_column(oins, prop, prop->key.value,
-                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_I8,
-                                                                        CARBON_COLUMN_TYPE_I8,
+                                                                        JAK_CARBON_FIELD_TYPE_NUMBER_I8,
+                                                                        JAK_CARBON_COLUMN_TYPE_I8,
                                                                         i8, signed_integer);
                                                 break;
                                         case JSON_LIST_TYPE_FIXED_I16:
                                                 prop_insert_into_column(oins, prop, prop->key.value,
-                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_I16,
-                                                                        CARBON_COLUMN_TYPE_I16,
+                                                                        JAK_CARBON_FIELD_TYPE_NUMBER_I16,
+                                                                        JAK_CARBON_COLUMN_TYPE_I16,
                                                                         i16, signed_integer);
                                                 break;
                                         case JSON_LIST_TYPE_FIXED_I32:
                                                 prop_insert_into_column(oins, prop, prop->key.value,
-                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_I32,
-                                                                        CARBON_COLUMN_TYPE_I32,
+                                                                        JAK_CARBON_FIELD_TYPE_NUMBER_I32,
+                                                                        JAK_CARBON_COLUMN_TYPE_I32,
                                                                         i32, signed_integer);
                                                 break;
                                         case JSON_LIST_TYPE_FIXED_I64:
                                                 prop_insert_into_column(oins, prop, prop->key.value,
-                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_I64,
-                                                                        CARBON_COLUMN_TYPE_I64,
+                                                                        JAK_CARBON_FIELD_TYPE_NUMBER_I64,
+                                                                        JAK_CARBON_COLUMN_TYPE_I64,
                                                                         i64, signed_integer);
                                                 break;
                                         case JSON_LIST_TYPE_FIXED_FLOAT:
                                                 prop_insert_into_column(oins, prop, prop->key.value,
-                                                                        CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT,
-                                                                        CARBON_COLUMN_TYPE_FLOAT,
+                                                                        JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT,
+                                                                        JAK_CARBON_COLUMN_TYPE_FLOAT,
                                                                         float, float_number);
                                                 break;
                                         case JSON_LIST_TYPE_FIXED_NULL: {
@@ -1198,7 +1198,7 @@ static void int_insert_prop_object(jak_carbon_insert *oins, struct jak_json_obje
                                                 jak_carbon_insert *array_ins = carbon_insert_prop_column_begin(
                                                         &state, oins,
                                                         prop->key.value,
-                                                        CARBON_COLUMN_TYPE_BOOLEAN, cap_nbytes);
+                                                        JAK_CARBON_COLUMN_TYPE_BOOLEAN, cap_nbytes);
                                                 for (jak_u32 k = 0; k <
                                                                     prop->value.value.value.array->elements.elements.num_elems; k++) {
                                                         struct jak_json_element *array_elem = vec_get(
@@ -1303,8 +1303,8 @@ static void int_carbon_from_json_elem(jak_carbon_insert *ins, const struct jak_j
                                         if (is_root) {
                                                 insert_into_array(ins, elem, unsigned, unsigned_integer)
                                         } else {
-                                                insert_into_column(ins, elem, CARBON_JAK_FIELD_TYPE_NUMBER_U8,
-                                                                   CARBON_COLUMN_TYPE_U8,
+                                                insert_into_column(ins, elem, JAK_CARBON_FIELD_TYPE_NUMBER_U8,
+                                                                   JAK_CARBON_COLUMN_TYPE_U8,
                                                                    u8, unsigned_integer);
                                         }
                                         break;
@@ -1312,8 +1312,8 @@ static void int_carbon_from_json_elem(jak_carbon_insert *ins, const struct jak_j
                                         if (is_root) {
                                                 insert_into_array(ins, elem, unsigned, unsigned_integer)
                                         } else {
-                                                insert_into_column(ins, elem, CARBON_JAK_FIELD_TYPE_NUMBER_U16,
-                                                                   CARBON_COLUMN_TYPE_U16,
+                                                insert_into_column(ins, elem, JAK_CARBON_FIELD_TYPE_NUMBER_U16,
+                                                                   JAK_CARBON_COLUMN_TYPE_U16,
                                                                    u16, unsigned_integer);
                                         }
                                         break;
@@ -1321,8 +1321,8 @@ static void int_carbon_from_json_elem(jak_carbon_insert *ins, const struct jak_j
                                         if (is_root) {
                                                 insert_into_array(ins, elem, unsigned, unsigned_integer)
                                         } else {
-                                                insert_into_column(ins, elem, CARBON_JAK_FIELD_TYPE_NUMBER_U32,
-                                                                   CARBON_COLUMN_TYPE_U32,
+                                                insert_into_column(ins, elem, JAK_CARBON_FIELD_TYPE_NUMBER_U32,
+                                                                   JAK_CARBON_COLUMN_TYPE_U32,
                                                                    u32, unsigned_integer);
                                         }
                                         break;
@@ -1330,8 +1330,8 @@ static void int_carbon_from_json_elem(jak_carbon_insert *ins, const struct jak_j
                                         if (is_root) {
                                                 insert_into_array(ins, elem, unsigned, unsigned_integer)
                                         } else {
-                                                insert_into_column(ins, elem, CARBON_JAK_FIELD_TYPE_NUMBER_U64,
-                                                                   CARBON_COLUMN_TYPE_U64,
+                                                insert_into_column(ins, elem, JAK_CARBON_FIELD_TYPE_NUMBER_U64,
+                                                                   JAK_CARBON_COLUMN_TYPE_U64,
                                                                    u64, unsigned_integer);
                                         }
                                         break;
@@ -1339,8 +1339,8 @@ static void int_carbon_from_json_elem(jak_carbon_insert *ins, const struct jak_j
                                         if (is_root) {
                                                 insert_into_array(ins, elem, signed, signed_integer)
                                         } else {
-                                                insert_into_column(ins, elem, CARBON_JAK_FIELD_TYPE_NUMBER_I8,
-                                                                   CARBON_COLUMN_TYPE_I8,
+                                                insert_into_column(ins, elem, JAK_CARBON_FIELD_TYPE_NUMBER_I8,
+                                                                   JAK_CARBON_COLUMN_TYPE_I8,
                                                                    i8, signed_integer);
                                         }
                                         break;
@@ -1348,8 +1348,8 @@ static void int_carbon_from_json_elem(jak_carbon_insert *ins, const struct jak_j
                                         if (is_root) {
                                                 insert_into_array(ins, elem, signed, signed_integer)
                                         } else {
-                                                insert_into_column(ins, elem, CARBON_JAK_FIELD_TYPE_NUMBER_I16,
-                                                                   CARBON_COLUMN_TYPE_I16,
+                                                insert_into_column(ins, elem, JAK_CARBON_FIELD_TYPE_NUMBER_I16,
+                                                                   JAK_CARBON_COLUMN_TYPE_I16,
                                                                    u16, signed_integer);
                                         }
                                         break;
@@ -1357,8 +1357,8 @@ static void int_carbon_from_json_elem(jak_carbon_insert *ins, const struct jak_j
                                         if (is_root) {
                                                 insert_into_array(ins, elem, signed, signed_integer)
                                         } else {
-                                                insert_into_column(ins, elem, CARBON_JAK_FIELD_TYPE_NUMBER_I32,
-                                                                   CARBON_COLUMN_TYPE_I32,
+                                                insert_into_column(ins, elem, JAK_CARBON_FIELD_TYPE_NUMBER_I32,
+                                                                   JAK_CARBON_COLUMN_TYPE_I32,
                                                                    u32, signed_integer);
                                         }
                                         break;
@@ -1366,8 +1366,8 @@ static void int_carbon_from_json_elem(jak_carbon_insert *ins, const struct jak_j
                                         if (is_root) {
                                                 insert_into_array(ins, elem, signed, signed_integer)
                                         } else {
-                                                insert_into_column(ins, elem, CARBON_JAK_FIELD_TYPE_NUMBER_I64,
-                                                                   CARBON_COLUMN_TYPE_I64,
+                                                insert_into_column(ins, elem, JAK_CARBON_FIELD_TYPE_NUMBER_I64,
+                                                                   JAK_CARBON_COLUMN_TYPE_I64,
                                                                    u64, signed_integer);
                                         }
                                         break;
@@ -1375,8 +1375,8 @@ static void int_carbon_from_json_elem(jak_carbon_insert *ins, const struct jak_j
                                         if (is_root) {
                                                 insert_into_array(ins, elem, float, float_number)
                                         } else {
-                                                insert_into_column(ins, elem, CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT,
-                                                                   CARBON_COLUMN_TYPE_FLOAT,
+                                                insert_into_column(ins, elem, JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT,
+                                                                   JAK_CARBON_COLUMN_TYPE_FLOAT,
                                                                    float, float_number);
                                         }
                                         break;
@@ -1422,7 +1422,7 @@ static void int_carbon_from_json_elem(jak_carbon_insert *ins, const struct jak_j
                                                 jak_u64 cap_nbytes = elem->value.value.array->elements.elements.num_elems;
                                                 jak_carbon_insert *array_ins = carbon_insert_column_begin(&state,
                                                                                                                  ins,
-                                                                                                                 CARBON_COLUMN_TYPE_BOOLEAN,
+                                                                                                                 JAK_CARBON_COLUMN_TYPE_BOOLEAN,
                                                                                                                  cap_nbytes);
                                                 for (jak_u32 i = 0;
                                                      i < elem->value.value.array->elements.elements.num_elems; i++) {
@@ -1545,7 +1545,7 @@ static bool array_it_next_no_load(bool *is_empty_slot, bool *is_array_end, jak_c
 {
         if (array_it_is_slot_occupied(is_empty_slot, is_array_end, it)) {
                 carbon_int_array_it_field_type_read(it);
-                carbon_field_skip(&it->memfile);
+                jak_carbon_field_skip(&it->memfile);
                 return true;
         } else {
                 return false;

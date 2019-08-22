@@ -26,165 +26,137 @@
 #ifndef JAK_CARBON_JAK_FIELD_H
 #define JAK_CARBON_JAK_FIELD_H
 
-typedef enum carbon_field_type {
+typedef enum jak_carbon_field_type {
         /* constants */
-                CARBON_JAK_FIELD_TYPE_NULL = JAK_CARBON_MARKER_NULL, /* null */
-        CARBON_JAK_FIELD_TYPE_TRUE = JAK_CARBON_MARKER_TRUE, /* true */
-        CARBON_JAK_FIELD_TYPE_FALSE = JAK_CARBON_MARKER_FALSE, /* false */
+        JAK_CARBON_FIELD_TYPE_NULL = JAK_CARBON_MARKER_NULL, /* null */
+        JAK_CARBON_FIELD_TYPE_TRUE = JAK_CARBON_MARKER_TRUE, /* true */
+        JAK_CARBON_FIELD_TYPE_FALSE = JAK_CARBON_MARKER_FALSE, /* false */
 
         /* containers */
-                CARBON_JAK_FIELD_TYPE_OBJECT = JAK_CARBON_MARKER_OBJECT_BEGIN, /* object */
-        CARBON_JAK_FIELD_TYPE_ARRAY = JAK_CARBON_MARKER_ARRAY_BEGIN, /* variable-type array of elements of varying type */
-        CARBON_JAK_FIELD_TYPE_COLUMN_U8 = JAK_CARBON_MARKER_COLUMN_U8, /* fixed-type array of elements of particular type */
-        CARBON_JAK_FIELD_TYPE_COLUMN_U16 = JAK_CARBON_MARKER_COLUMN_U16, /* fixed-type array of elements of particular type */
-        CARBON_JAK_FIELD_TYPE_COLUMN_U32 = JAK_CARBON_MARKER_COLUMN_U32, /* fixed-type array of elements of particular type */
-        CARBON_JAK_FIELD_TYPE_COLUMN_U64 = JAK_CARBON_MARKER_COLUMN_U64, /* fixed-type array of elements of particular type */
-        CARBON_JAK_FIELD_TYPE_COLUMN_I8 = JAK_CARBON_MARKER_COLUMN_I8, /* fixed-type array of elements of particular type */
-        CARBON_JAK_FIELD_TYPE_COLUMN_I16 = JAK_CARBON_MARKER_COLUMN_I16, /* fixed-type array of elements of particular type */
-        CARBON_JAK_FIELD_TYPE_COLUMN_I32 = JAK_CARBON_MARKER_COLUMN_I32, /* fixed-type array of elements of particular type */
-        CARBON_JAK_FIELD_TYPE_COLUMN_I64 = JAK_CARBON_MARKER_COLUMN_I64, /* fixed-type array of elements of particular type */
-        CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT = JAK_CARBON_MARKER_COLUMN_FLOAT, /* fixed-type array of elements of particular type */
-        CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN = JAK_CARBON_MARKER_COLUMN_BOOLEAN, /* fixed-type array of elements of particular type */
+        JAK_CARBON_FIELD_TYPE_OBJECT = JAK_CARBON_MARKER_OBJECT_BEGIN, /* object */
+        JAK_CARBON_FIELD_TYPE_ARRAY = JAK_CARBON_MARKER_ARRAY_BEGIN, /* variable-type array of elements of varying type */
+        JAK_CARBON_FIELD_TYPE_COLUMN_U8 = JAK_CARBON_MARKER_COLUMN_U8, /* fixed-type array of elements of particular type */
+        JAK_CARBON_FIELD_TYPE_COLUMN_U16 = JAK_CARBON_MARKER_COLUMN_U16, /* fixed-type array of elements of particular type */
+        JAK_CARBON_FIELD_TYPE_COLUMN_U32 = JAK_CARBON_MARKER_COLUMN_U32, /* fixed-type array of elements of particular type */
+        JAK_CARBON_FIELD_TYPE_COLUMN_U64 = JAK_CARBON_MARKER_COLUMN_U64, /* fixed-type array of elements of particular type */
+        JAK_CARBON_FIELD_TYPE_COLUMN_I8 = JAK_CARBON_MARKER_COLUMN_I8, /* fixed-type array of elements of particular type */
+        JAK_CARBON_FIELD_TYPE_COLUMN_I16 = JAK_CARBON_MARKER_COLUMN_I16, /* fixed-type array of elements of particular type */
+        JAK_CARBON_FIELD_TYPE_COLUMN_I32 = JAK_CARBON_MARKER_COLUMN_I32, /* fixed-type array of elements of particular type */
+        JAK_CARBON_FIELD_TYPE_COLUMN_I64 = JAK_CARBON_MARKER_COLUMN_I64, /* fixed-type array of elements of particular type */
+        JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT = JAK_CARBON_MARKER_COLUMN_FLOAT, /* fixed-type array of elements of particular type */
+        JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN = JAK_CARBON_MARKER_COLUMN_BOOLEAN, /* fixed-type array of elements of particular type */
 
         /* character strings */
-                CARBON_JAK_FIELD_TYPE_STRING = JAK_CARBON_MARKER_STRING, /* UTF-8 string */
+        JAK_CARBON_FIELD_TYPE_STRING = JAK_CARBON_MARKER_STRING, /* UTF-8 string */
 
         /* numbers */
-                CARBON_JAK_FIELD_TYPE_NUMBER_U8 = JAK_CARBON_MARKER_U8, /* 8bit unsigned integer */
-        CARBON_JAK_FIELD_TYPE_NUMBER_U16 = JAK_CARBON_MARKER_U16, /* 16bit unsigned integer */
-        CARBON_JAK_FIELD_TYPE_NUMBER_U32 = JAK_CARBON_MARKER_U32, /* 32bit unsigned integer */
-        CARBON_JAK_FIELD_TYPE_NUMBER_U64 = JAK_CARBON_MARKER_U64, /* 64bit unsigned integer */
-        CARBON_JAK_FIELD_TYPE_NUMBER_I8 = JAK_CARBON_MARKER_I8, /* 8bit signed integer */
-        CARBON_JAK_FIELD_TYPE_NUMBER_I16 = JAK_CARBON_MARKER_I16, /* 16bit signed integer */
-        CARBON_JAK_FIELD_TYPE_NUMBER_I32 = JAK_CARBON_MARKER_I32, /* 32bit signed integer */
-        CARBON_JAK_FIELD_TYPE_NUMBER_I64 = JAK_CARBON_MARKER_I64, /* 64bit signed integer */
-        CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT = JAK_CARBON_MARKER_FLOAT, /* 32bit float */
+        JAK_CARBON_FIELD_TYPE_NUMBER_U8 = JAK_CARBON_MARKER_U8, /* 8bit unsigned integer */
+        JAK_CARBON_FIELD_TYPE_NUMBER_U16 = JAK_CARBON_MARKER_U16, /* 16bit unsigned integer */
+        JAK_CARBON_FIELD_TYPE_NUMBER_U32 = JAK_CARBON_MARKER_U32, /* 32bit unsigned integer */
+        JAK_CARBON_FIELD_TYPE_NUMBER_U64 = JAK_CARBON_MARKER_U64, /* 64bit unsigned integer */
+        JAK_CARBON_FIELD_TYPE_NUMBER_I8 = JAK_CARBON_MARKER_I8, /* 8bit signed integer */
+        JAK_CARBON_FIELD_TYPE_NUMBER_I16 = JAK_CARBON_MARKER_I16, /* 16bit signed integer */
+        JAK_CARBON_FIELD_TYPE_NUMBER_I32 = JAK_CARBON_MARKER_I32, /* 32bit signed integer */
+        JAK_CARBON_FIELD_TYPE_NUMBER_I64 = JAK_CARBON_MARKER_I64, /* 64bit signed integer */
+        JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT = JAK_CARBON_MARKER_FLOAT, /* 32bit float */
 
         /* binary data */
-                CARBON_JAK_FIELD_TYPE_BINARY = JAK_CARBON_MARKER_BINARY, /* arbitrary binary object with known mime type */
-        CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM = JAK_CARBON_MARKER_CUSTOM_BINARY, /* arbitrary binary object with unknown mime type*/
-} carbon_field_type_e;
+        JAK_CARBON_FIELD_TYPE_BINARY = JAK_CARBON_MARKER_BINARY, /* arbitrary binary object with known mime type */
+        JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM = JAK_CARBON_MARKER_CUSTOM_BINARY, /* arbitrary binary object with unknown mime type*/
+} jak_carbon_field_type_e;
 
-enum carbon_column_type {
-        CARBON_COLUMN_TYPE_U8,
-        CARBON_COLUMN_TYPE_U16,
-        CARBON_COLUMN_TYPE_U32,
-        CARBON_COLUMN_TYPE_U64,
-        CARBON_COLUMN_TYPE_I8,
-        CARBON_COLUMN_TYPE_I16,
-        CARBON_COLUMN_TYPE_I32,
-        CARBON_COLUMN_TYPE_I64,
-        CARBON_COLUMN_TYPE_FLOAT,
-        CARBON_COLUMN_TYPE_BOOLEAN
-};
+typedef enum jak_carbon_column_type {
+        JAK_CARBON_COLUMN_TYPE_U8,
+        JAK_CARBON_COLUMN_TYPE_U16,
+        JAK_CARBON_COLUMN_TYPE_U32,
+        JAK_CARBON_COLUMN_TYPE_U64,
+        JAK_CARBON_COLUMN_TYPE_I8,
+        JAK_CARBON_COLUMN_TYPE_I16,
+        JAK_CARBON_COLUMN_TYPE_I32,
+        JAK_CARBON_COLUMN_TYPE_I64,
+        JAK_CARBON_COLUMN_TYPE_FLOAT,
+        JAK_CARBON_COLUMN_TYPE_BOOLEAN
+} jak_carbon_column_type_e;
 
-enum carbon_field_class {
-        CARBON_JAK_FIELD_CLASS_CONSTANT,
-        CARBON_JAK_FIELD_CLASS_NUMBER,
-        CARBON_JAK_FIELD_CLASS_CHARACTER_STRING,
-        CARBON_JAK_FIELD_CLASS_BINARY_STRING,
-        CARBON_JAK_FIELD_CLASS_CONTAINER
-};
+typedef enum jak_carbon_field_class {
+        JAK_CARBON_FIELD_CLASS_CONSTANT,
+        JAK_CARBON_FIELD_CLASS_NUMBER,
+        JAK_CARBON_FIELD_CLASS_CHARACTER_STRING,
+        JAK_CARBON_FIELD_CLASS_BINARY_STRING,
+        JAK_CARBON_FIELD_CLASS_CONTAINER
+} jak_carbon_field_class_e;
 
-enum carbon_constant {
-        CARBON_CONSTANT_TRUE,
-        CARBON_CONSTANT_FALSE,
-        CARBON_CONSTANT_NULL
-};
+typedef enum jak_carbon_constant {
+        JAK_CARBON_CONSTANT_TRUE,
+        JAK_CARBON_CONSTANT_FALSE,
+        JAK_CARBON_CONSTANT_NULL
+} jak_carbon_constant_e;
 
-#define JAK_CARBON_JAK_FIELD_TYPE_NULL_STR "null"
-#define JAK_CARBON_JAK_FIELD_TYPE_TRUE_STR "boolean-true"
-#define JAK_CARBON_JAK_FIELD_TYPE_FALSE_STR "boolean-false"
-#define JAK_CARBON_JAK_FIELD_TYPE_OBJECT_STR "object"
-#define JAK_CARBON_JAK_FIELD_TYPE_ARRAY_STR "array"
-#define JAK_CARBON_JAK_FIELD_TYPE_COLUMN_U8_STR "column-jak_u8"
-#define JAK_CARBON_JAK_FIELD_TYPE_COLUMN_U16_STR "column-jak_u16"
-#define JAK_CARBON_JAK_FIELD_TYPE_COLUMN_U32_STR "column-jak_u32"
-#define JAK_CARBON_JAK_FIELD_TYPE_COLUMN_U64_STR "column-jak_u64"
-#define JAK_CARBON_JAK_FIELD_TYPE_COLUMN_I8_STR "column-jak_i8"
-#define JAK_CARBON_JAK_FIELD_TYPE_COLUMN_I16_STR "column-jak_i16"
-#define JAK_CARBON_JAK_FIELD_TYPE_COLUMN_I32_STR "column-jak_i32"
-#define JAK_CARBON_JAK_FIELD_TYPE_COLUMN_I64_STR "column-jak_i64"
-#define JAK_CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT_STR "column-float"
-#define JAK_CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN_STR "column-boolean"
-#define JAK_CARBON_JAK_FIELD_TYPE_STRING_STR "string"
-#define JAK_CARBON_JAK_FIELD_TYPE_BINARY_STR "binary"
-#define JAK_CARBON_JAK_FIELD_TYPE_NUMBER_U8_STR "number-jak_u8"
-#define JAK_CARBON_JAK_FIELD_TYPE_NUMBER_U16_STR "number-jak_u16"
-#define JAK_CARBON_JAK_FIELD_TYPE_NUMBER_U32_STR "number-jak_u32"
-#define JAK_CARBON_JAK_FIELD_TYPE_NUMBER_U64_STR "number-jak_u64"
-#define JAK_CARBON_JAK_FIELD_TYPE_NUMBER_I8_STR "number-jak_i8"
-#define JAK_CARBON_JAK_FIELD_TYPE_NUMBER_I16_STR "number-jak_i16"
-#define JAK_CARBON_JAK_FIELD_TYPE_NUMBER_I32_STR "number-jak_i32"
-#define JAK_CARBON_JAK_FIELD_TYPE_NUMBER_I64_STR "number-jak_i64"
-#define JAK_CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT_STR "number-float"
+#define JAK_CARBON_FIELD_TYPE_NULL_STR "null"
+#define JAK_CARBON_FIELD_TYPE_TRUE_STR "boolean-true"
+#define JAK_CARBON_FIELD_TYPE_FALSE_STR "boolean-false"
+#define JAK_CARBON_FIELD_TYPE_OBJECT_STR "object"
+#define JAK_CARBON_FIELD_TYPE_ARRAY_STR "array"
+#define JAK_CARBON_FIELD_TYPE_COLUMN_U8_STR "column-jak_u8"
+#define JAK_CARBON_FIELD_TYPE_COLUMN_U16_STR "column-jak_u16"
+#define JAK_CARBON_FIELD_TYPE_COLUMN_U32_STR "column-jak_u32"
+#define JAK_CARBON_FIELD_TYPE_COLUMN_U64_STR "column-jak_u64"
+#define JAK_CARBON_FIELD_TYPE_COLUMN_I8_STR "column-jak_i8"
+#define JAK_CARBON_FIELD_TYPE_COLUMN_I16_STR "column-jak_i16"
+#define JAK_CARBON_FIELD_TYPE_COLUMN_I32_STR "column-jak_i32"
+#define JAK_CARBON_FIELD_TYPE_COLUMN_I64_STR "column-jak_i64"
+#define JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT_STR "column-float"
+#define JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN_STR "column-boolean"
+#define JAK_CARBON_FIELD_TYPE_STRING_STR "string"
+#define JAK_CARBON_FIELD_TYPE_BINARY_STR "binary"
+#define JAK_CARBON_FIELD_TYPE_NUMBER_U8_STR "number-jak_u8"
+#define JAK_CARBON_FIELD_TYPE_NUMBER_U16_STR "number-jak_u16"
+#define JAK_CARBON_FIELD_TYPE_NUMBER_U32_STR "number-jak_u32"
+#define JAK_CARBON_FIELD_TYPE_NUMBER_U64_STR "number-jak_u64"
+#define JAK_CARBON_FIELD_TYPE_NUMBER_I8_STR "number-jak_i8"
+#define JAK_CARBON_FIELD_TYPE_NUMBER_I16_STR "number-jak_i16"
+#define JAK_CARBON_FIELD_TYPE_NUMBER_I32_STR "number-jak_i32"
+#define JAK_CARBON_FIELD_TYPE_NUMBER_I64_STR "number-jak_i64"
+#define JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT_STR "number-float"
 
 JAK_BEGIN_DECL
 
-const char *carbon_field_type_str(struct jak_error *err, carbon_field_type_e type);
+const char *jak_carbon_field_type_str(struct jak_error *err, jak_carbon_field_type_e type);
 
-bool carbon_field_type_is_traversable(carbon_field_type_e type);
+bool jak_carbon_field_type_is_traversable(jak_carbon_field_type_e type);
+bool jak_carbon_field_type_is_signed(jak_carbon_field_type_e type);
+bool jak_carbon_field_type_is_unsigned(jak_carbon_field_type_e type);
+bool jak_carbon_field_type_is_floating(jak_carbon_field_type_e type);
+bool jak_carbon_field_type_is_number(jak_carbon_field_type_e type);
+bool jak_carbon_field_type_is_integer(jak_carbon_field_type_e type);
+bool jak_carbon_field_type_is_binary(jak_carbon_field_type_e type);
+bool jak_carbon_field_type_is_boolean(jak_carbon_field_type_e type);
+bool jak_carbon_field_type_is_array(jak_carbon_field_type_e type);
+bool jak_carbon_field_type_is_column(jak_carbon_field_type_e type);
+bool jak_carbon_field_type_is_object(jak_carbon_field_type_e type);
+bool jak_carbon_field_type_is_null(jak_carbon_field_type_e type);
+bool jak_carbon_field_type_is_string(jak_carbon_field_type_e type);
+bool jak_carbon_field_type_is_constant(jak_carbon_field_type_e type);
 
-bool carbon_field_type_is_signed_integer(carbon_field_type_e type);
+jak_carbon_field_class_e jak_carbon_field_type_get_class(jak_carbon_field_type_e type, struct jak_error *err);
 
-bool carbon_field_type_is_unsigned_integer(carbon_field_type_e type);
+bool jak_carbon_field_skip(struct jak_memfile *file);
+bool jak_carbon_field_skip_object(struct jak_memfile *file);
+bool jak_carbon_field_skip_array(struct jak_memfile *file);
+bool jak_carbon_field_skip_column(struct jak_memfile *file);
+bool jak_carbon_field_skip_binary(struct jak_memfile *file);
+bool jak_carbon_field_skip_custom_binary(struct jak_memfile *file);
+bool jak_carbon_field_skip_string(struct jak_memfile *file);
+bool jak_carbon_field_skip_float(struct jak_memfile *file);
+bool jak_carbon_field_skip_boolean(struct jak_memfile *file);
+bool jak_carbon_field_skip_null(struct jak_memfile *file);
+bool jak_carbon_field_skip_8(struct jak_memfile *file);
+bool jak_carbon_field_skip_16(struct jak_memfile *file);
+bool jak_carbon_field_skip_32(struct jak_memfile *file);
+bool jak_carbon_field_skip_64(struct jak_memfile *file);
 
-bool carbon_field_type_is_floating_number(carbon_field_type_e type);
-
-bool carbon_field_type_is_number(carbon_field_type_e type);
-
-bool carbon_field_type_is_integer(carbon_field_type_e type);
-
-bool carbon_field_type_is_binary(carbon_field_type_e type);
-
-bool carbon_field_type_is_boolean(carbon_field_type_e type);
-
-bool carbon_field_type_is_array(carbon_field_type_e type);
-
-bool carbon_field_type_is_column(carbon_field_type_e type);
-
-bool carbon_field_type_is_object(carbon_field_type_e type);
-
-bool carbon_field_type_is_null(carbon_field_type_e type);
-
-bool carbon_field_type_is_string(carbon_field_type_e type);
-
-enum carbon_field_class carbon_field_type_get_class(carbon_field_type_e type, struct jak_error *err);
-
-bool carbon_field_type_is_constant(carbon_field_type_e type);
-
-bool carbon_field_skip(struct jak_memfile *file);
-
-bool carbon_field_skip_object(struct jak_memfile *file);
-
-bool carbon_field_skip_array(struct jak_memfile *file);
-
-bool carbon_field_skip_column(struct jak_memfile *file);
-
-bool carbon_field_skip_binary(struct jak_memfile *file);
-
-bool carbon_field_skip_custom_binary(struct jak_memfile *file);
-
-bool carbon_field_skip_string(struct jak_memfile *file);
-
-bool carbon_field_skip_float(struct jak_memfile *file);
-
-bool carbon_field_skip_boolean(struct jak_memfile *file);
-
-bool carbon_field_skip_null(struct jak_memfile *file);
-
-bool carbon_field_skip_8(struct jak_memfile *file);
-
-bool carbon_field_skip_16(struct jak_memfile *file);
-
-bool carbon_field_skip_32(struct jak_memfile *file);
-
-bool carbon_field_skip_64(struct jak_memfile *file);
-
-carbon_field_type_e carbon_field_type_for_column(enum carbon_column_type type);
-
-carbon_field_type_e
-carbon_field_type_column_entry_to_regular_type(carbon_field_type_e type, bool is_null, bool is_true);
+jak_carbon_field_type_e jak_carbon_field_type_for_column(jak_carbon_column_type_e type);
+jak_carbon_field_type_e jak_carbon_field_type_column_entry_to_regular_type(jak_carbon_field_type_e type, bool is_null, bool is_true);
 
 JAK_END_DECL
 

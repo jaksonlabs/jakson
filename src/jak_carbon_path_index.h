@@ -124,7 +124,7 @@ bool carbon_path_index_it_obj_enter(struct jak_carbon_path_index_it *it);
 //  field access
 // ---------------------------------------------------------------------------------------------------------------------
 
-bool carbon_path_index_it_field_type(carbon_field_type_e *type, struct jak_carbon_path_index_it *it);
+bool carbon_path_index_it_field_type(jak_carbon_field_type_e *type, struct jak_carbon_path_index_it *it);
 
 bool carbon_path_index_it_field_u8_value(jak_u8 *value, struct jak_carbon_path_index_it *it);
 

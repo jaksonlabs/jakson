@@ -38,7 +38,7 @@
         result;                                                                         \
 })
 
-bool carbon_media_write(struct jak_memfile *dst, carbon_field_type_e type)
+bool carbon_media_write(struct jak_memfile *dst, jak_carbon_field_type_e type)
 {
         JAK_ERROR_IF_NULL(dst);
         media_type_t t = type;

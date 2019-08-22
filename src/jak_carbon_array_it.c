@@ -47,41 +47,41 @@ bool jak_carbon_array_it_update_in_place_##type_name(jak_carbon_array_it *it, ja
         }                                                                                                              \
 }
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(u8, CARBON_JAK_FIELD_TYPE_NUMBER_U8)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(u8, JAK_CARBON_FIELD_TYPE_NUMBER_U8)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(u16, CARBON_JAK_FIELD_TYPE_NUMBER_U16)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(u16, JAK_CARBON_FIELD_TYPE_NUMBER_U16)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(u32, CARBON_JAK_FIELD_TYPE_NUMBER_U32)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(u32, JAK_CARBON_FIELD_TYPE_NUMBER_U32)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(u64, CARBON_JAK_FIELD_TYPE_NUMBER_U64)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(u64, JAK_CARBON_FIELD_TYPE_NUMBER_U64)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(i8, CARBON_JAK_FIELD_TYPE_NUMBER_I8)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(i8, JAK_CARBON_FIELD_TYPE_NUMBER_I8)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(i16, CARBON_JAK_FIELD_TYPE_NUMBER_I16)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(i16, JAK_CARBON_FIELD_TYPE_NUMBER_I16)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(i32, CARBON_JAK_FIELD_TYPE_NUMBER_I32)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(i32, JAK_CARBON_FIELD_TYPE_NUMBER_I32)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(i64, CARBON_JAK_FIELD_TYPE_NUMBER_I64)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(i64, JAK_CARBON_FIELD_TYPE_NUMBER_I64)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(float, CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(float, JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT)
 
-static bool update_in_place_constant(jak_carbon_array_it *it, enum carbon_constant constant)
+static bool update_in_place_constant(jak_carbon_array_it *it, jak_carbon_constant_e constant)
 {
         JAK_ERROR_IF_NULL(it);
 
         memfile_save_position(&it->memfile);
 
-        if (carbon_field_type_is_constant(it->field_access.it_field_type)) {
+        if (jak_carbon_field_type_is_constant(it->field_access.it_field_type)) {
                 jak_u8 value;
                 switch (constant) {
-                        case CARBON_CONSTANT_TRUE:
-                                value = CARBON_JAK_FIELD_TYPE_TRUE;
+                        case JAK_CARBON_CONSTANT_TRUE:
+                                value = JAK_CARBON_FIELD_TYPE_TRUE;
                                 break;
-                        case CARBON_CONSTANT_FALSE:
-                                value = CARBON_JAK_FIELD_TYPE_FALSE;
+                        case JAK_CARBON_CONSTANT_FALSE:
+                                value = JAK_CARBON_FIELD_TYPE_FALSE;
                                 break;
-                        case CARBON_CONSTANT_NULL:
-                                value = CARBON_JAK_FIELD_TYPE_NULL;
+                        case JAK_CARBON_CONSTANT_NULL:
+                                value = JAK_CARBON_FIELD_TYPE_NULL;
                                 break;
                         default: error(&it->err, JAK_ERR_INTERNALERR);
                                 break;
@@ -96,13 +96,13 @@ static bool update_in_place_constant(jak_carbon_array_it *it, enum carbon_consta
                 jak_carbon_array_it_insert_begin(&ins, it);
 
                 switch (constant) {
-                        case CARBON_CONSTANT_TRUE:
+                        case JAK_CARBON_CONSTANT_TRUE:
                                 carbon_insert_true(&ins);
                                 break;
-                        case CARBON_CONSTANT_FALSE:
+                        case JAK_CARBON_CONSTANT_FALSE:
                                 carbon_insert_false(&ins);
                                 break;
-                        case CARBON_CONSTANT_NULL:
+                        case JAK_CARBON_CONSTANT_NULL:
                                 carbon_insert_null(&ins);
                                 break;
                         default: error(&it->err, JAK_ERR_INTERNALERR);
@@ -118,17 +118,17 @@ static bool update_in_place_constant(jak_carbon_array_it *it, enum carbon_consta
 
 bool jak_carbon_array_it_update_in_place_true(jak_carbon_array_it *it)
 {
-        return update_in_place_constant(it, CARBON_CONSTANT_TRUE);
+        return update_in_place_constant(it, JAK_CARBON_CONSTANT_TRUE);
 }
 
 bool jak_carbon_array_it_update_in_place_false(jak_carbon_array_it *it)
 {
-        return update_in_place_constant(it, CARBON_CONSTANT_FALSE);
+        return update_in_place_constant(it, JAK_CARBON_CONSTANT_FALSE);
 }
 
 bool jak_carbon_array_it_update_in_place_null(jak_carbon_array_it *it)
 {
-        return update_in_place_constant(it, CARBON_CONSTANT_NULL);
+        return update_in_place_constant(it, JAK_CARBON_CONSTANT_NULL);
 }
 
 bool jak_carbon_array_it_create(jak_carbon_array_it *it, struct jak_memfile *memfile, struct jak_error *err,
@@ -356,7 +356,7 @@ bool jak_carbon_array_it_fast_forward(jak_carbon_array_it *it)
         return true;
 }
 
-bool jak_carbon_array_it_field_type(carbon_field_type_e *type, jak_carbon_array_it *it)
+bool jak_carbon_array_it_field_type(jak_carbon_field_type_e *type, jak_carbon_array_it *it)
 {
         return carbon_int_field_access_field_type(type, &it->field_access);
 }
@@ -457,7 +457,7 @@ bool jak_carbon_array_it_insert_end(jak_carbon_insert *inserter)
 bool jak_carbon_array_it_remove(jak_carbon_array_it *it)
 {
         JAK_ERROR_IF_NULL(it);
-        carbon_field_type_e type;
+        jak_carbon_field_type_e type;
         if (jak_carbon_array_it_field_type(&type, it)) {
                 jak_offset_t prev_off = carbon_int_history_pop(&it->history);
                 memfile_seek(&it->memfile, prev_off);

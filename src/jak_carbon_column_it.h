@@ -38,7 +38,7 @@ typedef struct jak_carbon_column_it {
         jak_offset_t column_start_offset;
 
         struct jak_error err;
-        carbon_field_type_e type;
+        jak_carbon_field_type_e type;
 
         /* in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
         jak_i64 mod_size;
@@ -57,8 +57,8 @@ bool jak_carbon_column_it_fast_forward(jak_carbon_column_it *it);
 jak_offset_t jak_carbon_column_it_memfilepos(jak_carbon_column_it *it);
 jak_offset_t jak_carbon_column_it_tell(jak_carbon_column_it *it, jak_u32 elem_idx);
 
-const void *jak_carbon_column_it_values(carbon_field_type_e *type, jak_u32 *nvalues, jak_carbon_column_it *it);
-bool jak_carbon_column_it_values_info(carbon_field_type_e *type, jak_u32 *nvalues, jak_carbon_column_it *it);
+const void *jak_carbon_column_it_values(jak_carbon_field_type_e *type, jak_u32 *nvalues, jak_carbon_column_it *it);
+bool jak_carbon_column_it_values_info(jak_carbon_field_type_e *type, jak_u32 *nvalues, jak_carbon_column_it *it);
 
 bool jak_carbon_column_it_value_is_null(jak_carbon_column_it *it, jak_u32 pos);
 

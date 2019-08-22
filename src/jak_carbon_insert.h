@@ -93,7 +93,7 @@ bool carbon_insert_array_end(struct jak_carbon_insert_array_state *state_in);
 
 jak_carbon_insert *carbon_insert_column_begin(struct jak_carbon_insert_column_state *state_out,
                                                      jak_carbon_insert *inserter_in,
-                                                     enum carbon_column_type type,
+                                                     jak_carbon_column_type_e type,
                                                      jak_u64 column_capacity);
 
 bool carbon_insert_column_end(struct jak_carbon_insert_column_state *state_in);
@@ -149,7 +149,7 @@ jak_u64 carbon_insert_prop_array_end(struct jak_carbon_insert_array_state *state
 
 jak_carbon_insert *carbon_insert_prop_column_begin(struct jak_carbon_insert_column_state *state_out,
                                                           jak_carbon_insert *inserter_in, const char *key,
-                                                          enum carbon_column_type type, jak_u64 column_capacity);
+                                                          jak_carbon_column_type_e type, jak_u64 column_capacity);
 
 jak_u64 carbon_insert_prop_column_end(struct jak_carbon_insert_column_state *state_in);
 

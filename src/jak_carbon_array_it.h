@@ -33,7 +33,7 @@
 JAK_BEGIN_DECL
 
 typedef struct jak_field_access {
-        carbon_field_type_e it_field_type;
+        jak_carbon_field_type_e it_field_type;
 
         const void *it_field_data;
         jak_u64 it_field_len;
@@ -134,7 +134,7 @@ jak_offset_t jak_carbon_array_it_tell(jak_carbon_array_it *it);
 bool jak_carbon_int_array_it_offset(jak_offset_t *off, jak_carbon_array_it *it);
 bool jak_carbon_array_it_fast_forward(jak_carbon_array_it *it);
 
-bool jak_carbon_array_it_field_type(carbon_field_type_e *type, jak_carbon_array_it *it);
+bool jak_carbon_array_it_field_type(jak_carbon_field_type_e *type, jak_carbon_array_it *it);
 bool jak_carbon_array_it_u8_value(jak_u8 *value, jak_carbon_array_it *it);
 bool jak_carbon_array_it_u16_value(jak_u16 *value, jak_carbon_array_it *it);
 bool jak_carbon_array_it_u32_value(jak_u32 *value, jak_carbon_array_it *it);

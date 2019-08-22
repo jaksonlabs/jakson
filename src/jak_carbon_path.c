@@ -101,12 +101,12 @@ bool carbon_path_exists(jak_carbon *doc, const char *path)
 bool carbon_path_is_array(jak_carbon *doc, const char *path)
 {
         struct jak_carbon_find find;
-        carbon_field_type_e field_type;
+        jak_carbon_field_type_e field_type;
         bool result = false;
 
         if (carbon_find_open(&find, path, doc)) {
                 carbon_find_result_type(&field_type, &find);
-                result = carbon_field_type_is_array(field_type);
+                result = jak_carbon_field_type_is_array(field_type);
         }
 
         carbon_find_close(&find);
@@ -116,12 +116,12 @@ bool carbon_path_is_array(jak_carbon *doc, const char *path)
 bool carbon_path_is_column(jak_carbon *doc, const char *path)
 {
         struct jak_carbon_find find;
-        carbon_field_type_e field_type;
+        jak_carbon_field_type_e field_type;
         bool result = false;
 
         if (carbon_find_open(&find, path, doc)) {
                 carbon_find_result_type(&field_type, &find);
-                result = carbon_field_type_is_column(field_type);
+                result = jak_carbon_field_type_is_column(field_type);
         }
 
         carbon_find_close(&find);
@@ -131,12 +131,12 @@ bool carbon_path_is_column(jak_carbon *doc, const char *path)
 bool carbon_path_is_object(jak_carbon *doc, const char *path)
 {
         struct jak_carbon_find find;
-        carbon_field_type_e field_type;
+        jak_carbon_field_type_e field_type;
         bool result = false;
 
         if (carbon_find_open(&find, path, doc)) {
                 carbon_find_result_type(&field_type, &find);
-                result = carbon_field_type_is_object(field_type);
+                result = jak_carbon_field_type_is_object(field_type);
         }
 
         carbon_find_close(&find);
@@ -152,12 +152,12 @@ bool carbon_path_is_container(jak_carbon *doc, const char *path)
 bool carbon_path_is_null(jak_carbon *doc, const char *path)
 {
         struct jak_carbon_find find;
-        carbon_field_type_e field_type;
+        jak_carbon_field_type_e field_type;
         bool result = false;
 
         if (carbon_find_open(&find, path, doc)) {
                 carbon_find_result_type(&field_type, &find);
-                result = carbon_field_type_is_null(field_type);
+                result = jak_carbon_field_type_is_null(field_type);
         }
 
         carbon_find_close(&find);
@@ -167,12 +167,12 @@ bool carbon_path_is_null(jak_carbon *doc, const char *path)
 bool carbon_path_is_number(jak_carbon *doc, const char *path)
 {
         struct jak_carbon_find find;
-        carbon_field_type_e field_type;
+        jak_carbon_field_type_e field_type;
         bool result = false;
 
         if (carbon_find_open(&find, path, doc)) {
                 carbon_find_result_type(&field_type, &find);
-                result = carbon_field_type_is_number(field_type);
+                result = jak_carbon_field_type_is_number(field_type);
         }
 
         carbon_find_close(&find);
@@ -182,12 +182,12 @@ bool carbon_path_is_number(jak_carbon *doc, const char *path)
 bool carbon_path_is_boolean(jak_carbon *doc, const char *path)
 {
         struct jak_carbon_find find;
-        carbon_field_type_e field_type;
+        jak_carbon_field_type_e field_type;
         bool result = false;
 
         if (carbon_find_open(&find, path, doc)) {
                 carbon_find_result_type(&field_type, &find);
-                result = carbon_field_type_is_boolean(field_type);
+                result = jak_carbon_field_type_is_boolean(field_type);
         }
 
         carbon_find_close(&find);
@@ -197,12 +197,12 @@ bool carbon_path_is_boolean(jak_carbon *doc, const char *path)
 bool carbon_path_is_string(jak_carbon *doc, const char *path)
 {
         struct jak_carbon_find find;
-        carbon_field_type_e field_type;
+        jak_carbon_field_type_e field_type;
         bool result = false;
 
         if (carbon_find_open(&find, path, doc)) {
                 carbon_find_result_type(&field_type, &find);
-                result = carbon_field_type_is_string(field_type);
+                result = jak_carbon_field_type_is_string(field_type);
         }
 
         carbon_find_close(&find);
@@ -242,26 +242,26 @@ static inline carbon_path_status_e traverse_object(struct jak_carbon_path_evalua
                                         /* path end not reached, traverse further if possible */
                                         JAK_ASSERT(next_path_pos < path_length);
 
-                                        carbon_field_type_e prop_type;
+                                        jak_carbon_field_type_e prop_type;
                                         carbon_object_it_prop_type(&prop_type, it);
 
-                                        if (!carbon_field_type_is_traversable(prop_type)) {
+                                        if (!jak_carbon_field_type_is_traversable(prop_type)) {
                                                 return JAK_CARBON_PATH_NOTTRAVERSABLE;
                                         } else {
-                                                JAK_ASSERT(prop_type == CARBON_JAK_FIELD_TYPE_OBJECT ||
-                                                           prop_type == CARBON_JAK_FIELD_TYPE_ARRAY ||
-                                                           prop_type == CARBON_JAK_FIELD_TYPE_COLUMN_U8 ||
-                                                           prop_type == CARBON_JAK_FIELD_TYPE_COLUMN_U16 ||
-                                                           prop_type == CARBON_JAK_FIELD_TYPE_COLUMN_U32 ||
-                                                           prop_type == CARBON_JAK_FIELD_TYPE_COLUMN_U64 ||
-                                                           prop_type == CARBON_JAK_FIELD_TYPE_COLUMN_I8 ||
-                                                           prop_type == CARBON_JAK_FIELD_TYPE_COLUMN_I16 ||
-                                                           prop_type == CARBON_JAK_FIELD_TYPE_COLUMN_I32 ||
-                                                           prop_type == CARBON_JAK_FIELD_TYPE_COLUMN_I64 ||
-                                                           prop_type == CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT ||
-                                                           prop_type == CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN);
+                                                JAK_ASSERT(prop_type == JAK_CARBON_FIELD_TYPE_OBJECT ||
+                                                           prop_type == JAK_CARBON_FIELD_TYPE_ARRAY ||
+                                                           prop_type == JAK_CARBON_FIELD_TYPE_COLUMN_U8 ||
+                                                           prop_type == JAK_CARBON_FIELD_TYPE_COLUMN_U16 ||
+                                                           prop_type == JAK_CARBON_FIELD_TYPE_COLUMN_U32 ||
+                                                           prop_type == JAK_CARBON_FIELD_TYPE_COLUMN_U64 ||
+                                                           prop_type == JAK_CARBON_FIELD_TYPE_COLUMN_I8 ||
+                                                           prop_type == JAK_CARBON_FIELD_TYPE_COLUMN_I16 ||
+                                                           prop_type == JAK_CARBON_FIELD_TYPE_COLUMN_I32 ||
+                                                           prop_type == JAK_CARBON_FIELD_TYPE_COLUMN_I64 ||
+                                                           prop_type == JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT ||
+                                                           prop_type == JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
                                                 switch (prop_type) {
-                                                        case CARBON_JAK_FIELD_TYPE_OBJECT: {
+                                                        case JAK_CARBON_FIELD_TYPE_OBJECT: {
                                                                 struct jak_carbon_object_it *sub_it = carbon_object_it_object_value(
                                                                         it);
                                                                 carbon_path_status_e ret = traverse_object(state,
@@ -271,7 +271,7 @@ static inline carbon_path_status_e traverse_object(struct jak_carbon_path_evalua
                                                                 carbon_object_it_drop(sub_it);
                                                                 return ret;
                                                         }
-                                                        case CARBON_JAK_FIELD_TYPE_ARRAY: {
+                                                        case JAK_CARBON_FIELD_TYPE_ARRAY: {
                                                                 jak_carbon_array_it *sub_it = carbon_object_it_array_value(
                                                                         it);
                                                                 carbon_path_status_e ret = traverse_array(state,
@@ -282,16 +282,16 @@ static inline carbon_path_status_e traverse_object(struct jak_carbon_path_evalua
                                                                 jak_carbon_array_it_drop(sub_it);
                                                                 return ret;
                                                         }
-                                                        case CARBON_JAK_FIELD_TYPE_COLUMN_U8:
-                                                        case CARBON_JAK_FIELD_TYPE_COLUMN_U16:
-                                                        case CARBON_JAK_FIELD_TYPE_COLUMN_U32:
-                                                        case CARBON_JAK_FIELD_TYPE_COLUMN_U64:
-                                                        case CARBON_JAK_FIELD_TYPE_COLUMN_I8:
-                                                        case CARBON_JAK_FIELD_TYPE_COLUMN_I16:
-                                                        case CARBON_JAK_FIELD_TYPE_COLUMN_I32:
-                                                        case CARBON_JAK_FIELD_TYPE_COLUMN_I64:
-                                                        case CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT:
-                                                        case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN: {
+                                                        case JAK_CARBON_FIELD_TYPE_COLUMN_U8:
+                                                        case JAK_CARBON_FIELD_TYPE_COLUMN_U16:
+                                                        case JAK_CARBON_FIELD_TYPE_COLUMN_U32:
+                                                        case JAK_CARBON_FIELD_TYPE_COLUMN_U64:
+                                                        case JAK_CARBON_FIELD_TYPE_COLUMN_I8:
+                                                        case JAK_CARBON_FIELD_TYPE_COLUMN_I16:
+                                                        case JAK_CARBON_FIELD_TYPE_COLUMN_I32:
+                                                        case JAK_CARBON_FIELD_TYPE_COLUMN_I64:
+                                                        case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT:
+                                                        case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
                                                                 jak_carbon_column_it *sub_it = carbon_object_it_column_value(
                                                                         it);
                                                                 return traverse_column(state,
@@ -320,7 +320,7 @@ static inline carbon_path_status_e traverse_array(struct jak_carbon_path_evaluat
         JAK_ASSERT(it);
         JAK_ASSERT(current_path_pos < path->path_len);
 
-        carbon_field_type_e elem_type;
+        jak_carbon_field_type_e elem_type;
         carbon_dot_node_e node_type;
         jak_u32 path_length;
         carbon_path_status_e status;
@@ -349,7 +349,7 @@ static inline carbon_path_status_e traverse_array(struct jak_carbon_path_evaluat
                                         /* requested index is reached; depending on the subsequent path, lookup may stops */
                                         jak_carbon_array_it_field_type(&elem_type, it);
                                         jak_u32 next_path_pos = current_path_pos + 1;
-                                        if (is_unit_array && is_record && carbon_field_type_is_column(elem_type)) {
+                                        if (is_unit_array && is_record && jak_carbon_field_type_is_column(elem_type)) {
                                                 jak_carbon_column_it *sub_it = jak_carbon_array_it_column_value(
                                                         it);
                                                 return traverse_column(state,
@@ -362,7 +362,7 @@ static inline carbon_path_status_e traverse_array(struct jak_carbon_path_evaluat
                                                          * type (for traversability) */
                                                         carbon_dot_node_e next_node_type;
                                                         jak_carbon_dot_path_type_at(&next_node_type, next_path_pos, path);
-                                                        if (!carbon_field_type_is_traversable(elem_type)) {
+                                                        if (!jak_carbon_field_type_is_traversable(elem_type)) {
                                                                 /* the array element is not a container; path evaluation stops here */
                                                                 return JAK_CARBON_PATH_NOTTRAVERSABLE;
                                                         } else {
@@ -372,31 +372,31 @@ static inline carbon_path_status_e traverse_array(struct jak_carbon_path_evaluat
                                                                                 /* next node in path is an array index which requires that
                                                                                  * the current array element is an array or column */
                                                                                 if (elem_type !=
-                                                                                    CARBON_JAK_FIELD_TYPE_ARRAY &&
+                                                                                    JAK_CARBON_FIELD_TYPE_ARRAY &&
                                                                                     elem_type !=
-                                                                                    CARBON_JAK_FIELD_TYPE_COLUMN_U8 &&
+                                                                                    JAK_CARBON_FIELD_TYPE_COLUMN_U8 &&
                                                                                     elem_type !=
-                                                                                    CARBON_JAK_FIELD_TYPE_COLUMN_U16 &&
+                                                                                    JAK_CARBON_FIELD_TYPE_COLUMN_U16 &&
                                                                                     elem_type !=
-                                                                                    CARBON_JAK_FIELD_TYPE_COLUMN_U32 &&
+                                                                                    JAK_CARBON_FIELD_TYPE_COLUMN_U32 &&
                                                                                     elem_type !=
-                                                                                    CARBON_JAK_FIELD_TYPE_COLUMN_U64 &&
+                                                                                    JAK_CARBON_FIELD_TYPE_COLUMN_U64 &&
                                                                                     elem_type !=
-                                                                                    CARBON_JAK_FIELD_TYPE_COLUMN_I8 &&
+                                                                                    JAK_CARBON_FIELD_TYPE_COLUMN_I8 &&
                                                                                     elem_type !=
-                                                                                    CARBON_JAK_FIELD_TYPE_COLUMN_I16 &&
+                                                                                    JAK_CARBON_FIELD_TYPE_COLUMN_I16 &&
                                                                                     elem_type !=
-                                                                                    CARBON_JAK_FIELD_TYPE_COLUMN_I32 &&
+                                                                                    JAK_CARBON_FIELD_TYPE_COLUMN_I32 &&
                                                                                     elem_type !=
-                                                                                    CARBON_JAK_FIELD_TYPE_COLUMN_I64 &&
+                                                                                    JAK_CARBON_FIELD_TYPE_COLUMN_I64 &&
                                                                                     elem_type !=
-                                                                                    CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT &&
+                                                                                    JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT &&
                                                                                     elem_type !=
-                                                                                    CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN) {
+                                                                                    JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN) {
                                                                                         return JAK_CARBON_PATH_NOCONTAINER;
                                                                                 } else {
                                                                                         if (elem_type ==
-                                                                                            CARBON_JAK_FIELD_TYPE_ARRAY) {
+                                                                                            JAK_CARBON_FIELD_TYPE_ARRAY) {
                                                                                                 jak_carbon_array_it *sub_it = jak_carbon_array_it_array_value(
                                                                                                         it);
                                                                                                 status = traverse_array(
@@ -409,25 +409,25 @@ static inline carbon_path_status_e traverse_array(struct jak_carbon_path_evaluat
                                                                                                 return status;
                                                                                         } else {
                                                                                                 JAK_ASSERT(elem_type ==
-                                                                                                           CARBON_JAK_FIELD_TYPE_COLUMN_U8 ||
+                                                                                                           JAK_CARBON_FIELD_TYPE_COLUMN_U8 ||
                                                                                                            elem_type ==
-                                                                                                           CARBON_JAK_FIELD_TYPE_COLUMN_U16 ||
+                                                                                                           JAK_CARBON_FIELD_TYPE_COLUMN_U16 ||
                                                                                                            elem_type ==
-                                                                                                           CARBON_JAK_FIELD_TYPE_COLUMN_U32 ||
+                                                                                                           JAK_CARBON_FIELD_TYPE_COLUMN_U32 ||
                                                                                                            elem_type ==
-                                                                                                           CARBON_JAK_FIELD_TYPE_COLUMN_U64 ||
+                                                                                                           JAK_CARBON_FIELD_TYPE_COLUMN_U64 ||
                                                                                                            elem_type ==
-                                                                                                           CARBON_JAK_FIELD_TYPE_COLUMN_I8 ||
+                                                                                                           JAK_CARBON_FIELD_TYPE_COLUMN_I8 ||
                                                                                                            elem_type ==
-                                                                                                           CARBON_JAK_FIELD_TYPE_COLUMN_I16 ||
+                                                                                                           JAK_CARBON_FIELD_TYPE_COLUMN_I16 ||
                                                                                                            elem_type ==
-                                                                                                           CARBON_JAK_FIELD_TYPE_COLUMN_I32 ||
+                                                                                                           JAK_CARBON_FIELD_TYPE_COLUMN_I32 ||
                                                                                                            elem_type ==
-                                                                                                           CARBON_JAK_FIELD_TYPE_COLUMN_I64 ||
+                                                                                                           JAK_CARBON_FIELD_TYPE_COLUMN_I64 ||
                                                                                                            elem_type ==
-                                                                                                           CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT ||
+                                                                                                           JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT ||
                                                                                                            elem_type ==
-                                                                                                           CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN);
+                                                                                                           JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
                                                                                                 jak_carbon_column_it *sub_it = jak_carbon_array_it_column_value(
                                                                                                         it);
                                                                                                 return traverse_column(
@@ -441,7 +441,7 @@ static inline carbon_path_status_e traverse_array(struct jak_carbon_path_evaluat
                                                                                 /* next node in path is a key name which requires that
                                                                                  * the current array element is of type object */
                                                                                 if (elem_type !=
-                                                                                    CARBON_JAK_FIELD_TYPE_OBJECT) {
+                                                                                    JAK_CARBON_FIELD_TYPE_OBJECT) {
                                                                                         return JAK_CARBON_PATH_NOTANOBJECT;
                                                                                 } else {
                                                                                         struct jak_carbon_object_it *sub_it = jak_carbon_array_it_object_value(
@@ -468,14 +468,14 @@ static inline carbon_path_status_e traverse_array(struct jak_carbon_path_evaluat
                         case JAK_DOT_NODE_KEY_NAME:
                                 /* first array element exists, which must be of type object */
                                 jak_carbon_array_it_field_type(&elem_type, it);
-                                if (elem_type != CARBON_JAK_FIELD_TYPE_OBJECT) {
+                                if (elem_type != JAK_CARBON_FIELD_TYPE_OBJECT) {
                                         /* first array element is not of type object and a key lookup cannot
                                          * be executed, consequentially */
                                         return JAK_CARBON_PATH_NOTANOBJECT;
                                 } else {
                                         /* next node in path is a key name which requires that
                                                                          * the current array element is of type object */
-                                        if (elem_type != CARBON_JAK_FIELD_TYPE_OBJECT) {
+                                        if (elem_type != JAK_CARBON_FIELD_TYPE_OBJECT) {
                                                 return JAK_CARBON_PATH_NOTANOBJECT;
                                         } else {
                                                 if (is_unit_array && is_record) {
@@ -507,7 +507,7 @@ static inline carbon_path_status_e traverse_column(struct jak_carbon_path_evalua
         jak_u32 requested_idx;
         jak_u32 nun_values_contained;
         carbon_dot_node_e node_type;
-        carbon_field_type_e column_type;
+        jak_carbon_field_type_e column_type;
         jak_carbon_dot_path_len(&total_path_len, path);
         if (current_path_pos + 1 != total_path_len) {
                 /* a column cannot contain further containers; since the current path node is not

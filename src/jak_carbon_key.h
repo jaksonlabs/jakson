@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef JAK_JAK_CARBON_KEY_H
-#define JAK_JAK_CARBON_KEY_H
+#ifndef JAK_CARBON_KEY_H
+#define JAK_CARBON_KEY_H
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  includes

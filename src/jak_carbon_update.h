@@ -85,7 +85,7 @@ bool carbon_update_set_array_end(struct jak_carbon_insert_array_state *state_in)
 
 jak_carbon_insert *carbon_update_set_column_begin(struct jak_carbon_revise *context, const char *path,
                                                          struct jak_carbon_insert_column_state *state_out,
-                                                         carbon_field_type_e type, jak_u64 column_capacity);
+                                                         jak_carbon_field_type_e type, jak_u64 column_capacity);
 
 bool carbon_update_set_column_end(struct jak_carbon_insert_column_state *state_in);
 
@@ -148,7 +148,7 @@ bool carbon_update_set_array_end_compiled(struct jak_carbon_insert_array_state *
 
 jak_carbon_insert *
 carbon_update_set_column_begin_compiled(struct jak_carbon_revise *context, const jak_carbon_dot_path *path,
-                                        struct jak_carbon_insert_column_state *state_out, carbon_field_type_e type,
+                                        struct jak_carbon_insert_column_state *state_out, jak_carbon_field_type_e type,
                                         jak_u64 column_capacity);
 
 bool carbon_update_set_column_end_compiled(struct jak_carbon_insert_column_state *state_in);
@@ -200,7 +200,7 @@ bool carbon_update_one_set_array_end(struct jak_carbon_insert_array_state *state
 
 jak_carbon_insert *carbon_update_one_set_column_begin(struct jak_carbon_insert_column_state *state_out,
                                                              const char *dot_path, jak_carbon *rev_doc,
-                                                             jak_carbon *doc, carbon_field_type_e type,
+                                                             jak_carbon *doc, jak_carbon_field_type_e type,
                                                              jak_u64 column_capacity);
 
 bool carbon_update_one_set_column_end(struct jak_carbon_insert_column_state *state_in);
@@ -287,7 +287,7 @@ jak_carbon_insert *carbon_update_one_set_column_begin_compiled(struct jak_carbon
                                                                       const jak_carbon_dot_path *path,
                                                                       jak_carbon *rev_doc,
                                                                       jak_carbon *doc,
-                                                                      carbon_field_type_e type,
+                                                                      jak_carbon_field_type_e type,
                                                                       jak_u64 column_capacity);
 
 bool carbon_update_one_set_column_end_compiled(struct jak_carbon_insert_column_state *state_in);

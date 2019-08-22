@@ -24,7 +24,7 @@
 
 #define try_array_update(type_match, in_place_update_fn, insert_fn)                                                    \
 ({                                                                                                                     \
-        carbon_field_type_e type_is = 0;                                                                            \
+        jak_carbon_field_type_e type_is = 0;                                                                            \
         jak_carbon_array_it_field_type(&type_is, it);                                                                      \
         bool status = false;                                                                                           \
         switch (type_is) {                                                                                             \
@@ -50,29 +50,29 @@ static bool array_update_##type_name(jak_carbon_array_it *it, jak_##type_name va
         return try_array_update(type_match, in_place_update_fn, insert_fn);                                            \
 }
 
-DEFINE_ARRAY_UPDATE_FUNCTION(u8, CARBON_JAK_FIELD_TYPE_NUMBER_U8, jak_carbon_array_it_update_in_place_u8, carbon_insert_u8)
+DEFINE_ARRAY_UPDATE_FUNCTION(u8, JAK_CARBON_FIELD_TYPE_NUMBER_U8, jak_carbon_array_it_update_in_place_u8, carbon_insert_u8)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(u16, CARBON_JAK_FIELD_TYPE_NUMBER_U16, jak_carbon_array_it_update_in_place_u16,
+DEFINE_ARRAY_UPDATE_FUNCTION(u16, JAK_CARBON_FIELD_TYPE_NUMBER_U16, jak_carbon_array_it_update_in_place_u16,
                              carbon_insert_u16)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(u32, CARBON_JAK_FIELD_TYPE_NUMBER_U32, jak_carbon_array_it_update_in_place_u32,
+DEFINE_ARRAY_UPDATE_FUNCTION(u32, JAK_CARBON_FIELD_TYPE_NUMBER_U32, jak_carbon_array_it_update_in_place_u32,
                              carbon_insert_u32)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(u64, CARBON_JAK_FIELD_TYPE_NUMBER_U64, jak_carbon_array_it_update_in_place_u64,
+DEFINE_ARRAY_UPDATE_FUNCTION(u64, JAK_CARBON_FIELD_TYPE_NUMBER_U64, jak_carbon_array_it_update_in_place_u64,
                              carbon_insert_u64)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(i8, CARBON_JAK_FIELD_TYPE_NUMBER_I8, jak_carbon_array_it_update_in_place_i8, carbon_insert_i8)
+DEFINE_ARRAY_UPDATE_FUNCTION(i8, JAK_CARBON_FIELD_TYPE_NUMBER_I8, jak_carbon_array_it_update_in_place_i8, carbon_insert_i8)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(i16, CARBON_JAK_FIELD_TYPE_NUMBER_I16, jak_carbon_array_it_update_in_place_i16,
+DEFINE_ARRAY_UPDATE_FUNCTION(i16, JAK_CARBON_FIELD_TYPE_NUMBER_I16, jak_carbon_array_it_update_in_place_i16,
                              carbon_insert_i16)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(i32, CARBON_JAK_FIELD_TYPE_NUMBER_I32, jak_carbon_array_it_update_in_place_i32,
+DEFINE_ARRAY_UPDATE_FUNCTION(i32, JAK_CARBON_FIELD_TYPE_NUMBER_I32, jak_carbon_array_it_update_in_place_i32,
                              carbon_insert_i32)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(i64, CARBON_JAK_FIELD_TYPE_NUMBER_I64, jak_carbon_array_it_update_in_place_i64,
+DEFINE_ARRAY_UPDATE_FUNCTION(i64, JAK_CARBON_FIELD_TYPE_NUMBER_I64, jak_carbon_array_it_update_in_place_i64,
                              carbon_insert_i64)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(float, CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT, jak_carbon_array_it_update_in_place_float,
+DEFINE_ARRAY_UPDATE_FUNCTION(float, JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT, jak_carbon_array_it_update_in_place_float,
                              carbon_insert_float)
 
 #define try_update_generic(context, path, array_exec, column_exec)                                                     \
@@ -408,7 +408,7 @@ bool carbon_update_set_array_end(struct jak_carbon_insert_array_state *state_in)
 
 jak_carbon_insert *carbon_update_set_column_begin(struct jak_carbon_revise *context, const char *path,
                                                          struct jak_carbon_insert_column_state *state_out,
-                                                         carbon_field_type_e type, jak_u64 column_capacity)
+                                                         jak_carbon_field_type_e type, jak_u64 column_capacity)
 {
         // TODO: Implement
         JAK_UNUSED(state_out);
@@ -583,7 +583,7 @@ bool carbon_update_set_array_end_compiled(struct jak_carbon_insert_array_state *
 jak_carbon_insert *carbon_update_set_column_begin_compiled(struct jak_carbon_revise *context,
                                                                   const jak_carbon_dot_path *path,
                                                                   struct jak_carbon_insert_column_state *state_out,
-                                                                  carbon_field_type_e type,
+                                                                  jak_carbon_field_type_e type,
                                                                   jak_u64 column_capacity)
 {
         // TODO: Implement
@@ -721,7 +721,7 @@ bool carbon_update_one_set_array_end(struct jak_carbon_insert_array_state *state
 
 jak_carbon_insert *carbon_update_one_set_column_begin(struct jak_carbon_insert_column_state *state_out,
                                                              const char *dot_path, jak_carbon *rev_doc,
-                                                             jak_carbon *doc, carbon_field_type_e type,
+                                                             jak_carbon *doc, jak_carbon_field_type_e type,
                                                              jak_u64 column_capacity)
 {
         struct jak_carbon_revise revise;
@@ -863,7 +863,7 @@ bool carbon_update_one_set_array_end_compiled(struct jak_carbon_insert_array_sta
 jak_carbon_insert *carbon_update_one_set_column_begin_compiled(
         struct jak_carbon_insert_column_state *state_out, const jak_carbon_dot_path *path,
         jak_carbon *rev_doc,
-        jak_carbon *doc, carbon_field_type_e type, jak_u64 column_capacity)
+        jak_carbon *doc, jak_carbon_field_type_e type, jak_u64 column_capacity)
 {
         struct jak_carbon_revise revise;
         carbon_revise_begin(&revise, rev_doc, doc);
