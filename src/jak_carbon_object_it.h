@@ -47,7 +47,7 @@ struct jak_carbon_object_it {
                 } key;
                 struct {
                         jak_offset_t offset;
-                        struct field_access data;
+                        jak_field_access data;
                 } value;
         } field;
 
@@ -119,7 +119,7 @@ const char *carbon_object_it_string_value(jak_u64 *strlen, struct jak_carbon_obj
 
 bool carbon_object_it_binary_value(struct jak_carbon_binary *out, struct jak_carbon_object_it *it);
 
-struct jak_carbon_array_it *carbon_object_it_array_value(struct jak_carbon_object_it *it_in);
+jak_carbon_array_it *carbon_object_it_array_value(struct jak_carbon_object_it *it_in);
 
 struct jak_carbon_object_it *carbon_object_it_object_value(struct jak_carbon_object_it *it_in);
 

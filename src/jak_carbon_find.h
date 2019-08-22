@@ -42,7 +42,7 @@ struct jak_carbon_find {
         bool value_is_nulled;
 
         union {
-                struct jak_carbon_array_it *array_it;
+                jak_carbon_array_it *array_it;
                 struct jak_carbon_column_it *column_it;
                 struct jak_carbon_object_it *object_it;
                 bool boolean;
@@ -78,7 +78,7 @@ char *carbon_find_result_to_json_compact_dup(struct jak_carbon_find *find);
 
 bool carbon_find_result_type(enum carbon_field_type *type, struct jak_carbon_find *find);
 
-struct jak_carbon_array_it *carbon_find_result_array(struct jak_carbon_find *find);
+jak_carbon_array_it *carbon_find_result_array(struct jak_carbon_find *find);
 
 struct jak_carbon_object_it *carbon_find_result_object(struct jak_carbon_find *find);
 

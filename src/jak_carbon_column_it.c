@@ -395,7 +395,7 @@ for (jak_u32 i = 0; i < num_values; i++) {                                      
 
 static bool rewrite_column_to_array(struct jak_carbon_column_it *it)
 {
-        struct jak_carbon_array_it array_it;
+        jak_carbon_array_it array_it;
         jak_carbon_insert array_ins;
 
         memfile_save_position(&it->memfile);
@@ -406,8 +406,8 @@ static bool rewrite_column_to_array(struct jak_carbon_column_it *it)
 
         size_t capacity = it->column_num_elements * carbon_int_get_type_value_size(it->type);
         carbon_int_insert_array(&it->memfile, capacity);
-        carbon_array_it_create(&array_it, &it->memfile, &it->err, array_marker_begin);
-        carbon_array_it_insert_begin(&array_ins, &array_it);
+        jak_carbon_array_it_create(&array_it, &it->memfile, &it->err, array_marker_begin);
+        jak_carbon_array_it_insert_begin(&array_ins, &array_it);
 
         enum carbon_field_type type;
         jak_u32 num_values;
@@ -455,9 +455,9 @@ static bool rewrite_column_to_array(struct jak_carbon_column_it *it)
                         return false;
         }
 
-        carbon_array_it_insert_end(&array_ins);
-        JAK_ASSERT(array_marker_begin < carbon_array_it_memfilepos(&array_it));
-        carbon_array_it_drop(&array_it);
+        jak_carbon_array_it_insert_end(&array_ins);
+        JAK_ASSERT(array_marker_begin < jak_carbon_array_it_memfilepos(&array_it));
+        jak_carbon_array_it_drop(&array_it);
 
         memfile_restore_position(&it->memfile);
         return true;

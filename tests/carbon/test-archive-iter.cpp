@@ -30,12 +30,12 @@ iterate_object_vals(jak_archive_value_vector *value_iter)
     ASSERT_TRUE(status);
     ASSERT_TRUE(is_object);
 
-    status = jak_jak_archive_value_vector_get_length(&vector_length, value_iter);
+    status = jak_archive_value_vector_get_length(&vector_length, value_iter);
     ASSERT_TRUE(status);
 
     for (jak_u32 i = 0; i < vector_length; i++)
     {
-        status = jak_jak_archive_value_vector_get_object_at(&object, i, value_iter);
+        status = jak_archive_value_vector_get_object_at(&object, i, value_iter);
         ASSERT_TRUE(status);
         printf("\t\t{type: object, id: %" PRIu64 "}\n", object.object_id);
 
@@ -307,9 +307,9 @@ iterate_properties(jak_prop_iter *prop_iter)
     {
         if (iter_type == JAK_PROP_ITER_MODE_OBJECT)
         {
-            keys = jak_jak_archive_value_vector_get_keys(&num_pairs, &value_iter);
+            keys = jak_archive_value_vector_get_keys(&num_pairs, &value_iter);
             jak_archive_value_vector_is_array_type(&is_array, &value_iter);
-            jak_jak_archive_value_vector_get_basic_type(&type, &value_iter);
+            jak_archive_value_vector_get_basic_type(&type, &value_iter);
             jak_archive_value_vector_get_object_id(&oid, &value_iter);
             for (jak_u32 i = 0; i < num_pairs; i++) {
                 printf("Key %" PRIu64 ", type: %d, is-array: %d\n", keys[i], type, is_array);

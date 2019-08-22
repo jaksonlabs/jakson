@@ -31,7 +31,6 @@ JAK_BEGIN_DECL
 
 struct jak_carbon_binary; /* forwarded from carbon.h */
 struct jak_carbon_object_it; /* forwarded from carbon-object-it.h */
-struct jak_carbon_array_it; /* forwarded from carbon-array-it.h */
 struct jak_carbon_column_it; /* forwarded from carbon-column-it.h */
 
 struct printer {
@@ -231,7 +230,7 @@ bool carbon_printer_object_prop_name(struct printer *printer, struct jak_string 
 
 bool carbon_printer_print_object(struct jak_carbon_object_it *it, struct printer *printer, struct jak_string *builder);
 
-bool carbon_printer_print_array(struct jak_carbon_array_it *it, struct printer *printer, struct jak_string *builder,
+bool carbon_printer_print_array(jak_carbon_array_it *it, struct printer *printer, struct jak_string *builder,
                                 bool is_record_container);
 
 bool carbon_printer_print_column(struct jak_carbon_column_it *it, struct printer *printer, struct jak_string *builder);

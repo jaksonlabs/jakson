@@ -274,12 +274,12 @@ const jak_archive_object *jak_archive_column_entry_object_iter_next_object(jak_c
 bool jak_archive_object_get_object_id(jak_global_id_t *id, const jak_archive_object *object);
 bool jak_archive_object_get_prop_iter(jak_prop_iter *iter, const jak_archive_object *object);
 bool jak_archive_value_vector_get_object_id(jak_global_id_t *id, const jak_archive_value_vector *iter);
-const jak_archive_field_sid_t *jak_jak_archive_value_vector_get_keys(jak_u32 *num_keys, jak_archive_value_vector *iter);
-bool jak_jak_archive_value_vector_get_basic_type(enum jak_archive_field_type *type, const jak_archive_value_vector *value);
+const jak_archive_field_sid_t *jak_archive_value_vector_get_keys(jak_u32 *num_keys, jak_archive_value_vector *iter);
+bool jak_archive_value_vector_get_basic_type(enum jak_archive_field_type *type, const jak_archive_value_vector *value);
 bool jak_archive_value_vector_is_array_type(bool *is_array, const jak_archive_value_vector *value);
-bool jak_jak_archive_value_vector_get_length(jak_u32 *length, const jak_archive_value_vector *value);
+bool jak_archive_value_vector_get_length(jak_u32 *length, const jak_archive_value_vector *value);
 bool jak_archive_value_vector_is_of_objects(bool *is_object, jak_archive_value_vector *value);
-bool jak_jak_archive_value_vector_get_object_at(jak_archive_object *object, jak_u32 idx, jak_archive_value_vector *value);
+bool jak_archive_value_vector_get_object_at(jak_archive_object *object, jak_u32 idx, jak_archive_value_vector *value);
 
 #define JAK_DEFINE_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(name)                                                            \
 bool                                                                                                       \

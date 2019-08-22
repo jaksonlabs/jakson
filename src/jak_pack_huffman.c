@@ -253,7 +253,7 @@ static const jak_u32 *get_num_used_blocks(jak_u16 *numUsedBlocks, struct pack_hu
 }
 
 static void
-import_into_entry(struct pack_huffman_entry *entry, const struct huff_node *node, const struct jak_bitmap *map)
+import_into_entry(struct pack_huffman_entry *entry, const struct huff_node *node, const jak_bitmap *map)
 {
         entry->letter = node->letter;
         jak_u32 *blocks, num_blocks;
@@ -324,7 +324,7 @@ static struct huff_node *find_smallest(struct huff_node *begin, jak_u64 lowerBou
         return result;
 }
 
-static void assign_code(struct huff_node *node, const struct jak_bitmap *path,
+static void assign_code(struct huff_node *node, const jak_bitmap *path,
                         struct jak_vector ofType(struct pack_huffman_entry) *table)
 {
         if (!node->left && !node->right) {
@@ -332,7 +332,7 @@ static void assign_code(struct huff_node *node, const struct jak_bitmap *path,
                 import_into_entry(entry, node, path);
         } else {
                 if (node->left) {
-                        struct jak_bitmap left;
+                        jak_bitmap left;
                         jak_bitmap_cpy(&left, path);
                         jak_bitmap_lshift(&left);
                         jak_bitmap_set(&left, 0, false);
@@ -340,7 +340,7 @@ static void assign_code(struct huff_node *node, const struct jak_bitmap *path,
                         jak_bitmap_drop(&left);
                 }
                 if (node->right) {
-                        struct jak_bitmap right;
+                        jak_bitmap right;
                         jak_bitmap_cpy(&right, path);
                         jak_bitmap_lshift(&right);
                         jak_bitmap_set(&right, 0, true);
@@ -482,7 +482,7 @@ static void huff_tree_create(struct jak_vector ofType(struct pack_huffman_entry)
         printf("\n");
 #endif
 
-        struct jak_bitmap root_path;
+        jak_bitmap root_path;
         jak_bitmap_create(&root_path, UCHAR_MAX);
         jak_bitmap_set(&root_path, 0, true);
         assign_code(new_node, &root_path, table);

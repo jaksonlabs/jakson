@@ -23,7 +23,7 @@
 #include <jak_carbon_find.h>
 #include "jak_carbon_find.h"
 
-static void result_from_array(struct jak_carbon_find *find, struct jak_carbon_array_it *it);
+static void result_from_array(struct jak_carbon_find *find, jak_carbon_array_it *it);
 
 static void result_from_object(struct jak_carbon_find *find, struct jak_carbon_object_it *it);
 
@@ -53,7 +53,7 @@ bool carbon_find_close(struct jak_carbon_find *find)
                                 carbon_object_it_drop(find->value.object_it);
                                 break;
                         case CARBON_JAK_FIELD_TYPE_ARRAY:
-                                carbon_array_it_drop(find->value.array_it);
+                                jak_carbon_array_it_drop(find->value.array_it);
                                 break;
                         case CARBON_JAK_FIELD_TYPE_COLUMN_U8:
                         case CARBON_JAK_FIELD_TYPE_COLUMN_U16:
@@ -140,7 +140,7 @@ carbon_find_result_to_str(struct jak_string *dst_str, jak_carbon_printer_impl_e 
                         }
                                 break;
                         case CARBON_JAK_FIELD_TYPE_ARRAY: {
-                                struct jak_carbon_array_it *sub_it = carbon_find_result_array(find);
+                                jak_carbon_array_it *sub_it = carbon_find_result_array(find);
                                 carbon_printer_print_array(sub_it, &printer, dst_str, false);
                         }
                                 break;
@@ -259,7 +259,7 @@ bool carbon_find_result_type(enum carbon_field_type *type, struct jak_carbon_fin
         return true;
 }
 
-struct jak_carbon_array_it *carbon_find_result_array(struct jak_carbon_find *find)
+jak_carbon_array_it *carbon_find_result_array(struct jak_carbon_find *find)
 {
         JAK_ERROR_IF_NULL(find)
         error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
@@ -353,7 +353,7 @@ bool carbon_find_drop(struct jak_carbon_find *find)
         return true;
 }
 
-static void result_from_array(struct jak_carbon_find *find, struct jak_carbon_array_it *it)
+static void result_from_array(struct jak_carbon_find *find, jak_carbon_array_it *it)
 {
         find->type = it->field_access.it_field_type;
         switch (find->type) {
@@ -363,7 +363,7 @@ static void result_from_array(struct jak_carbon_find *find, struct jak_carbon_ar
                         /* no value to be stored */
                         break;
                 case CARBON_JAK_FIELD_TYPE_ARRAY:
-                        find->value.array_it = carbon_array_it_array_value(it);
+                        find->value.array_it = jak_carbon_array_it_array_value(it);
                         break;
                 case CARBON_JAK_FIELD_TYPE_COLUMN_U8:
                 case CARBON_JAK_FIELD_TYPE_COLUMN_U16:
@@ -375,32 +375,32 @@ static void result_from_array(struct jak_carbon_find *find, struct jak_carbon_ar
                 case CARBON_JAK_FIELD_TYPE_COLUMN_I64:
                 case CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT:
                 case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN:
-                        find->value.column_it = carbon_array_it_column_value(it);
+                        find->value.column_it = jak_carbon_array_it_column_value(it);
                         break;
                 case CARBON_JAK_FIELD_TYPE_OBJECT:
-                        find->value.object_it = carbon_array_it_object_value(it);
+                        find->value.object_it = jak_carbon_array_it_object_value(it);
                         break;
                 case CARBON_JAK_FIELD_TYPE_STRING:
-                        find->value.string.base = carbon_array_it_string_value(&find->value.string.len, it);
+                        find->value.string.base = jak_carbon_array_it_string_value(&find->value.string.len, it);
                         break;
                 case CARBON_JAK_FIELD_TYPE_NUMBER_U8:
                 case CARBON_JAK_FIELD_TYPE_NUMBER_U16:
                 case CARBON_JAK_FIELD_TYPE_NUMBER_U32:
                 case CARBON_JAK_FIELD_TYPE_NUMBER_U64:
-                        carbon_array_it_unsigned_value(&find->value_is_nulled, &find->value.unsigned_number, it);
+                        jak_carbon_array_it_unsigned_value(&find->value_is_nulled, &find->value.unsigned_number, it);
                         break;
                 case CARBON_JAK_FIELD_TYPE_NUMBER_I8:
                 case CARBON_JAK_FIELD_TYPE_NUMBER_I16:
                 case CARBON_JAK_FIELD_TYPE_NUMBER_I32:
                 case CARBON_JAK_FIELD_TYPE_NUMBER_I64:
-                        carbon_array_it_signed_value(&find->value_is_nulled, &find->value.signed_number, it);
+                        jak_carbon_array_it_signed_value(&find->value_is_nulled, &find->value.signed_number, it);
                         break;
                 case CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT:
-                        carbon_array_it_float_value(&find->value_is_nulled, &find->value.float_number, it);
+                        jak_carbon_array_it_float_value(&find->value_is_nulled, &find->value.float_number, it);
                         break;
                 case CARBON_JAK_FIELD_TYPE_BINARY:
                 case CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM:
-                        carbon_array_it_binary_value(&find->value.binary, it);
+                        jak_carbon_array_it_binary_value(&find->value.binary, it);
                         break;
                 default: error(&find->err, JAK_ERR_INTERNALERR);
                         break;

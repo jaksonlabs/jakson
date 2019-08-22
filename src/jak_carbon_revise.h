@@ -57,9 +57,9 @@ bool carbon_revise_key_set_signed(struct jak_carbon_revise *context, jak_i64 key
 
 bool carbon_revise_key_set_string(struct jak_carbon_revise *context, const char *key_value);
 
-bool carbon_revise_iterator_open(struct jak_carbon_array_it *it, struct jak_carbon_revise *context);
+bool carbon_revise_iterator_open(jak_carbon_array_it *it, struct jak_carbon_revise *context);
 
-bool carbon_revise_iterator_close(struct jak_carbon_array_it *it);
+bool carbon_revise_iterator_close(jak_carbon_array_it *it);
 
 bool carbon_revise_find_open(struct jak_carbon_find *out, const char *dot_path, struct jak_carbon_revise *context);
 

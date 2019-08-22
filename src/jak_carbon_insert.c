@@ -48,11 +48,11 @@ static void internal_create(jak_carbon_insert *inserter, struct jak_memfile *src
 
 static void write_binary_blob(jak_carbon_insert *inserter, const void *value, size_t nbytes);
 
-bool carbon_int_insert_create_for_array(jak_carbon_insert *inserter, struct jak_carbon_array_it *context)
+bool carbon_int_insert_create_for_array(jak_carbon_insert *inserter, jak_carbon_array_it *context)
 {
         JAK_ERROR_IF_NULL(inserter)
         JAK_ERROR_IF_NULL(context)
-        carbon_array_it_lock(context);
+        jak_carbon_array_it_lock(context);
         inserter->context_type = JAK_CARBON_ARRAY;
         inserter->context.array = context;
         inserter->position = 0;
@@ -516,7 +516,7 @@ jak_carbon_insert *carbon_insert_array_begin(struct jak_carbon_insert_array_stat
 
         *state_out = (struct jak_carbon_insert_array_state) {
                 .parent_inserter = inserter_in,
-                .nested_array = JAK_MALLOC(sizeof(struct jak_carbon_array_it)),
+                .nested_array = JAK_MALLOC(sizeof(jak_carbon_array_it)),
                 .array_begin = memfile_tell(&inserter_in->memfile),
                 .array_end = 0
         };
@@ -524,8 +524,8 @@ jak_carbon_insert *carbon_insert_array_begin(struct jak_carbon_insert_array_stat
         carbon_int_insert_array(&inserter_in->memfile, array_capacity);
         jak_u64 payload_start = memfile_tell(&inserter_in->memfile) - 1;
 
-        carbon_array_it_create(state_out->nested_array, &inserter_in->memfile, &inserter_in->err, payload_start);
-        carbon_array_it_insert_begin(&state_out->nested_inserter, state_out->nested_array);
+        jak_carbon_array_it_create(state_out->nested_array, &inserter_in->memfile, &inserter_in->err, payload_start);
+        jak_carbon_array_it_insert_begin(&state_out->nested_inserter, state_out->nested_array);
 
         return &state_out->nested_inserter;
 }
@@ -534,19 +534,19 @@ bool carbon_insert_array_end(struct jak_carbon_insert_array_state *state_in)
 {
         JAK_ERROR_IF_NULL(state_in);
 
-        struct jak_carbon_array_it scan;
-        carbon_array_it_create(&scan, &state_in->parent_inserter->memfile, &state_in->parent_inserter->err,
+        jak_carbon_array_it scan;
+        jak_carbon_array_it_create(&scan, &state_in->parent_inserter->memfile, &state_in->parent_inserter->err,
                                memfile_tell(&state_in->parent_inserter->memfile) - 1);
 
-        carbon_array_it_fast_forward(&scan);
+        jak_carbon_array_it_fast_forward(&scan);
 
         state_in->array_end = memfile_tell(&scan.memfile);
         memfile_skip(&scan.memfile, 1);
 
         memfile_seek(&state_in->parent_inserter->memfile, memfile_tell(&scan.memfile) - 1);
-        carbon_array_it_drop(&scan);
+        jak_carbon_array_it_drop(&scan);
         carbon_insert_drop(&state_in->nested_inserter);
-        carbon_array_it_drop(state_in->nested_array);
+        jak_carbon_array_it_drop(state_in->nested_array);
         free(state_in->nested_array);
         return true;
 }
@@ -863,7 +863,7 @@ bool carbon_insert_drop(jak_carbon_insert *inserter)
 {
         JAK_ERROR_IF_NULL(inserter)
         if (inserter->context_type == JAK_CARBON_ARRAY) {
-                carbon_array_it_unlock(inserter->context.array);
+                jak_carbon_array_it_unlock(inserter->context.array);
         } else if (inserter->context_type == JAK_CARBON_COLUMN) {
                 carbon_column_it_unlock(inserter->context.column);
         } else if (inserter->context_type == JAK_CARBON_OBJECT) {

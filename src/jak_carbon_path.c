@@ -26,7 +26,7 @@ static inline enum carbon_path_status traverse_column(struct jak_carbon_path_eva
 
 static inline enum carbon_path_status traverse_array(struct jak_carbon_path_evaluator *state,
                                                      const struct jak_carbon_dot_path *path, jak_u32 current_path_pos,
-                                                     struct jak_carbon_array_it *it, bool is_record);
+                                                     jak_carbon_array_it *it, bool is_record);
 
 bool carbon_path_evaluator_begin(struct jak_carbon_path_evaluator *eval, struct jak_carbon_dot_path *path,
                                  jak_carbon *doc)
@@ -81,7 +81,7 @@ bool carbon_path_evaluator_end(struct jak_carbon_path_evaluator *state)
                         carbon_object_it_drop(&state->result.containers.object.it);
                         break;
                 case JAK_CARBON_ARRAY:
-                        carbon_array_it_drop(&state->result.containers.array.it);
+                        jak_carbon_array_it_drop(&state->result.containers.array.it);
                         break;
                 case JAK_CARBON_COLUMN:
                         break;
@@ -272,14 +272,14 @@ static inline enum carbon_path_status traverse_object(struct jak_carbon_path_eva
                                                                 return ret;
                                                         }
                                                         case CARBON_JAK_FIELD_TYPE_ARRAY: {
-                                                                struct jak_carbon_array_it *sub_it = carbon_object_it_array_value(
+                                                                jak_carbon_array_it *sub_it = carbon_object_it_array_value(
                                                                         it);
                                                                 enum carbon_path_status ret = traverse_array(state,
                                                                                                              path,
                                                                                                              next_path_pos,
                                                                                                              sub_it,
                                                                                                              false);
-                                                                carbon_array_it_drop(sub_it);
+                                                                jak_carbon_array_it_drop(sub_it);
                                                                 return ret;
                                                         }
                                                         case CARBON_JAK_FIELD_TYPE_COLUMN_U8:
@@ -313,7 +313,7 @@ static inline enum carbon_path_status traverse_object(struct jak_carbon_path_eva
 
 static inline enum carbon_path_status traverse_array(struct jak_carbon_path_evaluator *state,
                                                      const struct jak_carbon_dot_path *path, jak_u32 current_path_pos,
-                                                     struct jak_carbon_array_it *it, bool is_record)
+                                                     jak_carbon_array_it *it, bool is_record)
 {
         JAK_ASSERT(state);
         JAK_ASSERT(path);
@@ -326,13 +326,13 @@ static inline enum carbon_path_status traverse_array(struct jak_carbon_path_eval
         enum carbon_path_status status;
         jak_u32 requested_array_idx;
         jak_u32 current_array_idx = 0;
-        bool is_unit_array = carbon_array_it_is_unit(it);
+        bool is_unit_array = jak_carbon_array_it_is_unit(it);
 
         carbon_dot_path_type_at(&node_type, current_path_pos, path);
 
         carbon_dot_path_len(&path_length, path);
 
-        if (!carbon_array_it_next(it)) {
+        if (!jak_carbon_array_it_next(it)) {
                 /* empty document */
                 return CARBON_PATH_EMPTY_DOC;
         } else {
@@ -340,17 +340,17 @@ static inline enum carbon_path_status traverse_array(struct jak_carbon_path_eval
                         case DOT_NODE_ARRAY_IDX:
                                 carbon_dot_path_idx_at(&requested_array_idx, current_path_pos, path);
                                 while (current_array_idx < requested_array_idx &&
-                                       carbon_array_it_next(it)) { current_array_idx++; }
+                                       jak_carbon_array_it_next(it)) { current_array_idx++; }
                                 JAK_ASSERT(current_array_idx <= requested_array_idx);
                                 if (current_array_idx != requested_array_idx) {
                                         /* root array has too less elements to reach the requested index */
                                         return CARBON_PATH_NOSUCHINDEX;
                                 } else {
                                         /* requested index is reached; depending on the subsequent path, lookup may stops */
-                                        carbon_array_it_field_type(&elem_type, it);
+                                        jak_carbon_array_it_field_type(&elem_type, it);
                                         jak_u32 next_path_pos = current_path_pos + 1;
                                         if (is_unit_array && is_record && carbon_field_type_is_column(elem_type)) {
-                                                struct jak_carbon_column_it *sub_it = carbon_array_it_column_value(
+                                                struct jak_carbon_column_it *sub_it = jak_carbon_array_it_column_value(
                                                         it);
                                                 return traverse_column(state,
                                                                        path,
@@ -397,14 +397,14 @@ static inline enum carbon_path_status traverse_array(struct jak_carbon_path_eval
                                                                                 } else {
                                                                                         if (elem_type ==
                                                                                             CARBON_JAK_FIELD_TYPE_ARRAY) {
-                                                                                                struct jak_carbon_array_it *sub_it = carbon_array_it_array_value(
+                                                                                                jak_carbon_array_it *sub_it = jak_carbon_array_it_array_value(
                                                                                                         it);
                                                                                                 status = traverse_array(
                                                                                                         state,
                                                                                                         path,
                                                                                                         next_path_pos,
                                                                                                         sub_it, false);
-                                                                                                carbon_array_it_drop(
+                                                                                                jak_carbon_array_it_drop(
                                                                                                         sub_it);
                                                                                                 return status;
                                                                                         } else {
@@ -428,7 +428,7 @@ static inline enum carbon_path_status traverse_array(struct jak_carbon_path_eval
                                                                                                            CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT ||
                                                                                                            elem_type ==
                                                                                                            CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN);
-                                                                                                struct jak_carbon_column_it *sub_it = carbon_array_it_column_value(
+                                                                                                struct jak_carbon_column_it *sub_it = jak_carbon_array_it_column_value(
                                                                                                         it);
                                                                                                 return traverse_column(
                                                                                                         state,
@@ -444,7 +444,7 @@ static inline enum carbon_path_status traverse_array(struct jak_carbon_path_eval
                                                                                     CARBON_JAK_FIELD_TYPE_OBJECT) {
                                                                                         return CARBON_PATH_NOTANOBJECT;
                                                                                 } else {
-                                                                                        struct jak_carbon_object_it *sub_it = carbon_array_it_object_value(
+                                                                                        struct jak_carbon_object_it *sub_it = jak_carbon_array_it_object_value(
                                                                                                 it);
                                                                                         status = traverse_object(state,
                                                                                                                  path,
@@ -460,14 +460,14 @@ static inline enum carbon_path_status traverse_array(struct jak_carbon_path_eval
                                                 } else {
                                                         /* path end is reached */
                                                         state->result.container_type = JAK_CARBON_ARRAY;
-                                                        carbon_array_it_clone(&state->result.containers.array.it, it);
+                                                        jak_carbon_array_it_clone(&state->result.containers.array.it, it);
                                                         return CARBON_PATH_RESOLVED;
                                                 }
                                         }
                                 }
                         case DOT_NODE_KEY_NAME:
                                 /* first array element exists, which must be of type object */
-                                carbon_array_it_field_type(&elem_type, it);
+                                jak_carbon_array_it_field_type(&elem_type, it);
                                 if (elem_type != CARBON_JAK_FIELD_TYPE_OBJECT) {
                                         /* first array element is not of type object and a key lookup cannot
                                          * be executed, consequentially */
@@ -479,7 +479,7 @@ static inline enum carbon_path_status traverse_array(struct jak_carbon_path_eval
                                                 return CARBON_PATH_NOTANOBJECT;
                                         } else {
                                                 if (is_unit_array && is_record) {
-                                                        struct jak_carbon_object_it *sub_it = carbon_array_it_object_value(
+                                                        struct jak_carbon_object_it *sub_it = jak_carbon_array_it_object_value(
                                                                 it);
                                                         status = traverse_object(state,
                                                                                  path,

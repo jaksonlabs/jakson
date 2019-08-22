@@ -150,9 +150,9 @@ bool carbon_path_index_it_field_unsigned_value(bool *is_null_in, jak_u64 *value,
 
 const char *carbon_path_index_it_field_string_value(jak_u64 *strlen, struct jak_carbon_path_index_it *it);
 
-bool carbon_path_index_it_field_binary_value(struct jak_carbon_binary *out, struct jak_carbon_array_it *it);
+bool carbon_path_index_it_field_binary_value(struct jak_carbon_binary *out, jak_carbon_array_it *it);
 
-bool carbon_path_index_it_field_array_value(struct jak_carbon_array_it *it_out, struct jak_carbon_path_index_it *it_in);
+bool carbon_path_index_it_field_array_value(jak_carbon_array_it *it_out, struct jak_carbon_path_index_it *it_in);
 
 bool
 carbon_path_index_it_field_object_value(struct jak_carbon_object_it *it_out, struct jak_carbon_path_index_it *it_in);

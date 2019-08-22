@@ -29,7 +29,7 @@ JAK_BEGIN_DECL
 
 struct jak_carbon_path_evaluator {
         jak_carbon *doc;
-        struct jak_carbon_array_it root_it;
+        jak_carbon_array_it root_it;
         enum carbon_path_status status;
         struct jak_error err;
 
@@ -37,7 +37,7 @@ struct jak_carbon_path_evaluator {
                 jak_carbon_container_e container_type;
                 union {
                         struct {
-                                struct jak_carbon_array_it it;
+                                jak_carbon_array_it it;
                         } array;
 
                         struct {

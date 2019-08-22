@@ -55,7 +55,7 @@ jak_carbon_insert *jak_carbon_create_begin(jak_carbon_new *context, jak_carbon *
                           &doc->err, JAK_ERR_ILLEGALARG);
 
                 success_else_null(error_init(&context->err), &doc->err);
-                context->content_it = JAK_MALLOC(sizeof(struct jak_carbon_array_it));
+                context->content_it = JAK_MALLOC(sizeof(jak_carbon_array_it));
                 context->inserter = JAK_MALLOC(sizeof(jak_carbon_insert));
                 context->mode = options;
 
@@ -63,7 +63,7 @@ jak_carbon_insert *jak_carbon_create_begin(jak_carbon_new *context, jak_carbon *
                 success_else_null(carbon_revise_begin(&context->revision_context, doc, &context->original), &doc->err);
                 success_else_null(carbon_revise_iterator_open(context->content_it, &context->revision_context),
                                   &doc->err);
-                success_else_null(carbon_array_it_insert_begin(context->inserter, context->content_it), &doc->err);
+                success_else_null(jak_carbon_array_it_insert_begin(context->inserter, context->content_it), &doc->err);
                 return context->inserter;
         } else {
                 return NULL;
@@ -74,7 +74,7 @@ bool jak_carbon_create_end(jak_carbon_new *context)
 {
         bool success = true;
         if (JAK_LIKELY(context != NULL)) {
-                success &= carbon_array_it_insert_end(context->inserter);
+                success &= jak_carbon_array_it_insert_end(context->inserter);
                 success &= carbon_revise_iterator_close(context->content_it);
                 if (context->mode & JAK_CARBON_COMPACT) {
                         carbon_revise_pack(&context->revision_context);
@@ -325,11 +325,11 @@ bool jak_carbon_to_str(struct jak_string *dst, jak_carbon_printer_impl_e printer
         carbon_printer_header_end(&p, &b);
         carbon_printer_payload_begin(&p, &b);
 
-        struct jak_carbon_array_it it;
+        jak_carbon_array_it it;
         jak_carbon_iterator_open(&it, doc);
 
         carbon_printer_print_array(&it, &p, &b, true);
-        carbon_array_it_drop(&it);
+        jak_carbon_array_it_drop(&it);
 
         carbon_printer_payload_end(&p, &b);
         carbon_printer_end(&p, &b);
@@ -376,20 +376,20 @@ char *jak_carbon_to_json_compact_dup(jak_carbon *doc)
         return result;
 }
 
-bool jak_carbon_iterator_open(struct jak_carbon_array_it *it, jak_carbon *doc)
+bool jak_carbon_iterator_open(jak_carbon_array_it *it, jak_carbon *doc)
 {
         JAK_ERROR_IF_NULL(it);
         JAK_ERROR_IF_NULL(doc);
         jak_offset_t payload_start = carbon_int_payload_after_header(doc);
-        carbon_array_it_create(it, &doc->memfile, &doc->err, payload_start);
-        carbon_array_it_readonly(it);
+        jak_carbon_array_it_create(it, &doc->memfile, &doc->err, payload_start);
+        jak_carbon_array_it_readonly(it);
         return true;
 }
 
-bool jak_carbon_iterator_close(struct jak_carbon_array_it *it)
+bool jak_carbon_iterator_close(jak_carbon_array_it *it)
 {
         JAK_ERROR_IF_NULL(it);
-        return carbon_array_it_drop(it);
+        return jak_carbon_array_it_drop(it);
 }
 
 bool jak_carbon_print(FILE *file, jak_carbon_printer_impl_e printer, jak_carbon *doc)

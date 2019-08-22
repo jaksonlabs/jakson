@@ -78,12 +78,12 @@ bool slice_list_create(slice_list_t *list, const jak_allocator *alloc, size_t sl
 
         vec_create(&list->slices, &list->alloc, sizeof(Slice), sliceCapacity);
         vec_create(&list->descriptors, &list->alloc, sizeof(SliceDescriptor), sliceCapacity);
-        vec_create(&list->filters, &list->alloc, sizeof(struct jak_bitmap), sliceCapacity);
+        vec_create(&list->filters, &list->alloc, sizeof(jak_bitmap), sliceCapacity);
         vec_create(&list->bounds, &list->alloc, sizeof(HashBounds), sliceCapacity);
 
         JAK_zero_memory(vec_data(&list->slices), sliceCapacity * sizeof(Slice));
         JAK_zero_memory(vec_data(&list->descriptors), sliceCapacity * sizeof(SliceDescriptor));
-        JAK_zero_memory(vec_data(&list->filters), sliceCapacity * sizeof(struct jak_bitmap));
+        JAK_zero_memory(vec_data(&list->filters), sliceCapacity * sizeof(jak_bitmap));
         JAK_zero_memory(vec_data(&list->bounds), sliceCapacity * sizeof(HashBounds));
 
         appenderNew(list);
@@ -99,7 +99,7 @@ bool SliceListDrop(slice_list_t *list)
         vec_drop(&list->descriptors);
         vec_drop(&list->bounds);
         for (size_t i = 0; i < list->filters.num_elems; i++) {
-                struct jak_bitmap *filter = vec_get(&list->filters, i, struct jak_bitmap);
+                jak_bitmap *filter = vec_get(&list->filters, i, jak_bitmap);
                 jak_bloom_drop(filter);
         }
         vec_drop(&list->filters);
@@ -134,11 +134,11 @@ bool slice_list_insert(slice_list_t *list, char **strings, jak_archive_field_sid
                 } else {
                         /** pair is not found; append it */
                         HashBounds *restrict bounds = vec_all(&list->bounds, HashBounds);
-                        struct jak_bitmap *restrict filters = vec_all(&list->filters, struct jak_bitmap);
+                        jak_bitmap *restrict filters = vec_all(&list->filters, jak_bitmap);
                         Slice *restrict slices = vec_all(&list->slices, Slice);
 
                         Slice *restrict appender = slices + list->appender_idx;
-                        struct jak_bitmap *restrict appenderFilter = filters + list->appender_idx;
+                        jak_bitmap *restrict appenderFilter = filters + list->appender_idx;
                         HashBounds *restrict appenderBounds = bounds + list->appender_idx;
 
                         JAK_debug(JAK_SLICE_LIST_TAG,
@@ -175,7 +175,7 @@ bool slice_list_lookup(slice_handle_t *handle, slice_list_t *list, const char *n
 
         /** check whether the keys-values pair is already contained in one slice */
         HashBounds *restrict bounds = vec_all(&list->bounds, HashBounds);
-        struct jak_bitmap *restrict filters = vec_all(&list->filters, struct jak_bitmap);
+        jak_bitmap *restrict filters = vec_all(&list->filters, jak_bitmap);
         Slice *restrict slices = vec_all(&list->slices, Slice);
         SliceDescriptor *restrict descs = vec_all(&list->descriptors, SliceDescriptor);
 
@@ -189,7 +189,7 @@ bool slice_list_lookup(slice_handle_t *handle, slice_list_t *list, const char *n
                 if (slice->num_elems > 0) {
                         bool keyHashIn = keyHash >= bound->minHash && keyHash <= bound->maxHash;
                         if (keyHashIn) {
-                                struct jak_bitmap *restrict filter = filters + i;
+                                jak_bitmap *restrict filter = filters + i;
                                 bool maybeContained = JAK_BLOOM_TEST(filter, &keyHash, sizeof(hash32_t));
                                 if (maybeContained) {
                                         JAK_debug(JAK_SLICE_LIST_TAG,
@@ -225,7 +225,7 @@ bool slice_list_lookup(slice_handle_t *handle, slice_list_t *list, const char *n
                                                 return true;
                                         }
                                 } else {
-                                        /** struct jak_bitmap is sure that pair is not contained */
+                                        /** jak_bitmap is sure that pair is not contained */
                                         continue;
                                 }
                         } else {
@@ -265,16 +265,16 @@ static void appenderNew(slice_list_t *list)
         vec_push(&list->descriptors, &desc, 1);
 
         /** the lookup guards */
-        JAK_ASSERT(sizeof(struct jak_bitmap) <= JAK_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE);
-        struct jak_bitmap filter;
+        JAK_ASSERT(sizeof(jak_bitmap) <= JAK_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE);
+        jak_bitmap filter;
 
-        /** NOTE: the size of each struct jak_bitmap lead to a false positive probability of 100%, i.e., number of items in the
+        /** NOTE: the size of each jak_bitmap lead to a false positive probability of 100%, i.e., number of items in the
          * slice is around 32644 depending on the CPU cache size, the number of actual bits in the filter (Cache line size
-         * in bits minus the header for the struct jak_bitmap) along with the number of used hash functions (4), lead to that
-         * probability. However, the reason a struct jak_bitmap is used is to skip slices whch definitively do NOT contain the
+         * in bits minus the header for the jak_bitmap) along with the number of used hash functions (4), lead to that
+         * probability. However, the reason a jak_bitmap is used is to skip slices whch definitively do NOT contain the
          * keys-values pair - and that still works ;) */
         jak_bloom_create(&filter,
-                         (JAK_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE - sizeof(struct jak_bitmap)) * 8);
+                         (JAK_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE - sizeof(jak_bitmap)) * 8);
         vec_push(&list->filters, &filter, 1);
         HashBounds bounds = {.minHash        = (hash32_t) -1, .maxHash        = (hash32_t) 0};
         vec_push(&list->bounds, &bounds, 1);
@@ -283,10 +283,10 @@ static void appenderNew(slice_list_t *list)
                  "created new appender in slice list %p\n\t"
                  "# of slices (incl. appender) in total...............: %zu\n\t"
                  "Slice target memory size............................: %zuB (%s)\n\t"
-                 "struct jak_bitmap target memory size......................: %zuB (%s)\n\t"
+                 "jak_bitmap target memory size......................: %zuB (%s)\n\t"
                  "Max # of (keys, hash, string) in appender/slice......: %zu\n\t"
-                 "Bits used in per-slice struct jak_bitmap..................: %zu\n\t"
-                 "Prob. of struct jak_bitmap to produce false-positives.....: %f\n\t"
+                 "Bits used in per-slice jak_bitmap..................: %zu\n\t"
+                 "Prob. of jak_bitmap to produce false-positives.....: %f\n\t"
                  "Single slice type size..............................: %zuB\n\t"
                  "Total slice-list size...............................: %f MiB",
                  list,
@@ -304,7 +304,7 @@ static void appenderNew(slice_list_t *list)
                  (sizeof(slice_list_t) + list->slices.num_elems
                                          * (sizeof(Slice) + sizeof(SliceDescriptor) +
                                             (sizeof(jak_u32) * list->descriptors.num_elems)
-                                            + sizeof(struct jak_bitmap) + jak_bitmap_nbits(&filter) / 8 +
+                                            + sizeof(jak_bitmap) + jak_bitmap_nbits(&filter) / 8 +
                                             sizeof(HashBounds))) /
                  1024.0 / 1024.0);
 

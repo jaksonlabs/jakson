@@ -72,10 +72,10 @@ JAK_BEGIN_DECL
     (b0set && b1set && b2set && b3set);                     \
 })
 
-bool jak_bloom_create(struct jak_bitmap *filter, size_t size);
-bool jak_bloom_drop(struct jak_bitmap *filter);
-bool jak_bloom_clear(struct jak_bitmap *filter);
-size_t jak_bloom_nbits(struct jak_bitmap *filter);
+bool jak_bloom_create(jak_bitmap *filter, size_t size);
+bool jak_bloom_drop(jak_bitmap *filter);
+bool jak_bloom_clear(jak_bitmap *filter);
+size_t jak_bloom_nbits(jak_bitmap *filter);
 
 unsigned jak_bloom_nhashs();
 

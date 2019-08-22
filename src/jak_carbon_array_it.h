@@ -34,7 +34,7 @@ JAK_BEGIN_DECL
 
 struct jak_carbon_column_it; /* forwarded from carbon-column-it.h */
 
-struct field_access {
+typedef struct jak_field_access {
         enum carbon_field_type it_field_type;
 
         const void *it_field_data;
@@ -51,12 +51,12 @@ struct field_access {
 
         bool nested_column_it_is_created;
 
-        struct jak_carbon_array_it *nested_array_it;
+        jak_carbon_array_it *nested_array_it;
         struct jak_carbon_column_it *nested_column_it;
         struct jak_carbon_object_it *nested_object_it;
-};
+} jak_field_access;
 
-struct jak_carbon_array_it {
+typedef struct jak_carbon_array_it {
         struct jak_memfile memfile;
         jak_offset_t payload_start;
         struct spinlock lock;
@@ -67,142 +67,99 @@ struct jak_carbon_array_it {
         bool array_end_reached;
 
         struct jak_vector ofType(jak_offset_t) history;
-        struct field_access field_access;
+        jak_field_access field_access;
         jak_offset_t field_offset;
-};
+} jak_carbon_array_it;
 
 JAK_DEFINE_ERROR_GETTER(jak_carbon_array_it);
 
 #define DECLARE_IN_PLACE_UPDATE_FUNCTION(type_name)                                                                    \
-bool carbon_array_it_update_in_place_##type_name(struct jak_carbon_array_it *it, jak_##type_name value);
+bool jak_carbon_array_it_update_in_place_##type_name(jak_carbon_array_it *it, jak_##type_name value);
 
 DECLARE_IN_PLACE_UPDATE_FUNCTION(u8)
-
 DECLARE_IN_PLACE_UPDATE_FUNCTION(u16)
-
 DECLARE_IN_PLACE_UPDATE_FUNCTION(u32)
-
 DECLARE_IN_PLACE_UPDATE_FUNCTION(u64)
-
 DECLARE_IN_PLACE_UPDATE_FUNCTION(i8)
-
 DECLARE_IN_PLACE_UPDATE_FUNCTION(i16)
-
 DECLARE_IN_PLACE_UPDATE_FUNCTION(i32)
-
 DECLARE_IN_PLACE_UPDATE_FUNCTION(i64)
-
 DECLARE_IN_PLACE_UPDATE_FUNCTION(float)
 
-bool carbon_array_it_update_in_place_true(struct jak_carbon_array_it *it);
-
-bool carbon_array_it_update_in_place_false(struct jak_carbon_array_it *it);
-
-bool carbon_array_it_update_in_place_null(struct jak_carbon_array_it *it);
+bool jak_carbon_array_it_update_in_place_true(jak_carbon_array_it *it);
+bool jak_carbon_array_it_update_in_place_false(jak_carbon_array_it *it);
+bool jak_carbon_array_it_update_in_place_null(jak_carbon_array_it *it);
 
 /**
  * Constructs a new array iterator in a carbon document, where <code>payload_start</code> is a memory offset
  * that starts with the first (potentially empty) array entry. If there is some data before the array contents
  * (e.g., a header), <code>payload_start</code> must not include this data.
  */
-bool carbon_array_it_create(struct jak_carbon_array_it *it, struct jak_memfile *memfile, struct jak_error *err,
-                            jak_offset_t payload_start);
-
-bool carbon_array_it_copy(struct jak_carbon_array_it *dst, struct jak_carbon_array_it *src);
-
-bool carbon_array_it_clone(struct jak_carbon_array_it *dst, struct jak_carbon_array_it *src);
-
-bool carbon_array_it_readonly(struct jak_carbon_array_it *it);
-
-bool carbon_array_it_length(jak_u64 *len, struct jak_carbon_array_it *it);
-
-bool carbon_array_it_is_empty(struct jak_carbon_array_it *it);
+bool jak_carbon_array_it_create(jak_carbon_array_it *it, struct jak_memfile *memfile, struct jak_error *err, jak_offset_t payload_start);
+bool jak_carbon_array_it_copy(jak_carbon_array_it *dst, jak_carbon_array_it *src);
+bool jak_carbon_array_it_clone(jak_carbon_array_it *dst, jak_carbon_array_it *src);
+bool jak_carbon_array_it_readonly(jak_carbon_array_it *it);
+bool jak_carbon_array_it_length(jak_u64 *len, jak_carbon_array_it *it);
+bool jak_carbon_array_it_is_empty(jak_carbon_array_it *it);
 
 /**
  * Drops the iterator.
  */
-bool carbon_array_it_drop(struct jak_carbon_array_it *it);
+bool jak_carbon_array_it_drop(jak_carbon_array_it *it);
 
 /**
- * Locks the iterator with a spinlock. A call to <code>carbon_array_it_unlock</code> is required for unlocking.
+ * Locks the iterator with a spinlock. A call to <code>jak_carbon_array_it_unlock</code> is required for unlocking.
  */
-bool carbon_array_it_lock(struct jak_carbon_array_it *it);
+bool jak_carbon_array_it_lock(jak_carbon_array_it *it);
 
 /**
  * Unlocks the iterator
  */
-bool carbon_array_it_unlock(struct jak_carbon_array_it *it);
+bool jak_carbon_array_it_unlock(jak_carbon_array_it *it);
 
 /**
  * Positions the iterator at the beginning of this array.
  */
-bool carbon_array_it_rewind(struct jak_carbon_array_it *it);
+bool jak_carbon_array_it_rewind(jak_carbon_array_it *it);
 
 /**
  * Positions the iterator to the slot after the current element, potentially pointing to next element.
  * The function returns true, if the slot is non-empty, and false otherwise.
  */
-bool carbon_array_it_next(struct jak_carbon_array_it *it);
+bool jak_carbon_array_it_next(jak_carbon_array_it *it);
+bool jak_carbon_array_it_has_next(jak_carbon_array_it *it);
+bool jak_carbon_array_it_is_unit(jak_carbon_array_it *it);
+bool jak_carbon_array_it_prev(jak_carbon_array_it *it);
 
-bool carbon_array_it_has_next(struct jak_carbon_array_it *it);
+jak_offset_t jak_carbon_array_it_memfilepos(jak_carbon_array_it *it);
+jak_offset_t jak_carbon_array_it_tell(jak_carbon_array_it *it);
+bool jak_carbon_int_array_it_offset(jak_offset_t *off, jak_carbon_array_it *it);
+bool jak_carbon_array_it_fast_forward(jak_carbon_array_it *it);
 
-bool carbon_array_it_is_unit(struct jak_carbon_array_it *it);
-
-bool carbon_array_it_prev(struct jak_carbon_array_it *it);
-
-jak_offset_t carbon_array_it_memfilepos(struct jak_carbon_array_it *it);
-
-jak_offset_t carbon_array_it_tell(struct jak_carbon_array_it *it);
-
-bool carbon_int_array_it_offset(jak_offset_t *off, struct jak_carbon_array_it *it);
-
-bool carbon_array_it_fast_forward(struct jak_carbon_array_it *it);
-
-bool carbon_array_it_field_type(enum carbon_field_type *type, struct jak_carbon_array_it *it);
-
-bool carbon_array_it_u8_value(jak_u8 *value, struct jak_carbon_array_it *it);
-
-bool carbon_array_it_u16_value(jak_u16 *value, struct jak_carbon_array_it *it);
-
-bool carbon_array_it_u32_value(jak_u32 *value, struct jak_carbon_array_it *it);
-
-bool carbon_array_it_u64_value(jak_u64 *value, struct jak_carbon_array_it *it);
-
-bool carbon_array_it_i8_value(jak_i8 *value, struct jak_carbon_array_it *it);
-
-bool carbon_array_it_i16_value(jak_i16 *value, struct jak_carbon_array_it *it);
-
-bool carbon_array_it_i32_value(jak_i32 *value, struct jak_carbon_array_it *it);
-
-bool carbon_array_it_i64_value(jak_i64 *value, struct jak_carbon_array_it *it);
-
-bool carbon_array_it_float_value(bool *is_null_in, float *value, struct jak_carbon_array_it *it);
-
-bool carbon_array_it_signed_value(bool *is_null_in, jak_i64 *value, struct jak_carbon_array_it *it);
-
-bool carbon_array_it_unsigned_value(bool *is_null_in, jak_u64 *value, struct jak_carbon_array_it *it);
-
-const char *carbon_array_it_string_value(jak_u64 *strlen, struct jak_carbon_array_it *it);
-
-bool carbon_array_it_binary_value(struct jak_carbon_binary *out, struct jak_carbon_array_it *it);
-
-struct jak_carbon_array_it *carbon_array_it_array_value(struct jak_carbon_array_it *it_in);
-
-struct jak_carbon_object_it *carbon_array_it_object_value(struct jak_carbon_array_it *it_in);
-
-struct jak_carbon_column_it *carbon_array_it_column_value(struct jak_carbon_array_it *it_in);
+bool jak_carbon_array_it_field_type(enum carbon_field_type *type, jak_carbon_array_it *it);
+bool jak_carbon_array_it_u8_value(jak_u8 *value, jak_carbon_array_it *it);
+bool jak_carbon_array_it_u16_value(jak_u16 *value, jak_carbon_array_it *it);
+bool jak_carbon_array_it_u32_value(jak_u32 *value, jak_carbon_array_it *it);
+bool jak_carbon_array_it_u64_value(jak_u64 *value, jak_carbon_array_it *it);
+bool jak_carbon_array_it_i8_value(jak_i8 *value, jak_carbon_array_it *it);
+bool jak_carbon_array_it_i16_value(jak_i16 *value, jak_carbon_array_it *it);
+bool jak_carbon_array_it_i32_value(jak_i32 *value, jak_carbon_array_it *it);
+bool jak_carbon_array_it_i64_value(jak_i64 *value, jak_carbon_array_it *it);
+bool jak_carbon_array_it_float_value(bool *is_null_in, float *value, jak_carbon_array_it *it);
+bool jak_carbon_array_it_signed_value(bool *is_null_in, jak_i64 *value, jak_carbon_array_it *it);
+bool jak_carbon_array_it_unsigned_value(bool *is_null_in, jak_u64 *value, jak_carbon_array_it *it);
+const char *jak_carbon_array_it_string_value(jak_u64 *strlen, jak_carbon_array_it *it);
+bool jak_carbon_array_it_binary_value(struct jak_carbon_binary *out, jak_carbon_array_it *it);
+jak_carbon_array_it *jak_carbon_array_it_array_value(jak_carbon_array_it *it_in);
+struct jak_carbon_object_it *jak_carbon_array_it_object_value(jak_carbon_array_it *it_in);
+struct jak_carbon_column_it *jak_carbon_array_it_column_value(jak_carbon_array_it *it_in);
 
 /**
  * Inserts a new element at the current position of the iterator.
  */
-bool carbon_array_it_insert_begin(jak_carbon_insert *inserter, struct jak_carbon_array_it *it);
-
-bool carbon_array_it_insert_end(jak_carbon_insert *inserter);
-
-bool carbon_array_it_remove(struct jak_carbon_array_it *it);
-
-
-//bool carbon_array_it_update_in_place_u8(struct jak_carbon_array_it *it, jak_u8 value);
+bool jak_carbon_array_it_insert_begin(jak_carbon_insert *inserter, jak_carbon_array_it *it);
+bool jak_carbon_array_it_insert_end(jak_carbon_insert *inserter);
+bool jak_carbon_array_it_remove(jak_carbon_array_it *it);
 
 JAK_END_DECL
 

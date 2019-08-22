@@ -25,7 +25,7 @@
 #define try_array_update(type_match, in_place_update_fn, insert_fn)                                                    \
 ({                                                                                                                     \
         enum carbon_field_type type_is = 0;                                                                            \
-        carbon_array_it_field_type(&type_is, it);                                                                      \
+        jak_carbon_array_it_field_type(&type_is, it);                                                                      \
         bool status = false;                                                                                           \
         switch (type_is) {                                                                                             \
                 case type_match:                                                                                       \
@@ -33,11 +33,11 @@
                 break;                                                                                                 \
                 default: {                                                                                             \
                         jak_carbon_insert inserter;                                                                 \
-                        carbon_array_it_remove(it);                                                                    \
-                        carbon_array_it_next(it);                                                                      \
-                        carbon_array_it_insert_begin(&inserter, it);                                                   \
+                        jak_carbon_array_it_remove(it);                                                                    \
+                        jak_carbon_array_it_next(it);                                                                      \
+                        jak_carbon_array_it_insert_begin(&inserter, it);                                                   \
                         status = insert_fn(&inserter, value);                                                          \
-                        carbon_array_it_insert_end(&inserter);                                                         \
+                        jak_carbon_array_it_insert_end(&inserter);                                                         \
                 break;                                                                                                 \
                 }                                                                                                      \
         }                                                                                                              \
@@ -45,34 +45,34 @@
 })
 
 #define DEFINE_ARRAY_UPDATE_FUNCTION(type_name, type_match, in_place_update_fn, insert_fn)                             \
-static bool array_update_##type_name(struct jak_carbon_array_it *it, jak_##type_name value)                                       \
+static bool array_update_##type_name(jak_carbon_array_it *it, jak_##type_name value)                                       \
 {                                                                                                                      \
         return try_array_update(type_match, in_place_update_fn, insert_fn);                                            \
 }
 
-DEFINE_ARRAY_UPDATE_FUNCTION(u8, CARBON_JAK_FIELD_TYPE_NUMBER_U8, carbon_array_it_update_in_place_u8, carbon_insert_u8)
+DEFINE_ARRAY_UPDATE_FUNCTION(u8, CARBON_JAK_FIELD_TYPE_NUMBER_U8, jak_carbon_array_it_update_in_place_u8, carbon_insert_u8)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(u16, CARBON_JAK_FIELD_TYPE_NUMBER_U16, carbon_array_it_update_in_place_u16,
+DEFINE_ARRAY_UPDATE_FUNCTION(u16, CARBON_JAK_FIELD_TYPE_NUMBER_U16, jak_carbon_array_it_update_in_place_u16,
                              carbon_insert_u16)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(u32, CARBON_JAK_FIELD_TYPE_NUMBER_U32, carbon_array_it_update_in_place_u32,
+DEFINE_ARRAY_UPDATE_FUNCTION(u32, CARBON_JAK_FIELD_TYPE_NUMBER_U32, jak_carbon_array_it_update_in_place_u32,
                              carbon_insert_u32)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(u64, CARBON_JAK_FIELD_TYPE_NUMBER_U64, carbon_array_it_update_in_place_u64,
+DEFINE_ARRAY_UPDATE_FUNCTION(u64, CARBON_JAK_FIELD_TYPE_NUMBER_U64, jak_carbon_array_it_update_in_place_u64,
                              carbon_insert_u64)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(i8, CARBON_JAK_FIELD_TYPE_NUMBER_I8, carbon_array_it_update_in_place_i8, carbon_insert_i8)
+DEFINE_ARRAY_UPDATE_FUNCTION(i8, CARBON_JAK_FIELD_TYPE_NUMBER_I8, jak_carbon_array_it_update_in_place_i8, carbon_insert_i8)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(i16, CARBON_JAK_FIELD_TYPE_NUMBER_I16, carbon_array_it_update_in_place_i16,
+DEFINE_ARRAY_UPDATE_FUNCTION(i16, CARBON_JAK_FIELD_TYPE_NUMBER_I16, jak_carbon_array_it_update_in_place_i16,
                              carbon_insert_i16)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(i32, CARBON_JAK_FIELD_TYPE_NUMBER_I32, carbon_array_it_update_in_place_i32,
+DEFINE_ARRAY_UPDATE_FUNCTION(i32, CARBON_JAK_FIELD_TYPE_NUMBER_I32, jak_carbon_array_it_update_in_place_i32,
                              carbon_insert_i32)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(i64, CARBON_JAK_FIELD_TYPE_NUMBER_I64, carbon_array_it_update_in_place_i64,
+DEFINE_ARRAY_UPDATE_FUNCTION(i64, CARBON_JAK_FIELD_TYPE_NUMBER_I64, jak_carbon_array_it_update_in_place_i64,
                              carbon_insert_i64)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(float, CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT, carbon_array_it_update_in_place_float,
+DEFINE_ARRAY_UPDATE_FUNCTION(float, CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT, jak_carbon_array_it_update_in_place_float,
                              carbon_insert_float)
 
 #define try_update_generic(context, path, array_exec, column_exec)                                                     \
@@ -223,7 +223,7 @@ static bool column_update_float(struct jak_carbon_column_it *it, jak_u32 pos, fl
 }
 
 
-static inline struct jak_carbon_array_it *array_iterator(struct jak_carbon_update *updater)
+static inline jak_carbon_array_it *array_iterator(struct jak_carbon_update *updater)
 {
         return &updater->path_evaluater.result.containers.array.it;
 }
@@ -432,17 +432,17 @@ bool carbon_update_set_column_end(struct jak_carbon_insert_column_state *state_i
 
 bool carbon_update_set_null_compiled(struct jak_carbon_revise *context, const struct jak_carbon_dot_path *path)
 {
-        return try_update(context, path, carbon_array_it_update_in_place_null, carbon_column_it_update_set_null);
+        return try_update(context, path, jak_carbon_array_it_update_in_place_null, carbon_column_it_update_set_null);
 }
 
 bool carbon_update_set_true_compiled(struct jak_carbon_revise *context, const struct jak_carbon_dot_path *path)
 {
-        return try_update(context, path, carbon_array_it_update_in_place_true, carbon_column_it_update_set_true);
+        return try_update(context, path, jak_carbon_array_it_update_in_place_true, carbon_column_it_update_set_true);
 }
 
 bool carbon_update_set_false_compiled(struct jak_carbon_revise *context, const struct jak_carbon_dot_path *path)
 {
-        return try_update(context, path, carbon_array_it_update_in_place_false, carbon_column_it_update_set_false);
+        return try_update(context, path, jak_carbon_array_it_update_in_place_false, carbon_column_it_update_set_false);
 }
 
 bool carbon_update_set_u8_compiled(struct jak_carbon_revise *context, const struct jak_carbon_dot_path *path,

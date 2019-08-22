@@ -46,7 +46,7 @@ static void iterate_objects(jak_archive *archive, const jak_archive_field_sid_t 
         struct jak_error err;
 
         jak_archive_value_vector_get_object_id(&parent_object_id, value_iter);
-        jak_jak_archive_value_vector_get_length(&vector_length, value_iter);
+        jak_archive_value_vector_get_length(&vector_length, value_iter);
         JAK_ASSERT(num_pairs == vector_length);
 
         for (jak_u32 i = 0; i < vector_length; i++) {
@@ -59,7 +59,7 @@ static void iterate_objects(jak_archive *archive, const jak_archive_field_sid_t 
                 //  fprintf(stderr, "XXXX object: ");
                 //  jak_archive_visitor_print_path(stderr, archive, path_stack);
 
-                jak_jak_archive_value_vector_get_object_at(&object, i, value_iter);
+                jak_archive_value_vector_get_object_at(&object, i, value_iter);
                 jak_archive_object_get_object_id(&object_id, &object);
 
                 jak_archive_prop_iter_from_object(&prop_iter, mask, &err, &object);
@@ -180,9 +180,9 @@ static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
 
                 if (iter_type == JAK_PROP_ITER_MODE_OBJECT) {
 
-                        keys = jak_jak_archive_value_vector_get_keys(&num_pairs, &value_iter);
+                        keys = jak_archive_value_vector_get_keys(&num_pairs, &value_iter);
                         jak_archive_value_vector_is_array_type(&is_array, &value_iter);
-                        jak_jak_archive_value_vector_get_basic_type(&type, &value_iter);
+                        jak_archive_value_vector_get_basic_type(&type, &value_iter);
                         jak_archive_value_vector_get_object_id(&this_object_oid, &value_iter);
 
                         for (jak_u32 i = 0; i < num_pairs; i++) {

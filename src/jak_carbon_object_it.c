@@ -262,7 +262,7 @@ bool carbon_object_it_binary_value(struct jak_carbon_binary *out, struct jak_car
         return carbon_int_field_access_binary_value(out, &it->field.value.data, &it->err);
 }
 
-struct jak_carbon_array_it *carbon_object_it_array_value(struct jak_carbon_object_it *it_in)
+jak_carbon_array_it *carbon_object_it_array_value(struct jak_carbon_object_it *it_in)
 {
         return carbon_int_field_access_array_value(&it_in->field.value.data, &it_in->err);
 }

@@ -765,7 +765,7 @@ bool jak_archive_value_vector_get_object_id(jak_global_id_t *id, const jak_archi
 }
 
 const jak_archive_field_sid_t *
-jak_jak_archive_value_vector_get_keys(jak_u32 *num_keys, jak_archive_value_vector *iter)
+jak_archive_value_vector_get_keys(jak_u32 *num_keys, jak_archive_value_vector *iter)
 {
         if (num_keys && iter) {
                 *num_keys = iter->value_max_idx;
@@ -975,7 +975,7 @@ bool jak_archive_value_vector_from_prop_iter(jak_archive_value_vector *value, st
         return true;
 }
 
-bool jak_jak_archive_value_vector_get_basic_type(enum jak_archive_field_type *type,
+bool jak_archive_value_vector_get_basic_type(enum jak_archive_field_type *type,
                                                  const jak_archive_value_vector *value)
 {
         JAK_ERROR_IF_NULL(type)
@@ -992,7 +992,7 @@ bool jak_archive_value_vector_is_array_type(bool *is_array, const jak_archive_va
         return true;
 }
 
-bool jak_jak_archive_value_vector_get_length(jak_u32 *length, const jak_archive_value_vector *value)
+bool jak_archive_value_vector_get_length(jak_u32 *length, const jak_archive_value_vector *value)
 {
         JAK_ERROR_IF_NULL(length)
         JAK_ERROR_IF_NULL(value)
@@ -1010,7 +1010,7 @@ bool jak_archive_value_vector_is_of_objects(bool *is_object, jak_archive_value_v
         return true;
 }
 
-bool jak_jak_archive_value_vector_get_object_at(jak_archive_object *object, jak_u32 idx,
+bool jak_archive_value_vector_get_object_at(jak_archive_object *object, jak_u32 idx,
                                                 jak_archive_value_vector *value)
 {
         JAK_ERROR_IF_NULL(object)

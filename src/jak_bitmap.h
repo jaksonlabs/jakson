@@ -27,33 +27,22 @@
 
 JAK_BEGIN_DECL
 
-struct jak_bitmap {
+typedef struct jak_bitmap {
         struct jak_vector ofType(jak_u64) data;
         jak_u16 num_bits;
-};
+} jak_bitmap;
 
-bool jak_bitmap_create(struct jak_bitmap *bitmap, jak_u16 num_bits);
-
-bool jak_bitmap_cpy(struct jak_bitmap *dst, const struct jak_bitmap *src);
-
-bool jak_bitmap_drop(struct jak_bitmap *map);
-
-size_t jak_bitmap_nbits(const struct jak_bitmap *map);
-
-bool jak_bitmap_clear(struct jak_bitmap *map);
-
-bool jak_bitmap_set(struct jak_bitmap *map, jak_u16 bit_position, bool on);
-
-bool jak_bitmap_get(struct jak_bitmap *map, jak_u16 bit_position);
-
-bool jak_bitmap_lshift(struct jak_bitmap *map);
-
-bool jak_bitmap_print(FILE *file, const struct jak_bitmap *map);
-
-bool jak_bitmap_blocks(jak_u32 **blocks, jak_u32 *num_blocks, const struct jak_bitmap *map);
-
+bool jak_bitmap_create(jak_bitmap *bitmap, jak_u16 num_bits);
+bool jak_bitmap_cpy(jak_bitmap *dst, const jak_bitmap *src);
+bool jak_bitmap_drop(jak_bitmap *map);
+size_t jak_bitmap_nbits(const jak_bitmap *map);
+bool jak_bitmap_clear(jak_bitmap *map);
+bool jak_bitmap_set(jak_bitmap *map, jak_u16 bit_position, bool on);
+bool jak_bitmap_get(jak_bitmap *map, jak_u16 bit_position);
+bool jak_bitmap_lshift(jak_bitmap *map);
+bool jak_bitmap_print(FILE *file, const jak_bitmap *map);
+bool jak_bitmap_blocks(jak_u32 **blocks, jak_u32 *num_blocks, const jak_bitmap *map);
 void jak_bitmap_print_bits(FILE *file, jak_u32 n);
-
 void jak_bitmap_print_bits_in_char(FILE *file, char n);
 
 JAK_END_DECL

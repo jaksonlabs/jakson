@@ -74,7 +74,6 @@
 
 JAK_BEGIN_DECL
 
-struct jak_carbon_array_it; /* forwarded from carbon-array-it.h */
 struct jak_carbon_find; /* forward from carbon-find.h */
 
 typedef jak_u32 listener_handle_t;
@@ -109,7 +108,7 @@ typedef struct jak_carbon_new {
         struct jak_error err;
         jak_carbon original;
         struct jak_carbon_revise revision_context;
-        struct jak_carbon_array_it *content_it;
+        jak_carbon_array_it *content_it;
         jak_carbon_insert *inserter;
         /* options shrink or compact (or both) documents, see
          * CARBON_KEEP, CARBON_SHRINK, CARBON_COMPACT, and CARBON_OPTIMIZE  */
@@ -237,8 +236,8 @@ const char *jak_carbon_to_json_extended(struct jak_string *dst, jak_carbon *doc)
 const char *jak_carbon_to_json_compact(struct jak_string *dst, jak_carbon *doc);
 char *jak_carbon_to_json_extended_dup(jak_carbon *doc);
 char *jak_carbon_to_json_compact_dup(jak_carbon *doc);
-bool jak_carbon_iterator_open(struct jak_carbon_array_it *it, jak_carbon *doc);
-bool jak_carbon_iterator_close(struct jak_carbon_array_it *it);
+bool jak_carbon_iterator_open(jak_carbon_array_it *it, jak_carbon *doc);
+bool jak_carbon_iterator_close(jak_carbon_array_it *it);
 bool jak_carbon_print(FILE *file, jak_carbon_printer_impl_e printer, jak_carbon *doc);
 bool jak_carbon_hexdump_print(FILE *file, jak_carbon *doc);
 

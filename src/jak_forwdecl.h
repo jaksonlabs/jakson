@@ -64,8 +64,12 @@ typedef struct jak_filter_arg jak_filter_arg;
 typedef struct jak_map_args jak_map_args;
 typedef struct jak_gather_scatter_args jak_gather_scatter_args;
 
+typedef struct jak_bitmap jak_bitmap;
+
 typedef struct jak_carbon jak_carbon;
 typedef struct jak_carbon_insert jak_carbon_insert;
 typedef struct jak_carbon_new jak_carbon_new;
+typedef struct jak_field_access jak_field_access;
+typedef struct jak_carbon_array_it jak_carbon_array_it;
 
 #endif

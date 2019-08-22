@@ -25,7 +25,7 @@
 #include <jak_carbon_commit.h>
 #include <jak_carbon_object_it.h>
 
-static bool internal_pack_array(struct jak_carbon_array_it *it);
+static bool internal_pack_array(jak_carbon_array_it *it);
 
 static bool internal_pack_object(struct jak_carbon_object_it *it);
 
@@ -160,19 +160,19 @@ bool carbon_revise_key_set_string(struct jak_carbon_revise *context, const char 
         }
 }
 
-bool carbon_revise_iterator_open(struct jak_carbon_array_it *it, struct jak_carbon_revise *context)
+bool carbon_revise_iterator_open(jak_carbon_array_it *it, struct jak_carbon_revise *context)
 {
         JAK_ERROR_IF_NULL(it);
         JAK_ERROR_IF_NULL(context);
         jak_offset_t payload_start = carbon_int_payload_after_header(context->revised_doc);
         error_if(context->revised_doc->memfile.mode != READ_WRITE, &context->original->err, JAK_ERR_INTERNALERR)
-        return carbon_array_it_create(it, &context->revised_doc->memfile, &context->original->err, payload_start);
+        return jak_carbon_array_it_create(it, &context->revised_doc->memfile, &context->original->err, payload_start);
 }
 
-bool carbon_revise_iterator_close(struct jak_carbon_array_it *it)
+bool carbon_revise_iterator_close(jak_carbon_array_it *it)
 {
         JAK_ERROR_IF_NULL(it);
-        return carbon_array_it_drop(it);
+        return jak_carbon_array_it_drop(it);
 }
 
 bool carbon_revise_find_open(struct jak_carbon_find *out, const char *dot_path, struct jak_carbon_revise *context)
@@ -219,8 +219,8 @@ bool carbon_revise_remove(const char *dot_path, struct jak_carbon_revise *contex
                 } else {
                         switch (eval.result.container_type) {
                                 case JAK_CARBON_ARRAY: {
-                                        struct jak_carbon_array_it *it = &eval.result.containers.array.it;
-                                        result = carbon_array_it_remove(it);
+                                        jak_carbon_array_it *it = &eval.result.containers.array.it;
+                                        result = jak_carbon_array_it_remove(it);
                                 }
                                         break;
                                 case JAK_CARBON_COLUMN: {
@@ -244,7 +244,7 @@ bool carbon_revise_remove(const char *dot_path, struct jak_carbon_revise *contex
 bool carbon_revise_pack(struct jak_carbon_revise *context)
 {
         JAK_ERROR_IF_NULL(context);
-        struct jak_carbon_array_it it;
+        jak_carbon_array_it it;
         carbon_revise_iterator_open(&it, context);
         internal_pack_array(&it);
         carbon_revise_iterator_close(&it);
@@ -253,9 +253,9 @@ bool carbon_revise_pack(struct jak_carbon_revise *context)
 
 bool carbon_revise_shrink(struct jak_carbon_revise *context)
 {
-        struct jak_carbon_array_it it;
+        jak_carbon_array_it it;
         carbon_revise_iterator_open(&it, context);
-        carbon_array_it_fast_forward(&it);
+        jak_carbon_array_it_fast_forward(&it);
         if (memfile_remain_size(&it.memfile) > 0) {
                 jak_offset_t first_empty_slot = memfile_tell(&it.memfile);
                 JAK_ASSERT(memfile_size(&it.memfile) > first_empty_slot);
@@ -298,16 +298,16 @@ bool carbon_revise_abort(struct jak_carbon_revise *context)
         return true;
 }
 
-static bool internal_pack_array(struct jak_carbon_array_it *it)
+static bool internal_pack_array(jak_carbon_array_it *it)
 {
         JAK_ASSERT(it);
 
         /* shrink this array */
         {
-                struct jak_carbon_array_it this_array_it;
+                jak_carbon_array_it this_array_it;
                 bool is_empty_slot, is_array_end;
 
-                carbon_array_it_copy(&this_array_it, it);
+                jak_carbon_array_it_copy(&this_array_it, it);
                 carbon_int_array_skip_contents(&is_empty_slot, &is_array_end, &this_array_it);
 
                 if (!is_array_end) {
@@ -328,14 +328,14 @@ static bool internal_pack_array(struct jak_carbon_array_it *it)
                         JAK_ASSERT(final == JAK_CARBON_MARKER_ARRAY_END);
                 }
 
-                carbon_array_it_drop(&this_array_it);
+                jak_carbon_array_it_drop(&this_array_it);
         }
 
         /* shrink contained containers */
         {
-                while (carbon_array_it_next(it)) {
+                while (jak_carbon_array_it_next(it)) {
                         enum carbon_field_type type;
-                        carbon_array_it_field_type(&type, it);
+                        jak_carbon_array_it_field_type(&type, it);
                         switch (type) {
                                 case CARBON_JAK_FIELD_TYPE_NULL:
                                 case CARBON_JAK_FIELD_TYPE_TRUE:
@@ -355,8 +355,8 @@ static bool internal_pack_array(struct jak_carbon_array_it *it)
                                         /* nothing to shrink, because there are no padded zeros here */
                                         break;
                                 case CARBON_JAK_FIELD_TYPE_ARRAY: {
-                                        struct jak_carbon_array_it nested_array_it;
-                                        carbon_array_it_create(&nested_array_it, &it->memfile, &it->err,
+                                        jak_carbon_array_it nested_array_it;
+                                        jak_carbon_array_it_create(&nested_array_it, &it->memfile, &it->err,
                                                                it->field_access.nested_array_it->payload_start -
                                                                sizeof(jak_u8));
                                         internal_pack_array(&nested_array_it);
@@ -364,7 +364,7 @@ static bool internal_pack_array(struct jak_carbon_array_it *it)
                                                    JAK_CARBON_MARKER_ARRAY_END);
                                         memfile_skip(&nested_array_it.memfile, sizeof(char));
                                         memfile_seek(&it->memfile, memfile_tell(&nested_array_it.memfile));
-                                        carbon_array_it_drop(&nested_array_it);
+                                        jak_carbon_array_it_drop(&nested_array_it);
                                 }
                                         break;
                                 case CARBON_JAK_FIELD_TYPE_COLUMN_U8:
@@ -463,8 +463,8 @@ static bool internal_pack_object(struct jak_carbon_object_it *it)
                                         /* nothing to shrink, because there are no padded zeros here */
                                         break;
                                 case CARBON_JAK_FIELD_TYPE_ARRAY: {
-                                        struct jak_carbon_array_it nested_array_it;
-                                        carbon_array_it_create(&nested_array_it, &it->memfile, &it->err,
+                                        jak_carbon_array_it nested_array_it;
+                                        jak_carbon_array_it_create(&nested_array_it, &it->memfile, &it->err,
                                                                it->field.value.data.nested_array_it->payload_start -
                                                                sizeof(jak_u8));
                                         internal_pack_array(&nested_array_it);
@@ -472,7 +472,7 @@ static bool internal_pack_object(struct jak_carbon_object_it *it)
                                                    JAK_CARBON_MARKER_ARRAY_END);
                                         memfile_skip(&nested_array_it.memfile, sizeof(char));
                                         memfile_seek(&it->memfile, memfile_tell(&nested_array_it.memfile));
-                                        carbon_array_it_drop(&nested_array_it);
+                                        jak_carbon_array_it_drop(&nested_array_it);
                                 }
                                         break;
                                 case CARBON_JAK_FIELD_TYPE_COLUMN_U8:

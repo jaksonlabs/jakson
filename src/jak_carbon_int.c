@@ -31,13 +31,13 @@
 
 static void marker_insert(struct jak_memfile *memfile, jak_u8 marker);
 
-static bool array_it_is_slot_occupied(bool *is_empty_slot, bool *is_array_end, struct jak_carbon_array_it *it);
+static bool array_it_is_slot_occupied(bool *is_empty_slot, bool *is_array_end, jak_carbon_array_it *it);
 
 static bool object_it_is_slot_occupied(bool *is_empty_slot, bool *is_object_end, struct jak_carbon_object_it *it);
 
 static bool is_slot_occupied(bool *is_empty_slot, bool *is_array_end, struct jak_memfile *file, jak_u8 end_marker);
 
-static bool array_it_next_no_load(bool *is_empty_slot, bool *is_array_end, struct jak_carbon_array_it *it);
+static bool array_it_next_no_load(bool *is_empty_slot, bool *is_array_end, jak_carbon_array_it *it);
 
 static bool object_it_next_no_load(bool *is_empty_slot, bool *is_array_end, struct jak_carbon_object_it *it);
 
@@ -211,7 +211,7 @@ size_t carbon_int_get_type_value_size(enum carbon_field_type type)
         }
 }
 
-bool carbon_int_array_it_next(bool *is_empty_slot, bool *is_array_end, struct jak_carbon_array_it *it)
+bool carbon_int_array_it_next(bool *is_empty_slot, bool *is_array_end, jak_carbon_array_it *it)
 {
         if (carbon_int_array_it_refresh(is_empty_slot, is_array_end, it)) {
                 carbon_field_skip(&it->memfile);
@@ -281,13 +281,13 @@ bool carbon_int_object_skip_contents(bool *is_empty_slot, bool *is_array_end, st
         return true;
 }
 
-bool carbon_int_array_skip_contents(bool *is_empty_slot, bool *is_array_end, struct jak_carbon_array_it *it)
+bool carbon_int_array_skip_contents(bool *is_empty_slot, bool *is_array_end, jak_carbon_array_it *it)
 {
         while (array_it_next_no_load(is_empty_slot, is_array_end, it)) {}
         return true;
 }
 
-bool carbon_int_array_it_refresh(bool *is_empty_slot, bool *is_array_end, struct jak_carbon_array_it *it)
+bool carbon_int_array_it_refresh(bool *is_empty_slot, bool *is_array_end, jak_carbon_array_it *it)
 {
         JAK_ERROR_IF_NULL(it);
         carbon_int_field_access_drop(&it->field_access);
@@ -300,7 +300,7 @@ bool carbon_int_array_it_refresh(bool *is_empty_slot, bool *is_array_end, struct
         }
 }
 
-bool carbon_int_array_it_field_type_read(struct jak_carbon_array_it *it)
+bool carbon_int_array_it_field_type_read(jak_carbon_array_it *it)
 {
         JAK_ERROR_IF_NULL(it)
         error_if(memfile_remain_size(&it->memfile) < 1, &it->err, JAK_ERR_ILLEGALOP);
@@ -314,7 +314,7 @@ bool carbon_int_array_it_field_type_read(struct jak_carbon_array_it *it)
         return true;
 }
 
-bool carbon_int_field_data_access(struct jak_memfile *file, struct jak_error *err, struct field_access *field_access)
+bool carbon_int_field_data_access(struct jak_memfile *file, struct jak_error *err, jak_field_access *field_access)
 {
         memfile_save_position(file);
         memfile_skip(file, sizeof(media_type_t));
@@ -368,7 +368,7 @@ bool carbon_int_field_data_access(struct jak_memfile *file, struct jak_error *er
                 case CARBON_JAK_FIELD_TYPE_ARRAY:
                         carbon_int_field_access_create(field_access);
                         field_access->nested_array_it_is_created = true;
-                        carbon_array_it_create(field_access->nested_array_it, file, err,
+                        jak_carbon_array_it_create(field_access->nested_array_it, file, err,
                                                memfile_tell(file) - sizeof(jak_u8));
                         break;
                 case CARBON_JAK_FIELD_TYPE_COLUMN_U8:
@@ -483,20 +483,20 @@ bool carbon_int_history_has(struct jak_vector ofType(jak_offset_t) *vec)
         return !vec_is_empty(vec);
 }
 
-bool carbon_int_field_access_create(struct field_access *field)
+bool carbon_int_field_access_create(jak_field_access *field)
 {
         field->nested_array_it_is_created = false;
         field->nested_array_it_accessed = false;
         field->nested_object_it_is_created = false;
         field->nested_object_it_accessed = false;
         field->nested_column_it_is_created = false;
-        field->nested_array_it = JAK_MALLOC(sizeof(struct jak_carbon_array_it));
+        field->nested_array_it = JAK_MALLOC(sizeof(jak_carbon_array_it));
         field->nested_object_it = JAK_MALLOC(sizeof(struct jak_carbon_object_it));
         field->nested_column_it = JAK_MALLOC(sizeof(struct jak_carbon_column_it));
         return true;
 }
 
-bool carbon_int_field_access_clone(struct field_access *dst, struct field_access *src)
+bool carbon_int_field_access_clone(jak_field_access *dst, jak_field_access *src)
 {
         JAK_ERROR_IF_NULL(dst)
         JAK_ERROR_IF_NULL(src)
@@ -511,7 +511,7 @@ bool carbon_int_field_access_clone(struct field_access *dst, struct field_access
         dst->nested_object_it_is_created = src->nested_object_it_is_created;
         dst->nested_object_it_accessed = src->nested_object_it_accessed;
         dst->nested_column_it_is_created = src->nested_column_it_is_created;
-        dst->nested_array_it = JAK_MALLOC(sizeof(struct jak_carbon_array_it));
+        dst->nested_array_it = JAK_MALLOC(sizeof(jak_carbon_array_it));
         dst->nested_object_it = JAK_MALLOC(sizeof(struct jak_carbon_object_it));
         dst->nested_column_it = JAK_MALLOC(sizeof(struct jak_carbon_column_it));
 
@@ -520,12 +520,12 @@ bool carbon_int_field_access_clone(struct field_access *dst, struct field_access
         } else if (carbon_int_field_access_column_it_opened(src)) {
                 carbon_column_it_clone(dst->nested_column_it, src->nested_column_it);
         } else if (carbon_int_field_access_array_it_opened(src)) {
-                carbon_array_it_clone(dst->nested_array_it, src->nested_array_it);
+                jak_carbon_array_it_clone(dst->nested_array_it, src->nested_array_it);
         }
         return true;
 }
 
-bool carbon_int_field_access_drop(struct field_access *field)
+bool carbon_int_field_access_drop(jak_field_access *field)
 {
         carbon_int_field_auto_close(field);
         free(field->nested_array_it);
@@ -537,33 +537,33 @@ bool carbon_int_field_access_drop(struct field_access *field)
         return true;
 }
 
-bool carbon_int_field_access_object_it_opened(struct field_access *field)
+bool carbon_int_field_access_object_it_opened(jak_field_access *field)
 {
         JAK_ASSERT(field);
         return field->nested_object_it_is_created && field->nested_object_it != NULL;
 }
 
-bool carbon_int_field_access_array_it_opened(struct field_access *field)
+bool carbon_int_field_access_array_it_opened(jak_field_access *field)
 {
         JAK_ASSERT(field);
         return field->nested_array_it_is_created && field->nested_array_it != NULL;
 }
 
-bool carbon_int_field_access_column_it_opened(struct field_access *field)
+bool carbon_int_field_access_column_it_opened(jak_field_access *field)
 {
         JAK_ASSERT(field);
         return field->nested_column_it_is_created && field->nested_column_it != NULL;
 }
 
-void carbon_int_auto_close_nested_array_it(struct field_access *field)
+void carbon_int_auto_close_nested_array_it(jak_field_access *field)
 {
         if (carbon_int_field_access_array_it_opened(field)) {
-                carbon_array_it_drop(field->nested_array_it);
-                JAK_zero_memory(field->nested_array_it, sizeof(struct jak_carbon_array_it));
+                jak_carbon_array_it_drop(field->nested_array_it);
+                JAK_zero_memory(field->nested_array_it, sizeof(jak_carbon_array_it));
         }
 }
 
-void carbon_int_auto_close_nested_object_it(struct field_access *field)
+void carbon_int_auto_close_nested_object_it(jak_field_access *field)
 {
         if (carbon_int_field_access_object_it_opened(field)) {
                 carbon_object_it_drop(field->nested_object_it);
@@ -571,14 +571,14 @@ void carbon_int_auto_close_nested_object_it(struct field_access *field)
         }
 }
 
-void carbon_int_auto_close_nested_column_it(struct field_access *field)
+void carbon_int_auto_close_nested_column_it(jak_field_access *field)
 {
         if (carbon_int_field_access_column_it_opened(field)) {
                 JAK_zero_memory(field->nested_column_it, sizeof(struct jak_carbon_column_it));
         }
 }
 
-bool carbon_int_field_auto_close(struct field_access *field)
+bool carbon_int_field_auto_close(jak_field_access *field)
 {
         JAK_ERROR_IF_NULL(field)
         if (field->nested_array_it_is_created && !field->nested_array_it_accessed) {
@@ -599,7 +599,7 @@ bool carbon_int_field_auto_close(struct field_access *field)
         return true;
 }
 
-bool carbon_int_field_access_field_type(enum carbon_field_type *type, struct field_access *field)
+bool carbon_int_field_access_field_type(enum carbon_field_type *type, jak_field_access *field)
 {
         JAK_ERROR_IF_NULL(type)
         JAK_ERROR_IF_NULL(field)
@@ -607,7 +607,7 @@ bool carbon_int_field_access_field_type(enum carbon_field_type *type, struct fie
         return true;
 }
 
-bool carbon_int_field_access_u8_value(jak_u8 *value, struct field_access *field, struct jak_error *err)
+bool carbon_int_field_access_u8_value(jak_u8 *value, jak_field_access *field, struct jak_error *err)
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
@@ -616,7 +616,7 @@ bool carbon_int_field_access_u8_value(jak_u8 *value, struct field_access *field,
         return true;
 }
 
-bool carbon_int_field_access_u16_value(jak_u16 *value, struct field_access *field, struct jak_error *err)
+bool carbon_int_field_access_u16_value(jak_u16 *value, jak_field_access *field, struct jak_error *err)
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
@@ -625,7 +625,7 @@ bool carbon_int_field_access_u16_value(jak_u16 *value, struct field_access *fiel
         return true;
 }
 
-bool carbon_int_field_access_u32_value(jak_u32 *value, struct field_access *field, struct jak_error *err)
+bool carbon_int_field_access_u32_value(jak_u32 *value, jak_field_access *field, struct jak_error *err)
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
@@ -634,7 +634,7 @@ bool carbon_int_field_access_u32_value(jak_u32 *value, struct field_access *fiel
         return true;
 }
 
-bool carbon_int_field_access_u64_value(jak_u64 *value, struct field_access *field, struct jak_error *err)
+bool carbon_int_field_access_u64_value(jak_u64 *value, jak_field_access *field, struct jak_error *err)
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
@@ -643,7 +643,7 @@ bool carbon_int_field_access_u64_value(jak_u64 *value, struct field_access *fiel
         return true;
 }
 
-bool carbon_int_field_access_i8_value(jak_i8 *value, struct field_access *field, struct jak_error *err)
+bool carbon_int_field_access_i8_value(jak_i8 *value, jak_field_access *field, struct jak_error *err)
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
@@ -652,7 +652,7 @@ bool carbon_int_field_access_i8_value(jak_i8 *value, struct field_access *field,
         return true;
 }
 
-bool carbon_int_field_access_i16_value(jak_i16 *value, struct field_access *field, struct jak_error *err)
+bool carbon_int_field_access_i16_value(jak_i16 *value, jak_field_access *field, struct jak_error *err)
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
@@ -661,7 +661,7 @@ bool carbon_int_field_access_i16_value(jak_i16 *value, struct field_access *fiel
         return true;
 }
 
-bool carbon_int_field_access_i32_value(jak_i32 *value, struct field_access *field, struct jak_error *err)
+bool carbon_int_field_access_i32_value(jak_i32 *value, jak_field_access *field, struct jak_error *err)
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
@@ -670,7 +670,7 @@ bool carbon_int_field_access_i32_value(jak_i32 *value, struct field_access *fiel
         return true;
 }
 
-bool carbon_int_field_access_i64_value(jak_i64 *value, struct field_access *field, struct jak_error *err)
+bool carbon_int_field_access_i64_value(jak_i64 *value, jak_field_access *field, struct jak_error *err)
 {
         JAK_ERROR_IF_NULL(value)
         JAK_ERROR_IF_NULL(field)
@@ -680,7 +680,7 @@ bool carbon_int_field_access_i64_value(jak_i64 *value, struct field_access *fiel
 }
 
 bool
-carbon_int_field_access_float_value(bool *is_null_in, float *value, struct field_access *field, struct jak_error *err)
+carbon_int_field_access_float_value(bool *is_null_in, float *value, jak_field_access *field, struct jak_error *err)
 {
         JAK_ERROR_IF_NULL(field)
         error_if(field->it_field_type != CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT, err, JAK_ERR_TYPEMISMATCH);
@@ -691,7 +691,7 @@ carbon_int_field_access_float_value(bool *is_null_in, float *value, struct field
         return true;
 }
 
-bool carbon_int_field_access_signed_value(bool *is_null_in, jak_i64 *value, struct field_access *field,
+bool carbon_int_field_access_signed_value(bool *is_null_in, jak_i64 *value, jak_field_access *field,
                                           struct jak_error *err)
 {
         JAK_ERROR_IF_NULL(field)
@@ -730,7 +730,7 @@ bool carbon_int_field_access_signed_value(bool *is_null_in, jak_i64 *value, stru
         return true;
 }
 
-bool carbon_int_field_access_unsigned_value(bool *is_null_in, jak_u64 *value, struct field_access *field,
+bool carbon_int_field_access_unsigned_value(bool *is_null_in, jak_u64 *value, jak_field_access *field,
                                             struct jak_error *err)
 {
         JAK_ERROR_IF_NULL(field)
@@ -769,7 +769,7 @@ bool carbon_int_field_access_unsigned_value(bool *is_null_in, jak_u64 *value, st
         return true;
 }
 
-const char *carbon_int_field_access_string_value(jak_u64 *strlen, struct field_access *field, struct jak_error *err)
+const char *carbon_int_field_access_string_value(jak_u64 *strlen, jak_field_access *field, struct jak_error *err)
 {
         JAK_ERROR_IF_NULL(strlen);
         error_if_and_return(field == NULL, err, JAK_ERR_NULLPTR, NULL);
@@ -779,7 +779,7 @@ const char *carbon_int_field_access_string_value(jak_u64 *strlen, struct field_a
 }
 
 bool
-carbon_int_field_access_binary_value(struct jak_carbon_binary *out, struct field_access *field, struct jak_error *err)
+carbon_int_field_access_binary_value(struct jak_carbon_binary *out, jak_field_access *field, struct jak_error *err)
 {
         JAK_ERROR_IF_NULL(out)
         JAK_ERROR_IF_NULL(field)
@@ -793,7 +793,7 @@ carbon_int_field_access_binary_value(struct jak_carbon_binary *out, struct field
         return true;
 }
 
-struct jak_carbon_array_it *carbon_int_field_access_array_value(struct field_access *field, struct jak_error *err)
+jak_carbon_array_it *carbon_int_field_access_array_value(jak_field_access *field, struct jak_error *err)
 {
         error_print_if(!field, JAK_ERR_NULLPTR);
         error_if(field->it_field_type != CARBON_JAK_FIELD_TYPE_ARRAY, err, JAK_ERR_TYPEMISMATCH);
@@ -801,7 +801,7 @@ struct jak_carbon_array_it *carbon_int_field_access_array_value(struct field_acc
         return field->nested_array_it;
 }
 
-struct jak_carbon_object_it *carbon_int_field_access_object_value(struct field_access *field, struct jak_error *err)
+struct jak_carbon_object_it *carbon_int_field_access_object_value(jak_field_access *field, struct jak_error *err)
 {
         error_print_if(!field, JAK_ERR_NULLPTR);
         error_if(field->it_field_type != CARBON_JAK_FIELD_TYPE_OBJECT, err, JAK_ERR_TYPEMISMATCH);
@@ -809,7 +809,7 @@ struct jak_carbon_object_it *carbon_int_field_access_object_value(struct field_a
         return field->nested_object_it;
 }
 
-struct jak_carbon_column_it *carbon_int_field_access_column_value(struct field_access *field, struct jak_error *err)
+struct jak_carbon_column_it *carbon_int_field_access_column_value(jak_field_access *field, struct jak_error *err)
 {
         error_print_if(!field, JAK_ERR_NULLPTR);
         error_if(field->it_field_type != CARBON_JAK_FIELD_TYPE_COLUMN_U8 &&
@@ -896,13 +896,13 @@ bool carbon_int_field_remove(struct jak_memfile *memfile, struct jak_error *err,
                 }
                         break;
                 case CARBON_JAK_FIELD_TYPE_ARRAY: {
-                        struct jak_carbon_array_it it;
+                        jak_carbon_array_it it;
 
                         jak_offset_t begin_off = memfile_tell(memfile);
-                        carbon_array_it_create(&it, memfile, err, begin_off - sizeof(jak_u8));
-                        carbon_array_it_fast_forward(&it);
-                        jak_offset_t end_off = carbon_array_it_memfilepos(&it);
-                        carbon_array_it_drop(&it);
+                        jak_carbon_array_it_create(&it, memfile, err, begin_off - sizeof(jak_u8));
+                        jak_carbon_array_it_fast_forward(&it);
+                        jak_offset_t end_off = jak_carbon_array_it_memfilepos(&it);
+                        jak_carbon_array_it_drop(&it);
 
                         JAK_ASSERT(begin_off < end_off);
                         rm_nbytes += (end_off - begin_off);
@@ -1505,7 +1505,7 @@ static void marker_insert(struct jak_memfile *memfile, jak_u8 marker)
         memfile_write(memfile, &marker, sizeof(jak_u8));
 }
 
-static bool array_it_is_slot_occupied(bool *is_empty_slot, bool *is_array_end, struct jak_carbon_array_it *it)
+static bool array_it_is_slot_occupied(bool *is_empty_slot, bool *is_array_end, jak_carbon_array_it *it)
 {
         carbon_int_field_auto_close(&it->field_access);
         return is_slot_occupied(is_empty_slot, is_array_end, &it->memfile, JAK_CARBON_MARKER_ARRAY_END);
@@ -1541,7 +1541,7 @@ static bool object_it_next_no_load(bool *is_empty_slot, bool *is_array_end, stru
         }
 }
 
-static bool array_it_next_no_load(bool *is_empty_slot, bool *is_array_end, struct jak_carbon_array_it *it)
+static bool array_it_next_no_load(bool *is_empty_slot, bool *is_array_end, jak_carbon_array_it *it)
 {
         if (array_it_is_slot_occupied(is_empty_slot, is_array_end, it)) {
                 carbon_int_array_it_field_type_read(it);

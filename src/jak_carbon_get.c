@@ -97,11 +97,11 @@ carbon_get_or_default_binary(jak_carbon *doc, const char *path, struct jak_carbo
         return result;
 }
 
-struct jak_carbon_array_it *carbon_get_array_or_null(jak_carbon *doc, const char *path)
+jak_carbon_array_it *carbon_get_array_or_null(jak_carbon *doc, const char *path)
 {
         struct jak_carbon_find find;
         enum carbon_field_type field_type;
-        struct jak_carbon_array_it *result = NULL;
+        jak_carbon_array_it *result = NULL;
 
         if (carbon_find_open(&find, path, doc)) {
                 carbon_find_result_type(&field_type, &find);

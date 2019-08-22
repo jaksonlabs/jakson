@@ -21,7 +21,7 @@
 
 #include <jak_bitmap.h>
 
-bool jak_bitmap_create(struct jak_bitmap *bitmap, jak_u16 num_bits)
+bool jak_bitmap_create(jak_bitmap *bitmap, jak_u16 num_bits)
 {
         JAK_ERROR_IF_NULL(bitmap);
 
@@ -36,24 +36,24 @@ bool jak_bitmap_create(struct jak_bitmap *bitmap, jak_u16 num_bits)
         return true;
 }
 
-bool jak_bitmap_cpy(struct jak_bitmap *dst, const struct jak_bitmap *src)
+bool jak_bitmap_cpy(jak_bitmap *dst, const jak_bitmap *src)
 {
         dst->num_bits = src->num_bits;
         return vec_cpy(&dst->data, &src->data);
 }
 
-bool jak_bitmap_drop(struct jak_bitmap *bitset)
+bool jak_bitmap_drop(jak_bitmap *bitset)
 {
         return vec_drop(&bitset->data);
 }
 
-size_t jak_bitmap_nbits(const struct jak_bitmap *bitset)
+size_t jak_bitmap_nbits(const jak_bitmap *bitset)
 {
         JAK_ERROR_IF_NULL(bitset);
         return bitset->num_bits;
 }
 
-bool jak_bitmap_clear(struct jak_bitmap *bitset)
+bool jak_bitmap_clear(jak_bitmap *bitset)
 {
         JAK_ERROR_IF_NULL(bitset);
         void *data = (void *) vec_data(&bitset->data);
@@ -61,7 +61,7 @@ bool jak_bitmap_clear(struct jak_bitmap *bitset)
         return true;
 }
 
-bool jak_bitmap_set(struct jak_bitmap *bitset, jak_u16 bit_position, bool on)
+bool jak_bitmap_set(jak_bitmap *bitset, jak_u16 bit_position, bool on)
 {
         JAK_ERROR_IF_NULL(bitset)
         size_t block_pos = floor(bit_position / (double) JAK_bit_num_of(jak_u32));
@@ -77,7 +77,7 @@ bool jak_bitmap_set(struct jak_bitmap *bitset, jak_u16 bit_position, bool on)
         return true;
 }
 
-bool jak_bitmap_get(struct jak_bitmap *bitset, jak_u16 bit_position)
+bool jak_bitmap_get(jak_bitmap *bitset, jak_u16 bit_position)
 {
         JAK_ERROR_IF_NULL(bitset)
         size_t block_pos = floor(bit_position / (double) JAK_bit_num_of(jak_u32));
@@ -87,7 +87,7 @@ bool jak_bitmap_get(struct jak_bitmap *bitset, jak_u16 bit_position)
         return ((mask & block) >> bit_position) == true;
 }
 
-bool jak_bitmap_lshift(struct jak_bitmap *map)
+bool jak_bitmap_lshift(jak_bitmap *map)
 {
         JAK_ERROR_IF_NULL(map)
         for (int i = map->num_bits - 1; i >= 0; i--) {
@@ -116,7 +116,7 @@ void jak_bitmap_print_bits_in_char(FILE *file, char n)
         }
 }
 
-bool jak_bitmap_blocks(jak_u32 **blocks, jak_u32 *num_blocks, const struct jak_bitmap *map)
+bool jak_bitmap_blocks(jak_u32 **blocks, jak_u32 *num_blocks, const jak_bitmap *map)
 {
         JAK_ERROR_IF_NULL(blocks)
         JAK_ERROR_IF_NULL(num_blocks)
@@ -133,7 +133,7 @@ bool jak_bitmap_blocks(jak_u32 **blocks, jak_u32 *num_blocks, const struct jak_b
         return true;
 }
 
-bool jak_bitmap_print(FILE *file, const struct jak_bitmap *map)
+bool jak_bitmap_print(FILE *file, const jak_bitmap *map)
 {
         JAK_ERROR_IF_NULL(map)
 
