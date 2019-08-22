@@ -74,5 +74,9 @@ typedef struct jak_carbon_array_it jak_carbon_array_it;
 typedef struct jak_carbon_column_it jak_carbon_column_it;
 typedef struct jak_carbon_dot_node jak_carbon_dot_node;
 typedef struct jak_carbon_dot_path jak_carbon_dot_path;
+typedef struct jak_carbon_find jak_carbon_find;
+typedef struct jak_carbon_insert_array_state jak_carbon_insert_array_state;
+typedef struct jak_carbon_insert_object_state jak_carbon_insert_object_state;
+typedef struct jak_carbon_insert_column_state jak_carbon_insert_column_state;
 
 #endif

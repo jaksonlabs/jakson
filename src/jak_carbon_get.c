@@ -21,112 +21,112 @@
 
 #define get_or_default(doc, path, type_name, default_val, test_fn, get_fn)                                             \
 ({                                                                                                                     \
-        struct jak_carbon_find find;                                                                                        \
+        jak_carbon_find find;                                                                                        \
         jak_carbon_field_type_e field_type;                                                                              \
         type_name result = default_val;                                                                                \
                                                                                                                        \
-        if (carbon_find_open(&find, path, doc)) {                                                                       \
-                carbon_find_result_type(&field_type, &find);                                                            \
+        if (jak_carbon_find_open(&find, path, doc)) {                                                                       \
+                jak_carbon_find_result_type(&field_type, &find);                                                            \
                 if (test_fn(field_type)) {                                                                             \
                         get_fn(&result, &find);                                                                        \
                 }                                                                                                      \
         }                                                                                                              \
                                                                                                                        \
-        carbon_find_close(&find);                                                                                       \
+        jak_carbon_find_close(&find);                                                                                       \
         result;                                                                                                        \
 })
 
 
-jak_u64 carbon_get_or_default_unsigned(jak_carbon *doc, const char *path, jak_u64 default_val)
+jak_u64 jak_carbon_get_or_default_unsigned(jak_carbon *doc, const char *path, jak_u64 default_val)
 {
         return get_or_default(doc, path, jak_u64, default_val, jak_carbon_field_type_is_unsigned,
-                              carbon_find_result_unsigned);
+                              jak_carbon_find_result_unsigned);
 }
 
-jak_i64 carbon_get_or_default_signed(jak_carbon *doc, const char *path, jak_i64 default_val)
+jak_i64 jak_carbon_get_or_default_signed(jak_carbon *doc, const char *path, jak_i64 default_val)
 {
         return get_or_default(doc, path, jak_i64, default_val, jak_carbon_field_type_is_signed,
-                              carbon_find_result_signed);
+                              jak_carbon_find_result_signed);
 }
 
-float carbon_get_or_default_float(jak_carbon *doc, const char *path, float default_val)
+float jak_carbon_get_or_default_float(jak_carbon *doc, const char *path, float default_val)
 {
         return get_or_default(doc, path, float, default_val, jak_carbon_field_type_is_floating,
-                              carbon_find_result_float);
+                              jak_carbon_find_result_float);
 }
 
-bool carbon_get_or_default_boolean(jak_carbon *doc, const char *path, bool default_val)
+bool jak_carbon_get_or_default_boolean(jak_carbon *doc, const char *path, bool default_val)
 {
-        return get_or_default(doc, path, bool, default_val, jak_carbon_field_type_is_boolean, carbon_find_result_boolean);
+        return get_or_default(doc, path, bool, default_val, jak_carbon_field_type_is_boolean, jak_carbon_find_result_boolean);
 }
 
 const char *
-carbon_get_or_default_string(jak_u64 *len_out, jak_carbon *doc, const char *path, const char *default_val)
+jak_carbon_get_or_default_string(jak_u64 *len_out, jak_carbon *doc, const char *path, const char *default_val)
 {
-        struct jak_carbon_find find;
+        jak_carbon_find find;
         jak_carbon_field_type_e field_type;
         const char *result = default_val;
         *len_out = result ? strlen(default_val) : 0;
 
-        if (carbon_find_open(&find, path, doc)) {
-                carbon_find_result_type(&field_type, &find);
+        if (jak_carbon_find_open(&find, path, doc)) {
+                jak_carbon_find_result_type(&field_type, &find);
                 if (jak_carbon_field_type_is_string(field_type)) {
-                        result = carbon_find_result_string(len_out, &find);
+                        result = jak_carbon_find_result_string(len_out, &find);
                 }
         }
 
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         return result;
 }
 
 struct jak_carbon_binary *
-carbon_get_or_default_binary(jak_carbon *doc, const char *path, struct jak_carbon_binary *default_val)
+jak_carbon_get_or_default_binary(jak_carbon *doc, const char *path, struct jak_carbon_binary *default_val)
 {
-        struct jak_carbon_find find;
+        jak_carbon_find find;
         jak_carbon_field_type_e field_type;
         struct jak_carbon_binary *result = default_val;
 
-        if (carbon_find_open(&find, path, doc)) {
-                carbon_find_result_type(&field_type, &find);
+        if (jak_carbon_find_open(&find, path, doc)) {
+                jak_carbon_find_result_type(&field_type, &find);
                 if (jak_carbon_field_type_is_binary(field_type)) {
-                        result = carbon_find_result_binary(&find);
+                        result = jak_carbon_find_result_binary(&find);
                 }
         }
 
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         return result;
 }
 
 jak_carbon_array_it *carbon_get_array_or_null(jak_carbon *doc, const char *path)
 {
-        struct jak_carbon_find find;
+        jak_carbon_find find;
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it *result = NULL;
 
-        if (carbon_find_open(&find, path, doc)) {
-                carbon_find_result_type(&field_type, &find);
+        if (jak_carbon_find_open(&find, path, doc)) {
+                jak_carbon_find_result_type(&field_type, &find);
                 if (jak_carbon_field_type_is_array(field_type)) {
-                        result = carbon_find_result_array(&find);
+                        result = jak_carbon_find_result_array(&find);
                 }
         }
 
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         return result;
 }
 
 jak_carbon_column_it *carbon_get_column_or_null(jak_carbon *doc, const char *path)
 {
-        struct jak_carbon_find find;
+        jak_carbon_find find;
         jak_carbon_field_type_e field_type;
         jak_carbon_column_it *result = NULL;
 
-        if (carbon_find_open(&find, path, doc)) {
-                carbon_find_result_type(&field_type, &find);
+        if (jak_carbon_find_open(&find, path, doc)) {
+                jak_carbon_find_result_type(&field_type, &find);
                 if (jak_carbon_field_type_is_column(field_type)) {
-                        result = carbon_find_result_column(&find);
+                        result = jak_carbon_find_result_column(&find);
                 }
         }
 
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         return result;
 }

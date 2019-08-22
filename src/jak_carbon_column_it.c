@@ -94,7 +94,7 @@ bool jak_carbon_column_it_insert(jak_carbon_insert *inserter, jak_carbon_column_
 {
         JAK_ERROR_IF_NULL(inserter)
         JAK_ERROR_IF_NULL(it)
-        return carbon_int_insert_create_for_column(inserter, it);
+        return jak_carbon_int_insert_create_for_column(inserter, it);
 }
 
 bool jak_carbon_column_it_fast_forward(jak_carbon_column_it *it)
@@ -123,7 +123,7 @@ jak_offset_t jak_carbon_column_it_tell(jak_carbon_column_it *it, jak_u32 elem_id
                 memfile_read_uintvar_stream(NULL, &it->memfile);
                 jak_offset_t payload_start = memfile_tell(&it->memfile);
                 error_if(elem_idx >= num_elements, &it->err, JAK_ERR_OUTOFBOUNDS);
-                jak_offset_t ret = payload_start + elem_idx * carbon_int_get_type_value_size(it->type);
+                jak_offset_t ret = payload_start + elem_idx * jak_carbon_int_get_type_value_size(it->type);
                 memfile_restore_position(&it->memfile);
                 return ret;
         } else {
@@ -193,7 +193,7 @@ const void *jak_carbon_column_it_values(jak_carbon_field_type_e *type, jak_u32 *
         JAK_optional_set(type, it->type);
         JAK_optional_set(nvalues, num_elements);
 
-        jak_u32 skip = cap_elements * carbon_int_get_type_value_size(it->type);
+        jak_u32 skip = cap_elements * jak_carbon_int_get_type_value_size(it->type);
         memfile_seek(&it->memfile, payload_start + skip);
 
         return result;
@@ -256,10 +256,10 @@ bool jak_carbon_column_it_remove(jak_carbon_column_it *it, jak_u32 pos)
         error_if(pos >= it->column_num_elements, &it->err, JAK_ERR_OUTOFBOUNDS);
         memfile_save_position(&it->memfile);
 
-        jak_offset_t payload_start = carbon_int_column_get_payload_off(it);
+        jak_offset_t payload_start = jak_carbon_int_column_get_payload_off(it);
 
         /* remove element */
-        size_t elem_size = carbon_int_get_type_value_size(it->type);
+        size_t elem_size = jak_carbon_int_get_type_value_size(it->type);
         memfile_seek(&it->memfile, payload_start + pos * elem_size);
         memfile_inplace_remove(&it->memfile, elem_size);
 
@@ -288,8 +288,8 @@ bool jak_carbon_column_it_update_set_null(jak_carbon_column_it *it, jak_u32 pos)
 
         memfile_save_position(&it->memfile);
 
-        jak_offset_t payload_start = carbon_int_column_get_payload_off(it);
-        memfile_seek(&it->memfile, payload_start + pos * carbon_int_get_type_value_size(it->type));
+        jak_offset_t payload_start = jak_carbon_int_column_get_payload_off(it);
+        memfile_seek(&it->memfile, payload_start + pos * jak_carbon_int_get_type_value_size(it->type));
 
         switch (it->type) {
                 case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
@@ -379,7 +379,7 @@ for (jak_u32 i = 0; i < num_values; i++) {                                      
         if (JAK_LIKELY(null_check(datum) == false)) {                                                                      \
                 insert_func(&array_ins);                                                                               \
         } else {                                                                                                       \
-                carbon_insert_null(&array_ins);                                                                         \
+                jak_carbon_insert_null(&array_ins);                                                                         \
         }                                                                                                              \
 }
 
@@ -389,7 +389,7 @@ for (jak_u32 i = 0; i < num_values; i++) {                                      
         if (JAK_LIKELY(null_check(datum) == false)) {                                                                      \
                 insert_func(&array_ins, datum);                                                                        \
         } else {                                                                                                       \
-                carbon_insert_null(&array_ins);                                                                         \
+                jak_carbon_insert_null(&array_ins);                                                                         \
         }                                                                                                              \
 }
 
@@ -404,8 +404,8 @@ static bool rewrite_column_to_array(jak_carbon_column_it *it)
         memfile_seek_to_end(&it->memfile);
         jak_offset_t array_marker_begin = memfile_tell(&it->memfile);
 
-        size_t capacity = it->column_num_elements * carbon_int_get_type_value_size(it->type);
-        carbon_int_insert_array(&it->memfile, capacity);
+        size_t capacity = it->column_num_elements * jak_carbon_int_get_type_value_size(it->type);
+        jak_carbon_int_insert_array(&it->memfile, capacity);
         jak_carbon_array_it_create(&array_it, &it->memfile, &it->err, array_marker_begin);
         jak_carbon_array_it_insert_begin(&array_ins, &array_it);
 
@@ -415,41 +415,41 @@ static bool rewrite_column_to_array(jak_carbon_column_it *it)
         switch (type) {
                 case JAK_CARBON_FIELD_TYPE_NULL:
                         while (num_values--) {
-                                carbon_insert_null(&array_ins);
+                                jak_carbon_insert_null(&array_ins);
                         }
                         break;
                 case JAK_CARBON_FIELD_TYPE_TRUE:
-                        push_array_element(num_values, data, jak_u8, is_null_boolean, carbon_insert_true);
+                        push_array_element(num_values, data, jak_u8, is_null_boolean, jak_carbon_insert_true);
                         break;
                 case JAK_CARBON_FIELD_TYPE_FALSE:
-                        push_array_element(num_values, data, jak_u8, is_null_boolean, carbon_insert_false);
+                        push_array_element(num_values, data, jak_u8, is_null_boolean, jak_carbon_insert_false);
                         break;
                 case JAK_CARBON_FIELD_TYPE_NUMBER_U8:
-                        push_array_element_wvalue(num_values, data, jak_u8, is_null_u8, carbon_insert_u8);
+                        push_array_element_wvalue(num_values, data, jak_u8, is_null_u8, jak_carbon_insert_u8);
                         break;
                 case JAK_CARBON_FIELD_TYPE_NUMBER_U16:
-                        push_array_element_wvalue(num_values, data, jak_u16, is_null_u16, carbon_insert_u16);
+                        push_array_element_wvalue(num_values, data, jak_u16, is_null_u16, jak_carbon_insert_u16);
                         break;
                 case JAK_CARBON_FIELD_TYPE_NUMBER_U32:
-                        push_array_element_wvalue(num_values, data, jak_u32, is_null_u32, carbon_insert_u32);
+                        push_array_element_wvalue(num_values, data, jak_u32, is_null_u32, jak_carbon_insert_u32);
                         break;
                 case JAK_CARBON_FIELD_TYPE_NUMBER_U64:
-                        push_array_element_wvalue(num_values, data, jak_u64, is_null_u64, carbon_insert_u64);
+                        push_array_element_wvalue(num_values, data, jak_u64, is_null_u64, jak_carbon_insert_u64);
                         break;
                 case JAK_CARBON_FIELD_TYPE_NUMBER_I8:
-                        push_array_element_wvalue(num_values, data, jak_i8, is_null_i8, carbon_insert_i8);
+                        push_array_element_wvalue(num_values, data, jak_i8, is_null_i8, jak_carbon_insert_i8);
                         break;
                 case JAK_CARBON_FIELD_TYPE_NUMBER_I16:
-                        push_array_element_wvalue(num_values, data, jak_i16, is_null_i16, carbon_insert_i16);
+                        push_array_element_wvalue(num_values, data, jak_i16, is_null_i16, jak_carbon_insert_i16);
                         break;
                 case JAK_CARBON_FIELD_TYPE_NUMBER_I32:
-                        push_array_element_wvalue(num_values, data, jak_i32, is_null_i32, carbon_insert_i32);
+                        push_array_element_wvalue(num_values, data, jak_i32, is_null_i32, jak_carbon_insert_i32);
                         break;
                 case JAK_CARBON_FIELD_TYPE_NUMBER_I64:
-                        push_array_element_wvalue(num_values, data, jak_i64, is_null_i64, carbon_insert_i64);
+                        push_array_element_wvalue(num_values, data, jak_i64, is_null_i64, jak_carbon_insert_i64);
                         break;
                 case JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT:
-                        push_array_element_wvalue(num_values, data, float, is_null_float, carbon_insert_float);
+                        push_array_element_wvalue(num_values, data, float, is_null_float, jak_carbon_insert_float);
                         break;
                 default: error(&it->err, JAK_ERR_UNSUPPORTEDTYPE);
                         return false;
@@ -470,8 +470,8 @@ bool jak_carbon_column_it_update_set_true(jak_carbon_column_it *it, jak_u32 pos)
 
         memfile_save_position(&it->memfile);
 
-        jak_offset_t payload_start = carbon_int_column_get_payload_off(it);
-        memfile_seek(&it->memfile, payload_start + pos * carbon_int_get_type_value_size(it->type));
+        jak_offset_t payload_start = jak_carbon_int_column_get_payload_off(it);
+        memfile_seek(&it->memfile, payload_start + pos * jak_carbon_int_get_type_value_size(it->type));
 
         switch (it->type) {
                 case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
@@ -670,7 +670,7 @@ bool jak_carbon_column_it_unlock(jak_carbon_column_it *it)
 bool jak_carbon_column_it_rewind(jak_carbon_column_it *it)
 {
         JAK_ERROR_IF_NULL(it);
-        jak_offset_t playload_start = carbon_int_column_get_payload_off(it);
+        jak_offset_t playload_start = jak_carbon_int_column_get_payload_off(it);
         error_if(playload_start >= memfile_size(&it->memfile), &it->err, JAK_ERR_OUTOFBOUNDS);
         return memfile_seek(&it->memfile, playload_start);
 }

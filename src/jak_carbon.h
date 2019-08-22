@@ -74,10 +74,6 @@
 
 JAK_BEGIN_DECL
 
-struct jak_carbon_find; /* forward from carbon-find.h */
-
-typedef jak_u32 listener_handle_t;
-
 typedef struct jak_carbon {
         struct jak_memblock *memblock;
         struct jak_memfile memfile;

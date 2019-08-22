@@ -97,13 +97,13 @@ static bool update_in_place_constant(jak_carbon_array_it *it, jak_carbon_constan
 
                 switch (constant) {
                         case JAK_CARBON_CONSTANT_TRUE:
-                                carbon_insert_true(&ins);
+                                jak_carbon_insert_true(&ins);
                                 break;
                         case JAK_CARBON_CONSTANT_FALSE:
-                                carbon_insert_false(&ins);
+                                jak_carbon_insert_false(&ins);
                                 break;
                         case JAK_CARBON_CONSTANT_NULL:
-                                carbon_insert_null(&ins);
+                                jak_carbon_insert_null(&ins);
                                 break;
                         default: error(&it->err, JAK_ERR_INTERNALERR);
                                 break;
@@ -159,7 +159,7 @@ bool jak_carbon_array_it_create(jak_carbon_array_it *it, struct jak_memfile *mem
 
         it->payload_start += sizeof(jak_u8);
 
-        carbon_int_field_access_create(&it->field_access);
+        jak_carbon_int_field_access_create(&it->field_access);
 
         jak_carbon_array_it_rewind(it);
 
@@ -183,7 +183,7 @@ bool jak_carbon_array_it_clone(jak_carbon_array_it *dst, jak_carbon_array_it *sr
         dst->mod_size = src->mod_size;
         dst->array_end_reached = src->array_end_reached;
         vec_cpy(&dst->history, &src->history);
-        carbon_int_field_access_clone(&dst->field_access, &src->field_access);
+        jak_carbon_int_field_access_clone(&dst->field_access, &src->field_access);
         dst->field_offset = src->field_offset;
         return true;
 }
@@ -218,8 +218,8 @@ bool jak_carbon_array_it_is_empty(jak_carbon_array_it *it)
 
 bool jak_carbon_array_it_drop(jak_carbon_array_it *it)
 {
-        carbon_int_field_auto_close(&it->field_access);
-        carbon_int_field_access_drop(&it->field_access);
+        jak_carbon_int_field_auto_close(&it->field_access);
+        jak_carbon_int_field_access_drop(&it->field_access);
         vec_drop(&it->history);
         return true;
 }
@@ -248,15 +248,15 @@ bool jak_carbon_array_it_rewind(jak_carbon_array_it *it)
 {
         JAK_ERROR_IF_NULL(it);
         error_if(it->payload_start >= memfile_size(&it->memfile), &it->err, JAK_ERR_OUTOFBOUNDS);
-        carbon_int_history_clear(&it->history);
+        jak_carbon_int_history_clear(&it->history);
         return memfile_seek(&it->memfile, it->payload_start);
 }
 
 static void auto_adjust_pos_after_mod(jak_carbon_array_it *it)
 {
-        if (carbon_int_field_access_object_it_opened(&it->field_access)) {
+        if (jak_carbon_int_field_access_object_it_opened(&it->field_access)) {
                 memfile_skip(&it->memfile, it->field_access.nested_object_it->mod_size);
-        } else if (carbon_int_field_access_array_it_opened(&it->field_access)) {
+        } else if (jak_carbon_int_field_access_array_it_opened(&it->field_access)) {
                 //memfile_skip(&it->memfile, it->field_access.nested_array_it->mod_size);
                 //abort(); // TODO: implement!
         }
@@ -290,8 +290,8 @@ bool jak_carbon_array_it_next(jak_carbon_array_it *it)
         auto_adjust_pos_after_mod(it);
         jak_offset_t last_off = memfile_tell(&it->memfile);
 
-        if (carbon_int_array_it_next(&is_empty_slot, &it->array_end_reached, it)) {
-                carbon_int_history_push(&it->history, last_off);
+        if (jak_carbon_int_array_it_next(&is_empty_slot, &it->array_end_reached, it)) {
+                jak_carbon_int_history_push(&it->history, last_off);
                 return true;
         } else {
                 /* skip remaining zeros until end of array is reached */
@@ -303,7 +303,7 @@ bool jak_carbon_array_it_next(jak_carbon_array_it *it)
                         }
                 }
                 JAK_ASSERT(*memfile_peek(&it->memfile, sizeof(char)) == JAK_CARBON_MARKER_ARRAY_END);
-                carbon_int_field_auto_close(&it->field_access);
+                jak_carbon_int_field_auto_close(&it->field_access);
                 return false;
         }
 }
@@ -311,10 +311,10 @@ bool jak_carbon_array_it_next(jak_carbon_array_it *it)
 bool jak_carbon_array_it_prev(jak_carbon_array_it *it)
 {
         JAK_ERROR_IF_NULL(it);
-        if (carbon_int_history_has(&it->history)) {
-                jak_offset_t prev_off = carbon_int_history_pop(&it->history);
+        if (jak_carbon_int_history_has(&it->history)) {
+                jak_offset_t prev_off = jak_carbon_int_history_pop(&it->history);
                 memfile_seek(&it->memfile, prev_off);
-                return carbon_int_array_it_refresh(NULL, NULL, it);
+                return jak_carbon_int_array_it_refresh(NULL, NULL, it);
         } else {
                 return false;
         }
@@ -339,8 +339,8 @@ bool jak_carbon_int_array_it_offset(jak_offset_t *off, jak_carbon_array_it *it)
 {
         JAK_ERROR_IF_NULL(off)
         JAK_ERROR_IF_NULL(it)
-        if (carbon_int_history_has(&it->history)) {
-                *off = carbon_int_history_peek(&it->history);
+        if (jak_carbon_int_history_has(&it->history)) {
+                *off = jak_carbon_int_history_peek(&it->history);
                 return true;
         }
         return false;
@@ -358,100 +358,100 @@ bool jak_carbon_array_it_fast_forward(jak_carbon_array_it *it)
 
 bool jak_carbon_array_it_field_type(jak_carbon_field_type_e *type, jak_carbon_array_it *it)
 {
-        return carbon_int_field_access_field_type(type, &it->field_access);
+        return jak_carbon_int_field_access_field_type(type, &it->field_access);
 }
 
 bool jak_carbon_array_it_u8_value(jak_u8 *value, jak_carbon_array_it *it)
 {
-        return carbon_int_field_access_u8_value(value, &it->field_access, &it->err);
+        return jak_carbon_int_field_access_u8_value(value, &it->field_access, &it->err);
 }
 
 bool jak_carbon_array_it_u16_value(jak_u16 *value, jak_carbon_array_it *it)
 {
-        return carbon_int_field_access_u16_value(value, &it->field_access, &it->err);
+        return jak_carbon_int_field_access_u16_value(value, &it->field_access, &it->err);
 }
 
 bool jak_carbon_array_it_u32_value(jak_u32 *value, jak_carbon_array_it *it)
 {
-        return carbon_int_field_access_u32_value(value, &it->field_access, &it->err);
+        return jak_carbon_int_field_access_u32_value(value, &it->field_access, &it->err);
 }
 
 bool jak_carbon_array_it_u64_value(jak_u64 *value, jak_carbon_array_it *it)
 {
-        return carbon_int_field_access_u64_value(value, &it->field_access, &it->err);
+        return jak_carbon_int_field_access_u64_value(value, &it->field_access, &it->err);
 }
 
 bool jak_carbon_array_it_i8_value(jak_i8 *value, jak_carbon_array_it *it)
 {
-        return carbon_int_field_access_i8_value(value, &it->field_access, &it->err);
+        return jak_carbon_int_field_access_i8_value(value, &it->field_access, &it->err);
 }
 
 bool jak_carbon_array_it_i16_value(jak_i16 *value, jak_carbon_array_it *it)
 {
-        return carbon_int_field_access_i16_value(value, &it->field_access, &it->err);
+        return jak_carbon_int_field_access_i16_value(value, &it->field_access, &it->err);
 }
 
 bool jak_carbon_array_it_i32_value(jak_i32 *value, jak_carbon_array_it *it)
 {
-        return carbon_int_field_access_i32_value(value, &it->field_access, &it->err);
+        return jak_carbon_int_field_access_i32_value(value, &it->field_access, &it->err);
 }
 
 bool jak_carbon_array_it_i64_value(jak_i64 *value, jak_carbon_array_it *it)
 {
-        return carbon_int_field_access_i64_value(value, &it->field_access, &it->err);
+        return jak_carbon_int_field_access_i64_value(value, &it->field_access, &it->err);
 }
 
 bool jak_carbon_array_it_float_value(bool *is_null_in, float *value, jak_carbon_array_it *it)
 {
-        return carbon_int_field_access_float_value(is_null_in, value, &it->field_access, &it->err);
+        return jak_carbon_int_field_access_float_value(is_null_in, value, &it->field_access, &it->err);
 }
 
 bool jak_carbon_array_it_signed_value(bool *is_null_in, jak_i64 *value, jak_carbon_array_it *it)
 {
-        return carbon_int_field_access_signed_value(is_null_in, value, &it->field_access, &it->err);
+        return jak_carbon_int_field_access_signed_value(is_null_in, value, &it->field_access, &it->err);
 }
 
 bool jak_carbon_array_it_unsigned_value(bool *is_null_in, jak_u64 *value, jak_carbon_array_it *it)
 {
-        return carbon_int_field_access_unsigned_value(is_null_in, value, &it->field_access, &it->err);
+        return jak_carbon_int_field_access_unsigned_value(is_null_in, value, &it->field_access, &it->err);
 }
 
 const char *jak_carbon_array_it_string_value(jak_u64 *strlen, jak_carbon_array_it *it)
 {
-        return carbon_int_field_access_string_value(strlen, &it->field_access, &it->err);
+        return jak_carbon_int_field_access_string_value(strlen, &it->field_access, &it->err);
 }
 
 bool jak_carbon_array_it_binary_value(struct jak_carbon_binary *out, jak_carbon_array_it *it)
 {
-        return carbon_int_field_access_binary_value(out, &it->field_access, &it->err);
+        return jak_carbon_int_field_access_binary_value(out, &it->field_access, &it->err);
 }
 
 jak_carbon_array_it *jak_carbon_array_it_array_value(jak_carbon_array_it *it_in)
 {
-        return carbon_int_field_access_array_value(&it_in->field_access, &it_in->err);
+        return jak_carbon_int_field_access_array_value(&it_in->field_access, &it_in->err);
 }
 
 struct jak_carbon_object_it *jak_carbon_array_it_object_value(jak_carbon_array_it *it_in)
 {
-        return carbon_int_field_access_object_value(&it_in->field_access, &it_in->err);
+        return jak_carbon_int_field_access_object_value(&it_in->field_access, &it_in->err);
 }
 
 jak_carbon_column_it *jak_carbon_array_it_column_value(jak_carbon_array_it *it_in)
 {
-        return carbon_int_field_access_column_value(&it_in->field_access, &it_in->err);
+        return jak_carbon_int_field_access_column_value(&it_in->field_access, &it_in->err);
 }
 
 bool jak_carbon_array_it_insert_begin(jak_carbon_insert *inserter, jak_carbon_array_it *it)
 {
         JAK_ERROR_IF_NULL(inserter)
         JAK_ERROR_IF_NULL(it)
-        return carbon_int_insert_create_for_array(inserter, it);
+        return jak_carbon_int_insert_create_for_array(inserter, it);
 }
 
 bool jak_carbon_array_it_insert_end(jak_carbon_insert *inserter)
 {
         JAK_ERROR_IF_NULL(inserter)
-        return carbon_insert_drop(inserter);
+        return jak_carbon_insert_drop(inserter);
 }
 
 bool jak_carbon_array_it_remove(jak_carbon_array_it *it)
@@ -459,10 +459,10 @@ bool jak_carbon_array_it_remove(jak_carbon_array_it *it)
         JAK_ERROR_IF_NULL(it);
         jak_carbon_field_type_e type;
         if (jak_carbon_array_it_field_type(&type, it)) {
-                jak_offset_t prev_off = carbon_int_history_pop(&it->history);
+                jak_offset_t prev_off = jak_carbon_int_history_pop(&it->history);
                 memfile_seek(&it->memfile, prev_off);
-                if (carbon_int_field_remove(&it->memfile, &it->err, type)) {
-                        carbon_int_array_it_refresh(NULL, NULL, it);
+                if (jak_carbon_int_field_remove(&it->memfile, &it->err, type)) {
+                        jak_carbon_int_array_it_refresh(NULL, NULL, it);
                         return true;
                 } else {
                         return false;

@@ -265,8 +265,8 @@ TEST(CarbonTest, CarbonArrayIteratorInsertNullAfterNew) {
         carbon_revise_iterator_open(&it, &revise);
         carbon_revise_key_generate(NULL, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
-        carbon_insert_null(&inserter);
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_null(&inserter);
+        jak_carbon_insert_drop(&inserter);
         carbon_revise_end(&revise);
         jak_carbon_array_it_drop(&it);
 
@@ -293,18 +293,18 @@ TEST(CarbonTest, CarbonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
                 //jak_carbon_hexdump_print(stdout, &rev_doc);
                 bool status;
                 if (i % 3 == 0) {
-                        status = carbon_insert_null(&inserter);
+                        status = jak_carbon_insert_null(&inserter);
                 } else if (i % 3 == 1) {
-                        status = carbon_insert_true(&inserter);
+                        status = jak_carbon_insert_true(&inserter);
                 } else {
-                        status = carbon_insert_false(&inserter);
+                        status = jak_carbon_insert_false(&inserter);
                 }
                 ASSERT_TRUE(status);
                 // fprintf(stdout, "after:\n");
                 //jak_carbon_hexdump_print(stdout, &rev_doc);
                 // fprintf(stdout, "\n\n");
         }
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -328,14 +328,14 @@ TEST(CarbonTest, CarbonArrayIteratorOverwriteLiterals) {
         jak_carbon_array_it_insert_begin(&inserter, &it);
         for (jak_i32 i = 0; i < 3; i++) {
                 if (i % 3 == 0) {
-                        carbon_insert_null(&inserter);
+                        jak_carbon_insert_null(&inserter);
                 } else if (i % 3 == 1) {
-                        carbon_insert_true(&inserter);
+                        jak_carbon_insert_true(&inserter);
                 } else {
-                        carbon_insert_false(&inserter);
+                        jak_carbon_insert_false(&inserter);
                 }
         }
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -343,9 +343,9 @@ TEST(CarbonTest, CarbonArrayIteratorOverwriteLiterals) {
         carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
         for (jak_i32 i = 0; i < 2; i++) {
-                carbon_insert_true(&inserter);
+                jak_carbon_insert_true(&inserter);
         }
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -369,16 +369,16 @@ TEST(CarbonTest, CarbonArrayIteratorOverwriteLiteralsWithDocOverflow) {
         jak_carbon_array_it_insert_begin(&inserter, &it);
         for (jak_i32 i = 0; i < 22; i++) {
                 if (i % 3 == 0) {
-                        carbon_insert_null(&inserter);
+                        jak_carbon_insert_null(&inserter);
                 } else if (i % 3 == 1) {
-                        carbon_insert_true(&inserter);
+                        jak_carbon_insert_true(&inserter);
                 } else {
-                        carbon_insert_false(&inserter);
+                        jak_carbon_insert_false(&inserter);
                 }
                // fprintf(stdout, "after initial push:\n");
                // //jak_carbon_hexdump_print(stdout, &rev_doc);
         }
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -388,11 +388,11 @@ TEST(CarbonTest, CarbonArrayIteratorOverwriteLiteralsWithDocOverflow) {
         for (jak_i32 i = 0; i < 2; i++) {
                 // fprintf(stdout, "before:\n");
                 //jak_carbon_hexdump_print(stdout, &rev_doc2);
-                carbon_insert_true(&inserter);
+                jak_carbon_insert_true(&inserter);
                 // fprintf(stdout, "after:\n");
                 //jak_carbon_hexdump_print(stdout, &rev_doc2);
         }
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
         // jak_carbon_print(stdout, &rev_doc2);
@@ -414,25 +414,25 @@ TEST(CarbonTest, CarbonArrayIteratorUnsignedAndConstants) {
         jak_carbon_array_it_insert_begin(&inserter, &it);
         for (jak_i32 i = 0; i < 500; i++) {
                 if (i % 6 == 0) {
-                        carbon_insert_null(&inserter);
+                        jak_carbon_insert_null(&inserter);
                 } else if (i % 6 == 1) {
-                        carbon_insert_true(&inserter);
+                        jak_carbon_insert_true(&inserter);
                 } else if (i % 6 == 2) {
-                        carbon_insert_false(&inserter);
+                        jak_carbon_insert_false(&inserter);
                 } else if (i % 6 == 3) {
                         jak_u64 rand_value = random();
-                        carbon_insert_unsigned(&inserter, rand_value);
+                        jak_carbon_insert_unsigned(&inserter, rand_value);
                 } else if (i % 6 == 4) {
                         jak_i64 rand_value = random();
-                        carbon_insert_signed(&inserter, rand_value);
+                        jak_carbon_insert_signed(&inserter, rand_value);
                 } else {
                         float rand_value = (float)rand()/(float)(RAND_MAX/INT32_MAX);
-                        carbon_insert_float(&inserter, rand_value);
+                        jak_carbon_insert_float(&inserter, rand_value);
                 }
                 //fprintf(stdout, "after initial push:\n");
                 ////jak_carbon_hexdump_print(stdout, &rev_doc);
         }
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -462,11 +462,11 @@ TEST(CarbonTest, CarbonArrayIteratorStrings) {
                 buffer[0] = '!';
                 buffer[strlen - 2] = '!';
                 buffer[strlen - 1] = '\0';
-                carbon_insert_string(&inserter, buffer);
+                jak_carbon_insert_string(&inserter, buffer);
                 //fprintf(stdout, "after initial push:\n");
                 ////jak_carbon_hexdump_print(stdout, &rev_doc);
         }
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -488,10 +488,10 @@ TEST(CarbonTest, CarbonInsertMimeTypedBlob) {
         carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
         const char *data = "{ \"Message\": \"Hello World\" }";
-        bool status = carbon_insert_binary(&inserter, data, strlen(data), "json", NULL);
+        bool status = jak_carbon_insert_binary(&inserter, data, strlen(data), "json", NULL);
         ASSERT_TRUE(status);
 
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -513,10 +513,10 @@ TEST(CarbonTest, CarbonInsertCustomTypedBlob) {
         carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
         const char *data = "{ \"Message\": \"Hello World\" }";
-        bool status = carbon_insert_binary(&inserter, data, strlen(data), NULL, "my data");
+        bool status = jak_carbon_insert_binary(&inserter, data, strlen(data), NULL, "my data");
         ASSERT_TRUE(status);
         ////jak_carbon_hexdump_print(stdout, &rev_doc);
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -539,12 +539,12 @@ TEST(CarbonTest, CarbonInsertTwoMimeTypedBlob) {
         jak_carbon_array_it_insert_begin(&inserter, &it);
         const char *data1 = "{ \"Message\": \"Hello World\" }";
         const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
-        bool status = carbon_insert_binary(&inserter, data1, strlen(data1), "json", NULL);
+        bool status = jak_carbon_insert_binary(&inserter, data1, strlen(data1), "json", NULL);
         ASSERT_TRUE(status);
-        status = carbon_insert_binary(&inserter, data2, strlen(data2), "txt", NULL);
+        status = jak_carbon_insert_binary(&inserter, data2, strlen(data2), "txt", NULL);
         ASSERT_TRUE(status);
         ////jak_carbon_hexdump_print(stdout, &rev_doc);
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -568,13 +568,13 @@ TEST(CarbonTest, CarbonInsertMimeTypedBlobsWithOverflow) {
         const char *data1 = "{ \"Message\": \"Hello World\" }";
         const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
         for (jak_u32 i = 0; i < 100; i++) {
-                bool status = carbon_insert_binary(&inserter, i % 2 == 0 ? data1 : data2,
+                bool status = jak_carbon_insert_binary(&inserter, i % 2 == 0 ? data1 : data2,
                         strlen(i % 2 == 0 ? data1 : data2), "json", NULL);
                 ASSERT_TRUE(status);
         }
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -598,12 +598,12 @@ TEST(CarbonTest, CarbonInsertMixedTypedBlobsWithOverflow) {
         const char *data1 = "{ \"Message\": \"Hello World\" }";
         const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
         for (jak_u32 i = 0; i < 100; i++) {
-                bool status = carbon_insert_binary(&inserter, i % 2 == 0 ? data1 : data2,
+                bool status = jak_carbon_insert_binary(&inserter, i % 2 == 0 ? data1 : data2,
                         strlen(i % 2 == 0 ? data1 : data2), i % 3 == 0 ? "json" : NULL, i % 5 == 0 ? "user/app" : NULL);
                 ASSERT_TRUE(status);
         }
         ////jak_carbon_hexdump_print(stdout, &rev_doc);
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -618,7 +618,7 @@ TEST(CarbonTest, CarbonInsertArrayWithNoOverflow) {
         struct jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
-        struct jak_carbon_insert_array_state array_state;
+        jak_carbon_insert_array_state array_state;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
@@ -627,12 +627,12 @@ TEST(CarbonTest, CarbonInsertArrayWithNoOverflow) {
         jak_carbon_array_it_insert_begin(&inserter, &it);
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
-        jak_carbon_insert *nested_inserter = carbon_insert_array_begin(&array_state, &inserter, 10);
+        jak_carbon_insert *nested_inserter = jak_carbon_insert_array_begin(&array_state, &inserter, 10);
         ASSERT_TRUE(nested_inserter != NULL);
-        carbon_insert_array_end(&array_state);
+        jak_carbon_insert_array_end(&array_state);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -648,7 +648,7 @@ TEST(CarbonTest, CarbonInsertValuesIntoNestedArrayWithNoOverflow) {
         struct jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
-        struct jak_carbon_insert_array_state array_state;
+        jak_carbon_insert_array_state array_state;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
@@ -656,24 +656,24 @@ TEST(CarbonTest, CarbonInsertValuesIntoNestedArrayWithNoOverflow) {
         carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
-        carbon_insert_null(&inserter);
-        carbon_insert_null(&inserter);
-        carbon_insert_null(&inserter);
+        jak_carbon_insert_null(&inserter);
+        jak_carbon_insert_null(&inserter);
+        jak_carbon_insert_null(&inserter);
 
-        jak_carbon_insert *nested_inserter = carbon_insert_array_begin(&array_state, &inserter, 10);
+        jak_carbon_insert *nested_inserter = jak_carbon_insert_array_begin(&array_state, &inserter, 10);
         ASSERT_TRUE(nested_inserter != NULL);
-        carbon_insert_true(nested_inserter);
-        carbon_insert_true(nested_inserter);
-        carbon_insert_true(nested_inserter);
-        carbon_insert_array_end(&array_state);
+        jak_carbon_insert_true(nested_inserter);
+        jak_carbon_insert_true(nested_inserter);
+        jak_carbon_insert_true(nested_inserter);
+        jak_carbon_insert_array_end(&array_state);
 
-        carbon_insert_false(&inserter);
-        carbon_insert_false(&inserter);
-        carbon_insert_false(&inserter);
+        jak_carbon_insert_false(&inserter);
+        jak_carbon_insert_false(&inserter);
+        jak_carbon_insert_false(&inserter);
 
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -688,7 +688,7 @@ TEST(CarbonTest, CarbonInsert2xNestedArrayWithNoOverflow) {
         struct jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
-        struct jak_carbon_insert_array_state array_state_l1, array_state_l2;
+        jak_carbon_insert_array_state array_state_l1, array_state_l2;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
@@ -696,32 +696,32 @@ TEST(CarbonTest, CarbonInsert2xNestedArrayWithNoOverflow) {
         carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
-        carbon_insert_null(&inserter);
-        carbon_insert_null(&inserter);
-        carbon_insert_null(&inserter);
+        jak_carbon_insert_null(&inserter);
+        jak_carbon_insert_null(&inserter);
+        jak_carbon_insert_null(&inserter);
 
-        jak_carbon_insert *nested_inserter_l1 = carbon_insert_array_begin(&array_state_l1, &inserter, 10);
+        jak_carbon_insert *nested_inserter_l1 = jak_carbon_insert_array_begin(&array_state_l1, &inserter, 10);
         ASSERT_TRUE(nested_inserter_l1 != NULL);
-        carbon_insert_true(nested_inserter_l1);
-        carbon_insert_true(nested_inserter_l1);
-        carbon_insert_true(nested_inserter_l1);
+        jak_carbon_insert_true(nested_inserter_l1);
+        jak_carbon_insert_true(nested_inserter_l1);
+        jak_carbon_insert_true(nested_inserter_l1);
 
-        jak_carbon_insert *nested_inserter_l2 = carbon_insert_array_begin(&array_state_l2, nested_inserter_l1, 10);
+        jak_carbon_insert *nested_inserter_l2 = jak_carbon_insert_array_begin(&array_state_l2, nested_inserter_l1, 10);
         ASSERT_TRUE(nested_inserter_l2 != NULL);
-        carbon_insert_true(nested_inserter_l2);
-        carbon_insert_false(nested_inserter_l2);
-        carbon_insert_null(nested_inserter_l2);
-        carbon_insert_array_end(&array_state_l2);
+        jak_carbon_insert_true(nested_inserter_l2);
+        jak_carbon_insert_false(nested_inserter_l2);
+        jak_carbon_insert_null(nested_inserter_l2);
+        jak_carbon_insert_array_end(&array_state_l2);
 
-        carbon_insert_array_end(&array_state_l1);
+        jak_carbon_insert_array_end(&array_state_l1);
 
-        carbon_insert_false(&inserter);
-        carbon_insert_false(&inserter);
-        carbon_insert_false(&inserter);
+        jak_carbon_insert_false(&inserter);
+        jak_carbon_insert_false(&inserter);
+        jak_carbon_insert_false(&inserter);
 
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -736,7 +736,7 @@ TEST(CarbonTest, CarbonInsertXxNestedArrayWithoutOverflow) {
         struct jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
-        struct jak_carbon_insert_array_state array_state_l1;
+        jak_carbon_insert_array_state array_state_l1;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
@@ -744,25 +744,25 @@ TEST(CarbonTest, CarbonInsertXxNestedArrayWithoutOverflow) {
         carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
-        carbon_insert_null(&inserter);
-        carbon_insert_null(&inserter);
-        carbon_insert_null(&inserter);
+        jak_carbon_insert_null(&inserter);
+        jak_carbon_insert_null(&inserter);
+        jak_carbon_insert_null(&inserter);
 
         for (int i = 0; i < 10; i++) {
-                jak_carbon_insert *nested_inserter_l1 = carbon_insert_array_begin(&array_state_l1, &inserter, 10);
+                jak_carbon_insert *nested_inserter_l1 = jak_carbon_insert_array_begin(&array_state_l1, &inserter, 10);
                 ASSERT_TRUE(nested_inserter_l1 != NULL);
-                carbon_insert_true(nested_inserter_l1);
-                carbon_insert_true(nested_inserter_l1);
-                carbon_insert_true(nested_inserter_l1);
-                carbon_insert_array_end(&array_state_l1);
+                jak_carbon_insert_true(nested_inserter_l1);
+                jak_carbon_insert_true(nested_inserter_l1);
+                jak_carbon_insert_true(nested_inserter_l1);
+                jak_carbon_insert_array_end(&array_state_l1);
         }
 
-        carbon_insert_false(&inserter);
-        carbon_insert_false(&inserter);
-        carbon_insert_false(&inserter);
+        jak_carbon_insert_false(&inserter);
+        jak_carbon_insert_false(&inserter);
+        jak_carbon_insert_false(&inserter);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -782,7 +782,7 @@ TEST(CarbonTest, CarbonInsertXxNestedArrayWithOverflow) {
         struct jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
-        struct jak_carbon_insert_array_state array_state_l1;
+        jak_carbon_insert_array_state array_state_l1;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
@@ -793,32 +793,32 @@ TEST(CarbonTest, CarbonInsertXxNestedArrayWithOverflow) {
         //jak_carbon_hexdump_print(stdout, &rev_doc);
         // printf("\n");
 
-        carbon_insert_null(&inserter);
+        jak_carbon_insert_null(&inserter);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
         // printf("\n");
 
-        carbon_insert_null(&inserter);
+        jak_carbon_insert_null(&inserter);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
         // printf("\n");
 
-        carbon_insert_null(&inserter);
+        jak_carbon_insert_null(&inserter);
 
         for (int i = 0; i < 10; i++) {
-                jak_carbon_insert *nested_inserter_l1 = carbon_insert_array_begin(&array_state_l1, &inserter, 1);
+                jak_carbon_insert *nested_inserter_l1 = jak_carbon_insert_array_begin(&array_state_l1, &inserter, 1);
                 ASSERT_TRUE(nested_inserter_l1 != NULL);
-                carbon_insert_true(nested_inserter_l1);
-                carbon_insert_true(nested_inserter_l1);
-                carbon_insert_true(nested_inserter_l1);
-                carbon_insert_array_end(&array_state_l1);
+                jak_carbon_insert_true(nested_inserter_l1);
+                jak_carbon_insert_true(nested_inserter_l1);
+                jak_carbon_insert_true(nested_inserter_l1);
+                jak_carbon_insert_array_end(&array_state_l1);
         }
 
-        carbon_insert_false(&inserter);
-        carbon_insert_false(&inserter);
-        carbon_insert_false(&inserter);
+        jak_carbon_insert_false(&inserter);
+        jak_carbon_insert_false(&inserter);
+        jak_carbon_insert_false(&inserter);
 
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -838,7 +838,7 @@ TEST(CarbonTest, CarbonInsertInsertColumnWithoutOverflow) {
         struct jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
-        struct jak_carbon_insert_column_state column_state;
+        jak_carbon_insert_column_state column_state;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
@@ -846,17 +846,17 @@ TEST(CarbonTest, CarbonInsertInsertColumnWithoutOverflow) {
         carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
-        jak_carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
+        jak_carbon_insert *nested_inserter_l1 = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
         ASSERT_TRUE(nested_inserter_l1 != NULL);
-        carbon_insert_u8(nested_inserter_l1, 1);
-        carbon_insert_u8(nested_inserter_l1, 2);
-        carbon_insert_u8(nested_inserter_l1, 3);
-        carbon_insert_column_end(&column_state);
+        jak_carbon_insert_u8(nested_inserter_l1, 1);
+        jak_carbon_insert_u8(nested_inserter_l1, 2);
+        jak_carbon_insert_u8(nested_inserter_l1, 3);
+        jak_carbon_insert_column_end(&column_state);
 
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -878,7 +878,7 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersWithoutOverflow) {
         struct jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
-        struct jak_carbon_insert_column_state column_state;
+        jak_carbon_insert_column_state column_state;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
@@ -886,15 +886,15 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersWithoutOverflow) {
         carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
-        jak_carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
+        jak_carbon_insert *nested_inserter_l1 = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
 
         ASSERT_TRUE(nested_inserter_l1 != NULL);
-        carbon_insert_u8(nested_inserter_l1, 42);
-        carbon_insert_u8(nested_inserter_l1, 43);
-        carbon_insert_u8(nested_inserter_l1, 44);
-        carbon_insert_column_end(&column_state);
+        jak_carbon_insert_u8(nested_inserter_l1, 42);
+        jak_carbon_insert_u8(nested_inserter_l1, 43);
+        jak_carbon_insert_u8(nested_inserter_l1, 44);
+        jak_carbon_insert_column_end(&column_state);
 
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -916,7 +916,7 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersZeroWithoutOverflow) {
         struct jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
-        struct jak_carbon_insert_column_state column_state;
+        jak_carbon_insert_column_state column_state;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
@@ -924,15 +924,15 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersZeroWithoutOverflow) {
         carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
-        jak_carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
+        jak_carbon_insert *nested_inserter_l1 = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
 
         ASSERT_TRUE(nested_inserter_l1 != NULL);
-        carbon_insert_u8(nested_inserter_l1, 0);
-        carbon_insert_u8(nested_inserter_l1, 0);
-        carbon_insert_u8(nested_inserter_l1, 0);
-        carbon_insert_column_end(&column_state);
+        jak_carbon_insert_u8(nested_inserter_l1, 0);
+        jak_carbon_insert_u8(nested_inserter_l1, 0);
+        jak_carbon_insert_u8(nested_inserter_l1, 0);
+        jak_carbon_insert_column_end(&column_state);
 
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -954,7 +954,7 @@ TEST(CarbonTest, CarbonInsertInsertMultileTypedColumnsWithoutOverflow) {
         struct jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
-        struct jak_carbon_insert_column_state column_state;
+        jak_carbon_insert_column_state column_state;
         jak_carbon_insert *ins;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
@@ -963,79 +963,79 @@ TEST(CarbonTest, CarbonInsertInsertMultileTypedColumnsWithoutOverflow) {
         carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
-        carbon_insert_u8(ins, 1);
-        carbon_insert_u8(ins, 2);
-        carbon_insert_u8(ins, 3);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
+        jak_carbon_insert_u8(ins, 1);
+        jak_carbon_insert_u8(ins, 2);
+        jak_carbon_insert_u8(ins, 3);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_BOOLEAN, 10);
-        carbon_insert_true(ins);
-        carbon_insert_true(ins);
-        carbon_insert_true(ins);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_BOOLEAN, 10);
+        jak_carbon_insert_true(ins);
+        jak_carbon_insert_true(ins);
+        jak_carbon_insert_true(ins);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_BOOLEAN, 10);
-        carbon_insert_false(ins);
-        carbon_insert_false(ins);
-        carbon_insert_false(ins);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_BOOLEAN, 10);
+        jak_carbon_insert_false(ins);
+        jak_carbon_insert_false(ins);
+        jak_carbon_insert_false(ins);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
-        carbon_insert_u8(ins, 1);
-        carbon_insert_u8(ins, 2);
-        carbon_insert_u8(ins, 3);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
+        jak_carbon_insert_u8(ins, 1);
+        jak_carbon_insert_u8(ins, 2);
+        jak_carbon_insert_u8(ins, 3);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U16, 10);
-        carbon_insert_u16(ins, 4);
-        carbon_insert_u16(ins, 5);
-        carbon_insert_u16(ins, 6);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U16, 10);
+        jak_carbon_insert_u16(ins, 4);
+        jak_carbon_insert_u16(ins, 5);
+        jak_carbon_insert_u16(ins, 6);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U32, 10);
-        carbon_insert_u32(ins, 7);
-        carbon_insert_u32(ins, 8);
-        carbon_insert_u32(ins, 9);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U32, 10);
+        jak_carbon_insert_u32(ins, 7);
+        jak_carbon_insert_u32(ins, 8);
+        jak_carbon_insert_u32(ins, 9);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U64, 10);
-        carbon_insert_u64(ins, 10);
-        carbon_insert_u64(ins, 11);
-        carbon_insert_u64(ins, 12);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U64, 10);
+        jak_carbon_insert_u64(ins, 10);
+        jak_carbon_insert_u64(ins, 11);
+        jak_carbon_insert_u64(ins, 12);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I8, 10);
-        carbon_insert_i8(ins, -1);
-        carbon_insert_i8(ins, -2);
-        carbon_insert_i8(ins, -3);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I8, 10);
+        jak_carbon_insert_i8(ins, -1);
+        jak_carbon_insert_i8(ins, -2);
+        jak_carbon_insert_i8(ins, -3);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I16, 10);
-        carbon_insert_i16(ins, -4);
-        carbon_insert_i16(ins, -5);
-        carbon_insert_i16(ins, -6);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I16, 10);
+        jak_carbon_insert_i16(ins, -4);
+        jak_carbon_insert_i16(ins, -5);
+        jak_carbon_insert_i16(ins, -6);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I32, 10);
-        carbon_insert_i32(ins, -7);
-        carbon_insert_i32(ins, -8);
-        carbon_insert_i32(ins, -9);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I32, 10);
+        jak_carbon_insert_i32(ins, -7);
+        jak_carbon_insert_i32(ins, -8);
+        jak_carbon_insert_i32(ins, -9);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I64, 10);
-        carbon_insert_i64(ins, -10);
-        carbon_insert_i64(ins, -11);
-        carbon_insert_i64(ins, -12);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I64, 10);
+        jak_carbon_insert_i64(ins, -10);
+        jak_carbon_insert_i64(ins, -11);
+        jak_carbon_insert_i64(ins, -12);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_FLOAT, 10);
-        carbon_insert_float(ins, 42.0f);
-        carbon_insert_float(ins, 21.0f);
-        carbon_insert_float(ins, 23.4221f);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_FLOAT, 10);
+        jak_carbon_insert_float(ins, 42.0f);
+        jak_carbon_insert_float(ins, 21.0f);
+        jak_carbon_insert_float(ins, 23.4221f);
+        jak_carbon_insert_column_end(&column_state);
 
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -1058,7 +1058,7 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersZeroWithOverflow) {
         struct jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
-        struct jak_carbon_insert_column_state column_state;
+        jak_carbon_insert_column_state column_state;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,16, 1);
 
@@ -1066,15 +1066,15 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersZeroWithOverflow) {
         carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
-        jak_carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 1);
+        jak_carbon_insert *nested_inserter_l1 = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 1);
 
         ASSERT_TRUE(nested_inserter_l1 != NULL);
-        carbon_insert_u8(nested_inserter_l1, 1);
-        carbon_insert_u8(nested_inserter_l1, 2);
-        carbon_insert_u8(nested_inserter_l1, 3);
-        carbon_insert_column_end(&column_state);
+        jak_carbon_insert_u8(nested_inserter_l1, 1);
+        jak_carbon_insert_u8(nested_inserter_l1, 2);
+        jak_carbon_insert_u8(nested_inserter_l1, 3);
+        jak_carbon_insert_column_end(&column_state);
 
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -1098,7 +1098,7 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersWithHighOverflow) {
         struct jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
-        struct jak_carbon_insert_column_state column_state;
+        jak_carbon_insert_column_state column_state;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,16, 1);
 
@@ -1106,18 +1106,18 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersWithHighOverflow) {
         carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
-        jak_carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U32, 1);
+        jak_carbon_insert *nested_inserter_l1 = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U32, 1);
 
         ASSERT_TRUE(nested_inserter_l1 != NULL);
         for (jak_u32 i = 0; i < 100; i++) {
-                carbon_insert_u32(nested_inserter_l1, i);
-                carbon_insert_u32(nested_inserter_l1, i);
-                carbon_insert_u32(nested_inserter_l1, i);
+                jak_carbon_insert_u32(nested_inserter_l1, i);
+                jak_carbon_insert_u32(nested_inserter_l1, i);
+                jak_carbon_insert_u32(nested_inserter_l1, i);
         }
 
-        carbon_insert_column_end(&column_state);
+        jak_carbon_insert_column_end(&column_state);
 
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -1141,7 +1141,7 @@ TEST(CarbonTest, CarbonInsertInsertMultipleColumnsNumbersWithHighOverflow) {
         struct jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
-        struct jak_carbon_insert_column_state column_state;
+        jak_carbon_insert_column_state column_state;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,16, 1);
 
@@ -1150,19 +1150,19 @@ TEST(CarbonTest, CarbonInsertInsertMultipleColumnsNumbersWithHighOverflow) {
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
         for (jak_u32 k = 0; k < 3; k++) {
-                jak_carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U32, 1);
+                jak_carbon_insert *nested_inserter_l1 = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U32, 1);
 
                 ASSERT_TRUE(nested_inserter_l1 != NULL);
                 for (jak_u32 i = 0; i < 4; i++) {
-                        carbon_insert_u32(nested_inserter_l1, 'a' + i);
-                        carbon_insert_u32(nested_inserter_l1, 'a' + i);
-                        carbon_insert_u32(nested_inserter_l1, 'a' + i);
+                        jak_carbon_insert_u32(nested_inserter_l1, 'a' + i);
+                        jak_carbon_insert_u32(nested_inserter_l1, 'a' + i);
+                        jak_carbon_insert_u32(nested_inserter_l1, 'a' + i);
                 }
 
-                carbon_insert_column_end(&column_state);
+                jak_carbon_insert_column_end(&column_state);
         }
 
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -1186,7 +1186,7 @@ TEST(CarbonTest, CarbonInsertNullTest) {
         struct jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
-        struct jak_carbon_insert_column_state column_state;
+        jak_carbon_insert_column_state column_state;
         jak_carbon_insert *ins;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
@@ -1195,79 +1195,79 @@ TEST(CarbonTest, CarbonInsertNullTest) {
         carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
-        carbon_insert_u8(ins, 1);
-        carbon_insert_u8(ins, 2);
-        carbon_insert_u8(ins, 3);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
+        jak_carbon_insert_u8(ins, 1);
+        jak_carbon_insert_u8(ins, 2);
+        jak_carbon_insert_u8(ins, 3);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_BOOLEAN, 10);
-        carbon_insert_true(ins);
-        carbon_insert_true(ins);
-        carbon_insert_true(ins);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_BOOLEAN, 10);
+        jak_carbon_insert_true(ins);
+        jak_carbon_insert_true(ins);
+        jak_carbon_insert_true(ins);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_BOOLEAN, 10);
-        carbon_insert_false(ins);
-        carbon_insert_false(ins);
-        carbon_insert_false(ins);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_BOOLEAN, 10);
+        jak_carbon_insert_false(ins);
+        jak_carbon_insert_false(ins);
+        jak_carbon_insert_false(ins);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
-        carbon_insert_u8(ins, 1);
-        carbon_insert_u8(ins, U8_NULL);
-        carbon_insert_u8(ins, 3);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
+        jak_carbon_insert_u8(ins, 1);
+        jak_carbon_insert_u8(ins, U8_NULL);
+        jak_carbon_insert_u8(ins, 3);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U16, 10);
-        carbon_insert_u16(ins, 4);
-        carbon_insert_u16(ins, U16_NULL);
-        carbon_insert_u16(ins, 6);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U16, 10);
+        jak_carbon_insert_u16(ins, 4);
+        jak_carbon_insert_u16(ins, U16_NULL);
+        jak_carbon_insert_u16(ins, 6);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U32, 10);
-        carbon_insert_u32(ins, 7);
-        carbon_insert_u32(ins, U32_NULL);
-        carbon_insert_u32(ins, 9);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U32, 10);
+        jak_carbon_insert_u32(ins, 7);
+        jak_carbon_insert_u32(ins, U32_NULL);
+        jak_carbon_insert_u32(ins, 9);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U64, 10);
-        carbon_insert_u64(ins, 10);
-        carbon_insert_u64(ins, U64_NULL);
-        carbon_insert_u64(ins, 12);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U64, 10);
+        jak_carbon_insert_u64(ins, 10);
+        jak_carbon_insert_u64(ins, U64_NULL);
+        jak_carbon_insert_u64(ins, 12);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I8, 10);
-        carbon_insert_i8(ins, -1);
-        carbon_insert_i8(ins, I8_NULL);
-        carbon_insert_i8(ins, -3);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I8, 10);
+        jak_carbon_insert_i8(ins, -1);
+        jak_carbon_insert_i8(ins, I8_NULL);
+        jak_carbon_insert_i8(ins, -3);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I16, 10);
-        carbon_insert_i16(ins, -4);
-        carbon_insert_i16(ins, I16_NULL);
-        carbon_insert_i16(ins, -6);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I16, 10);
+        jak_carbon_insert_i16(ins, -4);
+        jak_carbon_insert_i16(ins, I16_NULL);
+        jak_carbon_insert_i16(ins, -6);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I32, 10);
-        carbon_insert_i32(ins, -7);
-        carbon_insert_i32(ins, I32_NULL);
-        carbon_insert_i32(ins, -9);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I32, 10);
+        jak_carbon_insert_i32(ins, -7);
+        jak_carbon_insert_i32(ins, I32_NULL);
+        jak_carbon_insert_i32(ins, -9);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I64, 10);
-        carbon_insert_i64(ins, -10);
-        carbon_insert_i64(ins, I64_NULL);
-        carbon_insert_i64(ins, -12);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I64, 10);
+        jak_carbon_insert_i64(ins, -10);
+        jak_carbon_insert_i64(ins, I64_NULL);
+        jak_carbon_insert_i64(ins, -12);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_FLOAT, 10);
-        carbon_insert_float(ins, 42.0f);
-        carbon_insert_float(ins, FLOAT_NULL);
-        carbon_insert_float(ins, 23.4221f);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_FLOAT, 10);
+        jak_carbon_insert_float(ins, 42.0f);
+        jak_carbon_insert_float(ins, FLOAT_NULL);
+        jak_carbon_insert_float(ins, 23.4221f);
+        jak_carbon_insert_column_end(&column_state);
 
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -1289,7 +1289,7 @@ TEST(CarbonTest, CarbonShrinkColumnListTest) {
         struct jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
-        struct jak_carbon_insert_column_state column_state;
+        jak_carbon_insert_column_state column_state;
         jak_carbon_insert *ins;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
@@ -1298,77 +1298,77 @@ TEST(CarbonTest, CarbonShrinkColumnListTest) {
         carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
-        carbon_insert_u8(ins, 1);
-        carbon_insert_u8(ins, 2);
-        carbon_insert_u8(ins, 3);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
+        jak_carbon_insert_u8(ins, 1);
+        jak_carbon_insert_u8(ins, 2);
+        jak_carbon_insert_u8(ins, 3);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_BOOLEAN, 10);
-        carbon_insert_true(ins);
-        carbon_insert_true(ins);
-        carbon_insert_true(ins);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_BOOLEAN, 10);
+        jak_carbon_insert_true(ins);
+        jak_carbon_insert_true(ins);
+        jak_carbon_insert_true(ins);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_BOOLEAN, 10);
-        carbon_insert_false(ins);
-        carbon_insert_false(ins);
-        carbon_insert_false(ins);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_BOOLEAN, 10);
+        jak_carbon_insert_false(ins);
+        jak_carbon_insert_false(ins);
+        jak_carbon_insert_false(ins);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
-        carbon_insert_u8(ins, 1);
-        carbon_insert_u8(ins, U8_NULL);
-        carbon_insert_u8(ins, 2);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
+        jak_carbon_insert_u8(ins, 1);
+        jak_carbon_insert_u8(ins, U8_NULL);
+        jak_carbon_insert_u8(ins, 2);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U16, 10);
-        carbon_insert_u16(ins, 3);
-        carbon_insert_u16(ins, U16_NULL);
-        carbon_insert_u16(ins, 4);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U16, 10);
+        jak_carbon_insert_u16(ins, 3);
+        jak_carbon_insert_u16(ins, U16_NULL);
+        jak_carbon_insert_u16(ins, 4);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U32, 10);
-        carbon_insert_u32(ins, 5);
-        carbon_insert_u32(ins, U32_NULL);
-        carbon_insert_u32(ins, 6);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U32, 10);
+        jak_carbon_insert_u32(ins, 5);
+        jak_carbon_insert_u32(ins, U32_NULL);
+        jak_carbon_insert_u32(ins, 6);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U64, 10);
-        carbon_insert_u64(ins, 7);
-        carbon_insert_u64(ins, U64_NULL);
-        carbon_insert_u64(ins, 8);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U64, 10);
+        jak_carbon_insert_u64(ins, 7);
+        jak_carbon_insert_u64(ins, U64_NULL);
+        jak_carbon_insert_u64(ins, 8);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I8, 10);
-        carbon_insert_i8(ins, 9);
-        carbon_insert_i8(ins, I8_NULL);
-        carbon_insert_i8(ins, 10);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I8, 10);
+        jak_carbon_insert_i8(ins, 9);
+        jak_carbon_insert_i8(ins, I8_NULL);
+        jak_carbon_insert_i8(ins, 10);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I16, 10);
-        carbon_insert_i16(ins, 11);
-        carbon_insert_i16(ins, I16_NULL);
-        carbon_insert_i16(ins, 12);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I16, 10);
+        jak_carbon_insert_i16(ins, 11);
+        jak_carbon_insert_i16(ins, I16_NULL);
+        jak_carbon_insert_i16(ins, 12);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I32, 10);
-        carbon_insert_i32(ins, 13);
-        carbon_insert_i32(ins, I32_NULL);
-        carbon_insert_i32(ins, 14);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I32, 10);
+        jak_carbon_insert_i32(ins, 13);
+        jak_carbon_insert_i32(ins, I32_NULL);
+        jak_carbon_insert_i32(ins, 14);
+        jak_carbon_insert_column_end(&column_state);
 
-        ins = carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I64, 10);
-        carbon_insert_i64(ins, 15);
-        carbon_insert_i64(ins, I64_NULL);
-        carbon_insert_i64(ins, 16);
-        carbon_insert_column_end(&column_state);
+        ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_I64, 10);
+        jak_carbon_insert_i64(ins, 15);
+        jak_carbon_insert_i64(ins, I64_NULL);
+        jak_carbon_insert_i64(ins, 16);
+        jak_carbon_insert_column_end(&column_state);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
         carbon_revise_shrink(&revise);
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -1390,7 +1390,7 @@ TEST(CarbonTest, CarbonShrinkArrayListTest) {
         struct jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
-        struct jak_carbon_insert_array_state array_state;
+        jak_carbon_insert_array_state array_state;
         jak_carbon_insert *ins;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
@@ -1399,29 +1399,29 @@ TEST(CarbonTest, CarbonShrinkArrayListTest) {
         carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
-        ins = carbon_insert_array_begin(&array_state, &inserter, 10);
-        carbon_insert_u8(ins, 1);
-        carbon_insert_u8(ins, 1);
-        carbon_insert_u8(ins, 1);
-        carbon_insert_array_end(&array_state);
+        ins = jak_carbon_insert_array_begin(&array_state, &inserter, 10);
+        jak_carbon_insert_u8(ins, 1);
+        jak_carbon_insert_u8(ins, 1);
+        jak_carbon_insert_u8(ins, 1);
+        jak_carbon_insert_array_end(&array_state);
 
-        ins = carbon_insert_array_begin(&array_state, &inserter, 10);
-        carbon_insert_u8(ins, 2);
-        carbon_insert_u8(ins, 3);
-        carbon_insert_u8(ins, 4);
-        carbon_insert_array_end(&array_state);
+        ins = jak_carbon_insert_array_begin(&array_state, &inserter, 10);
+        jak_carbon_insert_u8(ins, 2);
+        jak_carbon_insert_u8(ins, 3);
+        jak_carbon_insert_u8(ins, 4);
+        jak_carbon_insert_array_end(&array_state);
 
-        ins = carbon_insert_array_begin(&array_state, &inserter, 10);
-        carbon_insert_u8(ins, 5);
-        carbon_insert_u8(ins, 6);
-        carbon_insert_u8(ins, 7);
-        carbon_insert_array_end(&array_state);
+        ins = jak_carbon_insert_array_begin(&array_state, &inserter, 10);
+        jak_carbon_insert_u8(ins, 5);
+        jak_carbon_insert_u8(ins, 6);
+        jak_carbon_insert_u8(ins, 7);
+        jak_carbon_insert_array_end(&array_state);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
         carbon_revise_shrink(&revise);
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -1443,7 +1443,7 @@ TEST(CarbonTest, CarbonShrinkNestedArrayListTest) {
         struct jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
-        struct jak_carbon_insert_array_state array_state, nested_array_state;
+        jak_carbon_insert_array_state array_state, nested_array_state;
         jak_carbon_insert *ins, *nested_ins;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
@@ -1452,51 +1452,51 @@ TEST(CarbonTest, CarbonShrinkNestedArrayListTest) {
         carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
-        ins = carbon_insert_array_begin(&array_state, &inserter, 10);
-        nested_ins = carbon_insert_array_begin(&nested_array_state, ins, 10);
-        carbon_insert_string(nested_ins, "Hello");
-        carbon_insert_string(nested_ins, "World");
-        carbon_insert_array_end(&nested_array_state);
-        carbon_insert_u8(ins, 1);
-        carbon_insert_u8(ins, 1);
-        carbon_insert_u8(ins, 1);
-        carbon_insert_array_end(&array_state);
+        ins = jak_carbon_insert_array_begin(&array_state, &inserter, 10);
+        nested_ins = jak_carbon_insert_array_begin(&nested_array_state, ins, 10);
+        jak_carbon_insert_string(nested_ins, "Hello");
+        jak_carbon_insert_string(nested_ins, "World");
+        jak_carbon_insert_array_end(&nested_array_state);
+        jak_carbon_insert_u8(ins, 1);
+        jak_carbon_insert_u8(ins, 1);
+        jak_carbon_insert_u8(ins, 1);
+        jak_carbon_insert_array_end(&array_state);
 
-        ins = carbon_insert_array_begin(&array_state, &inserter, 10);
-        carbon_insert_u8(ins, 2);
-        nested_ins = carbon_insert_array_begin(&nested_array_state, ins, 10);
-        carbon_insert_string(nested_ins, "Hello");
-        carbon_insert_string(nested_ins, "World");
-        carbon_insert_array_end(&nested_array_state);
-        carbon_insert_u8(ins, 3);
-        carbon_insert_u8(ins, 4);
-        carbon_insert_array_end(&array_state);
+        ins = jak_carbon_insert_array_begin(&array_state, &inserter, 10);
+        jak_carbon_insert_u8(ins, 2);
+        nested_ins = jak_carbon_insert_array_begin(&nested_array_state, ins, 10);
+        jak_carbon_insert_string(nested_ins, "Hello");
+        jak_carbon_insert_string(nested_ins, "World");
+        jak_carbon_insert_array_end(&nested_array_state);
+        jak_carbon_insert_u8(ins, 3);
+        jak_carbon_insert_u8(ins, 4);
+        jak_carbon_insert_array_end(&array_state);
 
-        ins = carbon_insert_array_begin(&array_state, &inserter, 10);
-        carbon_insert_u8(ins, 5);
-        carbon_insert_u8(ins, 6);
-        nested_ins = carbon_insert_array_begin(&nested_array_state, ins, 10);
-        carbon_insert_string(nested_ins, "Hello");
-        carbon_insert_string(nested_ins, "World");
-        carbon_insert_array_end(&nested_array_state);
-        carbon_insert_u8(ins, 7);
-        carbon_insert_array_end(&array_state);
+        ins = jak_carbon_insert_array_begin(&array_state, &inserter, 10);
+        jak_carbon_insert_u8(ins, 5);
+        jak_carbon_insert_u8(ins, 6);
+        nested_ins = jak_carbon_insert_array_begin(&nested_array_state, ins, 10);
+        jak_carbon_insert_string(nested_ins, "Hello");
+        jak_carbon_insert_string(nested_ins, "World");
+        jak_carbon_insert_array_end(&nested_array_state);
+        jak_carbon_insert_u8(ins, 7);
+        jak_carbon_insert_array_end(&array_state);
 
-        ins = carbon_insert_array_begin(&array_state, &inserter, 10);
-        carbon_insert_u8(ins, 8);
-        carbon_insert_u8(ins, 9);
-        carbon_insert_u8(ins, 10);
-        nested_ins = carbon_insert_array_begin(&nested_array_state, ins, 10);
-        carbon_insert_string(nested_ins, "Hello");
-        carbon_insert_string(nested_ins, "World");
-        carbon_insert_array_end(&nested_array_state);
-        carbon_insert_array_end(&array_state);
+        ins = jak_carbon_insert_array_begin(&array_state, &inserter, 10);
+        jak_carbon_insert_u8(ins, 8);
+        jak_carbon_insert_u8(ins, 9);
+        jak_carbon_insert_u8(ins, 10);
+        nested_ins = jak_carbon_insert_array_begin(&nested_array_state, ins, 10);
+        jak_carbon_insert_string(nested_ins, "Hello");
+        jak_carbon_insert_string(nested_ins, "World");
+        jak_carbon_insert_array_end(&nested_array_state);
+        jak_carbon_insert_array_end(&array_state);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
         carbon_revise_shrink(&revise);
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -1518,8 +1518,8 @@ TEST(CarbonTest, CarbonShrinkNestedArrayListAndColumnListTest) {
         struct jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
-        struct jak_carbon_insert_column_state column_state;
-        struct jak_carbon_insert_array_state array_state, nested_array_state;
+        jak_carbon_insert_column_state column_state;
+        jak_carbon_insert_array_state array_state, nested_array_state;
         jak_carbon_insert *ins, *nested_ins, *column_ins;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
@@ -1528,37 +1528,37 @@ TEST(CarbonTest, CarbonShrinkNestedArrayListAndColumnListTest) {
         carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
-        carbon_insert_u64(&inserter, 4223);
-        ins = carbon_insert_array_begin(&array_state, &inserter, 10);
-                column_ins = carbon_insert_column_begin(&column_state, ins, JAK_CARBON_COLUMN_TYPE_U32, 10);
-                        carbon_insert_u32(column_ins, 'X');
-                        carbon_insert_u32(column_ins, 'Y');
-                        carbon_insert_u32(column_ins, 'Z');
-                carbon_insert_column_end(&column_state);
-                nested_ins = carbon_insert_array_begin(&nested_array_state, ins, 10);
-                        carbon_insert_string(nested_ins, "Hello");
-                        column_ins = carbon_insert_column_begin(&column_state, nested_ins, JAK_CARBON_COLUMN_TYPE_U32, 10);
-                                carbon_insert_u32(column_ins, 'A');
-                                carbon_insert_u32(column_ins, 'B');
-                                carbon_insert_u32(column_ins, 'C');
-                        carbon_insert_column_end(&column_state);
-                        carbon_insert_string(nested_ins, "World");
-                carbon_insert_array_end(&nested_array_state);
-                carbon_insert_u8(ins, 1);
-                carbon_insert_u8(ins, 1);
-                column_ins = carbon_insert_column_begin(&column_state, ins, JAK_CARBON_COLUMN_TYPE_U32, 10);
-                        carbon_insert_u32(column_ins, 23);
-                        carbon_insert_u32(column_ins, 24);
-                        carbon_insert_u32(column_ins, 25);
-                carbon_insert_column_end(&column_state);
-                carbon_insert_u8(ins, 1);
-        carbon_insert_array_end(&array_state);
+        jak_carbon_insert_u64(&inserter, 4223);
+        ins = jak_carbon_insert_array_begin(&array_state, &inserter, 10);
+                column_ins = jak_carbon_insert_column_begin(&column_state, ins, JAK_CARBON_COLUMN_TYPE_U32, 10);
+                        jak_carbon_insert_u32(column_ins, 'X');
+                        jak_carbon_insert_u32(column_ins, 'Y');
+                        jak_carbon_insert_u32(column_ins, 'Z');
+                jak_carbon_insert_column_end(&column_state);
+                nested_ins = jak_carbon_insert_array_begin(&nested_array_state, ins, 10);
+                        jak_carbon_insert_string(nested_ins, "Hello");
+                        column_ins = jak_carbon_insert_column_begin(&column_state, nested_ins, JAK_CARBON_COLUMN_TYPE_U32, 10);
+                                jak_carbon_insert_u32(column_ins, 'A');
+                                jak_carbon_insert_u32(column_ins, 'B');
+                                jak_carbon_insert_u32(column_ins, 'C');
+                        jak_carbon_insert_column_end(&column_state);
+                        jak_carbon_insert_string(nested_ins, "World");
+                jak_carbon_insert_array_end(&nested_array_state);
+                jak_carbon_insert_u8(ins, 1);
+                jak_carbon_insert_u8(ins, 1);
+                column_ins = jak_carbon_insert_column_begin(&column_state, ins, JAK_CARBON_COLUMN_TYPE_U32, 10);
+                        jak_carbon_insert_u32(column_ins, 23);
+                        jak_carbon_insert_u32(column_ins, 24);
+                        jak_carbon_insert_u32(column_ins, 25);
+                jak_carbon_insert_column_end(&column_state);
+                jak_carbon_insert_u8(ins, 1);
+        jak_carbon_insert_array_end(&array_state);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
         carbon_revise_shrink(&revise);
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -1692,7 +1692,7 @@ TEST(CarbonTest, CarbonFind) {
         struct jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert ins;
-        struct jak_carbon_find finder;
+        jak_carbon_find finder;
         jak_u64 result_unsigned;
         jak_carbon_field_type_e type;
         jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
@@ -1701,62 +1701,62 @@ TEST(CarbonTest, CarbonFind) {
 
         carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&ins, &it);
-        carbon_insert_u8(&ins, 'a');
-        carbon_insert_u8(&ins, 'b');
-        carbon_insert_u8(&ins, 'c');
+        jak_carbon_insert_u8(&ins, 'a');
+        jak_carbon_insert_u8(&ins, 'b');
+        jak_carbon_insert_u8(&ins, 'c');
         jak_carbon_array_it_insert_end(&ins);
         carbon_revise_iterator_close(&it);
 
         carbon_revise_end(&revise);
 
         {
-                carbon_find_open(&finder, "0", &rev_doc);
+                jak_carbon_find_open(&finder, "0", &rev_doc);
 
-                ASSERT_TRUE(carbon_find_has_result(&finder));
+                ASSERT_TRUE(jak_carbon_find_has_result(&finder));
 
-                carbon_find_result_type(&type, &finder);
+                jak_carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
 
-                carbon_find_result_unsigned(&result_unsigned, &finder);
+                jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 'a');
 
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1", &rev_doc);
+                jak_carbon_find_open(&finder, "1", &rev_doc);
 
-                ASSERT_TRUE(carbon_find_has_result(&finder));
+                ASSERT_TRUE(jak_carbon_find_has_result(&finder));
 
-                carbon_find_result_type(&type, &finder);
+                jak_carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
 
-                carbon_find_result_unsigned(&result_unsigned, &finder);
+                jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 'b');
 
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "2", &rev_doc);
+                jak_carbon_find_open(&finder, "2", &rev_doc);
 
-                ASSERT_TRUE(carbon_find_has_result(&finder));
+                ASSERT_TRUE(jak_carbon_find_has_result(&finder));
 
-                carbon_find_result_type(&type, &finder);
+                jak_carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
 
-                carbon_find_result_unsigned(&result_unsigned, &finder);
+                jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 'c');
 
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "3", &rev_doc);
+                jak_carbon_find_open(&finder, "3", &rev_doc);
 
-                ASSERT_FALSE(carbon_find_has_result(&finder));
+                ASSERT_FALSE(jak_carbon_find_has_result(&finder));
 
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         // jak_carbon_print(stdout, &rev_doc);
@@ -1769,9 +1769,9 @@ TEST(CarbonTest, CarbonFindTypes) {
         struct jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter, *ins, *nested_ins, *column_ins;
-        struct jak_carbon_insert_column_state column_state;
-        struct jak_carbon_insert_array_state array_state, nested_array_state;
-        struct jak_carbon_find finder;
+        jak_carbon_insert_column_state column_state;
+        jak_carbon_insert_array_state array_state, nested_array_state;
+        jak_carbon_find finder;
         jak_u64 result_unsigned;
         jak_carbon_field_type_e type;
         jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
@@ -1780,31 +1780,31 @@ TEST(CarbonTest, CarbonFindTypes) {
         carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
-        carbon_insert_u64(&inserter, 4223);
-        ins = carbon_insert_array_begin(&array_state, &inserter, 10);
-        column_ins = carbon_insert_column_begin(&column_state, ins, JAK_CARBON_COLUMN_TYPE_U32, 10);
-        carbon_insert_u32(column_ins, 'X');
-        carbon_insert_u32(column_ins, 'Y');
-        carbon_insert_u32(column_ins, 'Z');
-        carbon_insert_column_end(&column_state);
-        nested_ins = carbon_insert_array_begin(&nested_array_state, ins, 10);
-        carbon_insert_string(nested_ins, "Hello");
-        column_ins = carbon_insert_column_begin(&column_state, nested_ins, JAK_CARBON_COLUMN_TYPE_U32, 10);
-        carbon_insert_u32(column_ins, 'A');
-        carbon_insert_u32(column_ins, 'B');
-        carbon_insert_u32(column_ins, 'C');
-        carbon_insert_column_end(&column_state);
-        carbon_insert_string(nested_ins, "World");
-        carbon_insert_array_end(&nested_array_state);
-        carbon_insert_u8(ins, 1);
-        carbon_insert_u8(ins, 1);
-        column_ins = carbon_insert_column_begin(&column_state, ins, JAK_CARBON_COLUMN_TYPE_U32, 10);
-        carbon_insert_u32(column_ins, 23);
-        carbon_insert_u32(column_ins, 24);
-        carbon_insert_u32(column_ins, 25);
-        carbon_insert_column_end(&column_state);
-        carbon_insert_u8(ins, 1);
-        carbon_insert_array_end(&array_state);
+        jak_carbon_insert_u64(&inserter, 4223);
+        ins = jak_carbon_insert_array_begin(&array_state, &inserter, 10);
+        column_ins = jak_carbon_insert_column_begin(&column_state, ins, JAK_CARBON_COLUMN_TYPE_U32, 10);
+        jak_carbon_insert_u32(column_ins, 'X');
+        jak_carbon_insert_u32(column_ins, 'Y');
+        jak_carbon_insert_u32(column_ins, 'Z');
+        jak_carbon_insert_column_end(&column_state);
+        nested_ins = jak_carbon_insert_array_begin(&nested_array_state, ins, 10);
+        jak_carbon_insert_string(nested_ins, "Hello");
+        column_ins = jak_carbon_insert_column_begin(&column_state, nested_ins, JAK_CARBON_COLUMN_TYPE_U32, 10);
+        jak_carbon_insert_u32(column_ins, 'A');
+        jak_carbon_insert_u32(column_ins, 'B');
+        jak_carbon_insert_u32(column_ins, 'C');
+        jak_carbon_insert_column_end(&column_state);
+        jak_carbon_insert_string(nested_ins, "World");
+        jak_carbon_insert_array_end(&nested_array_state);
+        jak_carbon_insert_u8(ins, 1);
+        jak_carbon_insert_u8(ins, 1);
+        column_ins = jak_carbon_insert_column_begin(&column_state, ins, JAK_CARBON_COLUMN_TYPE_U32, 10);
+        jak_carbon_insert_u32(column_ins, 23);
+        jak_carbon_insert_u32(column_ins, 24);
+        jak_carbon_insert_u32(column_ins, 25);
+        jak_carbon_insert_column_end(&column_state);
+        jak_carbon_insert_u8(ins, 1);
+        jak_carbon_insert_array_end(&array_state);
 
         carbon_revise_shrink(&revise);
 
@@ -1812,29 +1812,29 @@ TEST(CarbonTest, CarbonFindTypes) {
         //jak_carbon_print(stdout, &rev_doc);
 
         {
-                carbon_find_open(&finder, "0", &rev_doc);
-                ASSERT_TRUE(carbon_find_has_result(&finder));
-                carbon_find_result_type(&type, &finder);
+                jak_carbon_find_open(&finder, "0", &rev_doc);
+                ASSERT_TRUE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U64);
-                carbon_find_result_unsigned(&result_unsigned, &finder);
+                jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 4223);
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1", &rev_doc);
-                ASSERT_TRUE(carbon_find_has_result(&finder));
-                carbon_find_result_type(&type, &finder);
+                jak_carbon_find_open(&finder, "1", &rev_doc);
+                ASSERT_TRUE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_ARRAY);
-                jak_carbon_array_it *retval = carbon_find_result_array(&finder);
+                jak_carbon_array_it *retval = jak_carbon_find_result_array(&finder);
                 ASSERT_TRUE(retval != NULL);
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.0", &rev_doc);
-                ASSERT_TRUE(carbon_find_has_result(&finder));
-                carbon_find_result_type(&type, &finder);
+                jak_carbon_find_open(&finder, "1.0", &rev_doc);
+                ASSERT_TRUE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_result_type(&type, &finder);
                 ASSERT_TRUE(type == JAK_CARBON_FIELD_TYPE_COLUMN_U8 ||
                         type == JAK_CARBON_FIELD_TYPE_COLUMN_U16 ||
                         type == JAK_CARBON_FIELD_TYPE_COLUMN_U32 ||
@@ -1845,72 +1845,72 @@ TEST(CarbonTest, CarbonFindTypes) {
                         type == JAK_CARBON_FIELD_TYPE_COLUMN_I64 ||
                         type == JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT ||
                         type == JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
-                jak_carbon_column_it *retval = carbon_find_result_column(&finder);
+                jak_carbon_column_it *retval = jak_carbon_find_result_column(&finder);
                 ASSERT_TRUE(retval != NULL);
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.0.0", &rev_doc);
-                ASSERT_TRUE(carbon_find_has_result(&finder));
-                carbon_find_result_type(&type, &finder);
+                jak_carbon_find_open(&finder, "1.0.0", &rev_doc);
+                ASSERT_TRUE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U32);
-                carbon_find_result_unsigned(&result_unsigned, &finder);
+                jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 88);
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.0.1", &rev_doc);
-                ASSERT_TRUE(carbon_find_has_result(&finder));
-                carbon_find_result_type(&type, &finder);
+                jak_carbon_find_open(&finder, "1.0.1", &rev_doc);
+                ASSERT_TRUE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U32);
-                carbon_find_result_unsigned(&result_unsigned, &finder);
+                jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 89);
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.0.2", &rev_doc);
-                ASSERT_TRUE(carbon_find_has_result(&finder));
-                carbon_find_result_type(&type, &finder);
+                jak_carbon_find_open(&finder, "1.0.2", &rev_doc);
+                ASSERT_TRUE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U32);
-                carbon_find_result_unsigned(&result_unsigned, &finder);
+                jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 90);
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.0.3", &rev_doc);
-                ASSERT_FALSE(carbon_find_has_result(&finder));
-                carbon_find_close(&finder);
+                jak_carbon_find_open(&finder, "1.0.3", &rev_doc);
+                ASSERT_FALSE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.1", &rev_doc);
-                ASSERT_TRUE(carbon_find_has_result(&finder));
-                carbon_find_result_type(&type, &finder);
+                jak_carbon_find_open(&finder, "1.1", &rev_doc);
+                ASSERT_TRUE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_ARRAY);
-                jak_carbon_array_it *retval = carbon_find_result_array(&finder);
+                jak_carbon_array_it *retval = jak_carbon_find_result_array(&finder);
                 ASSERT_TRUE(retval != NULL);
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.1.0", &rev_doc);
-                ASSERT_TRUE(carbon_find_has_result(&finder));
-                carbon_find_result_type(&type, &finder);
+                jak_carbon_find_open(&finder, "1.1.0", &rev_doc);
+                ASSERT_TRUE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_STRING);
                 jak_u64 str_len;
-                const char *retval = carbon_find_result_string(&str_len, &finder);
+                const char *retval = jak_carbon_find_result_string(&str_len, &finder);
                 ASSERT_TRUE(strncmp(retval, "Hello", str_len) == 0);
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.1.1", &rev_doc);
-                ASSERT_TRUE(carbon_find_has_result(&finder));
-                carbon_find_result_type(&type, &finder);
+                jak_carbon_find_open(&finder, "1.1.1", &rev_doc);
+                ASSERT_TRUE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_result_type(&type, &finder);
                 ASSERT_TRUE(type == JAK_CARBON_FIELD_TYPE_COLUMN_U8 ||
                         type == JAK_CARBON_FIELD_TYPE_COLUMN_U16 ||
                         type == JAK_CARBON_FIELD_TYPE_COLUMN_U32 ||
@@ -1921,87 +1921,87 @@ TEST(CarbonTest, CarbonFindTypes) {
                         type == JAK_CARBON_FIELD_TYPE_COLUMN_I64 ||
                         type == JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT ||
                         type == JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
-                jak_carbon_column_it *retval = carbon_find_result_column(&finder);
+                jak_carbon_column_it *retval = jak_carbon_find_result_column(&finder);
                 ASSERT_TRUE(retval != NULL);
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.1.1.0", &rev_doc);
-                ASSERT_TRUE(carbon_find_has_result(&finder));
-                carbon_find_result_type(&type, &finder);
+                jak_carbon_find_open(&finder, "1.1.1.0", &rev_doc);
+                ASSERT_TRUE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U32);
-                carbon_find_result_unsigned(&result_unsigned, &finder);
+                jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 65);
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.1.1.1", &rev_doc);
-                ASSERT_TRUE(carbon_find_has_result(&finder));
-                carbon_find_result_type(&type, &finder);
+                jak_carbon_find_open(&finder, "1.1.1.1", &rev_doc);
+                ASSERT_TRUE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U32);
-                carbon_find_result_unsigned(&result_unsigned, &finder);
+                jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 66);
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.1.1.2", &rev_doc);
-                ASSERT_TRUE(carbon_find_has_result(&finder));
-                carbon_find_result_type(&type, &finder);
+                jak_carbon_find_open(&finder, "1.1.1.2", &rev_doc);
+                ASSERT_TRUE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U32);
-                carbon_find_result_unsigned(&result_unsigned, &finder);
+                jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 67);
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.1.1.3", &rev_doc);
-                ASSERT_FALSE(carbon_find_has_result(&finder));
+                jak_carbon_find_open(&finder, "1.1.1.3", &rev_doc);
+                ASSERT_FALSE(jak_carbon_find_has_result(&finder));
         }
 
         {
-                carbon_find_open(&finder, "1.1.2", &rev_doc);
-                ASSERT_TRUE(carbon_find_has_result(&finder));
-                carbon_find_result_type(&type, &finder);
+                jak_carbon_find_open(&finder, "1.1.2", &rev_doc);
+                ASSERT_TRUE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_STRING);
                 jak_u64 str_len;
-                const char *retval = carbon_find_result_string(&str_len, &finder);
+                const char *retval = jak_carbon_find_result_string(&str_len, &finder);
                 ASSERT_TRUE(strncmp(retval, "World", str_len) == 0);
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.1.3", &rev_doc);
-                ASSERT_FALSE(carbon_find_has_result(&finder));
-                carbon_find_close(&finder);
+                jak_carbon_find_open(&finder, "1.1.3", &rev_doc);
+                ASSERT_FALSE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.2", &rev_doc);
-                ASSERT_TRUE(carbon_find_has_result(&finder));
-                carbon_find_result_type(&type, &finder);
+                jak_carbon_find_open(&finder, "1.2", &rev_doc);
+                ASSERT_TRUE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
-                carbon_find_result_unsigned(&result_unsigned, &finder);
+                jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 1);
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.3", &rev_doc);
-                ASSERT_TRUE(carbon_find_has_result(&finder));
-                carbon_find_result_type(&type, &finder);
+                jak_carbon_find_open(&finder, "1.3", &rev_doc);
+                ASSERT_TRUE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
-                carbon_find_result_unsigned(&result_unsigned, &finder);
+                jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 1);
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.4", &rev_doc);
-                ASSERT_TRUE(carbon_find_has_result(&finder));
-                carbon_find_result_type(&type, &finder);
+                jak_carbon_find_open(&finder, "1.4", &rev_doc);
+                ASSERT_TRUE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_result_type(&type, &finder);
                 ASSERT_TRUE(type == JAK_CARBON_FIELD_TYPE_COLUMN_U8 ||
                         type == JAK_CARBON_FIELD_TYPE_COLUMN_U16 ||
                         type == JAK_CARBON_FIELD_TYPE_COLUMN_U32 ||
@@ -2012,64 +2012,64 @@ TEST(CarbonTest, CarbonFindTypes) {
                         type == JAK_CARBON_FIELD_TYPE_COLUMN_I64 ||
                         type == JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT ||
                         type == JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
-                jak_carbon_column_it *retval = carbon_find_result_column(&finder);
+                jak_carbon_column_it *retval = jak_carbon_find_result_column(&finder);
                 ASSERT_TRUE(retval != NULL);
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.4.0", &rev_doc);
-                ASSERT_TRUE(carbon_find_has_result(&finder));
-                carbon_find_result_type(&type, &finder);
+                jak_carbon_find_open(&finder, "1.4.0", &rev_doc);
+                ASSERT_TRUE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U32);
-                carbon_find_result_unsigned(&result_unsigned, &finder);
+                jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 23);
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.4.1", &rev_doc);
-                ASSERT_TRUE(carbon_find_has_result(&finder));
-                carbon_find_result_type(&type, &finder);
+                jak_carbon_find_open(&finder, "1.4.1", &rev_doc);
+                ASSERT_TRUE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U32);
-                carbon_find_result_unsigned(&result_unsigned, &finder);
+                jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 24);
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.4.2", &rev_doc);
-                ASSERT_TRUE(carbon_find_has_result(&finder));
-                carbon_find_result_type(&type, &finder);
+                jak_carbon_find_open(&finder, "1.4.2", &rev_doc);
+                ASSERT_TRUE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U32);
-                carbon_find_result_unsigned(&result_unsigned, &finder);
+                jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 25);
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.4.3", &rev_doc);
-                ASSERT_FALSE(carbon_find_has_result(&finder));
-                carbon_find_close(&finder);
+                jak_carbon_find_open(&finder, "1.4.3", &rev_doc);
+                ASSERT_FALSE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.5", &rev_doc);
-                ASSERT_TRUE(carbon_find_has_result(&finder));
-                carbon_find_result_type(&type, &finder);
+                jak_carbon_find_open(&finder, "1.5", &rev_doc);
+                ASSERT_TRUE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
-                carbon_find_result_unsigned(&result_unsigned, &finder);
+                jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 1);
-                carbon_find_close(&finder);
+                jak_carbon_find_close(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.6", &rev_doc);
-                ASSERT_FALSE(carbon_find_has_result(&finder));
-                carbon_find_close(&finder);
+                jak_carbon_find_open(&finder, "1.6", &rev_doc);
+                ASSERT_FALSE(jak_carbon_find_has_result(&finder));
+                jak_carbon_find_close(&finder);
         }
 
-        carbon_insert_drop(&inserter);
+        jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
         carbon_revise_end(&revise);
 
@@ -2097,7 +2097,7 @@ TEST(CarbonTest, CarbonUpdateU8Simple)
         carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
-        carbon_insert_u8(&inserter, 'X');
+        jak_carbon_insert_u8(&inserter, 'X');
 
         jak_carbon_array_it_insert_end(&inserter);
         carbon_revise_iterator_close(&it);
@@ -2130,8 +2130,8 @@ TEST(CarbonTest, CarbonUpdateU8Simple)
         carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
-        carbon_insert_u8(&inserter, 'A');
-        carbon_insert_u8(&inserter, 'B');
+        jak_carbon_insert_u8(&inserter, 'A');
+        jak_carbon_insert_u8(&inserter, 'B');
         carbon_update_set_u8(&revise, "2", 'C');
 
         jak_carbon_array_it_insert_end(&inserter);
@@ -2191,9 +2191,9 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesSimple)
         carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
-        carbon_insert_u8(&inserter, 1);
-        carbon_insert_i64(&inserter, -42);
-        carbon_insert_float(&inserter, 23);
+        jak_carbon_insert_u8(&inserter, 1);
+        jak_carbon_insert_i64(&inserter, -42);
+        jak_carbon_insert_float(&inserter, 23);
 
         jak_carbon_array_it_insert_end(&inserter);
         carbon_revise_iterator_close(&it);
@@ -2223,9 +2223,9 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesSimple)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        jak_u64 e1 = carbon_get_or_default_unsigned(&rev_doc2, "0", 0);
-        jak_i64 e2 = carbon_get_or_default_signed(&rev_doc2, "1", 0);
-        float e3 = carbon_get_or_default_float(&rev_doc2, "2", NAN);
+        jak_u64 e1 = jak_carbon_get_or_default_unsigned(&rev_doc2, "0", 0);
+        jak_i64 e2 = jak_carbon_get_or_default_signed(&rev_doc2, "1", 0);
+        float e3 = jak_carbon_get_or_default_float(&rev_doc2, "2", NAN);
 
         ASSERT_EQ(e1, 1);
         ASSERT_EQ(e2, 1024);
@@ -2254,7 +2254,7 @@ TEST(CarbonTest, CarbonRemoveConstantsToEmpty)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
-        carbon_insert_null(ins);
+        jak_carbon_insert_null(ins);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -2303,8 +2303,8 @@ TEST(CarbonTest, CarbonRemoveFirstConstants)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
-        carbon_insert_true(ins);
-        carbon_insert_false(ins);
+        jak_carbon_insert_true(ins);
+        jak_carbon_insert_false(ins);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -2356,8 +2356,8 @@ TEST(CarbonTest, CarbonRemoveLastConstants)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
-        carbon_insert_true(ins);
-        carbon_insert_false(ins);
+        jak_carbon_insert_true(ins);
+        jak_carbon_insert_false(ins);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -2408,9 +2408,9 @@ TEST(CarbonTest, CarbonRemoveMiddleConstants)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
-        carbon_insert_true(ins);
-        carbon_insert_null(ins);
-        carbon_insert_false(ins);
+        jak_carbon_insert_true(ins);
+        jak_carbon_insert_null(ins);
+        jak_carbon_insert_false(ins);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -2465,7 +2465,7 @@ TEST(CarbonTest, CarbonRemoveNumberToEmpty)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
-        carbon_insert_u8(ins, 42);
+        jak_carbon_insert_u8(ins, 42);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -2514,8 +2514,8 @@ TEST(CarbonTest, CarbonRemoveFirstNumber)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
-        carbon_insert_u8(ins, 42);
-        carbon_insert_u32(ins, 23);
+        jak_carbon_insert_u8(ins, 42);
+        jak_carbon_insert_u32(ins, 23);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -2567,8 +2567,8 @@ TEST(CarbonTest, CarbonRemoveLastNumber)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
-        carbon_insert_u8(ins, 42);
-        carbon_insert_u32(ins, 23);
+        jak_carbon_insert_u8(ins, 42);
+        jak_carbon_insert_u32(ins, 23);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -2619,9 +2619,9 @@ TEST(CarbonTest, CarbonRemoveMiddleNumber)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
-        carbon_insert_u8(ins, 42);
-        carbon_insert_u16(ins, 21);
-        carbon_insert_u32(ins, 23);
+        jak_carbon_insert_u8(ins, 42);
+        jak_carbon_insert_u16(ins, 21);
+        jak_carbon_insert_u32(ins, 23);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -2677,7 +2677,7 @@ TEST(CarbonTest, CarbonRemoveStringToEmpty)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
-        carbon_insert_string(ins, "Hello");
+        jak_carbon_insert_string(ins, "Hello");
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -2726,8 +2726,8 @@ TEST(CarbonTest, CarbonRemoveFirstString)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
-        carbon_insert_string(ins, "Hello");
-        carbon_insert_string(ins, "World");
+        jak_carbon_insert_string(ins, "Hello");
+        jak_carbon_insert_string(ins, "World");
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -2779,8 +2779,8 @@ TEST(CarbonTest, CarbonRemoveLastString)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
-        carbon_insert_string(ins, "Hello");
-        carbon_insert_string(ins, "World");
+        jak_carbon_insert_string(ins, "Hello");
+        jak_carbon_insert_string(ins, "World");
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -2831,9 +2831,9 @@ TEST(CarbonTest, CarbonRemoveMiddleString)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
-        carbon_insert_string(ins, "Plato");
-        carbon_insert_string(ins, "Kant");
-        carbon_insert_string(ins, "Nietzsche");
+        jak_carbon_insert_string(ins, "Plato");
+        jak_carbon_insert_string(ins, "Kant");
+        jak_carbon_insert_string(ins, "Nietzsche");
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -2893,7 +2893,7 @@ TEST(CarbonTest, CarbonRemoveBinaryToEmpty)
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         const char *data = "This report, by its very length, defends itself against the risk of being read.";
-        carbon_insert_binary(ins, data, strlen(data), "txt", NULL);
+        jak_carbon_insert_binary(ins, data, strlen(data), "txt", NULL);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -2943,10 +2943,10 @@ TEST(CarbonTest, CarbonRemoveFirstBinary)
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
-        carbon_insert_binary(ins, data1, strlen(data1), "txt", NULL);
+        jak_carbon_insert_binary(ins, data1, strlen(data1), "txt", NULL);
 
         const char *data2 = "{\"key\": \"value\"}";
-        carbon_insert_binary(ins, data2, strlen(data2), "json", NULL);
+        jak_carbon_insert_binary(ins, data2, strlen(data2), "json", NULL);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -2999,10 +2999,10 @@ TEST(CarbonTest, CarbonRemoveLastBinary)
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
-        carbon_insert_binary(ins, data1, strlen(data1), "txt", NULL);
+        jak_carbon_insert_binary(ins, data1, strlen(data1), "txt", NULL);
 
         const char *data2 = "{\"key\": \"value\"}";
-        carbon_insert_binary(ins, data2, strlen(data2), "json", NULL);
+        jak_carbon_insert_binary(ins, data2, strlen(data2), "json", NULL);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -3054,13 +3054,13 @@ TEST(CarbonTest, CarbonRemoveMiddleBinary)
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
-        carbon_insert_binary(ins, data1, strlen(data1), "txt", NULL);
+        jak_carbon_insert_binary(ins, data1, strlen(data1), "txt", NULL);
 
         const char *data2 = "{\"key\": \"value\"}";
-        carbon_insert_binary(ins, data2, strlen(data2), "json", NULL);
+        jak_carbon_insert_binary(ins, data2, strlen(data2), "json", NULL);
 
         const char *data3 = "<html><body><p>The quick brown fox jumps over the lazy dog</p></body></html>";
-        carbon_insert_binary(ins, data3, strlen(data3), "html", NULL);
+        jak_carbon_insert_binary(ins, data3, strlen(data3), "html", NULL);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -3126,7 +3126,7 @@ TEST(CarbonTest, CarbonRemoveCustomBinaryToEmpty)
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         const char *data = "ABC";
-        carbon_insert_binary(ins, data, strlen(data), NULL, "123");
+        jak_carbon_insert_binary(ins, data, strlen(data), NULL, "123");
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -3178,10 +3178,10 @@ TEST(CarbonTest, CarbonRemoveFirstCustomBinary)
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
-        carbon_insert_binary(ins, data1, strlen(data1), NULL, "my-fancy-format");
+        jak_carbon_insert_binary(ins, data1, strlen(data1), NULL, "my-fancy-format");
 
         const char *data2 = "{\"key\": \"value\"}";
-        carbon_insert_binary(ins, data2, strlen(data2), NULL, "application/something-json-like");
+        jak_carbon_insert_binary(ins, data2, strlen(data2), NULL, "application/something-json-like");
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -3234,10 +3234,10 @@ TEST(CarbonTest, CarbonRemoveLastCustomBinary)
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
-        carbon_insert_binary(ins, data1, strlen(data1), NULL, "my-fancy-format");
+        jak_carbon_insert_binary(ins, data1, strlen(data1), NULL, "my-fancy-format");
 
         const char *data2 = "{\"key\": \"value\"}";
-        carbon_insert_binary(ins, data2, strlen(data2), NULL, "application/something-json-like");
+        jak_carbon_insert_binary(ins, data2, strlen(data2), NULL, "application/something-json-like");
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -3289,13 +3289,13 @@ TEST(CarbonTest, CarbonRemoveMiddleCustomBinary)
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
         const char *data1 = "This report, by its very length, defends itself against the risk of being read.";
-        carbon_insert_binary(ins, data1, strlen(data1), NULL, "my-fancy-format");
+        jak_carbon_insert_binary(ins, data1, strlen(data1), NULL, "my-fancy-format");
 
         const char *data2 = "{\"key\": \"value\"}";
-        carbon_insert_binary(ins, data2, strlen(data2), NULL, "application/something-json-like");
+        jak_carbon_insert_binary(ins, data2, strlen(data2), NULL, "application/something-json-like");
 
         const char *data3 = "<html><body><p>The quick brown fox jumps over the lazy dog</p></body></html>";
-        carbon_insert_binary(ins, data3, strlen(data3), NULL, "my-other-nonstandard-format");
+        jak_carbon_insert_binary(ins, data3, strlen(data3), NULL, "my-other-nonstandard-format");
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -3353,7 +3353,7 @@ TEST(CarbonTest, CarbonRemoveArrayToEmpty)
         struct jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
-        struct jak_carbon_insert_array_state state;
+        jak_carbon_insert_array_state state;
         jak_carbon_insert *array_ins;
         bool has_next;
         string_create(&sb);
@@ -3361,11 +3361,11 @@ TEST(CarbonTest, CarbonRemoveArrayToEmpty)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
-        array_ins = carbon_insert_array_begin(&state, ins, 10);
-        carbon_insert_u8(array_ins, 1);
-        carbon_insert_u8(array_ins, 2);
-        carbon_insert_u8(array_ins, 3);
-        carbon_insert_array_end(&state);
+        array_ins = jak_carbon_insert_array_begin(&state, ins, 10);
+        jak_carbon_insert_u8(array_ins, 1);
+        jak_carbon_insert_u8(array_ins, 2);
+        jak_carbon_insert_u8(array_ins, 3);
+        jak_carbon_insert_array_end(&state);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -3413,23 +3413,23 @@ TEST(CarbonTest, CarbonRemoveFirstArray)
         bool has_next;
         string_create(&sb);
 
-        struct jak_carbon_insert_array_state state;
+        jak_carbon_insert_array_state state;
         jak_carbon_insert *array_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
-        array_ins = carbon_insert_array_begin(&state, ins, 10);
-        carbon_insert_u8(array_ins, 1);
-        carbon_insert_u8(array_ins, 2);
-        carbon_insert_u8(array_ins, 3);
-        carbon_insert_array_end(&state);
+        array_ins = jak_carbon_insert_array_begin(&state, ins, 10);
+        jak_carbon_insert_u8(array_ins, 1);
+        jak_carbon_insert_u8(array_ins, 2);
+        jak_carbon_insert_u8(array_ins, 3);
+        jak_carbon_insert_array_end(&state);
 
-        array_ins = carbon_insert_array_begin(&state, ins, 10);
-        carbon_insert_u8(array_ins, 4);
-        carbon_insert_u8(array_ins, 5);
-        carbon_insert_u8(array_ins, 6);
-        carbon_insert_array_end(&state);
+        array_ins = jak_carbon_insert_array_begin(&state, ins, 10);
+        jak_carbon_insert_u8(array_ins, 4);
+        jak_carbon_insert_u8(array_ins, 5);
+        jak_carbon_insert_u8(array_ins, 6);
+        jak_carbon_insert_array_end(&state);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -3478,23 +3478,23 @@ TEST(CarbonTest, CarbonRemoveLastArray)
         bool has_next;
         string_create(&sb);
 
-        struct jak_carbon_insert_array_state state;
+        jak_carbon_insert_array_state state;
         jak_carbon_insert *array_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
-        array_ins = carbon_insert_array_begin(&state, ins, 10);
-        carbon_insert_u8(array_ins, 1);
-        carbon_insert_u8(array_ins, 2);
-        carbon_insert_u8(array_ins, 3);
-        carbon_insert_array_end(&state);
+        array_ins = jak_carbon_insert_array_begin(&state, ins, 10);
+        jak_carbon_insert_u8(array_ins, 1);
+        jak_carbon_insert_u8(array_ins, 2);
+        jak_carbon_insert_u8(array_ins, 3);
+        jak_carbon_insert_array_end(&state);
 
-        array_ins = carbon_insert_array_begin(&state, ins, 10);
-        carbon_insert_u8(array_ins, 4);
-        carbon_insert_u8(array_ins, 5);
-        carbon_insert_u8(array_ins, 6);
-        carbon_insert_array_end(&state);
+        array_ins = jak_carbon_insert_array_begin(&state, ins, 10);
+        jak_carbon_insert_u8(array_ins, 4);
+        jak_carbon_insert_u8(array_ins, 5);
+        jak_carbon_insert_u8(array_ins, 6);
+        jak_carbon_insert_array_end(&state);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -3542,29 +3542,29 @@ TEST(CarbonTest, CarbonRemoveMiddleArray)
         bool has_next;
         string_create(&sb);
 
-        struct jak_carbon_insert_array_state state;
+        jak_carbon_insert_array_state state;
         jak_carbon_insert *array_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
-        array_ins = carbon_insert_array_begin(&state, ins, 10);
-        carbon_insert_u8(array_ins, 1);
-        carbon_insert_u8(array_ins, 2);
-        carbon_insert_u8(array_ins, 3);
-        carbon_insert_array_end(&state);
+        array_ins = jak_carbon_insert_array_begin(&state, ins, 10);
+        jak_carbon_insert_u8(array_ins, 1);
+        jak_carbon_insert_u8(array_ins, 2);
+        jak_carbon_insert_u8(array_ins, 3);
+        jak_carbon_insert_array_end(&state);
 
-        array_ins = carbon_insert_array_begin(&state, ins, 10);
-        carbon_insert_u8(array_ins, 4);
-        carbon_insert_u8(array_ins, 5);
-        carbon_insert_u8(array_ins, 6);
-        carbon_insert_array_end(&state);
+        array_ins = jak_carbon_insert_array_begin(&state, ins, 10);
+        jak_carbon_insert_u8(array_ins, 4);
+        jak_carbon_insert_u8(array_ins, 5);
+        jak_carbon_insert_u8(array_ins, 6);
+        jak_carbon_insert_array_end(&state);
 
-        array_ins = carbon_insert_array_begin(&state, ins, 10);
-        carbon_insert_u8(array_ins, 7);
-        carbon_insert_u8(array_ins, 8);
-        carbon_insert_u8(array_ins, 9);
-        carbon_insert_array_end(&state);
+        array_ins = jak_carbon_insert_array_begin(&state, ins, 10);
+        jak_carbon_insert_u8(array_ins, 7);
+        jak_carbon_insert_u8(array_ins, 8);
+        jak_carbon_insert_u8(array_ins, 9);
+        jak_carbon_insert_array_end(&state);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -3618,17 +3618,17 @@ TEST(CarbonTest, CarbonColumnRemoveTest)
         bool status;
         const jak_u16 *values;
 
-        struct jak_carbon_insert_column_state state;
+        jak_carbon_insert_column_state state;
         jak_carbon_insert *array_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
 
-        array_ins = carbon_insert_column_begin(&state, ins, JAK_CARBON_COLUMN_TYPE_U16, 10);
-        carbon_insert_u16(array_ins, 1);
-        carbon_insert_u16(array_ins, 2);
-        carbon_insert_u16(array_ins, 3);
-        carbon_insert_column_end(&state);
+        array_ins = jak_carbon_insert_column_begin(&state, ins, JAK_CARBON_COLUMN_TYPE_U16, 10);
+        jak_carbon_insert_u16(array_ins, 1);
+        jak_carbon_insert_u16(array_ins, 2);
+        jak_carbon_insert_u16(array_ins, 3);
+        jak_carbon_insert_column_end(&state);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -3710,54 +3710,54 @@ TEST(CarbonTest, CarbonRemoveComplexTest)
         struct jak_string sb;
         string_create(&sb);
 
-        struct jak_carbon_insert_array_state state, state2, state3;
-        struct jak_carbon_insert_column_state cstate;
+        jak_carbon_insert_array_state state, state2, state3;
+        jak_carbon_insert_column_state cstate;
         jak_carbon_insert *array_ins, *array_ins2, *array_ins3, *column_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        carbon_insert_u8(ins, 1);
-        carbon_insert_string(ins, "Hello");
-        carbon_insert_u16(ins, 2);
-        carbon_insert_u32(ins, 3);
-        carbon_insert_u64(ins, 3);
-        carbon_insert_string(ins, "World");
+        jak_carbon_insert_u8(ins, 1);
+        jak_carbon_insert_string(ins, "Hello");
+        jak_carbon_insert_u16(ins, 2);
+        jak_carbon_insert_u32(ins, 3);
+        jak_carbon_insert_u64(ins, 3);
+        jak_carbon_insert_string(ins, "World");
 
-        array_ins = carbon_insert_array_begin(&state, ins, 10);
-        carbon_insert_array_end(&state);
+        array_ins = jak_carbon_insert_array_begin(&state, ins, 10);
+        jak_carbon_insert_array_end(&state);
 
-        array_ins = carbon_insert_array_begin(&state, ins, 10);
-        carbon_insert_u8(array_ins, 4);
-        carbon_insert_string(array_ins, "Fox!");
-        carbon_insert_u8(array_ins, 6);
-        carbon_insert_array_end(&state);
+        array_ins = jak_carbon_insert_array_begin(&state, ins, 10);
+        jak_carbon_insert_u8(array_ins, 4);
+        jak_carbon_insert_string(array_ins, "Fox!");
+        jak_carbon_insert_u8(array_ins, 6);
+        jak_carbon_insert_array_end(&state);
 
-        array_ins = carbon_insert_array_begin(&state, ins, 10);
-        array_ins2 = carbon_insert_array_begin(&state2, array_ins, 10);
-        carbon_insert_array_end(&state2);
-        array_ins2 = carbon_insert_array_begin(&state2, array_ins, 10);
-        carbon_insert_u8(array_ins2, 4);
-        carbon_insert_array_end(&state2);
-        carbon_insert_null(array_ins);
-        array_ins2 = carbon_insert_array_begin(&state2, array_ins, 10);
-        carbon_insert_string(array_ins2, "Dog!");
-        array_ins3 = carbon_insert_array_begin(&state3, array_ins2, 10);
-        carbon_insert_array_end(&state3);
-        array_ins3 = carbon_insert_array_begin(&state3, array_ins2, 10);
-        column_ins = carbon_insert_column_begin(&cstate, array_ins3, JAK_CARBON_COLUMN_TYPE_U8, 10);
+        array_ins = jak_carbon_insert_array_begin(&state, ins, 10);
+        array_ins2 = jak_carbon_insert_array_begin(&state2, array_ins, 10);
+        jak_carbon_insert_array_end(&state2);
+        array_ins2 = jak_carbon_insert_array_begin(&state2, array_ins, 10);
+        jak_carbon_insert_u8(array_ins2, 4);
+        jak_carbon_insert_array_end(&state2);
+        jak_carbon_insert_null(array_ins);
+        array_ins2 = jak_carbon_insert_array_begin(&state2, array_ins, 10);
+        jak_carbon_insert_string(array_ins2, "Dog!");
+        array_ins3 = jak_carbon_insert_array_begin(&state3, array_ins2, 10);
+        jak_carbon_insert_array_end(&state3);
+        array_ins3 = jak_carbon_insert_array_begin(&state3, array_ins2, 10);
+        column_ins = jak_carbon_insert_column_begin(&cstate, array_ins3, JAK_CARBON_COLUMN_TYPE_U8, 10);
 
-        carbon_insert_u8(column_ins, 41);
-        carbon_insert_u8(column_ins, 42);
-        carbon_insert_u8(column_ins, 43);
-        carbon_insert_column_end(&cstate);
+        jak_carbon_insert_u8(column_ins, 41);
+        jak_carbon_insert_u8(column_ins, 42);
+        jak_carbon_insert_u8(column_ins, 43);
+        jak_carbon_insert_column_end(&cstate);
 
-        carbon_insert_array_end(&state3);
-        array_ins3 = carbon_insert_array_begin(&state3, array_ins2, 10);
-        carbon_insert_array_end(&state3);
+        jak_carbon_insert_array_end(&state3);
+        array_ins3 = jak_carbon_insert_array_begin(&state3, array_ins2, 10);
+        jak_carbon_insert_array_end(&state3);
 
-        carbon_insert_array_end(&state2);
-        carbon_insert_array_end(&state);
+        jak_carbon_insert_array_end(&state2);
+        jak_carbon_insert_array_end(&state);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -3881,9 +3881,9 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesTypeChangeSimple)
         carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
-        carbon_insert_u8(&inserter, 1);
-        carbon_insert_i64(&inserter, -42);
-        carbon_insert_float(&inserter, 23);
+        jak_carbon_insert_u8(&inserter, 1);
+        jak_carbon_insert_i64(&inserter, -42);
+        jak_carbon_insert_float(&inserter, 23);
 
         jak_carbon_array_it_insert_end(&inserter);
         carbon_revise_iterator_close(&it);
@@ -3921,8 +3921,8 @@ TEST(CarbonTest, CarbonShrinkIssueFix)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        carbon_insert_string(ins, "Hello");
-        carbon_insert_string(ins, "World");
+        jak_carbon_insert_string(ins, "Hello");
+        jak_carbon_insert_string(ins, "World");
 
         jak_carbon_create_end(&context);
 
@@ -3945,8 +3945,8 @@ TEST(CarbonTest, CarbonKeyTypeNoKey)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        carbon_insert_string(ins, "Hello");
-        carbon_insert_string(ins, "World");
+        jak_carbon_insert_string(ins, "Hello");
+        jak_carbon_insert_string(ins, "World");
 
         jak_carbon_create_end(&context);
 
@@ -3972,8 +3972,8 @@ TEST(CarbonTest, CarbonKeyTypeNoKeyNoRevInc)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        carbon_insert_string(ins, "Hello");
-        carbon_insert_string(ins, "World");
+        jak_carbon_insert_string(ins, "Hello");
+        jak_carbon_insert_string(ins, "World");
 
         jak_carbon_create_end(&context);
 
@@ -4001,8 +4001,8 @@ TEST(CarbonTest, CarbonKeyTypeAutoKey)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        carbon_insert_string(ins, "Hello");
-        carbon_insert_string(ins, "World");
+        jak_carbon_insert_string(ins, "Hello");
+        jak_carbon_insert_string(ins, "World");
 
         jak_carbon_create_end(&context);
 
@@ -4028,8 +4028,8 @@ TEST(CarbonTest, CarbonKeyTypeAutoKeyRevInc)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        carbon_insert_string(ins, "Hello");
-        carbon_insert_string(ins, "World");
+        jak_carbon_insert_string(ins, "Hello");
+        jak_carbon_insert_string(ins, "World");
 
         jak_carbon_create_end(&context);
 
@@ -4058,8 +4058,8 @@ TEST(CarbonTest, CarbonKeyTypeAutoKeyUpdate)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_AUTOKEY, JAK_CARBON_OPTIMIZE);
 
-        carbon_insert_string(ins, "Hello");
-        carbon_insert_string(ins, "World");
+        jak_carbon_insert_string(ins, "Hello");
+        jak_carbon_insert_string(ins, "World");
 
         jak_carbon_create_end(&context);
 
@@ -4094,8 +4094,8 @@ TEST(CarbonTest, CarbonKeyTypeUnsignedKeyUpdate)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_UKEY, JAK_CARBON_OPTIMIZE);
 
-        carbon_insert_string(ins, "Hello");
-        carbon_insert_string(ins, "World");
+        jak_carbon_insert_string(ins, "Hello");
+        jak_carbon_insert_string(ins, "World");
 
         jak_carbon_create_end(&context);
 
@@ -4128,8 +4128,8 @@ TEST(CarbonTest, CarbonKeyTypeSignedKeyUpdate)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_IKEY, JAK_CARBON_OPTIMIZE);
 
-        carbon_insert_string(ins, "Hello");
-        carbon_insert_string(ins, "World");
+        jak_carbon_insert_string(ins, "Hello");
+        jak_carbon_insert_string(ins, "World");
 
         jak_carbon_create_end(&context);
 
@@ -4162,8 +4162,8 @@ TEST(CarbonTest, CarbonKeyTypeStringKeyUpdate)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_SKEY, JAK_CARBON_OPTIMIZE);
 
-        carbon_insert_string(ins, "Hello");
-        carbon_insert_string(ins, "World");
+        jak_carbon_insert_string(ins, "Hello");
+        jak_carbon_insert_string(ins, "World");
 
         jak_carbon_create_end(&context);
 
@@ -4189,8 +4189,8 @@ TEST(CarbonTest, CarbonKeyTypeUnsignedKey)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_UKEY, JAK_CARBON_OPTIMIZE);
 
-        carbon_insert_string(ins, "Hello");
-        carbon_insert_string(ins, "World");
+        jak_carbon_insert_string(ins, "Hello");
+        jak_carbon_insert_string(ins, "World");
 
         jak_carbon_create_end(&context);
 
@@ -4213,8 +4213,8 @@ TEST(CarbonTest, CarbonKeyTypeSignedKeyRevInc)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_IKEY, JAK_CARBON_OPTIMIZE);
 
-        carbon_insert_string(ins, "Hello");
-        carbon_insert_string(ins, "World");
+        jak_carbon_insert_string(ins, "Hello");
+        jak_carbon_insert_string(ins, "World");
 
         jak_carbon_create_end(&context);
 
@@ -4256,8 +4256,8 @@ TEST(CarbonTest, CarbonKeyTypeUnsignedKeyRevInc)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_UKEY, JAK_CARBON_OPTIMIZE);
 
-        carbon_insert_string(ins, "Hello");
-        carbon_insert_string(ins, "World");
+        jak_carbon_insert_string(ins, "Hello");
+        jak_carbon_insert_string(ins, "World");
 
         jak_carbon_create_end(&context);
 
@@ -4284,8 +4284,8 @@ TEST(CarbonTest, CarbonKeyTypeSignedKey)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_IKEY, JAK_CARBON_OPTIMIZE);
 
-        carbon_insert_string(ins, "Hello");
-        carbon_insert_string(ins, "World");
+        jak_carbon_insert_string(ins, "Hello");
+        jak_carbon_insert_string(ins, "World");
 
         jak_carbon_create_end(&context);
 
@@ -4306,8 +4306,8 @@ TEST(CarbonTest, CarbonKeyTypeStringKey)
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        carbon_insert_string(ins, "Hello");
-        carbon_insert_string(ins, "World");
+        jak_carbon_insert_string(ins, "Hello");
+        jak_carbon_insert_string(ins, "World");
 
         jak_carbon_create_end(&context);
 
@@ -4327,14 +4327,14 @@ TEST(CarbonTest, CarbonObjectInsertEmpty)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        carbon_insert_object_begin(&state, ins, 1024);
-        carbon_insert_object_end(&state);
+        jak_carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -4354,15 +4354,15 @@ TEST(CarbonTest, CarbonObjectInsertNull)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-        carbon_insert_prop_null(obj_ins, "My Key");
-        carbon_insert_object_end(&state);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert_prop_null(obj_ins, "My Key");
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -4382,17 +4382,17 @@ TEST(CarbonTest, CarbonObjectInsertMultipleNulls)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-        carbon_insert_prop_null(obj_ins, "My Key 1");
-        carbon_insert_prop_null(obj_ins, "My Key 2");
-        carbon_insert_prop_null(obj_ins, "My Key 3");
-        carbon_insert_object_end(&state);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert_prop_null(obj_ins, "My Key 1");
+        jak_carbon_insert_prop_null(obj_ins, "My Key 2");
+        jak_carbon_insert_prop_null(obj_ins, "My Key 3");
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -4411,15 +4411,15 @@ TEST(CarbonTest, CarbonObjectInsertU8)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-        carbon_insert_prop_u8(obj_ins, "My Key", 123);
-        carbon_insert_object_end(&state);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert_prop_u8(obj_ins, "My Key", 123);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -4439,17 +4439,17 @@ TEST(CarbonTest, CarbonObjectInsertMultipleU8s)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-        carbon_insert_prop_u8(obj_ins, "My Key 1", 1);
-        carbon_insert_prop_u8(obj_ins, "My Key 2", 2);
-        carbon_insert_prop_u8(obj_ins, "My Key 3", 3);
-        carbon_insert_object_end(&state);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert_prop_u8(obj_ins, "My Key 1", 1);
+        jak_carbon_insert_prop_u8(obj_ins, "My Key 2", 2);
+        jak_carbon_insert_prop_u8(obj_ins, "My Key 3", 3);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -4469,15 +4469,15 @@ TEST(CarbonTest, CarbonObjectInsertU16)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-        carbon_insert_prop_u16(obj_ins, "My Key", 123);
-        carbon_insert_object_end(&state);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert_prop_u16(obj_ins, "My Key", 123);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -4497,17 +4497,17 @@ TEST(CarbonTest, CarbonObjectInsertMultipleU16s)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-        carbon_insert_prop_u16(obj_ins, "My Key 1", 1);
-        carbon_insert_prop_u16(obj_ins, "My Key 2", 2);
-        carbon_insert_prop_u16(obj_ins, "My Key 3", 3);
-        carbon_insert_object_end(&state);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert_prop_u16(obj_ins, "My Key 1", 1);
+        jak_carbon_insert_prop_u16(obj_ins, "My Key 2", 2);
+        jak_carbon_insert_prop_u16(obj_ins, "My Key 3", 3);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -4527,15 +4527,15 @@ TEST(CarbonTest, CarbonObjectInsertU32)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-        carbon_insert_prop_u32(obj_ins, "My Key", 123);
-        carbon_insert_object_end(&state);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert_prop_u32(obj_ins, "My Key", 123);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -4555,17 +4555,17 @@ TEST(CarbonTest, CarbonObjectInsertMultipleU32s)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-        carbon_insert_prop_u32(obj_ins, "My Key 1", 1);
-        carbon_insert_prop_u32(obj_ins, "My Key 2", 2);
-        carbon_insert_prop_u32(obj_ins, "My Key 3", 3);
-        carbon_insert_object_end(&state);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert_prop_u32(obj_ins, "My Key 1", 1);
+        jak_carbon_insert_prop_u32(obj_ins, "My Key 2", 2);
+        jak_carbon_insert_prop_u32(obj_ins, "My Key 3", 3);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -4585,15 +4585,15 @@ TEST(CarbonTest, CarbonObjectInsertU64)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-        carbon_insert_prop_u64(obj_ins, "My Key", 123);
-        carbon_insert_object_end(&state);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert_prop_u64(obj_ins, "My Key", 123);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -4613,17 +4613,17 @@ TEST(CarbonTest, CarbonObjectInsertMultipleU64s)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-        carbon_insert_prop_u64(obj_ins, "My Key 1", 1);
-        carbon_insert_prop_u64(obj_ins, "My Key 2", 2);
-        carbon_insert_prop_u64(obj_ins, "My Key 3", 3);
-        carbon_insert_object_end(&state);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert_prop_u64(obj_ins, "My Key 1", 1);
+        jak_carbon_insert_prop_u64(obj_ins, "My Key 2", 2);
+        jak_carbon_insert_prop_u64(obj_ins, "My Key 3", 3);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -4643,15 +4643,15 @@ TEST(CarbonTest, CarbonObjectInsertI8)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-        carbon_insert_prop_i8(obj_ins, "My Key", -123);
-        carbon_insert_object_end(&state);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert_prop_i8(obj_ins, "My Key", -123);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -4671,17 +4671,17 @@ TEST(CarbonTest, CarbonObjectInsertMultipleI8s)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-        carbon_insert_prop_i8(obj_ins, "My Key 1", -1);
-        carbon_insert_prop_i8(obj_ins, "My Key 2", -2);
-        carbon_insert_prop_i8(obj_ins, "My Key 3", -3);
-        carbon_insert_object_end(&state);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert_prop_i8(obj_ins, "My Key 1", -1);
+        jak_carbon_insert_prop_i8(obj_ins, "My Key 2", -2);
+        jak_carbon_insert_prop_i8(obj_ins, "My Key 3", -3);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -4701,15 +4701,15 @@ TEST(CarbonTest, CarbonObjectInsertI16)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-        carbon_insert_prop_i16(obj_ins, "My Key", -123);
-        carbon_insert_object_end(&state);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert_prop_i16(obj_ins, "My Key", -123);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -4729,17 +4729,17 @@ TEST(CarbonTest, CarbonObjectInsertMultipleI16s)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-        carbon_insert_prop_i16(obj_ins, "My Key 1", -1);
-        carbon_insert_prop_i16(obj_ins, "My Key 2", -2);
-        carbon_insert_prop_i16(obj_ins, "My Key 3", -3);
-        carbon_insert_object_end(&state);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert_prop_i16(obj_ins, "My Key 1", -1);
+        jak_carbon_insert_prop_i16(obj_ins, "My Key 2", -2);
+        jak_carbon_insert_prop_i16(obj_ins, "My Key 3", -3);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -4759,15 +4759,15 @@ TEST(CarbonTest, CarbonObjectInsertI32)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-        carbon_insert_prop_i32(obj_ins, "My Key", -123);
-        carbon_insert_object_end(&state);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert_prop_i32(obj_ins, "My Key", -123);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -4787,17 +4787,17 @@ TEST(CarbonTest, CarbonObjectInsertMultipleI32s)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-        carbon_insert_prop_i32(obj_ins, "My Key 1", -1);
-        carbon_insert_prop_i32(obj_ins, "My Key 2", -2);
-        carbon_insert_prop_i32(obj_ins, "My Key 3", -3);
-        carbon_insert_object_end(&state);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert_prop_i32(obj_ins, "My Key 1", -1);
+        jak_carbon_insert_prop_i32(obj_ins, "My Key 2", -2);
+        jak_carbon_insert_prop_i32(obj_ins, "My Key 3", -3);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -4817,15 +4817,15 @@ TEST(CarbonTest, CarbonObjectInsertI64)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-        carbon_insert_prop_i64(obj_ins, "My Key", -123);
-        carbon_insert_object_end(&state);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert_prop_i64(obj_ins, "My Key", -123);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -4845,17 +4845,17 @@ TEST(CarbonTest, CarbonObjectInsertMultipleI64s)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-        carbon_insert_prop_i64(obj_ins, "My Key 1", -1);
-        carbon_insert_prop_i64(obj_ins, "My Key 2", -2);
-        carbon_insert_prop_i64(obj_ins, "My Key 3", -3);
-        carbon_insert_object_end(&state);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert_prop_i64(obj_ins, "My Key 1", -1);
+        jak_carbon_insert_prop_i64(obj_ins, "My Key 2", -2);
+        jak_carbon_insert_prop_i64(obj_ins, "My Key 3", -3);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -4875,15 +4875,15 @@ TEST(CarbonTest, CarbonObjectInsertFloat)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-        carbon_insert_prop_float(obj_ins, "My Key", -123.32);
-        carbon_insert_object_end(&state);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert_prop_float(obj_ins, "My Key", -123.32);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -4903,17 +4903,17 @@ TEST(CarbonTest, CarbonObjectInsertMultipleFloats)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-        carbon_insert_prop_float(obj_ins, "My Key 1", -1.23);
-        carbon_insert_prop_float(obj_ins, "My Key 2", -2.42);
-        carbon_insert_prop_float(obj_ins, "My Key 3", 3.21);
-        carbon_insert_object_end(&state);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert_prop_float(obj_ins, "My Key 1", -1.23);
+        jak_carbon_insert_prop_float(obj_ins, "My Key 2", -2.42);
+        jak_carbon_insert_prop_float(obj_ins, "My Key 3", 3.21);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -4933,15 +4933,15 @@ TEST(CarbonTest, CarbonObjectInsertTrue)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-        carbon_insert_prop_true(obj_ins, "My Key");
-        carbon_insert_object_end(&state);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert_prop_true(obj_ins, "My Key");
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -4961,15 +4961,15 @@ TEST(CarbonTest, CarbonObjectInsertFalse)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1024);
-        carbon_insert_prop_false(obj_ins, "My Key");
-        carbon_insert_object_end(&state);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1024);
+        jak_carbon_insert_prop_false(obj_ins, "My Key");
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -4989,17 +4989,17 @@ TEST(CarbonTest, CarbonObjectInsertMultipleBooleans)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-        carbon_insert_prop_true(obj_ins, "My Key 1");
-        carbon_insert_prop_false(obj_ins, "My Key 2");
-        carbon_insert_prop_true(obj_ins, "My Key 3");
-        carbon_insert_object_end(&state);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert_prop_true(obj_ins, "My Key 1");
+        jak_carbon_insert_prop_false(obj_ins, "My Key 2");
+        jak_carbon_insert_prop_true(obj_ins, "My Key 3");
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -5019,27 +5019,27 @@ TEST(CarbonTest, CarbonObjectInsertMixed)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
-        carbon_insert_prop_true(obj_ins, "k1");
-        carbon_insert_prop_false(obj_ins, "k2");
-        carbon_insert_prop_null(obj_ins, "k3");
-        carbon_insert_prop_u8(obj_ins, "k4", 1);
-        carbon_insert_prop_u16(obj_ins, "k5", 2);
-        carbon_insert_prop_u32(obj_ins, "k6", 3);
-        carbon_insert_prop_u64(obj_ins, "k7", 4);
-        carbon_insert_prop_i8(obj_ins, "k8", -1);
-        carbon_insert_prop_i16(obj_ins, "k9", -2);
-        carbon_insert_prop_i32(obj_ins, "k10", -3);
-        carbon_insert_prop_i64(obj_ins, "k11", -4);
-        carbon_insert_prop_float(obj_ins, "k12", 42.23);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert_prop_true(obj_ins, "k1");
+        jak_carbon_insert_prop_false(obj_ins, "k2");
+        jak_carbon_insert_prop_null(obj_ins, "k3");
+        jak_carbon_insert_prop_u8(obj_ins, "k4", 1);
+        jak_carbon_insert_prop_u16(obj_ins, "k5", 2);
+        jak_carbon_insert_prop_u32(obj_ins, "k6", 3);
+        jak_carbon_insert_prop_u64(obj_ins, "k7", 4);
+        jak_carbon_insert_prop_i8(obj_ins, "k8", -1);
+        jak_carbon_insert_prop_i16(obj_ins, "k9", -2);
+        jak_carbon_insert_prop_i32(obj_ins, "k10", -3);
+        jak_carbon_insert_prop_i64(obj_ins, "k11", -4);
+        jak_carbon_insert_prop_float(obj_ins, "k12", 42.23);
 
-        carbon_insert_object_end(&state);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -5059,17 +5059,17 @@ TEST(CarbonTest, CarbonObjectInsertString)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1);
 
-        carbon_insert_prop_string(obj_ins, "hello", "world");
+        jak_carbon_insert_prop_string(obj_ins, "hello", "world");
 
-        carbon_insert_object_end(&state);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -5089,19 +5089,19 @@ TEST(CarbonTest, CarbonObjectInsertMultipleString)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1);
 
-        carbon_insert_prop_string(obj_ins, "k1", "v1");
-        carbon_insert_prop_string(obj_ins, "hello", "world");
-        carbon_insert_prop_string(obj_ins, "k3", "there");
+        jak_carbon_insert_prop_string(obj_ins, "k1", "v1");
+        jak_carbon_insert_prop_string(obj_ins, "hello", "world");
+        jak_carbon_insert_prop_string(obj_ins, "k3", "there");
 
-        carbon_insert_object_end(&state);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -5121,32 +5121,32 @@ TEST(CarbonTest, CarbonObjectInsertMultipleStringMixedTypes)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1);
 
-        carbon_insert_prop_false(obj_ins, "k2");
-        carbon_insert_prop_null(obj_ins, "k3");
-        carbon_insert_prop_u8(obj_ins, "k4", 1);
-        carbon_insert_prop_string(obj_ins, "s1", "v1");
-        carbon_insert_prop_u16(obj_ins, "k5", 2);
-        carbon_insert_prop_string(obj_ins, "s2-longer", "world");
-        carbon_insert_prop_u32(obj_ins, "k6", 3);
-        carbon_insert_prop_u64(obj_ins, "k7", 4);
-        carbon_insert_prop_i8(obj_ins, "k8", -1);
-        carbon_insert_prop_string(obj_ins, "s3", "there");
-        carbon_insert_prop_i16(obj_ins, "k9", -2);
-        carbon_insert_prop_i32(obj_ins, "k10", -3);
-        carbon_insert_prop_i64(obj_ins, "k11", -4);
-        carbon_insert_prop_float(obj_ins, "k12", 42.23);
-        carbon_insert_prop_true(obj_ins, "k1");
+        jak_carbon_insert_prop_false(obj_ins, "k2");
+        jak_carbon_insert_prop_null(obj_ins, "k3");
+        jak_carbon_insert_prop_u8(obj_ins, "k4", 1);
+        jak_carbon_insert_prop_string(obj_ins, "s1", "v1");
+        jak_carbon_insert_prop_u16(obj_ins, "k5", 2);
+        jak_carbon_insert_prop_string(obj_ins, "s2-longer", "world");
+        jak_carbon_insert_prop_u32(obj_ins, "k6", 3);
+        jak_carbon_insert_prop_u64(obj_ins, "k7", 4);
+        jak_carbon_insert_prop_i8(obj_ins, "k8", -1);
+        jak_carbon_insert_prop_string(obj_ins, "s3", "there");
+        jak_carbon_insert_prop_i16(obj_ins, "k9", -2);
+        jak_carbon_insert_prop_i32(obj_ins, "k10", -3);
+        jak_carbon_insert_prop_i64(obj_ins, "k11", -4);
+        jak_carbon_insert_prop_float(obj_ins, "k12", 42.23);
+        jak_carbon_insert_prop_true(obj_ins, "k1");
 
 
-        carbon_insert_object_end(&state);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -5166,17 +5166,17 @@ TEST(CarbonTest, CarbonObjectInsertBinary)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1);
 
-        carbon_insert_prop_binary(obj_ins, "my binary", "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
+        jak_carbon_insert_prop_binary(obj_ins, "my binary", "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
 
-        carbon_insert_object_end(&state);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -5196,34 +5196,34 @@ TEST(CarbonTest, CarbonObjectInsertMultipleBinariesMixedTypes)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1);
 
-        carbon_insert_prop_float(obj_ins, "k12", 42.23);
-        carbon_insert_prop_true(obj_ins, "k1");
-        carbon_insert_prop_binary(obj_ins, "b1", "Hello", strlen("Hello"), "txt", NULL);
-        carbon_insert_prop_binary(obj_ins, "my binary", ",", strlen(","), "txt", NULL);
-        carbon_insert_prop_false(obj_ins, "k2");
-        carbon_insert_prop_null(obj_ins, "k3");
-        carbon_insert_prop_u8(obj_ins, "k4", 1);
-        carbon_insert_prop_string(obj_ins, "s1", "v1");
-        carbon_insert_prop_u16(obj_ins, "k5", 2);
-        carbon_insert_prop_binary(obj_ins, "b2", "World", strlen("World"), "txt", NULL);
-        carbon_insert_prop_string(obj_ins, "s2-longer", "world");
-        carbon_insert_prop_u32(obj_ins, "k6", 3);
-        carbon_insert_prop_u64(obj_ins, "k7", 4);
-        carbon_insert_prop_i8(obj_ins, "k8", -1);
-        carbon_insert_prop_string(obj_ins, "s3", "there");
-        carbon_insert_prop_i16(obj_ins, "k9", -2);
-        carbon_insert_prop_i32(obj_ins, "k10", -3);
-        carbon_insert_prop_i64(obj_ins, "k11", -4);
+        jak_carbon_insert_prop_float(obj_ins, "k12", 42.23);
+        jak_carbon_insert_prop_true(obj_ins, "k1");
+        jak_carbon_insert_prop_binary(obj_ins, "b1", "Hello", strlen("Hello"), "txt", NULL);
+        jak_carbon_insert_prop_binary(obj_ins, "my binary", ",", strlen(","), "txt", NULL);
+        jak_carbon_insert_prop_false(obj_ins, "k2");
+        jak_carbon_insert_prop_null(obj_ins, "k3");
+        jak_carbon_insert_prop_u8(obj_ins, "k4", 1);
+        jak_carbon_insert_prop_string(obj_ins, "s1", "v1");
+        jak_carbon_insert_prop_u16(obj_ins, "k5", 2);
+        jak_carbon_insert_prop_binary(obj_ins, "b2", "World", strlen("World"), "txt", NULL);
+        jak_carbon_insert_prop_string(obj_ins, "s2-longer", "world");
+        jak_carbon_insert_prop_u32(obj_ins, "k6", 3);
+        jak_carbon_insert_prop_u64(obj_ins, "k7", 4);
+        jak_carbon_insert_prop_i8(obj_ins, "k8", -1);
+        jak_carbon_insert_prop_string(obj_ins, "s3", "there");
+        jak_carbon_insert_prop_i16(obj_ins, "k9", -2);
+        jak_carbon_insert_prop_i32(obj_ins, "k10", -3);
+        jak_carbon_insert_prop_i64(obj_ins, "k11", -4);
 
-        carbon_insert_object_end(&state);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -5243,19 +5243,19 @@ TEST(CarbonTest, CarbonObjectInsertMultipleBinaries)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1);
 
-        carbon_insert_prop_binary(obj_ins, "b1", "Hello", strlen("Hello"), "txt", NULL);
-        carbon_insert_prop_binary(obj_ins, "my binary", ",", strlen(","), "txt", NULL);
-        carbon_insert_prop_binary(obj_ins, "b2", "World", strlen("World"), "txt", NULL);
+        jak_carbon_insert_prop_binary(obj_ins, "b1", "Hello", strlen("Hello"), "txt", NULL);
+        jak_carbon_insert_prop_binary(obj_ins, "my binary", ",", strlen(","), "txt", NULL);
+        jak_carbon_insert_prop_binary(obj_ins, "b2", "World", strlen("World"), "txt", NULL);
 
-        carbon_insert_object_end(&state);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -5275,18 +5275,18 @@ TEST(CarbonTest, CarbonObjectInsertObjectEmpty)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state, nested;
+        jak_carbon_insert_object_state state, nested;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1);
 
-        carbon_insert_prop_object_begin(&nested, obj_ins, "my nested", 200);
-        carbon_insert_prop_object_end(&nested);
+        jak_carbon_insert_prop_object_begin(&nested, obj_ins, "my nested", 200);
+        jak_carbon_insert_prop_object_end(&nested);
 
-        carbon_insert_object_end(&state);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -5306,41 +5306,41 @@ TEST(CarbonTest, CarbonObjectInsertObjectMixedMxed)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state, nested;
+        jak_carbon_insert_object_state state, nested;
 
         // -------------------------------------------------------------------------------------------------------------
 
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1);
 
-        carbon_insert_prop_float(obj_ins, "1", 42.23);
-        carbon_insert_prop_true(obj_ins, "2");
-        carbon_insert_prop_binary(obj_ins, "3", "Hello", strlen("Hello"), "txt", NULL);
-        carbon_insert_prop_binary(obj_ins, "4", ",", strlen(","), "txt", NULL);
-        carbon_insert_prop_binary(obj_ins, "5", "World", strlen("World"), "txt", NULL);
-        carbon_insert_prop_string(obj_ins, "6", "world");
+        jak_carbon_insert_prop_float(obj_ins, "1", 42.23);
+        jak_carbon_insert_prop_true(obj_ins, "2");
+        jak_carbon_insert_prop_binary(obj_ins, "3", "Hello", strlen("Hello"), "txt", NULL);
+        jak_carbon_insert_prop_binary(obj_ins, "4", ",", strlen(","), "txt", NULL);
+        jak_carbon_insert_prop_binary(obj_ins, "5", "World", strlen("World"), "txt", NULL);
+        jak_carbon_insert_prop_string(obj_ins, "6", "world");
 
-        jak_carbon_insert *nested_obj_ins = carbon_insert_prop_object_begin(&nested, obj_ins, "my nested", 200);
+        jak_carbon_insert *nested_obj_ins = jak_carbon_insert_prop_object_begin(&nested, obj_ins, "my nested", 200);
 
-        carbon_insert_prop_false(nested_obj_ins, "7");
-        carbon_insert_prop_null(nested_obj_ins, "8");
-        carbon_insert_prop_u8(nested_obj_ins, "9", 1);
-        carbon_insert_prop_string(nested_obj_ins, "10", "v1");
-        carbon_insert_prop_u16(nested_obj_ins, "11", 2);
+        jak_carbon_insert_prop_false(nested_obj_ins, "7");
+        jak_carbon_insert_prop_null(nested_obj_ins, "8");
+        jak_carbon_insert_prop_u8(nested_obj_ins, "9", 1);
+        jak_carbon_insert_prop_string(nested_obj_ins, "10", "v1");
+        jak_carbon_insert_prop_u16(nested_obj_ins, "11", 2);
 
-        carbon_insert_prop_object_end(&nested);
+        jak_carbon_insert_prop_object_end(&nested);
 
-        carbon_insert_prop_u32(obj_ins, "12", 3);
-        carbon_insert_prop_u64(obj_ins, "13", 4);
-        carbon_insert_prop_i8(obj_ins, "14", -1);
-        carbon_insert_prop_string(obj_ins, "15", "there");
-        carbon_insert_prop_i16(obj_ins, "16", -2);
-        carbon_insert_prop_i32(obj_ins, "17", -3);
-        carbon_insert_prop_i64(obj_ins, "18", -4);
+        jak_carbon_insert_prop_u32(obj_ins, "12", 3);
+        jak_carbon_insert_prop_u64(obj_ins, "13", 4);
+        jak_carbon_insert_prop_i8(obj_ins, "14", -1);
+        jak_carbon_insert_prop_string(obj_ins, "15", "there");
+        jak_carbon_insert_prop_i16(obj_ins, "16", -2);
+        jak_carbon_insert_prop_i32(obj_ins, "17", -3);
+        jak_carbon_insert_prop_i64(obj_ins, "18", -4);
 
-        carbon_insert_object_end(&state);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -5360,19 +5360,19 @@ TEST(CarbonTest, CarbonObjectInsertArrayEmpty)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
-        struct jak_carbon_insert_array_state array_state;
+        jak_carbon_insert_object_state state;
+        jak_carbon_insert_array_state array_state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1);
 
-        carbon_insert_prop_array_begin(&array_state, obj_ins, "my array", 200);
-        carbon_insert_prop_array_end(&array_state);
+        jak_carbon_insert_prop_array_begin(&array_state, obj_ins, "my array", 200);
+        jak_carbon_insert_prop_array_end(&array_state);
 
-        carbon_insert_object_end(&state);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -5392,44 +5392,44 @@ TEST(CarbonTest, CarbonObjectInsertArrayData)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
-        struct jak_carbon_insert_array_state array_state, nested_array_state;
-        struct jak_carbon_insert_column_state column_state;
+        jak_carbon_insert_object_state state;
+        jak_carbon_insert_array_state array_state, nested_array_state;
+        jak_carbon_insert_column_state column_state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1);
 
-        jak_carbon_insert *nested_array_ins = carbon_insert_prop_array_begin(&array_state, obj_ins, "my array", 200);
+        jak_carbon_insert *nested_array_ins = jak_carbon_insert_prop_array_begin(&array_state, obj_ins, "my array", 200);
 
-        jak_carbon_insert *column_ins = carbon_insert_column_begin(&column_state, nested_array_ins, JAK_CARBON_COLUMN_TYPE_U32, 10);
-        carbon_insert_u32(column_ins, 'X');
-        carbon_insert_u32(column_ins, 'Y');
-        carbon_insert_u32(column_ins, 'Z');
-        carbon_insert_column_end(&column_state);
-        jak_carbon_insert *nested_ins = carbon_insert_array_begin(&nested_array_state, nested_array_ins, 10);
-        carbon_insert_string(nested_ins, "Hello");
-        column_ins = carbon_insert_column_begin(&column_state, nested_ins, JAK_CARBON_COLUMN_TYPE_U32, 10);
-        carbon_insert_u32(column_ins, 'A');
-        carbon_insert_u32(column_ins, 'B');
-        carbon_insert_u32(column_ins, 'C');
-        carbon_insert_column_end(&column_state);
-        carbon_insert_string(nested_ins, "World");
-        carbon_insert_array_end(&nested_array_state);
-        carbon_insert_u8(nested_array_ins, 1);
-        carbon_insert_u8(nested_array_ins, 1);
-        column_ins = carbon_insert_column_begin(&column_state, nested_array_ins, JAK_CARBON_COLUMN_TYPE_U32, 10);
-        carbon_insert_u32(column_ins, 23);
-        carbon_insert_u32(column_ins, 24);
-        carbon_insert_u32(column_ins, 25);
-        carbon_insert_column_end(&column_state);
-        carbon_insert_u8(nested_array_ins, 1);
+        jak_carbon_insert *column_ins = jak_carbon_insert_column_begin(&column_state, nested_array_ins, JAK_CARBON_COLUMN_TYPE_U32, 10);
+        jak_carbon_insert_u32(column_ins, 'X');
+        jak_carbon_insert_u32(column_ins, 'Y');
+        jak_carbon_insert_u32(column_ins, 'Z');
+        jak_carbon_insert_column_end(&column_state);
+        jak_carbon_insert *nested_ins = jak_carbon_insert_array_begin(&nested_array_state, nested_array_ins, 10);
+        jak_carbon_insert_string(nested_ins, "Hello");
+        column_ins = jak_carbon_insert_column_begin(&column_state, nested_ins, JAK_CARBON_COLUMN_TYPE_U32, 10);
+        jak_carbon_insert_u32(column_ins, 'A');
+        jak_carbon_insert_u32(column_ins, 'B');
+        jak_carbon_insert_u32(column_ins, 'C');
+        jak_carbon_insert_column_end(&column_state);
+        jak_carbon_insert_string(nested_ins, "World");
+        jak_carbon_insert_array_end(&nested_array_state);
+        jak_carbon_insert_u8(nested_array_ins, 1);
+        jak_carbon_insert_u8(nested_array_ins, 1);
+        column_ins = jak_carbon_insert_column_begin(&column_state, nested_array_ins, JAK_CARBON_COLUMN_TYPE_U32, 10);
+        jak_carbon_insert_u32(column_ins, 23);
+        jak_carbon_insert_u32(column_ins, 24);
+        jak_carbon_insert_u32(column_ins, 25);
+        jak_carbon_insert_column_end(&column_state);
+        jak_carbon_insert_u8(nested_array_ins, 1);
 
-        carbon_insert_prop_array_end(&array_state);
+        jak_carbon_insert_prop_array_end(&array_state);
 
-        carbon_insert_object_end(&state);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -5449,22 +5449,22 @@ TEST(CarbonTest, CarbonObjectInsertColumnNonEmpty)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state state;
-        struct jak_carbon_insert_column_state column_state;
+        jak_carbon_insert_object_state state;
+        jak_carbon_insert_column_state column_state;
 
         // -------------------------------------------------------------------------------------------------------------
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *obj_ins = carbon_insert_object_begin(&state, ins, 1);
+        jak_carbon_insert *obj_ins = jak_carbon_insert_object_begin(&state, ins, 1);
 
-        jak_carbon_insert *nested_column_ins = carbon_insert_prop_column_begin(&column_state, obj_ins, "my column", JAK_CARBON_COLUMN_TYPE_U16, 200);
-        carbon_insert_u16(nested_column_ins, 1);
-        carbon_insert_u16(nested_column_ins, 2);
-        carbon_insert_u16(nested_column_ins, 3);
-        carbon_insert_prop_column_end(&column_state);
+        jak_carbon_insert *nested_column_ins = jak_carbon_insert_prop_column_begin(&column_state, obj_ins, "my column", JAK_CARBON_COLUMN_TYPE_U16, 200);
+        jak_carbon_insert_u16(nested_column_ins, 1);
+        jak_carbon_insert_u16(nested_column_ins, 2);
+        jak_carbon_insert_u16(nested_column_ins, 3);
+        jak_carbon_insert_prop_column_end(&column_state);
 
-        carbon_insert_object_end(&state);
+        jak_carbon_insert_object_end(&state);
 
         jak_carbon_create_end(&context);
 
@@ -5486,8 +5486,8 @@ TEST(CarbonTest, CarbonObjectInsertColumnNonEmpty)
 //        struct jak_carbon_revise revise;
 //        jak_carbon_array_it it;
 //        jak_carbon_insert nested_ins, *array_ins, *col_ins, *nested_array_ins;
-//        struct jak_carbon_insert_array_state array_state, nested_array_state;
-//        struct jak_carbon_insert_column_state column_state;
+//        jak_carbon_insert_array_state array_state, nested_array_state;
+//        jak_carbon_insert_column_state column_state;
 //
 //        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
 //        carbon_revise_begin(&revise, rev_doc, &doc);
@@ -5495,95 +5495,95 @@ TEST(CarbonTest, CarbonObjectInsertColumnNonEmpty)
 //
 //        jak_carbon_array_it_insert_begin(&nested_ins, &it);
 //
-//        array_ins = carbon_insert_array_begin(&array_state, &nested_ins, 10);
+//        array_ins = jak_carbon_insert_array_begin(&array_state, &nested_ins, 10);
 //
-//        carbon_insert_null(array_ins);
-//        carbon_insert_true(array_ins);
-//        carbon_insert_false(array_ins);
-//        carbon_insert_u8(array_ins, 8);
-//        carbon_insert_i16(array_ins, -16);
-//        carbon_insert_string(array_ins, "Hello, World!");
-//        carbon_insert_binary(array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
-//        carbon_insert_binary(array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
-//        col_ins = carbon_insert_column_begin(&column_state, array_ins, JAK_CARBON_COLUMN_TYPE_U32, 20);
+//        jak_carbon_insert_null(array_ins);
+//        jak_carbon_insert_true(array_ins);
+//        jak_carbon_insert_false(array_ins);
+//        jak_carbon_insert_u8(array_ins, 8);
+//        jak_carbon_insert_i16(array_ins, -16);
+//        jak_carbon_insert_string(array_ins, "Hello, World!");
+//        jak_carbon_insert_binary(array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
+//        jak_carbon_insert_binary(array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
+//        col_ins = jak_carbon_insert_column_begin(&column_state, array_ins, JAK_CARBON_COLUMN_TYPE_U32, 20);
 //
-//        carbon_insert_u32(col_ins, 32);
-//        carbon_insert_u32(col_ins, 33);
-//        carbon_insert_u32(col_ins, 34);
-//        carbon_insert_u32(col_ins, 35);
+//        jak_carbon_insert_u32(col_ins, 32);
+//        jak_carbon_insert_u32(col_ins, 33);
+//        jak_carbon_insert_u32(col_ins, 34);
+//        jak_carbon_insert_u32(col_ins, 35);
 //
-//        carbon_insert_column_end(&column_state);
+//        jak_carbon_insert_column_end(&column_state);
 //
-//        carbon_insert_array_begin(&nested_array_state, array_ins, 20);
-//        carbon_insert_array_end(&nested_array_state);
+//        jak_carbon_insert_array_begin(&nested_array_state, array_ins, 20);
+//        jak_carbon_insert_array_end(&nested_array_state);
 //
-//        nested_array_ins = carbon_insert_array_begin(&nested_array_state, array_ins, 20);
+//        nested_array_ins = jak_carbon_insert_array_begin(&nested_array_state, array_ins, 20);
 //
-//        carbon_insert_null(nested_array_ins);
-//        carbon_insert_true(nested_array_ins);
-//        carbon_insert_false(nested_array_ins);
-//        carbon_insert_u8(nested_array_ins, 8);
-//        carbon_insert_i16(nested_array_ins, -16);
-//        carbon_insert_string(nested_array_ins, "Hello, World!");
-//        carbon_insert_binary(nested_array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
-//        carbon_insert_binary(nested_array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
-//        col_ins = carbon_insert_column_begin(&column_state, nested_array_ins, JAK_CARBON_COLUMN_TYPE_U32, 20);
+//        jak_carbon_insert_null(nested_array_ins);
+//        jak_carbon_insert_true(nested_array_ins);
+//        jak_carbon_insert_false(nested_array_ins);
+//        jak_carbon_insert_u8(nested_array_ins, 8);
+//        jak_carbon_insert_i16(nested_array_ins, -16);
+//        jak_carbon_insert_string(nested_array_ins, "Hello, World!");
+//        jak_carbon_insert_binary(nested_array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
+//        jak_carbon_insert_binary(nested_array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
+//        col_ins = jak_carbon_insert_column_begin(&column_state, nested_array_ins, JAK_CARBON_COLUMN_TYPE_U32, 20);
 //
-//        carbon_insert_u32(col_ins, 32);
-//        carbon_insert_u32(col_ins, 33);
-//        carbon_insert_u32(col_ins, 34);
-//        carbon_insert_u32(col_ins, 35);
+//        jak_carbon_insert_u32(col_ins, 32);
+//        jak_carbon_insert_u32(col_ins, 33);
+//        jak_carbon_insert_u32(col_ins, 34);
+//        jak_carbon_insert_u32(col_ins, 35);
 //
-//        carbon_insert_column_end(&column_state);
+//        jak_carbon_insert_column_end(&column_state);
 //
-//        carbon_insert_array_end(&nested_array_state);
+//        jak_carbon_insert_array_end(&nested_array_state);
 //
-//        carbon_insert_array_end(&array_state);
+//        jak_carbon_insert_array_end(&array_state);
 //
-//        array_ins = carbon_insert_array_begin(&array_state, &nested_ins, 10);
+//        array_ins = jak_carbon_insert_array_begin(&array_state, &nested_ins, 10);
 //
-//        carbon_insert_null(array_ins);
-//        carbon_insert_true(array_ins);
-//        carbon_insert_false(array_ins);
-//        carbon_insert_u8(array_ins, 8);
-//        carbon_insert_i16(array_ins, -16);
-//        carbon_insert_string(array_ins, "Hello, World!");
-//        carbon_insert_binary(array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
-//        carbon_insert_binary(array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
-//        col_ins = carbon_insert_column_begin(&column_state, array_ins, JAK_CARBON_COLUMN_TYPE_U32, 20);
+//        jak_carbon_insert_null(array_ins);
+//        jak_carbon_insert_true(array_ins);
+//        jak_carbon_insert_false(array_ins);
+//        jak_carbon_insert_u8(array_ins, 8);
+//        jak_carbon_insert_i16(array_ins, -16);
+//        jak_carbon_insert_string(array_ins, "Hello, World!");
+//        jak_carbon_insert_binary(array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
+//        jak_carbon_insert_binary(array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
+//        col_ins = jak_carbon_insert_column_begin(&column_state, array_ins, JAK_CARBON_COLUMN_TYPE_U32, 20);
 //
-//        carbon_insert_u32(col_ins, 32);
-//        carbon_insert_u32(col_ins, 33);
-//        carbon_insert_u32(col_ins, 34);
-//        carbon_insert_u32(col_ins, 35);
+//        jak_carbon_insert_u32(col_ins, 32);
+//        jak_carbon_insert_u32(col_ins, 33);
+//        jak_carbon_insert_u32(col_ins, 34);
+//        jak_carbon_insert_u32(col_ins, 35);
 //
-//        carbon_insert_column_end(&column_state);
+//        jak_carbon_insert_column_end(&column_state);
 //
-//        carbon_insert_array_begin(&nested_array_state, array_ins, 20);
-//        carbon_insert_array_end(&nested_array_state);
+//        jak_carbon_insert_array_begin(&nested_array_state, array_ins, 20);
+//        jak_carbon_insert_array_end(&nested_array_state);
 //
-//        nested_array_ins = carbon_insert_array_begin(&nested_array_state, array_ins, 20);
+//        nested_array_ins = jak_carbon_insert_array_begin(&nested_array_state, array_ins, 20);
 //
-//        carbon_insert_null(nested_array_ins);
-//        carbon_insert_true(nested_array_ins);
-//        carbon_insert_false(nested_array_ins);
-//        carbon_insert_u8(nested_array_ins, 8);
-//        carbon_insert_i16(nested_array_ins, -16);
-//        carbon_insert_string(nested_array_ins, "Hello, World!");
-//        carbon_insert_binary(nested_array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
-//        carbon_insert_binary(nested_array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
-//        col_ins = carbon_insert_column_begin(&column_state, nested_array_ins, JAK_CARBON_COLUMN_TYPE_U32, 20);
+//        jak_carbon_insert_null(nested_array_ins);
+//        jak_carbon_insert_true(nested_array_ins);
+//        jak_carbon_insert_false(nested_array_ins);
+//        jak_carbon_insert_u8(nested_array_ins, 8);
+//        jak_carbon_insert_i16(nested_array_ins, -16);
+//        jak_carbon_insert_string(nested_array_ins, "Hello, World!");
+//        jak_carbon_insert_binary(nested_array_ins, "My Plain-Text", strlen("My Plain-Text"), "txt", NULL);
+//        jak_carbon_insert_binary(nested_array_ins, "My Own Format", strlen("My Own Format"), NULL, "own");
+//        col_ins = jak_carbon_insert_column_begin(&column_state, nested_array_ins, JAK_CARBON_COLUMN_TYPE_U32, 20);
 //
-//        carbon_insert_u32(col_ins, 32);
-//        carbon_insert_u32(col_ins, 33);
-//        carbon_insert_u32(col_ins, 34);
-//        carbon_insert_u32(col_ins, 35);
+//        jak_carbon_insert_u32(col_ins, 32);
+//        jak_carbon_insert_u32(col_ins, 33);
+//        jak_carbon_insert_u32(col_ins, 34);
+//        jak_carbon_insert_u32(col_ins, 35);
 //
-//        carbon_insert_column_end(&column_state);
+//        jak_carbon_insert_column_end(&column_state);
 //
-//        carbon_insert_array_end(&nested_array_state);
+//        jak_carbon_insert_array_end(&nested_array_state);
 //
-//        carbon_insert_array_end(&array_state);
+//        jak_carbon_insert_array_end(&array_state);
 //
 //        jak_carbon_array_it_insert_end(&nested_ins);
 //
@@ -5601,40 +5601,40 @@ TEST(CarbonTest, CarbonObjectRemoveTest)
         bool has_next;
         string_create(&sb);
 
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = jak_carbon_insert_object_begin(&state, ins, 200);
 
-        carbon_insert_prop_false(nested_obj_ins, "1");
-        carbon_insert_prop_null(nested_obj_ins, "2");
-        carbon_insert_prop_u8(nested_obj_ins, "3", 1);
-        carbon_insert_prop_string(nested_obj_ins, "4", "v1");
-        carbon_insert_prop_u16(nested_obj_ins, "5", 2);
+        jak_carbon_insert_prop_false(nested_obj_ins, "1");
+        jak_carbon_insert_prop_null(nested_obj_ins, "2");
+        jak_carbon_insert_prop_u8(nested_obj_ins, "3", 1);
+        jak_carbon_insert_prop_string(nested_obj_ins, "4", "v1");
+        jak_carbon_insert_prop_u16(nested_obj_ins, "5", 2);
 
-        carbon_insert_prop_object_end(&state);
+        jak_carbon_insert_prop_object_end(&state);
 
-        nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        nested_obj_ins = jak_carbon_insert_object_begin(&state, ins, 200);
 
-        carbon_insert_prop_false(nested_obj_ins, "6");
-        carbon_insert_prop_null(nested_obj_ins, "7");
-        carbon_insert_prop_u8(nested_obj_ins, "8", 1);
-        carbon_insert_prop_string(nested_obj_ins, "9", "v1");
-        carbon_insert_prop_u16(nested_obj_ins, "10", 2);
+        jak_carbon_insert_prop_false(nested_obj_ins, "6");
+        jak_carbon_insert_prop_null(nested_obj_ins, "7");
+        jak_carbon_insert_prop_u8(nested_obj_ins, "8", 1);
+        jak_carbon_insert_prop_string(nested_obj_ins, "9", "v1");
+        jak_carbon_insert_prop_u16(nested_obj_ins, "10", 2);
 
-        carbon_insert_prop_object_end(&state);
+        jak_carbon_insert_prop_object_end(&state);
 
-        nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        nested_obj_ins = jak_carbon_insert_object_begin(&state, ins, 200);
 
-        carbon_insert_prop_false(nested_obj_ins, "11");
-        carbon_insert_prop_null(nested_obj_ins, "12");
-        carbon_insert_prop_u8(nested_obj_ins, "13", 1);
-        carbon_insert_prop_string(nested_obj_ins, "14", "v1");
-        carbon_insert_prop_u16(nested_obj_ins, "15", 2);
+        jak_carbon_insert_prop_false(nested_obj_ins, "11");
+        jak_carbon_insert_prop_null(nested_obj_ins, "12");
+        jak_carbon_insert_prop_u8(nested_obj_ins, "13", 1);
+        jak_carbon_insert_prop_string(nested_obj_ins, "14", "v1");
+        jak_carbon_insert_prop_u16(nested_obj_ins, "15", 2);
 
-        carbon_insert_prop_object_end(&state);
+        jak_carbon_insert_prop_object_end(&state);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -5691,40 +5691,40 @@ TEST(CarbonTest, CarbonObjectRemoveSkipOneTest)
         bool has_next;
         string_create(&sb);
 
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = jak_carbon_insert_object_begin(&state, ins, 200);
 
-        carbon_insert_prop_false(nested_obj_ins, "1");
-        carbon_insert_prop_null(nested_obj_ins, "2");
-        carbon_insert_prop_u8(nested_obj_ins, "3", 1);
-        carbon_insert_prop_string(nested_obj_ins, "4", "v1");
-        carbon_insert_prop_u16(nested_obj_ins, "5", 2);
+        jak_carbon_insert_prop_false(nested_obj_ins, "1");
+        jak_carbon_insert_prop_null(nested_obj_ins, "2");
+        jak_carbon_insert_prop_u8(nested_obj_ins, "3", 1);
+        jak_carbon_insert_prop_string(nested_obj_ins, "4", "v1");
+        jak_carbon_insert_prop_u16(nested_obj_ins, "5", 2);
 
-        carbon_insert_prop_object_end(&state);
+        jak_carbon_insert_prop_object_end(&state);
 
-        nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        nested_obj_ins = jak_carbon_insert_object_begin(&state, ins, 200);
 
-        carbon_insert_prop_false(nested_obj_ins, "6");
-        carbon_insert_prop_null(nested_obj_ins, "7");
-        carbon_insert_prop_u8(nested_obj_ins, "8", 1);
-        carbon_insert_prop_string(nested_obj_ins, "9", "v1");
-        carbon_insert_prop_u16(nested_obj_ins, "10", 2);
+        jak_carbon_insert_prop_false(nested_obj_ins, "6");
+        jak_carbon_insert_prop_null(nested_obj_ins, "7");
+        jak_carbon_insert_prop_u8(nested_obj_ins, "8", 1);
+        jak_carbon_insert_prop_string(nested_obj_ins, "9", "v1");
+        jak_carbon_insert_prop_u16(nested_obj_ins, "10", 2);
 
-        carbon_insert_prop_object_end(&state);
+        jak_carbon_insert_prop_object_end(&state);
 
-        nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        nested_obj_ins = jak_carbon_insert_object_begin(&state, ins, 200);
 
-        carbon_insert_prop_false(nested_obj_ins, "11");
-        carbon_insert_prop_null(nested_obj_ins, "12");
-        carbon_insert_prop_u8(nested_obj_ins, "13", 1);
-        carbon_insert_prop_string(nested_obj_ins, "14", "v1");
-        carbon_insert_prop_u16(nested_obj_ins, "15", 2);
+        jak_carbon_insert_prop_false(nested_obj_ins, "11");
+        jak_carbon_insert_prop_null(nested_obj_ins, "12");
+        jak_carbon_insert_prop_u8(nested_obj_ins, "13", 1);
+        jak_carbon_insert_prop_string(nested_obj_ins, "14", "v1");
+        jak_carbon_insert_prop_u16(nested_obj_ins, "15", 2);
 
-        carbon_insert_prop_object_end(&state);
+        jak_carbon_insert_prop_object_end(&state);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -5781,21 +5781,21 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringIt)
         string_create(&sb);
         jak_u64 key_len;
 
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
         jak_carbon_insert nested_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = jak_carbon_insert_object_begin(&state, ins, 200);
 
-        carbon_insert_prop_false(nested_obj_ins, "1");
-        carbon_insert_prop_null(nested_obj_ins, "2");
-        carbon_insert_prop_u8(nested_obj_ins, "3", 1);
-        carbon_insert_prop_string(nested_obj_ins, "4", "v1");
-        carbon_insert_prop_u16(nested_obj_ins, "5", 2);
+        jak_carbon_insert_prop_false(nested_obj_ins, "1");
+        jak_carbon_insert_prop_null(nested_obj_ins, "2");
+        jak_carbon_insert_prop_u8(nested_obj_ins, "3", 1);
+        jak_carbon_insert_prop_string(nested_obj_ins, "4", "v1");
+        jak_carbon_insert_prop_u16(nested_obj_ins, "5", 2);
 
-        carbon_insert_prop_object_end(&state);
+        jak_carbon_insert_prop_object_end(&state);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -5821,7 +5821,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringIt)
         ASSERT_TRUE(strncmp(prop_name, "1", strlen("1")) == 0);
 
         carbon_object_it_insert_begin(&nested_ins, obj_it);
-        carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
+        jak_carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
         carbon_object_it_insert_end(&nested_ins);
 
         carbon_object_it_drop(obj_it);
@@ -5859,21 +5859,21 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex1)
         bool has_next;
         string_create(&sb);
 
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
         jak_carbon_insert nested_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = jak_carbon_insert_object_begin(&state, ins, 200);
 
-        carbon_insert_prop_false(nested_obj_ins, "1");
-        carbon_insert_prop_null(nested_obj_ins, "2");
-        carbon_insert_prop_u8(nested_obj_ins, "3", 1);
-        carbon_insert_prop_string(nested_obj_ins, "4", "v1");
-        carbon_insert_prop_u16(nested_obj_ins, "5", 2);
+        jak_carbon_insert_prop_false(nested_obj_ins, "1");
+        jak_carbon_insert_prop_null(nested_obj_ins, "2");
+        jak_carbon_insert_prop_u8(nested_obj_ins, "3", 1);
+        jak_carbon_insert_prop_string(nested_obj_ins, "4", "v1");
+        jak_carbon_insert_prop_u16(nested_obj_ins, "5", 2);
 
-        carbon_insert_prop_object_end(&state);
+        jak_carbon_insert_prop_object_end(&state);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -5897,7 +5897,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex1)
         ASSERT_TRUE(carbon_object_it_next(obj_it));
 
         carbon_object_it_insert_begin(&nested_ins, obj_it);
-        carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
+        jak_carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
         carbon_object_it_insert_end(&nested_ins);
 
         carbon_object_it_drop(obj_it);
@@ -5934,21 +5934,21 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex2)
         bool has_next;
         string_create(&sb);
 
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
         jak_carbon_insert nested_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = jak_carbon_insert_object_begin(&state, ins, 200);
 
-        carbon_insert_prop_false(nested_obj_ins, "1");
-        carbon_insert_prop_null(nested_obj_ins, "2");
-        carbon_insert_prop_u8(nested_obj_ins, "3", 1);
-        carbon_insert_prop_string(nested_obj_ins, "4", "v1");
-        carbon_insert_prop_u16(nested_obj_ins, "5", 2);
+        jak_carbon_insert_prop_false(nested_obj_ins, "1");
+        jak_carbon_insert_prop_null(nested_obj_ins, "2");
+        jak_carbon_insert_prop_u8(nested_obj_ins, "3", 1);
+        jak_carbon_insert_prop_string(nested_obj_ins, "4", "v1");
+        jak_carbon_insert_prop_u16(nested_obj_ins, "5", 2);
 
-        carbon_insert_prop_object_end(&state);
+        jak_carbon_insert_prop_object_end(&state);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -5973,7 +5973,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex2)
         ASSERT_TRUE(carbon_object_it_next(obj_it));
 
         carbon_object_it_insert_begin(&nested_ins, obj_it);
-        carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
+        jak_carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
         carbon_object_it_insert_end(&nested_ins);
         carbon_object_it_drop(obj_it);
 
@@ -6009,21 +6009,21 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex3)
         bool has_next;
         string_create(&sb);
 
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
         jak_carbon_insert nested_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = jak_carbon_insert_object_begin(&state, ins, 200);
 
-        carbon_insert_prop_false(nested_obj_ins, "1");
-        carbon_insert_prop_null(nested_obj_ins, "2");
-        carbon_insert_prop_u8(nested_obj_ins, "3", 1);
-        carbon_insert_prop_string(nested_obj_ins, "4", "v1");
-        carbon_insert_prop_u16(nested_obj_ins, "5", 2);
+        jak_carbon_insert_prop_false(nested_obj_ins, "1");
+        jak_carbon_insert_prop_null(nested_obj_ins, "2");
+        jak_carbon_insert_prop_u8(nested_obj_ins, "3", 1);
+        jak_carbon_insert_prop_string(nested_obj_ins, "4", "v1");
+        jak_carbon_insert_prop_u16(nested_obj_ins, "5", 2);
 
-        carbon_insert_prop_object_end(&state);
+        jak_carbon_insert_prop_object_end(&state);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -6049,7 +6049,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex3)
         ASSERT_TRUE(carbon_object_it_next(obj_it));
 
         carbon_object_it_insert_begin(&nested_ins, obj_it);
-        carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
+        jak_carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
         carbon_object_it_insert_end(&nested_ins);
         carbon_object_it_drop(obj_it);
 
@@ -6085,21 +6085,21 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex4)
         bool has_next;
         string_create(&sb);
 
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
         jak_carbon_insert nested_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = jak_carbon_insert_object_begin(&state, ins, 200);
 
-        carbon_insert_prop_false(nested_obj_ins, "1");
-        carbon_insert_prop_null(nested_obj_ins, "2");
-        carbon_insert_prop_u8(nested_obj_ins, "3", 1);
-        carbon_insert_prop_string(nested_obj_ins, "4", "v1");
-        carbon_insert_prop_u16(nested_obj_ins, "5", 2);
+        jak_carbon_insert_prop_false(nested_obj_ins, "1");
+        jak_carbon_insert_prop_null(nested_obj_ins, "2");
+        jak_carbon_insert_prop_u8(nested_obj_ins, "3", 1);
+        jak_carbon_insert_prop_string(nested_obj_ins, "4", "v1");
+        jak_carbon_insert_prop_u16(nested_obj_ins, "5", 2);
 
-        carbon_insert_prop_object_end(&state);
+        jak_carbon_insert_prop_object_end(&state);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -6126,7 +6126,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex4)
         ASSERT_TRUE(carbon_object_it_next(obj_it));
 
         carbon_object_it_insert_begin(&nested_ins, obj_it);
-        carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
+        jak_carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
         carbon_object_it_insert_end(&nested_ins);
         carbon_object_it_drop(obj_it);
 
@@ -6162,21 +6162,21 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex5)
         bool has_next;
         string_create(&sb);
 
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
         jak_carbon_insert nested_ins;
 
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = jak_carbon_insert_object_begin(&state, ins, 200);
 
-        carbon_insert_prop_false(nested_obj_ins, "1");
-        carbon_insert_prop_null(nested_obj_ins, "2");
-        carbon_insert_prop_u8(nested_obj_ins, "3", 1);
-        carbon_insert_prop_string(nested_obj_ins, "4", "v1");
-        carbon_insert_prop_u16(nested_obj_ins, "5", 2);
+        jak_carbon_insert_prop_false(nested_obj_ins, "1");
+        jak_carbon_insert_prop_null(nested_obj_ins, "2");
+        jak_carbon_insert_prop_u8(nested_obj_ins, "3", 1);
+        jak_carbon_insert_prop_string(nested_obj_ins, "4", "v1");
+        jak_carbon_insert_prop_u16(nested_obj_ins, "5", 2);
 
-        carbon_insert_prop_object_end(&state);
+        jak_carbon_insert_prop_object_end(&state);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -6204,7 +6204,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex5)
         ASSERT_FALSE(carbon_object_it_next(obj_it));
 
         carbon_object_it_insert_begin(&nested_ins, obj_it);
-        carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
+        jak_carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
         carbon_object_it_insert_end(&nested_ins);
         carbon_object_it_drop(obj_it);
 
@@ -6241,20 +6241,20 @@ TEST(CarbonTest, CarbonObjectRemovePropByKey)
         string_create(&sb);
         jak_u64 key_len;
 
-        struct jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state state;
 
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = jak_carbon_insert_object_begin(&state, ins, 200);
 
-        carbon_insert_prop_false(nested_obj_ins, "1");
-        carbon_insert_prop_null(nested_obj_ins, "2");
-        carbon_insert_prop_u8(nested_obj_ins, "3", 1);
-        carbon_insert_prop_string(nested_obj_ins, "4", "v1");
-        carbon_insert_prop_u16(nested_obj_ins, "5", 2);
+        jak_carbon_insert_prop_false(nested_obj_ins, "1");
+        jak_carbon_insert_prop_null(nested_obj_ins, "2");
+        jak_carbon_insert_prop_u8(nested_obj_ins, "3", 1);
+        jak_carbon_insert_prop_string(nested_obj_ins, "4", "v1");
+        jak_carbon_insert_prop_u16(nested_obj_ins, "5", 2);
 
-        carbon_insert_prop_object_end(&state);
+        jak_carbon_insert_prop_object_end(&state);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -6315,27 +6315,27 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectNonEmpty)
         string_create(&sb);
         jak_u64 key_len;
 
-        struct jak_carbon_insert_object_state state;
-        struct jak_carbon_insert_object_state nested_obj;
+        jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state nested_obj;
 
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = jak_carbon_insert_object_begin(&state, ins, 200);
 
-        jak_carbon_insert *nested_nested_obj_ins = carbon_insert_prop_object_begin(&nested_obj, nested_obj_ins, "1", 100);
-        carbon_insert_prop_null(nested_nested_obj_ins, "2");
-        carbon_insert_prop_u8(nested_nested_obj_ins, "3", 1);
-        carbon_insert_prop_string(nested_nested_obj_ins, "4", "v1");
-        carbon_insert_prop_u16(nested_nested_obj_ins, "5", 2);
-        carbon_insert_prop_object_end(&nested_obj);
+        jak_carbon_insert *nested_nested_obj_ins = jak_carbon_insert_prop_object_begin(&nested_obj, nested_obj_ins, "1", 100);
+        jak_carbon_insert_prop_null(nested_nested_obj_ins, "2");
+        jak_carbon_insert_prop_u8(nested_nested_obj_ins, "3", 1);
+        jak_carbon_insert_prop_string(nested_nested_obj_ins, "4", "v1");
+        jak_carbon_insert_prop_u16(nested_nested_obj_ins, "5", 2);
+        jak_carbon_insert_prop_object_end(&nested_obj);
 
-        carbon_insert_prop_null(nested_obj_ins, "6");
-        carbon_insert_prop_u8(nested_obj_ins, "7", 1);
-        carbon_insert_prop_string(nested_obj_ins, "8", "v1");
-        carbon_insert_prop_u16(nested_obj_ins, "9", 2);
+        jak_carbon_insert_prop_null(nested_obj_ins, "6");
+        jak_carbon_insert_prop_u8(nested_obj_ins, "7", 1);
+        jak_carbon_insert_prop_string(nested_obj_ins, "8", "v1");
+        jak_carbon_insert_prop_u16(nested_obj_ins, "9", 2);
 
-        carbon_insert_prop_object_end(&state);
+        jak_carbon_insert_prop_object_end(&state);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -6396,24 +6396,24 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayEmpty)
         string_create(&sb);
         jak_u64 key_len;
 
-        struct jak_carbon_insert_object_state state;
-        struct jak_carbon_insert_array_state nested_arr;
+        jak_carbon_insert_object_state state;
+        jak_carbon_insert_array_state nested_arr;
 
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = jak_carbon_insert_object_begin(&state, ins, 200);
 
-        carbon_insert_prop_array_begin(&nested_arr, nested_obj_ins, "1", 100);
+        jak_carbon_insert_prop_array_begin(&nested_arr, nested_obj_ins, "1", 100);
 
-        carbon_insert_prop_array_end(&nested_arr);
+        jak_carbon_insert_prop_array_end(&nested_arr);
 
-        carbon_insert_prop_null(nested_obj_ins, "2");
-        carbon_insert_prop_u8(nested_obj_ins, "3", 1);
-        carbon_insert_prop_string(nested_obj_ins, "4", "v1");
-        carbon_insert_prop_u16(nested_obj_ins, "5", 2);
+        jak_carbon_insert_prop_null(nested_obj_ins, "2");
+        jak_carbon_insert_prop_u8(nested_obj_ins, "3", 1);
+        jak_carbon_insert_prop_string(nested_obj_ins, "4", "v1");
+        jak_carbon_insert_prop_u16(nested_obj_ins, "5", 2);
 
-        carbon_insert_prop_object_end(&state);
+        jak_carbon_insert_prop_object_end(&state);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -6476,27 +6476,27 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayNonEmpty)
         string_create(&sb);
         jak_u64 key_len;
 
-        struct jak_carbon_insert_object_state state;
-        struct jak_carbon_insert_array_state nested_arr;
+        jak_carbon_insert_object_state state;
+        jak_carbon_insert_array_state nested_arr;
 
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = jak_carbon_insert_object_begin(&state, ins, 200);
 
-        jak_carbon_insert *nested_arr_it = carbon_insert_prop_array_begin(&nested_arr, nested_obj_ins, "1", 100);
-        carbon_insert_null(nested_arr_it);
-        carbon_insert_u8(nested_arr_it, 1);
-        carbon_insert_string(nested_arr_it, "v1");
-        carbon_insert_u16(nested_arr_it, 2);
-        carbon_insert_prop_array_end(&nested_arr);
+        jak_carbon_insert *nested_arr_it = jak_carbon_insert_prop_array_begin(&nested_arr, nested_obj_ins, "1", 100);
+        jak_carbon_insert_null(nested_arr_it);
+        jak_carbon_insert_u8(nested_arr_it, 1);
+        jak_carbon_insert_string(nested_arr_it, "v1");
+        jak_carbon_insert_u16(nested_arr_it, 2);
+        jak_carbon_insert_prop_array_end(&nested_arr);
 
-        carbon_insert_prop_null(nested_obj_ins, "2");
-        carbon_insert_prop_u8(nested_obj_ins, "3", 1);
-        carbon_insert_prop_string(nested_obj_ins, "4", "v1");
-        carbon_insert_prop_u16(nested_obj_ins, "5", 2);
+        jak_carbon_insert_prop_null(nested_obj_ins, "2");
+        jak_carbon_insert_prop_u8(nested_obj_ins, "3", 1);
+        jak_carbon_insert_prop_string(nested_obj_ins, "4", "v1");
+        jak_carbon_insert_prop_u16(nested_obj_ins, "5", 2);
 
-        carbon_insert_prop_object_end(&state);
+        jak_carbon_insert_prop_object_end(&state);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -6557,24 +6557,24 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeColumnEmpty)
         string_create(&sb);
         jak_u64 key_len;
 
-        struct jak_carbon_insert_object_state state;
-        struct jak_carbon_insert_column_state nested_col;
+        jak_carbon_insert_object_state state;
+        jak_carbon_insert_column_state nested_col;
 
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = jak_carbon_insert_object_begin(&state, ins, 200);
 
-        carbon_insert_prop_column_begin(&nested_col, nested_obj_ins, "1", JAK_CARBON_COLUMN_TYPE_U32, 100);
+        jak_carbon_insert_prop_column_begin(&nested_col, nested_obj_ins, "1", JAK_CARBON_COLUMN_TYPE_U32, 100);
 
-        carbon_insert_prop_column_end(&nested_col);
+        jak_carbon_insert_prop_column_end(&nested_col);
 
-        carbon_insert_prop_null(nested_obj_ins, "2");
-        carbon_insert_prop_u8(nested_obj_ins, "3", 1);
-        carbon_insert_prop_string(nested_obj_ins, "4", "v1");
-        carbon_insert_prop_u16(nested_obj_ins, "5", 2);
+        jak_carbon_insert_prop_null(nested_obj_ins, "2");
+        jak_carbon_insert_prop_u8(nested_obj_ins, "3", 1);
+        jak_carbon_insert_prop_string(nested_obj_ins, "4", "v1");
+        jak_carbon_insert_prop_u16(nested_obj_ins, "5", 2);
 
-        carbon_insert_prop_object_end(&state);
+        jak_carbon_insert_prop_object_end(&state);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -6635,23 +6635,23 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectEmpty)
         string_create(&sb);
         jak_u64 key_len;
 
-        struct jak_carbon_insert_object_state state;
-        struct jak_carbon_insert_object_state nested_obj;
+        jak_carbon_insert_object_state state;
+        jak_carbon_insert_object_state nested_obj;
 
         // -------------------------------------------------------------------------------------------------------------
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
 
-        jak_carbon_insert *nested_obj_ins = carbon_insert_object_begin(&state, ins, 200);
+        jak_carbon_insert *nested_obj_ins = jak_carbon_insert_object_begin(&state, ins, 200);
 
-        carbon_insert_prop_object_begin(&nested_obj, nested_obj_ins, "1", 100);
-        carbon_insert_prop_object_end(&nested_obj);
+        jak_carbon_insert_prop_object_begin(&nested_obj, nested_obj_ins, "1", 100);
+        jak_carbon_insert_prop_object_end(&nested_obj);
 
-        carbon_insert_prop_null(nested_obj_ins, "2");
-        carbon_insert_prop_u8(nested_obj_ins, "3", 1);
-        carbon_insert_prop_string(nested_obj_ins, "4", "v1");
-        carbon_insert_prop_u16(nested_obj_ins, "5", 2);
+        jak_carbon_insert_prop_null(nested_obj_ins, "2");
+        jak_carbon_insert_prop_u8(nested_obj_ins, "3", 1);
+        jak_carbon_insert_prop_string(nested_obj_ins, "4", "v1");
+        jak_carbon_insert_prop_u16(nested_obj_ins, "5", 2);
 
-        carbon_insert_prop_object_end(&state);
+        jak_carbon_insert_prop_object_end(&state);
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -7812,14 +7812,14 @@ TEST(CarbonTest, CarbonColumnOptimizeFix)
 {
         jak_carbon_new context;
         jak_carbon doc;
-        struct jak_carbon_insert_column_state state_out;
+        jak_carbon_insert_column_state state_out;
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
-        jak_carbon_insert *cins = carbon_insert_column_begin(&state_out, ins, JAK_CARBON_COLUMN_TYPE_U8, 4);
-        carbon_insert_u8(cins, 3);
-        carbon_insert_u8(cins, 4);
-        carbon_insert_u8(cins, 5);
-        carbon_insert_column_end(&state_out);
+        jak_carbon_insert *cins = jak_carbon_insert_column_begin(&state_out, ins, JAK_CARBON_COLUMN_TYPE_U8, 4);
+        jak_carbon_insert_u8(cins, 3);
+        jak_carbon_insert_u8(cins, 4);
+        jak_carbon_insert_u8(cins, 5);
+        jak_carbon_insert_column_end(&state_out);
         jak_carbon_create_end(&context);
 
         char *json = jak_carbon_to_json_compact_dup(&doc);
@@ -7961,138 +7961,138 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
 {
         jak_carbon doc;
         struct jak_error err;
-        struct jak_carbon_find find;
+        jak_carbon_find find;
         jak_carbon_field_type_e result_type;
         jak_u64 number;
 
         const char *json_in = "{\"a\": 1, \"b\": {\"c\": [1,2,3], \"d\": [\"Hello\", \"World\"], \"e\": [4], \"f\": [\"!\"], \"the key\": \"x\"}}";
         jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0", &doc));
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
         ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_OBJECT);
-        ASSERT_TRUE(carbon_find_close(&find));
+        ASSERT_TRUE(jak_carbon_find_close(&find));
 
-        ASSERT_TRUE(carbon_find_open(&find, "1", &doc));
-        ASSERT_FALSE(carbon_find_has_result(&find));
-        ASSERT_TRUE(carbon_find_close(&find));
+        ASSERT_TRUE(jak_carbon_find_open(&find, "1", &doc));
+        ASSERT_FALSE(jak_carbon_find_has_result(&find));
+        ASSERT_TRUE(jak_carbon_find_close(&find));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.a", &doc));
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0.a", &doc));
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
         ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
-        ASSERT_TRUE(carbon_find_close(&find));
+        ASSERT_TRUE(jak_carbon_find_close(&find));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b", &doc));
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0.b", &doc));
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
         ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_OBJECT);
-        ASSERT_TRUE(carbon_find_close(&find));
+        ASSERT_TRUE(jak_carbon_find_close(&find));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.c", &doc));
-        ASSERT_FALSE(carbon_find_has_result(&find));
-        ASSERT_TRUE(carbon_find_close(&find));
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0.c", &doc));
+        ASSERT_FALSE(jak_carbon_find_has_result(&find));
+        ASSERT_TRUE(jak_carbon_find_close(&find));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.c", &doc));
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.c", &doc));
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
         ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_COLUMN_U8);
-        ASSERT_TRUE(carbon_find_close(&find));
+        ASSERT_TRUE(jak_carbon_find_close(&find));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.c.0", &doc));
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.c.0", &doc));
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
         ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
-        ASSERT_TRUE(carbon_find_result_unsigned(&number, &find));
+        ASSERT_TRUE(jak_carbon_find_result_unsigned(&number, &find));
         ASSERT_EQ(number, 1);
-        ASSERT_TRUE(carbon_find_close(&find));
+        ASSERT_TRUE(jak_carbon_find_close(&find));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.c.1", &doc));
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.c.1", &doc));
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
         ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
-        ASSERT_TRUE(carbon_find_result_unsigned(&number, &find));
+        ASSERT_TRUE(jak_carbon_find_result_unsigned(&number, &find));
         ASSERT_EQ(number, 2);
-        ASSERT_TRUE(carbon_find_close(&find));
+        ASSERT_TRUE(jak_carbon_find_close(&find));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.c.2", &doc));
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.c.2", &doc));
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
         ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
-        ASSERT_TRUE(carbon_find_result_unsigned(&number, &find));
+        ASSERT_TRUE(jak_carbon_find_result_unsigned(&number, &find));
         ASSERT_EQ(number, 3);
-        ASSERT_TRUE(carbon_find_close(&find));
+        ASSERT_TRUE(jak_carbon_find_close(&find));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.c.3", &doc));
-        ASSERT_FALSE(carbon_find_has_result(&find));
-        ASSERT_TRUE(carbon_find_close(&find));
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.c.3", &doc));
+        ASSERT_FALSE(jak_carbon_find_has_result(&find));
+        ASSERT_TRUE(jak_carbon_find_close(&find));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.d", &doc));
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.d", &doc));
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
         ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_ARRAY);
-        ASSERT_TRUE(carbon_find_close(&find));
+        ASSERT_TRUE(jak_carbon_find_close(&find));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.d.0", &doc));
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.d.0", &doc));
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
         ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_STRING);
-        ASSERT_TRUE(strncmp(carbon_find_result_string(&number, &find), "Hello", number) == 0);
-        ASSERT_TRUE(carbon_find_close(&find));
+        ASSERT_TRUE(strncmp(jak_carbon_find_result_string(&number, &find), "Hello", number) == 0);
+        ASSERT_TRUE(jak_carbon_find_close(&find));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.d.1", &doc));
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.d.1", &doc));
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
         ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_STRING);
-        ASSERT_TRUE(strncmp(carbon_find_result_string(&number, &find), "World", number) == 0);
-        ASSERT_TRUE(carbon_find_close(&find));
+        ASSERT_TRUE(strncmp(jak_carbon_find_result_string(&number, &find), "World", number) == 0);
+        ASSERT_TRUE(jak_carbon_find_close(&find));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.d.2", &doc));
-        ASSERT_FALSE(carbon_find_has_result(&find));
-        ASSERT_TRUE(carbon_find_close(&find));
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.d.2", &doc));
+        ASSERT_FALSE(jak_carbon_find_has_result(&find));
+        ASSERT_TRUE(jak_carbon_find_close(&find));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.e", &doc));
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.e", &doc));
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
         ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_COLUMN_U8);
-        ASSERT_TRUE(carbon_find_close(&find));
+        ASSERT_TRUE(jak_carbon_find_close(&find));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.e.0", &doc));
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.e.0", &doc));
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
         ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
-        ASSERT_TRUE(carbon_find_result_unsigned(&number, &find));
+        ASSERT_TRUE(jak_carbon_find_result_unsigned(&number, &find));
         ASSERT_EQ(number, 4);
-        ASSERT_TRUE(carbon_find_close(&find));
+        ASSERT_TRUE(jak_carbon_find_close(&find));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.e.1", &doc));
-        ASSERT_FALSE(carbon_find_has_result(&find));
-        ASSERT_TRUE(carbon_find_close(&find));
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.e.1", &doc));
+        ASSERT_FALSE(jak_carbon_find_has_result(&find));
+        ASSERT_TRUE(jak_carbon_find_close(&find));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.f", &doc));
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.f", &doc));
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
         ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_ARRAY);
-        ASSERT_TRUE(carbon_find_close(&find));
+        ASSERT_TRUE(jak_carbon_find_close(&find));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.f.0", &doc));
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.f.0", &doc));
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
         ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_STRING);
-        ASSERT_TRUE(strncmp(carbon_find_result_string(&number, &find), "!", number) == 0);
-        ASSERT_TRUE(carbon_find_close(&find));
+        ASSERT_TRUE(strncmp(jak_carbon_find_result_string(&number, &find), "!", number) == 0);
+        ASSERT_TRUE(jak_carbon_find_close(&find));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.f.1", &doc));
-        ASSERT_FALSE(carbon_find_has_result(&find));
-        ASSERT_TRUE(carbon_find_close(&find));
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.f.1", &doc));
+        ASSERT_FALSE(jak_carbon_find_has_result(&find));
+        ASSERT_TRUE(jak_carbon_find_close(&find));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.\"the key\"", &doc));
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.\"the key\"", &doc));
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
         ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_STRING);
-        ASSERT_TRUE(strncmp(carbon_find_result_string(&number, &find), "x", number) == 0);
-        ASSERT_TRUE(carbon_find_close(&find));
+        ASSERT_TRUE(strncmp(jak_carbon_find_result_string(&number, &find), "x", number) == 0);
+        ASSERT_TRUE(jak_carbon_find_close(&find));
 
         jak_carbon_drop(&doc);
 }
@@ -8101,7 +8101,7 @@ TEST(CarbonTest, CarbonResolveDotPathForObjectsBench)
 {
         jak_carbon doc;
         struct jak_error err;
-        struct jak_carbon_find find;
+        jak_carbon_find find;
 
         const char *json_in = "{\"a\": 1, \"b\": {\"c\": [1,2,3], \"d\": [\"Hello\", \"World\"], \"e\": [4], \"f\": [\"!\"], \"the key\": \"x\"}}";
         jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
@@ -8134,89 +8134,89 @@ TEST(CarbonTest, CarbonResolveDotPathForObjectsBench)
         jak_u32 max = 10000;
         timestamp_t t1 = time_now_wallclock();
         for (jak_u32 i = 0; i < max; i++) {
-                ASSERT_TRUE(carbon_find_create(&find, &path1, &doc));
-                ASSERT_TRUE(carbon_find_has_result(&find));
-                ASSERT_TRUE(carbon_find_close(&find));
+                ASSERT_TRUE(jak_carbon_find_create(&find, &path1, &doc));
+                ASSERT_TRUE(jak_carbon_find_has_result(&find));
+                ASSERT_TRUE(jak_carbon_find_close(&find));
 
-                ASSERT_TRUE(carbon_find_create(&find, &path2, &doc));
-                ASSERT_FALSE(carbon_find_has_result(&find));
-                ASSERT_TRUE(carbon_find_close(&find));
+                ASSERT_TRUE(jak_carbon_find_create(&find, &path2, &doc));
+                ASSERT_FALSE(jak_carbon_find_has_result(&find));
+                ASSERT_TRUE(jak_carbon_find_close(&find));
 
-                ASSERT_TRUE(carbon_find_create(&find, &path3, &doc));
-                ASSERT_TRUE(carbon_find_has_result(&find));
-                ASSERT_TRUE(carbon_find_close(&find));
+                ASSERT_TRUE(jak_carbon_find_create(&find, &path3, &doc));
+                ASSERT_TRUE(jak_carbon_find_has_result(&find));
+                ASSERT_TRUE(jak_carbon_find_close(&find));
 
-                ASSERT_TRUE(carbon_find_create(&find, &path4, &doc));
-                ASSERT_TRUE(carbon_find_has_result(&find));
-                ASSERT_TRUE(carbon_find_close(&find));
+                ASSERT_TRUE(jak_carbon_find_create(&find, &path4, &doc));
+                ASSERT_TRUE(jak_carbon_find_has_result(&find));
+                ASSERT_TRUE(jak_carbon_find_close(&find));
 
-                ASSERT_TRUE(carbon_find_create(&find, &path5, &doc));
-                ASSERT_FALSE(carbon_find_has_result(&find));
-                ASSERT_TRUE(carbon_find_close(&find));
+                ASSERT_TRUE(jak_carbon_find_create(&find, &path5, &doc));
+                ASSERT_FALSE(jak_carbon_find_has_result(&find));
+                ASSERT_TRUE(jak_carbon_find_close(&find));
 
-                ASSERT_TRUE(carbon_find_create(&find, &path6, &doc));
-                ASSERT_TRUE(carbon_find_has_result(&find));
-                ASSERT_TRUE(carbon_find_close(&find));
+                ASSERT_TRUE(jak_carbon_find_create(&find, &path6, &doc));
+                ASSERT_TRUE(jak_carbon_find_has_result(&find));
+                ASSERT_TRUE(jak_carbon_find_close(&find));
 
-                ASSERT_TRUE(carbon_find_create(&find, &path7, &doc));
-                ASSERT_TRUE(carbon_find_has_result(&find));
-                ASSERT_TRUE(carbon_find_close(&find));
+                ASSERT_TRUE(jak_carbon_find_create(&find, &path7, &doc));
+                ASSERT_TRUE(jak_carbon_find_has_result(&find));
+                ASSERT_TRUE(jak_carbon_find_close(&find));
 
-                ASSERT_TRUE(carbon_find_create(&find, &path8, &doc));
-                ASSERT_TRUE(carbon_find_has_result(&find));
-                ASSERT_TRUE(carbon_find_close(&find));
+                ASSERT_TRUE(jak_carbon_find_create(&find, &path8, &doc));
+                ASSERT_TRUE(jak_carbon_find_has_result(&find));
+                ASSERT_TRUE(jak_carbon_find_close(&find));
 
-                ASSERT_TRUE(carbon_find_create(&find, &path9, &doc));
-                ASSERT_TRUE(carbon_find_has_result(&find));
-                ASSERT_TRUE(carbon_find_close(&find));
+                ASSERT_TRUE(jak_carbon_find_create(&find, &path9, &doc));
+                ASSERT_TRUE(jak_carbon_find_has_result(&find));
+                ASSERT_TRUE(jak_carbon_find_close(&find));
 
-                ASSERT_TRUE(carbon_find_create(&find, &path10, &doc));
-                ASSERT_FALSE(carbon_find_has_result(&find));
-                ASSERT_TRUE(carbon_find_close(&find));
+                ASSERT_TRUE(jak_carbon_find_create(&find, &path10, &doc));
+                ASSERT_FALSE(jak_carbon_find_has_result(&find));
+                ASSERT_TRUE(jak_carbon_find_close(&find));
 
-                ASSERT_TRUE(carbon_find_create(&find, &path11, &doc));
-                ASSERT_TRUE(carbon_find_has_result(&find));
-                ASSERT_TRUE(carbon_find_close(&find));
+                ASSERT_TRUE(jak_carbon_find_create(&find, &path11, &doc));
+                ASSERT_TRUE(jak_carbon_find_has_result(&find));
+                ASSERT_TRUE(jak_carbon_find_close(&find));
 
-                ASSERT_TRUE(carbon_find_create(&find, &path12, &doc));
-                ASSERT_TRUE(carbon_find_has_result(&find));
-                ASSERT_TRUE(carbon_find_close(&find));
+                ASSERT_TRUE(jak_carbon_find_create(&find, &path12, &doc));
+                ASSERT_TRUE(jak_carbon_find_has_result(&find));
+                ASSERT_TRUE(jak_carbon_find_close(&find));
 
-                ASSERT_TRUE(carbon_find_create(&find, &path13, &doc));
-                ASSERT_TRUE(carbon_find_has_result(&find));
-                ASSERT_TRUE(carbon_find_close(&find));
+                ASSERT_TRUE(jak_carbon_find_create(&find, &path13, &doc));
+                ASSERT_TRUE(jak_carbon_find_has_result(&find));
+                ASSERT_TRUE(jak_carbon_find_close(&find));
 
-                ASSERT_TRUE(carbon_find_create(&find, &path14, &doc));
-                ASSERT_FALSE(carbon_find_has_result(&find));
-                ASSERT_TRUE(carbon_find_close(&find));
+                ASSERT_TRUE(jak_carbon_find_create(&find, &path14, &doc));
+                ASSERT_FALSE(jak_carbon_find_has_result(&find));
+                ASSERT_TRUE(jak_carbon_find_close(&find));
 
-                ASSERT_TRUE(carbon_find_create(&find, &path15, &doc));
-                ASSERT_TRUE(carbon_find_has_result(&find));
-                ASSERT_TRUE(carbon_find_close(&find));
+                ASSERT_TRUE(jak_carbon_find_create(&find, &path15, &doc));
+                ASSERT_TRUE(jak_carbon_find_has_result(&find));
+                ASSERT_TRUE(jak_carbon_find_close(&find));
 
-                ASSERT_TRUE(carbon_find_create(&find, &path16, &doc));
-                ASSERT_TRUE(carbon_find_has_result(&find));
-                ASSERT_TRUE(carbon_find_close(&find));
+                ASSERT_TRUE(jak_carbon_find_create(&find, &path16, &doc));
+                ASSERT_TRUE(jak_carbon_find_has_result(&find));
+                ASSERT_TRUE(jak_carbon_find_close(&find));
 
-                ASSERT_TRUE(carbon_find_create(&find, &path17, &doc));
-                ASSERT_FALSE(carbon_find_has_result(&find));
-                ASSERT_TRUE(carbon_find_close(&find));
+                ASSERT_TRUE(jak_carbon_find_create(&find, &path17, &doc));
+                ASSERT_FALSE(jak_carbon_find_has_result(&find));
+                ASSERT_TRUE(jak_carbon_find_close(&find));
 
-                ASSERT_TRUE(carbon_find_create(&find, &path18, &doc));
-                ASSERT_TRUE(carbon_find_has_result(&find));
-                ASSERT_TRUE(carbon_find_close(&find));
+                ASSERT_TRUE(jak_carbon_find_create(&find, &path18, &doc));
+                ASSERT_TRUE(jak_carbon_find_has_result(&find));
+                ASSERT_TRUE(jak_carbon_find_close(&find));
 
-                ASSERT_TRUE(carbon_find_create(&find, &path19, &doc));
-                ASSERT_TRUE(carbon_find_has_result(&find));
-                ASSERT_TRUE(carbon_find_close(&find));
+                ASSERT_TRUE(jak_carbon_find_create(&find, &path19, &doc));
+                ASSERT_TRUE(jak_carbon_find_has_result(&find));
+                ASSERT_TRUE(jak_carbon_find_close(&find));
 
-                ASSERT_TRUE(carbon_find_create(&find, &path20, &doc));
-                ASSERT_FALSE(carbon_find_has_result(&find));
-                ASSERT_TRUE(carbon_find_close(&find));
+                ASSERT_TRUE(jak_carbon_find_create(&find, &path20, &doc));
+                ASSERT_FALSE(jak_carbon_find_has_result(&find));
+                ASSERT_TRUE(jak_carbon_find_close(&find));
 
-                ASSERT_TRUE(carbon_find_create(&find, &path21, &doc));
-                ASSERT_TRUE(carbon_find_has_result(&find));
-                ASSERT_TRUE(carbon_find_close(&find));
+                ASSERT_TRUE(jak_carbon_find_create(&find, &path21, &doc));
+                ASSERT_TRUE(jak_carbon_find_has_result(&find));
+                ASSERT_TRUE(jak_carbon_find_close(&find));
         }
         timestamp_t t2 = time_now_wallclock();
         printf("%.2fmsec/opp, %.4f ops/sec\n", (t2-t1)/(float)max/21.0f, 1.0f/((t2-t1)/(float)max/(21*1000.0f)));
@@ -8249,7 +8249,7 @@ TEST(CarbonTest, CarbonResolveDotPathForObjectsBench)
 TEST(CarbonTest, CarbonFromJsonShortenedDotPath)
 {
         jak_carbon doc;
-        struct jak_carbon_find find;
+        jak_carbon_find find;
         jak_carbon_field_type_e result_type;
         struct jak_error err;
 
@@ -8258,18 +8258,18 @@ TEST(CarbonTest, CarbonFromJsonShortenedDotPath)
 
         /* without shortened dot path rule, the json object as given is embedded in an record container (aka array)
          * such that the object must be referenced by its index in the record container (i.e., 0) */
-        carbon_find_open(&find, "0.x", &doc);
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        carbon_find_result_type(&result_type, &find);
+        jak_carbon_find_open(&find, "0.x", &doc);
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        jak_carbon_find_result_type(&result_type, &find);
         ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_STRING);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
 
         /* with shortened dot path rule, the json object can be referenced without providing its index in the record */
-        carbon_find_open(&find, "x", &doc);
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        carbon_find_result_type(&result_type, &find);
+        jak_carbon_find_open(&find, "x", &doc);
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        jak_carbon_find_result_type(&result_type, &find);
         ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_STRING);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
 
         jak_carbon_drop(&doc);
 
@@ -8277,30 +8277,30 @@ TEST(CarbonTest, CarbonFromJsonShortenedDotPath)
         jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
         /* The shortened dot path rule does not apply here since the user input is an array  */
-        carbon_find_open(&find, "0.x", &doc);
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        carbon_find_result_type(&result_type, &find);
+        jak_carbon_find_open(&find, "0.x", &doc);
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        jak_carbon_find_result_type(&result_type, &find);
         ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_STRING);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
 
-        carbon_find_open(&find, "1.x", &doc);
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        carbon_find_result_type(&result_type, &find);
+        jak_carbon_find_open(&find, "1.x", &doc);
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        jak_carbon_find_result_type(&result_type, &find);
         ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_ARRAY);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
 
-        carbon_find_open(&find, "x", &doc);
-        ASSERT_FALSE(carbon_find_has_result(&find));
-        carbon_find_close(&find);
+        jak_carbon_find_open(&find, "x", &doc);
+        ASSERT_FALSE(jak_carbon_find_has_result(&find));
+        jak_carbon_find_close(&find);
 
         /* The shortened dot path rule does also never apply outside the record container  */
-        carbon_find_open(&find, "1.x.0.z", &doc);
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        carbon_find_close(&find);
+        jak_carbon_find_open(&find, "1.x.0.z", &doc);
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        jak_carbon_find_close(&find);
 
-        carbon_find_open(&find, "1.x.z", &doc);
-        ASSERT_FALSE(carbon_find_has_result(&find));
-        carbon_find_close(&find);
+        jak_carbon_find_open(&find, "1.x.z", &doc);
+        ASSERT_FALSE(jak_carbon_find_has_result(&find));
+        jak_carbon_find_close(&find);
 
         jak_carbon_drop(&doc);
 }
@@ -8309,158 +8309,158 @@ TEST(CarbonTest, CarbonFindPrint)
 {
         jak_carbon doc;
         struct jak_error err;
-        struct jak_carbon_find find;
+        jak_carbon_find find;
         char *result;
 
         jak_carbon_from_json(&doc, "8", JAK_CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "8") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
         jak_carbon_drop(&doc);
 
         jak_carbon_from_json(&doc, "-8", JAK_CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "-8") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
         jak_carbon_drop(&doc);
 
         jak_carbon_from_json(&doc, "\"A\"", JAK_CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "\"A\"") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
         jak_carbon_drop(&doc);
 
         jak_carbon_from_json(&doc, "32.4", JAK_CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "32.40") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
         jak_carbon_drop(&doc);
 
         jak_carbon_from_json(&doc, "null", JAK_CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "null") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
         jak_carbon_drop(&doc);
 
         jak_carbon_from_json(&doc, "true", JAK_CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "true") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
         jak_carbon_drop(&doc);
 
         jak_carbon_from_json(&doc, "false", JAK_CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "false") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
         jak_carbon_drop(&doc);
 
         jak_carbon_from_json(&doc, "[1, 2, 3, null]", JAK_CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "1") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
         jak_carbon_drop(&doc);
 
         jak_carbon_from_json(&doc, "[1, 2, 3, null]", JAK_CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "1", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "1", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "2") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
         jak_carbon_drop(&doc);
 
         jak_carbon_from_json(&doc, "[1, 2, 3, null]", JAK_CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "2", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "2", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "3") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
         jak_carbon_drop(&doc);
 
         jak_carbon_from_json(&doc, "[1, 2, 3, null]", JAK_CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "3", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "3", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "null") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
         jak_carbon_drop(&doc);
 
         jak_carbon_from_json(&doc, "[1, 2, 3, null]", JAK_CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "4", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "4", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "_nil") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
         jak_carbon_drop(&doc);
 
         jak_carbon_from_json(&doc, "[\"A\", \"B\", \"C\", null]", JAK_CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "\"A\"") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
         jak_carbon_drop(&doc);
 
         jak_carbon_from_json(&doc, "[\"A\", \"B\", \"C\", null]", JAK_CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "1", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "1", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "\"B\"") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
         jak_carbon_drop(&doc);
 
         jak_carbon_from_json(&doc, "[\"A\", \"B\", \"C\", null]", JAK_CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "2", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "2", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "\"C\"") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
         jak_carbon_drop(&doc);
 
         jak_carbon_from_json(&doc, "[\"A\", \"B\", \"C\", null]", JAK_CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "3", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "3", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "null") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
         jak_carbon_drop(&doc);
 
         jak_carbon_from_json(&doc, "\"Hello, World!\"", JAK_CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "\"Hello, World!\"") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
         jak_carbon_drop(&doc);
 
         jak_carbon_from_json(&doc, "{}", JAK_CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "{}") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
         jak_carbon_drop(&doc);
 
         jak_carbon_from_json(&doc, "[]", JAK_CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "_nil") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
         jak_carbon_drop(&doc);
 
@@ -8499,124 +8499,124 @@ TEST(CarbonTest, CarbonFindPrint)
 
         jak_carbon_from_json(&doc, complex, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "m", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "{\"n\": 8, \"o\": -8, \"p\": \"A\", \"q\": 32.40, \"r\": null, \"s\": true, \"t\": false, \"u\": [1, 2, 3, null], \"v\": [\"A\", \"B\", null], \"w\": \"Hello, World!\", \"x\": {\"a\": null}, \"y\": [], \"z\": {}}") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.n", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "m.n", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "8") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.o", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "m.o", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "-8") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.p", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "m.p", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "\"A\"") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.q", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "m.q", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "32.40") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.r", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "m.r", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "null") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.s", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "m.s", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "true") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.t", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "m.t", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "false") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.u", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "m.u", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "[1, 2, 3, null]") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.u.0", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "m.u.0", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "1") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.u.1", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "m.u.1", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "2") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.u.2", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "m.u.2", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "3") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.u.3", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "m.u.3", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "null") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.u.4", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "m.u.4", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "_nil") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.v", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "m.v", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "[\"A\", \"B\", null]") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.w", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "m.w", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "\"Hello, World!\"") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.x", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "m.x", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "{\"a\": null}") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.x.a", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "m.x.a", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "null") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.y", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "m.y", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "[]") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.z", &doc));
-        result = carbon_find_result_to_json_compact_dup(&find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "m.z", &doc));
+        result = jak_carbon_find_result_to_json_compact_dup(&find);
         ASSERT_TRUE(strcmp(result, "{}") == 0);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         free(result);
         
         jak_carbon_drop(&doc);
@@ -8626,7 +8626,7 @@ TEST(CarbonTest, CarbonFindPrintExamples)
 {
         jak_carbon doc;
         struct jak_error err;
-        struct jak_carbon_find find;
+        jak_carbon_find find;
         struct jak_string result;
 
         const char *json = "{\"x\": {\"y\": [{\"z\": 23}, {\"z\": null}]} }";
@@ -8636,29 +8636,29 @@ TEST(CarbonTest, CarbonFindPrintExamples)
 
         printf("input: '%s'\n", json);
 
-        carbon_find_open(&find, "x", &doc);
-        printf("x\t\t\t->\t%s\n", carbon_find_result_to_json_compact(&result, &find));
-        carbon_find_close(&find);
+        jak_carbon_find_open(&find, "x", &doc);
+        printf("x\t\t\t->\t%s\n", jak_carbon_find_result_to_json_compact(&result, &find));
+        jak_carbon_find_close(&find);
 
-        carbon_find_open(&find, "x.y", &doc);
-        printf("x.y\t\t\t->\t%s\n", carbon_find_result_to_json_compact(&result, &find));
-        carbon_find_close(&find);
+        jak_carbon_find_open(&find, "x.y", &doc);
+        printf("x.y\t\t\t->\t%s\n", jak_carbon_find_result_to_json_compact(&result, &find));
+        jak_carbon_find_close(&find);
 
-        carbon_find_open(&find, "x.z", &doc);
-        printf("x.z\t\t\t->\t%s\n", carbon_find_result_to_json_compact(&result, &find));
-        carbon_find_close(&find);
+        jak_carbon_find_open(&find, "x.z", &doc);
+        printf("x.z\t\t\t->\t%s\n", jak_carbon_find_result_to_json_compact(&result, &find));
+        jak_carbon_find_close(&find);
 
-        carbon_find_open(&find, "x.y.z", &doc);
-        printf("x.y.z\t\t->\t%s\n", carbon_find_result_to_json_compact(&result, &find));
-        carbon_find_close(&find);
+        jak_carbon_find_open(&find, "x.y.z", &doc);
+        printf("x.y.z\t\t->\t%s\n", jak_carbon_find_result_to_json_compact(&result, &find));
+        jak_carbon_find_close(&find);
 
-        carbon_find_open(&find, "x.y.0.z", &doc);
-        printf("x.y.0.z\t\t->\t%s\n", carbon_find_result_to_json_compact(&result, &find));
-        carbon_find_close(&find);
+        jak_carbon_find_open(&find, "x.y.0.z", &doc);
+        printf("x.y.0.z\t\t->\t%s\n", jak_carbon_find_result_to_json_compact(&result, &find));
+        jak_carbon_find_close(&find);
 
-        carbon_find_open(&find, "x.y.1.z", &doc);
-        printf("x.y.0.z\t\t->\t%s\n", carbon_find_result_to_json_compact(&result, &find));
-        carbon_find_close(&find);
+        jak_carbon_find_open(&find, "x.y.1.z", &doc);
+        printf("x.y.0.z\t\t->\t%s\n", jak_carbon_find_result_to_json_compact(&result, &find));
+        jak_carbon_find_close(&find);
 
         string_drop(&result);
         jak_carbon_drop(&doc);
@@ -8667,35 +8667,35 @@ TEST(CarbonTest, CarbonFindPrintExamples)
 TEST(CarbonTest, ParseBooleanArray) {
         jak_carbon doc;
         struct jak_error err;
-        struct jak_carbon_find find;
+        jak_carbon_find find;
         jak_carbon_field_type_e type;
         const char *json = "[{\"col\": [true, null, false]}]";
 
         jak_carbon_from_json(&doc, json, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.col", &doc));
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        carbon_find_result_type(&type, &find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0.col", &doc));
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        jak_carbon_find_result_type(&type, &find);
         ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.col.0", &doc));
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        carbon_find_result_type(&type, &find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0.col.0", &doc));
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        jak_carbon_find_result_type(&type, &find);
         ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_TRUE);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.col.1", &doc));
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        carbon_find_result_type(&type, &find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0.col.1", &doc));
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        jak_carbon_find_result_type(&type, &find);
         ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NULL);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.col.2", &doc));
-        ASSERT_TRUE(carbon_find_has_result(&find));
-        carbon_find_result_type(&type, &find);
+        ASSERT_TRUE(jak_carbon_find_open(&find, "0.col.2", &doc));
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        jak_carbon_find_result_type(&type, &find);
         ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_FALSE);
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
 
         jak_carbon_drop(&doc);
 }

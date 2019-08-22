@@ -164,7 +164,7 @@ bool carbon_revise_iterator_open(jak_carbon_array_it *it, struct jak_carbon_revi
 {
         JAK_ERROR_IF_NULL(it);
         JAK_ERROR_IF_NULL(context);
-        jak_offset_t payload_start = carbon_int_payload_after_header(context->revised_doc);
+        jak_offset_t payload_start = jak_carbon_int_payload_after_header(context->revised_doc);
         error_if(context->revised_doc->memfile.mode != READ_WRITE, &context->original->err, JAK_ERR_INTERNALERR)
         return jak_carbon_array_it_create(it, &context->revised_doc->memfile, &context->original->err, payload_start);
 }
@@ -175,22 +175,22 @@ bool carbon_revise_iterator_close(jak_carbon_array_it *it)
         return jak_carbon_array_it_drop(it);
 }
 
-bool carbon_revise_find_open(struct jak_carbon_find *out, const char *dot_path, struct jak_carbon_revise *context)
+bool carbon_revise_find_open(jak_carbon_find *out, const char *dot_path, struct jak_carbon_revise *context)
 {
         JAK_ERROR_IF_NULL(out)
         JAK_ERROR_IF_NULL(dot_path)
         JAK_ERROR_IF_NULL(context)
         jak_carbon_dot_path path;
         jak_carbon_dot_path_from_string(&path, dot_path);
-        bool status = carbon_find_create(out, &path, context->revised_doc);
+        bool status = jak_carbon_find_create(out, &path, context->revised_doc);
         jak_carbon_dot_path_drop(&path);
         return status;
 }
 
-bool carbon_revise_find_close(struct jak_carbon_find *find)
+bool carbon_revise_find_close(jak_carbon_find *find)
 {
         JAK_ERROR_IF_NULL(find)
-        return carbon_find_drop(find);
+        return jak_carbon_find_drop(find);
 }
 
 bool carbon_revise_remove_one(const char *dot_path, jak_carbon *rev_doc, jak_carbon *doc)
@@ -308,7 +308,7 @@ static bool internal_pack_array(jak_carbon_array_it *it)
                 bool is_empty_slot, is_array_end;
 
                 jak_carbon_array_it_copy(&this_array_it, it);
-                carbon_int_array_skip_contents(&is_empty_slot, &is_array_end, &this_array_it);
+                jak_carbon_int_array_skip_contents(&is_empty_slot, &is_array_end, &this_array_it);
 
                 if (!is_array_end) {
 
@@ -416,7 +416,7 @@ static bool internal_pack_object(struct jak_carbon_object_it *it)
                 bool is_empty_slot, is_object_end;
 
                 carbon_object_it_copy(&this_object_it, it);
-                carbon_int_object_skip_contents(&is_empty_slot, &is_object_end, &this_object_it);
+                jak_carbon_int_object_skip_contents(&is_empty_slot, &is_object_end, &this_object_it);
 
                 if (!is_object_end) {
 
@@ -518,9 +518,9 @@ static bool internal_pack_column(jak_carbon_column_it *it)
 {
         JAK_ASSERT(it);
 
-        jak_u32 free_space = (it->column_capacity - it->column_num_elements) * carbon_int_get_type_value_size(it->type);
-        jak_offset_t payload_start = carbon_int_column_get_payload_off(it);
-        jak_u64 payload_size = it->column_num_elements * carbon_int_get_type_value_size(it->type);
+        jak_u32 free_space = (it->column_capacity - it->column_num_elements) * jak_carbon_int_get_type_value_size(it->type);
+        jak_offset_t payload_start = jak_carbon_int_column_get_payload_off(it);
+        jak_u64 payload_size = it->column_num_elements * jak_carbon_int_get_type_value_size(it->type);
         memfile_seek(&it->memfile, payload_start);
         memfile_skip(&it->memfile, payload_size);
 

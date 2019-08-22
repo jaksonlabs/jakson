@@ -545,9 +545,9 @@ static jak_u8 field_ref_into_carbon(jak_carbon_insert *ins, struct jak_carbon_pa
         jak_u8 field_type = memfile_read_byte(&index->memfile);
 
         if (is_root) {
-                carbon_insert_prop_null(ins, "container");
+                jak_carbon_insert_prop_null(ins, "container");
         } else {
-                carbon_insert_prop_string(ins, "container", jak_carbon_field_type_str(NULL, field_type));
+                jak_carbon_insert_prop_string(ins, "container", jak_carbon_field_type_str(NULL, field_type));
         }
 
 
@@ -557,16 +557,16 @@ static jak_u8 field_ref_into_carbon(jak_carbon_insert *ins, struct jak_carbon_pa
                  * the field offset */
                 jak_u64 field_offset = memfile_read_uintvar_stream(NULL, &index->memfile);
                 if (is_root) {
-                        carbon_insert_prop_null(ins, "offset");
+                        jak_carbon_insert_prop_null(ins, "offset");
                 } else {
                         struct jak_string str;
                         string_create(&str);
                         string_add_u64_as_hex_0x_prefix_compact(&str, field_offset);
-                        carbon_insert_prop_string(ins, "offset", string_cstr(&str));
+                        jak_carbon_insert_prop_string(ins, "offset", string_cstr(&str));
                         string_drop(&str);
                 }
         } else {
-                carbon_insert_prop_null(ins, "offset");
+                jak_carbon_insert_prop_null(ins, "offset");
         }
         return field_type;
 }
@@ -605,10 +605,10 @@ static void column_to_str(struct jak_string *str, struct jak_carbon_path_index *
 
 static jak_u8 _insert_field_ref(jak_carbon_insert *ins, struct jak_carbon_path_index *index, bool is_root)
 {
-        struct jak_carbon_insert_object_state object;
-        jak_carbon_insert *oins = carbon_insert_prop_object_begin(&object, ins, "record-reference", 1024);
+        jak_carbon_insert_object_state object;
+        jak_carbon_insert *oins = jak_carbon_insert_prop_object_begin(&object, ins, "record-reference", 1024);
         jak_u8 ret = field_ref_into_carbon(oins, index, is_root);
-        carbon_insert_prop_object_end(&object);
+        jak_carbon_insert_prop_object_end(&object);
         return ret;
 }
 
@@ -616,17 +616,17 @@ JAK_FUNC_UNUSED
 static void column_into_carbon(jak_carbon_insert *ins, struct jak_carbon_path_index *index)
 {
         memfile_skip_byte(&index->memfile);
-        carbon_insert_prop_string(ins, "type", "column");
+        jak_carbon_insert_prop_string(ins, "type", "column");
         _insert_field_ref(ins, index, false);
 }
 
 static void container_contents_into_carbon(jak_carbon_insert *ins, struct jak_carbon_path_index *index)
 {
         jak_u64 num_elems = memfile_read_uintvar_stream(NULL, &index->memfile);
-        carbon_insert_prop_unsigned(ins, "element-count", num_elems);
+        jak_carbon_insert_prop_unsigned(ins, "element-count", num_elems);
 
-        struct jak_carbon_insert_array_state array;
-        jak_carbon_insert *ains = carbon_insert_prop_array_begin(&array, ins, "element-offsets", 1024);
+        jak_carbon_insert_array_state array;
+        jak_carbon_insert *ains = jak_carbon_insert_prop_array_begin(&array, ins, "element-offsets", 1024);
 
         struct jak_string str;
         string_create(&str);
@@ -634,21 +634,21 @@ static void container_contents_into_carbon(jak_carbon_insert *ins, struct jak_ca
                 jak_u64 pos_offs = memfile_read_uintvar_stream(NULL, &index->memfile);
                 string_clear(&str);
                 string_add_u64_as_hex_0x_prefix_compact(&str, pos_offs);
-                carbon_insert_string(ains, string_cstr(&str));
+                jak_carbon_insert_string(ains, string_cstr(&str));
         }
         string_drop(&str);
 
-        carbon_insert_prop_array_end(&array);
+        jak_carbon_insert_prop_array_end(&array);
 
-        ains = carbon_insert_prop_array_begin(&array, ins, "elements", 1024);
+        ains = jak_carbon_insert_prop_array_begin(&array, ins, "elements", 1024);
         JAK_UNUSED(ains)
         for (jak_u32 i = 0; i < num_elems; i++) {
-                struct jak_carbon_insert_object_state node_obj;
-                jak_carbon_insert *node_obj_ins = carbon_insert_object_begin(&node_obj, ains, 1024);
+                jak_carbon_insert_object_state node_obj;
+                jak_carbon_insert *node_obj_ins = jak_carbon_insert_object_begin(&node_obj, ains, 1024);
                 node_into_carbon(node_obj_ins, index);
-                carbon_insert_object_end(&node_obj);
+                jak_carbon_insert_object_end(&node_obj);
         }
-        carbon_insert_prop_array_end(&array);
+        jak_carbon_insert_prop_array_end(&array);
 
 }
 
@@ -777,7 +777,7 @@ JAK_FUNC_UNUSED
 static void prop_into_carbon(jak_carbon_insert *ins, struct jak_carbon_path_index *index)
 {
         memfile_skip_byte(&index->memfile);
-        carbon_insert_prop_string(ins, "type", "key");
+        jak_carbon_insert_prop_string(ins, "type", "key");
         jak_u8 field_type = _insert_field_ref(ins, index, false);
 
         struct jak_string str;
@@ -785,7 +785,7 @@ static void prop_into_carbon(jak_carbon_insert *ins, struct jak_carbon_path_inde
 
         jak_u64 key_offset = memfile_read_uintvar_stream(NULL, &index->memfile);
         string_add_u64_as_hex_0x_prefix_compact(&str, key_offset);
-        carbon_insert_prop_string(ins, "key", string_cstr(&str));
+        jak_carbon_insert_prop_string(ins, "key", string_cstr(&str));
         string_drop(&str);
 
         container_into_carbon(ins, index, field_type);
@@ -796,17 +796,17 @@ static void array_into_carbon(jak_carbon_insert *ins, struct jak_carbon_path_ind
         memfile_skip_byte(&index->memfile);
         jak_u8 field_type;
 
-        carbon_insert_prop_string(ins, "parent", is_root ? "record" : "array");
+        jak_carbon_insert_prop_string(ins, "parent", is_root ? "record" : "array");
         field_type = _insert_field_ref(ins, index, is_root);
 
-        struct jak_carbon_insert_object_state object;
-        jak_carbon_insert *oins = carbon_insert_prop_object_begin(&object, ins, "nodes", 1024);
+        jak_carbon_insert_object_state object;
+        jak_carbon_insert *oins = jak_carbon_insert_prop_object_begin(&object, ins, "nodes", 1024);
         if (JAK_UNLIKELY(is_root)) {
                 container_contents_into_carbon(oins, index);
         } else {
                 container_into_carbon(oins, index, field_type);
         }
-        carbon_insert_prop_object_end(&object);
+        jak_carbon_insert_prop_object_end(&object);
 }
 
 static void
@@ -932,7 +932,7 @@ static void record_ref_to_str(struct jak_string *str, struct jak_carbon_path_ind
 static void record_ref_to_carbon(jak_carbon_insert *roins, struct jak_carbon_path_index *index)
 {
         char key_type = memfile_read_byte(&index->memfile);
-        carbon_insert_prop_string(roins, "key-type", carbon_key_type_str(key_type));
+        jak_carbon_insert_prop_string(roins, "key-type", carbon_key_type_str(key_type));
 
         switch (key_type) {
                 case JAK_CARBON_KEY_NOKEY:
@@ -941,18 +941,18 @@ static void record_ref_to_carbon(jak_carbon_insert *roins, struct jak_carbon_pat
                 case JAK_CARBON_KEY_AUTOKEY:
                 case JAK_CARBON_KEY_UKEY: {
                         jak_u64 key = memfile_read_u64(&index->memfile);
-                        carbon_insert_prop_unsigned(roins, "key-value", key);
+                        jak_carbon_insert_prop_unsigned(roins, "key-value", key);
                 }
                         break;
                 case JAK_CARBON_KEY_IKEY: {
                         jak_i64 key = memfile_read_i64(&index->memfile);
-                        carbon_insert_prop_signed(roins, "key-value", key);
+                        jak_carbon_insert_prop_signed(roins, "key-value", key);
                 }
                         break;
                 case JAK_CARBON_KEY_SKEY: {
                         jak_u64 key_len;
                         const char *key = carbon_string_read(&key_len, &index->memfile);
-                        carbon_insert_prop_nchar(roins, "key-value", key, key_len);
+                        jak_carbon_insert_prop_nchar(roins, "key-value", key, key_len);
                 }
                         break;
                 default: error(&index->err, JAK_ERR_INTERNALERR);
@@ -961,7 +961,7 @@ static void record_ref_to_carbon(jak_carbon_insert *roins, struct jak_carbon_pat
         struct jak_string str;
         string_create(&str);
         jak_carbon_commit_hash_to_str(&str, commit_hash);
-        carbon_insert_prop_string(roins, "commit-hash", string_cstr(&str));
+        jak_carbon_insert_prop_string(roins, "commit-hash", string_cstr(&str));
         string_drop(&str);
 }
 
@@ -1286,28 +1286,28 @@ bool carbon_path_index_hexdump(FILE *file, struct jak_carbon_path_index *index)
 bool carbon_path_index_to_carbon(jak_carbon *doc, struct jak_carbon_path_index *index)
 {
         jak_carbon_new context;
-        struct jak_carbon_insert_object_state object;
+        jak_carbon_insert_object_state object;
 
         memfile_seek_to_start(&index->memfile);
 
         jak_carbon_insert *ins = jak_carbon_create_begin(&context, doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
-        jak_carbon_insert *oins = carbon_insert_object_begin(&object, ins, 1024);
+        jak_carbon_insert *oins = jak_carbon_insert_object_begin(&object, ins, 1024);
 
         {
-                struct jak_carbon_insert_object_state ref_object;
-                jak_carbon_insert *roins = carbon_insert_prop_object_begin(&ref_object, oins,
+                jak_carbon_insert_object_state ref_object;
+                jak_carbon_insert *roins = jak_carbon_insert_prop_object_begin(&ref_object, oins,
                                                                                   "record-association", 1024);
                 record_ref_to_carbon(roins, index);
-                carbon_insert_prop_object_end(&ref_object);
+                jak_carbon_insert_prop_object_end(&ref_object);
         }
         {
-                struct jak_carbon_insert_object_state root_object;
-                jak_carbon_insert *roins = carbon_insert_prop_object_begin(&root_object, oins, "index", 1024);
+                jak_carbon_insert_object_state root_object;
+                jak_carbon_insert *roins = jak_carbon_insert_prop_object_begin(&root_object, oins, "index", 1024);
                 array_into_carbon(roins, index, true);
-                carbon_insert_prop_object_end(&root_object);
+                jak_carbon_insert_prop_object_end(&root_object);
         }
 
-        carbon_insert_object_end(&object);
+        jak_carbon_insert_object_end(&object);
         jak_carbon_create_end(&context);
         return true;
 }

@@ -92,54 +92,54 @@ bool carbon_path_evaluator_end(struct jak_carbon_path_evaluator *state)
 
 bool carbon_path_exists(jak_carbon *doc, const char *path)
 {
-        struct jak_carbon_find find;
-        bool result = carbon_find_open(&find, path, doc);
-        carbon_find_close(&find);
+        jak_carbon_find find;
+        bool result = jak_carbon_find_open(&find, path, doc);
+        jak_carbon_find_close(&find);
         return result;
 }
 
 bool carbon_path_is_array(jak_carbon *doc, const char *path)
 {
-        struct jak_carbon_find find;
+        jak_carbon_find find;
         jak_carbon_field_type_e field_type;
         bool result = false;
 
-        if (carbon_find_open(&find, path, doc)) {
-                carbon_find_result_type(&field_type, &find);
+        if (jak_carbon_find_open(&find, path, doc)) {
+                jak_carbon_find_result_type(&field_type, &find);
                 result = jak_carbon_field_type_is_array(field_type);
         }
 
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         return result;
 }
 
 bool carbon_path_is_column(jak_carbon *doc, const char *path)
 {
-        struct jak_carbon_find find;
+        jak_carbon_find find;
         jak_carbon_field_type_e field_type;
         bool result = false;
 
-        if (carbon_find_open(&find, path, doc)) {
-                carbon_find_result_type(&field_type, &find);
+        if (jak_carbon_find_open(&find, path, doc)) {
+                jak_carbon_find_result_type(&field_type, &find);
                 result = jak_carbon_field_type_is_column(field_type);
         }
 
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         return result;
 }
 
 bool carbon_path_is_object(jak_carbon *doc, const char *path)
 {
-        struct jak_carbon_find find;
+        jak_carbon_find find;
         jak_carbon_field_type_e field_type;
         bool result = false;
 
-        if (carbon_find_open(&find, path, doc)) {
-                carbon_find_result_type(&field_type, &find);
+        if (jak_carbon_find_open(&find, path, doc)) {
+                jak_carbon_find_result_type(&field_type, &find);
                 result = jak_carbon_field_type_is_object(field_type);
         }
 
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         return result;
 }
 
@@ -151,61 +151,61 @@ bool carbon_path_is_container(jak_carbon *doc, const char *path)
 
 bool carbon_path_is_null(jak_carbon *doc, const char *path)
 {
-        struct jak_carbon_find find;
+        jak_carbon_find find;
         jak_carbon_field_type_e field_type;
         bool result = false;
 
-        if (carbon_find_open(&find, path, doc)) {
-                carbon_find_result_type(&field_type, &find);
+        if (jak_carbon_find_open(&find, path, doc)) {
+                jak_carbon_find_result_type(&field_type, &find);
                 result = jak_carbon_field_type_is_null(field_type);
         }
 
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         return result;
 }
 
 bool carbon_path_is_number(jak_carbon *doc, const char *path)
 {
-        struct jak_carbon_find find;
+        jak_carbon_find find;
         jak_carbon_field_type_e field_type;
         bool result = false;
 
-        if (carbon_find_open(&find, path, doc)) {
-                carbon_find_result_type(&field_type, &find);
+        if (jak_carbon_find_open(&find, path, doc)) {
+                jak_carbon_find_result_type(&field_type, &find);
                 result = jak_carbon_field_type_is_number(field_type);
         }
 
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         return result;
 }
 
 bool carbon_path_is_boolean(jak_carbon *doc, const char *path)
 {
-        struct jak_carbon_find find;
+        jak_carbon_find find;
         jak_carbon_field_type_e field_type;
         bool result = false;
 
-        if (carbon_find_open(&find, path, doc)) {
-                carbon_find_result_type(&field_type, &find);
+        if (jak_carbon_find_open(&find, path, doc)) {
+                jak_carbon_find_result_type(&field_type, &find);
                 result = jak_carbon_field_type_is_boolean(field_type);
         }
 
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         return result;
 }
 
 bool carbon_path_is_string(jak_carbon *doc, const char *path)
 {
-        struct jak_carbon_find find;
+        jak_carbon_find find;
         jak_carbon_field_type_e field_type;
         bool result = false;
 
-        if (carbon_find_open(&find, path, doc)) {
-                carbon_find_result_type(&field_type, &find);
+        if (jak_carbon_find_open(&find, path, doc)) {
+                jak_carbon_find_result_type(&field_type, &find);
                 result = jak_carbon_field_type_is_string(field_type);
         }
 
-        carbon_find_close(&find);
+        jak_carbon_find_close(&find);
         return result;
 }
 

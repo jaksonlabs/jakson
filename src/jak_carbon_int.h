@@ -46,155 +46,101 @@ typedef struct jak_carbon_insert {
         struct jak_error err;
 } jak_carbon_insert;
 
-struct jak_carbon_insert_array_state {
+typedef struct jak_carbon_insert_array_state {
         jak_carbon_insert *parent_inserter;
-
         jak_carbon_array_it *nested_array;
         jak_carbon_insert nested_inserter;
-
         jak_offset_t array_begin, array_end;
-};
+} jak_carbon_insert_array_state;
 
-struct jak_carbon_insert_object_state {
+typedef struct jak_carbon_insert_object_state {
         jak_carbon_insert *parent_inserter;
-
         struct jak_carbon_object_it *it;
         jak_carbon_insert inserter;
-
         jak_offset_t object_begin, object_end;
-};
+} jak_carbon_insert_object_state;
 
-struct jak_carbon_insert_column_state {
+typedef struct jak_carbon_insert_column_state {
         jak_carbon_insert *parent_inserter;
-
         jak_carbon_field_type_e type;
         jak_carbon_column_it *nested_column;
         jak_carbon_insert nested_inserter;
-
         jak_offset_t column_begin, column_end;
-};
+} jak_carbon_insert_column_state;
 
-bool carbon_int_insert_object(struct jak_memfile *memfile, size_t nbytes);
-
-bool carbon_int_insert_array(struct jak_memfile *memfile, size_t nbytes);
-
-bool carbon_int_insert_column(struct jak_memfile *memfile_in, struct jak_error *err_in, jak_carbon_column_type_e type,
-                              size_t capactity);
+bool jak_carbon_int_insert_object(struct jak_memfile *memfile, size_t nbytes);
+bool jak_carbon_int_insert_array(struct jak_memfile *memfile, size_t nbytes);
+bool jak_carbon_int_insert_column(struct jak_memfile *memfile_in, struct jak_error *err_in, jak_carbon_column_type_e type, size_t capactity);
 
 /**
  * Returns the number of bytes required to store a field type including its type marker in a byte sequence.
  */
-size_t carbon_int_get_type_size_encoded(jak_carbon_field_type_e type);
+size_t jak_carbon_int_get_type_size_encoded(jak_carbon_field_type_e type);
 
 /**
  * Returns the number of bytes required to store a field value of a particular type exclusing its type marker.
  */
-size_t carbon_int_get_type_value_size(jak_carbon_field_type_e type);
+size_t jak_carbon_int_get_type_value_size(jak_carbon_field_type_e type);
 
-bool carbon_int_array_it_next(bool *is_empty_slot, bool *is_array_end, jak_carbon_array_it *it);
+bool jak_carbon_int_array_it_next(bool *is_empty_slot, bool *is_array_end, jak_carbon_array_it *it);
+bool jak_carbon_int_array_it_refresh(bool *is_empty_slot, bool *is_array_end, jak_carbon_array_it *it);
+bool jak_carbon_int_array_it_field_type_read(jak_carbon_array_it *it);
+bool jak_carbon_int_array_skip_contents(bool *is_empty_slot, bool *is_array_end, jak_carbon_array_it *it);
 
-bool carbon_int_object_it_next(bool *is_empty_slot, bool *is_object_end, struct jak_carbon_object_it *it);
+bool jak_carbon_int_object_it_next(bool *is_empty_slot, bool *is_object_end, struct jak_carbon_object_it *it);
+bool jak_carbon_int_object_it_refresh(bool *is_empty_slot, bool *is_object_end, struct jak_carbon_object_it *it);
+bool jak_carbon_int_object_it_prop_key_access(struct jak_carbon_object_it *it);
+bool jak_carbon_int_object_it_prop_value_skip(struct jak_carbon_object_it *it);
+bool jak_carbon_int_object_it_prop_skip(struct jak_carbon_object_it *it);
+bool jak_carbon_int_object_skip_contents(bool *is_empty_slot, bool *is_array_end, struct jak_carbon_object_it *it);
+bool jak_carbon_int_field_data_access(struct jak_memfile *file, struct jak_error *err, jak_field_access *field_access);
 
-bool carbon_int_object_it_refresh(bool *is_empty_slot, bool *is_object_end, struct jak_carbon_object_it *it);
+jak_offset_t jak_carbon_int_column_get_payload_off(jak_carbon_column_it *it);
+jak_offset_t jak_carbon_int_payload_after_header(jak_carbon *doc);
 
-bool carbon_int_object_it_prop_key_access(struct jak_carbon_object_it *it);
+jak_u64 jak_carbon_int_header_get_commit_hash(jak_carbon *doc);
 
-bool carbon_int_object_it_prop_value_skip(struct jak_carbon_object_it *it);
+void jak_carbon_int_history_push(struct jak_vector ofType(jak_offset_t) *vec, jak_offset_t off);
+void jak_carbon_int_history_clear(struct jak_vector ofType(jak_offset_t) *vec);
+jak_offset_t jak_carbon_int_history_pop(struct jak_vector ofType(jak_offset_t) *vec);
+jak_offset_t jak_carbon_int_history_peek(struct jak_vector ofType(jak_offset_t) *vec);
+bool jak_carbon_int_history_has(struct jak_vector ofType(jak_offset_t) *vec);
 
-bool carbon_int_object_it_prop_skip(struct jak_carbon_object_it *it);
+bool jak_carbon_int_field_access_create(jak_field_access *field);
+bool jak_carbon_int_field_access_clone(jak_field_access *dst, jak_field_access *src);
+bool jak_carbon_int_field_access_drop(jak_field_access *field);
+bool jak_carbon_int_field_auto_close(jak_field_access *it);
+bool jak_carbon_int_field_access_object_it_opened(jak_field_access *field);
+bool jak_carbon_int_field_access_array_it_opened(jak_field_access *field);
+bool jak_carbon_int_field_access_column_it_opened(jak_field_access *field);
+bool jak_carbon_int_field_access_field_type(jak_carbon_field_type_e *type, jak_field_access *field);
+bool jak_carbon_int_field_access_u8_value(jak_u8 *value, jak_field_access *field, struct jak_error *err);
+bool jak_carbon_int_field_access_u16_value(jak_u16 *value, jak_field_access *field, struct jak_error *err);
+bool jak_carbon_int_field_access_u32_value(jak_u32 *value, jak_field_access *field, struct jak_error *err);
+bool jak_carbon_int_field_access_u64_value(jak_u64 *value, jak_field_access *field, struct jak_error *err);
+bool jak_carbon_int_field_access_i8_value(jak_i8 *value, jak_field_access *field, struct jak_error *err);
+bool jak_carbon_int_field_access_i16_value(jak_i16 *value, jak_field_access *field, struct jak_error *err);
+bool jak_carbon_int_field_access_i32_value(jak_i32 *value, jak_field_access *field, struct jak_error *err);
+bool jak_carbon_int_field_access_i64_value(jak_i64 *value, jak_field_access *field, struct jak_error *err);
+bool jak_carbon_int_field_access_float_value(bool *is_null_in, float *value, jak_field_access *field, struct jak_error *err);
+bool jak_carbon_int_field_access_signed_value(bool *is_null_in, jak_i64 *value, jak_field_access *field, struct jak_error *err);
+bool jak_carbon_int_field_access_unsigned_value(bool *is_null_in, jak_u64 *value, jak_field_access *field, struct jak_error *err);
+const char *jak_carbon_int_field_access_string_value(jak_u64 *strlen, jak_field_access *field, struct jak_error *err);
+bool jak_carbon_int_field_access_binary_value(struct jak_carbon_binary *out, jak_field_access *field, struct jak_error *err);
+jak_carbon_array_it *jak_carbon_int_field_access_array_value(jak_field_access *field, struct jak_error *err);
+struct jak_carbon_object_it *jak_carbon_int_field_access_object_value(jak_field_access *field, struct jak_error *err);
+jak_carbon_column_it *jak_carbon_int_field_access_column_value(jak_field_access *field, struct jak_error *err);
 
-bool carbon_int_object_skip_contents(bool *is_empty_slot, bool *is_array_end, struct jak_carbon_object_it *it);
+void jak_carbon_int_auto_close_nested_array_it(jak_field_access *field);
+void jak_carbon_int_auto_close_nested_object_it(jak_field_access *field);
+void jak_carbon_int_auto_close_nested_column_it(jak_field_access *field);
 
-bool carbon_int_array_skip_contents(bool *is_empty_slot, bool *is_array_end, jak_carbon_array_it *it);
-
-bool carbon_int_array_it_refresh(bool *is_empty_slot, bool *is_array_end, jak_carbon_array_it *it);
-
-bool carbon_int_array_it_field_type_read(jak_carbon_array_it *it);
-
-bool carbon_int_field_data_access(struct jak_memfile *file, struct jak_error *err, jak_field_access *field_access);
-
-jak_offset_t carbon_int_column_get_payload_off(jak_carbon_column_it *it);
-
-jak_offset_t carbon_int_payload_after_header(jak_carbon *doc);
-
-jak_u64 carbon_int_header_get_commit_hash(jak_carbon *doc);
-
-void carbon_int_history_push(struct jak_vector ofType(jak_offset_t) *vec, jak_offset_t off);
-
-void carbon_int_history_clear(struct jak_vector ofType(jak_offset_t) *vec);
-
-jak_offset_t carbon_int_history_pop(struct jak_vector ofType(jak_offset_t) *vec);
-
-jak_offset_t carbon_int_history_peek(struct jak_vector ofType(jak_offset_t) *vec);
-
-bool carbon_int_history_has(struct jak_vector ofType(jak_offset_t) *vec);
-
-bool carbon_int_field_access_create(jak_field_access *field);
-
-bool carbon_int_field_access_clone(jak_field_access *dst, jak_field_access *src);
-
-bool carbon_int_field_access_drop(jak_field_access *field);
-
-bool carbon_int_field_auto_close(jak_field_access *it);
-
-bool carbon_int_field_access_object_it_opened(jak_field_access *field);
-
-bool carbon_int_field_access_array_it_opened(jak_field_access *field);
-
-bool carbon_int_field_access_column_it_opened(jak_field_access *field);
-
-void carbon_int_auto_close_nested_array_it(jak_field_access *field);
-
-void carbon_int_auto_close_nested_object_it(jak_field_access *field);
-
-void carbon_int_auto_close_nested_column_it(jak_field_access *field);
-
-bool carbon_int_field_access_field_type(jak_carbon_field_type_e *type, jak_field_access *field);
-
-bool carbon_int_field_access_u8_value(jak_u8 *value, jak_field_access *field, struct jak_error *err);
-
-bool carbon_int_field_access_u16_value(jak_u16 *value, jak_field_access *field, struct jak_error *err);
-
-bool carbon_int_field_access_u32_value(jak_u32 *value, jak_field_access *field, struct jak_error *err);
-
-bool carbon_int_field_access_u64_value(jak_u64 *value, jak_field_access *field, struct jak_error *err);
-
-bool carbon_int_field_access_i8_value(jak_i8 *value, jak_field_access *field, struct jak_error *err);
-
-bool carbon_int_field_access_i16_value(jak_i16 *value, jak_field_access *field, struct jak_error *err);
-
-bool carbon_int_field_access_i32_value(jak_i32 *value, jak_field_access *field, struct jak_error *err);
-
-bool carbon_int_field_access_i64_value(jak_i64 *value, jak_field_access *field, struct jak_error *err);
-
-bool
-carbon_int_field_access_float_value(bool *is_null_in, float *value, jak_field_access *field, struct jak_error *err);
-
-bool carbon_int_field_access_signed_value(bool *is_null_in, jak_i64 *value, jak_field_access *field,
-                                          struct jak_error *err);
-
-bool carbon_int_field_access_unsigned_value(bool *is_null_in, jak_u64 *value, jak_field_access *field,
-                                            struct jak_error *err);
-
-const char *carbon_int_field_access_string_value(jak_u64 *strlen, jak_field_access *field, struct jak_error *err);
-
-bool
-carbon_int_field_access_binary_value(struct jak_carbon_binary *out, jak_field_access *field, struct jak_error *err);
-
-jak_carbon_array_it *carbon_int_field_access_array_value(jak_field_access *field, struct jak_error *err);
-
-struct jak_carbon_object_it *carbon_int_field_access_object_value(jak_field_access *field, struct jak_error *err);
-
-jak_carbon_column_it *carbon_int_field_access_column_value(jak_field_access *field, struct jak_error *err);
-
-bool carbon_int_field_remove(struct jak_memfile *memfile, struct jak_error *err, jak_carbon_field_type_e type);
+bool jak_carbon_int_field_remove(struct jak_memfile *memfile, struct jak_error *err, jak_carbon_field_type_e type);
 
 /**
  * For <code>mode</code>, see <code>jak_carbon_create_begin</code>
  */
-bool carbon_int_from_json(jak_carbon *doc, const struct jak_json *data, jak_carbon_key_e key_type,
-                          const void *primary_key, int mode);
-
+bool jak_carbon_int_from_json(jak_carbon *doc, const struct jak_json *data, jak_carbon_key_e key_type, const void *primary_key, int mode);
 
 JAK_END_DECL
 

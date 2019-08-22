@@ -121,7 +121,7 @@ bool jak_carbon_create_empty_ex(jak_carbon *doc, jak_carbon_key_e type, jak_u64 
         doc->versioning.is_latest = true;
 
         carbon_header_init(doc, type);
-        carbon_int_insert_array(&doc->memfile, array_cap);
+        jak_carbon_int_insert_array(&doc->memfile, array_cap);
 
         return true;
 }
@@ -159,7 +159,7 @@ bool jak_carbon_from_json(jak_carbon *doc, const char *json, jak_carbon_key_e ty
 
                 return false;
         } else {
-                carbon_int_from_json(doc, &data, type, key, JAK_CARBON_OPTIMIZE);
+                jak_carbon_int_from_json(doc, &data, type, key, JAK_CARBON_OPTIMIZE);
                 json_drop(&data);
                 return true;
         }
@@ -291,7 +291,7 @@ bool jak_carbon_clone(jak_carbon *clone, jak_carbon *doc)
 bool jak_carbon_commit_hash(jak_u64 *hash, jak_carbon *doc)
 {
         JAK_ERROR_IF_NULL(doc);
-        *hash = carbon_int_header_get_commit_hash(doc);
+        *hash = jak_carbon_int_header_get_commit_hash(doc);
         return true;
 }
 
@@ -380,7 +380,7 @@ bool jak_carbon_iterator_open(jak_carbon_array_it *it, jak_carbon *doc)
 {
         JAK_ERROR_IF_NULL(it);
         JAK_ERROR_IF_NULL(doc);
-        jak_offset_t payload_start = carbon_int_payload_after_header(doc);
+        jak_offset_t payload_start = jak_carbon_int_payload_after_header(doc);
         jak_carbon_array_it_create(it, &doc->memfile, &doc->err, payload_start);
         jak_carbon_array_it_readonly(it);
         return true;
