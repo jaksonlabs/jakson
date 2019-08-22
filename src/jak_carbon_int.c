@@ -779,7 +779,7 @@ const char *jak_carbon_int_field_access_string_value(jak_u64 *strlen, jak_field_
 }
 
 bool
-jak_carbon_int_field_access_binary_value(struct jak_carbon_binary *out, jak_field_access *field, struct jak_error *err)
+jak_carbon_int_field_access_binary_value(jak_carbon_binary *out, jak_field_access *field, struct jak_error *err)
 {
         JAK_ERROR_IF_NULL(out)
         JAK_ERROR_IF_NULL(field)

@@ -37,18 +37,18 @@ static bool carbon_header_rev_inc(jak_carbon *doc);
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bool carbon_revise_try_begin(struct jak_carbon_revise *context, jak_carbon *revised_doc, jak_carbon *doc)
+bool jak_carbon_revise_try_begin(jak_carbon_revise *context, jak_carbon *revised_doc, jak_carbon *doc)
 {
         JAK_ERROR_IF_NULL(context)
         JAK_ERROR_IF_NULL(doc)
         if (!doc->versioning.commit_lock) {
-                return carbon_revise_begin(context, revised_doc, doc);
+                return jak_carbon_revise_begin(context, revised_doc, doc);
         } else {
                 return false;
         }
 }
 
-bool carbon_revise_begin(struct jak_carbon_revise *context, jak_carbon *revised_doc, jak_carbon *original)
+bool jak_carbon_revise_begin(jak_carbon_revise *context, jak_carbon *revised_doc, jak_carbon *original)
 {
         JAK_ERROR_IF_NULL(context)
         JAK_ERROR_IF_NULL(original)
@@ -101,7 +101,7 @@ static void key_string_set(jak_carbon *doc, const char *key)
         memfile_restore_position(&doc->memfile);
 }
 
-bool carbon_revise_key_generate(jak_global_id_t *out, struct jak_carbon_revise *context)
+bool jak_carbon_revise_key_generate(jak_global_id_t *out, jak_carbon_revise *context)
 {
         JAK_ERROR_IF_NULL(context);
         jak_carbon_key_e key_type;
@@ -118,7 +118,7 @@ bool carbon_revise_key_generate(jak_global_id_t *out, struct jak_carbon_revise *
         }
 }
 
-bool carbon_revise_key_set_unsigned(struct jak_carbon_revise *context, jak_u64 key_value)
+bool jak_carbon_revise_key_set_unsigned(jak_carbon_revise *context, jak_u64 key_value)
 {
         JAK_ERROR_IF_NULL(context);
         jak_carbon_key_e key_type;
@@ -132,7 +132,7 @@ bool carbon_revise_key_set_unsigned(struct jak_carbon_revise *context, jak_u64 k
         }
 }
 
-bool carbon_revise_key_set_signed(struct jak_carbon_revise *context, jak_i64 key_value)
+bool jak_carbon_revise_key_set_signed(jak_carbon_revise *context, jak_i64 key_value)
 {
         JAK_ERROR_IF_NULL(context);
         jak_carbon_key_e key_type;
@@ -146,7 +146,7 @@ bool carbon_revise_key_set_signed(struct jak_carbon_revise *context, jak_i64 key
         }
 }
 
-bool carbon_revise_key_set_string(struct jak_carbon_revise *context, const char *key_value)
+bool jak_carbon_revise_key_set_string(jak_carbon_revise *context, const char *key_value)
 {
         JAK_ERROR_IF_NULL(context);
         jak_carbon_key_e key_type;
@@ -160,7 +160,7 @@ bool carbon_revise_key_set_string(struct jak_carbon_revise *context, const char 
         }
 }
 
-bool carbon_revise_iterator_open(jak_carbon_array_it *it, struct jak_carbon_revise *context)
+bool jak_carbon_revise_iterator_open(jak_carbon_array_it *it, jak_carbon_revise *context)
 {
         JAK_ERROR_IF_NULL(it);
         JAK_ERROR_IF_NULL(context);
@@ -169,13 +169,13 @@ bool carbon_revise_iterator_open(jak_carbon_array_it *it, struct jak_carbon_revi
         return jak_carbon_array_it_create(it, &context->revised_doc->memfile, &context->original->err, payload_start);
 }
 
-bool carbon_revise_iterator_close(jak_carbon_array_it *it)
+bool jak_carbon_revise_iterator_close(jak_carbon_array_it *it)
 {
         JAK_ERROR_IF_NULL(it);
         return jak_carbon_array_it_drop(it);
 }
 
-bool carbon_revise_find_open(jak_carbon_find *out, const char *dot_path, struct jak_carbon_revise *context)
+bool jak_carbon_revise_find_open(jak_carbon_find *out, const char *dot_path, jak_carbon_revise *context)
 {
         JAK_ERROR_IF_NULL(out)
         JAK_ERROR_IF_NULL(dot_path)
@@ -187,22 +187,22 @@ bool carbon_revise_find_open(jak_carbon_find *out, const char *dot_path, struct 
         return status;
 }
 
-bool carbon_revise_find_close(jak_carbon_find *find)
+bool jak_carbon_revise_find_close(jak_carbon_find *find)
 {
         JAK_ERROR_IF_NULL(find)
         return jak_carbon_find_drop(find);
 }
 
-bool carbon_revise_remove_one(const char *dot_path, jak_carbon *rev_doc, jak_carbon *doc)
+bool jak_carbon_revise_remove_one(const char *dot_path, jak_carbon *rev_doc, jak_carbon *doc)
 {
-        struct jak_carbon_revise revise;
-        carbon_revise_begin(&revise, rev_doc, doc);
-        bool status = carbon_revise_remove(dot_path, &revise);
-        carbon_revise_end(&revise);
+        jak_carbon_revise revise;
+        jak_carbon_revise_begin(&revise, rev_doc, doc);
+        bool status = jak_carbon_revise_remove(dot_path, &revise);
+        jak_carbon_revise_end(&revise);
         return status;
 }
 
-bool carbon_revise_remove(const char *dot_path, struct jak_carbon_revise *context)
+bool jak_carbon_revise_remove(const char *dot_path, jak_carbon_revise *context)
 {
         JAK_ERROR_IF_NULL(dot_path)
         JAK_ERROR_IF_NULL(context)
@@ -241,20 +241,20 @@ bool carbon_revise_remove(const char *dot_path, struct jak_carbon_revise *contex
         }
 }
 
-bool carbon_revise_pack(struct jak_carbon_revise *context)
+bool jak_carbon_revise_pack(jak_carbon_revise *context)
 {
         JAK_ERROR_IF_NULL(context);
         jak_carbon_array_it it;
-        carbon_revise_iterator_open(&it, context);
+        jak_carbon_revise_iterator_open(&it, context);
         internal_pack_array(&it);
-        carbon_revise_iterator_close(&it);
+        jak_carbon_revise_iterator_close(&it);
         return true;
 }
 
-bool carbon_revise_shrink(struct jak_carbon_revise *context)
+bool jak_carbon_revise_shrink(jak_carbon_revise *context)
 {
         jak_carbon_array_it it;
-        carbon_revise_iterator_open(&it, context);
+        jak_carbon_revise_iterator_open(&it, context);
         jak_carbon_array_it_fast_forward(&it);
         if (memfile_remain_size(&it.memfile) > 0) {
                 jak_offset_t first_empty_slot = memfile_tell(&it.memfile);
@@ -265,11 +265,11 @@ bool carbon_revise_shrink(struct jak_carbon_revise *context)
 
         jak_offset_t size;
         memblock_size(&size, it.memfile.memblock);
-        carbon_revise_iterator_close(&it);
+        jak_carbon_revise_iterator_close(&it);
         return true;
 }
 
-const jak_carbon *carbon_revise_end(struct jak_carbon_revise *context)
+const jak_carbon *jak_carbon_revise_end(jak_carbon_revise *context)
 {
         if (JAK_LIKELY(context != NULL)) {
                 internal_commit_update(context->revised_doc);
@@ -286,7 +286,7 @@ const jak_carbon *carbon_revise_end(struct jak_carbon_revise *context)
         }
 }
 
-bool carbon_revise_abort(struct jak_carbon_revise *context)
+bool jak_carbon_revise_abort(jak_carbon_revise *context)
 {
         JAK_ERROR_IF_NULL(context)
 

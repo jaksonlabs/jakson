@@ -27,12 +27,12 @@ static void write_payload(struct jak_memfile *file, const char *string, size_t s
         memfile_write(file, string, str_len);
 }
 
-bool carbon_string_nomarker_write(struct jak_memfile *file, const char *string)
+bool jak_carbon_string_nomarker_write(struct jak_memfile *file, const char *string)
 {
-        return carbon_string_nomarker_nchar_write(file, string, strlen(string));
+        return jak_carbon_string_nomarker_nchar_write(file, string, strlen(string));
 }
 
-bool carbon_string_nomarker_nchar_write(struct jak_memfile *file, const char *string, jak_u64 str_len)
+bool jak_carbon_string_nomarker_nchar_write(struct jak_memfile *file, const char *string, jak_u64 str_len)
 {
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(string)
@@ -41,7 +41,7 @@ bool carbon_string_nomarker_nchar_write(struct jak_memfile *file, const char *st
         return true;
 }
 
-bool carbon_string_nomarker_remove(struct jak_memfile *file)
+bool jak_carbon_string_nomarker_remove(struct jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(file);
         jak_u8 len_nbytes;
@@ -51,42 +51,42 @@ bool carbon_string_nomarker_remove(struct jak_memfile *file)
         return true;
 }
 
-bool carbon_string_remove(struct jak_memfile *file)
+bool jak_carbon_string_remove(struct jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(file);
         jak_u8 marker = *JAK_MEMFILE_READ_TYPE(file, jak_u8);
         if (JAK_LIKELY(marker == JAK_CARBON_FIELD_TYPE_STRING)) {
                 memfile_inplace_remove(file, sizeof(jak_u8));
-                return carbon_string_nomarker_remove(file);
+                return jak_carbon_string_nomarker_remove(file);
         } else {
                 error(&file->err, JAK_ERR_MARKERMAPPING)
                 return false;
         }
 }
 
-bool carbon_string_write(struct jak_memfile *file, const char *string)
+bool jak_carbon_string_write(struct jak_memfile *file, const char *string)
 {
-        return carbon_string_nchar_write(file, string, strlen(string));
+        return jak_carbon_string_nchar_write(file, string, strlen(string));
 }
 
-bool carbon_string_nchar_write(struct jak_memfile *file, const char *string, jak_u64 str_len)
+bool jak_carbon_string_nchar_write(struct jak_memfile *file, const char *string, jak_u64 str_len)
 {
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(string)
 
         memfile_ensure_space(file, sizeof(jak_media_type));
         jak_carbon_media_write(file, JAK_CARBON_FIELD_TYPE_STRING);
-        carbon_string_nomarker_nchar_write(file, string, str_len);
+        jak_carbon_string_nomarker_nchar_write(file, string, str_len);
 
         return true;
 }
 
-bool carbon_string_update(struct jak_memfile *file, const char *string)
+bool jak_carbon_string_update(struct jak_memfile *file, const char *string)
 {
-        return carbon_string_update_wnchar(file, string, strlen(string));
+        return jak_carbon_string_update_wnchar(file, string, strlen(string));
 }
 
-bool carbon_string_update_wnchar(struct jak_memfile *file, const char *string, size_t str_len)
+bool jak_carbon_string_update_wnchar(struct jak_memfile *file, const char *string, size_t str_len)
 {
         jak_u8 marker = *JAK_MEMFILE_READ_TYPE(file, jak_u8);
         if (JAK_LIKELY(marker == JAK_CARBON_FIELD_TYPE_STRING)) {
@@ -105,29 +105,29 @@ bool carbon_string_update_wnchar(struct jak_memfile *file, const char *string, s
         }
 }
 
-bool carbon_string_skip(struct jak_memfile *file)
+bool jak_carbon_string_skip(struct jak_memfile *file)
 {
-        return carbon_string_read(NULL, file);
+        return jak_carbon_string_read(NULL, file);
 }
 
-bool carbon_string_nomarker_skip(struct jak_memfile *file)
+bool jak_carbon_string_nomarker_skip(struct jak_memfile *file)
 {
-        return carbon_string_nomarker_read(NULL, file);
+        return jak_carbon_string_nomarker_read(NULL, file);
 }
 
-const char *carbon_string_read(jak_u64 *len, struct jak_memfile *file)
+const char *jak_carbon_string_read(jak_u64 *len, struct jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(file)
         jak_u8 marker = *JAK_MEMFILE_READ_TYPE(file, jak_u8);
         if (JAK_LIKELY(marker == JAK_CARBON_FIELD_TYPE_STRING)) {
-                return carbon_string_nomarker_read(len, file);
+                return jak_carbon_string_nomarker_read(len, file);
         } else {
                 error(&file->err, JAK_ERR_MARKERMAPPING)
                 return false;
         }
 }
 
-const char *carbon_string_nomarker_read(jak_u64 *len, struct jak_memfile *file)
+const char *jak_carbon_string_nomarker_read(jak_u64 *len, struct jak_memfile *file)
 {
         jak_u64 str_len = memfile_read_uintvar_stream(NULL, file);
         const char *result = memfile_read(file, str_len);

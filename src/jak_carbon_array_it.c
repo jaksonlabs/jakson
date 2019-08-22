@@ -421,7 +421,7 @@ const char *jak_carbon_array_it_string_value(jak_u64 *strlen, jak_carbon_array_i
         return jak_carbon_int_field_access_string_value(strlen, &it->field_access, &it->err);
 }
 
-bool jak_carbon_array_it_binary_value(struct jak_carbon_binary *out, jak_carbon_array_it *it)
+bool jak_carbon_array_it_binary_value(jak_carbon_binary *out, jak_carbon_array_it *it)
 {
         return jak_carbon_int_field_access_binary_value(out, &it->field_access, &it->err);
 }

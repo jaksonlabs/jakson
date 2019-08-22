@@ -87,23 +87,23 @@ typedef struct jak_carbon {
         struct jak_error err;
 } jak_carbon;
 
-struct jak_carbon_revise {
+typedef struct jak_carbon_revise {
         jak_carbon *original;
         jak_carbon *revised_doc;
         struct jak_error err;
-};
+} jak_carbon_revise;
 
-struct jak_carbon_binary {
+typedef struct jak_carbon_binary {
         const char *mime_type;
         jak_u64 mime_type_strlen;
         const void *blob;
         jak_u64 blob_len;
-};
+} jak_carbon_binary;
 
 typedef struct jak_carbon_new {
         struct jak_error err;
         jak_carbon original;
-        struct jak_carbon_revise revision_context;
+        jak_carbon_revise revision_context;
         jak_carbon_array_it *content_it;
         jak_carbon_insert *inserter;
         /* options shrink or compact (or both) documents, see
@@ -115,9 +115,9 @@ typedef enum jak_carbon_container_type {
         JAK_CARBON_OBJECT, JAK_CARBON_ARRAY, JAK_CARBON_COLUMN
 } jak_carbon_container_e;
 
-typedef enum jak_carbon_printer_impl {
+typedef enum jak_jak_carbon_printer_impl {
         JAK_JSON_EXTENDED, JAK_JSON_COMPACT
-} jak_carbon_printer_impl_e;
+} jak_jak_carbon_printer_impl_e;
 
 #define JAK_CARBON_MARKER_KEY_NOKEY '?'
 #define JAK_CARBON_MARKER_KEY_AUTOKEY '*'
@@ -227,14 +227,14 @@ bool jak_carbon_key_is_string(jak_carbon_key_e type);
 bool jak_carbon_clone(jak_carbon *clone, jak_carbon *doc);
 bool jak_carbon_commit_hash(jak_u64 *hash, jak_carbon *doc);
 
-bool jak_carbon_to_str(struct jak_string *dst, jak_carbon_printer_impl_e printer, jak_carbon *doc);
+bool jak_carbon_to_str(struct jak_string *dst, jak_jak_carbon_printer_impl_e printer, jak_carbon *doc);
 const char *jak_carbon_to_json_extended(struct jak_string *dst, jak_carbon *doc);
 const char *jak_carbon_to_json_compact(struct jak_string *dst, jak_carbon *doc);
 char *jak_carbon_to_json_extended_dup(jak_carbon *doc);
 char *jak_carbon_to_json_compact_dup(jak_carbon *doc);
 bool jak_carbon_iterator_open(jak_carbon_array_it *it, jak_carbon *doc);
 bool jak_carbon_iterator_close(jak_carbon_array_it *it);
-bool jak_carbon_print(FILE *file, jak_carbon_printer_impl_e printer, jak_carbon *doc);
+bool jak_carbon_print(FILE *file, jak_jak_carbon_printer_impl_e printer, jak_carbon *doc);
 bool jak_carbon_hexdump_print(FILE *file, jak_carbon *doc);
 
 JAK_END_DECL

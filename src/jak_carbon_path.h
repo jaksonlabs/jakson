@@ -53,7 +53,7 @@ typedef struct jak_carbon_path_evaluator {
 } jak_carbon_path_evaluator;
 
 bool jak_carbon_path_evaluator_begin(jak_carbon_path_evaluator *eval, jak_carbon_dot_path *path, jak_carbon *doc);
-bool jak_carbon_path_evaluator_begin_mutable(jak_carbon_path_evaluator *eval, const jak_carbon_dot_path *path, struct jak_carbon_revise *context);
+bool jak_carbon_path_evaluator_begin_mutable(jak_carbon_path_evaluator *eval, const jak_carbon_dot_path *path, jak_carbon_revise *context);
 bool jak_carbon_path_evaluator_end(jak_carbon_path_evaluator *state);
 
 bool jak_carbon_path_evaluator_status(jak_carbon_path_status_e *status, jak_carbon_path_evaluator *state);

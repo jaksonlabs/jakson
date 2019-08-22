@@ -915,7 +915,7 @@ static void record_ref_to_str(struct jak_string *str, jak_carbon_path_index *ind
                         break;
                 case JAK_CARBON_KEY_SKEY: {
                         jak_u64 key_len;
-                        const char *key = carbon_string_read(&key_len, &index->memfile);
+                        const char *key = jak_carbon_string_read(&key_len, &index->memfile);
                         string_add_char(str, '(');
                         string_add_nchar(str, key, key_len);
                         string_add_char(str, ')');
@@ -951,7 +951,7 @@ static void record_ref_to_carbon(jak_carbon_insert *roins, jak_carbon_path_index
                         break;
                 case JAK_CARBON_KEY_SKEY: {
                         jak_u64 key_len;
-                        const char *key = carbon_string_read(&key_len, &index->memfile);
+                        const char *key = jak_carbon_string_read(&key_len, &index->memfile);
                         jak_carbon_insert_prop_nchar(roins, "key-value", key, key_len);
                 }
                         break;
@@ -1254,7 +1254,7 @@ bool jak_carbon_path_index_it_open(jak_carbon_path_index_it *it, jak_carbon_path
 //
 //}
 //
-//bool jak_carbon_path_index_it_field_binary_value(struct jak_carbon_binary *out, jak_carbon_array_it *it)
+//bool jak_carbon_path_index_it_field_binary_value(jak_carbon_binary *out, jak_carbon_array_it *it)
 //{
 //
 //}

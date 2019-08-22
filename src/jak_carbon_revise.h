@@ -35,45 +35,36 @@ JAK_DEFINE_ERROR_GETTER(jak_carbon_revise)
  * Acquires a new revision context for the carbon document.
  *
  * In case of an already running revision, the function returns <code>false</code> without blocking.
- * Otherwise, <code>carbon_revise_begin</code> is called internally.
+ * Otherwise, <code>jak_carbon_revise_begin</code> is called internally.
  *
  * @param context non-null pointer to revision context
  * @param doc document that should be revised
  * @return <code>false</code> in case of an already running revision. Otherwise returns value of
- *                            <code>carbon_revise_begin</code>
+ *                            <code>jak_carbon_revise_begin</code>
  */
-bool carbon_revise_try_begin(struct jak_carbon_revise *context, jak_carbon *revised_doc, jak_carbon *doc);
+bool jak_carbon_revise_try_begin(jak_carbon_revise *context, jak_carbon *revised_doc, jak_carbon *doc);
+bool jak_carbon_revise_begin(jak_carbon_revise *context, jak_carbon *revised_doc, jak_carbon *original);
+const jak_carbon *jak_carbon_revise_end(jak_carbon_revise *context);
 
-bool
-carbon_revise_begin(struct jak_carbon_revise *context, jak_carbon *revised_doc, jak_carbon *original);
+bool jak_carbon_revise_key_generate(jak_global_id_t *out, jak_carbon_revise *context);
 
-const jak_carbon *carbon_revise_end(struct jak_carbon_revise *context);
+bool jak_carbon_revise_key_set_unsigned(jak_carbon_revise *context, jak_u64 key_value);
+bool jak_carbon_revise_key_set_signed(jak_carbon_revise *context, jak_i64 key_value);
+bool jak_carbon_revise_key_set_string(jak_carbon_revise *context, const char *key_value);
 
-bool carbon_revise_key_generate(jak_global_id_t *out, struct jak_carbon_revise *context);
+bool jak_carbon_revise_iterator_open(jak_carbon_array_it *it, jak_carbon_revise *context);
+bool jak_carbon_revise_iterator_close(jak_carbon_array_it *it);
 
-bool carbon_revise_key_set_unsigned(struct jak_carbon_revise *context, jak_u64 key_value);
+bool jak_carbon_revise_find_open(jak_carbon_find *out, const char *dot_path, jak_carbon_revise *context);
+bool jak_carbon_revise_find_close(jak_carbon_find *find);
 
-bool carbon_revise_key_set_signed(struct jak_carbon_revise *context, jak_i64 key_value);
+bool jak_carbon_revise_remove(const char *dot_path, jak_carbon_revise *context);
+bool jak_carbon_revise_remove_one(const char *dot_path, jak_carbon *rev_doc, jak_carbon *doc);
 
-bool carbon_revise_key_set_string(struct jak_carbon_revise *context, const char *key_value);
+bool jak_carbon_revise_pack(jak_carbon_revise *context);
+bool jak_carbon_revise_shrink(jak_carbon_revise *context);
 
-bool carbon_revise_iterator_open(jak_carbon_array_it *it, struct jak_carbon_revise *context);
-
-bool carbon_revise_iterator_close(jak_carbon_array_it *it);
-
-bool carbon_revise_find_open(jak_carbon_find *out, const char *dot_path, struct jak_carbon_revise *context);
-
-bool carbon_revise_find_close(jak_carbon_find *find);
-
-bool carbon_revise_remove(const char *dot_path, struct jak_carbon_revise *context);
-
-bool carbon_revise_remove_one(const char *dot_path, jak_carbon *rev_doc, jak_carbon *doc);
-
-bool carbon_revise_pack(struct jak_carbon_revise *context);
-
-bool carbon_revise_shrink(struct jak_carbon_revise *context);
-
-bool carbon_revise_abort(struct jak_carbon_revise *context);
+bool jak_carbon_revise_abort(jak_carbon_revise *context);
 
 JAK_END_DECL
 

@@ -48,14 +48,14 @@ TEST(CarbonTest, CreateCarbon) {
 TEST(CarbonTest, CreateCarbonRevisionNumberingNoKey) {
         jak_carbon_new context;
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_u64 commit_new, commit_mod;
 
         jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
         jak_carbon_create_end(&context);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_end(&revise);
 
         /* Commit hash value for records with 'nokey' option are always set to 0 (see specs) */
         jak_carbon_commit_hash(&commit_new, &doc);
@@ -70,14 +70,14 @@ TEST(CarbonTest, CreateCarbonRevisionNumberingNoKey) {
 TEST(CarbonTest, CreateCarbonRevisionNumberingWithKey) {
         jak_carbon_new context;
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_u64 commit_new, commit_mod, commit_mod_cmpr;
 
         jak_carbon_create_begin(&context, &doc, JAK_CARBON_KEY_AUTOKEY, JAK_CARBON_OPTIMIZE);
         jak_carbon_create_end(&context);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_end(&revise);
 
         /* Commit hash value for records with no 'nokey' option shall be a (almost global) random number, and
          * a 64bit bernstein hash value of the original document after any modification (see specs) */
@@ -108,9 +108,9 @@ TEST(CarbonTest, CreateCarbonRevisionNumbering) {
         EXPECT_TRUE(status);
         EXPECT_EQ(rev, 0);
 
-        struct jak_carbon_revise revise;
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_end(&revise);
+        jak_carbon_revise revise;
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_end(&revise);
 
         status = jak_carbon_commit_hash(&rev, &doc);
         EXPECT_TRUE(status);
@@ -149,9 +149,9 @@ TEST(CarbonTest, CreateCarbonRevisionAbort) {
         EXPECT_TRUE(status);
         EXPECT_EQ(rev, 0);
 
-        struct jak_carbon_revise revise;
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_abort(&revise);
+        jak_carbon_revise revise;
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_abort(&revise);
 
         status = jak_carbon_commit_hash(&rev, &doc);
         EXPECT_TRUE(status);
@@ -179,14 +179,14 @@ TEST(CarbonTest, CreateCarbonRevisionAsyncReading) {
         EXPECT_TRUE(status);
         EXPECT_EQ(rev, 0);
 
-        struct jak_carbon_revise revise;
-        carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise revise;
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
 
         status = jak_carbon_commit_hash(&rev, &doc);
         EXPECT_TRUE(status);
         EXPECT_EQ(rev, 0);
 
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         status = jak_carbon_commit_hash(&rev, &doc);
         EXPECT_TRUE(status);
@@ -204,7 +204,7 @@ TEST(CarbonTest, ModifyCarbonObjectId) {
         jak_carbon doc, rev_doc;
         jak_global_id_t oid;
         jak_global_id_t new_oid;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_u64 commit_hash_old, commit_hash_new;
 
         jak_carbon_create_empty(&doc, JAK_CARBON_KEY_AUTOKEY);
@@ -214,10 +214,10 @@ TEST(CarbonTest, ModifyCarbonObjectId) {
 
         jak_carbon_commit_hash(&commit_hash_old, &doc);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_key_generate(&new_oid, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_key_generate(&new_oid, &revise);
         EXPECT_NE(oid, new_oid);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         jak_carbon_commit_hash(&commit_hash_new, &rev_doc);
         EXPECT_NE(commit_hash_old, commit_hash_new);
@@ -233,17 +233,17 @@ TEST(CarbonTest, ModifyCarbonObjectId) {
 
 TEST(CarbonTest, CarbonArrayIteratorOpenAfterNew) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
 
         jak_carbon_create_empty(&doc, JAK_CARBON_KEY_AUTOKEY);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_key_generate(NULL, &revise);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_key_generate(NULL, &revise);
+        jak_carbon_revise_iterator_open(&it, &revise);
         bool has_next = jak_carbon_array_it_next(&it);
         EXPECT_EQ(has_next, false);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
         jak_carbon_array_it_drop(&it);
 
         // jak_carbon_print(stdout, &rev_doc);
@@ -255,19 +255,19 @@ TEST(CarbonTest, CarbonArrayIteratorOpenAfterNew) {
 
 TEST(CarbonTest, CarbonArrayIteratorInsertNullAfterNew) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
 
         jak_carbon_create_empty(&doc, JAK_CARBON_KEY_AUTOKEY);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
-        carbon_revise_key_generate(NULL, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_key_generate(NULL, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
         jak_carbon_insert_null(&inserter);
         jak_carbon_insert_drop(&inserter);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
         jak_carbon_array_it_drop(&it);
 
         // jak_carbon_print(stdout, &rev_doc);
@@ -279,14 +279,14 @@ TEST(CarbonTest, CarbonArrayIteratorInsertNullAfterNew) {
 
 TEST(CarbonTest, CarbonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
 
         jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
         for (jak_i32 i = 0; i < 10; i++) {
                 // fprintf(stdout, "before:\n");
@@ -306,7 +306,7 @@ TEST(CarbonTest, CarbonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
         }
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         // jak_carbon_print(stdout, &rev_doc);
         //jak_carbon_hexdump_print(stdout, &rev_doc);
@@ -317,14 +317,14 @@ TEST(CarbonTest, CarbonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
 
 TEST(CarbonTest, CarbonArrayIteratorOverwriteLiterals) {
         jak_carbon doc, rev_doc, rev_doc2;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
 
         jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
         for (jak_i32 i = 0; i < 3; i++) {
                 if (i % 3 == 0) {
@@ -337,17 +337,17 @@ TEST(CarbonTest, CarbonArrayIteratorOverwriteLiterals) {
         }
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
-        carbon_revise_begin(&revise, &rev_doc2, &rev_doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc2, &rev_doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
         for (jak_i32 i = 0; i < 2; i++) {
                 jak_carbon_insert_true(&inserter);
         }
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         // jak_carbon_print(stdout, &rev_doc2);
 
@@ -358,14 +358,14 @@ TEST(CarbonTest, CarbonArrayIteratorOverwriteLiterals) {
 
 TEST(CarbonTest, CarbonArrayIteratorOverwriteLiteralsWithDocOverflow) {
         jak_carbon doc, rev_doc, rev_doc2;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
         for (jak_i32 i = 0; i < 22; i++) {
                 if (i % 3 == 0) {
@@ -380,10 +380,10 @@ TEST(CarbonTest, CarbonArrayIteratorOverwriteLiteralsWithDocOverflow) {
         }
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
-        carbon_revise_begin(&revise, &rev_doc2, &rev_doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc2, &rev_doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
         for (jak_i32 i = 0; i < 2; i++) {
                 // fprintf(stdout, "before:\n");
@@ -394,7 +394,7 @@ TEST(CarbonTest, CarbonArrayIteratorOverwriteLiteralsWithDocOverflow) {
         }
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
         // jak_carbon_print(stdout, &rev_doc2);
         jak_carbon_drop(&doc);
         jak_carbon_drop(&rev_doc);
@@ -403,14 +403,14 @@ TEST(CarbonTest, CarbonArrayIteratorOverwriteLiteralsWithDocOverflow) {
 
 TEST(CarbonTest, CarbonArrayIteratorUnsignedAndConstants) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
         for (jak_i32 i = 0; i < 500; i++) {
                 if (i % 6 == 0) {
@@ -434,7 +434,7 @@ TEST(CarbonTest, CarbonArrayIteratorUnsignedAndConstants) {
         }
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         // jak_carbon_print(stdout, &rev_doc);
 
@@ -444,14 +444,14 @@ TEST(CarbonTest, CarbonArrayIteratorUnsignedAndConstants) {
 
 TEST(CarbonTest, CarbonArrayIteratorStrings) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
         for (jak_i32 i = 0; i < 10; i++) {
                 jak_u64 strlen = rand() % (100 + 1 - 4) + 4;
@@ -468,7 +468,7 @@ TEST(CarbonTest, CarbonArrayIteratorStrings) {
         }
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         // jak_carbon_print(stdout, &rev_doc);
 
@@ -478,14 +478,14 @@ TEST(CarbonTest, CarbonArrayIteratorStrings) {
 
 TEST(CarbonTest, CarbonInsertMimeTypedBlob) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
         const char *data = "{ \"Message\": \"Hello World\" }";
         bool status = jak_carbon_insert_binary(&inserter, data, strlen(data), "json", NULL);
@@ -493,7 +493,7 @@ TEST(CarbonTest, CarbonInsertMimeTypedBlob) {
 
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         // jak_carbon_print(stdout, &rev_doc);
 
@@ -503,14 +503,14 @@ TEST(CarbonTest, CarbonInsertMimeTypedBlob) {
 
 TEST(CarbonTest, CarbonInsertCustomTypedBlob) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
         const char *data = "{ \"Message\": \"Hello World\" }";
         bool status = jak_carbon_insert_binary(&inserter, data, strlen(data), NULL, "my data");
@@ -518,7 +518,7 @@ TEST(CarbonTest, CarbonInsertCustomTypedBlob) {
         ////jak_carbon_hexdump_print(stdout, &rev_doc);
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         // jak_carbon_print(stdout, &rev_doc);
 
@@ -528,14 +528,14 @@ TEST(CarbonTest, CarbonInsertCustomTypedBlob) {
 
 TEST(CarbonTest, CarbonInsertTwoMimeTypedBlob) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
         const char *data1 = "{ \"Message\": \"Hello World\" }";
         const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
@@ -546,7 +546,7 @@ TEST(CarbonTest, CarbonInsertTwoMimeTypedBlob) {
         ////jak_carbon_hexdump_print(stdout, &rev_doc);
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         // jak_carbon_print(stdout, &rev_doc);
 
@@ -556,14 +556,14 @@ TEST(CarbonTest, CarbonInsertTwoMimeTypedBlob) {
 
 TEST(CarbonTest, CarbonInsertMimeTypedBlobsWithOverflow) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
         const char *data1 = "{ \"Message\": \"Hello World\" }";
         const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
@@ -576,7 +576,7 @@ TEST(CarbonTest, CarbonInsertMimeTypedBlobsWithOverflow) {
 
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         // jak_carbon_print(stdout, &rev_doc);
 
@@ -586,14 +586,14 @@ TEST(CarbonTest, CarbonInsertMimeTypedBlobsWithOverflow) {
 
 TEST(CarbonTest, CarbonInsertMixedTypedBlobsWithOverflow) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
         const char *data1 = "{ \"Message\": \"Hello World\" }";
         const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
@@ -605,7 +605,7 @@ TEST(CarbonTest, CarbonInsertMixedTypedBlobsWithOverflow) {
         ////jak_carbon_hexdump_print(stdout, &rev_doc);
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         //jak_carbon_print(stdout, &rev_doc);
 
@@ -615,15 +615,15 @@ TEST(CarbonTest, CarbonInsertMixedTypedBlobsWithOverflow) {
 
 TEST(CarbonTest, CarbonInsertArrayWithNoOverflow) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
         jak_carbon_insert_array_state array_state;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
@@ -634,7 +634,7 @@ TEST(CarbonTest, CarbonInsertArrayWithNoOverflow) {
         //jak_carbon_hexdump_print(stdout, &rev_doc);
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
         // jak_carbon_print(stdout, &rev_doc);
@@ -645,15 +645,15 @@ TEST(CarbonTest, CarbonInsertArrayWithNoOverflow) {
 
 TEST(CarbonTest, CarbonInsertValuesIntoNestedArrayWithNoOverflow) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
         jak_carbon_insert_array_state array_state;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
         jak_carbon_insert_null(&inserter);
@@ -675,7 +675,7 @@ TEST(CarbonTest, CarbonInsertValuesIntoNestedArrayWithNoOverflow) {
         //jak_carbon_hexdump_print(stdout, &rev_doc);
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         // jak_carbon_print(stdout, &rev_doc);
 
@@ -685,15 +685,15 @@ TEST(CarbonTest, CarbonInsertValuesIntoNestedArrayWithNoOverflow) {
 
 TEST(CarbonTest, CarbonInsert2xNestedArrayWithNoOverflow) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
         jak_carbon_insert_array_state array_state_l1, array_state_l2;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
         jak_carbon_insert_null(&inserter);
@@ -723,7 +723,7 @@ TEST(CarbonTest, CarbonInsert2xNestedArrayWithNoOverflow) {
         //jak_carbon_hexdump_print(stdout, &rev_doc);
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         // jak_carbon_print(stdout, &rev_doc);
 
@@ -733,15 +733,15 @@ TEST(CarbonTest, CarbonInsert2xNestedArrayWithNoOverflow) {
 
 TEST(CarbonTest, CarbonInsertXxNestedArrayWithoutOverflow) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
         jak_carbon_insert_array_state array_state_l1;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
         jak_carbon_insert_null(&inserter);
@@ -764,7 +764,7 @@ TEST(CarbonTest, CarbonInsertXxNestedArrayWithoutOverflow) {
         //jak_carbon_hexdump_print(stdout, &rev_doc);
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         //jak_carbon_print(stdout, &rev_doc);
         struct jak_string sb;
@@ -779,15 +779,15 @@ TEST(CarbonTest, CarbonInsertXxNestedArrayWithoutOverflow) {
 
 TEST(CarbonTest, CarbonInsertXxNestedArrayWithOverflow) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
         jak_carbon_insert_array_state array_state_l1;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
@@ -820,7 +820,7 @@ TEST(CarbonTest, CarbonInsertXxNestedArrayWithOverflow) {
 
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         // jak_carbon_print(stdout, &rev_doc);
         struct jak_string sb;
@@ -835,15 +835,15 @@ TEST(CarbonTest, CarbonInsertXxNestedArrayWithOverflow) {
 
 TEST(CarbonTest, CarbonInsertInsertColumnWithoutOverflow) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
         jak_carbon_insert_column_state column_state;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
         jak_carbon_insert *nested_inserter_l1 = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
@@ -858,7 +858,7 @@ TEST(CarbonTest, CarbonInsertInsertColumnWithoutOverflow) {
 
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
@@ -875,15 +875,15 @@ TEST(CarbonTest, CarbonInsertInsertColumnWithoutOverflow) {
 
 TEST(CarbonTest, CarbonInsertInsertColumnNumbersWithoutOverflow) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
         jak_carbon_insert_column_state column_state;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
         jak_carbon_insert *nested_inserter_l1 = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
@@ -896,7 +896,7 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersWithoutOverflow) {
 
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
@@ -913,15 +913,15 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersWithoutOverflow) {
 
 TEST(CarbonTest, CarbonInsertInsertColumnNumbersZeroWithoutOverflow) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
         jak_carbon_insert_column_state column_state;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
         jak_carbon_insert *nested_inserter_l1 = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
@@ -934,7 +934,7 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersZeroWithoutOverflow) {
 
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
@@ -951,7 +951,7 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersZeroWithoutOverflow) {
 
 TEST(CarbonTest, CarbonInsertInsertMultileTypedColumnsWithoutOverflow) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
         jak_carbon_insert_column_state column_state;
@@ -959,8 +959,8 @@ TEST(CarbonTest, CarbonInsertInsertMultileTypedColumnsWithoutOverflow) {
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
         ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
@@ -1037,7 +1037,7 @@ TEST(CarbonTest, CarbonInsertInsertMultileTypedColumnsWithoutOverflow) {
 
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
@@ -1055,15 +1055,15 @@ TEST(CarbonTest, CarbonInsertInsertMultileTypedColumnsWithoutOverflow) {
 
 TEST(CarbonTest, CarbonInsertInsertColumnNumbersZeroWithOverflow) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
         jak_carbon_insert_column_state column_state;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,16, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
         jak_carbon_insert *nested_inserter_l1 = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 1);
@@ -1076,7 +1076,7 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersZeroWithOverflow) {
 
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
@@ -1095,15 +1095,15 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersZeroWithOverflow) {
 
 TEST(CarbonTest, CarbonInsertInsertColumnNumbersWithHighOverflow) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
         jak_carbon_insert_column_state column_state;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,16, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
         jak_carbon_insert *nested_inserter_l1 = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U32, 1);
@@ -1119,7 +1119,7 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersWithHighOverflow) {
 
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
@@ -1138,15 +1138,15 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersWithHighOverflow) {
 
 TEST(CarbonTest, CarbonInsertInsertMultipleColumnsNumbersWithHighOverflow) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
         jak_carbon_insert_column_state column_state;
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,16, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
         for (jak_u32 k = 0; k < 3; k++) {
@@ -1164,7 +1164,7 @@ TEST(CarbonTest, CarbonInsertInsertMultipleColumnsNumbersWithHighOverflow) {
 
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         ////jak_carbon_hexdump_print(stdout, &rev_doc);
 
@@ -1183,7 +1183,7 @@ TEST(CarbonTest, CarbonInsertInsertMultipleColumnsNumbersWithHighOverflow) {
 
 TEST(CarbonTest, CarbonInsertNullTest) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
         jak_carbon_insert_column_state column_state;
@@ -1191,8 +1191,8 @@ TEST(CarbonTest, CarbonInsertNullTest) {
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
         ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
@@ -1269,7 +1269,7 @@ TEST(CarbonTest, CarbonInsertNullTest) {
 
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
@@ -1286,7 +1286,7 @@ TEST(CarbonTest, CarbonInsertNullTest) {
 
 TEST(CarbonTest, CarbonShrinkColumnListTest) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
         jak_carbon_insert_column_state column_state;
@@ -1294,8 +1294,8 @@ TEST(CarbonTest, CarbonShrinkColumnListTest) {
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
         ins = jak_carbon_insert_column_begin(&column_state, &inserter, JAK_CARBON_COLUMN_TYPE_U8, 10);
@@ -1365,12 +1365,12 @@ TEST(CarbonTest, CarbonShrinkColumnListTest) {
         jak_carbon_insert_column_end(&column_state);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
-        carbon_revise_shrink(&revise);
+        jak_carbon_revise_shrink(&revise);
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
@@ -1387,7 +1387,7 @@ TEST(CarbonTest, CarbonShrinkColumnListTest) {
 
 TEST(CarbonTest, CarbonShrinkArrayListTest) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
         jak_carbon_insert_array_state array_state;
@@ -1395,8 +1395,8 @@ TEST(CarbonTest, CarbonShrinkArrayListTest) {
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
         ins = jak_carbon_insert_array_begin(&array_state, &inserter, 10);
@@ -1418,12 +1418,12 @@ TEST(CarbonTest, CarbonShrinkArrayListTest) {
         jak_carbon_insert_array_end(&array_state);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
-        carbon_revise_shrink(&revise);
+        jak_carbon_revise_shrink(&revise);
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
@@ -1440,7 +1440,7 @@ TEST(CarbonTest, CarbonShrinkArrayListTest) {
 
 TEST(CarbonTest, CarbonShrinkNestedArrayListTest) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
         jak_carbon_insert_array_state array_state, nested_array_state;
@@ -1448,8 +1448,8 @@ TEST(CarbonTest, CarbonShrinkNestedArrayListTest) {
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
         ins = jak_carbon_insert_array_begin(&array_state, &inserter, 10);
@@ -1493,12 +1493,12 @@ TEST(CarbonTest, CarbonShrinkNestedArrayListTest) {
         jak_carbon_insert_array_end(&array_state);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
-        carbon_revise_shrink(&revise);
+        jak_carbon_revise_shrink(&revise);
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
@@ -1515,7 +1515,7 @@ TEST(CarbonTest, CarbonShrinkNestedArrayListTest) {
 
 TEST(CarbonTest, CarbonShrinkNestedArrayListAndColumnListTest) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
         jak_carbon_insert_column_state column_state;
@@ -1524,8 +1524,8 @@ TEST(CarbonTest, CarbonShrinkNestedArrayListAndColumnListTest) {
 
         jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
         jak_carbon_insert_u64(&inserter, 4223);
@@ -1555,12 +1555,12 @@ TEST(CarbonTest, CarbonShrinkNestedArrayListAndColumnListTest) {
         jak_carbon_insert_array_end(&array_state);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
-        carbon_revise_shrink(&revise);
+        jak_carbon_revise_shrink(&revise);
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
@@ -1689,7 +1689,7 @@ TEST(CarbonTest, CarbonDotNotationParsing) {
 
 TEST(CarbonTest, CarbonFind) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert ins;
         jak_carbon_find finder;
@@ -1697,17 +1697,17 @@ TEST(CarbonTest, CarbonFind) {
         jak_carbon_field_type_e type;
         jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
 
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&ins, &it);
         jak_carbon_insert_u8(&ins, 'a');
         jak_carbon_insert_u8(&ins, 'b');
         jak_carbon_insert_u8(&ins, 'c');
         jak_carbon_array_it_insert_end(&ins);
-        carbon_revise_iterator_close(&it);
+        jak_carbon_revise_iterator_close(&it);
 
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         {
                 jak_carbon_find_open(&finder, "0", &rev_doc);
@@ -1766,7 +1766,7 @@ TEST(CarbonTest, CarbonFind) {
 
 TEST(CarbonTest, CarbonFindTypes) {
         jak_carbon doc, rev_doc;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter, *ins, *nested_ins, *column_ins;
         jak_carbon_insert_column_state column_state;
@@ -1776,8 +1776,8 @@ TEST(CarbonTest, CarbonFindTypes) {
         jak_carbon_field_type_e type;
         jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
         jak_carbon_insert_u64(&inserter, 4223);
@@ -1806,7 +1806,7 @@ TEST(CarbonTest, CarbonFindTypes) {
         jak_carbon_insert_u8(ins, 1);
         jak_carbon_insert_array_end(&array_state);
 
-        carbon_revise_shrink(&revise);
+        jak_carbon_revise_shrink(&revise);
 
 
         //jak_carbon_print(stdout, &rev_doc);
@@ -2071,7 +2071,7 @@ TEST(CarbonTest, CarbonFindTypes) {
 
         jak_carbon_insert_drop(&inserter);
         jak_carbon_array_it_drop(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_end(&revise);
 
         //jak_carbon_hexdump_print(stdout, &rev_doc);
 
@@ -2082,7 +2082,7 @@ TEST(CarbonTest, CarbonFindTypes) {
 TEST(CarbonTest, CarbonUpdateU8Simple)
 {
         jak_carbon doc, rev_doc, rev_doc2, rev_doc3, rev_doc4;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
         struct jak_string sb;
@@ -2093,15 +2093,15 @@ TEST(CarbonTest, CarbonUpdateU8Simple)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
         jak_carbon_insert_u8(&inserter, 'X');
 
         jak_carbon_array_it_insert_end(&inserter);
-        carbon_revise_iterator_close(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&it);
+        jak_carbon_revise_end(&revise);
 
 
         json = jak_carbon_to_json_extended(&sb, &rev_doc);
@@ -2109,15 +2109,15 @@ TEST(CarbonTest, CarbonUpdateU8Simple)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc2, &rev_doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc2, &rev_doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
-        carbon_update_set_u8(&revise, "0", 'Y');
+        jak_carbon_update_set_u8(&revise, "0", 'Y');
 
         jak_carbon_array_it_insert_end(&inserter);
-        carbon_revise_iterator_close(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&it);
+        jak_carbon_revise_end(&revise);
 
 
         json = jak_carbon_to_json_extended(&sb, &rev_doc2);
@@ -2126,17 +2126,17 @@ TEST(CarbonTest, CarbonUpdateU8Simple)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc3, &rev_doc2);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc3, &rev_doc2);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
         jak_carbon_insert_u8(&inserter, 'A');
         jak_carbon_insert_u8(&inserter, 'B');
-        carbon_update_set_u8(&revise, "2", 'C');
+        jak_carbon_update_set_u8(&revise, "2", 'C');
 
         jak_carbon_array_it_insert_end(&inserter);
-        carbon_revise_iterator_close(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&it);
+        jak_carbon_revise_end(&revise);
 
 
         json = jak_carbon_to_json_extended(&sb, &rev_doc3);
@@ -2145,17 +2145,17 @@ TEST(CarbonTest, CarbonUpdateU8Simple)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc4, &rev_doc3);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc4, &rev_doc3);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
-        carbon_update_set_u8(&revise, "0", 1);
-        carbon_update_set_u8(&revise, "1", 2);
-        carbon_update_set_u8(&revise, "2", 3);
+        jak_carbon_update_set_u8(&revise, "0", 1);
+        jak_carbon_update_set_u8(&revise, "1", 2);
+        jak_carbon_update_set_u8(&revise, "2", 3);
 
         jak_carbon_array_it_insert_end(&inserter);
-        carbon_revise_iterator_close(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&it);
+        jak_carbon_revise_end(&revise);
 
 
         json = jak_carbon_to_json_extended(&sb, &rev_doc4);
@@ -2176,7 +2176,7 @@ TEST(CarbonTest, CarbonUpdateU8Simple)
 TEST(CarbonTest, CarbonUpdateMixedFixedTypesSimple)
 {
         jak_carbon doc, rev_doc, rev_doc2;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
         struct jak_string sb;
@@ -2187,8 +2187,8 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesSimple)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
         jak_carbon_insert_u8(&inserter, 1);
@@ -2196,8 +2196,8 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesSimple)
         jak_carbon_insert_float(&inserter, 23);
 
         jak_carbon_array_it_insert_end(&inserter);
-        carbon_revise_iterator_close(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&it);
+        jak_carbon_revise_end(&revise);
 
 
         json = jak_carbon_to_json_extended(&sb, &rev_doc);
@@ -2206,15 +2206,15 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesSimple)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc2, &rev_doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc2, &rev_doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
-        carbon_update_set_i64(&revise, "1", 1024);
+        jak_carbon_update_set_i64(&revise, "1", 1024);
 
         jak_carbon_array_it_insert_end(&inserter);
-        carbon_revise_iterator_close(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&it);
+        jak_carbon_revise_end(&revise);
 
 
         json = jak_carbon_to_json_extended(&sb, &rev_doc2);
@@ -2245,7 +2245,7 @@ TEST(CarbonTest, CarbonRemoveConstantsToEmpty)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -2262,15 +2262,15 @@ TEST(CarbonTest, CarbonRemoveConstantsToEmpty)
         char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         jak_carbon_array_it_remove(&rev_it);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -2294,7 +2294,7 @@ TEST(CarbonTest, CarbonRemoveFirstConstants)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -2312,8 +2312,8 @@ TEST(CarbonTest, CarbonRemoveFirstConstants)
         char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         jak_carbon_array_it_remove(&rev_it);
@@ -2322,8 +2322,8 @@ TEST(CarbonTest, CarbonRemoveFirstConstants)
         jak_carbon_field_type_e next_type;
         jak_carbon_array_it_field_type(&next_type, &rev_it);
         ASSERT_EQ(next_type, JAK_CARBON_FIELD_TYPE_FALSE);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -2347,7 +2347,7 @@ TEST(CarbonTest, CarbonRemoveLastConstants)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -2365,8 +2365,8 @@ TEST(CarbonTest, CarbonRemoveLastConstants)
         char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         has_next = jak_carbon_array_it_next(&rev_it);
@@ -2374,8 +2374,8 @@ TEST(CarbonTest, CarbonRemoveLastConstants)
         jak_carbon_array_it_remove(&rev_it);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -2399,7 +2399,7 @@ TEST(CarbonTest, CarbonRemoveMiddleConstants)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -2418,8 +2418,8 @@ TEST(CarbonTest, CarbonRemoveMiddleConstants)
         char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         has_next = jak_carbon_array_it_next(&rev_it);
@@ -2432,8 +2432,8 @@ TEST(CarbonTest, CarbonRemoveMiddleConstants)
         ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_FALSE);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -2456,7 +2456,7 @@ TEST(CarbonTest, CarbonRemoveNumberToEmpty)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -2473,15 +2473,15 @@ TEST(CarbonTest, CarbonRemoveNumberToEmpty)
         char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         jak_carbon_array_it_remove(&rev_it);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -2505,7 +2505,7 @@ TEST(CarbonTest, CarbonRemoveFirstNumber)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -2523,8 +2523,8 @@ TEST(CarbonTest, CarbonRemoveFirstNumber)
         char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         jak_carbon_array_it_remove(&rev_it);
@@ -2533,8 +2533,8 @@ TEST(CarbonTest, CarbonRemoveFirstNumber)
         jak_carbon_field_type_e next_type;
         jak_carbon_array_it_field_type(&next_type, &rev_it);
         ASSERT_EQ(next_type, JAK_CARBON_FIELD_TYPE_NUMBER_U32);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -2558,7 +2558,7 @@ TEST(CarbonTest, CarbonRemoveLastNumber)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -2576,8 +2576,8 @@ TEST(CarbonTest, CarbonRemoveLastNumber)
         char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         has_next = jak_carbon_array_it_next(&rev_it);
@@ -2585,8 +2585,8 @@ TEST(CarbonTest, CarbonRemoveLastNumber)
         jak_carbon_array_it_remove(&rev_it);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -2610,7 +2610,7 @@ TEST(CarbonTest, CarbonRemoveMiddleNumber)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -2629,8 +2629,8 @@ TEST(CarbonTest, CarbonRemoveMiddleNumber)
         char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         has_next = jak_carbon_array_it_next(&rev_it);
@@ -2643,8 +2643,8 @@ TEST(CarbonTest, CarbonRemoveMiddleNumber)
         ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U32);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -2668,7 +2668,7 @@ TEST(CarbonTest, CarbonRemoveStringToEmpty)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -2685,15 +2685,15 @@ TEST(CarbonTest, CarbonRemoveStringToEmpty)
         char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         jak_carbon_array_it_remove(&rev_it);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -2717,7 +2717,7 @@ TEST(CarbonTest, CarbonRemoveFirstString)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -2735,8 +2735,8 @@ TEST(CarbonTest, CarbonRemoveFirstString)
         char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         jak_carbon_array_it_remove(&rev_it);
@@ -2745,8 +2745,8 @@ TEST(CarbonTest, CarbonRemoveFirstString)
         jak_carbon_field_type_e next_type;
         jak_carbon_array_it_field_type(&next_type, &rev_it);
         ASSERT_EQ(next_type, JAK_CARBON_FIELD_TYPE_STRING);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -2770,7 +2770,7 @@ TEST(CarbonTest, CarbonRemoveLastString)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -2788,8 +2788,8 @@ TEST(CarbonTest, CarbonRemoveLastString)
         char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         has_next = jak_carbon_array_it_next(&rev_it);
@@ -2797,8 +2797,8 @@ TEST(CarbonTest, CarbonRemoveLastString)
         jak_carbon_array_it_remove(&rev_it);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -2822,7 +2822,7 @@ TEST(CarbonTest, CarbonRemoveMiddleString)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -2841,8 +2841,8 @@ TEST(CarbonTest, CarbonRemoveMiddleString)
         char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         has_next = jak_carbon_array_it_next(&rev_it);
@@ -2855,8 +2855,8 @@ TEST(CarbonTest, CarbonRemoveMiddleString)
         ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_STRING);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -2883,7 +2883,7 @@ TEST(CarbonTest, CarbonRemoveBinaryToEmpty)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -2901,15 +2901,15 @@ TEST(CarbonTest, CarbonRemoveBinaryToEmpty)
         char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         jak_carbon_array_it_remove(&rev_it);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -2933,7 +2933,7 @@ TEST(CarbonTest, CarbonRemoveFirstBinary)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -2954,8 +2954,8 @@ TEST(CarbonTest, CarbonRemoveFirstBinary)
         char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         jak_carbon_array_it_remove(&rev_it);
@@ -2964,8 +2964,8 @@ TEST(CarbonTest, CarbonRemoveFirstBinary)
         jak_carbon_field_type_e next_type;
         jak_carbon_array_it_field_type(&next_type, &rev_it);
         ASSERT_EQ(next_type, JAK_CARBON_FIELD_TYPE_BINARY);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -2989,7 +2989,7 @@ TEST(CarbonTest, CarbonRemoveLastBinary)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -3010,8 +3010,8 @@ TEST(CarbonTest, CarbonRemoveLastBinary)
         char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         has_next = jak_carbon_array_it_next(&rev_it);
@@ -3019,8 +3019,8 @@ TEST(CarbonTest, CarbonRemoveLastBinary)
         jak_carbon_array_it_remove(&rev_it);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -3044,7 +3044,7 @@ TEST(CarbonTest, CarbonRemoveMiddleBinary)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -3068,8 +3068,8 @@ TEST(CarbonTest, CarbonRemoveMiddleBinary)
         char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         has_next = jak_carbon_array_it_next(&rev_it);
@@ -3082,8 +3082,8 @@ TEST(CarbonTest, CarbonRemoveMiddleBinary)
         ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_BINARY);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -3116,7 +3116,7 @@ TEST(CarbonTest, CarbonRemoveCustomBinaryToEmpty)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -3136,15 +3136,15 @@ TEST(CarbonTest, CarbonRemoveCustomBinaryToEmpty)
         //jak_carbon_hexdump_print(stdout, &doc);
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         jak_carbon_array_it_remove(&rev_it);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -3168,7 +3168,7 @@ TEST(CarbonTest, CarbonRemoveFirstCustomBinary)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -3189,8 +3189,8 @@ TEST(CarbonTest, CarbonRemoveFirstCustomBinary)
         char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         jak_carbon_array_it_remove(&rev_it);
@@ -3199,8 +3199,8 @@ TEST(CarbonTest, CarbonRemoveFirstCustomBinary)
         jak_carbon_field_type_e next_type;
         jak_carbon_array_it_field_type(&next_type, &rev_it);
         ASSERT_EQ(next_type, JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -3224,7 +3224,7 @@ TEST(CarbonTest, CarbonRemoveLastCustomBinary)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -3245,8 +3245,8 @@ TEST(CarbonTest, CarbonRemoveLastCustomBinary)
         char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         has_next = jak_carbon_array_it_next(&rev_it);
@@ -3254,8 +3254,8 @@ TEST(CarbonTest, CarbonRemoveLastCustomBinary)
         jak_carbon_array_it_remove(&rev_it);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -3279,7 +3279,7 @@ TEST(CarbonTest, CarbonRemoveMiddleCustomBinary)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -3303,8 +3303,8 @@ TEST(CarbonTest, CarbonRemoveMiddleCustomBinary)
         char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         has_next = jak_carbon_array_it_next(&rev_it);
@@ -3317,8 +3317,8 @@ TEST(CarbonTest, CarbonRemoveMiddleCustomBinary)
         ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -3350,7 +3350,7 @@ TEST(CarbonTest, CarbonRemoveArrayToEmpty)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         jak_carbon_insert_array_state state;
@@ -3375,15 +3375,15 @@ TEST(CarbonTest, CarbonRemoveArrayToEmpty)
         //jak_carbon_hexdump_print(stdout, &doc);
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         jak_carbon_array_it_remove(&rev_it);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -3407,7 +3407,7 @@ TEST(CarbonTest, CarbonRemoveFirstArray)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -3437,8 +3437,8 @@ TEST(CarbonTest, CarbonRemoveFirstArray)
         char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         jak_carbon_array_it_remove(&rev_it);
@@ -3447,8 +3447,8 @@ TEST(CarbonTest, CarbonRemoveFirstArray)
         jak_carbon_field_type_e next_type;
         jak_carbon_array_it_field_type(&next_type, &rev_it);
         ASSERT_EQ(next_type, JAK_CARBON_FIELD_TYPE_ARRAY);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -3472,7 +3472,7 @@ TEST(CarbonTest, CarbonRemoveLastArray)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -3502,8 +3502,8 @@ TEST(CarbonTest, CarbonRemoveLastArray)
         char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         has_next = jak_carbon_array_it_next(&rev_it);
@@ -3511,8 +3511,8 @@ TEST(CarbonTest, CarbonRemoveLastArray)
         jak_carbon_array_it_remove(&rev_it);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -3536,7 +3536,7 @@ TEST(CarbonTest, CarbonRemoveMiddleArray)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -3572,8 +3572,8 @@ TEST(CarbonTest, CarbonRemoveMiddleArray)
         char *json_1 = strdup(jak_carbon_to_json_extended(&sb, &doc));
 
         // -------------------------------------------------------------------------------------------------------------
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         has_next = jak_carbon_array_it_next(&rev_it);
@@ -3586,8 +3586,8 @@ TEST(CarbonTest, CarbonRemoveMiddleArray)
         ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_ARRAY);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -3610,7 +3610,7 @@ TEST(CarbonTest, CarbonColumnRemoveTest)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -3637,8 +3637,8 @@ TEST(CarbonTest, CarbonColumnRemoveTest)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
         jak_carbon_column_it *cit = jak_carbon_array_it_column_value(&rev_it);
@@ -3677,8 +3677,8 @@ TEST(CarbonTest, CarbonColumnRemoveTest)
 
         char *json_4 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -3767,68 +3767,68 @@ TEST(CarbonTest, CarbonRemoveComplexTest)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_remove_one("3", &rev_doc, &doc);
+        jak_carbon_revise_remove_one("3", &rev_doc, &doc);
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, \"Hello\", 2, 3, \"World\", [], [4, \"Fox!\", 6], [[], [4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_remove_one("5", &rev_doc2, &rev_doc);
+        jak_carbon_revise_remove_one("5", &rev_doc2, &rev_doc);
         char *json_3 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc2));
         ASSERT_TRUE(strcmp(json_3, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, \"Hello\", 2, 3, \"World\", [4, \"Fox!\", 6], [[], [4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_remove_one("5.1", &rev_doc3, &rev_doc2);
+        jak_carbon_revise_remove_one("5.1", &rev_doc3, &rev_doc2);
         char *json_4 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc3));
         ASSERT_TRUE(strcmp(json_4, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, \"Hello\", 2, 3, \"World\", [4, 6], [[], [4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_remove_one("6.0", &rev_doc4, &rev_doc3);
+        jak_carbon_revise_remove_one("6.0", &rev_doc4, &rev_doc3);
         char *json_5 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc4));
         ASSERT_TRUE(strcmp(json_5, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, \"Hello\", 2, 3, \"World\", [4, 6], [[4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_remove_one("5", &rev_doc5, &rev_doc4);
+        jak_carbon_revise_remove_one("5", &rev_doc5, &rev_doc4);
         char *json_6 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc5));
         ASSERT_TRUE(strcmp(json_6, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, \"Hello\", 2, 3, \"World\", [[4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_remove_one("0", &rev_doc6, &rev_doc5);
-        carbon_revise_remove_one("1", &rev_doc7, &rev_doc6);
-        carbon_revise_remove_one("0", &rev_doc8, &rev_doc7);
-        carbon_revise_remove_one("1", &rev_doc9, &rev_doc8);
-        carbon_revise_remove_one("0", &rev_doc10, &rev_doc9);
+        jak_carbon_revise_remove_one("0", &rev_doc6, &rev_doc5);
+        jak_carbon_revise_remove_one("1", &rev_doc7, &rev_doc6);
+        jak_carbon_revise_remove_one("0", &rev_doc8, &rev_doc7);
+        jak_carbon_revise_remove_one("1", &rev_doc9, &rev_doc8);
+        jak_carbon_revise_remove_one("0", &rev_doc10, &rev_doc9);
         char *json_11 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc10));
         ASSERT_TRUE(strcmp(json_11, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[[4], null, [\"Dog!\", [], [[41, 42, 43]], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_remove_one("0.2.2.0", &rev_doc11, &rev_doc10);
+        jak_carbon_revise_remove_one("0.2.2.0", &rev_doc11, &rev_doc10);
 
         char *json_12 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc11));
         ASSERT_TRUE(strcmp(json_12, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[[4], null, [\"Dog!\", [], [], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_remove_one("0.2.2", &rev_doc12, &rev_doc11);
+        jak_carbon_revise_remove_one("0.2.2", &rev_doc12, &rev_doc11);
 
         char *json_13 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc12));
         ASSERT_TRUE(strcmp(json_13, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[[4], null, [\"Dog!\", [], []]]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_remove_one("0.2", &rev_doc13, &rev_doc12);
+        jak_carbon_revise_remove_one("0.2", &rev_doc13, &rev_doc12);
 
         char *json_14 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc13));
         ASSERT_TRUE(strcmp(json_14, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [[[4], null]]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_remove_one("0", &rev_doc14, &rev_doc13);
+        jak_carbon_revise_remove_one("0", &rev_doc14, &rev_doc13);
 
         char *json_15 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc14));
         ASSERT_TRUE(strcmp(json_15, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": []}") == 0);
@@ -3866,7 +3866,7 @@ TEST(CarbonTest, CarbonRemoveComplexTest)
 TEST(CarbonTest, CarbonUpdateMixedFixedTypesTypeChangeSimple)
 {
         jak_carbon doc, rev_doc, rev_doc2;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
         struct jak_string sb;
@@ -3877,8 +3877,8 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesTypeChangeSimple)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&it, &revise);
         jak_carbon_array_it_insert_begin(&inserter, &it);
 
         jak_carbon_insert_u8(&inserter, 1);
@@ -3886,8 +3886,8 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesTypeChangeSimple)
         jak_carbon_insert_float(&inserter, 23);
 
         jak_carbon_array_it_insert_end(&inserter);
-        carbon_revise_iterator_close(&it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&it);
+        jak_carbon_revise_end(&revise);
 
 
         json = jak_carbon_to_json_extended(&sb, &rev_doc);
@@ -3895,9 +3895,9 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesTypeChangeSimple)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc2, &rev_doc);
-        carbon_update_set_u32(&revise, "1", 1024);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_begin(&revise, &rev_doc2, &rev_doc);
+        jak_carbon_update_set_u32(&revise, "1", 1024);
+        jak_carbon_revise_end(&revise);
 
 
         json = jak_carbon_to_json_extended(&sb, &rev_doc2);
@@ -3966,7 +3966,7 @@ TEST(CarbonTest, CarbonKeyTypeNoKeyNoRevInc)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_u64 rev_old, rev_new;
 
         // -------------------------------------------------------------------------------------------------------------
@@ -3981,8 +3981,8 @@ TEST(CarbonTest, CarbonKeyTypeNoKeyNoRevInc)
 
         jak_carbon_commit_hash(&rev_old, &doc);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_end(&revise);
 
         jak_carbon_commit_hash(&rev_new, &rev_doc);
 
@@ -4022,7 +4022,7 @@ TEST(CarbonTest, CarbonKeyTypeAutoKeyRevInc)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_u64 rev_old, rev_new;
 
         // -------------------------------------------------------------------------------------------------------------
@@ -4037,8 +4037,8 @@ TEST(CarbonTest, CarbonKeyTypeAutoKeyRevInc)
 
         jak_carbon_commit_hash(&rev_old, &doc);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_end(&revise);
 
         jak_carbon_commit_hash(&rev_new, &rev_doc);
 
@@ -4052,7 +4052,7 @@ TEST(CarbonTest, CarbonKeyTypeAutoKeyUpdate)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_global_id_t id, id_read;
 
         // -------------------------------------------------------------------------------------------------------------
@@ -4066,9 +4066,9 @@ TEST(CarbonTest, CarbonKeyTypeAutoKeyUpdate)
         // -------------------------------------------------------------------------------------------------------------
 
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_key_generate(&id, &revise);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_key_generate(&id, &revise);
+        jak_carbon_revise_end(&revise);
 
         jak_carbon_key_unsigned_value(&id_read, &rev_doc);
         ASSERT_NE(id, 0);
@@ -4084,7 +4084,7 @@ TEST(CarbonTest, CarbonKeyTypeUnsignedKeyUpdate)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         struct jak_string sb;
 
         string_create(&sb);
@@ -4102,9 +4102,9 @@ TEST(CarbonTest, CarbonKeyTypeUnsignedKeyUpdate)
         // -------------------------------------------------------------------------------------------------------------
 
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_key_set_unsigned(&revise, 42);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_key_set_unsigned(&revise, 42);
+        jak_carbon_revise_end(&revise);
 
         jak_carbon_key_unsigned_value(&id_read, &rev_doc);
         ASSERT_EQ(id_read, 42);
@@ -4118,7 +4118,7 @@ TEST(CarbonTest, CarbonKeyTypeSignedKeyUpdate)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         struct jak_string sb;
 
         string_create(&sb);
@@ -4136,9 +4136,9 @@ TEST(CarbonTest, CarbonKeyTypeSignedKeyUpdate)
         // -------------------------------------------------------------------------------------------------------------
 
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_key_set_signed(&revise, 42);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_key_set_signed(&revise, 42);
+        jak_carbon_revise_end(&revise);
 
         jak_carbon_key_signed_value(&id_read, &rev_doc);
         ASSERT_EQ(id_read, 42);
@@ -4152,7 +4152,7 @@ TEST(CarbonTest, CarbonKeyTypeStringKeyUpdate)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         struct jak_string sb;
 
         string_create(&sb);
@@ -4169,9 +4169,9 @@ TEST(CarbonTest, CarbonKeyTypeStringKeyUpdate)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_key_set_string(&revise, "my_unique_id");
-        carbon_revise_end(&revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_key_set_string(&revise, "my_unique_id");
+        jak_carbon_revise_end(&revise);
 
         const char *key = jak_carbon_key_string_value(&key_len, &rev_doc);
         ASSERT_TRUE(strncmp(key, "my_unique_id", strlen("my_unique_id")) == 0);
@@ -4207,7 +4207,7 @@ TEST(CarbonTest, CarbonKeyTypeSignedKeyRevInc)
 {
         jak_carbon doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_u64 rev_old, rev_new;
 
         // -------------------------------------------------------------------------------------------------------------
@@ -4233,8 +4233,8 @@ TEST(CarbonTest, CarbonKeyTypeSignedKeyRevInc)
 
                 jak_carbon* new_f = vec_new_and_get(&files, jak_carbon);
 
-                carbon_revise_begin(&revise, new_f, old_f);
-                carbon_revise_end(&revise);
+                jak_carbon_revise_begin(&revise, new_f, old_f);
+                jak_carbon_revise_end(&revise);
 
                 jak_carbon_commit_hash(&rev_new, new_f);
 
@@ -4250,7 +4250,7 @@ TEST(CarbonTest, CarbonKeyTypeUnsignedKeyRevInc)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_u64 rev_old, rev_new;
 
         // -------------------------------------------------------------------------------------------------------------
@@ -4265,8 +4265,8 @@ TEST(CarbonTest, CarbonKeyTypeUnsignedKeyRevInc)
 
         jak_carbon_commit_hash(&rev_old, &doc);
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_end(&revise);
 
         jak_carbon_commit_hash(&rev_new, &rev_doc);
 
@@ -5483,15 +5483,15 @@ TEST(CarbonTest, CarbonObjectInsertColumnNonEmpty)
 //static void create_nested_doc(jak_carbon *rev_doc)
 //{
 //        jak_carbon doc;
-//        struct jak_carbon_revise revise;
+//        jak_carbon_revise revise;
 //        jak_carbon_array_it it;
 //        jak_carbon_insert nested_ins, *array_ins, *col_ins, *nested_array_ins;
 //        jak_carbon_insert_array_state array_state, nested_array_state;
 //        jak_carbon_insert_column_state column_state;
 //
 //        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
-//        carbon_revise_begin(&revise, rev_doc, &doc);
-//        carbon_revise_iterator_open(&it, &revise);
+//        jak_carbon_revise_begin(&revise, rev_doc, &doc);
+//        jak_carbon_revise_iterator_open(&it, &revise);
 //
 //        jak_carbon_array_it_insert_begin(&nested_ins, &it);
 //
@@ -5587,15 +5587,15 @@ TEST(CarbonTest, CarbonObjectInsertColumnNonEmpty)
 //
 //        jak_carbon_array_it_insert_end(&nested_ins);
 //
-//        carbon_revise_iterator_close(&it);
-//        carbon_revise_end(&revise);
+//        jak_carbon_revise_iterator_close(&it);
+//        jak_carbon_revise_end(&revise);
 //}
 
 TEST(CarbonTest, CarbonObjectRemoveTest)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -5643,8 +5643,8 @@ TEST(CarbonTest, CarbonObjectRemoveTest)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
 
@@ -5664,8 +5664,8 @@ TEST(CarbonTest, CarbonObjectRemoveTest)
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
 
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
@@ -5685,7 +5685,7 @@ TEST(CarbonTest, CarbonObjectRemoveSkipOneTest)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -5733,8 +5733,8 @@ TEST(CarbonTest, CarbonObjectRemoveSkipOneTest)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
 
@@ -5753,8 +5753,8 @@ TEST(CarbonTest, CarbonObjectRemoveSkipOneTest)
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
 
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
@@ -5774,7 +5774,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringIt)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -5804,8 +5804,8 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringIt)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
 
@@ -5831,8 +5831,8 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringIt)
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
 
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
         //printf("\n%s\n", json_2);
@@ -5853,7 +5853,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex1)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -5882,8 +5882,8 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex1)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
 
@@ -5907,8 +5907,8 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex1)
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
 
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
@@ -5928,7 +5928,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex2)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -5957,8 +5957,8 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex2)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
 
@@ -5982,8 +5982,8 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex2)
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
 
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
@@ -6003,7 +6003,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex3)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -6032,8 +6032,8 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex3)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
 
@@ -6058,8 +6058,8 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex3)
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
 
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
@@ -6079,7 +6079,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex4)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -6108,8 +6108,8 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex4)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
 
@@ -6135,8 +6135,8 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex4)
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
 
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
@@ -6156,7 +6156,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex5)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -6185,8 +6185,8 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex5)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
 
@@ -6213,8 +6213,8 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex5)
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
 
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
@@ -6234,7 +6234,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKey)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -6263,8 +6263,8 @@ TEST(CarbonTest, CarbonObjectRemovePropByKey)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
 
@@ -6287,8 +6287,8 @@ TEST(CarbonTest, CarbonObjectRemovePropByKey)
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
 
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
@@ -6308,7 +6308,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectNonEmpty)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -6344,8 +6344,8 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectNonEmpty)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
 
@@ -6368,8 +6368,8 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectNonEmpty)
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
 
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
@@ -6389,7 +6389,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayEmpty)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -6422,8 +6422,8 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayEmpty)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
 
@@ -6446,8 +6446,8 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayEmpty)
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
 
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
@@ -6469,7 +6469,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayNonEmpty)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -6505,8 +6505,8 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayNonEmpty)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
 
@@ -6529,8 +6529,8 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayNonEmpty)
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
 
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
@@ -6550,7 +6550,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeColumnEmpty)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -6583,8 +6583,8 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeColumnEmpty)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
 
@@ -6607,8 +6607,8 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeColumnEmpty)
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
 
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 
@@ -6628,7 +6628,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectEmpty)
 {
         jak_carbon doc, rev_doc;
         jak_carbon_new context;
-        struct jak_carbon_revise revise;
+        jak_carbon_revise revise;
         jak_carbon_array_it rev_it;
         struct jak_string sb;
         bool has_next;
@@ -6660,8 +6660,8 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectEmpty)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        carbon_revise_begin(&revise, &rev_doc, &doc);
-        carbon_revise_iterator_open(&rev_it, &revise);
+        jak_carbon_revise_begin(&revise, &rev_doc, &doc);
+        jak_carbon_revise_iterator_open(&rev_it, &revise);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
 
@@ -6684,8 +6684,8 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectEmpty)
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
 
-        carbon_revise_iterator_close(&rev_it);
-        carbon_revise_end(&revise);
+        jak_carbon_revise_iterator_close(&rev_it);
+        jak_carbon_revise_end(&revise);
 
         char *json_2 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
 

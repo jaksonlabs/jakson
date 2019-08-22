@@ -24,6 +24,6 @@
 
 #include <jak_carbon_printers.h>
 
-bool json_extended_printer_create(struct printer *printer);
+bool json_extended_printer_create(jak_carbon_printer *printer);
 
 #endif

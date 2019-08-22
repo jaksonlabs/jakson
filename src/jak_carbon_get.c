@@ -79,12 +79,12 @@ jak_carbon_get_or_default_string(jak_u64 *len_out, jak_carbon *doc, const char *
         return result;
 }
 
-struct jak_carbon_binary *
-jak_carbon_get_or_default_binary(jak_carbon *doc, const char *path, struct jak_carbon_binary *default_val)
+jak_carbon_binary *
+jak_carbon_get_or_default_binary(jak_carbon *doc, const char *path, jak_carbon_binary *default_val)
 {
         jak_carbon_find find;
         jak_carbon_field_type_e field_type;
-        struct jak_carbon_binary *result = default_val;
+        jak_carbon_binary *result = default_val;
 
         if (jak_carbon_find_open(&find, path, doc)) {
                 jak_carbon_find_result_type(&field_type, &find);

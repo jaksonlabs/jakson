@@ -120,7 +120,7 @@ bool jak_carbon_path_index_it_field_float_value(bool *is_null_in, float *value, 
 bool jak_carbon_path_index_it_field_signed_value(bool *is_null_in, jak_i64 *value, jak_carbon_path_index_it *it);
 bool jak_carbon_path_index_it_field_unsigned_value(bool *is_null_in, jak_u64 *value, jak_carbon_path_index_it *it);
 const char *jak_carbon_path_index_it_field_string_value(jak_u64 *strlen, jak_carbon_path_index_it *it);
-bool jak_carbon_path_index_it_field_binary_value(struct jak_carbon_binary *out, jak_carbon_array_it *it);
+bool jak_carbon_path_index_it_field_binary_value(jak_carbon_binary *out, jak_carbon_array_it *it);
 bool jak_carbon_path_index_it_field_array_value(jak_carbon_array_it *it_out, jak_carbon_path_index_it *it_in);
 bool jak_carbon_path_index_it_field_object_value(jak_carbon_object_it *it_out, jak_carbon_path_index_it *it_in);
 bool jak_carbon_path_index_it_field_column_value(jak_carbon_column_it *it_out, jak_carbon_path_index_it *it_in);

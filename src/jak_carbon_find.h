@@ -55,7 +55,7 @@ typedef struct jak_carbon_find {
                         jak_u64 len;
                 } string;
 
-                struct jak_carbon_binary binary;
+                jak_carbon_binary binary;
         } value;
 } jak_carbon_find;
 
@@ -67,7 +67,7 @@ bool jak_carbon_find_create(jak_carbon_find *find, jak_carbon_dot_path *path, ja
 bool jak_carbon_find_drop(jak_carbon_find *find);
 
 bool jak_carbon_find_has_result(jak_carbon_find *find);
-const char *jak_carbon_find_result_to_str(struct jak_string *dst_str, jak_carbon_printer_impl_e print_type, jak_carbon_find *find);
+const char *jak_carbon_find_result_to_str(struct jak_string *dst_str, jak_jak_carbon_printer_impl_e print_type, jak_carbon_find *find);
 const char *jak_carbon_find_result_to_json_compact(struct jak_string *dst_str, jak_carbon_find *find);
 char *jak_carbon_find_result_to_json_compact_dup(jak_carbon_find *find);
 
@@ -81,7 +81,7 @@ bool jak_carbon_find_result_unsigned(jak_u64 *out, jak_carbon_find *find);
 bool jak_carbon_find_result_signed(jak_i64 *out, jak_carbon_find *find);
 bool jak_carbon_find_result_float(float *out, jak_carbon_find *find);
 const char *jak_carbon_find_result_string(jak_u64 *str_len, jak_carbon_find *find);
-struct jak_carbon_binary *jak_carbon_find_result_binary(jak_carbon_find *find);
+jak_carbon_binary *jak_carbon_find_result_binary(jak_carbon_find *find);
 
 JAK_END_DECL
 

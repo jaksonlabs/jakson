@@ -47,32 +47,32 @@ struct jak_json_compact_extra {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-static void nop(struct printer *self, struct jak_string *builder)
+static void nop(jak_carbon_printer *self, struct jak_string *builder)
 {
         JAK_UNUSED(self)
         JAK_UNUSED(builder)
 }
 
-static void drop(struct printer *self)
+static void drop(jak_carbon_printer *self)
 {
         struct jak_json_compact_extra *extra = (struct jak_json_compact_extra *) self->extra;
         free(extra->buffer);
         free(self->extra);
 }
 
-static void obj_begin(struct printer *self, struct jak_string *builder)
+static void obj_begin(jak_carbon_printer *self, struct jak_string *builder)
 {
         JAK_UNUSED(self);
         string_add(builder, "{");
 }
 
-static void obj_end(struct printer *self, struct jak_string *builder)
+static void obj_end(jak_carbon_printer *self, struct jak_string *builder)
 {
         JAK_UNUSED(self);
         string_add(builder, "}");
 }
 
-static void meta_data_nop(struct printer *self, struct jak_string *builder, int key_type, const void *key,
+static void meta_data_nop(jak_carbon_printer *self, struct jak_string *builder, int key_type, const void *key,
                           jak_u64 key_length, jak_u64 rev)
 {
         JAK_UNUSED(self)
@@ -83,44 +83,44 @@ static void meta_data_nop(struct printer *self, struct jak_string *builder, int 
         JAK_UNUSED(rev)
 }
 
-static void empty_record(struct printer *self, struct jak_string *builder)
+static void empty_record(jak_carbon_printer *self, struct jak_string *builder)
 {
         JAK_UNUSED(self);
         string_add(builder, "{}");
 }
 
-static void array_begin(struct printer *self, struct jak_string *builder)
+static void array_begin(jak_carbon_printer *self, struct jak_string *builder)
 {
         JAK_UNUSED(self);
 
         string_add(builder, "[");
 }
 
-static void array_end(struct printer *self, struct jak_string *builder)
+static void array_end(jak_carbon_printer *self, struct jak_string *builder)
 {
         JAK_UNUSED(self);
         string_add(builder, "]");
 }
 
-static void const_null(struct printer *self, struct jak_string *builder)
+static void const_null(jak_carbon_printer *self, struct jak_string *builder)
 {
         JAK_UNUSED(self);
         string_add(builder, "null");
 }
 
-static void const_true(struct printer *self, bool is_null, struct jak_string *builder)
+static void const_true(jak_carbon_printer *self, bool is_null, struct jak_string *builder)
 {
         JAK_UNUSED(self);
         string_add(builder, is_null ? "null" : "true");
 }
 
-static void const_false(struct printer *self, bool is_null, struct jak_string *builder)
+static void const_false(jak_carbon_printer *self, bool is_null, struct jak_string *builder)
 {
         JAK_UNUSED(self);
         string_add(builder, is_null ? "null" : "false");
 }
 
-static void val_signed(struct printer *self, struct jak_string *builder, const jak_i64 *value)
+static void val_signed(jak_carbon_printer *self, struct jak_string *builder, const jak_i64 *value)
 {
         JAK_UNUSED(self);
         if (JAK_LIKELY(value != NULL)) {
@@ -131,7 +131,7 @@ static void val_signed(struct printer *self, struct jak_string *builder, const j
 
 }
 
-static void val_unsigned(struct printer *self, struct jak_string *builder, const jak_u64 *value)
+static void val_unsigned(jak_carbon_printer *self, struct jak_string *builder, const jak_u64 *value)
 {
         JAK_UNUSED(self);
         if (JAK_LIKELY(value != NULL)) {
@@ -141,7 +141,7 @@ static void val_unsigned(struct printer *self, struct jak_string *builder, const
         }
 }
 
-static void val_float(struct printer *self, struct jak_string *builder, const float *value)
+static void val_float(jak_carbon_printer *self, struct jak_string *builder, const float *value)
 {
         JAK_UNUSED(self);
         if (JAK_LIKELY(value != NULL)) {
@@ -151,7 +151,7 @@ static void val_float(struct printer *self, struct jak_string *builder, const fl
         }
 }
 
-static void val_string(struct printer *self, struct jak_string *builder, const char *value, jak_u64 strlen)
+static void val_string(jak_carbon_printer *self, struct jak_string *builder, const char *value, jak_u64 strlen)
 {
         JAK_UNUSED(self);
         string_add_char(builder, '"');
@@ -162,7 +162,7 @@ static void val_string(struct printer *self, struct jak_string *builder, const c
 #define code_of(x, data_len)      (x + data_len + 2)
 #define data_of(x)      (x)
 
-static void print_binary(struct printer *self, struct jak_string *builder, const struct jak_carbon_binary *binary)
+static void print_binary(jak_carbon_printer *self, struct jak_string *builder, const jak_carbon_binary *binary)
 {
         /* base64 code will be written into the extra's buffer after a null-terminated copy of the binary data */
         struct jak_json_compact_extra *extra = (struct jak_json_compact_extra *) self->extra;
@@ -203,12 +203,12 @@ static void print_binary(struct printer *self, struct jak_string *builder, const
         string_add(builder, "\" }");
 }
 
-static void val_binary(struct printer *self, struct jak_string *builder, const struct jak_carbon_binary *binary)
+static void val_binary(jak_carbon_printer *self, struct jak_string *builder, const jak_carbon_binary *binary)
 {
         print_binary(self, builder, binary);
 }
 
-static void comma(struct printer *self, struct jak_string *builder)
+static void comma(jak_carbon_printer *self, struct jak_string *builder)
 {
         JAK_UNUSED(self);
         string_add(builder, ", ");
@@ -221,7 +221,7 @@ static void print_key(struct jak_string *builder, const char *key_name, jak_u64 
         string_add(builder, "\": ");
 }
 
-static void prop_null(struct printer *self, struct jak_string *builder,
+static void prop_null(jak_carbon_printer *self, struct jak_string *builder,
                       const char *key_name, jak_u64 key_len)
 {
         JAK_UNUSED(self);
@@ -229,7 +229,7 @@ static void prop_null(struct printer *self, struct jak_string *builder,
         string_add(builder, "null");
 }
 
-static void prop_true(struct printer *self, struct jak_string *builder,
+static void prop_true(jak_carbon_printer *self, struct jak_string *builder,
                       const char *key_name, jak_u64 key_len)
 {
         JAK_UNUSED(self);
@@ -237,7 +237,7 @@ static void prop_true(struct printer *self, struct jak_string *builder,
         string_add(builder, "true");
 }
 
-static void prop_false(struct printer *self, struct jak_string *builder,
+static void prop_false(jak_carbon_printer *self, struct jak_string *builder,
                        const char *key_name, jak_u64 key_len)
 {
         JAK_UNUSED(self);
@@ -245,7 +245,7 @@ static void prop_false(struct printer *self, struct jak_string *builder,
         string_add(builder, "false");
 }
 
-static void prop_signed(struct printer *self, struct jak_string *builder,
+static void prop_signed(jak_carbon_printer *self, struct jak_string *builder,
                         const char *key_name, jak_u64 key_len, const jak_i64 *value)
 {
         JAK_UNUSED(self);
@@ -253,7 +253,7 @@ static void prop_signed(struct printer *self, struct jak_string *builder,
         string_add_i64(builder, *value);
 }
 
-static void prop_unsigned(struct printer *self, struct jak_string *builder,
+static void prop_unsigned(jak_carbon_printer *self, struct jak_string *builder,
                           const char *key_name, jak_u64 key_len, const jak_u64 *value)
 {
         JAK_UNUSED(self);
@@ -261,7 +261,7 @@ static void prop_unsigned(struct printer *self, struct jak_string *builder,
         string_add_u64(builder, *value);
 }
 
-static void prop_float(struct printer *self, struct jak_string *builder,
+static void prop_float(jak_carbon_printer *self, struct jak_string *builder,
                        const char *key_name, jak_u64 key_len, const float *value)
 {
         JAK_UNUSED(self);
@@ -269,7 +269,7 @@ static void prop_float(struct printer *self, struct jak_string *builder,
         string_add_float(builder, *value);
 }
 
-static void prop_string(struct printer *self, struct jak_string *builder,
+static void prop_string(jak_carbon_printer *self, struct jak_string *builder,
                         const char *key_name, jak_u64 key_len, const char *value, jak_u64 strlen)
 {
         JAK_UNUSED(self);
@@ -279,21 +279,21 @@ static void prop_string(struct printer *self, struct jak_string *builder,
         string_add_char(builder, '"');
 }
 
-static void prop_binary(struct printer *self, struct jak_string *builder,
-                        const char *key_name, jak_u64 key_len, const struct jak_carbon_binary *binary)
+static void prop_binary(jak_carbon_printer *self, struct jak_string *builder,
+                        const char *key_name, jak_u64 key_len, const jak_carbon_binary *binary)
 {
         print_key(builder, key_name, key_len);
         print_binary(self, builder, binary);
 }
 
-static void array_prop_name(struct printer *self, struct jak_string *builder,
+static void array_prop_name(jak_carbon_printer *self, struct jak_string *builder,
                             const char *key_name, jak_u64 key_len)
 {
         JAK_UNUSED(self)
         print_key(builder, key_name, key_len);
 }
 
-static void obj_prop_name(struct printer *self, struct jak_string *builder,
+static void obj_prop_name(jak_carbon_printer *self, struct jak_string *builder,
                           const char *key_name, jak_u64 key_len)
 {
         JAK_UNUSED(self)
@@ -302,7 +302,7 @@ static void obj_prop_name(struct printer *self, struct jak_string *builder,
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bool json_compact_printer_create(struct printer *printer)
+bool json_compact_printer_create(jak_carbon_printer *printer)
 {
         JAK_ERROR_IF_NULL(printer);
         printer->drop = drop;

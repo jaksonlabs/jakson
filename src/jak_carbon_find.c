@@ -111,37 +111,37 @@ bool jak_carbon_find_has_result(jak_carbon_find *find)
 }
 
 const char *
-jak_carbon_find_result_to_str(struct jak_string *dst_str, jak_carbon_printer_impl_e print_type, jak_carbon_find *find)
+jak_carbon_find_result_to_str(struct jak_string *dst_str, jak_jak_carbon_printer_impl_e print_type, jak_carbon_find *find)
 {
         JAK_ERROR_IF_NULL(dst_str)
         JAK_ERROR_IF_NULL(find)
 
         string_clear(dst_str);
 
-        struct printer printer;
-        carbon_printer_by_type(&printer, print_type);
+        jak_carbon_printer printer;
+        jak_carbon_printer_by_type(&printer, print_type);
 
         if (jak_carbon_find_has_result(find)) {
                 jak_carbon_field_type_e result_type;
                 jak_carbon_find_result_type(&result_type, find);
                 switch (result_type) {
                         case JAK_CARBON_FIELD_TYPE_NULL:
-                                carbon_printer_null(&printer, dst_str);
+                                jak_carbon_printer_null(&printer, dst_str);
                                 break;
                         case JAK_CARBON_FIELD_TYPE_TRUE:
-                                carbon_printer_true(&printer, false, dst_str);
+                                jak_carbon_printer_true(&printer, false, dst_str);
                                 break;
                         case JAK_CARBON_FIELD_TYPE_FALSE:
-                                carbon_printer_false(&printer, false, dst_str);
+                                jak_carbon_printer_false(&printer, false, dst_str);
                                 break;
                         case JAK_CARBON_FIELD_TYPE_OBJECT: {
                                 jak_carbon_object_it *sub_it = jak_carbon_find_result_object(find);
-                                carbon_printer_print_object(sub_it, &printer, dst_str);
+                                jak_carbon_printer_print_object(sub_it, &printer, dst_str);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_ARRAY: {
                                 jak_carbon_array_it *sub_it = jak_carbon_find_result_array(find);
-                                carbon_printer_print_array(sub_it, &printer, dst_str, false);
+                                jak_carbon_printer_print_array(sub_it, &printer, dst_str, false);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_COLUMN_U8:
@@ -155,73 +155,73 @@ jak_carbon_find_result_to_str(struct jak_string *dst_str, jak_carbon_printer_imp
                         case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT:
                         case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
                                 jak_carbon_column_it *sub_it = jak_carbon_find_result_column(find);
-                                carbon_printer_print_column(sub_it, &printer, dst_str);
+                                jak_carbon_printer_print_column(sub_it, &printer, dst_str);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_STRING: {
                                 jak_u64 str_len = 0;
                                 const char *str = jak_carbon_find_result_string(&str_len, find);
-                                carbon_printer_string(&printer, dst_str, str, str_len);
+                                jak_carbon_printer_string(&printer, dst_str, str, str_len);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_NUMBER_U8: {
                                 jak_u64 val = 0;
                                 jak_carbon_find_result_unsigned(&val, find);
-                                carbon_printer_u8_or_null(&printer, dst_str, (jak_u8) val);
+                                jak_carbon_printer_u8_or_null(&printer, dst_str, (jak_u8) val);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_NUMBER_U16: {
                                 jak_u64 val = 0;
                                 jak_carbon_find_result_unsigned(&val, find);
-                                carbon_printer_u16_or_null(&printer, dst_str, (jak_u16) val);
+                                jak_carbon_printer_u16_or_null(&printer, dst_str, (jak_u16) val);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_NUMBER_U32: {
                                 jak_u64 val = 0;
                                 jak_carbon_find_result_unsigned(&val, find);
-                                carbon_printer_u32_or_null(&printer, dst_str, (jak_u32) val);
+                                jak_carbon_printer_u32_or_null(&printer, dst_str, (jak_u32) val);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_NUMBER_U64: {
                                 jak_u64 val = 0;
                                 jak_carbon_find_result_unsigned(&val, find);
-                                carbon_printer_u64_or_null(&printer, dst_str, (jak_u64) val);
+                                jak_carbon_printer_u64_or_null(&printer, dst_str, (jak_u64) val);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_NUMBER_I8: {
                                 jak_i64 val = 0;
                                 jak_carbon_find_result_signed(&val, find);
-                                carbon_printer_i8_or_null(&printer, dst_str, (jak_i8) val);
+                                jak_carbon_printer_i8_or_null(&printer, dst_str, (jak_i8) val);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_NUMBER_I16: {
                                 jak_i64 val = 0;
                                 jak_carbon_find_result_signed(&val, find);
-                                carbon_printer_i16_or_null(&printer, dst_str, (jak_i16) val);
+                                jak_carbon_printer_i16_or_null(&printer, dst_str, (jak_i16) val);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_NUMBER_I32: {
                                 jak_i64 val = 0;
                                 jak_carbon_find_result_signed(&val, find);
-                                carbon_printer_i32_or_null(&printer, dst_str, (jak_i32) val);
+                                jak_carbon_printer_i32_or_null(&printer, dst_str, (jak_i32) val);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_NUMBER_I64: {
                                 jak_i64 val = 0;
                                 jak_carbon_find_result_signed(&val, find);
-                                carbon_printer_i64_or_null(&printer, dst_str, (jak_i64) val);
+                                jak_carbon_printer_i64_or_null(&printer, dst_str, (jak_i64) val);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT: {
                                 float val = 0;
                                 jak_carbon_find_result_float(&val, find);
-                                carbon_printer_float(&printer, dst_str, &val);
+                                jak_carbon_printer_float(&printer, dst_str, &val);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_BINARY:
                         case JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM: {
-                                const struct jak_carbon_binary *val = jak_carbon_find_result_binary(find);
-                                carbon_printer_binary(&printer, dst_str, val);
+                                const jak_carbon_binary *val = jak_carbon_find_result_binary(find);
+                                jak_carbon_printer_binary(&printer, dst_str, val);
                         }
                                 break;
                         default: error(&find->err, JAK_ERR_INTERNALERR)
@@ -231,7 +231,7 @@ jak_carbon_find_result_to_str(struct jak_string *dst_str, jak_carbon_printer_imp
         } else {
                 string_add(dst_str, JAK_CARBON_NIL_STR);
         }
-        carbon_printer_drop(&printer);
+        jak_carbon_printer_drop(&printer);
 
         return string_cstr(dst_str);
 }
@@ -338,7 +338,7 @@ const char *jak_carbon_find_result_string(jak_u64 *str_len, jak_carbon_find *fin
         return find->value.string.base;
 }
 
-struct jak_carbon_binary *jak_carbon_find_result_binary(jak_carbon_find *find)
+jak_carbon_binary *jak_carbon_find_result_binary(jak_carbon_find *find)
 {
         JAK_ERROR_IF_NULL(find)
         error_if(!jak_carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)

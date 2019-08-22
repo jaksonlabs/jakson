@@ -45,7 +45,7 @@ bool jak_carbon_path_evaluator_begin(jak_carbon_path_evaluator *eval, jak_carbon
 }
 
 bool jak_carbon_path_evaluator_begin_mutable(jak_carbon_path_evaluator *eval, const jak_carbon_dot_path *path,
-                                         struct jak_carbon_revise *context)
+                                         jak_carbon_revise *context)
 {
         JAK_ERROR_IF_NULL(eval)
         JAK_ERROR_IF_NULL(path)
@@ -53,7 +53,7 @@ bool jak_carbon_path_evaluator_begin_mutable(jak_carbon_path_evaluator *eval, co
 
         eval->doc = context->revised_doc;
         JAK_check_success(error_init(&eval->err));
-        JAK_check_success(carbon_revise_iterator_open(&eval->root_it, context));
+        JAK_check_success(jak_carbon_revise_iterator_open(&eval->root_it, context));
         eval->status = traverse_array(eval, path, 0, &eval->root_it, true);
         JAK_check_success(jak_carbon_iterator_close(&eval->root_it));
         return true;

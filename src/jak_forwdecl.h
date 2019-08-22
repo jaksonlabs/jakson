@@ -82,5 +82,9 @@ typedef struct jak_carbon_object_it jak_carbon_object_it;
 typedef struct jak_carbon_path_evaluator jak_carbon_path_evaluator;
 typedef struct jak_carbon_path_index jak_carbon_path_index;
 typedef struct jak_carbon_path_index_it jak_carbon_path_index_it;
+typedef struct jak_carbon_printer jak_carbon_printer;
+typedef struct jak_carbon_revise jak_carbon_revise;
+typedef struct jak_carbon_binary jak_carbon_binary;
+typedef struct jak_carbon_update jak_carbon_update;
 
 #endif
