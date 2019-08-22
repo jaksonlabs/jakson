@@ -47,19 +47,19 @@ static void carbon_header_init(jak_carbon *doc, jak_carbon_key_e key_type);
 // ---------------------------------------------------------------------------------------------------------------------
 
 jak_carbon_insert *jak_carbon_create_begin(jak_carbon_new *context, jak_carbon *doc,
-                                              jak_carbon_key_e key_type, int mode)
+                                           jak_carbon_key_e type, int options)
 {
         if (JAK_LIKELY(context != NULL && doc != NULL)) {
-                error_if (mode != JAK_CARBON_KEEP && mode != JAK_CARBON_SHRINK && mode != JAK_CARBON_COMPACT &&
-                          mode != JAK_CARBON_OPTIMIZE,
+                error_if (options != JAK_CARBON_KEEP && options != JAK_CARBON_SHRINK && options != JAK_CARBON_COMPACT &&
+                          options != JAK_CARBON_OPTIMIZE,
                           &doc->err, JAK_ERR_ILLEGALARG);
 
                 success_else_null(error_init(&context->err), &doc->err);
                 context->content_it = JAK_MALLOC(sizeof(struct jak_carbon_array_it));
                 context->inserter = JAK_MALLOC(sizeof(jak_carbon_insert));
-                context->mode = mode;
+                context->mode = options;
 
-                success_else_null(jak_carbon_create_empty(&context->original, key_type), &doc->err);
+                success_else_null(jak_carbon_create_empty(&context->original, type), &doc->err);
                 success_else_null(carbon_revise_begin(&context->revision_context, doc, &context->original), &doc->err);
                 success_else_null(carbon_revise_iterator_open(context->content_it, &context->revision_context),
                                   &doc->err);
@@ -98,20 +98,20 @@ bool jak_carbon_create_end(jak_carbon_new *context)
         }
 }
 
-bool jak_carbon_create_empty(jak_carbon *doc, jak_carbon_key_e key_type)
+bool jak_carbon_create_empty(jak_carbon *doc, jak_carbon_key_e type)
 {
-        return jak_carbon_create_empty_ex(doc, key_type, 1024, 1);
+        return jak_carbon_create_empty_ex(doc, type, 1024, 1);
 }
 
-bool jak_carbon_create_empty_ex(jak_carbon *doc, jak_carbon_key_e key_type, jak_u64 doc_cap_byte,
-                            jak_u64 array_cap_byte)
+bool jak_carbon_create_empty_ex(jak_carbon *doc, jak_carbon_key_e type, jak_u64 doc_cap,
+                                jak_u64 array_cap)
 {
         JAK_ERROR_IF_NULL(doc);
 
-        doc_cap_byte = JAK_max(MIN_DOC_CAPACITY, doc_cap_byte);
+        doc_cap = JAK_max(MIN_DOC_CAPACITY, doc_cap);
 
         error_init(&doc->err);
-        memblock_create(&doc->memblock, doc_cap_byte);
+        memblock_create(&doc->memblock, doc_cap);
         memblock_zero_out(doc->memblock);
         memfile_open(&doc->memfile, doc->memblock, READ_WRITE);
 
@@ -120,13 +120,13 @@ bool jak_carbon_create_empty_ex(jak_carbon *doc, jak_carbon_key_e key_type, jak_
         doc->versioning.commit_lock = false;
         doc->versioning.is_latest = true;
 
-        carbon_header_init(doc, key_type);
-        carbon_int_insert_array(&doc->memfile, array_cap_byte);
+        carbon_header_init(doc, type);
+        carbon_int_insert_array(&doc->memfile, array_cap);
 
         return true;
 }
 
-bool jak_carbon_from_json(jak_carbon *doc, const char *json, jak_carbon_key_e key_type,
+bool jak_carbon_from_json(jak_carbon *doc, const char *json, jak_carbon_key_e type,
                       const void *key, struct jak_error *err)
 {
         JAK_ERROR_IF_NULL(doc)
@@ -159,7 +159,7 @@ bool jak_carbon_from_json(jak_carbon *doc, const char *json, jak_carbon_key_e ke
 
                 return false;
         } else {
-                carbon_int_from_json(doc, &data, key_type, key, JAK_CARBON_OPTIMIZE);
+                carbon_int_from_json(doc, &data, type, key, JAK_CARBON_OPTIMIZE);
                 json_drop(&data);
                 return true;
         }
@@ -197,11 +197,11 @@ bool jak_carbon_key_type(jak_carbon_key_e *out, jak_carbon *doc)
         return true;
 }
 
-const void *jak_carbon_key_raw_value(jak_u64 *key_len, jak_carbon_key_e *type, jak_carbon *doc)
+const void *jak_carbon_key_raw_value(jak_u64 *len, jak_carbon_key_e *type, jak_carbon *doc)
 {
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
-        const void *result = carbon_key_read(key_len, type, &doc->memfile);
+        const void *result = carbon_key_read(len, type, &doc->memfile);
         memfile_restore_position(&doc->memfile);
         return result;
 }
@@ -238,12 +238,12 @@ bool jak_carbon_key_unsigned_value(jak_u64 *key, jak_carbon *doc)
         }
 }
 
-const char *jak_carbon_key_string_value(jak_u64 *str_len, jak_carbon *doc)
+const char *jak_carbon_key_string_value(jak_u64 *len, jak_carbon *doc)
 {
         jak_carbon_key_e type;
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
-        const void *result = carbon_key_read(str_len, &type, &doc->memfile);
+        const void *result = carbon_key_read(len, &type, &doc->memfile);
         memfile_restore_position(&doc->memfile);
         if (JAK_LIKELY(jak_carbon_key_is_string(type))) {
                 return result;
@@ -288,10 +288,10 @@ bool jak_carbon_clone(jak_carbon *clone, jak_carbon *doc)
         return true;
 }
 
-bool jak_carbon_commit_hash(jak_u64 *commit_hash, jak_carbon *doc)
+bool jak_carbon_commit_hash(jak_u64 *hash, jak_carbon *doc)
 {
         JAK_ERROR_IF_NULL(doc);
-        *commit_hash = carbon_int_header_get_commit_hash(doc);
+        *hash = carbon_int_header_get_commit_hash(doc);
         return true;
 }
 

@@ -427,10 +427,10 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
         fclose(f);
         jsonContent[fsize] = 0;
 
-        struct jak_archive archive;
+        jak_archive archive;
         struct jak_error err;
 
-        struct jak_archive_callback progress_tracker = { 0 };
+        jak_archive_callback progress_tracker = { 0 };
         progress_tracker.begin_create_from_model = tracker_begin_create_from_model;
         progress_tracker.end_create_from_model = tracker_end_create_from_model;
         progress_tracker.begin_create_from_json = tracker_begin_create_from_json;
@@ -561,7 +561,7 @@ bool moduleInspectInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *m
         }
         JAK_CONSOLE_OUTPUT_ON()
 
-        struct jak_archive archive;
+        jak_archive archive;
         struct jak_archive_info info;
         if ((jak_archive_open(&archive, pathCarbonFileIn)) != true) {
             JAK_CONSOLE_WRITE(file, "Cannot open requested CARBON file: %s", pathCarbonFileIn);
@@ -608,7 +608,7 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
         }
         JAK_CONSOLE_OUTPUT_ON()
 
-        struct jak_archive archive;
+        jak_archive archive;
         int status;
         if ((status = jak_archive_open(&archive, pathCarbonFileIn))) {
             struct jak_encoded_doc_list collection;

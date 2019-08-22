@@ -56,7 +56,7 @@ struct jak_string_dict {
         /**
          * Memory allocator that is used to get memory for user data
          */
-        struct jak_allocator alloc;
+        jak_allocator alloc;
 
         /**
          * Frees up implementation-specific resources.

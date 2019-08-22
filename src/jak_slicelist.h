@@ -97,7 +97,7 @@ typedef struct SliceDescriptor {
 } SliceDescriptor;
 
 typedef struct JAK_slice_list_t {
-        struct jak_allocator alloc;
+        jak_allocator alloc;
         struct spinlock lock;
 
         struct jak_vector ofType(JAK_slice_t) slices;
@@ -117,7 +117,7 @@ typedef struct JAK_slice_handle_t {
         bool is_contained;
 } slice_handle_t;
 
-bool slice_list_create(slice_list_t *list, const struct jak_allocator *alloc, size_t sliceCapacity);
+bool slice_list_create(slice_list_t *list, const jak_allocator *alloc, size_t sliceCapacity);
 
 bool SliceListDrop(slice_list_t *list);
 

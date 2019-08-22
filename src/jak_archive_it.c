@@ -26,11 +26,11 @@ static bool init_object_from_memfile(struct jak_archive_object *obj, struct jak_
 {
         JAK_ASSERT(obj);
         jak_offset_t object_off;
-        struct jak_object_header *header;
+        jak_object_header *header;
         union jak_object_flags flags;
 
         object_off = memfile_tell(memfile);
-        header = JAK_MEMFILE_READ_TYPE(memfile, struct jak_object_header);
+        header = JAK_MEMFILE_READ_TYPE(memfile, jak_object_header);
         if (JAK_UNLIKELY(header->marker != JAK_MARKER_SYMBOL_OBJECT_BEGIN)) {
                 return false;
         }
@@ -418,7 +418,7 @@ static bool archive_prop_iter_from_memblock(struct jak_prop_iter *iter, struct j
 }
 
 bool jak_archive_prop_iter_from_archive(struct jak_prop_iter *iter, struct jak_error *err, jak_u16 mask,
-                                        struct jak_archive *archive)
+                                        jak_archive *archive)
 {
         return archive_prop_iter_from_memblock(iter, err, mask, archive->record_table.record_db, 0);
 }

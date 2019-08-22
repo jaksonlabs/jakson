@@ -21,7 +21,7 @@
 
 #include <jak_archive_strid_it.h>
 
-bool jak_strid_iter_open(struct jak_strid_iter *it, struct jak_error *err, struct jak_archive *archive)
+bool jak_strid_iter_open(struct jak_strid_iter *it, struct jak_error *err, jak_archive *archive)
 {
         JAK_ERROR_IF_NULL(it)
         JAK_ERROR_IF_NULL(archive)

@@ -67,7 +67,7 @@ static void lock(slice_list_t *list);
 
 static void unlock(slice_list_t *list);
 
-bool slice_list_create(slice_list_t *list, const struct jak_allocator *alloc, size_t sliceCapacity)
+bool slice_list_create(slice_list_t *list, const jak_allocator *alloc, size_t sliceCapacity)
 {
         JAK_ERROR_IF_NULL(list)
         JAK_ERROR_IF_NULL(sliceCapacity)

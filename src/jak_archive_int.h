@@ -30,29 +30,29 @@
 
 JAK_BEGIN_DECL
 
-struct __attribute__((packed)) jak_archive_header {
+typedef struct __attribute__((packed)) jak_archive_header {
         char magic[9];
         jak_u8 version;
         jak_offset_t root_object_header_offset;
         jak_offset_t string_id_to_offset_index_offset;
-};
+} jak_archive_header;
 
-struct __attribute__((packed)) jak_record_header {
+typedef struct __attribute__((packed)) jak_record_header {
         char marker;
         jak_u8 flags;
         jak_u64 record_size;
-};
+} jak_record_header;
 
-struct __attribute__((packed)) jak_object_header {
+typedef struct __attribute__((packed)) jak_object_header {
         char marker;
         jak_global_id_t oid;
         jak_u32 flags;
-};
+} jak_object_header;
 
-struct __attribute__((packed)) jak_prop_header {
+typedef struct __attribute__((packed)) jak_prop_header {
         char marker;
         jak_u32 num_entries;
-};
+} jak_prop_header;
 
 union __attribute__((packed)) jak_string_tab_flags {
         struct {
@@ -190,33 +190,33 @@ struct jak_archive_prop_offs {
 };
 
 struct jak_fixed_prop {
-        struct jak_prop_header *header;
+        jak_prop_header *header;
         const jak_archive_field_sid_t *keys;
         const void *values;
 };
 
 struct jak_table_prop {
-        struct jak_prop_header *header;
+        jak_prop_header *header;
         const jak_archive_field_sid_t *keys;
         const jak_offset_t *group_offs;
 };
 
 struct jak_var_prop {
-        struct jak_prop_header *header;
+        jak_prop_header *header;
         const jak_archive_field_sid_t *keys;
         const jak_offset_t *offsets;
         const void *values;
 };
 
 struct jak_array_prop {
-        struct jak_prop_header *header;
+        jak_prop_header *header;
         const jak_archive_field_sid_t *keys;
         const jak_u32 *lengths;
         jak_offset_t values_begin;
 };
 
 struct jak_null_prop {
-        struct jak_prop_header *header;
+        jak_prop_header *header;
         const jak_archive_field_sid_t *keys;
 };
 
@@ -260,7 +260,7 @@ enum jak_archive_marker {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
-static struct jak_archive_header this_file_header = {.version = JAK_CARBON_ARCHIVE_VERSION, .root_object_header_offset = 0};
+static jak_archive_header this_file_header = {.version = JAK_CARBON_ARCHIVE_VERSION, .root_object_header_offset = 0};
 
 static struct {
         enum jak_archive_marker type;

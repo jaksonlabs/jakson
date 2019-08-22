@@ -86,7 +86,7 @@ static int freelist_push(struct jak_string_dict *self, jak_archive_field_sid_t i
 
 int
 encode_sync_create(struct jak_string_dict *dic, size_t capacity, size_t num_indx_buckets, size_t num_index_bucket_cap,
-                   size_t num_threads, const struct jak_allocator *alloc)
+                   size_t num_threads, const jak_allocator *alloc)
 {
         JAK_ERROR_IF_NULL(dic);
 
@@ -139,7 +139,7 @@ create_extra(struct jak_string_dict *self, size_t capacity, size_t num_index_buc
         }
         JAK_UNUSED(num_threads);
 
-        struct jak_allocator hashtable_alloc;
+        jak_allocator hashtable_alloc;
 #if defined(JAK_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
         CHECK_SUCCESS(allocatorTrace(&hashtable_alloc));
 #else
@@ -226,7 +226,7 @@ this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *c
 
         struct sync_extra *extra = this_extra(self);
 
-        struct jak_allocator hashtable_alloc;
+        jak_allocator hashtable_alloc;
 #if defined(JAK_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
         CHECK_SUCCESS(allocatorTrace(&hashtable_alloc));
 #else
@@ -425,7 +425,7 @@ static char **this_extract(struct jak_string_dict *self, const jak_archive_field
 
         lock(self);
 
-        struct jak_allocator hashtable_alloc;
+        jak_allocator hashtable_alloc;
 #if defined(JAK_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
         allocatorTrace(&hashtable_alloc);
 #else
@@ -456,7 +456,7 @@ static bool this_free(struct jak_string_dict *self, void *ptr)
 {
         JAK_UNUSED(self);
 
-        struct jak_allocator hashtable_alloc;
+        jak_allocator hashtable_alloc;
 #if defined(JAK_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
         CHECK_SUCCESS(allocatorTrace(&hashtable_alloc));
 #else

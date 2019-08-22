@@ -244,7 +244,7 @@ JAK_DEFINE_GET_ERROR_FUNCTION(archive_column_entry_object_iter, struct jak_colum
 JAK_DEFINE_GET_ERROR_FUNCTION(archive_object, struct jak_archive_object, obj)
 
 bool jak_archive_prop_iter_from_archive(struct jak_prop_iter *iter, struct jak_error *err, jak_u16 mask,
-                                        struct jak_archive *archive);
+                                        jak_archive *archive);
 
 bool jak_archive_prop_iter_from_object(struct jak_prop_iter *iter, jak_u16 mask, struct jak_error *err,
                                        const struct jak_archive_object *obj);

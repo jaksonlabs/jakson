@@ -132,7 +132,7 @@ static bool this_setup_carriers(struct jak_string_dict *self, size_t capacity, s
 })
 
 int encode_async_create(struct jak_string_dict *dic, size_t capacity, size_t num_index_buckets,
-                        size_t approx_num_unique_strs, size_t num_threads, const struct jak_allocator *alloc)
+                        size_t approx_num_unique_strs, size_t num_threads, const jak_allocator *alloc)
 {
         JAK_check_success(jak_alloc_this_or_std(&dic->alloc, alloc));
 
@@ -312,7 +312,7 @@ static void synchronize(struct jak_vector ofType(carrier) *carriers, size_t num_
 }
 
 static void create_thread_assignment(atomic_uint_fast16_t **str_carrier_mapping, atomic_size_t **carrier_num_strings,
-                                     size_t **str_carrier_idx_mapping, struct jak_allocator *alloc, size_t num_strings,
+                                     size_t **str_carrier_idx_mapping, jak_allocator *alloc, size_t num_strings,
                                      size_t num_threads)
 {
         /** jak_async_map_exec string depending on hash values to a particular carrier */
@@ -329,7 +329,7 @@ static void create_thread_assignment(atomic_uint_fast16_t **str_carrier_mapping,
         *str_carrier_idx_mapping = jak_alloc_malloc(alloc, num_strings * sizeof(size_t));
 }
 
-static void drop_thread_assignment(struct jak_allocator *alloc, atomic_uint_fast16_t *str_carrier_mapping,
+static void drop_thread_assignment(jak_allocator *alloc, atomic_uint_fast16_t *str_carrier_mapping,
                                    atomic_size_t *carrier_num_strings, size_t *str_carrier_idx_mapping)
 {
         jak_alloc_free(alloc, carrier_num_strings);
@@ -930,7 +930,7 @@ struct create_carrier_arg {
         size_t local_capacity;
         size_t local_bucket_num;
         size_t local_bucket_cap;
-        const struct jak_allocator *alloc;
+        const jak_allocator *alloc;
 };
 
 static void parallel_create_carrier(const void *restrict start, size_t width, size_t len, void *restrict args,

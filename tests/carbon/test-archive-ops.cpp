@@ -21,7 +21,7 @@ TEST(CarbonArchiveOpsTest, CreateStreamFromJsonString)
 
 TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonString)
 {
-    struct jak_archive   archive;
+    jak_archive   archive;
     struct jak_error       err;
 
     const char        *json_string = "{ \"test\": 123 }";
@@ -41,7 +41,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonString)
 
 TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonStringWithBakedStringIdIndex)
 {
-    struct jak_archive   archive;
+    jak_archive   archive;
     struct jak_error       err;
 
     const char        *json_string = "{ \"test\": 123 }";
@@ -63,7 +63,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
 {
     std::set<jak_archive_field_sid_t> haystack;
 
-    struct jak_archive     archive;
+    jak_archive     archive;
     struct jak_strid_iter  strid_iter;
     struct jak_strid_info *info;
     size_t               vector_len;
@@ -110,7 +110,7 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
 {
     std::set<jak_archive_field_sid_t> all_str_ids;
 
-    struct jak_archive     archive;
+    jak_archive     archive;
     struct jak_strid_iter  strid_iter;
     struct jak_strid_info *info;
     size_t               vector_len;
@@ -156,7 +156,7 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
 
 TEST(CarbonArchiveOpsTest, DecodeStringByFastUnsafeAccess)
 {
-    struct jak_archive                 archive;
+    jak_archive                 archive;
     struct jak_strid_iter              strid_iter;
     struct jak_strid_info             *info;
     size_t                           vector_len;
@@ -199,7 +199,7 @@ TEST(CarbonArchiveOpsTest, DecodeStringByFastUnsafeAccess)
 
 TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateContains)
 {
-    struct jak_archive      archive;
+    jak_archive      archive;
     struct jak_archive_query        query;
     bool                  status;
     size_t                num_match;
@@ -236,7 +236,7 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateContains)
 
 TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateEquals)
 {
-    struct jak_archive      archive;
+    jak_archive      archive;
     struct jak_archive_query        query;
     bool                  status;
     size_t                num_match;

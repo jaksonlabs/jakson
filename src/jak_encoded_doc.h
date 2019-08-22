@@ -93,7 +93,7 @@ struct jak_encoded_doc {
 };
 
 struct jak_encoded_doc_list {
-        struct jak_archive *archive;
+        jak_archive *archive;
         struct jak_vector ofType(
                 struct jak_encoded_doc) flat_object_collection;   /* list of objects; also nested ones */
         struct hashtable ofMapping(object_id_t, jak_u32) index;   /* maps oid to index in collection */
@@ -101,7 +101,7 @@ struct jak_encoded_doc_list {
 };
 
 bool encoded_doc_collection_create(struct jak_encoded_doc_list *collection, struct jak_error *err,
-                                   struct jak_archive *archive);
+                                   jak_archive *archive);
 
 bool encoded_doc_collection_drop(struct jak_encoded_doc_list *collection);
 

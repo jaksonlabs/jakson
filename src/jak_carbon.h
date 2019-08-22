@@ -111,7 +111,6 @@ typedef struct jak_carbon_new {
         struct jak_carbon_revise revision_context;
         struct jak_carbon_array_it *content_it;
         jak_carbon_insert *inserter;
-
         /* options shrink or compact (or both) documents, see
          * CARBON_KEEP, CARBON_SHRINK, CARBON_COMPACT, and CARBON_OPTIMIZE  */
         int mode;
@@ -145,7 +144,6 @@ typedef enum jak_carbon_key_type {
 } jak_carbon_key_e;
 
 #define JAK_CARBON_NIL_STR "_nil"
-
 #define JAK_CARBON_MARKER_NULL 'n'
 #define JAK_CARBON_MARKER_TRUE 't'
 #define JAK_CARBON_MARKER_FALSE 'f'
@@ -161,13 +159,10 @@ typedef enum jak_carbon_key_type {
 #define JAK_CARBON_MARKER_FLOAT 'r'
 #define JAK_CARBON_MARKER_BINARY 'b'
 #define JAK_CARBON_MARKER_CUSTOM_BINARY 'x'
-
 #define JAK_CARBON_MARKER_OBJECT_BEGIN '{'
 #define JAK_CARBON_MARKER_OBJECT_END '}'
-
 #define JAK_CARBON_MARKER_ARRAY_BEGIN '['
 #define JAK_CARBON_MARKER_ARRAY_END ']'
-
 #define JAK_CARBON_MARKER_COLUMN_U8 '1'
 #define JAK_CARBON_MARKER_COLUMN_U16 '2'
 #define JAK_CARBON_MARKER_COLUMN_U32 '3'
@@ -180,7 +175,6 @@ typedef enum jak_carbon_key_type {
 #define JAK_CARBON_MARKER_COLUMN_BOOLEAN 'B'
 
 JAK_DEFINE_ERROR_GETTER(jak_carbon);
-
 JAK_DEFINE_ERROR_GETTER(jak_carbon_new);
 
 #define JAK_CARBON_KEEP              0x0
@@ -189,16 +183,16 @@ JAK_DEFINE_ERROR_GETTER(jak_carbon_new);
 #define JAK_CARBON_OPTIMIZE          (JAK_CARBON_SHRINK | JAK_CARBON_COMPACT)
 
 /**
- * Constructs a new context in which a new document can be created. The parameter <b>mode</b> controls
- * how reserved spaces should be handled after document creation is done. Set <code>mode</code> to
- * <code>CARBON_KEEP</code> for no optimization. With this mode, all capacities (i.e., additional ununsed but free
+ * Constructs a new context in which a new document can be created. The parameter <b>options</b> controls
+ * how reserved spaces should be handled after document creation is done. Set <code>options</code> to
+ * <code>CARBON_KEEP</code> for no optimization. With this option, all capacities (i.e., additional ununsed but free
  * space) in containers (objects, arrays, and columns) are kept and tailing free space after the document is
- * kept, too. Use this mode to optimize for "insertion-heavy" documents since keeping all capacities lowerst the
- * probability of reallocations and memory movements. Set <b>mode</b> to <code>CARBON_COMPACT</code> if capacities in
+ * kept, too. Use this option to optimize for "insertion-heavy" documents since keeping all capacities lowerst the
+ * probability of reallocations and memory movements. Set <b>options</b> to <code>CARBON_COMPACT</code> if capacities in
  * containers should be removed after creation, and <code>CARBON_COMPACT</code> to remove tailing free space. Use
  * <code>CARBON_OPTIMIZE</code> to use both <code>CARBON_SHRINK</code> and <code>CARBON_COMPACT</code>.
  *
- * As a rule of thumb for <b>mode</b>. The resulting document...
+ * As a rule of thumb for <b>options</b>. The resulting document...
  * <ul>
  *  <li>...will be updated heavily where updates may change the type-width of fields, will be target of many inserts
  *  containers, use <code>CARBON_KEEP</code>. The document will have a notable portion of reserved memory contained;
@@ -211,32 +205,32 @@ JAK_DEFINE_ERROR_GETTER(jak_carbon_new);
  *      padding reserved memory at the end of the document lowers the risk of a reallocation.</li>
  *  <li>...will <i>not</i> not be target of insertion operations or update operations that changes a fields type-width
  *      in the near future. In simpler words, if a document is updated and each such update keeps the (byte) size
- *      of the field, use <code>CARBON_COMPACT</code>. This mode will remove all capacities in containers.</li>
+ *      of the field, use <code>CARBON_COMPACT</code>. This option will remove all capacities in containers.</li>
  *  <li>...is read-mostly, or updates will not change the type or type-width of fields, use <code>CARBON_OPTIMIZE</code>.
  *      The document will have the smallest memory footprint possible.</li>
  * </ul>
  */
-jak_carbon_insert *jak_carbon_create_begin(jak_carbon_new *context, jak_carbon *doc, jak_carbon_key_e key_type, int mode);
+jak_carbon_insert *jak_carbon_create_begin(jak_carbon_new *context, jak_carbon *doc, jak_carbon_key_e type, int options);
 bool jak_carbon_create_end(jak_carbon_new *context);
-bool jak_carbon_create_empty(jak_carbon *doc, jak_carbon_key_e key_type);
-bool jak_carbon_create_empty_ex(jak_carbon *doc, jak_carbon_key_e key_type, jak_u64 doc_cap_byte, jak_u64 array_cap_byte);
-bool jak_carbon_from_json(jak_carbon *doc, const char *json, jak_carbon_key_e key_type, const void *key, struct jak_error *err);
+bool jak_carbon_create_empty(jak_carbon *doc, jak_carbon_key_e type);
+bool jak_carbon_create_empty_ex(jak_carbon *doc, jak_carbon_key_e type, jak_u64 doc_cap, jak_u64 array_cap);
+bool jak_carbon_from_json(jak_carbon *doc, const char *json, jak_carbon_key_e type, const void *key, struct jak_error *err);
 bool jak_carbon_drop(jak_carbon *doc);
 
 const void *jak_carbon_raw_data(jak_u64 *len, jak_carbon *doc);
 
 bool jak_carbon_is_up_to_date(jak_carbon *doc);
 bool jak_carbon_key_type(jak_carbon_key_e *out, jak_carbon *doc);
-const void *jak_carbon_key_raw_value(jak_u64 *key_len, jak_carbon_key_e *type, jak_carbon *doc);
+const void *jak_carbon_key_raw_value(jak_u64 *len, jak_carbon_key_e *type, jak_carbon *doc);
 bool jak_carbon_key_signed_value(jak_i64 *key, jak_carbon *doc);
 bool jak_carbon_key_unsigned_value(jak_u64 *key, jak_carbon *doc);
-const char *jak_carbon_key_string_value(jak_u64 *str_len, jak_carbon *doc);
+const char *jak_carbon_key_string_value(jak_u64 *len, jak_carbon *doc);
 bool jak_carbon_has_key(jak_carbon_key_e type);
 bool jak_carbon_key_is_unsigned(jak_carbon_key_e type);
 bool jak_carbon_key_is_signed(jak_carbon_key_e type);
 bool jak_carbon_key_is_string(jak_carbon_key_e type);
 bool jak_carbon_clone(jak_carbon *clone, jak_carbon *doc);
-bool jak_carbon_commit_hash(jak_u64 *commit_hash, jak_carbon *doc);
+bool jak_carbon_commit_hash(jak_u64 *hash, jak_carbon *doc);
 
 bool jak_carbon_to_str(struct jak_string *dst, jak_carbon_printer_impl_e printer, jak_carbon *doc);
 const char *jak_carbon_to_json_extended(struct jak_string *dst, jak_carbon *doc);

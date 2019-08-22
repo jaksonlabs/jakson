@@ -40,7 +40,7 @@ JAK_BEGIN_DECL
 #define JAK_ALLOC_FREE(name, alloc)                                                                                       \
     jak_alloc_free(alloc, name)
 
-struct jak_allocator {
+typedef struct jak_allocator {
         /**
          *  Implementation-specific data (private fields etc.)
          *  This pointer may point to NULL.
@@ -55,18 +55,18 @@ struct jak_allocator {
         /**
          *  Implementation to call memory allocation.
          */
-        void *(*malloc)(struct jak_allocator *self, size_t size);
+        void *(*malloc)(jak_allocator *self, size_t size);
 
         /**
          *  Implementation to call memory re-allocation.
          */
-        void *(*realloc)(struct jak_allocator *self, void *ptr, size_t size);
+        void *(*realloc)(jak_allocator *self, void *ptr, size_t size);
 
         /**
          *  Implementation to call freeing up memory.
          *  Depending on the strategy, freeing up memory might be lazy.
          */
-        void (*free)(struct jak_allocator *self, void *ptr);
+        void (*free)(jak_allocator *self, void *ptr);
 
         /**
          *  Perform a deep copy of this allocator including implementation-specific data stored in 'extra'
@@ -74,8 +74,8 @@ struct jak_allocator {
          * @param dst non-null target in which 'self' should be cloned
          * @param self non-null source which should be clones in 'dst'
          */
-        void (*clone)(struct jak_allocator *dst, const struct jak_allocator *self);
-};
+        void (*clone)(jak_allocator *dst, const jak_allocator *self);
+} jak_allocator;
 
 /**
  * Returns standard c-lib allocator (malloc, realloc, free)
@@ -83,7 +83,7 @@ struct jak_allocator {
  * @param alloc must be non-null
  * @return STATUS_OK in case of non-null parameter alloc, STATUS_NULLPTR otherwise
  */
-bool jak_alloc_create_std(struct jak_allocator *alloc);
+bool jak_alloc_create_std(jak_allocator *alloc);
 
 /**
  * Creates a new allocator 'dst' with default constructor (in case of 'this' is null), or as copy of
@@ -92,7 +92,7 @@ bool jak_alloc_create_std(struct jak_allocator *alloc);
  * @param self possibly null-pointer to an allocator implementation
  * @return a value unequal to STATUS_OK in case the operation is not successful
  */
-bool jak_alloc_this_or_std(struct jak_allocator *dst, const struct jak_allocator *self);
+bool jak_alloc_this_or_std(jak_allocator *dst, const jak_allocator *self);
 
 /**
  * Performs a deep copy of the allocator 'src' into the allocator 'dst'.
@@ -101,7 +101,7 @@ bool jak_alloc_this_or_std(struct jak_allocator *dst, const struct jak_allocator
  * @param src non-null pointer to allocator implementation (of same implementation as dst)
  * @return STATUS_OK in case of success, otherwise a value unequal to STATUS_OK describing the error
  */
-bool jak_alloc_clone(struct jak_allocator *dst, const struct jak_allocator *src);
+bool jak_alloc_clone(jak_allocator *dst, const jak_allocator *src);
 
 /**
  * Invokes memory allocation of 'size' bytes using the allocator 'alloc'.
@@ -112,7 +112,7 @@ bool jak_alloc_clone(struct jak_allocator *dst, const struct jak_allocator *src)
  * @param size number of bytes requested
  * @return non-null pointer to memory allocated with 'alloc'
  */
-void *jak_alloc_malloc(struct jak_allocator *alloc, size_t size);
+void *jak_alloc_malloc(jak_allocator *alloc, size_t size);
 
 /**
  * Invokes memory re-allocation for pointer 'ptr' (that is managed by 'alloc') to size 'size' in bytes.
@@ -122,7 +122,7 @@ void *jak_alloc_malloc(struct jak_allocator *alloc, size_t size);
  * @param size new number of bytes for 'ptr'
  * @return non-null pointer that points to reallocated memory for 'ptr'
  */
-void *jak_alloc_realloc(struct jak_allocator *alloc, void *ptr, size_t size);
+void *jak_alloc_realloc(jak_allocator *alloc, void *ptr, size_t size);
 
 /**
  * Invokes memory freeing for pointer 'ptr' (that is managed by 'alloc').
@@ -132,7 +132,7 @@ void *jak_alloc_realloc(struct jak_allocator *alloc, void *ptr, size_t size);
  * @param ptr non-null pointer manged by 'alloc'
  * @return STATUS_OK if success, STATUS_NULLPTR if <code>alloc</code> or <code>ptr</ptr> is <b>NULL</b>
  */
-bool jak_alloc_free(struct jak_allocator *alloc, void *ptr);
+bool jak_alloc_free(jak_allocator *alloc, void *ptr);
 
 JAK_END_DECL
 

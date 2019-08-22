@@ -18,6 +18,16 @@
 #ifndef JAK_FORWDECL_H
 #define JAK_FORWDECL_H
 
+typedef struct jak_allocator jak_allocator;
+
+typedef struct jak_archive jak_archive;
+typedef struct jak_archive_callback jak_archive_callback;
+typedef struct jak_sid_cache_stats jak_sid_cache_stats;
+typedef struct jak_archive_header jak_archive_header;
+typedef struct jak_record_header jak_record_header;
+typedef struct jak_object_header jak_object_header;
+typedef struct jak_prop_header jak_prop_header;
+
 typedef struct jak_carbon jak_carbon;
 typedef struct jak_carbon_insert jak_carbon_insert;
 typedef struct jak_carbon_new jak_carbon_new;

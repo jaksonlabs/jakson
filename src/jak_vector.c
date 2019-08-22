@@ -65,10 +65,10 @@ DEFINE_PRINTER_FUNCTION(jak_u64, "%"
 
 DEFINE_PRINTER_FUNCTION(size_t, "%zu")
 
-bool vec_create(struct jak_vector *out, const struct jak_allocator *alloc, size_t elem_size, size_t cap_elems)
+bool vec_create(struct jak_vector *out, const jak_allocator *alloc, size_t elem_size, size_t cap_elems)
 {
         JAK_ERROR_IF_NULL(out)
-        out->allocator = JAK_MALLOC(sizeof(struct jak_allocator));
+        out->allocator = JAK_MALLOC(sizeof(jak_allocator));
         jak_alloc_this_or_std(out->allocator, alloc);
         out->base = jak_alloc_malloc(out->allocator, cap_elems * elem_size);
         out->num_elems = 0;
@@ -123,7 +123,7 @@ bool vec_deserialize(struct jak_vector *vec, struct jak_error *err, FILE *file)
                 goto error_handling;
         }
 
-        vec->allocator = JAK_MALLOC(sizeof(struct jak_allocator));
+        vec->allocator = JAK_MALLOC(sizeof(jak_allocator));
         jak_alloc_this_or_std(vec->allocator, NULL);
         vec->base = jak_alloc_malloc(vec->allocator, header.cap_elems * header.elem_size);
         vec->num_elems = header.num_elems;

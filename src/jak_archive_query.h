@@ -31,14 +31,14 @@
 JAK_BEGIN_DECL
 
 struct jak_archive_query {
-        struct jak_archive *archive;
+        jak_archive *archive;
         struct jak_io_context *context;
         struct jak_error err;
 };
 
 JAK_DEFINE_GET_ERROR_FUNCTION(query, struct jak_archive_query, query)
 
-bool jak_query_create(struct jak_archive_query *query, struct jak_archive *archive);
+bool jak_query_create(struct jak_archive_query *query, jak_archive *archive);
 
 bool jak_query_drop(struct jak_archive_query *query);
 

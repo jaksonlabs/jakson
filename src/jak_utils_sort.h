@@ -81,10 +81,10 @@ typedef bool (*less_func_t)(const void *lhs, const void *rhs);
 })
 
 bool sort_qsort_indicies(size_t *indices, const void *base, size_t width, less_eq_func_t comp,
-                         size_t nelemns, struct jak_allocator *alloc);
+                         size_t nelemns, jak_allocator *alloc);
 
 int sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width, less_eq_wargs_func_t comp,
-                              size_t nelemens, struct jak_allocator *alloc, void *args);
+                              size_t nelemens, jak_allocator *alloc, void *args);
 
 size_t sort_bsearch_indicies(const size_t *indicies, const void *base, size_t width, size_t nelemens,
                              const void *neelde, eq_func_t compEq, less_func_t compLess);

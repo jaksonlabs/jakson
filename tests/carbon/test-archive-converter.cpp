@@ -5,7 +5,7 @@
 TEST(ConverterTest, PerformConversion)
 {
     bool status;
-    struct jak_archive archive;
+    jak_archive archive;
     struct jak_encoded_doc_list collection;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
@@ -23,7 +23,7 @@ TEST(ConverterTest, PerformConversion)
 
 
         struct jak_string_cache *cache = jak_archive_get_query_string_id_cache(&archive);
-        struct jak_sid_cache_stats statistics;
+        jak_sid_cache_stats statistics;
         jak_string_id_cache_get_statistics(&statistics, cache);
         fprintf(stderr, "string_id_cache_info hits: %zu   misses: %zu   hit ratio: %.4f   num evicted: %zu\n",
                 statistics.num_hits, statistics.num_misses,

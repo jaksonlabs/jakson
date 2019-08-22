@@ -41,7 +41,7 @@ struct jak_strid_iter {
         struct jak_strid_info vector[100000];
 };
 
-bool jak_strid_iter_open(struct jak_strid_iter *it, struct jak_error *err, struct jak_archive *archive);
+bool jak_strid_iter_open(struct jak_strid_iter *it, struct jak_error *err, jak_archive *archive);
 
 bool jak_strid_iter_next(bool *success, struct jak_strid_info **info, struct jak_error *err, size_t *info_length,
                          struct jak_strid_iter *it);

@@ -38,7 +38,7 @@ struct lru_list {
 
 struct jak_string_cache {
         struct jak_vector ofType(struct lru_list) list_entries;
-        struct jak_sid_cache_stats statistics;
+        jak_sid_cache_stats statistics;
         struct jak_archive_query query;
         struct jak_error err;
         size_t capacity;
@@ -56,7 +56,7 @@ static void init_list(struct lru_list *list)
         }
 }
 
-bool jak_string_id_cache_create_lru(struct jak_string_cache **cache, struct jak_archive *archive)
+bool jak_string_id_cache_create_lru(struct jak_string_cache **cache, jak_archive *archive)
 {
         struct jak_archive_info archive_info;
         jak_archive_get_info(&archive_info, archive);
@@ -64,7 +64,7 @@ bool jak_string_id_cache_create_lru(struct jak_string_cache **cache, struct jak_
         return jak_string_id_cache_create_lru_ex(cache, archive, capacity);
 }
 
-bool jak_string_id_cache_create_lru_ex(struct jak_string_cache **cache, struct jak_archive *archive, size_t capacity)
+bool jak_string_id_cache_create_lru_ex(struct jak_string_cache **cache, jak_archive *archive, size_t capacity)
 {
         JAK_ERROR_IF_NULL(cache)
         JAK_ERROR_IF_NULL(archive)
@@ -151,7 +151,7 @@ char *jak_string_id_cache_get(struct jak_string_cache *cache, jak_archive_field_
         return strdup(result);
 }
 
-bool jak_string_id_cache_get_statistics(struct jak_sid_cache_stats *statistics, struct jak_string_cache *cache)
+bool jak_string_id_cache_get_statistics(jak_sid_cache_stats *statistics, struct jak_string_cache *cache)
 {
         JAK_ERROR_IF_NULL(statistics);
         JAK_ERROR_IF_NULL(cache);
@@ -162,7 +162,7 @@ bool jak_string_id_cache_get_statistics(struct jak_sid_cache_stats *statistics, 
 bool jak_string_id_cache_reset_statistics(struct jak_string_cache *cache)
 {
         JAK_ERROR_IF_NULL(cache);
-        JAK_zero_memory(&cache->statistics, sizeof(struct jak_sid_cache_stats));
+        JAK_zero_memory(&cache->statistics, sizeof(jak_sid_cache_stats));
         return true;
 }
 

@@ -34,7 +34,7 @@ JAK_BEGIN_DECL
  * @param alloc must be non-null
  * @return STATUS_OK in case of non-null parameter alloc, STATUS_NULLPTR otherwise
  */
-int jak_trace_alloc_create(struct jak_allocator *alloc);
+int jak_trace_alloc_create(jak_allocator *alloc);
 
 JAK_END_DECL
 

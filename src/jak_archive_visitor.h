@@ -40,32 +40,32 @@ enum jak_visit_policy {
 typedef const struct jak_vector ofType(struct jak_path_entry) *path_stack_t;
 
 #define JAK_DEFINE_VISIT_BASIC_TYPE_PAIRS(name, built_in_type)                                                             \
-void (*visit_##name##_pairs) (struct jak_archive *jak_archive, path_stack_t path, jak_global_id_t id,                              \
+void (*visit_##name##_pairs) (jak_archive *jak_archive, path_stack_t path, jak_global_id_t id,                              \
                               const jak_archive_field_sid_t *keys, const built_in_type *values, jak_u32 num_pairs,                     \
                               void *capture);
 
 #define JAK_DEFINE_VISIT_ARRAY_TYPE_PAIRS(name, built_in_type)                                                             \
-enum jak_visit_policy (*visit_enter_##name##_array_pairs)(struct jak_archive *jak_archive, path_stack_t path,                      \
+enum jak_visit_policy (*visit_enter_##name##_array_pairs)(jak_archive *jak_archive, path_stack_t path,                      \
                                                         jak_global_id_t id, const jak_archive_field_sid_t *keys,                       \
                                                         jak_u32 num_pairs,                                                 \
                                                         void *capture);                                                \
                                                                                                                        \
-void (*visit_enter_##name##_array_pair)(struct jak_archive *jak_archive, path_stack_t path, jak_global_id_t id,                    \
+void (*visit_enter_##name##_array_pair)(jak_archive *jak_archive, path_stack_t path, jak_global_id_t id,                    \
                                         jak_archive_field_sid_t key, jak_u32 entry_idx, jak_u32 num_elems,                                 \
                                         void *capture);                                                                \
                                                                                                                        \
-void (*visit_##name##_array_pair) (struct jak_archive *jak_archive, path_stack_t path, jak_global_id_t id,                         \
+void (*visit_##name##_array_pair) (jak_archive *jak_archive, path_stack_t path, jak_global_id_t id,                         \
                                    jak_archive_field_sid_t key, jak_u32 entry_idx, jak_u32 max_entries,                                    \
                                    const built_in_type *array, jak_u32 array_length, void *capture);                       \
                                                                                                                        \
-void (*visit_leave_##name##_array_pair)(struct jak_archive *jak_archive, path_stack_t path, jak_global_id_t id,                    \
+void (*visit_leave_##name##_array_pair)(jak_archive *jak_archive, path_stack_t path, jak_global_id_t id,                    \
                                         jak_u32 pair_idx, jak_u32 num_pairs, void *capture);                                   \
                                                                                                                        \
-void (*visit_leave_##name##_array_pairs)(struct jak_archive *jak_archive, path_stack_t path, jak_global_id_t id,                   \
+void (*visit_leave_##name##_array_pairs)(jak_archive *jak_archive, path_stack_t path, jak_global_id_t id,                   \
                                          void *capture);
 
 #define JAK_DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(name, built_in_type)                                                     \
-    void (*visit_object_array_object_property_##name)(struct jak_archive *jak_archive, path_stack_t path,                      \
+    void (*visit_object_array_object_property_##name)(jak_archive *jak_archive, path_stack_t path,                      \
                                                jak_global_id_t parent_id,                                                  \
                                                jak_archive_field_sid_t key,                                                        \
                                                jak_global_id_t nested_object_id,                                           \
@@ -74,28 +74,28 @@ void (*visit_leave_##name##_array_pairs)(struct jak_archive *jak_archive, path_s
                                                jak_u32 num_nested_values, void *capture);
 
 struct jak_archive_visitor {
-        void (*visit_root_object)(struct jak_archive *archive, jak_global_id_t id, void *capture);
+        void (*visit_root_object)(jak_archive *archive, jak_global_id_t id, void *capture);
 
-        void (*before_visit_starts)(struct jak_archive *archive, void *capture);
+        void (*before_visit_starts)(jak_archive *archive, void *capture);
 
-        void (*after_visit_ends)(struct jak_archive *archive, void *capture);
+        void (*after_visit_ends)(jak_archive *archive, void *capture);
 
         enum jak_visit_policy
-        (*before_object_visit)(struct jak_archive *archive, path_stack_t path, jak_global_id_t parent_id,
+        (*before_object_visit)(jak_archive *archive, path_stack_t path, jak_global_id_t parent_id,
                                jak_global_id_t value_id, jak_u32 object_idx, jak_u32 num_objects,
                                jak_archive_field_sid_t key,
                                void *capture);
 
         void
-        (*after_object_visit)(struct jak_archive *archive, path_stack_t path, jak_global_id_t id, jak_u32 object_idx,
+        (*after_object_visit)(jak_archive *archive, path_stack_t path, jak_global_id_t id, jak_u32 object_idx,
                               jak_u32 num_objects, void *capture);
 
-        void (*first_prop_type_group)(struct jak_archive *archive, path_stack_t path, jak_global_id_t id,
+        void (*first_prop_type_group)(jak_archive *archive, path_stack_t path, jak_global_id_t id,
                                       const jak_archive_field_sid_t *keys, enum jak_archive_field_type type,
                                       bool is_array, jak_u32 num_pairs,
                                       void *capture);
 
-        void (*next_prop_type_group)(struct jak_archive *archive, path_stack_t path, jak_global_id_t id,
+        void (*next_prop_type_group)(jak_archive *archive, path_stack_t path, jak_global_id_t id,
                                      const jak_archive_field_sid_t *keys, enum jak_archive_field_type type,
                                      bool is_array, jak_u32 num_pairs,
                                      void *capture);
@@ -122,7 +122,7 @@ struct jak_archive_visitor {
 
         JAK_DEFINE_VISIT_BASIC_TYPE_PAIRS(boolean, jak_archive_field_boolean_t);
 
-        void (*visit_null_pairs)(struct jak_archive *archive, path_stack_t path, jak_global_id_t id,
+        void (*visit_null_pairs)(jak_archive *archive, path_stack_t path, jak_global_id_t id,
                                  const jak_archive_field_sid_t *keys,
                                  jak_u32 num_pairs, void *capture);
 
@@ -149,37 +149,37 @@ struct jak_archive_visitor {
         JAK_DEFINE_VISIT_ARRAY_TYPE_PAIRS(boolean, jak_archive_field_boolean_t);
 
         enum jak_visit_policy
-        (*visit_enter_null_array_pairs)(struct jak_archive *archive, path_stack_t path, jak_global_id_t id,
+        (*visit_enter_null_array_pairs)(jak_archive *archive, path_stack_t path, jak_global_id_t id,
                                         const jak_archive_field_sid_t *keys, jak_u32 num_pairs, void *capture);
 
-        void (*visit_enter_null_array_pair)(struct jak_archive *archive, path_stack_t path, jak_global_id_t id,
+        void (*visit_enter_null_array_pair)(jak_archive *archive, path_stack_t path, jak_global_id_t id,
                                             jak_archive_field_sid_t key,
                                             jak_u32 entry_idx, jak_u32 num_elems, void *capture);
 
-        void (*visit_null_array_pair)(struct jak_archive *archive, path_stack_t path, jak_global_id_t id,
+        void (*visit_null_array_pair)(jak_archive *archive, path_stack_t path, jak_global_id_t id,
                                       jak_archive_field_sid_t key,
                                       jak_u32 entry_idx, jak_u32 max_entries, jak_archive_field_u32_t num_nulls,
                                       void *capture);
 
-        void (*visit_leave_null_array_pair)(struct jak_archive *archive, path_stack_t path, jak_global_id_t id,
+        void (*visit_leave_null_array_pair)(jak_archive *archive, path_stack_t path, jak_global_id_t id,
                                             jak_u32 pair_idx,
                                             jak_u32 num_pairs, void *capture);
 
-        void (*visit_leave_null_array_pairs)(struct jak_archive *archive, path_stack_t path, jak_global_id_t id,
+        void (*visit_leave_null_array_pairs)(jak_archive *archive, path_stack_t path, jak_global_id_t id,
                                              void *capture);
 
-        enum jak_visit_policy (*before_visit_object_array)(struct jak_archive *archive, path_stack_t path,
+        enum jak_visit_policy (*before_visit_object_array)(jak_archive *archive, path_stack_t path,
                                                            jak_global_id_t parent_id, jak_archive_field_sid_t key,
                                                            void *capture);
 
-        void (*before_visit_object_array_objects)(bool *skip_group_object_ids, struct jak_archive *archive,
+        void (*before_visit_object_array_objects)(bool *skip_group_object_ids, jak_archive *archive,
                                                   path_stack_t path, jak_global_id_t parent_id,
                                                   jak_archive_field_sid_t key,
                                                   const jak_global_id_t *group_object_ids,
                                                   jak_u32 num_group_object_ids, void *capture);
 
         enum jak_visit_policy
-        (*before_visit_object_array_object_property)(struct jak_archive *archive, path_stack_t path,
+        (*before_visit_object_array_object_property)(jak_archive *archive, path_stack_t path,
                                                      jak_global_id_t parent_id, jak_archive_field_sid_t key,
                                                      jak_archive_field_sid_t nested_key,
                                                      enum jak_archive_field_type nested_value_type,
@@ -210,35 +210,35 @@ struct jak_archive_visitor {
         JAK_DEFINE_VISIT_OBJECT_ARRAY_OBJECT_PROP(nulls, jak_archive_field_u32_t);
 
         enum jak_visit_policy
-        (*before_object_array_object_property_object)(struct jak_archive *archive, path_stack_t path,
+        (*before_object_array_object_property_object)(jak_archive *archive, path_stack_t path,
                                                       jak_global_id_t parent_id, jak_archive_field_sid_t key,
                                                       jak_global_id_t nested_object_id,
                                                       jak_archive_field_sid_t nested_key,
                                                       jak_u32 nested_value_object_id, void *capture);
 
-        void (*visit_object_property)(struct jak_archive *archive, path_stack_t path, jak_global_id_t parent_id,
+        void (*visit_object_property)(jak_archive *archive, path_stack_t path, jak_global_id_t parent_id,
                                       jak_archive_field_sid_t key, enum jak_archive_field_type type, bool is_array_type,
                                       void *capture);
 
-        void (*visit_object_array_prop)(struct jak_archive *archive, path_stack_t path, jak_global_id_t parent_id,
+        void (*visit_object_array_prop)(jak_archive *archive, path_stack_t path, jak_global_id_t parent_id,
                                         jak_archive_field_sid_t key, enum jak_archive_field_type type, void *capture);
 
-        bool (*get_column_entry_count)(struct jak_archive *archive, path_stack_t path, jak_archive_field_sid_t key,
+        bool (*get_column_entry_count)(jak_archive *archive, path_stack_t path, jak_archive_field_sid_t key,
                                        enum jak_archive_field_type type, jak_u32 count, void *capture);
 
 };
 
-bool jak_archive_visit_archive(struct jak_archive *archive, const struct jak_archive_visitor_desc *desc,
+bool jak_archive_visit_archive(jak_archive *archive, const struct jak_archive_visitor_desc *desc,
                                struct jak_archive_visitor *visitor, void *capture);
 
-bool jak_archive_visitor_print_path(FILE *file, struct jak_archive *archive,
+bool jak_archive_visitor_print_path(FILE *file, jak_archive *archive,
                                     const struct jak_vector ofType(struct jak_path_entry) *path_stack);
 
-void jak_archive_visitor_path_to_string(char path_buffer[2048], struct jak_archive *archive,
+void jak_archive_visitor_path_to_string(char path_buffer[2048], jak_archive *archive,
                                         const struct jak_vector ofType(struct jak_path_entry) *path_stack);
 
 bool jak_archive_visitor_path_compare(const struct jak_vector ofType(struct jak_path_entry) *path,
                                       jak_archive_field_sid_t *group_name, const char *path_str,
-                                      struct jak_archive *archive);
+                                      jak_archive *archive);
 
 #endif

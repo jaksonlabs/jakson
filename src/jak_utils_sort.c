@@ -18,7 +18,7 @@
 #include <jak_utils_sort.h>
 
 bool sort_qsort_indicies(size_t *indices, const void *base, size_t width, less_eq_func_t comp,
-                         size_t nelemns, struct jak_allocator *alloc)
+                         size_t nelemns, jak_allocator *alloc)
 {
         JAK_ERROR_IF_NULL(base);
         JAK_ERROR_IF_NULL(alloc);
@@ -57,7 +57,7 @@ bool sort_qsort_indicies(size_t *indices, const void *base, size_t width, less_e
 }
 
 int sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width, less_eq_wargs_func_t comp,
-                              size_t nelemens, struct jak_allocator *alloc, void *args)
+                              size_t nelemens, jak_allocator *alloc, void *args)
 {
         JAK_ERROR_IF_NULL(base);
         JAK_ERROR_IF_NULL(alloc);

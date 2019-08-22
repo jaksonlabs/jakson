@@ -25,7 +25,7 @@ bool jak_bitmap_create(struct jak_bitmap *bitmap, jak_u16 num_bits)
 {
         JAK_ERROR_IF_NULL(bitmap);
 
-        struct jak_allocator alloc;
+        jak_allocator alloc;
         jak_alloc_create_std(&alloc);
         vec_create(&bitmap->data, &alloc, sizeof(jak_u32), ceil(num_bits / (double) JAK_bit_num_of(jak_u32)));
         size_t cap = vec_capacity(&bitmap->data);

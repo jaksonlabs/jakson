@@ -67,17 +67,17 @@ static int this_free(struct jak_str_hash *self, void *ptr);
 static int this_insert_bulk(struct jak_vector ofType(bucket) *buckets, char *const *restrict keys,
                             const jak_archive_field_sid_t *restrict values, size_t *restrict bucket_idxs,
                             size_t num_pairs,
-                            struct jak_allocator *alloc,
+                            jak_allocator *alloc,
                             struct jak_str_hash_counters *counter);
 
 static int
 this_insert_exact(struct jak_vector ofType(bucket) *buckets, const char *restrict key, jak_archive_field_sid_t value,
-                  size_t bucket_idx, struct jak_allocator *alloc, struct jak_str_hash_counters *counter);
+                  size_t bucket_idx, jak_allocator *alloc, struct jak_str_hash_counters *counter);
 
 static int
 this_fetch_bulk(struct jak_vector ofType(bucket) *buckets, jak_archive_field_sid_t *values_out, bool *key_found_mask,
                 size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
-                struct jak_allocator *alloc,
+                jak_allocator *alloc,
                 struct jak_str_hash_counters *counter);
 
 static int
@@ -88,16 +88,16 @@ static int this_create_extra(struct jak_str_hash *self, size_t num_buckets, size
 
 static struct mem_extra *this_get_exta(struct jak_str_hash *self);
 
-static int bucket_create(struct bucket *buckets, size_t num_buckets, size_t bucket_cap, struct jak_allocator *alloc);
+static int bucket_create(struct bucket *buckets, size_t num_buckets, size_t bucket_cap, jak_allocator *alloc);
 
-static int bucket_drop(struct bucket *buckets, size_t num_buckets, struct jak_allocator *alloc);
+static int bucket_drop(struct bucket *buckets, size_t num_buckets, jak_allocator *alloc);
 
 static int bucket_insert(struct bucket *bucket, const char *restrict key, jak_archive_field_sid_t value,
-                         struct jak_allocator *alloc,
+                         jak_allocator *alloc,
                          struct jak_str_hash_counters *counter);
 
 bool
-strhash_create_inmemory(struct jak_str_hash *jak_async_map_exec, const struct jak_allocator *alloc, size_t num_buckets,
+strhash_create_inmemory(struct jak_str_hash *jak_async_map_exec, const jak_allocator *alloc, size_t num_buckets,
                         size_t cap_buckets)
 {
         JAK_check_success(jak_alloc_this_or_std(&jak_async_map_exec->allocator, alloc));
@@ -199,7 +199,7 @@ static int this_put_fast_bulk(struct jak_str_hash *self, char *const *keys, cons
 static int
 this_fetch_bulk(struct jak_vector ofType(bucket) *buckets, jak_archive_field_sid_t *values_out, bool *key_found_mask,
                 size_t *num_keys_not_found, size_t *bucket_idxs, char *const *keys, size_t num_keys,
-                struct jak_allocator *alloc,
+                jak_allocator *alloc,
                 struct jak_str_hash_counters *counter)
 {
         JAK_UNUSED(counter);
@@ -261,7 +261,7 @@ this_get_safe(struct jak_str_hash *self, jak_archive_field_sid_t **out, bool **f
         timestamp_t begin = time_now_wallclock();
         JAK_trace(SMART_MAP_TAG, "'get_safe' function invoked for %zu strings", num_keys)
 
-        struct jak_allocator hashtable_alloc;
+        jak_allocator hashtable_alloc;
 #if defined(JAK_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
         CHECK_SUCCESS(allocator_TRACE(&hashtable_alloc));
 #else
@@ -317,7 +317,7 @@ this_get_safe_exact(struct jak_str_hash *self, jak_archive_field_sid_t *out, boo
 {
         JAK_ASSERT(self->tag == MEMORY_RESIDENT);
 
-        struct jak_allocator hashtable_alloc;
+        jak_allocator hashtable_alloc;
 #if defined(JAK_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
         CHECK_SUCCESS(allocator_TRACE(&hashtable_alloc));
 #else
@@ -357,7 +357,7 @@ static int this_update_key_fast(struct jak_str_hash *self, const jak_archive_fie
 }
 
 static int simple_map_remove(struct mem_extra *extra, size_t *bucket_idxs, char *const *keys, size_t num_keys,
-                             struct jak_allocator *alloc, struct jak_str_hash_counters *counter)
+                             jak_allocator *alloc, struct jak_str_hash_counters *counter)
 {
         JAK_UNUSED(counter);
         JAK_UNUSED(alloc);
@@ -429,7 +429,7 @@ static struct mem_extra *this_get_exta(struct jak_str_hash *self)
 }
 
 JAK_FUNC_UNUSED
-static int bucket_create(struct bucket *buckets, size_t num_buckets, size_t bucket_cap, struct jak_allocator *alloc)
+static int bucket_create(struct bucket *buckets, size_t num_buckets, size_t bucket_cap, jak_allocator *alloc)
 {
         JAK_ERROR_IF_NULL(buckets);
 
@@ -442,7 +442,7 @@ static int bucket_create(struct bucket *buckets, size_t num_buckets, size_t buck
         return true;
 }
 
-static int bucket_drop(struct bucket *buckets, size_t num_buckets, struct jak_allocator *alloc)
+static int bucket_drop(struct bucket *buckets, size_t num_buckets, jak_allocator *alloc)
 {
         JAK_UNUSED(alloc);
         JAK_ERROR_IF_NULL(buckets);
@@ -456,7 +456,7 @@ static int bucket_drop(struct bucket *buckets, size_t num_buckets, struct jak_al
 }
 
 static int bucket_insert(struct bucket *bucket, const char *restrict key, jak_archive_field_sid_t value,
-                         struct jak_allocator *alloc,
+                         jak_allocator *alloc,
                          struct jak_str_hash_counters *counter)
 {
         JAK_UNUSED(counter);
@@ -486,7 +486,7 @@ static int bucket_insert(struct bucket *bucket, const char *restrict key, jak_ar
 static int this_insert_bulk(struct jak_vector ofType(bucket) *buckets, char *const *restrict keys,
                             const jak_archive_field_sid_t *restrict values, size_t *restrict bucket_idxs,
                             size_t num_pairs,
-                            struct jak_allocator *alloc,
+                            jak_allocator *alloc,
                             struct jak_str_hash_counters *counter)
 {
         JAK_ERROR_IF_NULL(buckets)
@@ -510,7 +510,7 @@ static int this_insert_bulk(struct jak_vector ofType(bucket) *buckets, char *con
 
 static int
 this_insert_exact(struct jak_vector ofType(bucket) *buckets, const char *restrict key, jak_archive_field_sid_t value,
-                  size_t bucket_idx, struct jak_allocator *alloc, struct jak_str_hash_counters *counter)
+                  size_t bucket_idx, jak_allocator *alloc, struct jak_str_hash_counters *counter)
 {
         JAK_ERROR_IF_NULL(buckets)
         JAK_ERROR_IF_NULL(key)

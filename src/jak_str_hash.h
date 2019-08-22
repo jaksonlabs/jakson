@@ -115,7 +115,7 @@ struct jak_str_hash {
         /**
         *  Memory allocator that is used to get memory for user data
         */
-        struct jak_allocator allocator;
+        jak_allocator allocator;
 
         /**
          *  Frees resources bound to <code>self</code> via the allocator specified by the constructor

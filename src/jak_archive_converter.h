@@ -27,7 +27,7 @@
 
 JAK_BEGIN_DECL
 
-bool jak_archive_converter(struct jak_encoded_doc_list *collection, struct jak_archive *archive);
+bool jak_archive_converter(struct jak_encoded_doc_list *collection, jak_archive *archive);
 
 JAK_END_DECL
 

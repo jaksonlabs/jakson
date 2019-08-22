@@ -71,7 +71,7 @@ struct jak_vector {
         /**
         *  Memory allocator that is used to get memory for user data
         */
-        struct jak_allocator *allocator;
+        jak_allocator *allocator;
 
         /**
          *  Fixed number of bytes for a single element that should be stored in the vector
@@ -119,7 +119,7 @@ typedef struct jak_vector ofType(const char *) string_vector_t;
  * @param cap_elems number of elements for which memory should be reserved
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
-bool vec_create(struct jak_vector *out, const struct jak_allocator *alloc, size_t elem_size, size_t cap_elems);
+bool vec_create(struct jak_vector *out, const jak_allocator *alloc, size_t elem_size, size_t cap_elems);
 
 bool vec_serialize(FILE *file, struct jak_vector *vec);
 

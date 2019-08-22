@@ -174,13 +174,13 @@ static inline void *alloc_register(size_t size)
 struct trace_stats global_trace_stats =
         {.num_malloc_calls   = 0, .num_realloc_calls  = 0, .num_free_calls     = 0, .total_size         = 0, .malloc_sizes       = NULL, .spinlock           = NULL};
 
-static void *invoke_malloc(struct jak_allocator *self, size_t size);
+static void *invoke_malloc(jak_allocator *self, size_t size);
 
-static void *invoke_realloc(struct jak_allocator *self, void *ptr, size_t size);
+static void *invoke_realloc(jak_allocator *self, void *ptr, size_t size);
 
-static void invoke_free(struct jak_allocator *self, void *ptr);
+static void invoke_free(jak_allocator *self, void *ptr);
 
-static void invoke_clone(struct jak_allocator *dst, const struct jak_allocator *self);
+static void invoke_clone(jak_allocator *dst, const jak_allocator *self);
 
 #define LAZY_INIT()                                                                                                    \
 if (!global_trace_stats.malloc_sizes) {                                                                                \
@@ -205,10 +205,10 @@ if (!global_trace_stats.malloc_sizes) {                                         
     fflush(global_trace_stats.statistics_file);                                                                        \
 }
 
-int jak_trace_alloc_create(struct jak_allocator *alloc)
+int jak_trace_alloc_create(jak_allocator *alloc)
 {
         JAK_ERROR_IF_NULL(alloc);
-        struct jak_allocator default_alloc;
+        jak_allocator default_alloc;
         jak_alloc_create_std(&default_alloc);
 
         alloc->extra = NULL;
@@ -222,13 +222,13 @@ int jak_trace_alloc_create(struct jak_allocator *alloc)
         return true;
 }
 
-static void *invoke_malloc(struct jak_allocator *self, size_t size)
+static void *invoke_malloc(jak_allocator *self, size_t size)
 {
         JAK_UNUSED(self);
 
         spin_acquire(global_trace_stats.spinlock);
 
-        struct jak_allocator default_alloc;
+        jak_allocator default_alloc;
         jak_alloc_create_std(&default_alloc);
 
         LAZY_INIT();
@@ -265,13 +265,13 @@ static void *invoke_malloc(struct jak_allocator *self, size_t size)
         return result;
 }
 
-static void *invoke_realloc(struct jak_allocator *self, void *ptr, size_t size)
+static void *invoke_realloc(jak_allocator *self, void *ptr, size_t size)
 {
         JAK_UNUSED(self);
 
         spin_acquire(global_trace_stats.spinlock);
 
-        struct jak_allocator default_alloc;
+        jak_allocator default_alloc;
         jak_alloc_create_std(&default_alloc);
 
         LAZY_INIT();
@@ -304,13 +304,13 @@ static void *invoke_realloc(struct jak_allocator *self, void *ptr, size_t size)
         }
 }
 
-static void invoke_free(struct jak_allocator *self, void *ptr)
+static void invoke_free(jak_allocator *self, void *ptr)
 {
         JAK_UNUSED(self);
 
         spin_acquire(global_trace_stats.spinlock);
 
-        struct jak_allocator default_alloc;
+        jak_allocator default_alloc;
         jak_alloc_create_std(&default_alloc);
 
         void *page_ptr = ptr - 2 * sizeof(size_t);
@@ -332,7 +332,7 @@ static void invoke_free(struct jak_allocator *self, void *ptr)
         spin_release(global_trace_stats.spinlock);
 }
 
-static void invoke_clone(struct jak_allocator *dst, const struct jak_allocator *self)
+static void invoke_clone(jak_allocator *dst, const jak_allocator *self)
 {
         *dst = *self;
 }

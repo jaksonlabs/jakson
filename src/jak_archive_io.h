@@ -27,7 +27,6 @@
 
 JAK_BEGIN_DECL
 
-struct jak_archive; /* forwarded */
 struct jak_io_context; /* forwarded */
 
 bool jak_io_context_create(struct jak_io_context **context, struct jak_error *err, const char *file_path);

@@ -20,7 +20,7 @@
 #include <jak_encoded_doc.h>
 
 bool encoded_doc_collection_create(struct jak_encoded_doc_list *collection, struct jak_error *err,
-                                   struct jak_archive *archive)
+                                   jak_archive *archive)
 {
         JAK_UNUSED(collection);
         JAK_UNUSED(err);

@@ -25,13 +25,13 @@
 #include <jak_archive_visitor.h>
 #include <jak_archive_query.h>
 
-static void iterate_props(struct jak_archive *archive, struct jak_prop_iter *prop_iter,
+static void iterate_props(jak_archive *archive, struct jak_prop_iter *prop_iter,
                           struct jak_vector ofType(struct jak_path_entry) *path_stack,
                           struct jak_archive_visitor *visitor,
                           int mask, void *capture,
                           bool is_root_object, jak_archive_field_sid_t parent_key, jak_u32 parent_key_array_idx);
 
-static void iterate_objects(struct jak_archive *archive, const jak_archive_field_sid_t *keys, jak_u32 num_pairs,
+static void iterate_objects(jak_archive *archive, const jak_archive_field_sid_t *keys, jak_u32 num_pairs,
                             struct jak_archive_value_vector *value_iter,
                             struct jak_vector ofType(struct jak_path_entry) *path_stack,
                             struct jak_archive_visitor *visitor, int mask, void *capture, bool is_root_object)
@@ -152,7 +152,7 @@ static void iterate_objects(struct jak_archive *archive, const jak_archive_field
                   current_column_name, values, entry_length, capture);                                                 \
 }
 
-static void iterate_props(struct jak_archive *archive, struct jak_prop_iter *prop_iter,
+static void iterate_props(jak_archive *archive, struct jak_prop_iter *prop_iter,
                           struct jak_vector ofType(struct jak_path_entry) *path_stack,
                           struct jak_archive_visitor *visitor,
                           int mask, void *capture,
@@ -654,7 +654,7 @@ static void iterate_props(struct jak_archive *archive, struct jak_prop_iter *pro
         vec_pop(path_stack);
 }
 
-bool jak_archive_visit_archive(struct jak_archive *archive, const struct jak_archive_visitor_desc *desc,
+bool jak_archive_visit_archive(jak_archive *archive, const struct jak_archive_visitor_desc *desc,
                                struct jak_archive_visitor *visitor, void *capture)
 {
         JAK_ERROR_IF_NULL(archive)
@@ -679,7 +679,7 @@ bool jak_archive_visit_archive(struct jak_archive *archive, const struct jak_arc
 
 #include <inttypes.h>
 
-void jak_archive_visitor_path_to_string(char path_buffer[2048], struct jak_archive *archive,
+void jak_archive_visitor_path_to_string(char path_buffer[2048], jak_archive *archive,
                                         const struct jak_vector ofType(struct jak_path_entry) *path_stack)
 {
 
@@ -698,7 +698,7 @@ void jak_archive_visitor_path_to_string(char path_buffer[2048], struct jak_archi
         }
 }
 
-bool jak_archive_visitor_print_path(FILE *file, struct jak_archive *archive,
+bool jak_archive_visitor_print_path(FILE *file, jak_archive *archive,
                                     const struct jak_vector ofType(struct jak_path_entry) *path_stack)
 {
         JAK_ERROR_IF_NULL(file)
@@ -729,7 +729,7 @@ bool jak_archive_visitor_print_path(FILE *file, struct jak_archive *archive,
 
 bool jak_archive_visitor_path_compare(const struct jak_vector ofType(struct jak_path_entry) *path,
                                       jak_archive_field_sid_t *group_name, const char *path_str,
-                                      struct jak_archive *archive)
+                                      jak_archive *archive)
 {
         char path_buffer[2048];
         memset(path_buffer, 0, sizeof(path_buffer));

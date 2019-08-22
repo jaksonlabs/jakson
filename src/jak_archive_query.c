@@ -56,7 +56,7 @@ struct jak_sid_to_offset {
     }                                                                                                                  \
 }
 
-bool jak_query_create(struct jak_archive_query *query, struct jak_archive *archive)
+bool jak_query_create(struct jak_archive_query *query, jak_archive *archive)
 {
         JAK_ERROR_IF_NULL(query)
         JAK_ERROR_IF_NULL(archive)
@@ -203,7 +203,7 @@ bool jak_query_index_id_to_offset_deserialize(struct jak_sid_to_offset **index, 
 }
 
 static char *fetch_string_from_file(bool *decode_success, FILE *disk_file, size_t offset, size_t string_len,
-                                    struct jak_error *err, struct jak_archive *archive)
+                                    struct jak_error *err, jak_archive *archive)
 {
         char *result = JAK_MALLOC(string_len + 1);
         memset(result, 0, string_len + 1);

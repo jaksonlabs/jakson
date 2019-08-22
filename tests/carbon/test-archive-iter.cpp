@@ -504,7 +504,7 @@ iterate_properties(struct jak_prop_iter *prop_iter)
 
 TEST(ArchiveIterTest, CreateIterator)
 {
-    struct jak_archive            archive;
+    jak_archive            archive;
     struct jak_error                err;
     struct jak_prop_iter  prop_iter;
     bool                        status;
