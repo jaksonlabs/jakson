@@ -210,7 +210,7 @@ static char *fetch_string_from_file(bool *decode_success, FILE *disk_file, size_
 
         fseek(disk_file, offset, SEEK_SET);
 
-        bool decode_result = pack_decode(err, &archive->string_table.compressor, result, string_len, disk_file);
+        bool decode_result = jak_pack_decode(err, &archive->string_table.compressor, result, string_len, disk_file);
 
         *decode_success = decode_result;
         return result;
@@ -359,7 +359,7 @@ char **jak_query_fetch_strings_by_offset(jak_archive_query *query, jak_offset_t 
 
                 for (size_t i = 0; i < num_offs; i++) {
                         fseek(file, offs[i], SEEK_SET);
-                        if (!pack_decode(&query->err,
+                        if (!jak_pack_decode(&query->err,
                                          &query->archive->string_table.compressor,
                                          result[i],
                                          strlens[i],

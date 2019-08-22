@@ -75,12 +75,12 @@ typedef struct jak_archive_callback {
 
 JAK_DEFINE_GET_ERROR_FUNCTION(archive, jak_archive, archive);
 
-bool jak_archive_from_json(jak_archive *out, const char *file, jak_error *err, const char *json_string, enum jak_packer_type compressor, enum jak_str_dict_tag dictionary, size_t num_async_dic_threads, bool read_optimized, bool bake_string_id_index, jak_archive_callback *callback);
-bool jak_archive_stream_from_json(struct jak_memblock **stream, jak_error *err, const char *json_string, enum jak_packer_type compressor, enum jak_str_dict_tag dictionary, size_t num_async_dic_threads, bool read_optimized, bool bake_id_index, jak_archive_callback *callback);
-bool jak_archive_from_model(struct jak_memblock **stream, jak_error *err, jak_column_doc *model, enum jak_packer_type compressor, bool bake_string_id_index, jak_archive_callback *callback);
-bool jak_archive_write(FILE *file, const struct jak_memblock *stream);
-bool jak_archive_load(struct jak_memblock **stream, FILE *file);
-bool jak_archive_print(FILE *file, jak_error *err, struct jak_memblock *stream);
+bool jak_archive_from_json(jak_archive *out, const char *file, jak_error *err, const char *json_string, jak_packer_e compressor, enum jak_str_dict_tag dictionary, size_t num_async_dic_threads, bool read_optimized, bool bake_string_id_index, jak_archive_callback *callback);
+bool jak_archive_stream_from_json(jak_memblock **stream, jak_error *err, const char *json_string, jak_packer_e compressor, enum jak_str_dict_tag dictionary, size_t num_async_dic_threads, bool read_optimized, bool bake_id_index, jak_archive_callback *callback);
+bool jak_archive_from_model(jak_memblock **stream, jak_error *err, jak_column_doc *model, jak_packer_e compressor, bool bake_string_id_index, jak_archive_callback *callback);
+bool jak_archive_write(FILE *file, const jak_memblock *stream);
+bool jak_archive_load(jak_memblock **stream, FILE *file);
+bool jak_archive_print(FILE *file, jak_error *err, jak_memblock *stream);
 bool jak_archive_open(jak_archive *out, const char *file_path);
 bool jak_archive_get_info(jak_archive_info *info, const jak_archive *archive);
 bool jak_archive_close(jak_archive *archive);

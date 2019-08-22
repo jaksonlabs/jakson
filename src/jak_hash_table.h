@@ -28,12 +28,12 @@
 
 JAK_BEGIN_DECL
 
-typedef struct jak_jak_hashtable_bucket {
+typedef struct jak_hashtable_bucket {
         bool in_use_flag;  /* flag indicating if bucket is in use */
         jak_i32 displacement; /* difference between intended position during insert, and actual position in table */
         jak_u32 num_probs;    /* number of probe calls to this bucket */
         jak_u64 data_idx;      /* position of key element in owning jak_hashtable structure */
-} jak_jak_hashtable_bucket;
+} jak_hashtable_bucket;
 
 /**
  * Hash table implementation specialized for key and value types of fixed-length size, and where comparision
@@ -49,7 +49,7 @@ typedef struct jak_jak_hashtable_bucket {
 typedef struct jak_hashtable {
         struct jak_vector key_data;
         struct jak_vector value_data;
-        struct jak_vector ofType(jak_jak_hashtable_bucket) table;
+        struct jak_vector ofType(jak_hashtable_bucket) table;
         struct spinlock lock;
         jak_u32 size;
         jak_error err;

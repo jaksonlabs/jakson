@@ -18,7 +18,7 @@
 #include <jak_memfile.h>
 #include <jak_uintvar_stream.h>
 
-bool memfile_open(struct jak_memfile *file, struct jak_memblock *block, enum access_mode mode)
+bool memfile_open(struct jak_memfile *file, jak_memblock *block, enum access_mode mode)
 {
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(block)
@@ -49,11 +49,11 @@ bool memfile_seek(struct jak_memfile *file, jak_offset_t pos)
 {
         JAK_ERROR_IF_NULL(file)
         jak_offset_t file_size = 0;
-        memblock_size(&file_size, file->memblock);
+        jak_memblock_size(&file_size, file->memblock);
         if (JAK_UNLIKELY(pos >= file_size)) {
                 if (file->mode == READ_WRITE) {
                         jak_offset_t new_size = pos + 1;
-                        memblock_resize(file->memblock, new_size);
+                        jak_memblock_resize(file->memblock, new_size);
                 } else {
                         JAK_ERROR(&file->err, JAK_ERR_MEMSTATE)
                         return false;
@@ -82,8 +82,8 @@ bool memfile_grow(struct jak_memfile *file_in, size_t grow_by_bytes)
         JAK_ERROR_IF_NULL(file_in)
         if (JAK_LIKELY(grow_by_bytes > 0)) {
                 jak_offset_t block_size;
-                memblock_size(&block_size, file_in->memblock);
-                memblock_resize(file_in->memblock, (block_size + grow_by_bytes));
+                jak_memblock_size(&block_size, file_in->memblock);
+                jak_memblock_resize(file_in->memblock, (block_size + grow_by_bytes));
         }
         return true;
 }
@@ -102,7 +102,7 @@ size_t memfile_size(struct jak_memfile *file)
                 return 0;
         } else {
                 jak_u64 size;
-                memblock_size(&size, file->memblock);
+                jak_memblock_size(&size, file->memblock);
                 return size;
         }
 }
@@ -111,11 +111,11 @@ bool memfile_cut(struct jak_memfile *file, size_t how_many_bytes)
 {
         JAK_ERROR_IF_NULL(file);
         jak_offset_t block_size;
-        memblock_size(&block_size, file->memblock);
+        jak_memblock_size(&block_size, file->memblock);
 
         if (how_many_bytes > 0 && block_size > how_many_bytes) {
                 size_t new_block_size = block_size - how_many_bytes;
-                memblock_resize(file->memblock, new_block_size);
+                jak_memblock_resize(file->memblock, new_block_size);
                 file->pos = JAK_min(file->pos, new_block_size);
                 return true;
         } else {
@@ -134,9 +134,9 @@ bool memfile_shrink(struct jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(file);
         if (file->mode == READ_WRITE) {
-                int status = memblock_shrink(file->memblock);
+                int status = jak_memblock_shrink(file->memblock);
                 jak_u64 size;
-                memblock_size(&size, file->memblock);
+                jak_memblock_size(&size, file->memblock);
                 JAK_ASSERT(size == file->pos);
                 return status;
         } else {
@@ -177,11 +177,11 @@ bool memfile_skip(struct jak_memfile *file, signed_offset_t nbytes)
         jak_offset_t required_size = file->pos + nbytes;
         file->pos += nbytes;
         jak_offset_t file_size;
-        memblock_size(&file_size, file->memblock);
+        jak_memblock_size(&file_size, file->memblock);
 
         if (JAK_UNLIKELY(required_size >= file_size)) {
                 if (file->mode == READ_WRITE) {
-                        memblock_resize(file->memblock, required_size * 1.7f);
+                        jak_memblock_resize(file->memblock, required_size * 1.7f);
                 } else {
                         JAK_ERROR(&file->err, JAK_ERR_WRITEPROT);
                         return false;
@@ -195,12 +195,12 @@ bool memfile_skip(struct jak_memfile *file, signed_offset_t nbytes)
 const char *memfile_peek(struct jak_memfile *file, jak_offset_t nbytes)
 {
         jak_offset_t file_size;
-        memblock_size(&file_size, file->memblock);
+        jak_memblock_size(&file_size, file->memblock);
         if (JAK_UNLIKELY(file->pos + nbytes > file_size)) {
                 JAK_ERROR(&file->err, JAK_ERR_READOUTOFBOUNDS);
                 return NULL;
         } else {
-                const char *result = memblock_raw_data(file->memblock) + file->pos;
+                const char *result = jak_memblock_raw_data(file->memblock) + file->pos;
                 return result;
         }
 }
@@ -217,13 +217,13 @@ bool memfile_write(struct jak_memfile *file, const void *data, jak_offset_t nbyt
         if (file->mode == READ_WRITE) {
                 if (JAK_LIKELY(nbytes != 0)) {
                         jak_offset_t file_size;
-                        memblock_size(&file_size, file->memblock);
+                        jak_memblock_size(&file_size, file->memblock);
                         jak_offset_t required_size = file->pos + nbytes;
                         if (JAK_UNLIKELY(required_size >= file_size)) {
-                                memblock_resize(file->memblock, required_size * 1.7f);
+                                jak_memblock_resize(file->memblock, required_size * 1.7f);
                         }
 
-                        if (JAK_UNLIKELY(!memblock_write(file->memblock, file->pos, data, nbytes))) {
+                        if (JAK_UNLIKELY(!jak_memblock_write(file->memblock, file->pos, data, nbytes))) {
                                 return false;
                         }
                         file->pos += nbytes;
@@ -365,7 +365,7 @@ signed_offset_t memfile_ensure_space(struct jak_memfile *memfile, jak_u64 nbytes
         JAK_ERROR_IF_NULL(memfile)
 
         jak_offset_t block_size;
-        memblock_size(&block_size, memfile->memblock);
+        jak_memblock_size(&block_size, memfile->memblock);
         JAK_ASSERT(memfile->pos < block_size);
         size_t diff = block_size - memfile->pos;
         if (diff < nbytes) {
@@ -457,20 +457,20 @@ bool memfile_seek_to_start(struct jak_memfile *file)
 bool memfile_seek_to_end(struct jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(file)
-        size_t size = memblock_last_used_byte(file->memblock);
+        size_t size = jak_memblock_last_used_byte(file->memblock);
         return memfile_seek(file, size);
 }
 
 bool memfile_inplace_insert(struct jak_memfile *file, size_t nbytes)
 {
         JAK_ERROR_IF_NULL(file);
-        return memblock_move_right(file->memblock, file->pos, nbytes);
+        return jak_memblock_move_right(file->memblock, file->pos, nbytes);
 }
 
 bool memfile_inplace_remove(struct jak_memfile *file, size_t nbytes_from_here)
 {
         JAK_ERROR_IF_NULL(file);
-        return memblock_move_left(file->memblock, file->pos, nbytes_from_here);
+        return jak_memblock_move_left(file->memblock, file->pos, nbytes_from_here);
 }
 
 bool memfile_end_bit_mode(size_t *num_bytes_written, struct jak_memfile *file)
@@ -490,11 +490,11 @@ void *memfile_current_pos(struct jak_memfile *file, jak_offset_t nbytes)
 {
         if (file && nbytes > 0) {
                 jak_offset_t file_size;
-                memblock_size(&file_size, file->memblock);
+                jak_memblock_size(&file_size, file->memblock);
                 jak_offset_t required_size = file->pos + nbytes;
                 if (JAK_UNLIKELY(file->pos + nbytes >= file_size)) {
                         if (file->mode == READ_WRITE) {
-                                memblock_resize(file->memblock, required_size * 1.7f);
+                                jak_memblock_resize(file->memblock, required_size * 1.7f);
                         } else {
                                 JAK_ERROR(&file->err, JAK_ERR_WRITEPROT);
                                 return NULL;
@@ -512,8 +512,8 @@ bool memfile_hexdump(struct jak_string *sb, struct jak_memfile *file)
         JAK_ERROR_IF_NULL(sb);
         JAK_ERROR_IF_NULL(file);
         jak_offset_t block_size;
-        memblock_size(&block_size, file->memblock);
-        hexdump(sb, memblock_raw_data(file->memblock), block_size);
+        jak_memblock_size(&block_size, file->memblock);
+        hexdump(sb, jak_memblock_raw_data(file->memblock), block_size);
         return true;
 }
 
@@ -522,8 +522,8 @@ bool memfile_hexdump_printf(FILE *file, struct jak_memfile *memfile)
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(memfile)
         jak_offset_t block_size;
-        memblock_size(&block_size, memfile->memblock);
-        hexdump_print(file, memblock_raw_data(memfile->memblock), block_size);
+        jak_memblock_size(&block_size, memfile->memblock);
+        hexdump_print(file, jak_memblock_raw_data(memfile->memblock), block_size);
         return true;
 }
 

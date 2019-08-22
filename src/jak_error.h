@@ -60,7 +60,7 @@ JAK_BEGIN_DECL
 #define JAK_ERR_ERRINTERNAL 28             /** Internal JAK_ERROR */
 #define JAK_ERR_HUFFERR 29                 /** No huffman code table entry found for character */
 #define JAK_ERR_MEMSTATE 30                /** Memory file was opened as read-only but requested a modification */
-#define JAK_ERR_JSONTYPE 31                /** Unable to import json file: unsupported type */
+#define JAK_ERR_JSONTYPE 31                /** Unable to import jak_json file: unsupported type */
 #define JAK_ERR_WRITEPROT 32               /** Mode set to read-only but modification was requested */
 #define JAK_ERR_READOUTOFBOUNDS 33         /** Read outside of memory range bounds */
 #define JAK_ERR_SLOTBROKEN 34              /** Slot management broken */
@@ -145,7 +145,7 @@ static const char *const jak_global_err_str[] =
          "Stream is not a valid archive file", "Unsupported strategy requested for key lookup", "Internal JAK_ERROR",
          "No huffman code table entry found for character",
          "Memory file was opened as read-only but requested a modification",
-         "Unable to import json file: unsupported type", "Mode set to read-only but modification was requested",
+         "Unable to import jak_json file: unsupported type", "Mode set to read-only but modification was requested",
          "Read outside of memory range bounds", "Slot management broken",
          "Thread run out of object ids: start another one", "JSON parsing JAK_ERROR",
          "Document insertion bulk creation failed", "File cannot be opened for writing",

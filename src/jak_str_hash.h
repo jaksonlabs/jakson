@@ -58,9 +58,9 @@ JAK_BEGIN_DECL
 
 /**
  * Enables or disabled packing of entries inside a bucket. By default, packing is disabled.
- * To turn on packing, set 'JAK_CONFIG_PACK_BUCKETS' symbol
+ * To turn on packing, set 'JAK_CONFIG_JAK_PACK_BUCKETS' symbol
  */
-#ifdef JAK_CONFIG_PACK_BUCKETS
+#ifdef JAK_CONFIG_JAK_PACK_BUCKETS
 #define
 #define JAK_BUCKET_PACKING __attribute__((__packed__))
 #else

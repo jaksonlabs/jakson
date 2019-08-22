@@ -36,7 +36,8 @@
 #include <jak_carbon_string.h>
 #include <jak_carbon_key.h>
 #include <jak_carbon_commit.h>
-#include <jak_json_printer.h>
+#include <jak_json_printer_compact.h>
+#include <jak_json_printer_extended.h>
 
 #define MIN_DOC_CAPACITY 17 /* minimum number of bytes required to store header and empty document array */
 
@@ -111,8 +112,8 @@ bool jak_carbon_create_empty_ex(jak_carbon *doc, jak_carbon_key_e type, jak_u64 
         doc_cap = JAK_max(MIN_DOC_CAPACITY, doc_cap);
 
         jak_error_init(&doc->err);
-        memblock_create(&doc->memblock, doc_cap);
-        memblock_zero_out(doc->memblock);
+        jak_memblock_create(&doc->memblock, doc_cap);
+        jak_memblock_zero_out(doc->memblock);
         memfile_open(&doc->memfile, doc->memblock, READ_WRITE);
 
         spin_init(&doc->versioning.write_lock);
@@ -132,13 +133,13 @@ bool jak_carbon_from_json(jak_carbon *doc, const char *json, jak_carbon_key_e ty
         JAK_ERROR_IF_NULL(doc)
         JAK_ERROR_IF_NULL(json)
 
-        struct jak_json data;
-        struct jak_json_err status;
-        struct jak_json_parser parser;
+        jak_json data;
+        jak_json_err status;
+        jak_json_parser parser;
 
-        json_parser_create(&parser);
+        jak_json_parser_create(&parser);
 
-        if (!(json_parse(&data, &status, &parser, json))) {
+        if (!(jak_json_parse(&data, &status, &parser, json))) {
                 struct jak_string sb;
                 string_create(&sb);
 
@@ -160,7 +161,7 @@ bool jak_carbon_from_json(jak_carbon *doc, const char *json, jak_carbon_key_e ty
                 return false;
         } else {
                 jak_carbon_int_from_json(doc, &data, type, key, JAK_CARBON_OPTIMIZE);
-                json_drop(&data);
+                jak_json_drop(&data);
                 return true;
         }
 }
@@ -174,8 +175,8 @@ bool jak_carbon_drop(jak_carbon *doc)
 const void *jak_carbon_raw_data(jak_u64 *len, jak_carbon *doc)
 {
         if (len && doc) {
-                memblock_size(len, doc->memfile.memblock);
-                return memblock_raw_data(doc->memfile.memblock);
+                jak_memblock_size(len, doc->memfile.memblock);
+                return jak_memblock_raw_data(doc->memfile.memblock);
         } else {
                 return NULL;
         }
@@ -277,7 +278,7 @@ bool jak_carbon_clone(jak_carbon *clone, jak_carbon *doc)
 {
         JAK_ERROR_IF_NULL(clone);
         JAK_ERROR_IF_NULL(doc);
-        JAK_check_success(memblock_cpy(&clone->memblock, doc->memblock));
+        JAK_check_success(jak_memblock_cpy(&clone->memblock, doc->memblock));
         JAK_check_success(memfile_open(&clone->memfile, clone->memblock, READ_WRITE));
         JAK_check_success(jak_error_init(&clone->err));
 
@@ -422,7 +423,7 @@ bool jak_carbon_hexdump_print(FILE *file, jak_carbon *doc)
 static bool internal_drop(jak_carbon *doc)
 {
         JAK_ASSERT(doc);
-        memblock_drop(doc->memblock);
+        jak_memblock_drop(doc->memblock);
         return true;
 }
 

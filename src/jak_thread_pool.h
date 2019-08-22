@@ -72,7 +72,7 @@ struct task_handle {
 struct thread_pool {
         char *name;
         pthread_t *pool;
-        struct jak_priority_queue waiting_tasks;
+        jak_priority_queue waiting_tasks;
         struct task_state *task_group_states;
         size_t task_state_capacity; // number of tasks that can be tracked
         size_t size;

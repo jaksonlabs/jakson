@@ -30,7 +30,7 @@
 JAK_BEGIN_DECL
 
 struct jak_memfile {
-        struct jak_memblock *memblock;
+        jak_memblock *memblock;
         jak_offset_t pos;
         jak_offset_t saved_pos[10];
         jak_i8 saved_pos_ptr;
@@ -68,7 +68,7 @@ struct jak_memfile {
     offset;                                                                                                            \
 })
 
-bool memfile_open(struct jak_memfile *file, struct jak_memblock *block, enum access_mode mode);
+bool memfile_open(struct jak_memfile *file, jak_memblock *block, enum access_mode mode);
 
 bool memfile_clone(struct jak_memfile *dst, struct jak_memfile *src);
 

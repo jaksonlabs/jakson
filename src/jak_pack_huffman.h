@@ -28,26 +28,15 @@
 
 JAK_BEGIN_DECL
 
-bool pack_huffman_init(struct jak_packer *self);
-
-bool pack_coding_huffman_cpy(const struct jak_packer *self, struct jak_packer *dst);
-
-bool pack_coding_huffman_drop(struct jak_packer *self);
-
-bool pack_huffman_write_extra(struct jak_packer *self, struct jak_memfile *dst,
-                              const struct jak_vector ofType (const char *) *strings);
-
-bool pack_huffman_read_extra(struct jak_packer *self, FILE *src, size_t nbytes);
-
-bool pack_huffman_print_extra(struct jak_packer *self, FILE *file, struct jak_memfile *src);
-
-bool pack_huffman_print_encoded(struct jak_packer *self, FILE *file, struct jak_memfile *src,
-                                jak_u32 decompressed_strlen);
-
-bool pack_huffman_encode_string(struct jak_packer *self, struct jak_memfile *dst, jak_error *err,
-                                const char *string);
-
-bool pack_huffman_decode_string(struct jak_packer *self, char *dst, size_t strlen, FILE *src);
+bool jak_pack_huffman_init(jak_packer *self);
+bool jak_pack_jak_coding_huffman_cpy(const jak_packer *self, jak_packer *dst);
+bool jak_pack_jak_coding_huffman_drop(jak_packer *self);
+bool jak_pack_huffman_write_extra(jak_packer *self, struct jak_memfile *dst, const struct jak_vector ofType (const char *) *strings);
+bool jak_pack_huffman_read_extra(jak_packer *self, FILE *src, size_t nbytes);
+bool jak_pack_huffman_print_extra(jak_packer *self, FILE *file, struct jak_memfile *src);
+bool jak_pack_huffman_print_encoded(jak_packer *self, FILE *file, struct jak_memfile *src, jak_u32 decompressed_strlen);
+bool jak_pack_huffman_encode_string(jak_packer *self, struct jak_memfile *dst, jak_error *err, const char *string);
+bool jak_pack_huffman_decode_string(jak_packer *self, char *dst, size_t strlen, FILE *src);
 
 JAK_END_DECL
 

@@ -27,8 +27,7 @@
 
 JAK_BEGIN_DECL
 
-JAK_BUILT_IN(static bool) __string_pred_equals_func(size_t *idxs_matching, size_t *num_matching, char **strings,
-                                                    size_t num_strings, void *capture)
+JAK_BUILT_IN(static bool) __jak_string_pred_equals_func(size_t *idxs_matching, size_t *num_matching, char **strings, size_t num_strings, void *capture)
 {
         size_t result_size = 0;
         const char *needle = (const char *) capture;
@@ -45,11 +44,11 @@ JAK_BUILT_IN(static bool) __string_pred_equals_func(size_t *idxs_matching, size_
 
 JAK_BUILT_IN(static bool)
 
-string_pred_equals_init(jak_string_pred *pred)
+jak_string_pred_equals_init(jak_string_pred *pred)
 {
         JAK_ERROR_IF_NULL(pred);
         pred->limit = JAK_QUERY_LIMIT_1;
-        pred->func = __string_pred_equals_func;
+        pred->func = __jak_string_pred_equals_func;
         return true;
 }
 

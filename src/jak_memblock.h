@@ -27,43 +27,27 @@
 
 JAK_BEGIN_DECL
 
-struct jak_memblock;
+bool jak_memblock_create(jak_memblock **block, size_t size);
+bool jak_memblock_drop(jak_memblock *block);
 
-bool memblock_create(struct jak_memblock **block, size_t size);
+bool jak_memblock_from_file(jak_memblock **block, FILE *file, size_t nbytes);
 
-bool memblock_zero_out(struct jak_memblock *block);
+bool jak_memblock_get_error(jak_error *out, jak_memblock *block);
 
-bool memblock_from_file(struct jak_memblock **block, FILE *file, size_t nbytes);
-
-bool memblock_drop(struct jak_memblock *block);
-
-bool memblock_get_error(jak_error *out, struct jak_memblock *block);
-
-bool memblock_size(jak_offset_t *size, const struct jak_memblock *block);
-
-jak_offset_t memblock_last_used_byte(const struct jak_memblock *block);
-
-bool memblock_write_to_file(FILE *file, const struct jak_memblock *block);
-
-const char *memblock_raw_data(const struct jak_memblock *block);
-
-bool memblock_resize(struct jak_memblock *block, size_t size);
-
-bool memblock_write(struct jak_memblock *block, jak_offset_t position, const char *data, jak_offset_t nbytes);
-
-bool memblock_cpy(struct jak_memblock **dst, struct jak_memblock *src);
-
-bool memblock_shrink(struct jak_memblock *block);
-
-bool memblock_move_right(struct jak_memblock *block, jak_offset_t where, size_t nbytes);
-
-bool memblock_move_left(struct jak_memblock *block, jak_offset_t where, size_t nbytes);
-
-bool memblock_move_ex(struct jak_memblock *block, jak_offset_t where, size_t nbytes, bool zero_out);
-
-void *memblock_move_contents_and_drop(struct jak_memblock *block);
-
-bool memfile_update_last_byte(struct jak_memblock *block, size_t where);
+bool jak_memblock_zero_out(jak_memblock *block);
+bool jak_memblock_size(jak_offset_t *size, const jak_memblock *block);
+jak_offset_t jak_memblock_last_used_byte(const jak_memblock *block);
+bool jak_memblock_write_to_file(FILE *file, const jak_memblock *block);
+const char *jak_memblock_raw_data(const jak_memblock *block);
+bool jak_memblock_resize(jak_memblock *block, size_t size);
+bool jak_memblock_write(jak_memblock *block, jak_offset_t position, const char *data, jak_offset_t nbytes);
+bool jak_memblock_cpy(jak_memblock **dst, jak_memblock *src);
+bool jak_memblock_shrink(jak_memblock *block);
+bool jak_memblock_move_right(jak_memblock *block, jak_offset_t where, size_t nbytes);
+bool jak_memblock_move_left(jak_memblock *block, jak_offset_t where, size_t nbytes);
+bool jak_memblock_move_ex(jak_memblock *block, jak_offset_t where, size_t nbytes, bool zero_out);
+void *jak_memblock_move_contents_and_drop(jak_memblock *block);
+bool memfile_update_last_byte(jak_memblock *block, size_t where);
 
 JAK_END_DECL
 

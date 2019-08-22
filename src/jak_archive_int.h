@@ -357,14 +357,14 @@ typedef struct jak_record_flags {
 } jak_record_flags;
 
 typedef struct jak_string_table {
-        struct jak_packer compressor;
+        jak_packer compressor;
         jak_offset_t first_entry_off;
         jak_u32 num_embeddded_strings;
 } jak_string_table;
 
 typedef struct jak_record_table {
         jak_record_flags flags;
-        struct jak_memblock *record_db;
+        jak_memblock *record_db;
 } jak_record_table;
 
 typedef struct jak_archive_info {

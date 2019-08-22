@@ -37,7 +37,7 @@ JAK_BEGIN_DECL
 // ---------------------------------------------------------------------------------------------------------------------
 
 typedef struct jak_carbon_path_index {
-        struct jak_memblock *memblock;
+        jak_memblock *memblock;
         struct jak_memfile memfile;
         jak_error err;
 } jak_carbon_path_index;

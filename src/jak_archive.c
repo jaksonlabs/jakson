@@ -143,12 +143,12 @@ static void update_file_header(struct jak_memfile *memfile, jak_offset_t root_ob
 static void skip_file_header(struct jak_memfile *memfile);
 
 static bool serialize_string_dic(struct jak_memfile *memfile, jak_error *err, const jak_doc_bulk *context,
-                                 enum jak_packer_type compressor);
+                                 jak_packer_e compressor);
 
 static bool print_archive_from_memfile(FILE *file, jak_error *err, struct jak_memfile *memfile);
 
 bool jak_archive_from_json(jak_archive *out, const char *file, jak_error *err, const char *json_string,
-                           enum jak_packer_type compressor, enum jak_str_dict_tag dictionary,
+                           jak_packer_e compressor, enum jak_str_dict_tag dictionary,
                            size_t num_async_dic_threads,
                            bool read_optimized,
                            bool bake_string_id_index, jak_archive_callback *callback)
@@ -160,7 +160,7 @@ bool jak_archive_from_json(jak_archive *out, const char *file, jak_error *err, c
 
         JAK_optional_call(callback, begin_create_from_json);
 
-        struct jak_memblock *stream;
+        jak_memblock *stream;
         FILE *out_file;
 
         if (!jak_archive_stream_from_json(&stream,
@@ -179,14 +179,14 @@ bool jak_archive_from_json(jak_archive *out, const char *file, jak_error *err, c
 
         if ((out_file = fopen(file, "w")) == NULL) {
                 JAK_ERROR(err, JAK_ERR_FOPENWRITE);
-                memblock_drop(stream);
+                jak_memblock_drop(stream);
                 return false;
         }
 
         if (!jak_archive_write(out_file, stream)) {
                 JAK_ERROR(err, JAK_ERR_WRITEARCHIVE);
                 fclose(out_file);
-                memblock_drop(stream);
+                jak_memblock_drop(stream);
                 return false;
         }
 
@@ -203,15 +203,15 @@ bool jak_archive_from_json(jak_archive *out, const char *file, jak_error *err, c
 
         JAK_optional_call(callback, end_load_archive);
 
-        memblock_drop(stream);
+        jak_memblock_drop(stream);
 
         JAK_optional_call(callback, end_create_from_json);
 
         return true;
 }
 
-bool jak_archive_stream_from_json(struct jak_memblock **stream, jak_error *err, const char *json_string,
-                                  enum jak_packer_type compressor, enum jak_str_dict_tag dictionary,
+bool jak_archive_stream_from_json(jak_memblock **stream, jak_error *err, const char *json_string,
+                                  jak_packer_e compressor, enum jak_str_dict_tag dictionary,
                                   size_t num_async_dic_threads,
                                   bool read_optimized,
                                   bool bake_id_index, jak_archive_callback *callback)
@@ -221,12 +221,12 @@ bool jak_archive_stream_from_json(struct jak_memblock **stream, jak_error *err, 
         JAK_ERROR_IF_NULL(json_string);
 
         struct jak_string_dict dic;
-        struct jak_json_parser parser;
-        struct jak_json_err error_desc;
+        jak_json_parser parser;
+        jak_json_err error_desc;
         jak_doc_bulk bulk;
         jak_doc_entries *partition;
         jak_column_doc *columndoc;
-        struct jak_json json;
+        jak_json jak_json;
 
         JAK_optional_call(callback, begin_jak_archive_stream_from_json)
 
@@ -242,8 +242,8 @@ bool jak_archive_stream_from_json(struct jak_memblock **stream, jak_error *err, 
         JAK_optional_call(callback, end_setup_string_dictionary);
 
         JAK_optional_call(callback, begin_parse_json);
-        json_parser_create(&parser);
-        if (!(json_parse(&json, &error_desc, &parser, json_string))) {
+        jak_json_parser_create(&parser);
+        if (!(jak_json_parse(&jak_json, &error_desc, &parser, json_string))) {
                 char buffer[2048];
                 if (error_desc.token) {
                         sprintf(buffer,
@@ -262,7 +262,7 @@ bool jak_archive_stream_from_json(struct jak_memblock **stream, jak_error *err, 
         JAK_optional_call(callback, end_parse_json);
 
         JAK_optional_call(callback, begin_test_json);
-        if (!json_test(err, &json)) {
+        if (!jak_json_test(err, &jak_json)) {
                 return false;
         }
         JAK_optional_call(callback, end_test_json);
@@ -274,9 +274,9 @@ bool jak_archive_stream_from_json(struct jak_memblock **stream, jak_error *err, 
         }
 
         partition = jak_doc_bulk_new_entries(&bulk);
-        jak_doc_bulk_add_json(partition, &json);
+        jak_doc_bulk_add_json(partition, &jak_json);
 
-        json_drop(&json);
+        jak_json_drop(&jak_json);
 
         jak_doc_bulk_shrink(&bulk);
 
@@ -301,7 +301,7 @@ bool jak_archive_stream_from_json(struct jak_memblock **stream, jak_error *err, 
         return true;
 }
 
-static bool run_string_id_baking(jak_error *err, struct jak_memblock **stream)
+static bool run_string_id_baking(jak_error *err, jak_memblock **stream)
 {
         jak_archive archive;
         char tmp_file_name[512];
@@ -369,16 +369,16 @@ static bool run_string_id_baking(jak_error *err, struct jak_memblock **stream)
 
         jak_query_drop_index_string_id_to_offset(index);
 
-        memblock_drop(*stream);
-        memblock_from_file(stream, tmp_file, file_length);
+        jak_memblock_drop(*stream);
+        jak_memblock_from_file(stream, tmp_file, file_length);
 
         remove(tmp_file_name);
 
         return true;
 }
 
-bool jak_archive_from_model(struct jak_memblock **stream, jak_error *err, jak_column_doc *model,
-                            enum jak_packer_type compressor,
+bool jak_archive_from_model(jak_memblock **stream, jak_error *err, jak_column_doc *model,
+                            jak_packer_e compressor,
                             bool bake_string_id_index, jak_archive_callback *callback)
 {
         JAK_ERROR_IF_NULL(model)
@@ -387,7 +387,7 @@ bool jak_archive_from_model(struct jak_memblock **stream, jak_error *err, jak_co
 
         JAK_optional_call(callback, begin_create_from_model)
 
-        memblock_create(stream, 1024 * 1024 * 1024);
+        jak_memblock_create(stream, 1024 * 1024 * 1024);
         struct jak_memfile memfile;
         memfile_open(&memfile, *stream, READ_WRITE);
 
@@ -439,12 +439,12 @@ jak_archive_io_context *jak_archive_io_context_create(jak_archive *archive)
         }
 }
 
-bool jak_archive_write(FILE *file, const struct jak_memblock *stream)
+bool jak_archive_write(FILE *file, const jak_memblock *stream)
 {
-        return memblock_write_to_file(file, stream);
+        return jak_memblock_write_to_file(file, stream);
 }
 
-bool jak_archive_load(struct jak_memblock **stream, FILE *file)
+bool jak_archive_load(jak_memblock **stream, FILE *file)
 {
         long start = ftell(file);
         fseek(file, 0, SEEK_END);
@@ -452,10 +452,10 @@ bool jak_archive_load(struct jak_memblock **stream, FILE *file)
         fseek(file, start, SEEK_SET);
         long fileSize = (end - start);
 
-        return memblock_from_file(stream, file, fileSize);
+        return jak_memblock_from_file(stream, file, fileSize);
 }
 
-bool jak_archive_print(FILE *file, jak_error *err, struct jak_memblock *stream)
+bool jak_archive_print(FILE *file, jak_error *err, jak_memblock *stream)
 {
         struct jak_memfile memfile;
         memfile_open(&memfile, stream, READ_ONLY);
@@ -1394,9 +1394,9 @@ static char *embedded_dic_flags_to_string(const jak_string_tab_flags_u *flags)
                 JAK_ASSERT(length <= max);
         } else {
 
-                for (size_t i = 0; i < JAK_ARRAY_LENGTH(compressor_strategy_register); i++) {
-                        if (flags->value & compressor_strategy_register[i].flag_bit) {
-                                strcpy(string + length, compressor_strategy_register[i].name);
+                for (size_t i = 0; i < JAK_ARRAY_LENGTH(jak_global_pack_strategy_register); i++) {
+                        if (flags->value & jak_global_pack_strategy_register[i].flag_bit) {
+                                strcpy(string + length, jak_global_pack_strategy_register[i].name);
                                 length = strlen(string);
                                 strcpy(string + length, " ");
                                 length = strlen(string);
@@ -1429,10 +1429,10 @@ static char *record_header_flags_to_string(const jak_record_flags *flags)
 }
 
 static bool serialize_string_dic(struct jak_memfile *memfile, jak_error *err, const jak_doc_bulk *context,
-                                 enum jak_packer_type compressor)
+                                 jak_packer_e compressor)
 {
         jak_string_tab_flags_u flags;
-        struct jak_packer strategy;
+        jak_packer strategy;
         jak_string_table_header header;
 
         struct jak_vector ofType (const char *) *strings;
@@ -1443,17 +1443,17 @@ static bool serialize_string_dic(struct jak_memfile *memfile, jak_error *err, co
         JAK_ASSERT(strings->num_elems == string_ids->num_elems);
 
         flags.value = 0;
-        if (!pack_by_type(err, &strategy, compressor)) {
+        if (!jak_pack_by_type(err, &strategy, compressor)) {
                 return false;
         }
-        jak_u8 flag_bit = pack_flagbit_by_type(compressor);
+        jak_u8 flag_bit = jak_pack_flagbit_by_type(compressor);
         JAK_set_bits(flags.value, flag_bit);
 
         jak_offset_t header_pos = memfile_tell(memfile);
         memfile_skip(memfile, sizeof(jak_string_table_header));
 
         jak_offset_t extra_begin_off = memfile_tell(memfile);
-        pack_write_extra(err, &strategy, memfile, strings);
+        jak_pack_write_extra(err, &strategy, memfile, strings);
         jak_offset_t extra_end_off = memfile_tell(memfile);
 
         header = (jak_string_table_header) {.marker = jak_global_marker_symbols[JAK_MARKER_TYPE_EMBEDDED_STR_DIC]
@@ -1471,7 +1471,7 @@ static bool serialize_string_dic(struct jak_memfile *memfile, jak_error *err, co
                 jak_offset_t header_pos_off = memfile_tell(memfile);
                 memfile_skip(memfile, sizeof(jak_string_entry_header));
 
-                if (!pack_encode(err, &strategy, memfile, string)) {
+                if (!jak_pack_encode(err, &strategy, memfile, string)) {
                         JAK_ERROR_PRINT(err.code);
                         return false;
                 }
@@ -1492,7 +1492,7 @@ static bool serialize_string_dic(struct jak_memfile *memfile, jak_error *err, co
         free(strings);
         free(string_ids);
 
-        return pack_drop(err, &strategy);
+        return jak_pack_drop(err, &strategy);
 }
 
 static void skip_file_header(struct jak_memfile *memfile)
@@ -2256,7 +2256,7 @@ static bool print_header_from_memfile(FILE *file, jak_error *err, struct jak_mem
 
 static bool print_embedded_dic_from_memfile(FILE *file, jak_error *err, struct jak_memfile *memfile)
 {
-        struct jak_packer strategy;
+        jak_packer strategy;
         jak_string_tab_flags_u flags;
 
         unsigned offset = memfile_tell(memfile);
@@ -2283,12 +2283,12 @@ static bool print_embedded_dic_from_memfile(FILE *file, jak_error *err, struct j
                 header->compressor_extra_size);
         free(flagsStr);
 
-        if (pack_by_flags(&strategy, flags.value) != true) {
+        if (jak_pack_by_flags(&strategy, flags.value) != true) {
                 JAK_ERROR(err, JAK_ERR_NOCOMPRESSOR);
                 return false;
         }
 
-        pack_print_extra(err, &strategy, file, memfile);
+        jak_pack_print_extra(err, &strategy, file, memfile);
 
         while ((*JAK_MEMFILE_PEEK(memfile, char)) == jak_global_marker_symbols[JAK_MARKER_TYPE_EMBEDDED_UNCOMP_STR].symbol) {
                 unsigned offset = memfile_tell(memfile);
@@ -2300,11 +2300,11 @@ static bool print_embedded_dic_from_memfile(FILE *file, jak_error *err, struct j
                         (size_t) header.next_entry_off,
                         header.string_id,
                         header.string_len);
-                pack_print_encoded(err, &strategy, file, memfile, header.string_len);
+                jak_pack_print_encoded(err, &strategy, file, memfile, header.string_len);
                 fprintf(file, "\n");
         }
 
-        return pack_drop(err, &strategy);
+        return jak_pack_drop(err, &strategy);
 }
 
 static bool print_archive_from_memfile(FILE *file, jak_error *err, struct jak_memfile *memfile)
@@ -2355,7 +2355,7 @@ static jak_object_flags_u *get_flags(jak_object_flags_u *flags, jak_column_doc_o
         return flags;
 }
 
-static bool init_decompressor(struct jak_packer *strategy, jak_u8 flags);
+static bool init_decompressor(jak_packer *strategy, jak_u8 flags);
 
 static bool read_stringtable(jak_string_table *table, jak_error *err, FILE *disk_file);
 
@@ -2465,7 +2465,7 @@ bool jak_archive_close(jak_archive *archive)
         jak_archive_drop_indexes(archive);
         jak_archive_drop_query_string_id_cache(archive);
         free(archive->disk_file_path);
-        memblock_drop(archive->record_table.record_db);
+        jak_memblock_drop(archive->record_table.record_db);
         jak_query_drop(archive->default_query);
         free(archive->default_query);
         return true;
@@ -2535,9 +2535,9 @@ jak_archive_query *jak_archive_query_default(jak_archive *archive)
         return archive ? archive->default_query : NULL;
 }
 
-static bool init_decompressor(struct jak_packer *strategy, jak_u8 flags)
+static bool init_decompressor(jak_packer *strategy, jak_u8 flags)
 {
-        if (pack_by_flags(strategy, flags) != true) {
+        if (jak_pack_by_flags(strategy, flags) != true) {
                 return false;
         }
         return true;
@@ -2567,7 +2567,7 @@ static bool read_stringtable(jak_string_table *table, jak_error *err, FILE *disk
         if ((init_decompressor(&table->compressor, flags.value)) != true) {
                 return false;
         }
-        if ((pack_read_extra(err, &table->compressor, disk_file, header.compressor_extra_size)) != true) {
+        if ((jak_pack_read_extra(err, &table->compressor, disk_file, header.compressor_extra_size)) != true) {
                 return false;
         }
         return true;
@@ -2584,9 +2584,9 @@ static bool read_record(jak_record_header *header_read, jak_archive *archive, FI
                 return false;
         } else {
                 archive->record_table.flags.value = header.flags;
-                bool status = memblock_from_file(&archive->record_table.record_db, disk_file, header.record_size);
+                bool status = jak_memblock_from_file(&archive->record_table.record_db, disk_file, header.record_size);
                 if (!status) {
-                        memblock_get_error(&err, archive->record_table.record_db);
+                        jak_memblock_get_error(&err, archive->record_table.record_db);
                         jak_error_cpy(&archive->err, &err);
                         return false;
                 }

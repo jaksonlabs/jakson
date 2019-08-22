@@ -20,7 +20,7 @@
 
 #include <jak_priority_queue.h>
 
-void priority_queue_init(struct jak_priority_queue *queue)
+void jak_priority_queue_init(jak_priority_queue *queue)
 {
         queue->num_elements = 0;
         pthread_mutex_init(&queue->mutex, NULL);
@@ -28,29 +28,29 @@ void priority_queue_init(struct jak_priority_queue *queue)
         queue->data = NULL;
 }
 
-void priority_queue_free(struct jak_priority_queue *queue)
+void jak_priority_queue_free(jak_priority_queue *queue)
 {
         free(queue->data);
 }
 
-void priority_queue_resize(struct jak_priority_queue *queue, size_t size)
+void jak_priority_queue_resize(jak_priority_queue *queue, size_t size)
 {
-        struct priority_queue_element_info *new_data = JAK_MALLOC(sizeof(struct priority_queue_element_info) * size);
+        jak_priority_queue_element_info *new_data = JAK_MALLOC(sizeof(jak_priority_queue_element_info) * size);
 
-        memcpy(new_data, queue->data, sizeof(struct priority_queue_element_info) * queue->num_elements);
+        memcpy(new_data, queue->data, sizeof(jak_priority_queue_element_info) * queue->num_elements);
         free(queue->data);
 
         queue->data = new_data;
 }
 
-inline static void swap(struct priority_queue_element_info *el1, struct priority_queue_element_info *el2)
+inline static void swap(jak_priority_queue_element_info *el1, jak_priority_queue_element_info *el2)
 {
-        struct priority_queue_element_info tmp = *el1;
+        jak_priority_queue_element_info tmp = *el1;
         *el1 = *el2;
         *el2 = tmp;
 }
 
-static void down_heap(struct priority_queue_element_info *heap, size_t size)
+static void down_heap(jak_priority_queue_element_info *heap, size_t size)
 {
         size_t cur = 0;
         size_t id = 1;
@@ -71,7 +71,7 @@ static void down_heap(struct priority_queue_element_info *heap, size_t size)
         }
 }
 
-static void up_heap(struct priority_queue_element_info *heap, size_t size)
+static void up_heap(jak_priority_queue_element_info *heap, size_t size)
 {
         if (size == 1) { return; }
         size_t log = 31 - __builtin_clz(size);
@@ -100,12 +100,12 @@ static void up_heap(struct priority_queue_element_info *heap, size_t size)
         }
 }
 
-void priority_queue_push(struct jak_priority_queue *queue, void *data, size_t priority)
+void jak_priority_queue_push(jak_priority_queue *queue, void *data, size_t priority)
 {
         pthread_mutex_lock(&queue->mutex);
 
         if (queue->num_elements >= queue->capacity) {
-                priority_queue_resize(queue, ((queue->num_elements + 1) * 3) / 2);
+                jak_priority_queue_resize(queue, ((queue->num_elements + 1) * 3) / 2);
         }
 
         queue->data[queue->num_elements].element = data;
@@ -116,7 +116,7 @@ void priority_queue_push(struct jak_priority_queue *queue, void *data, size_t pr
         pthread_mutex_unlock(&queue->mutex);
 }
 
-void *priority_queue_pop(struct jak_priority_queue *queue)
+void *jak_priority_queue_pop(jak_priority_queue *queue)
 {
         pthread_mutex_lock(&queue->mutex);
 
@@ -134,7 +134,7 @@ void *priority_queue_pop(struct jak_priority_queue *queue)
         return ptr;
 }
 
-int priority_queue_is_empty(struct jak_priority_queue *queue)
+int jak_priority_queue_is_empty(jak_priority_queue *queue)
 {
         pthread_mutex_lock(&queue->mutex);
 

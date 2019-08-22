@@ -10,36 +10,36 @@
 // Test if push and isEmpty works correkt
 TEST(PriorityQueue, IsEmpty)
 {
-        struct jak_priority_queue queue;
-        priority_queue_init(&queue);
+        jak_priority_queue queue;
+        jak_priority_queue_init(&queue);
 
-        EXPECT_EQ(priority_queue_is_empty(&queue), 1);
+        EXPECT_EQ(jak_priority_queue_is_empty(&queue), 1);
 
         for (size_t i = 0; i < 10; ++i) {
-                priority_queue_push(&queue, (void *) i, i);
+                jak_priority_queue_push(&queue, (void *) i, i);
         }
 
-        EXPECT_EQ(!priority_queue_is_empty(&queue), 1);
+        EXPECT_EQ(!jak_priority_queue_is_empty(&queue), 1);
 
-        priority_queue_free(&queue);
+        jak_priority_queue_free(&queue);
 }
 
 // Test if push with Prio works correktly
 TEST(PriorityQueue, PushPrio)
 {
-        struct jak_priority_queue queue;
-        priority_queue_init(&queue);
+        jak_priority_queue queue;
+        jak_priority_queue_init(&queue);
 
         for (size_t i = 1; i < 5; ++i) {
-                priority_queue_push(&queue, (void *) i, i);
+                jak_priority_queue_push(&queue, (void *) i, i);
         }
 
         int test = 99;
-        priority_queue_push(&queue, (void *) &test, 0);
+        jak_priority_queue_push(&queue, (void *) &test, 0);
 
-        EXPECT_EQ(*(int *) priority_queue_pop(&queue), test);
+        EXPECT_EQ(*(int *) jak_priority_queue_pop(&queue), test);
 
-        priority_queue_free(&queue);
+        jak_priority_queue_free(&queue);
 }
 
 // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60932

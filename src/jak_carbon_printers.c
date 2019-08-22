@@ -28,10 +28,10 @@ bool jak_carbon_printer_by_type(jak_carbon_printer *printer, int impl)
 
         switch (impl) {
                 case JAK_JSON_EXTENDED:
-                        json_extended_printer_create(printer);
+                        jak_json_extended_printer_create(printer);
                         break;
                 case JAK_JSON_COMPACT:
-                        json_compact_printer_create(printer);
+                        jak_json_compact_printer_create(printer);
                         break;
                 default: JAK_ERROR_PRINT(JAK_ERR_NOTFOUND)
                         return false;

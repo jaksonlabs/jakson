@@ -102,10 +102,39 @@ typedef struct jak_carbon_printer jak_carbon_printer;
 typedef struct jak_carbon_revise jak_carbon_revise;
 typedef struct jak_carbon_binary jak_carbon_binary;
 typedef struct jak_carbon_update jak_carbon_update;
+typedef struct jak_packer jak_packer;
 
-typedef struct jak_jak_hashset_bucket jak_jak_hashset_bucket;
+typedef struct jak_hashset_bucket jak_hashset_bucket;
 typedef struct jak_hashset jak_hashset;
-typedef struct jak_jak_hashtable_bucket jak_jak_hashtable_bucket;
+typedef struct jak_hashtable_bucket jak_hashtable_bucket;
 typedef struct jak_hashtable jak_hashtable;
+typedef struct jak_huffman jak_huffman;
+typedef struct jak_pack_huffman_entry jak_pack_huffman_entry;
+typedef struct jak_pack_huffman_info jak_pack_huffman_info;
+typedef struct jak_pack_huffman_str_info jak_pack_huffman_str_info;
+
+typedef struct jak_json_token jak_json_token;
+typedef struct jak_json_err jak_json_err;
+typedef struct jak_json_tokenizer jak_json_tokenizer;
+typedef struct jak_json_parser jak_json_parser;
+typedef struct jak_json jak_json;
+typedef struct jak_json_node_value jak_json_node_value;
+typedef struct jak_json_object jak_json_object;
+typedef struct jak_json_element jak_json_element;
+typedef struct jak_json_string jak_json_string;
+typedef struct jak_json_prop jak_json_prop;
+typedef struct jak_json_members jak_json_members;
+typedef struct jak_json_elements jak_json_elements;
+typedef struct jak_json_array jak_json_array;
+typedef struct jak_json_number jak_json_number;
+
+typedef struct jak_memblock jak_memblock;
+
+typedef struct jak_command_opt jak_command_opt;
+typedef struct jak_command_opt_group jak_command_opt_group;
+typedef struct jak_command_opt_mgr jak_command_opt_mgr;
+
+typedef struct jak_priority_queue_element_info jak_priority_queue_element_info;
+typedef struct jak_priority_queue jak_priority_queue;
 
 #endif

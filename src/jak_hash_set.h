@@ -28,11 +28,11 @@
 
 JAK_BEGIN_DECL
 
-typedef struct jak_jak_hashset_bucket {
+typedef struct jak_hashset_bucket {
         bool in_use_flag;  /* flag indicating if bucket is in use */
         jak_i32 displacement; /* difference between intended position during insert, and actual position in table */
         jak_u64 key_idx;      /* position of key element in owning jak_hashset structure */
-} jak_jak_hashset_bucket;
+} jak_hashset_bucket;
 
 /**
  * Hashset implementation specialized for key of fixed-length size, and where comparision
@@ -47,7 +47,7 @@ typedef struct jak_jak_hashset_bucket {
  */
 typedef struct jak_hashset {
         struct jak_vector key_data;
-        struct jak_vector ofType(jak_jak_hashset_bucket) table;
+        struct jak_vector ofType(jak_hashset_bucket) table;
         struct spinlock lock;
         jak_u32 size;
         jak_error err;

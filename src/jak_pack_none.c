@@ -19,35 +19,35 @@
 #include <jak_pack.h>
 #include <jak_pack_none.h>
 
-bool pack_none_init(struct jak_packer *self)
+bool jak_pack_none_init(jak_packer *self)
 {
         JAK_UNUSED(self);
         /* nothing to do for uncompressed dictionaries */
         return true;
 }
 
-bool pack_none_cpy(const struct jak_packer *self, struct jak_packer *dst)
+bool jak_pack_none_cpy(const jak_packer *self, jak_packer *dst)
 {
-        JAK_check_tag(self->tag, PACK_NONE);
+        JAK_check_tag(self->tag, JAK_PACK_NONE);
 
         /* nothing to hard copy but the function pointers */
         *dst = *self;
         return true;
 }
 
-bool pack_none_drop(struct jak_packer *self)
+bool jak_pack_none_drop(jak_packer *self)
 {
-        JAK_check_tag(self->tag, PACK_NONE);
+        JAK_check_tag(self->tag, JAK_PACK_NONE);
 
         JAK_UNUSED(self);
         /* nothing to do for uncompressed dictionaries */
         return true;
 }
 
-bool pack_none_write_extra(struct jak_packer *self, struct jak_memfile *dst,
+bool jak_pack_none_write_extra(jak_packer *self, struct jak_memfile *dst,
                            const struct jak_vector ofType (const char *) *strings)
 {
-        JAK_check_tag(self->tag, PACK_NONE);
+        JAK_check_tag(self->tag, JAK_PACK_NONE);
 
         JAK_UNUSED(self);
         JAK_UNUSED(dst);
@@ -56,9 +56,9 @@ bool pack_none_write_extra(struct jak_packer *self, struct jak_memfile *dst,
         return true;
 }
 
-bool pack_none_read_extra(struct jak_packer *self, FILE *src, size_t nbytes)
+bool jak_pack_none_read_extra(jak_packer *self, FILE *src, size_t nbytes)
 {
-        JAK_check_tag(self->tag, PACK_NONE);
+        JAK_check_tag(self->tag, JAK_PACK_NONE);
 
         JAK_UNUSED(self);
         JAK_UNUSED(src);
@@ -67,9 +67,9 @@ bool pack_none_read_extra(struct jak_packer *self, FILE *src, size_t nbytes)
         return true;
 }
 
-bool pack_none_print_extra(struct jak_packer *self, FILE *file, struct jak_memfile *src)
+bool jak_pack_none_print_extra(jak_packer *self, FILE *file, struct jak_memfile *src)
 {
-        JAK_check_tag(self->tag, PACK_NONE);
+        JAK_check_tag(self->tag, JAK_PACK_NONE);
 
         JAK_UNUSED(self);
         JAK_UNUSED(file);
@@ -78,10 +78,10 @@ bool pack_none_print_extra(struct jak_packer *self, FILE *file, struct jak_memfi
         return true;
 }
 
-bool pack_none_print_encoded_string(struct jak_packer *self, FILE *file, struct jak_memfile *src,
+bool jak_pack_none_print_encoded_string(jak_packer *self, FILE *file, struct jak_memfile *src,
                                     jak_u32 decompressed_strlen)
 {
-        JAK_check_tag(self->tag, PACK_NONE);
+        JAK_check_tag(self->tag, JAK_PACK_NONE);
 
         JAK_UNUSED(self);
 
@@ -98,10 +98,10 @@ bool pack_none_print_encoded_string(struct jak_packer *self, FILE *file, struct 
         return true;
 }
 
-bool pack_none_encode_string(struct jak_packer *self, struct jak_memfile *dst, jak_error *err,
+bool jak_pack_none_encode_string(jak_packer *self, struct jak_memfile *dst, jak_error *err,
                              const char *string)
 {
-        JAK_check_tag(self->tag, PACK_NONE);
+        JAK_check_tag(self->tag, JAK_PACK_NONE);
 
         JAK_UNUSED(self);
 
@@ -116,9 +116,9 @@ bool pack_none_encode_string(struct jak_packer *self, struct jak_memfile *dst, j
         return false;
 }
 
-bool pack_none_decode_string(struct jak_packer *self, char *dst, size_t strlen, FILE *src)
+bool jak_pack_none_decode_string(jak_packer *self, char *dst, size_t strlen, FILE *src)
 {
-        JAK_check_tag(self->tag, PACK_NONE);
+        JAK_check_tag(self->tag, JAK_PACK_NONE);
 
         JAK_UNUSED(self);
 

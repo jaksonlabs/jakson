@@ -75,7 +75,7 @@
 JAK_BEGIN_DECL
 
 typedef struct jak_carbon {
-        struct jak_memblock *memblock;
+        jak_memblock *memblock;
         struct jak_memfile memfile;
 
         struct {

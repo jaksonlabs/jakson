@@ -2086,7 +2086,7 @@ TEST(CarbonTest, CarbonUpdateU8Simple)
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
         struct jak_string sb;
-        const char *json;
+        const char *jak_json;
 
         string_create(&sb);
         jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
@@ -2104,8 +2104,8 @@ TEST(CarbonTest, CarbonUpdateU8Simple)
         jak_carbon_revise_end(&revise);
 
 
-        json = jak_carbon_to_json_extended(&sb, &rev_doc);
-        // printf("JSON (rev1): %s\n", json);
+        jak_json = jak_carbon_to_json_extended(&sb, &rev_doc);
+        // printf("JSON (rev1): %s\n", jak_json);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2120,9 +2120,9 @@ TEST(CarbonTest, CarbonUpdateU8Simple)
         jak_carbon_revise_end(&revise);
 
 
-        json = jak_carbon_to_json_extended(&sb, &rev_doc2);
-        // printf("JSON (rev2): %s\n", json);
-        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [89]}") == 0);
+        jak_json = jak_carbon_to_json_extended(&sb, &rev_doc2);
+        // printf("JSON (rev2): %s\n", jak_json);
+        ASSERT_TRUE(strcmp(jak_json, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [89]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2139,9 +2139,9 @@ TEST(CarbonTest, CarbonUpdateU8Simple)
         jak_carbon_revise_end(&revise);
 
 
-        json = jak_carbon_to_json_extended(&sb, &rev_doc3);
-        // printf("JSON (rev3): %s\n", json);
-        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [65, 66, 67]}") == 0);
+        jak_json = jak_carbon_to_json_extended(&sb, &rev_doc3);
+        // printf("JSON (rev3): %s\n", jak_json);
+        ASSERT_TRUE(strcmp(jak_json, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [65, 66, 67]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2158,9 +2158,9 @@ TEST(CarbonTest, CarbonUpdateU8Simple)
         jak_carbon_revise_end(&revise);
 
 
-        json = jak_carbon_to_json_extended(&sb, &rev_doc4);
-        // printf("JSON (rev4): %s\n", json);
-        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, 2, 3]}") == 0);
+        jak_json = jak_carbon_to_json_extended(&sb, &rev_doc4);
+        // printf("JSON (rev4): %s\n", jak_json);
+        ASSERT_TRUE(strcmp(jak_json, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, 2, 3]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2180,7 +2180,7 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesSimple)
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
         struct jak_string sb;
-        const char *json;
+        const char *jak_json;
 
         string_create(&sb);
         jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
@@ -2200,9 +2200,9 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesSimple)
         jak_carbon_revise_end(&revise);
 
 
-        json = jak_carbon_to_json_extended(&sb, &rev_doc);
-        // printf("JSON (rev1): %s\n", json);
-        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, -42, 23.00]}") == 0);
+        jak_json = jak_carbon_to_json_extended(&sb, &rev_doc);
+        // printf("JSON (rev1): %s\n", jak_json);
+        ASSERT_TRUE(strcmp(jak_json, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, -42, 23.00]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2217,9 +2217,9 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesSimple)
         jak_carbon_revise_end(&revise);
 
 
-        json = jak_carbon_to_json_extended(&sb, &rev_doc2);
-        // printf("JSON (rev2): %s\n", json);
-        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, 1024, 23.00]}") == 0);
+        jak_json = jak_carbon_to_json_extended(&sb, &rev_doc2);
+        // printf("JSON (rev2): %s\n", jak_json);
+        ASSERT_TRUE(strcmp(jak_json, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, 1024, 23.00]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2973,7 +2973,7 @@ TEST(CarbonTest, CarbonRemoveFirstBinary)
         // -------------------------------------------------------------------------------------------------------------
 
 
-        // printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
+        //printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
         ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{ \"type\": \"text/plain\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/json\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{ \"type\": \"application/json\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
@@ -3181,7 +3181,7 @@ TEST(CarbonTest, CarbonRemoveFirstCustomBinary)
         jak_carbon_insert_binary(ins, data1, strlen(data1), NULL, "my-fancy-format");
 
         const char *data2 = "{\"key\": \"value\"}";
-        jak_carbon_insert_binary(ins, data2, strlen(data2), NULL, "application/something-json-like");
+        jak_carbon_insert_binary(ins, data2, strlen(data2), NULL, "application/something-jak_json-like");
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -3210,8 +3210,8 @@ TEST(CarbonTest, CarbonRemoveFirstCustomBinary)
 
         // printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{ \"type\": \"my-fancy-format\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/something-json-like\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
-        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{ \"type\": \"application/something-json-like\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{ \"type\": \"my-fancy-format\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/something-jak_json-like\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
+        ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{ \"type\": \"application/something-jak_json-like\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
 
         string_drop(&sb);
         jak_carbon_drop(&doc);
@@ -3237,7 +3237,7 @@ TEST(CarbonTest, CarbonRemoveLastCustomBinary)
         jak_carbon_insert_binary(ins, data1, strlen(data1), NULL, "my-fancy-format");
 
         const char *data2 = "{\"key\": \"value\"}";
-        jak_carbon_insert_binary(ins, data2, strlen(data2), NULL, "application/something-json-like");
+        jak_carbon_insert_binary(ins, data2, strlen(data2), NULL, "application/something-jak_json-like");
 
         jak_carbon_create_end(&context);
         // -------------------------------------------------------------------------------------------------------------
@@ -3265,7 +3265,7 @@ TEST(CarbonTest, CarbonRemoveLastCustomBinary)
 
         // printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{ \"type\": \"my-fancy-format\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/something-json-like\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{ \"type\": \"my-fancy-format\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/something-jak_json-like\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }]}") == 0);
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{ \"type\": \"my-fancy-format\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }]}") == 0);
 
         string_drop(&sb);
@@ -3292,7 +3292,7 @@ TEST(CarbonTest, CarbonRemoveMiddleCustomBinary)
         jak_carbon_insert_binary(ins, data1, strlen(data1), NULL, "my-fancy-format");
 
         const char *data2 = "{\"key\": \"value\"}";
-        jak_carbon_insert_binary(ins, data2, strlen(data2), NULL, "application/something-json-like");
+        jak_carbon_insert_binary(ins, data2, strlen(data2), NULL, "application/something-jak_json-like");
 
         const char *data3 = "<html><body><p>The quick brown fox jumps over the lazy dog</p></body></html>";
         jak_carbon_insert_binary(ins, data3, strlen(data3), NULL, "my-other-nonstandard-format");
@@ -3327,7 +3327,7 @@ TEST(CarbonTest, CarbonRemoveMiddleCustomBinary)
 
         // printf("BEFORE\t'%s'\nAFTER\t'%s'\n", json_1, json_2);
 
-        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{ \"type\": \"my-fancy-format\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/something-json-like\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }, { \"type\": \"my-other-nonstandard-format\", \"encoding\": \"base64\", \"binary-string\": \"PGh0bWw+PGJvZHk+PHA+VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZzwvcD48L2JvZHk+PC9odG1sPgAA\" }]}") == 0);
+        ASSERT_TRUE(strcmp(json_1, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{ \"type\": \"my-fancy-format\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"application/something-jak_json-like\", \"encoding\": \"base64\", \"binary-string\": \"eyJrZXkiOiAidmFsdWUifQAA\" }, { \"type\": \"my-other-nonstandard-format\", \"encoding\": \"base64\", \"binary-string\": \"PGh0bWw+PGJvZHk+PHA+VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZzwvcD48L2JvZHk+PC9odG1sPgAA\" }]}") == 0);
         ASSERT_TRUE(strcmp(json_2, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [{ \"type\": \"my-fancy-format\", \"encoding\": \"base64\", \"binary-string\": \"VGhpcyByZXBvcnQsIGJ5IGl0cyB2ZXJ5IGxlbmd0aCwgZGVmZW5kcyBpdHNlbGYgYWdhaW5zdCB0aGUgcmlzayBvZiBiZWluZyByZWFkLgAA\" }, { \"type\": \"my-other-nonstandard-format\", \"encoding\": \"base64\", \"binary-string\": \"PGh0bWw+PGJvZHk+PHA+VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZzwvcD48L2JvZHk+PC9odG1sPgAA\" }]}") == 0);
 
         string_drop(&sb);
@@ -3870,7 +3870,7 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesTypeChangeSimple)
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
         struct jak_string sb;
-        const char *json;
+        const char *jak_json;
 
         string_create(&sb);
         jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
@@ -3890,8 +3890,8 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesTypeChangeSimple)
         jak_carbon_revise_end(&revise);
 
 
-        json = jak_carbon_to_json_extended(&sb, &rev_doc);
-        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, -42, 23.00]}") == 0);
+        jak_json = jak_carbon_to_json_extended(&sb, &rev_doc);
+        ASSERT_TRUE(strcmp(jak_json, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, -42, 23.00]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -3900,8 +3900,8 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesTypeChangeSimple)
         jak_carbon_revise_end(&revise);
 
 
-        json = jak_carbon_to_json_extended(&sb, &rev_doc2);
-        ASSERT_TRUE(strcmp(json, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, 1024, 23.00]}") == 0);
+        jak_json = jak_carbon_to_json_extended(&sb, &rev_doc2);
+        ASSERT_TRUE(strcmp(jak_json, "{\"meta\": {\"key\": {\"type\": \"nokey\", \"value\": null}, \"commit\": null}, \"doc\": [1, 1024, 23.00]}") == 0);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -7822,10 +7822,10 @@ TEST(CarbonTest, CarbonColumnOptimizeFix)
         jak_carbon_insert_column_end(&state_out);
         jak_carbon_create_end(&context);
 
-        char *json = jak_carbon_to_json_compact_dup(&doc);
-        ASSERT_TRUE(strcmp(json, "[3, 4, 5]") == 0);
+        char *jak_json = jak_carbon_to_json_compact_dup(&doc);
+        ASSERT_TRUE(strcmp(jak_json, "[3, 4, 5]") == 0);
         jak_carbon_drop(&doc);
-        free(json);
+        free(jak_json);
 }
 
 TEST(CarbonTest, CarbonFromJsonExample)
@@ -7836,7 +7836,7 @@ TEST(CarbonTest, CarbonFromJsonExample)
         const char *json_in;
         char *json_out_compact;
 
-        /* example json taken from 'https://json.org/example.html' */
+        /* example jak_json taken from 'https://jak_json.org/example.html' */
         json_in = "{\"web-app\": {\"servlet\": [{\"servlet-name\": \"cofaxCDS\", \"servlet-class\": \"org.cofax.cds.CDSServlet\", \"init-param\": {\"configGlossary: installationAt\": \"Philadelphia, PA\", \"configGlossary: adminEmail\": \"ksm@pobox.com\", \"configGlossary: poweredBy\": \"Cofax\", \"configGlossary: poweredByIcon\": \"/images/cofax.gif\", \"configGlossary: staticPath\": \"/content/static\", \"templateProcessorClass\": \"org.cofax.WysiwygTemplate\", \"templateLoaderClass\": \"org.cofax.FilesTemplateLoader\", \"templatePath\": \"templates\", \"templateOverridePath\": \"\", \"defaultListTemplate\": \"listTemplate.htm\", \"defaultFileTemplate\": \"articleTemplate.htm\", \"useJSP\": false, \"jspListTemplate\": \"listTemplate.jsp\", \"jspFileTemplate\": \"articleTemplate.jsp\", \"cachePackageTagsTrack\": 200, \"cachePackageTagsStore\": 200, \"cachePackageTagsRefresh\": 60, \"cacheTemplatesTrack\": 100, \"cacheTemplatesStore\": 50, \"cacheTemplatesRefresh\": 15, \"cachePagesTrack\": 200, \"cachePagesStore\": 100, \"cachePagesRefresh\": 10, \"cachePagesDirtyRead\": 10, \"searchEngineListTemplate\": \"forSearchEnginesList.htm\", \"searchEngineFileTemplate\": \"forSearchEngines.htm\", \"searchEngineRobotsDb\": \"WEB-INF/robots.db\", \"useDataStore\": true, \"dataStoreClass\": \"org.cofax.SqlDataStore\", \"redirectionClass\": \"org.cofax.SqlRedirection\", \"dataStoreName\": \"cofax\", \"dataStoreDriver\": \"com.microsoft.jdbc.sqlserver.SQLServerDriver\", \"dataStoreUrl\": \"jdbc: microsoft: sqlserver: //LOCALHOST: 1433;DatabaseName=goon\", \"dataStoreUser\": \"sa\", \"dataStorePassword\": \"dataStoreTestQuery\", \"dataStoreTestQuery\": \"SET NOCOUNT ON;select test='test';\", \"dataStoreLogFile\": \"/usr/local/tomcat/logs/datastore.log\", \"dataStoreInitConns\": 10, \"dataStoreMaxConns\": 100, \"dataStoreConnUsageLimit\": 100, \"dataStoreLogLevel\": \"debug\", \"maxUrlLength\": 500}}, {\"servlet-name\": \"cofaxEmail\", \"servlet-class\": \"org.cofax.cds.EmailServlet\", \"init-param\": {\"mailHost\": \"mail1\", \"mailHostOverride\": \"mail2\"}}, {\"servlet-name\": \"cofaxAdmin\", \"servlet-class\": \"org.cofax.cds.AdminServlet\"}, {\"servlet-name\": \"fileServlet\", \"servlet-class\": \"org.cofax.cds.FileServlet\"}, {\"servlet-name\": \"cofaxTools\", \"servlet-class\": \"org.cofax.cms.CofaxToolsServlet\", \"init-param\": {\"templatePath\": \"toolstemplates/\", \"log\": 1, \"logLocation\": \"/usr/local/tomcat/logs/CofaxTools.log\", \"logMaxSize\": \"\", \"dataLog\": 1, \"dataLogLocation\": \"/usr/local/tomcat/logs/dataLog.log\", \"dataLogMaxSize\": \"\", \"removePageCache\": \"/content/admin/remove?cache=pages&id=\", \"removeTemplateCache\": \"/content/admin/remove?cache=templates&id=\", \"fileTransferFolder\": \"/usr/local/tomcat/webapps/content/fileTransferFolder\", \"lookInContext\": 1, \"adminGroupID\": 4, \"betaServer\": true}}], \"servlet-mapping\": {\"cofaxCDS\": \"/\", \"cofaxEmail\": \"/cofaxutil/aemail/*\", \"cofaxAdmin\": \"/admin/*\", \"fileServlet\": \"/static/*\", \"cofaxTools\": \"/tools/*\"}, \"taglib\": {\"taglib-uri\": \"cofax.tld\", \"taglib-location\": \"/WEB-INF/tlds/cofax.tld\"}}}";
 
         jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
@@ -8256,7 +8256,7 @@ TEST(CarbonTest, CarbonFromJsonShortenedDotPath)
         const char *json_in = "{\"x\": \"y\"}";
         jak_carbon_from_json(&doc, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-        /* without shortened dot path rule, the json object as given is embedded in an record container (aka array)
+        /* without shortened dot path rule, the jak_json object as given is embedded in an record container (aka array)
          * such that the object must be referenced by its index in the record container (i.e., 0) */
         jak_carbon_find_open(&find, "0.x", &doc);
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
@@ -8264,7 +8264,7 @@ TEST(CarbonTest, CarbonFromJsonShortenedDotPath)
         ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_STRING);
         jak_carbon_find_close(&find);
 
-        /* with shortened dot path rule, the json object can be referenced without providing its index in the record */
+        /* with shortened dot path rule, the jak_json object can be referenced without providing its index in the record */
         jak_carbon_find_open(&find, "x", &doc);
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         jak_carbon_find_result_type(&result_type, &find);
@@ -8629,12 +8629,12 @@ TEST(CarbonTest, CarbonFindPrintExamples)
         jak_carbon_find find;
         struct jak_string result;
 
-        const char *json = "{\"x\": {\"y\": [{\"z\": 23}, {\"z\": null}]} }";
+        const char *jak_json = "{\"x\": {\"y\": [{\"z\": 23}, {\"z\": null}]} }";
 
-        jak_carbon_from_json(&doc, json, JAK_CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, jak_json, JAK_CARBON_KEY_NOKEY, NULL, &err);
         string_create(&result);
 
-        printf("input: '%s'\n", json);
+        printf("input: '%s'\n", jak_json);
 
         jak_carbon_find_open(&find, "x", &doc);
         printf("x\t\t\t->\t%s\n", jak_carbon_find_result_to_json_compact(&result, &find));
@@ -8669,9 +8669,9 @@ TEST(CarbonTest, ParseBooleanArray) {
         jak_error err;
         jak_carbon_find find;
         jak_carbon_field_type_e type;
-        const char *json = "[{\"col\": [true, null, false]}]";
+        const char *jak_json = "[{\"col\": [true, null, false]}]";
 
-        jak_carbon_from_json(&doc, json, JAK_CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, jak_json, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
         ASSERT_TRUE(jak_carbon_find_open(&find, "0.col", &doc));
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
@@ -8705,7 +8705,7 @@ TEST(CarbonTest, PathIndex) {
         jak_carbon doc;
         jak_error err;
 
-        const char *json = "[\n"
+        const char *jak_json = "[\n"
                            "   {\n"
                            "      \"a\":null,\n"
                            "      \"b\":[ 1, 2, 3 ],\n"
@@ -8723,9 +8723,9 @@ TEST(CarbonTest, PathIndex) {
 //        int fd = open("./assets/ms-academic-graph.json", O_RDONLY);
 //        ASSERT_NE(fd, -1);
 //        int json_in_len = lseek(fd, 0, SEEK_END);
-//        const char *json = (const char *) mmap(0, json_in_len, PROT_READ, MAP_PRIVATE, fd, 0);
+//        const char *jak_json = (const char *) mmap(0, json_in_len, PROT_READ, MAP_PRIVATE, fd, 0);
 
-        jak_carbon_from_json(&doc, json, JAK_CARBON_KEY_NOKEY, NULL, &err);
+        jak_carbon_from_json(&doc, jak_json, JAK_CARBON_KEY_NOKEY, NULL, &err);
         jak_carbon_path_index_create(&index, &doc);
         jak_carbon_path_index_print(stdout, &index);
         jak_carbon_hexdump_print(stdout, &doc);

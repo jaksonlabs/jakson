@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef CMDOPT_H
-#define CMDOPT_H
+#ifndef JAK_OPT_H
+#define JAK_OPT_H
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  includes
@@ -25,50 +25,36 @@
 #include <jak_stdinc.h>
 #include <jak_vector.h>
 
-struct cmdopt {
+typedef struct jak_command_opt {
         char *opt_name;
-
         char *opt_desc;
-
         char *opt_manfile;
-
         int (*callback)(int argc, char **argv, FILE *file);
-};
+} jak_command_opt;
 
-struct cmdopt_group {
-        struct jak_vector ofType(struct cmdopt) cmd_options;
+typedef struct jak_command_opt_group {
+        struct jak_vector ofType(jak_command_opt) cmd_options;
         char *desc;
-};
+} jak_command_opt_group;
 
-enum mod_arg_policy {
+typedef enum jak_module_arg_policy {
         JAK_MOD_ARG_REQUIRED, JAK_MOD_ARG_NOT_REQUIRED, JAK_MOD_ARG_MAYBE_REQUIRED,
-};
+} jak_module_arg_policy;
 
-struct cmdopt_mgr {
-        struct jak_vector ofType(struct cmdopt_group) groups;
-
-        enum mod_arg_policy policy;
-
-        bool (*fallback)(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager);
-
+typedef struct jak_command_opt_mgr {
+        struct jak_vector ofType(jak_command_opt_group) groups;
+        jak_module_arg_policy policy;
+        bool (*fallback)(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager);
         char *module_name;
-
         char *module_desc;
-};
+} jak_command_opt_mgr;
 
-bool opt_mgr_create(struct cmdopt_mgr *manager, char *module_name, char *module_desc,
-                    enum mod_arg_policy policy,
-                    bool (*fallback)(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager));
+bool jak_opt_manager_create(jak_command_opt_mgr *manager, char *module_name, char *module_desc, jak_module_arg_policy policy, bool (*fallback)(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager));
+bool jak_opt_manager_drop(jak_command_opt_mgr *manager);
 
-bool opt_mgr_drop(struct cmdopt_mgr *manager);
-
-bool opt_mgr_process(struct cmdopt_mgr *manager, int argc, char **argv, FILE *file);
-
-bool opt_mgr_create_group(struct cmdopt_group **group, const char *desc, struct cmdopt_mgr *manager);
-
-bool opt_group_add_cmd(struct cmdopt_group *group, const char *opt_name, char *opt_desc,
-                       char *opt_manfile, int (*callback)(int argc, char **argv, FILE *file));
-
-bool opt_mgr_show_help(FILE *file, struct cmdopt_mgr *manager);
+bool jak_opt_manager_process(jak_command_opt_mgr *manager, int argc, char **argv, FILE *file);
+bool jak_opt_manager_create_group(jak_command_opt_group **group, const char *desc, jak_command_opt_mgr *manager);
+bool opt_group_add_cmd(jak_command_opt_group *group, const char *opt_name, char *opt_desc, char *opt_manfile, int (*callback)(int argc, char **argv, FILE *file));
+bool jak_opt_manager_show_help(FILE *file, jak_command_opt_mgr *manager);
 
 #endif

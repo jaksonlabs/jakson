@@ -27,204 +27,165 @@
 
 JAK_BEGIN_DECL
 
-/** forwarded */
+typedef enum jak_json_token_type {
+        JAK_OBJECT_OPEN,
+        JAK_OBJECT_CLOSE,
+        JAK_LITERAL_STRING,
+        JAK_LITERAL_INT,
+        JAK_LITERAL_FLOAT,
+        JAK_LITERAL_TRUE,
+        JAK_LITERAL_FALSE,
+        JAK_LITERAL_NULL,
+        JAK_COMMA,
+        JAK_ASSIGN,
+        JAK_ARRAY_OPEN,
+        JAK_ARRAY_CLOSE,
+        JAK_JSON_UNKNOWN
+} jak_json_token_e;
 
-struct jak_json;
-
-struct jak_json_element;
-
-struct jak_json_object_t;
-
-struct jak_json_array;
-
-struct jak_json_string;
-
-struct jak_json_number;
-
-struct jak_json_members;
-
-struct jak_json_prop;
-
-struct jak_json_elements;
-
-enum json_token_type {
-        OBJECT_OPEN,
-        OBJECT_CLOSE,
-        LITERAL_STRING,
-        LITERAL_INT,
-        LITERAL_FLOAT,
-        LITERAL_TRUE,
-        LITERAL_FALSE,
-        LITERAL_NULL,
-        COMMA,
-        ASSIGN,
-        ARRAY_OPEN,
-        ARRAY_CLOSE,
-        JSON_UNKNOWN
-};
-
-struct jak_json_token {
-        enum json_token_type type;
+typedef struct jak_json_token {
+        jak_json_token_e type;
         const char *string;
         unsigned line;
         unsigned column;
         unsigned length;
-};
+} jak_json_token;
 
-struct jak_json_err {
-        const struct jak_json_token *token;
+typedef struct jak_json_err {
+        const jak_json_token *token;
         const char *token_type_str;
         const char *msg;
-};
+} jak_json_err;
 
-struct jak_json_tokenizer {
+typedef struct jak_json_tokenizer {
         const char *cursor;
-        struct jak_json_token token;
+        jak_json_token token;
         jak_error err;
-};
+} jak_json_tokenizer;
 
-struct jak_json_parser {
-        struct jak_json_tokenizer tokenizer;
+typedef struct jak_json_parser {
+        jak_json_tokenizer tokenizer;
         jak_error err;
-};
+} jak_json_parser;
 
-enum json_parent {
-        JSON_PARENT_OBJECT, JSON_PARENT_MEMBER, JSON_PARENT_ELEMENTS
-};
+typedef enum json_parent {
+        JAK_JSON_PARENT_OBJECT, JAK_JSON_PARENT_MEMBER, JAK_JSON_PARENT_ELEMENTS
+} json_parent_e;
 
-enum json_value_type {
-        JSON_VALUE_OBJECT,
-        JSON_VALUE_ARRAY,
-        JSON_VALUE_STRING,
-        JSON_VALUE_NUMBER,
-        JSON_VALUE_TRUE,
-        JSON_VALUE_FALSE,
-        JSON_VALUE_NULL
-};
+typedef enum jak_json_value_type_e {
+        JAK_JSON_VALUE_OBJECT,
+        JAK_JSON_VALUE_ARRAY,
+        JAK_JSON_VALUE_STRING,
+        JAK_JSON_VALUE_NUMBER,
+        JAK_JSON_VALUE_TRUE,
+        JAK_JSON_VALUE_FALSE,
+        JAK_JSON_VALUE_NULL
+} jak_json_value_type_e;
 
-enum json_list_type {
-        JSON_LIST_TYPE_EMPTY,
-        JSON_LIST_TYPE_VARIABLE_OR_NESTED,
-        JSON_LIST_TYPE_FIXED_U8,
-        JSON_LIST_TYPE_FIXED_U16,
-        JSON_LIST_TYPE_FIXED_U32,
-        JSON_LIST_TYPE_FIXED_U64,
-        JSON_LIST_TYPE_FIXED_I8,
-        JSON_LIST_TYPE_FIXED_I16,
-        JSON_LIST_TYPE_FIXED_I32,
-        JSON_LIST_TYPE_FIXED_I64,
-        JSON_LIST_TYPE_FIXED_FLOAT,
-        JSON_LIST_TYPE_FIXED_NULL,
-        JSON_LIST_TYPE_FIXED_BOOLEAN
-};
+typedef enum jak_json_list_type_e {
+        JAK_JSON_LIST_EMPTY,
+        JAK_JSON_LIST_VARIABLE_OR_NESTED,
+        JAK_JSON_LIST_FIXED_U8,
+        JAK_JSON_LIST_FIXED_U16,
+        JAK_JSON_LIST_FIXED_U32,
+        JAK_JSON_LIST_FIXED_U64,
+        JAK_JSON_LIST_FIXED_I8,
+        JAK_JSON_LIST_FIXED_I16,
+        JAK_JSON_LIST_FIXED_I32,
+        JAK_JSON_LIST_FIXED_I64,
+        JAK_JSON_LIST_FIXED_FLOAT,
+        JAK_JSON_LIST_FIXED_NULL,
+        JAK_JSON_LIST_FIXED_BOOLEAN
+} jak_json_list_type_e;
 
-struct jak_json {
-        struct jak_json_element *element;
+typedef struct jak_json {
+        jak_json_element *element;
         jak_error err;
-};
+} jak_json;
 
-struct jak_json_node_value {
-        struct jak_json_element *parent;
-
-        enum json_value_type value_type;
-
+typedef struct jak_json_node_value {
+        jak_json_element *parent;
+        jak_json_value_type_e value_type;
         union {
-                struct jak_json_object_t *object;
-                struct jak_json_array *array;
-                struct jak_json_string *string;
-                struct jak_json_number *number;
+                jak_json_object *object;
+                jak_json_array *array;
+                jak_json_string *string;
+                jak_json_number *number;
                 void *ptr;
         } value;
-};
+} jak_json_node_value;
 
-struct jak_json_object_t {
-        struct jak_json_node_value *parent;
-        struct jak_json_members *value;
-};
+typedef struct jak_json_object {
+        jak_json_node_value *parent;
+        jak_json_members *value;
+} jak_json_object;
 
-struct jak_json_element {
-        enum json_parent parent_type;
-
+typedef struct jak_json_element {
+        json_parent_e parent_type;
         union {
-                struct jak_json *json;
-                struct jak_json_prop *member;
-                struct jak_json_elements *elements;
+                jak_json *jak_json;
+                jak_json_prop *member;
+                jak_json_elements *elements;
                 void *ptr;
         } parent;
+        jak_json_node_value value;
+} jak_json_element;
 
-        struct jak_json_node_value value;
-
-};
-
-struct jak_json_string {
-        struct jak_json_prop *parent;
+typedef struct jak_json_string {
+        jak_json_prop *parent;
         char *value;
-};
+} jak_json_string;
 
-struct jak_json_prop {
-        struct jak_json_members *parent;
-        struct jak_json_string key;
-        struct jak_json_element value;
-};
+typedef struct jak_json_prop {
+        jak_json_members *parent;
+        jak_json_string key;
+        jak_json_element value;
+} jak_json_prop;
 
-struct jak_json_members {
-        struct jak_json_object_t *parent;
-        struct jak_vector ofType(struct jak_json_prop) members;
-};
+typedef struct jak_json_members {
+        jak_json_object *parent;
+        struct jak_vector ofType(jak_json_prop) members;
+} jak_json_members;
 
-struct jak_json_elements {
-        struct jak_json_array *parent;
-        struct jak_vector ofType(struct jak_json_element) elements;
-};
+typedef struct jak_json_elements {
+        jak_json_array *parent;
+        struct jak_vector ofType(jak_json_element) elements;
+} jak_json_elements;
 
-struct jak_json_array {
-        struct jak_json_node_value *parent;
-        struct jak_json_elements elements;
-};
+typedef struct jak_json_array {
+        jak_json_node_value *parent;
+        jak_json_elements elements;
+} jak_json_array;
 
-enum json_number_type {
-        JSON_NUMBER_FLOAT, JSON_NUMBER_UNSIGNED, JSON_NUMBER_SIGNED
-};
+typedef enum json_number_type {
+        JAK_JSON_NUMBER_FLOAT, JAK_JSON_NUMBER_UNSIGNED, JAK_JSON_NUMBER_SIGNED
+} json_number_type_e;
 
-struct jak_json_number {
-        struct jak_json_node_value *parent;
-        enum json_number_type value_type;
-
+typedef struct jak_json_number {
+        jak_json_node_value *parent;
+        json_number_type_e value_type;
         union {
                 float float_number;
                 jak_i64 signed_integer;
                 jak_u64 unsigned_integer;
         } value;
-};
+} jak_json_number;
 
-bool json_tokenizer_init(struct jak_json_tokenizer *tokenizer, const char *input);
+bool jak_json_tokenizer_init(jak_json_tokenizer *tokenizer, const char *input);
+const jak_json_token *json_tokenizer_next(jak_json_tokenizer *tokenizer);
+void jak_json_token_dup(jak_json_token *dst, const jak_json_token *src);
+void jak_json_token_print(FILE *file, const jak_json_token *token);
+bool jak_json_parser_create(jak_json_parser *parser);
+bool jak_json_parse(jak_json *json, jak_json_err *error_desc, jak_json_parser *parser, const char *input);
+bool jak_json_test(jak_error *err, jak_json *jak_json);
+bool jak_json_drop(jak_json *jak_json);
+bool jak_json_print(FILE *file, jak_json *jak_json);
+bool jak_json_list_is_empty(const jak_json_elements *elements);
+bool jak_json_list_length(jak_u32 *len, const jak_json_elements *elements);
+jak_json_list_type_e jak_json_fitting_type(jak_json_list_type_e current, jak_json_list_type_e to_add);
+bool jak_json_array_get_type(jak_json_list_type_e *type, const jak_json_array *array);
 
-const struct jak_json_token *json_tokenizer_next(struct jak_json_tokenizer *tokenizer);
-
-void json_token_dup(struct jak_json_token *dst, const struct jak_json_token *src);
-
-void json_token_print(FILE *file, const struct jak_json_token *token);
-
-bool json_parser_create(struct jak_json_parser *parser);
-
-bool json_parse(struct jak_json *json, struct jak_json_err *error_desc, struct jak_json_parser *parser,
-                const char *input);
-
-bool json_test(jak_error *err, struct jak_json *json);
-
-bool json_drop(struct jak_json *json);
-
-bool json_print(FILE *file, struct jak_json *json);
-
-bool json_list_is_empty(const struct jak_json_elements *elements);
-
-bool json_list_length(jak_u32 *len, const struct jak_json_elements *elements);
-
-enum json_list_type json_fitting_type(enum json_list_type current, enum json_list_type to_add);
-
-bool json_array_get_type(enum json_list_type *type, const struct jak_json_array *array);
-
-JAK_DEFINE_GET_ERROR_FUNCTION(json, struct jak_json, json);
+JAK_DEFINE_GET_ERROR_FUNCTION(jak_json, jak_json, jak_json);
 
 JAK_END_DECL
 

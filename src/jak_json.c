@@ -25,49 +25,49 @@
 #include "jak_json.h"
 
 static struct {
-        enum json_token_type token;
+        jak_json_token_e token;
         const char *string;
-} TOKEN_STRING[] = {{.token = OBJECT_OPEN, .string = "OBJECT_OPEN"},
-                    {.token = OBJECT_CLOSE, .string = "OBJECT_CLOSE"},
-                    {.token = LITERAL_STRING, .string = "JSON_TOKEN_STRING"},
-                    {.token = LITERAL_INT, .string = "LITERAL_INT"},
-                    {.token = LITERAL_FLOAT, .string = "LITERAL_FLOAT"},
-                    {.token = LITERAL_TRUE, .string = "LITERAL_TRUE"},
-                    {.token = LITERAL_FALSE, .string = "LITERAL_FALSE"},
-                    {.token = LITERAL_NULL, .string = "LITERAL_NULL"},
-                    {.token = COMMA, .string = "COMMA"},
-                    {.token = ASSIGN, .string = "JSON_TOKEN_ASSIGMENT"},
-                    {.token = ARRAY_OPEN, .string = "ARRAY_OPEN"},
-                    {.token = ARRAY_CLOSE, .string = "ARRAY_CLOSE"},
-                    {.token = JSON_UNKNOWN, .string = "JSON_UNKNOWN"}};
+} TOKEN_STRING[] = {{.token = JAK_OBJECT_OPEN, .string = "JAK_OBJECT_OPEN"},
+                    {.token = JAK_OBJECT_CLOSE, .string = "JAK_OBJECT_CLOSE"},
+                    {.token = JAK_LITERAL_STRING, .string = "JSON_TOKEN_STRING"},
+                    {.token = JAK_LITERAL_INT, .string = "JAK_LITERAL_INT"},
+                    {.token = JAK_LITERAL_FLOAT, .string = "JAK_LITERAL_FLOAT"},
+                    {.token = JAK_LITERAL_TRUE, .string = "JAK_LITERAL_TRUE"},
+                    {.token = JAK_LITERAL_FALSE, .string = "JAK_LITERAL_FALSE"},
+                    {.token = JAK_LITERAL_NULL, .string = "JAK_LITERAL_NULL"},
+                    {.token = JAK_COMMA, .string = "JAK_COMMA"},
+                    {.token = JAK_ASSIGN, .string = "JSON_TOKEN_ASSIGMENT"},
+                    {.token = JAK_ARRAY_OPEN, .string = "JAK_ARRAY_OPEN"},
+                    {.token = JAK_ARRAY_CLOSE, .string = "JAK_ARRAY_CLOSE"},
+                    {.token = JAK_JSON_UNKNOWN, .string = "JAK_JSON_UNKNOWN"}};
 
 struct token_memory {
-        enum json_token_type type;
+        jak_json_token_e type;
         bool init;
 };
 
-static int process_token(jak_error *err, struct jak_json_err *error_desc, const struct jak_json_token *token,
-                         struct jak_vector ofType(enum json_token_type) *brackets, struct token_memory *token_mem);
+static int process_token(jak_error *err, jak_json_err *error_desc, const jak_json_token *token,
+                         struct jak_vector ofType(jak_json_token_e) *brackets, struct token_memory *token_mem);
 
-static int set_error(struct jak_json_err *error_desc, const struct jak_json_token *token, const char *msg);
+static int set_error(jak_json_err *error_desc, const jak_json_token *token, const char *msg);
 
-bool json_tokenizer_init(struct jak_json_tokenizer *tokenizer, const char *input)
+bool jak_json_tokenizer_init(jak_json_tokenizer *tokenizer, const char *input)
 {
         JAK_ERROR_IF_NULL(tokenizer)
         JAK_ERROR_IF_NULL(input)
         tokenizer->cursor = input;
         tokenizer->token =
-                (struct jak_json_token) {.type = JSON_UNKNOWN, .length = 0, .column = 0, .line = 1, .string = NULL};
+                (jak_json_token) {.type = JAK_JSON_UNKNOWN, .length = 0, .column = 0, .line = 1, .string = NULL};
         jak_error_init(&tokenizer->err);
         return true;
 }
 
 static void
-parse_string_token(struct jak_json_tokenizer *tokenizer, char c, char delimiter, char delimiter2, char delimiter3,
+parse_string_token(jak_json_tokenizer *tokenizer, char c, char delimiter, char delimiter2, char delimiter3,
                    bool include_start, bool include_end)
 {
         bool escapeQuote = false;
-        tokenizer->token.type = LITERAL_STRING;
+        tokenizer->token.type = JAK_LITERAL_STRING;
         if (!include_start) {
                 tokenizer->token.string++;
         }
@@ -100,7 +100,7 @@ parse_string_token(struct jak_json_tokenizer *tokenizer, char c, char delimiter,
         tokenizer->cursor += (c == '\r' || c == '\n') ? 1 : 0;
 }
 
-const struct jak_json_token *json_tokenizer_next(struct jak_json_tokenizer *tokenizer)
+const jak_json_token *json_tokenizer_next(jak_json_tokenizer *tokenizer)
 {
         if (JAK_LIKELY(*tokenizer->cursor != '\0')) {
                 char c = *tokenizer->cursor;
@@ -120,11 +120,11 @@ const struct jak_json_token *json_tokenizer_next(struct jak_json_tokenizer *toke
                         return json_tokenizer_next(tokenizer);
                 } else if (c == '{' || c == '}' || c == '[' || c == ']' || c == ':' || c == ',') {
                         tokenizer->token.type =
-                                c == '{' ? OBJECT_OPEN : c == '}' ? OBJECT_CLOSE : c == '[' ? ARRAY_OPEN : c == ']'
-                                                                                                           ? ARRAY_CLOSE
+                                c == '{' ? JAK_OBJECT_OPEN : c == '}' ? JAK_OBJECT_CLOSE : c == '[' ? JAK_ARRAY_OPEN : c == ']'
+                                                                                                           ? JAK_ARRAY_CLOSE
                                                                                                            : c == ':'
-                                                                                                             ? ASSIGN
-                                                                                                             : COMMA;
+                                                                                                             ? JAK_ASSIGN
+                                                                                                             : JAK_COMMA;
                         tokenizer->token.column++;
                         tokenizer->token.length = 1;
                         tokenizer->cursor++;
@@ -140,13 +140,13 @@ const struct jak_json_token *json_tokenizer_next(struct jak_json_tokenizer *toke
                         const unsigned lenFalse = 5;
                         const unsigned cursorLen = strlen(tokenizer->cursor);
                         if (cursorLen >= lenTrueNull && strncmp(tokenizer->cursor, "true", lenTrueNull) == 0) {
-                                tokenizer->token.type = LITERAL_TRUE;
+                                tokenizer->token.type = JAK_LITERAL_TRUE;
                                 tokenizer->token.length = lenTrueNull;
                         } else if (cursorLen >= lenFalse && strncmp(tokenizer->cursor, "false", lenFalse) == 0) {
-                                tokenizer->token.type = LITERAL_FALSE;
+                                tokenizer->token.type = JAK_LITERAL_FALSE;
                                 tokenizer->token.length = lenFalse;
                         } else if (cursorLen >= lenTrueNull && strncmp(tokenizer->cursor, "null", lenTrueNull) == 0) {
-                                tokenizer->token.type = LITERAL_NULL;
+                                tokenizer->token.type = JAK_LITERAL_NULL;
                                 tokenizer->token.length = lenTrueNull;
                         } else {
                                 goto caseTokenUnknown;
@@ -174,10 +174,10 @@ const struct jak_json_token *json_tokenizer_next(struct jak_json_tokenizer *toke
                                 goto caseTokenUnknown;
                         }
                         tokenizer->cursor += (c == '\r' || c == '\n') ? 1 : 0;
-                        tokenizer->token.type = fracFound ? LITERAL_FLOAT : LITERAL_INT;
+                        tokenizer->token.type = fracFound ? JAK_LITERAL_FLOAT : JAK_LITERAL_INT;
                 } else {
                         caseTokenUnknown:
-                        tokenizer->token.type = JSON_UNKNOWN;
+                        tokenizer->token.type = JAK_JSON_UNKNOWN;
                         tokenizer->token.column++;
                         tokenizer->token.length = strlen(tokenizer->cursor);
                         tokenizer->cursor += tokenizer->token.length;
@@ -188,14 +188,14 @@ const struct jak_json_token *json_tokenizer_next(struct jak_json_tokenizer *toke
         }
 }
 
-void json_token_dup(struct jak_json_token *dst, const struct jak_json_token *src)
+void jak_json_token_dup(jak_json_token *dst, const jak_json_token *src)
 {
         JAK_ASSERT(dst);
         JAK_ASSERT(src);
-        memcpy(dst, src, sizeof(struct jak_json_token));
+        memcpy(dst, src, sizeof(jak_json_token));
 }
 
-void json_token_print(FILE *file, const struct jak_json_token *token)
+void jak_json_token_print(FILE *file, const jak_json_token *token)
 {
         char *string = JAK_MALLOC(token->length + 1);
         strncpy(string, token->string, token->length);
@@ -210,59 +210,59 @@ void json_token_print(FILE *file, const struct jak_json_token *token)
         free(string);
 }
 
-static bool parse_object(struct jak_json_object_t *object, jak_error *err,
-                         struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx);
+static bool parse_object(jak_json_object *object, jak_error *err,
+                         struct jak_vector ofType(jak_json_token) *token_stream, size_t *token_idx);
 
-static bool parse_array(struct jak_json_array *array, jak_error *err,
-                        struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx);
+static bool parse_array(jak_json_array *array, jak_error *err,
+                        struct jak_vector ofType(jak_json_token) *token_stream, size_t *token_idx);
 
-static void parse_string(struct jak_json_string *string, struct jak_vector ofType(struct jak_json_token) *token_stream,
+static void parse_string(jak_json_string *string, struct jak_vector ofType(jak_json_token) *token_stream,
                          size_t *token_idx);
 
-static void parse_number(struct jak_json_number *number, struct jak_vector ofType(struct jak_json_token) *token_stream,
+static void parse_number(jak_json_number *number, struct jak_vector ofType(jak_json_token) *token_stream,
                          size_t *token_idx);
 
-static bool parse_element(struct jak_json_element *element, jak_error *err,
-                          struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx);
+static bool parse_element(jak_json_element *element, jak_error *err,
+                          struct jak_vector ofType(jak_json_token) *token_stream, size_t *token_idx);
 
-static bool parse_elements(struct jak_json_elements *elements, jak_error *err,
-                           struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx);
+static bool parse_elements(jak_json_elements *elements, jak_error *err,
+                           struct jak_vector ofType(jak_json_token) *token_stream, size_t *token_idx);
 
-static bool parse_token_stream(struct jak_json *json, jak_error *err,
-                               struct jak_vector ofType(struct jak_json_token) *token_stream);
+static bool parse_token_stream(jak_json *jak_json, jak_error *err,
+                               struct jak_vector ofType(jak_json_token) *token_stream);
 
-static struct jak_json_token get_token(struct jak_vector ofType(struct jak_json_token) *token_stream, size_t token_idx);
+static jak_json_token get_token(struct jak_vector ofType(jak_json_token) *token_stream, size_t token_idx);
 
-static void connect_child_and_parents_member(struct jak_json_prop *member);
+static void connect_child_and_parents_member(jak_json_prop *member);
 
-static void connect_child_and_parents_object(struct jak_json_object_t *object);
+static void connect_child_and_parents_object(jak_json_object *object);
 
-static void connect_child_and_parents_array(struct jak_json_array *array);
+static void connect_child_and_parents_array(jak_json_array *array);
 
-static void connect_child_and_parents_value(struct jak_json_node_value *value);
+static void connect_child_and_parents_value(jak_json_node_value *value);
 
-static void connect_child_and_parents_element(struct jak_json_element *element);
+static void connect_child_and_parents_element(jak_json_element *element);
 
-static void connect_child_and_parents(struct jak_json *json);
+static void connect_child_and_parents(jak_json *jak_json);
 
-static bool json_ast_node_member_print(FILE *file, jak_error *err, struct jak_json_prop *member);
+static bool json_ast_node_member_print(FILE *file, jak_error *err, jak_json_prop *member);
 
-static bool json_ast_node_object_print(FILE *file, jak_error *err, struct jak_json_object_t *object);
+static bool json_ast_node_object_print(FILE *file, jak_error *err, jak_json_object *object);
 
-static bool json_ast_node_array_print(FILE *file, jak_error *err, struct jak_json_array *array);
+static bool json_ast_node_array_print(FILE *file, jak_error *err, jak_json_array *array);
 
-static void json_ast_node_string_print(FILE *file, struct jak_json_string *string);
+static void json_ast_node_string_print(FILE *file, jak_json_string *string);
 
-static bool json_ast_node_number_print(FILE *file, jak_error *err, struct jak_json_number *number);
+static bool json_ast_node_number_print(FILE *file, jak_error *err, jak_json_number *number);
 
-static bool json_ast_node_value_print(FILE *file, jak_error *err, struct jak_json_node_value *value);
+static bool json_ast_node_value_print(FILE *file, jak_error *err, jak_json_node_value *value);
 
-static bool json_ast_node_element_print(FILE *file, jak_error *err, struct jak_json_element *element);
+static bool json_ast_node_element_print(FILE *file, jak_error *err, jak_json_element *element);
 
 #define NEXT_TOKEN(x) { *x = *x + 1; }
 #define PREV_TOKEN(x) { *x = *x - 1; }
 
-bool json_parser_create(struct jak_json_parser *parser)
+bool jak_json_parser_create(jak_json_parser *parser)
 {
         JAK_ERROR_IF_NULL(parser)
 
@@ -272,43 +272,43 @@ bool json_parser_create(struct jak_json_parser *parser)
 }
 
 bool
-json_parse(struct jak_json *json, struct jak_json_err *error_desc, struct jak_json_parser *parser, const char *input)
+jak_json_parse(jak_json *json, jak_json_err *error_desc, jak_json_parser *parser, const char *input)
 {
         JAK_ERROR_IF_NULL(parser)
         JAK_ERROR_IF_NULL(input)
 
-        struct jak_vector ofType(enum json_token_type) brackets;
-        struct jak_vector ofType(struct jak_json_token) token_stream;
+        struct jak_vector ofType(jak_json_token_e) brackets;
+        struct jak_vector ofType(jak_json_token) token_stream;
 
-        struct jak_json retval;
-        JAK_zero_memory(&retval, sizeof(struct jak_json))
-        retval.element = JAK_MALLOC(sizeof(struct jak_json_element));
+        jak_json retval;
+        JAK_zero_memory(&retval, sizeof(jak_json))
+        retval.element = JAK_MALLOC(sizeof(jak_json_element));
         jak_error_init(&retval.err);
-        const struct jak_json_token *token;
+        const jak_json_token *token;
         int status;
 
-        json_tokenizer_init(&parser->tokenizer, input);
-        vec_create(&brackets, NULL, sizeof(enum json_token_type), 15);
-        vec_create(&token_stream, NULL, sizeof(struct jak_json_token), 200);
+        jak_json_tokenizer_init(&parser->tokenizer, input);
+        vec_create(&brackets, NULL, sizeof(jak_json_token_e), 15);
+        vec_create(&token_stream, NULL, sizeof(jak_json_token), 200);
 
-        struct token_memory token_mem = {.init = true, .type = JSON_UNKNOWN};
+        struct token_memory token_mem = {.init = true, .type = JAK_JSON_UNKNOWN};
 
         while ((token = json_tokenizer_next(&parser->tokenizer))) {
                 if (JAK_LIKELY(
                         (status = process_token(&parser->err, error_desc, token, &brackets, &token_mem)) == true)) {
-                        struct jak_json_token *newToken = vec_new_and_get(&token_stream, struct jak_json_token);
-                        json_token_dup(newToken, token);
+                        jak_json_token *newToken = vec_new_and_get(&token_stream, jak_json_token);
+                        jak_json_token_dup(newToken, token);
                 } else {
                         goto cleanup;
                 }
         }
         if (!vec_is_empty(&brackets)) {
-                enum json_token_type type = *VECTOR_PEEK(&brackets, enum json_token_type);
+                jak_json_token_e type = *VECTOR_PEEK(&brackets, jak_json_token_e);
                 char buffer[1024];
                 sprintf(&buffer[0],
                         "Unexpected end of file: missing '%s' to match unclosed '%s' (if any)",
-                        type == OBJECT_OPEN ? "}" : "]",
-                        type == OBJECT_OPEN ? "{" : "[");
+                        type == JAK_OBJECT_OPEN ? "}" : "]",
+                        type == JAK_OBJECT_OPEN ? "{" : "[");
                 status = set_error(error_desc, token, &buffer[0]);
                 goto cleanup;
         }
@@ -317,7 +317,7 @@ json_parse(struct jak_json *json, struct jak_json_err *error_desc, struct jak_js
                 return false;
         }
 
-        JAK_optional_set_or_else(json, retval, json_drop(json));
+        JAK_OPTIONAL_SET_OR_ELSE(json, retval, jak_json_drop(json));
         status = true;
 
         cleanup:
@@ -326,40 +326,40 @@ json_parse(struct jak_json *json, struct jak_json_err *error_desc, struct jak_js
         return status;
 }
 
-bool test_condition_value(jak_error *err, struct jak_json_node_value *value)
+bool test_condition_value(jak_error *err, jak_json_node_value *value)
 {
         switch (value->value_type) {
-                case JSON_VALUE_OBJECT:
+                case JAK_JSON_VALUE_OBJECT:
                         for (size_t i = 0; i < value->value.object->value->members.num_elems; i++) {
-                                struct jak_json_prop *member = vec_get(&value->value.object->value->members, i,
-                                                                       struct jak_json_prop);
+                                jak_json_prop *member = vec_get(&value->value.object->value->members, i,
+                                                                       jak_json_prop);
                                 if (!test_condition_value(err, &member->value.value)) {
                                         return false;
                                 }
                         }
                         break;
-                case JSON_VALUE_ARRAY: {
-                        struct jak_json_elements *elements = &value->value.array->elements;
-                        enum json_value_type value_type = JSON_VALUE_NULL;
+                case JAK_JSON_VALUE_ARRAY: {
+                        jak_json_elements *elements = &value->value.array->elements;
+                        jak_json_value_type_e value_type = JAK_JSON_VALUE_NULL;
 
                         for (size_t i = 0; i < elements->elements.num_elems; i++) {
-                                struct jak_json_element *element = vec_get(&elements->elements, i,
-                                                                           struct jak_json_element);
+                                jak_json_element *element = vec_get(&elements->elements, i,
+                                                                           jak_json_element);
                                 value_type =
-                                        ((i == 0 || value_type == JSON_VALUE_NULL) ? element->value.value_type
+                                        ((i == 0 || value_type == JAK_JSON_VALUE_NULL) ? element->value.value_type
                                                                                    : value_type);
 
                                 /** Test "All elements in array of same type" condition */
-                                if ((element->value.value_type != JSON_VALUE_NULL) && (value_type == JSON_VALUE_TRUE
+                                if ((element->value.value_type != JAK_JSON_VALUE_NULL) && (value_type == JAK_JSON_VALUE_TRUE
                                                                                        && (element->value.value_type !=
-                                                                                           JSON_VALUE_TRUE
+                                                                                           JAK_JSON_VALUE_TRUE
                                                                                            ||
                                                                                            element->value.value_type !=
-                                                                                           JSON_VALUE_FALSE))
-                                    && (value_type == JSON_VALUE_FALSE && (element->value.value_type != JSON_VALUE_TRUE
+                                                                                           JAK_JSON_VALUE_FALSE))
+                                    && (value_type == JAK_JSON_VALUE_FALSE && (element->value.value_type != JAK_JSON_VALUE_TRUE
                                                                            || element->value.value_type !=
-                                                                              JSON_VALUE_FALSE))
-                                    && ((value_type != JSON_VALUE_TRUE && value_type != JSON_VALUE_FALSE)
+                                                                              JAK_JSON_VALUE_FALSE))
+                                    && ((value_type != JAK_JSON_VALUE_TRUE && value_type != JAK_JSON_VALUE_FALSE)
                                         && value_type != element->value.value_type)) {
                                         char message[] = "JSON file constraint broken: arrays of mixed types detected";
                                         char *result = JAK_MALLOC(strlen(message) + 1);
@@ -370,19 +370,19 @@ bool test_condition_value(jak_error *err, struct jak_json_node_value *value)
                                 }
 
                                 switch (element->value.value_type) {
-                                        case JSON_VALUE_OBJECT: {
-                                                struct jak_json_object_t *object = element->value.value.object;
+                                        case JAK_JSON_VALUE_OBJECT: {
+                                                jak_json_object *object = element->value.value.object;
                                                 for (size_t i = 0; i < object->value->members.num_elems; i++) {
-                                                        struct jak_json_prop
+                                                        jak_json_prop
                                                                 *member = vec_get(&object->value->members, i,
-                                                                                  struct jak_json_prop);
+                                                                                  jak_json_prop);
                                                         if (!test_condition_value(err, &member->value.value)) {
                                                                 return false;
                                                         }
                                                 }
                                         }
                                                 break;
-                                        case JSON_VALUE_ARRAY: {/** Test "No Array of Arrays" condition */
+                                        case JAK_JSON_VALUE_ARRAY: {/** Test "No Array of Arrays" condition */
                                                 char message[] = "JSON file constraint broken: arrays of arrays detected";
                                                 char *result = JAK_MALLOC(strlen(message) + 1);
                                                 strcpy(result, &message[0]);
@@ -402,26 +402,26 @@ bool test_condition_value(jak_error *err, struct jak_json_node_value *value)
         return true;
 }
 
-bool json_test(jak_error *err, struct jak_json *json)
+bool jak_json_test(jak_error *err, jak_json *jak_json)
 {
-        return (test_condition_value(err, &json->element->value));
+        return (test_condition_value(err, &jak_json->element->value));
 }
 
-static struct jak_json_token get_token(struct jak_vector ofType(struct jak_json_token) *token_stream, size_t token_idx)
+static jak_json_token get_token(struct jak_vector ofType(jak_json_token) *token_stream, size_t token_idx)
 {
-        return *(struct jak_json_token *) vec_at(token_stream, token_idx);
+        return *(jak_json_token *) vec_at(token_stream, token_idx);
 }
 
-bool parse_members(jak_error *err, struct jak_json_members *members,
-                   struct jak_vector ofType(struct jak_json_token) *token_stream,
+bool parse_members(jak_error *err, jak_json_members *members,
+                   struct jak_vector ofType(jak_json_token) *token_stream,
                    size_t *token_idx)
 {
-        vec_create(&members->members, NULL, sizeof(struct jak_json_prop), 20);
-        struct jak_json_token delimiter_token;
+        vec_create(&members->members, NULL, sizeof(jak_json_prop), 20);
+        jak_json_token delimiter_token;
 
         do {
-                struct jak_json_prop *member = vec_new_and_get(&members->members, struct jak_json_prop);
-                struct jak_json_token keyNameToken = get_token(token_stream, *token_idx);
+                jak_json_prop *member = vec_new_and_get(&members->members, jak_json_prop);
+                jak_json_token keyNameToken = get_token(token_stream, *token_idx);
 
                 member->key.value = JAK_MALLOC(keyNameToken.length + 1);
                 strncpy(member->key.value, keyNameToken.string, keyNameToken.length);
@@ -429,44 +429,44 @@ bool parse_members(jak_error *err, struct jak_json_members *members,
 
                 NEXT_TOKEN(token_idx); /** skip assignment token */
                 NEXT_TOKEN(token_idx);
-                struct jak_json_token valueToken = get_token(token_stream, *token_idx);
+                jak_json_token valueToken = get_token(token_stream, *token_idx);
 
                 switch (valueToken.type) {
-                        case OBJECT_OPEN:
-                                member->value.value.value_type = JSON_VALUE_OBJECT;
-                                member->value.value.value.object = JAK_MALLOC(sizeof(struct jak_json_object_t));
+                        case JAK_OBJECT_OPEN:
+                                member->value.value.value_type = JAK_JSON_VALUE_OBJECT;
+                                member->value.value.value.object = JAK_MALLOC(sizeof(jak_json_object));
                                 if (!parse_object(member->value.value.value.object, err, token_stream, token_idx)) {
                                         return false;
                                 }
                                 break;
-                        case ARRAY_OPEN:
-                                member->value.value.value_type = JSON_VALUE_ARRAY;
-                                member->value.value.value.array = JAK_MALLOC(sizeof(struct jak_json_array));
+                        case JAK_ARRAY_OPEN:
+                                member->value.value.value_type = JAK_JSON_VALUE_ARRAY;
+                                member->value.value.value.array = JAK_MALLOC(sizeof(jak_json_array));
                                 if (!parse_array(member->value.value.value.array, err, token_stream, token_idx)) {
                                         return false;
                                 }
                                 break;
-                        case LITERAL_STRING:
-                                member->value.value.value_type = JSON_VALUE_STRING;
-                                member->value.value.value.string = JAK_MALLOC(sizeof(struct jak_json_string));
+                        case JAK_LITERAL_STRING:
+                                member->value.value.value_type = JAK_JSON_VALUE_STRING;
+                                member->value.value.value.string = JAK_MALLOC(sizeof(jak_json_string));
                                 parse_string(member->value.value.value.string, token_stream, token_idx);
                                 break;
-                        case LITERAL_INT:
-                        case LITERAL_FLOAT:
-                                member->value.value.value_type = JSON_VALUE_NUMBER;
-                                member->value.value.value.number = JAK_MALLOC(sizeof(struct jak_json_number));
+                        case JAK_LITERAL_INT:
+                        case JAK_LITERAL_FLOAT:
+                                member->value.value.value_type = JAK_JSON_VALUE_NUMBER;
+                                member->value.value.value.number = JAK_MALLOC(sizeof(jak_json_number));
                                 parse_number(member->value.value.value.number, token_stream, token_idx);
                                 break;
-                        case LITERAL_TRUE:
-                                member->value.value.value_type = JSON_VALUE_TRUE;
+                        case JAK_LITERAL_TRUE:
+                                member->value.value.value_type = JAK_JSON_VALUE_TRUE;
                                 NEXT_TOKEN(token_idx);
                                 break;
-                        case LITERAL_FALSE:
-                                member->value.value.value_type = JSON_VALUE_FALSE;
+                        case JAK_LITERAL_FALSE:
+                                member->value.value.value_type = JAK_JSON_VALUE_FALSE;
                                 NEXT_TOKEN(token_idx);
                                 break;
-                        case LITERAL_NULL:
-                                member->value.value.value_type = JSON_VALUE_NULL;
+                        case JAK_LITERAL_NULL:
+                                member->value.value.value_type = JAK_JSON_VALUE_NULL;
                                 NEXT_TOKEN(token_idx);
                                 break;
                         default: JAK_ERROR(err, JAK_ERR_PARSETYPE)
@@ -475,42 +475,42 @@ bool parse_members(jak_error *err, struct jak_json_members *members,
 
                 delimiter_token = get_token(token_stream, *token_idx);
                 NEXT_TOKEN(token_idx);
-        } while (delimiter_token.type == COMMA);
+        } while (delimiter_token.type == JAK_COMMA);
         PREV_TOKEN(token_idx);
         return true;
 }
 
-static bool parse_object(struct jak_json_object_t *object, jak_error *err,
-                         struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx)
+static bool parse_object(jak_json_object *object, jak_error *err,
+                         struct jak_vector ofType(jak_json_token) *token_stream, size_t *token_idx)
 {
-        JAK_ASSERT(get_token(token_stream, *token_idx).type == OBJECT_OPEN);
+        JAK_ASSERT(get_token(token_stream, *token_idx).type == JAK_OBJECT_OPEN);
         NEXT_TOKEN(token_idx);  /** Skip '{' */
-        object->value = JAK_MALLOC(sizeof(struct jak_json_members));
+        object->value = JAK_MALLOC(sizeof(jak_json_members));
 
         /** test whether this is an empty object */
-        struct jak_json_token token = get_token(token_stream, *token_idx);
+        jak_json_token token = get_token(token_stream, *token_idx);
 
-        if (token.type != OBJECT_CLOSE) {
+        if (token.type != JAK_OBJECT_CLOSE) {
                 if (!parse_members(err, object->value, token_stream, token_idx)) {
                         return false;
                 }
         } else {
-                vec_create(&object->value->members, NULL, sizeof(struct jak_json_prop), 20);
+                vec_create(&object->value->members, NULL, sizeof(jak_json_prop), 20);
         }
 
         NEXT_TOKEN(token_idx);  /** Skip '}' */
         return true;
 }
 
-static bool parse_array(struct jak_json_array *array, jak_error *err,
-                        struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx)
+static bool parse_array(jak_json_array *array, jak_error *err,
+                        struct jak_vector ofType(jak_json_token) *token_stream, size_t *token_idx)
 {
-        struct jak_json_token token = get_token(token_stream, *token_idx);
+        jak_json_token token = get_token(token_stream, *token_idx);
         JAK_UNUSED(token);
-        JAK_ASSERT(token.type == ARRAY_OPEN);
+        JAK_ASSERT(token.type == JAK_ARRAY_OPEN);
         NEXT_TOKEN(token_idx); /** Skip '[' */
 
-        vec_create(&array->elements.elements, NULL, sizeof(struct jak_json_element), 250);
+        vec_create(&array->elements.elements, NULL, sizeof(jak_json_element), 250);
         if (!parse_elements(&array->elements, err, token_stream, token_idx)) {
                 return false;
         }
@@ -519,11 +519,11 @@ static bool parse_array(struct jak_json_array *array, jak_error *err,
         return true;
 }
 
-static void parse_string(struct jak_json_string *string, struct jak_vector ofType(struct jak_json_token) *token_stream,
+static void parse_string(jak_json_string *string, struct jak_vector ofType(jak_json_token) *token_stream,
                          size_t *token_idx)
 {
-        struct jak_json_token token = get_token(token_stream, *token_idx);
-        JAK_ASSERT(token.type == LITERAL_STRING);
+        jak_json_token token = get_token(token_stream, *token_idx);
+        JAK_ASSERT(token.type == JAK_LITERAL_STRING);
 
         string->value = JAK_MALLOC(token.length + 1);
         if (JAK_LIKELY(token.length > 0)) {
@@ -533,33 +533,33 @@ static void parse_string(struct jak_json_string *string, struct jak_vector ofTyp
         NEXT_TOKEN(token_idx);
 }
 
-static void parse_number(struct jak_json_number *number, struct jak_vector ofType(struct jak_json_token) *token_stream,
+static void parse_number(jak_json_number *number, struct jak_vector ofType(jak_json_token) *token_stream,
                          size_t *token_idx)
 {
-        struct jak_json_token token = get_token(token_stream, *token_idx);
-        JAK_ASSERT(token.type == LITERAL_FLOAT || token.type == LITERAL_INT);
+        jak_json_token token = get_token(token_stream, *token_idx);
+        JAK_ASSERT(token.type == JAK_LITERAL_FLOAT || token.type == JAK_LITERAL_INT);
 
         char *value = JAK_MALLOC(token.length + 1);
         strncpy(value, token.string, token.length);
         value[token.length] = '\0';
 
-        if (token.type == LITERAL_INT) {
+        if (token.type == JAK_LITERAL_INT) {
                 jak_i64 assumeSigned = convert_atoi64(value);
                 if (value[0] == '-') {
-                        number->value_type = JSON_NUMBER_SIGNED;
+                        number->value_type = JAK_JSON_NUMBER_SIGNED;
                         number->value.signed_integer = assumeSigned;
                 } else {
                         jak_u64 assumeUnsigned = convert_atoiu64(value);
                         if (assumeUnsigned >= (jak_u64) assumeSigned) {
-                                number->value_type = JSON_NUMBER_UNSIGNED;
+                                number->value_type = JAK_JSON_NUMBER_UNSIGNED;
                                 number->value.unsigned_integer = assumeUnsigned;
                         } else {
-                                number->value_type = JSON_NUMBER_SIGNED;
+                                number->value_type = JAK_JSON_NUMBER_SIGNED;
                                 number->value.signed_integer = assumeSigned;
                         }
                 }
         } else {
-                number->value_type = JSON_NUMBER_FLOAT;
+                number->value_type = JAK_JSON_NUMBER_FLOAT;
                 setlocale(LC_ALL | ~LC_NUMERIC, "");
                 number->value.float_number = strtof(value, NULL);
         }
@@ -568,54 +568,54 @@ static void parse_number(struct jak_json_number *number, struct jak_vector ofTyp
         NEXT_TOKEN(token_idx);
 }
 
-static bool parse_element(struct jak_json_element *element, jak_error *err,
-                          struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx)
+static bool parse_element(jak_json_element *element, jak_error *err,
+                          struct jak_vector ofType(jak_json_token) *token_stream, size_t *token_idx)
 {
-        struct jak_json_token token = get_token(token_stream, *token_idx);
+        jak_json_token token = get_token(token_stream, *token_idx);
 
-        if (token.type == OBJECT_OPEN) { /** Parse object */
-                element->value.value_type = JSON_VALUE_OBJECT;
-                element->value.value.object = JAK_MALLOC(sizeof(struct jak_json_object_t));
+        if (token.type == JAK_OBJECT_OPEN) { /** Parse object */
+                element->value.value_type = JAK_JSON_VALUE_OBJECT;
+                element->value.value.object = JAK_MALLOC(sizeof(jak_json_object));
                 if (!parse_object(element->value.value.object, err, token_stream, token_idx)) {
                         return false;
                 }
-        } else if (token.type == ARRAY_OPEN) { /** Parse array */
-                element->value.value_type = JSON_VALUE_ARRAY;
-                element->value.value.array = JAK_MALLOC(sizeof(struct jak_json_array));
+        } else if (token.type == JAK_ARRAY_OPEN) { /** Parse array */
+                element->value.value_type = JAK_JSON_VALUE_ARRAY;
+                element->value.value.array = JAK_MALLOC(sizeof(jak_json_array));
                 if (!parse_array(element->value.value.array, err, token_stream, token_idx)) {
                         return false;
                 }
-        } else if (token.type == LITERAL_STRING) { /** Parse string */
-                element->value.value_type = JSON_VALUE_STRING;
-                element->value.value.string = JAK_MALLOC(sizeof(struct jak_json_string));
+        } else if (token.type == JAK_LITERAL_STRING) { /** Parse string */
+                element->value.value_type = JAK_JSON_VALUE_STRING;
+                element->value.value.string = JAK_MALLOC(sizeof(jak_json_string));
                 parse_string(element->value.value.string, token_stream, token_idx);
-        } else if (token.type == LITERAL_FLOAT || token.type == LITERAL_INT) { /** Parse number */
-                element->value.value_type = JSON_VALUE_NUMBER;
-                element->value.value.number = JAK_MALLOC(sizeof(struct jak_json_number));
+        } else if (token.type == JAK_LITERAL_FLOAT || token.type == JAK_LITERAL_INT) { /** Parse number */
+                element->value.value_type = JAK_JSON_VALUE_NUMBER;
+                element->value.value.number = JAK_MALLOC(sizeof(jak_json_number));
                 parse_number(element->value.value.number, token_stream, token_idx);
-        } else if (token.type == LITERAL_TRUE) {
-                element->value.value_type = JSON_VALUE_TRUE;
+        } else if (token.type == JAK_LITERAL_TRUE) {
+                element->value.value_type = JAK_JSON_VALUE_TRUE;
                 NEXT_TOKEN(token_idx);
-        } else if (token.type == LITERAL_FALSE) {
-                element->value.value_type = JSON_VALUE_FALSE;
+        } else if (token.type == JAK_LITERAL_FALSE) {
+                element->value.value_type = JAK_JSON_VALUE_FALSE;
                 NEXT_TOKEN(token_idx);
-        } else if (token.type == LITERAL_NULL) {
-                element->value.value_type = JSON_VALUE_NULL;
+        } else if (token.type == JAK_LITERAL_NULL) {
+                element->value.value_type = JAK_JSON_VALUE_NULL;
                 NEXT_TOKEN(token_idx);
         } else {
-                element->value.value_type = JSON_VALUE_NULL;
+                element->value.value_type = JAK_JSON_VALUE_NULL;
         }
         return true;
 }
 
-static bool parse_elements(struct jak_json_elements *elements, jak_error *err,
-                           struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx)
+static bool parse_elements(jak_json_elements *elements, jak_error *err,
+                           struct jak_vector ofType(jak_json_token) *token_stream, size_t *token_idx)
 {
-        struct jak_json_token delimiter;
+        jak_json_token delimiter;
         do {
-                struct jak_json_token current = get_token(token_stream, *token_idx);
-                if (current.type != ARRAY_CLOSE && current.type != OBJECT_CLOSE) {
-                        if (!parse_element(vec_new_and_get(&elements->elements, struct jak_json_element),
+                jak_json_token current = get_token(token_stream, *token_idx);
+                if (current.type != JAK_ARRAY_CLOSE && current.type != JAK_OBJECT_CLOSE) {
+                        if (!parse_element(vec_new_and_get(&elements->elements, jak_json_element),
                                            err,
                                            token_stream,
                                            token_idx)) {
@@ -624,61 +624,61 @@ static bool parse_elements(struct jak_json_elements *elements, jak_error *err,
                 }
                 delimiter = get_token(token_stream, *token_idx);
                 NEXT_TOKEN(token_idx);
-        } while (delimiter.type == COMMA);
+        } while (delimiter.type == JAK_COMMA);
         PREV_TOKEN(token_idx);
         return true;
 }
 
-static bool parse_token_stream(struct jak_json *json, jak_error *err,
-                               struct jak_vector ofType(struct jak_json_token) *token_stream)
+static bool parse_token_stream(jak_json *jak_json, jak_error *err,
+                               struct jak_vector ofType(jak_json_token) *token_stream)
 {
         size_t token_idx = 0;
-        if (!parse_element(json->element, err, token_stream, &token_idx)) {
+        if (!parse_element(jak_json->element, err, token_stream, &token_idx)) {
                 return false;
         }
-        connect_child_and_parents(json);
+        connect_child_and_parents(jak_json);
         return true;
 }
 
-static void connect_child_and_parents_member(struct jak_json_prop *member)
+static void connect_child_and_parents_member(jak_json_prop *member)
 {
         connect_child_and_parents_element(&member->value);
 }
 
-static void connect_child_and_parents_object(struct jak_json_object_t *object)
+static void connect_child_and_parents_object(jak_json_object *object)
 {
         object->value->parent = object;
         for (size_t i = 0; i < object->value->members.num_elems; i++) {
-                struct jak_json_prop *member = vec_get(&object->value->members, i, struct jak_json_prop);
+                jak_json_prop *member = vec_get(&object->value->members, i, jak_json_prop);
                 member->parent = object->value;
 
                 member->key.parent = member;
 
-                member->value.parent_type = JSON_PARENT_MEMBER;
+                member->value.parent_type = JAK_JSON_PARENT_MEMBER;
                 member->value.parent.member = member;
 
                 connect_child_and_parents_member(member);
         }
 }
 
-static void connect_child_and_parents_array(struct jak_json_array *array)
+static void connect_child_and_parents_array(jak_json_array *array)
 {
         array->elements.parent = array;
         for (size_t i = 0; i < array->elements.elements.num_elems; i++) {
-                struct jak_json_element *element = vec_get(&array->elements.elements, i, struct jak_json_element);
-                element->parent_type = JSON_PARENT_ELEMENTS;
+                jak_json_element *element = vec_get(&array->elements.elements, i, jak_json_element);
+                element->parent_type = JAK_JSON_PARENT_ELEMENTS;
                 element->parent.elements = &array->elements;
                 connect_child_and_parents_element(element);
         }
 }
 
-static void connect_child_and_parents_value(struct jak_json_node_value *value)
+static void connect_child_and_parents_value(jak_json_node_value *value)
 {
         switch (value->value_type) {
-                case JSON_VALUE_OBJECT:
+                case JAK_JSON_VALUE_OBJECT:
                         connect_child_and_parents_object(value->value.object);
                         break;
-                case JSON_VALUE_ARRAY:
+                case JAK_JSON_VALUE_ARRAY:
                         connect_child_and_parents_array(value->value.array);
                         break;
                 default:
@@ -686,39 +686,39 @@ static void connect_child_and_parents_value(struct jak_json_node_value *value)
         }
 }
 
-static void connect_child_and_parents_element(struct jak_json_element *element)
+static void connect_child_and_parents_element(jak_json_element *element)
 {
         element->value.parent = element;
         connect_child_and_parents_value(&element->value);
 }
 
-static void connect_child_and_parents(struct jak_json *json)
+static void connect_child_and_parents(jak_json *jak_json)
 {
-        json->element->parent_type = JSON_PARENT_OBJECT;
-        json->element->parent.json = json;
-        connect_child_and_parents_element(json->element);
+        jak_json->element->parent_type = JAK_JSON_PARENT_OBJECT;
+        jak_json->element->parent.jak_json = jak_json;
+        connect_child_and_parents_element(jak_json->element);
 }
 
-static bool isValue(enum json_token_type token)
+static bool isValue(jak_json_token_e token)
 {
-        return (token == LITERAL_STRING || token == LITERAL_FLOAT || token == LITERAL_INT || token == LITERAL_TRUE
-                || token == LITERAL_FALSE || token == LITERAL_NULL);
+        return (token == JAK_LITERAL_STRING || token == JAK_LITERAL_FLOAT || token == JAK_LITERAL_INT || token == JAK_LITERAL_TRUE
+                || token == JAK_LITERAL_FALSE || token == JAK_LITERAL_NULL);
 }
 
-static int process_token(jak_error *err, struct jak_json_err *error_desc, const struct jak_json_token *token,
-                         struct jak_vector ofType(enum json_token_type) *brackets, struct token_memory *token_mem)
+static int process_token(jak_error *err, jak_json_err *error_desc, const jak_json_token *token,
+                         struct jak_vector ofType(jak_json_token_e) *brackets, struct token_memory *token_mem)
 {
         switch (token->type) {
-                case OBJECT_OPEN:
-                case ARRAY_OPEN:
+                case JAK_OBJECT_OPEN:
+                case JAK_ARRAY_OPEN:
                         vec_push(brackets, &token->type, 1);
                         break;
-                case OBJECT_CLOSE:
-                case ARRAY_CLOSE: {
+                case JAK_OBJECT_CLOSE:
+                case JAK_ARRAY_CLOSE: {
                         if (!vec_is_empty(brackets)) {
-                                enum json_token_type bracket = *VECTOR_PEEK(brackets, enum json_token_type);
-                                if ((token->type == ARRAY_CLOSE && bracket == ARRAY_OPEN)
-                                    || (token->type == OBJECT_CLOSE && bracket == OBJECT_OPEN)) {
+                                jak_json_token_e bracket = *VECTOR_PEEK(brackets, jak_json_token_e);
+                                if ((token->type == JAK_ARRAY_CLOSE && bracket == JAK_ARRAY_OPEN)
+                                    || (token->type == JAK_OBJECT_CLOSE && bracket == JAK_OBJECT_OPEN)) {
                                         vec_pop(brackets);
                                 } else {
                                         goto pushEntry;
@@ -734,21 +734,21 @@ static int process_token(jak_error *err, struct jak_json_err *error_desc, const 
         }
 
         switch (token_mem->type) {
-                case OBJECT_OPEN:
+                case JAK_OBJECT_OPEN:
                         switch (token->type) {
-                                case LITERAL_STRING:
-                                case OBJECT_CLOSE:
+                                case JAK_LITERAL_STRING:
+                                case JAK_OBJECT_CLOSE:
                                         break;
                                 default:
                                         return set_error(error_desc, token, "Expected key name or '}'");
                         }
                         break;
-                case LITERAL_STRING:
+                case JAK_LITERAL_STRING:
                         switch (token->type) {
-                                case ASSIGN:
-                                case COMMA:
-                                case ARRAY_CLOSE:
-                                case OBJECT_CLOSE:
+                                case JAK_ASSIGN:
+                                case JAK_COMMA:
+                                case JAK_ARRAY_CLOSE:
+                                case JAK_OBJECT_CLOSE:
                                         break;
                                 default:
                                         return set_error(error_desc, token,
@@ -756,16 +756,16 @@ static int process_token(jak_error *err, struct jak_json_err *error_desc, const 
                                                          "end of enumeration (']'), or end of object ('}')");
                         }
                         break;
-                case OBJECT_CLOSE:
-                case LITERAL_INT:
-                case LITERAL_FLOAT:
-                case LITERAL_TRUE:
-                case LITERAL_FALSE:
-                case LITERAL_NULL:
+                case JAK_OBJECT_CLOSE:
+                case JAK_LITERAL_INT:
+                case JAK_LITERAL_FLOAT:
+                case JAK_LITERAL_TRUE:
+                case JAK_LITERAL_FALSE:
+                case JAK_LITERAL_NULL:
                         switch (token->type) {
-                                case COMMA:
-                                case ARRAY_CLOSE:
-                                case OBJECT_CLOSE:
+                                case JAK_COMMA:
+                                case JAK_ARRAY_CLOSE:
+                                case JAK_OBJECT_CLOSE:
                                         break;
                                 default:
                                         return set_error(error_desc, token,
@@ -773,17 +773,17 @@ static int process_token(jak_error *err, struct jak_json_err *error_desc, const 
                                                          "or end of object ('})");
                         }
                         break;
-                case ASSIGN:
-                case COMMA:
+                case JAK_ASSIGN:
+                case JAK_COMMA:
                         switch (token->type) {
-                                case LITERAL_STRING:
-                                case LITERAL_FLOAT:
-                                case LITERAL_INT:
-                                case OBJECT_OPEN:
-                                case ARRAY_OPEN:
-                                case LITERAL_TRUE:
-                                case LITERAL_FALSE:
-                                case LITERAL_NULL:
+                                case JAK_LITERAL_STRING:
+                                case JAK_LITERAL_FLOAT:
+                                case JAK_LITERAL_INT:
+                                case JAK_OBJECT_OPEN:
+                                case JAK_ARRAY_OPEN:
+                                case JAK_LITERAL_TRUE:
+                                case JAK_LITERAL_FALSE:
+                                case JAK_LITERAL_NULL:
                                         break;
                                 default:
                                         return set_error(error_desc,
@@ -792,17 +792,17 @@ static int process_token(jak_error *err, struct jak_json_err *error_desc, const 
                                                          "false, or null).");
                         }
                         break;
-                case ARRAY_OPEN:
+                case JAK_ARRAY_OPEN:
                         switch (token->type) {
-                                case ARRAY_CLOSE:
-                                case LITERAL_STRING:
-                                case LITERAL_FLOAT:
-                                case LITERAL_INT:
-                                case OBJECT_OPEN:
-                                case ARRAY_OPEN:
-                                case LITERAL_TRUE:
-                                case LITERAL_FALSE:
-                                case LITERAL_NULL:
+                                case JAK_ARRAY_CLOSE:
+                                case JAK_LITERAL_STRING:
+                                case JAK_LITERAL_FLOAT:
+                                case JAK_LITERAL_INT:
+                                case JAK_OBJECT_OPEN:
+                                case JAK_ARRAY_OPEN:
+                                case JAK_LITERAL_TRUE:
+                                case JAK_LITERAL_FALSE:
+                                case JAK_LITERAL_NULL:
                                         break;
                                 default:
                                         return set_error(error_desc, token,
@@ -810,11 +810,11 @@ static int process_token(jak_error *err, struct jak_json_err *error_desc, const 
                                                          "end of enumeration (']')");
                         }
                         break;
-                case ARRAY_CLOSE:
+                case JAK_ARRAY_CLOSE:
                         switch (token->type) {
-                                case COMMA:
-                                case ARRAY_CLOSE:
-                                case OBJECT_CLOSE:
+                                case JAK_COMMA:
+                                case JAK_ARRAY_CLOSE:
+                                case JAK_OBJECT_CLOSE:
                                         break;
                                 default:
                                         return set_error(error_desc, token,
@@ -822,9 +822,9 @@ static int process_token(jak_error *err, struct jak_json_err *error_desc, const 
                                                          "end of object ('}')");
                         }
                         break;
-                case JSON_UNKNOWN:
+                case JAK_JSON_UNKNOWN:
                         if (token_mem->init) {
-                                if (token->type != OBJECT_OPEN && token->type != ARRAY_OPEN && !isValue(token->type)) {
+                                if (token->type != JAK_OBJECT_OPEN && token->type != JAK_ARRAY_OPEN && !isValue(token->type)) {
                                         return set_error(error_desc, token,
                                                          "Expected JSON document: missing '{' or '['");
                                 }
@@ -841,7 +841,7 @@ static int process_token(jak_error *err, struct jak_json_err *error_desc, const 
         return true;
 }
 
-static int set_error(struct jak_json_err *error_desc, const struct jak_json_token *token, const char *msg)
+static int set_error(jak_json_err *error_desc, const jak_json_token *token, const char *msg)
 {
         if (error_desc) {
                 error_desc->token = token;
@@ -851,17 +851,17 @@ static int set_error(struct jak_json_err *error_desc, const struct jak_json_toke
         return false;
 }
 
-static bool json_ast_node_member_print(FILE *file, jak_error *err, struct jak_json_prop *member)
+static bool json_ast_node_member_print(FILE *file, jak_error *err, jak_json_prop *member)
 {
         fprintf(file, "\"%s\": ", member->key.value);
         return json_ast_node_value_print(file, err, &member->value.value);
 }
 
-static bool json_ast_node_object_print(FILE *file, jak_error *err, struct jak_json_object_t *object)
+static bool json_ast_node_object_print(FILE *file, jak_error *err, jak_json_object *object)
 {
         fprintf(file, "{");
         for (size_t i = 0; i < object->value->members.num_elems; i++) {
-                struct jak_json_prop *member = vec_get(&object->value->members, i, struct jak_json_prop);
+                jak_json_prop *member = vec_get(&object->value->members, i, jak_json_prop);
                 if (!json_ast_node_member_print(file, err, member)) {
                         return false;
                 }
@@ -871,11 +871,11 @@ static bool json_ast_node_object_print(FILE *file, jak_error *err, struct jak_js
         return true;
 }
 
-static bool json_ast_node_array_print(FILE *file, jak_error *err, struct jak_json_array *array)
+static bool json_ast_node_array_print(FILE *file, jak_error *err, jak_json_array *array)
 {
         fprintf(file, "[");
         for (size_t i = 0; i < array->elements.elements.num_elems; i++) {
-                struct jak_json_element *element = vec_get(&array->elements.elements, i, struct jak_json_element);
+                jak_json_element *element = vec_get(&array->elements.elements, i, jak_json_element);
                 if (!json_ast_node_element_print(file, err, element)) {
                         return false;
                 }
@@ -885,21 +885,21 @@ static bool json_ast_node_array_print(FILE *file, jak_error *err, struct jak_jso
         return true;
 }
 
-static void json_ast_node_string_print(FILE *file, struct jak_json_string *string)
+static void json_ast_node_string_print(FILE *file, jak_json_string *string)
 {
         fprintf(file, "\"%s\"", string->value);
 }
 
-static bool json_ast_node_number_print(FILE *file, jak_error *err, struct jak_json_number *number)
+static bool json_ast_node_number_print(FILE *file, jak_error *err, jak_json_number *number)
 {
         switch (number->value_type) {
-                case JSON_NUMBER_FLOAT:
+                case JAK_JSON_NUMBER_FLOAT:
                         fprintf(file, "%f", number->value.float_number);
                         break;
-                case JSON_NUMBER_UNSIGNED:
+                case JAK_JSON_NUMBER_UNSIGNED:
                         fprintf(file, "%" PRIu64, number->value.unsigned_integer);
                         break;
-                case JSON_NUMBER_SIGNED:
+                case JAK_JSON_NUMBER_SIGNED:
                         fprintf(file, "%" PRIi64, number->value.signed_integer);
                         break;
                 default: JAK_ERROR(err, JAK_ERR_NOJSONNUMBERT);
@@ -908,34 +908,34 @@ static bool json_ast_node_number_print(FILE *file, jak_error *err, struct jak_js
         return true;
 }
 
-static bool json_ast_node_value_print(FILE *file, jak_error *err, struct jak_json_node_value *value)
+static bool json_ast_node_value_print(FILE *file, jak_error *err, jak_json_node_value *value)
 {
         switch (value->value_type) {
-                case JSON_VALUE_OBJECT:
+                case JAK_JSON_VALUE_OBJECT:
                         if (!json_ast_node_object_print(file, err, value->value.object)) {
                                 return false;
                         }
                         break;
-                case JSON_VALUE_ARRAY:
+                case JAK_JSON_VALUE_ARRAY:
                         if (!json_ast_node_array_print(file, err, value->value.array)) {
                                 return false;
                         }
                         break;
-                case JSON_VALUE_STRING:
+                case JAK_JSON_VALUE_STRING:
                         json_ast_node_string_print(file, value->value.string);
                         break;
-                case JSON_VALUE_NUMBER:
+                case JAK_JSON_VALUE_NUMBER:
                         if (!json_ast_node_number_print(file, err, value->value.number)) {
                                 return false;
                         }
                         break;
-                case JSON_VALUE_TRUE:
+                case JAK_JSON_VALUE_TRUE:
                         fprintf(file, "true");
                         break;
-                case JSON_VALUE_FALSE:
+                case JAK_JSON_VALUE_FALSE:
                         fprintf(file, "false");
                         break;
-                case JSON_VALUE_NULL:
+                case JAK_JSON_VALUE_NULL:
                         fprintf(file, "null");
                         break;
                 default: JAK_ERROR(err, JAK_ERR_NOTYPE);
@@ -944,28 +944,28 @@ static bool json_ast_node_value_print(FILE *file, jak_error *err, struct jak_jso
         return true;
 }
 
-static bool json_ast_node_element_print(FILE *file, jak_error *err, struct jak_json_element *element)
+static bool json_ast_node_element_print(FILE *file, jak_error *err, jak_json_element *element)
 {
         return json_ast_node_value_print(file, err, &element->value);
 }
 
-static bool json_ast_node_value_drop(struct jak_json_node_value *value, jak_error *err);
+static bool json_ast_node_value_drop(jak_json_node_value *value, jak_error *err);
 
-static bool json_ast_node_element_drop(struct jak_json_element *element, jak_error *err)
+static bool json_ast_node_element_drop(jak_json_element *element, jak_error *err)
 {
         return json_ast_node_value_drop(&element->value, err);
 }
 
-static bool json_ast_node_member_drop(struct jak_json_prop *member, jak_error *err)
+static bool json_ast_node_member_drop(jak_json_prop *member, jak_error *err)
 {
         free(member->key.value);
         return json_ast_node_element_drop(&member->value, err);
 }
 
-static bool json_ast_node_members_drop(struct jak_json_members *members, jak_error *err)
+static bool json_ast_node_members_drop(jak_json_members *members, jak_error *err)
 {
         for (size_t i = 0; i < members->members.num_elems; i++) {
-                struct jak_json_prop *member = vec_get(&members->members, i, struct jak_json_prop);
+                jak_json_prop *member = vec_get(&members->members, i, jak_json_prop);
                 if (!json_ast_node_member_drop(member, err)) {
                         return false;
                 }
@@ -974,10 +974,10 @@ static bool json_ast_node_members_drop(struct jak_json_members *members, jak_err
         return true;
 }
 
-static bool json_ast_node_elements_drop(struct jak_json_elements *elements, jak_error *err)
+static bool json_ast_node_elements_drop(jak_json_elements *elements, jak_error *err)
 {
         for (size_t i = 0; i < elements->elements.num_elems; i++) {
-                struct jak_json_element *element = vec_get(&elements->elements, i, struct jak_json_element);
+                jak_json_element *element = vec_get(&elements->elements, i, jak_json_element);
                 if (!json_ast_node_element_drop(element, err)) {
                         return false;
                 }
@@ -986,7 +986,7 @@ static bool json_ast_node_elements_drop(struct jak_json_elements *elements, jak_
         return true;
 }
 
-static bool json_ast_node_object_drop(struct jak_json_object_t *object, jak_error *err)
+static bool json_ast_node_object_drop(jak_json_object *object, jak_error *err)
 {
         if (!json_ast_node_members_drop(object->value, err)) {
                 return false;
@@ -996,49 +996,49 @@ static bool json_ast_node_object_drop(struct jak_json_object_t *object, jak_erro
         }
 }
 
-static bool json_ast_node_array_drop(struct jak_json_array *array, jak_error *err)
+static bool json_ast_node_array_drop(jak_json_array *array, jak_error *err)
 {
         return json_ast_node_elements_drop(&array->elements, err);
 }
 
-static void json_ast_node_string_drop(struct jak_json_string *string)
+static void json_ast_node_string_drop(jak_json_string *string)
 {
         free(string->value);
 }
 
-static void json_ast_node_number_drop(struct jak_json_number *number)
+static void json_ast_node_number_drop(jak_json_number *number)
 {
         JAK_UNUSED(number);
 }
 
-static bool json_ast_node_value_drop(struct jak_json_node_value *value, jak_error *err)
+static bool json_ast_node_value_drop(jak_json_node_value *value, jak_error *err)
 {
         switch (value->value_type) {
-                case JSON_VALUE_OBJECT:
+                case JAK_JSON_VALUE_OBJECT:
                         if (!json_ast_node_object_drop(value->value.object, err)) {
                                 return false;
                         } else {
                                 free(value->value.object);
                         }
                         break;
-                case JSON_VALUE_ARRAY:
+                case JAK_JSON_VALUE_ARRAY:
                         if (!json_ast_node_array_drop(value->value.array, err)) {
                                 return false;
                         } else {
                                 free(value->value.array);
                         }
                         break;
-                case JSON_VALUE_STRING:
+                case JAK_JSON_VALUE_STRING:
                         json_ast_node_string_drop(value->value.string);
                         free(value->value.string);
                         break;
-                case JSON_VALUE_NUMBER:
+                case JAK_JSON_VALUE_NUMBER:
                         json_ast_node_number_drop(value->value.number);
                         free(value->value.number);
                         break;
-                case JSON_VALUE_TRUE:
-                case JSON_VALUE_FALSE:
-                case JSON_VALUE_NULL:
+                case JAK_JSON_VALUE_TRUE:
+                case JAK_JSON_VALUE_FALSE:
+                case JAK_JSON_VALUE_NULL:
                         break;
                 default: JAK_ERROR(err, JAK_ERR_NOTYPE)
                         return false;
@@ -1047,28 +1047,28 @@ static bool json_ast_node_value_drop(struct jak_json_node_value *value, jak_erro
         return true;
 }
 
-bool json_drop(struct jak_json *json)
+bool jak_json_drop(jak_json *jak_json)
 {
-        struct jak_json_element *element = json->element;
-        if (!json_ast_node_value_drop(&element->value, &json->err)) {
+        jak_json_element *element = jak_json->element;
+        if (!json_ast_node_value_drop(&element->value, &jak_json->err)) {
                 return false;
         } else {
-                free(json->element);
+                free(jak_json->element);
                 return true;
         }
 }
 
-bool json_print(FILE *file, struct jak_json *json)
+bool jak_json_print(FILE *file, jak_json *jak_json)
 {
-        return json_ast_node_element_print(file, &json->err, json->element);
+        return json_ast_node_element_print(file, &jak_json->err, jak_json->element);
 }
 
-bool json_list_is_empty(const struct jak_json_elements *elements)
+bool jak_json_list_is_empty(const jak_json_elements *elements)
 {
         return elements->elements.num_elems == 0;
 }
 
-bool json_list_length(jak_u32 *len, const struct jak_json_elements *elements)
+bool jak_json_list_length(jak_u32 *len, const jak_json_elements *elements)
 {
         JAK_ERROR_IF_NULL(len)
         JAK_ERROR_IF_NULL(elements)
@@ -1076,281 +1076,281 @@ bool json_list_length(jak_u32 *len, const struct jak_json_elements *elements)
         return true;
 }
 
-enum json_list_type json_fitting_type(enum json_list_type current, enum json_list_type to_add)
+jak_json_list_type_e jak_json_fitting_type(jak_json_list_type_e current, jak_json_list_type_e to_add)
 {
-        if (current == JSON_LIST_TYPE_VARIABLE_OR_NESTED || to_add == JSON_LIST_TYPE_VARIABLE_OR_NESTED) {
-                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+        if (current == JAK_JSON_LIST_VARIABLE_OR_NESTED || to_add == JAK_JSON_LIST_VARIABLE_OR_NESTED) {
+                return JAK_JSON_LIST_VARIABLE_OR_NESTED;
         }
-        if (current == JSON_LIST_TYPE_EMPTY || current == JSON_LIST_TYPE_FIXED_BOOLEAN ||
-            to_add == JSON_LIST_TYPE_EMPTY || to_add == JSON_LIST_TYPE_FIXED_BOOLEAN) {
+        if (current == JAK_JSON_LIST_EMPTY || current == JAK_JSON_LIST_FIXED_BOOLEAN ||
+            to_add == JAK_JSON_LIST_EMPTY || to_add == JAK_JSON_LIST_FIXED_BOOLEAN) {
                 if (current == to_add) {
                         return current;
                 } else {
-                        if ((to_add == JSON_LIST_TYPE_FIXED_BOOLEAN && current == JSON_LIST_TYPE_FIXED_NULL) ||
-                            (to_add == JSON_LIST_TYPE_FIXED_NULL && current == JSON_LIST_TYPE_FIXED_BOOLEAN)) {
-                                return JSON_LIST_TYPE_FIXED_BOOLEAN;
+                        if ((to_add == JAK_JSON_LIST_FIXED_BOOLEAN && current == JAK_JSON_LIST_FIXED_NULL) ||
+                            (to_add == JAK_JSON_LIST_FIXED_NULL && current == JAK_JSON_LIST_FIXED_BOOLEAN)) {
+                                return JAK_JSON_LIST_FIXED_BOOLEAN;
                         } else {
-                                if (to_add == JSON_LIST_TYPE_EMPTY) {
+                                if (to_add == JAK_JSON_LIST_EMPTY) {
                                         return current;
-                                } else if (current == JSON_LIST_TYPE_EMPTY) {
+                                } else if (current == JAK_JSON_LIST_EMPTY) {
                                         return to_add;
                                 } else {
 
-                                        return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                        return JAK_JSON_LIST_VARIABLE_OR_NESTED;
                                 }
                         }
                 }
         } else {
                 switch (current) {
-                        case JSON_LIST_TYPE_FIXED_NULL:
+                        case JAK_JSON_LIST_FIXED_NULL:
                                 switch (to_add) {
-                                        case JSON_LIST_TYPE_FIXED_NULL:
-                                        case JSON_LIST_TYPE_FIXED_FLOAT:
-                                        case JSON_LIST_TYPE_FIXED_BOOLEAN:
-                                        case JSON_LIST_TYPE_FIXED_U8:
-                                        case JSON_LIST_TYPE_FIXED_U16:
-                                        case JSON_LIST_TYPE_FIXED_U32:
-                                        case JSON_LIST_TYPE_FIXED_U64:
-                                        case JSON_LIST_TYPE_FIXED_I8:
-                                        case JSON_LIST_TYPE_FIXED_I16:
-                                        case JSON_LIST_TYPE_FIXED_I32:
-                                        case JSON_LIST_TYPE_FIXED_I64:
+                                        case JAK_JSON_LIST_FIXED_NULL:
+                                        case JAK_JSON_LIST_FIXED_FLOAT:
+                                        case JAK_JSON_LIST_FIXED_BOOLEAN:
+                                        case JAK_JSON_LIST_FIXED_U8:
+                                        case JAK_JSON_LIST_FIXED_U16:
+                                        case JAK_JSON_LIST_FIXED_U32:
+                                        case JAK_JSON_LIST_FIXED_U64:
+                                        case JAK_JSON_LIST_FIXED_I8:
+                                        case JAK_JSON_LIST_FIXED_I16:
+                                        case JAK_JSON_LIST_FIXED_I32:
+                                        case JAK_JSON_LIST_FIXED_I64:
                                                 return to_add;
                                         default:
-                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                                return JAK_JSON_LIST_VARIABLE_OR_NESTED;
                                 }
-                        case JSON_LIST_TYPE_FIXED_FLOAT:
+                        case JAK_JSON_LIST_FIXED_FLOAT:
                                 switch (to_add) {
-                                        case JSON_LIST_TYPE_FIXED_NULL:
-                                        case JSON_LIST_TYPE_FIXED_FLOAT:
-                                        case JSON_LIST_TYPE_FIXED_U8:
-                                        case JSON_LIST_TYPE_FIXED_U16:
-                                        case JSON_LIST_TYPE_FIXED_U32:
-                                        case JSON_LIST_TYPE_FIXED_U64:
-                                        case JSON_LIST_TYPE_FIXED_I8:
-                                        case JSON_LIST_TYPE_FIXED_I16:
-                                        case JSON_LIST_TYPE_FIXED_I32:
-                                        case JSON_LIST_TYPE_FIXED_I64:
-                                                return JSON_LIST_TYPE_FIXED_FLOAT;
+                                        case JAK_JSON_LIST_FIXED_NULL:
+                                        case JAK_JSON_LIST_FIXED_FLOAT:
+                                        case JAK_JSON_LIST_FIXED_U8:
+                                        case JAK_JSON_LIST_FIXED_U16:
+                                        case JAK_JSON_LIST_FIXED_U32:
+                                        case JAK_JSON_LIST_FIXED_U64:
+                                        case JAK_JSON_LIST_FIXED_I8:
+                                        case JAK_JSON_LIST_FIXED_I16:
+                                        case JAK_JSON_LIST_FIXED_I32:
+                                        case JAK_JSON_LIST_FIXED_I64:
+                                                return JAK_JSON_LIST_FIXED_FLOAT;
                                         default:
-                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                                return JAK_JSON_LIST_VARIABLE_OR_NESTED;
                                 }
-                        case JSON_LIST_TYPE_FIXED_U8:
+                        case JAK_JSON_LIST_FIXED_U8:
                                 switch (to_add) {
-                                        case JSON_LIST_TYPE_FIXED_NULL:
-                                                return JSON_LIST_TYPE_FIXED_U8;
-                                        case JSON_LIST_TYPE_FIXED_U8:
-                                                return JSON_LIST_TYPE_FIXED_U8;
-                                        case JSON_LIST_TYPE_FIXED_U16:
-                                                return JSON_LIST_TYPE_FIXED_U16;
-                                        case JSON_LIST_TYPE_FIXED_U32:
-                                                return JSON_LIST_TYPE_FIXED_U32;
-                                        case JSON_LIST_TYPE_FIXED_U64:
-                                                return JSON_LIST_TYPE_FIXED_U64;
-                                        case JSON_LIST_TYPE_FIXED_I8:
-                                                return JSON_LIST_TYPE_FIXED_I16;
-                                        case JSON_LIST_TYPE_FIXED_I16:
-                                                return JSON_LIST_TYPE_FIXED_I32;
-                                        case JSON_LIST_TYPE_FIXED_I32:
-                                                return JSON_LIST_TYPE_FIXED_I64;
-                                        case JSON_LIST_TYPE_FIXED_I64:
-                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                        case JAK_JSON_LIST_FIXED_NULL:
+                                                return JAK_JSON_LIST_FIXED_U8;
+                                        case JAK_JSON_LIST_FIXED_U8:
+                                                return JAK_JSON_LIST_FIXED_U8;
+                                        case JAK_JSON_LIST_FIXED_U16:
+                                                return JAK_JSON_LIST_FIXED_U16;
+                                        case JAK_JSON_LIST_FIXED_U32:
+                                                return JAK_JSON_LIST_FIXED_U32;
+                                        case JAK_JSON_LIST_FIXED_U64:
+                                                return JAK_JSON_LIST_FIXED_U64;
+                                        case JAK_JSON_LIST_FIXED_I8:
+                                                return JAK_JSON_LIST_FIXED_I16;
+                                        case JAK_JSON_LIST_FIXED_I16:
+                                                return JAK_JSON_LIST_FIXED_I32;
+                                        case JAK_JSON_LIST_FIXED_I32:
+                                                return JAK_JSON_LIST_FIXED_I64;
+                                        case JAK_JSON_LIST_FIXED_I64:
+                                                return JAK_JSON_LIST_VARIABLE_OR_NESTED;
                                         default:
-                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                                return JAK_JSON_LIST_VARIABLE_OR_NESTED;
                                 }
-                        case JSON_LIST_TYPE_FIXED_U16:
+                        case JAK_JSON_LIST_FIXED_U16:
                                 switch (to_add) {
-                                        case JSON_LIST_TYPE_FIXED_NULL:
-                                                return JSON_LIST_TYPE_FIXED_U16;
-                                        case JSON_LIST_TYPE_FIXED_U8:
-                                        case JSON_LIST_TYPE_FIXED_U16:
-                                                return JSON_LIST_TYPE_FIXED_U16;
-                                        case JSON_LIST_TYPE_FIXED_U32:
-                                                return JSON_LIST_TYPE_FIXED_U32;
-                                        case JSON_LIST_TYPE_FIXED_U64:
-                                                return JSON_LIST_TYPE_FIXED_U64;
-                                        case JSON_LIST_TYPE_FIXED_I8:
-                                                return JSON_LIST_TYPE_FIXED_I32;
-                                        case JSON_LIST_TYPE_FIXED_I16:
-                                                return JSON_LIST_TYPE_FIXED_I32;
-                                        case JSON_LIST_TYPE_FIXED_I32:
-                                                return JSON_LIST_TYPE_FIXED_I64;
-                                        case JSON_LIST_TYPE_FIXED_I64:
-                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                        case JAK_JSON_LIST_FIXED_NULL:
+                                                return JAK_JSON_LIST_FIXED_U16;
+                                        case JAK_JSON_LIST_FIXED_U8:
+                                        case JAK_JSON_LIST_FIXED_U16:
+                                                return JAK_JSON_LIST_FIXED_U16;
+                                        case JAK_JSON_LIST_FIXED_U32:
+                                                return JAK_JSON_LIST_FIXED_U32;
+                                        case JAK_JSON_LIST_FIXED_U64:
+                                                return JAK_JSON_LIST_FIXED_U64;
+                                        case JAK_JSON_LIST_FIXED_I8:
+                                                return JAK_JSON_LIST_FIXED_I32;
+                                        case JAK_JSON_LIST_FIXED_I16:
+                                                return JAK_JSON_LIST_FIXED_I32;
+                                        case JAK_JSON_LIST_FIXED_I32:
+                                                return JAK_JSON_LIST_FIXED_I64;
+                                        case JAK_JSON_LIST_FIXED_I64:
+                                                return JAK_JSON_LIST_VARIABLE_OR_NESTED;
                                         default:
-                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                                return JAK_JSON_LIST_VARIABLE_OR_NESTED;
                                 }
-                        case JSON_LIST_TYPE_FIXED_U32:
+                        case JAK_JSON_LIST_FIXED_U32:
                                 switch (to_add) {
-                                        case JSON_LIST_TYPE_FIXED_NULL:
-                                                return JSON_LIST_TYPE_FIXED_U32;
-                                        case JSON_LIST_TYPE_FIXED_U8:
-                                        case JSON_LIST_TYPE_FIXED_U16:
-                                        case JSON_LIST_TYPE_FIXED_U32:
-                                                return JSON_LIST_TYPE_FIXED_U32;
-                                        case JSON_LIST_TYPE_FIXED_U64:
-                                                return JSON_LIST_TYPE_FIXED_U64;
-                                        case JSON_LIST_TYPE_FIXED_I8:
-                                        case JSON_LIST_TYPE_FIXED_I16:
-                                        case JSON_LIST_TYPE_FIXED_I32:
-                                                return JSON_LIST_TYPE_FIXED_I64;
-                                        case JSON_LIST_TYPE_FIXED_I64:
-                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                        case JAK_JSON_LIST_FIXED_NULL:
+                                                return JAK_JSON_LIST_FIXED_U32;
+                                        case JAK_JSON_LIST_FIXED_U8:
+                                        case JAK_JSON_LIST_FIXED_U16:
+                                        case JAK_JSON_LIST_FIXED_U32:
+                                                return JAK_JSON_LIST_FIXED_U32;
+                                        case JAK_JSON_LIST_FIXED_U64:
+                                                return JAK_JSON_LIST_FIXED_U64;
+                                        case JAK_JSON_LIST_FIXED_I8:
+                                        case JAK_JSON_LIST_FIXED_I16:
+                                        case JAK_JSON_LIST_FIXED_I32:
+                                                return JAK_JSON_LIST_FIXED_I64;
+                                        case JAK_JSON_LIST_FIXED_I64:
+                                                return JAK_JSON_LIST_VARIABLE_OR_NESTED;
                                         default:
-                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                                return JAK_JSON_LIST_VARIABLE_OR_NESTED;
                                 }
-                        case JSON_LIST_TYPE_FIXED_U64:
+                        case JAK_JSON_LIST_FIXED_U64:
                                 switch (to_add) {
-                                        case JSON_LIST_TYPE_FIXED_NULL:
-                                                return JSON_LIST_TYPE_FIXED_U64;
-                                        case JSON_LIST_TYPE_FIXED_U8:
-                                        case JSON_LIST_TYPE_FIXED_U16:
-                                        case JSON_LIST_TYPE_FIXED_U32:
-                                        case JSON_LIST_TYPE_FIXED_U64:
-                                                return JSON_LIST_TYPE_FIXED_U64;
-                                        case JSON_LIST_TYPE_FIXED_I8:
-                                        case JSON_LIST_TYPE_FIXED_I16:
-                                        case JSON_LIST_TYPE_FIXED_I32:
-                                        case JSON_LIST_TYPE_FIXED_I64:
-                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                        case JAK_JSON_LIST_FIXED_NULL:
+                                                return JAK_JSON_LIST_FIXED_U64;
+                                        case JAK_JSON_LIST_FIXED_U8:
+                                        case JAK_JSON_LIST_FIXED_U16:
+                                        case JAK_JSON_LIST_FIXED_U32:
+                                        case JAK_JSON_LIST_FIXED_U64:
+                                                return JAK_JSON_LIST_FIXED_U64;
+                                        case JAK_JSON_LIST_FIXED_I8:
+                                        case JAK_JSON_LIST_FIXED_I16:
+                                        case JAK_JSON_LIST_FIXED_I32:
+                                        case JAK_JSON_LIST_FIXED_I64:
+                                                return JAK_JSON_LIST_VARIABLE_OR_NESTED;
                                         default:
-                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                                return JAK_JSON_LIST_VARIABLE_OR_NESTED;
                                 }
-                        case JSON_LIST_TYPE_FIXED_I8:
+                        case JAK_JSON_LIST_FIXED_I8:
                                 switch (to_add) {
-                                        case JSON_LIST_TYPE_FIXED_NULL:
-                                                return JSON_LIST_TYPE_FIXED_I8;
-                                        case JSON_LIST_TYPE_FIXED_U8:
-                                                return JSON_LIST_TYPE_FIXED_I16;
-                                        case JSON_LIST_TYPE_FIXED_U16:
-                                                return JSON_LIST_TYPE_FIXED_I32;
-                                        case JSON_LIST_TYPE_FIXED_U32:
-                                                return JSON_LIST_TYPE_FIXED_I64;
-                                        case JSON_LIST_TYPE_FIXED_U64:
-                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
-                                        case JSON_LIST_TYPE_FIXED_I8:
-                                                return JSON_LIST_TYPE_FIXED_I8;
-                                        case JSON_LIST_TYPE_FIXED_I16:
-                                                return JSON_LIST_TYPE_FIXED_I16;
-                                        case JSON_LIST_TYPE_FIXED_I32:
-                                                return JSON_LIST_TYPE_FIXED_I32;
-                                        case JSON_LIST_TYPE_FIXED_I64:
-                                                return JSON_LIST_TYPE_FIXED_I64;
+                                        case JAK_JSON_LIST_FIXED_NULL:
+                                                return JAK_JSON_LIST_FIXED_I8;
+                                        case JAK_JSON_LIST_FIXED_U8:
+                                                return JAK_JSON_LIST_FIXED_I16;
+                                        case JAK_JSON_LIST_FIXED_U16:
+                                                return JAK_JSON_LIST_FIXED_I32;
+                                        case JAK_JSON_LIST_FIXED_U32:
+                                                return JAK_JSON_LIST_FIXED_I64;
+                                        case JAK_JSON_LIST_FIXED_U64:
+                                                return JAK_JSON_LIST_VARIABLE_OR_NESTED;
+                                        case JAK_JSON_LIST_FIXED_I8:
+                                                return JAK_JSON_LIST_FIXED_I8;
+                                        case JAK_JSON_LIST_FIXED_I16:
+                                                return JAK_JSON_LIST_FIXED_I16;
+                                        case JAK_JSON_LIST_FIXED_I32:
+                                                return JAK_JSON_LIST_FIXED_I32;
+                                        case JAK_JSON_LIST_FIXED_I64:
+                                                return JAK_JSON_LIST_FIXED_I64;
                                         default:
-                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                                return JAK_JSON_LIST_VARIABLE_OR_NESTED;
                                 }
-                        case JSON_LIST_TYPE_FIXED_I16:
+                        case JAK_JSON_LIST_FIXED_I16:
                                 switch (to_add) {
-                                        case JSON_LIST_TYPE_FIXED_NULL:
-                                                return JSON_LIST_TYPE_FIXED_I16;
-                                        case JSON_LIST_TYPE_FIXED_U8:
-                                        case JSON_LIST_TYPE_FIXED_U16:
-                                                return JSON_LIST_TYPE_FIXED_I32;
-                                        case JSON_LIST_TYPE_FIXED_U32:
-                                                return JSON_LIST_TYPE_FIXED_I64;
-                                        case JSON_LIST_TYPE_FIXED_U64:
-                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
-                                        case JSON_LIST_TYPE_FIXED_I8:
-                                        case JSON_LIST_TYPE_FIXED_I16:
-                                                return JSON_LIST_TYPE_FIXED_I16;
-                                        case JSON_LIST_TYPE_FIXED_I32:
-                                                return JSON_LIST_TYPE_FIXED_I32;
-                                        case JSON_LIST_TYPE_FIXED_I64:
-                                                return JSON_LIST_TYPE_FIXED_I64;
+                                        case JAK_JSON_LIST_FIXED_NULL:
+                                                return JAK_JSON_LIST_FIXED_I16;
+                                        case JAK_JSON_LIST_FIXED_U8:
+                                        case JAK_JSON_LIST_FIXED_U16:
+                                                return JAK_JSON_LIST_FIXED_I32;
+                                        case JAK_JSON_LIST_FIXED_U32:
+                                                return JAK_JSON_LIST_FIXED_I64;
+                                        case JAK_JSON_LIST_FIXED_U64:
+                                                return JAK_JSON_LIST_VARIABLE_OR_NESTED;
+                                        case JAK_JSON_LIST_FIXED_I8:
+                                        case JAK_JSON_LIST_FIXED_I16:
+                                                return JAK_JSON_LIST_FIXED_I16;
+                                        case JAK_JSON_LIST_FIXED_I32:
+                                                return JAK_JSON_LIST_FIXED_I32;
+                                        case JAK_JSON_LIST_FIXED_I64:
+                                                return JAK_JSON_LIST_FIXED_I64;
                                         default:
-                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                                return JAK_JSON_LIST_VARIABLE_OR_NESTED;
                                 }
-                        case JSON_LIST_TYPE_FIXED_I32:
+                        case JAK_JSON_LIST_FIXED_I32:
                                 switch (to_add) {
-                                        case JSON_LIST_TYPE_FIXED_NULL:
-                                                return JSON_LIST_TYPE_FIXED_I32;
-                                        case JSON_LIST_TYPE_FIXED_U8:
-                                        case JSON_LIST_TYPE_FIXED_U16:
-                                        case JSON_LIST_TYPE_FIXED_U32:
-                                                return JSON_LIST_TYPE_FIXED_I64;
-                                        case JSON_LIST_TYPE_FIXED_U64:
-                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
-                                        case JSON_LIST_TYPE_FIXED_I8:
-                                        case JSON_LIST_TYPE_FIXED_I16:
-                                        case JSON_LIST_TYPE_FIXED_I32:
-                                                return JSON_LIST_TYPE_FIXED_I32;
-                                        case JSON_LIST_TYPE_FIXED_I64:
-                                                return JSON_LIST_TYPE_FIXED_I64;
+                                        case JAK_JSON_LIST_FIXED_NULL:
+                                                return JAK_JSON_LIST_FIXED_I32;
+                                        case JAK_JSON_LIST_FIXED_U8:
+                                        case JAK_JSON_LIST_FIXED_U16:
+                                        case JAK_JSON_LIST_FIXED_U32:
+                                                return JAK_JSON_LIST_FIXED_I64;
+                                        case JAK_JSON_LIST_FIXED_U64:
+                                                return JAK_JSON_LIST_VARIABLE_OR_NESTED;
+                                        case JAK_JSON_LIST_FIXED_I8:
+                                        case JAK_JSON_LIST_FIXED_I16:
+                                        case JAK_JSON_LIST_FIXED_I32:
+                                                return JAK_JSON_LIST_FIXED_I32;
+                                        case JAK_JSON_LIST_FIXED_I64:
+                                                return JAK_JSON_LIST_FIXED_I64;
                                         default:
-                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                                return JAK_JSON_LIST_VARIABLE_OR_NESTED;
                                 }
-                        case JSON_LIST_TYPE_FIXED_I64:
+                        case JAK_JSON_LIST_FIXED_I64:
                                 switch (to_add) {
-                                        case JSON_LIST_TYPE_FIXED_NULL:
-                                                return JSON_LIST_TYPE_FIXED_I64;
-                                        case JSON_LIST_TYPE_FIXED_U8:
-                                        case JSON_LIST_TYPE_FIXED_U16:
-                                        case JSON_LIST_TYPE_FIXED_U32:
-                                        case JSON_LIST_TYPE_FIXED_U64:
-                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
-                                        case JSON_LIST_TYPE_FIXED_I8:
-                                        case JSON_LIST_TYPE_FIXED_I16:
-                                        case JSON_LIST_TYPE_FIXED_I32:
-                                        case JSON_LIST_TYPE_FIXED_I64:
-                                                return JSON_LIST_TYPE_FIXED_I64;
+                                        case JAK_JSON_LIST_FIXED_NULL:
+                                                return JAK_JSON_LIST_FIXED_I64;
+                                        case JAK_JSON_LIST_FIXED_U8:
+                                        case JAK_JSON_LIST_FIXED_U16:
+                                        case JAK_JSON_LIST_FIXED_U32:
+                                        case JAK_JSON_LIST_FIXED_U64:
+                                                return JAK_JSON_LIST_VARIABLE_OR_NESTED;
+                                        case JAK_JSON_LIST_FIXED_I8:
+                                        case JAK_JSON_LIST_FIXED_I16:
+                                        case JAK_JSON_LIST_FIXED_I32:
+                                        case JAK_JSON_LIST_FIXED_I64:
+                                                return JAK_JSON_LIST_FIXED_I64;
                                         default:
-                                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                                return JAK_JSON_LIST_VARIABLE_OR_NESTED;
                                 }
                         default:
-                                return JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                                return JAK_JSON_LIST_VARIABLE_OR_NESTED;
                 }
         }
 }
 
-static enum json_list_type number_type_to_list_type(enum number_min_type type)
+static jak_json_list_type_e number_type_to_list_type(enum number_min_type type)
 {
         switch (type) {
                 case NUMBER_U8:
-                        return JSON_LIST_TYPE_FIXED_U8;
+                        return JAK_JSON_LIST_FIXED_U8;
                 case NUMBER_U16:
-                        return JSON_LIST_TYPE_FIXED_U16;
+                        return JAK_JSON_LIST_FIXED_U16;
                 case NUMBER_U32:
-                        return JSON_LIST_TYPE_FIXED_U32;
+                        return JAK_JSON_LIST_FIXED_U32;
                 case NUMBER_U64:
-                        return JSON_LIST_TYPE_FIXED_U64;
+                        return JAK_JSON_LIST_FIXED_U64;
                 case NUMBER_I8:
-                        return JSON_LIST_TYPE_FIXED_I8;
+                        return JAK_JSON_LIST_FIXED_I8;
                 case NUMBER_I16:
-                        return JSON_LIST_TYPE_FIXED_I16;
+                        return JAK_JSON_LIST_FIXED_I16;
                 case NUMBER_I32:
-                        return JSON_LIST_TYPE_FIXED_I32;
+                        return JAK_JSON_LIST_FIXED_I32;
                 case NUMBER_I64:
-                        return JSON_LIST_TYPE_FIXED_I64;
+                        return JAK_JSON_LIST_FIXED_I64;
                 default: JAK_ERROR_PRINT(JAK_ERR_UNSUPPORTEDTYPE)
-                        return JSON_LIST_TYPE_EMPTY;
+                        return JAK_JSON_LIST_EMPTY;
 
         }
 }
 
-bool json_array_get_type(enum json_list_type *type, const struct jak_json_array *array)
+bool jak_json_array_get_type(jak_json_list_type_e *type, const jak_json_array *array)
 {
         JAK_ERROR_IF_NULL(type)
         JAK_ERROR_IF_NULL(array)
-        enum json_list_type list_type = JSON_LIST_TYPE_EMPTY;
+        jak_json_list_type_e list_type = JAK_JSON_LIST_EMPTY;
         for (jak_u32 i = 0; i < array->elements.elements.num_elems; i++) {
-                const struct jak_json_element *elem = vec_get(&array->elements.elements, i, struct jak_json_element);
+                const jak_json_element *elem = vec_get(&array->elements.elements, i, jak_json_element);
                 switch (elem->value.value_type) {
-                        case JSON_VALUE_OBJECT:
-                        case JSON_VALUE_ARRAY:
-                        case JSON_VALUE_STRING:
-                                list_type = JSON_LIST_TYPE_VARIABLE_OR_NESTED;
+                        case JAK_JSON_VALUE_OBJECT:
+                        case JAK_JSON_VALUE_ARRAY:
+                        case JAK_JSON_VALUE_STRING:
+                                list_type = JAK_JSON_LIST_VARIABLE_OR_NESTED;
                                 goto return_result;
-                        case JSON_VALUE_NUMBER: {
-                                enum json_list_type elem_type;
+                        case JAK_JSON_VALUE_NUMBER: {
+                                jak_json_list_type_e elem_type;
                                 switch (elem->value.value.number->value_type) {
-                                        case JSON_NUMBER_FLOAT:
-                                                elem_type = JSON_LIST_TYPE_FIXED_FLOAT;
+                                        case JAK_JSON_NUMBER_FLOAT:
+                                                elem_type = JAK_JSON_LIST_FIXED_FLOAT;
                                                 break;
-                                        case JSON_NUMBER_UNSIGNED:
+                                        case JAK_JSON_NUMBER_UNSIGNED:
                                                 elem_type = number_type_to_list_type(number_min_type_unsigned(
                                                         elem->value.value.number->value.unsigned_integer));
                                                 break;
-                                        case JSON_NUMBER_SIGNED:
+                                        case JAK_JSON_NUMBER_SIGNED:
                                                 elem_type = number_type_to_list_type(number_min_type_signed(
                                                         elem->value.value.number->value.signed_integer));
                                                 break;
@@ -1358,22 +1358,22 @@ bool json_array_get_type(enum json_list_type *type, const struct jak_json_array 
                                                 continue;
                                 }
 
-                                list_type = json_fitting_type(list_type, elem_type);
-                                if (list_type == JSON_LIST_TYPE_VARIABLE_OR_NESTED) {
+                                list_type = jak_json_fitting_type(list_type, elem_type);
+                                if (list_type == JAK_JSON_LIST_VARIABLE_OR_NESTED) {
                                         goto return_result;
                                 }
                                 break;
                         }
-                        case JSON_VALUE_TRUE:
-                        case JSON_VALUE_FALSE:
-                                list_type = json_fitting_type(list_type, JSON_LIST_TYPE_FIXED_BOOLEAN);
-                                if (list_type == JSON_LIST_TYPE_VARIABLE_OR_NESTED) {
+                        case JAK_JSON_VALUE_TRUE:
+                        case JAK_JSON_VALUE_FALSE:
+                                list_type = jak_json_fitting_type(list_type, JAK_JSON_LIST_FIXED_BOOLEAN);
+                                if (list_type == JAK_JSON_LIST_VARIABLE_OR_NESTED) {
                                         goto return_result;
                                 }
                                 break;
-                        case JSON_VALUE_NULL:
-                                list_type = json_fitting_type(list_type, JSON_LIST_TYPE_FIXED_NULL);
-                                if (list_type == JSON_LIST_TYPE_VARIABLE_OR_NESTED) {
+                        case JAK_JSON_VALUE_NULL:
+                                list_type = jak_json_fitting_type(list_type, JAK_JSON_LIST_FIXED_NULL);
+                                if (list_type == JAK_JSON_LIST_VARIABLE_OR_NESTED) {
                                         goto return_result;
                                 }
                                 break;

@@ -305,7 +305,7 @@ this_insert(struct jak_string_dict *self, jak_archive_field_sid_t **out, char *c
         }
 
         /** set potential non-null out parameters */
-        JAK_optional_set_or_else(out, ids_out, jak_alloc_free(&self->alloc, ids_out));
+        JAK_OPTIONAL_SET_OR_ELSE(out, ids_out, jak_alloc_free(&self->alloc, ids_out));
 
         /** cleanup */
         jak_alloc_free(&jak_hashtable_alloc, found_mask);

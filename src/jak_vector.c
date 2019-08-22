@@ -352,10 +352,10 @@ const void *vec_data(const struct jak_vector *vec)
 char *vector_string(const struct jak_vector ofType(T) *vec,
                     void (*printerFunc)(struct jak_memfile *dst, void ofType(T) *values, size_t num_elems))
 {
-        struct jak_memblock *block;
+        jak_memblock *block;
         struct jak_memfile file;
-        memblock_create(&block, vec->num_elems * vec->elem_size);
+        jak_memblock_create(&block, vec->num_elems * vec->elem_size);
         memfile_open(&file, block, READ_WRITE);
         printerFunc(&file, vec->base, vec->num_elems);
-        return memblock_move_contents_and_drop(block);
+        return jak_memblock_move_contents_and_drop(block);
 }

@@ -31,7 +31,7 @@ struct thread_pool *thread_pool_create(size_t num_threads, int enable_monitoring
         pool->name = NULL;
         pool->size = num_threads;
         pool->capacity = num_threads * 2;
-        priority_queue_init(&pool->waiting_tasks);
+        jak_priority_queue_init(&pool->waiting_tasks);
 
         pool->thread_tasks = calloc(num_threads, sizeof(struct thread_task *));
         pool->thread_infos = calloc(sizeof(struct thread_info *) * pool->capacity, 1);
@@ -101,7 +101,7 @@ void thread_pool_free(struct thread_pool *pool)
                 free(pool->thread_infos[i]);
         }
 
-        priority_queue_free(&pool->waiting_tasks);
+        jak_priority_queue_free(&pool->waiting_tasks);
         free(pool->pool);
         free(pool->thread_tasks);
         free(pool->thread_infos);
@@ -181,7 +181,7 @@ bool thread_pool_enqueue_tasks(struct thread_task *tasks, struct thread_pool *po
                 }
 
                 tasks[i].group_id = ind;
-                priority_queue_push(&pool->waiting_tasks, &tasks[i], tasks[i].priority);
+                jak_priority_queue_push(&pool->waiting_tasks, &tasks[i], tasks[i].priority);
         }
 
         if (hndl) {
@@ -327,7 +327,7 @@ void *__thread_main(void *args)
 
 struct thread_task *__get_next_task(struct thread_pool *pool)
 {
-        struct thread_task *next_task = priority_queue_pop(&pool->waiting_tasks);
+        struct thread_task *next_task = jak_priority_queue_pop(&pool->waiting_tasks);
         return next_task;
 }
 

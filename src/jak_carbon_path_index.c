@@ -973,7 +973,7 @@ bool jak_carbon_path_index_create(jak_carbon_path_index *index, jak_carbon *doc)
 {
         JAK_ERROR_IF_NULL(index);
         JAK_ERROR_IF_NULL(doc);
-        memblock_create(&index->memblock, PATH_INDEX_CAPACITY);
+        jak_memblock_create(&index->memblock, PATH_INDEX_CAPACITY);
         memfile_open(&index->memfile, index->memblock, READ_WRITE);
         jak_error_init(&index->err);
         record_ref_create(&index->memfile, doc);
@@ -994,8 +994,8 @@ bool jak_carbon_path_index_drop(jak_carbon_path_index *index)
 const void *jak_carbon_path_index_raw_data(jak_u64 *size, jak_carbon_path_index *index)
 {
         if (size && index) {
-                const char *raw = memblock_raw_data(index->memfile.memblock);
-                memblock_size(size, index->memfile.memblock);
+                const char *raw = jak_memblock_raw_data(index->memfile.memblock);
+                jak_memblock_size(size, index->memfile.memblock);
                 return raw;
         } else {
                 return NULL;

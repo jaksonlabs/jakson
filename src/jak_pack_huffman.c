@@ -27,20 +27,20 @@ struct huff_node {
         unsigned char letter;
 };
 
-static void huff_tree_create(struct jak_vector ofType(struct pack_huffman_entry) *table,
+static void huff_tree_create(struct jak_vector ofType(jak_pack_huffman_entry) *table,
                              const struct jak_vector ofType(jak_u32) *frequencies);
 
-bool coding_huffman_create(struct jak_huffman *dic)
+bool jak_coding_huffman_create(jak_huffman *dic)
 {
         JAK_ERROR_IF_NULL(dic);
 
-        vec_create(&dic->table, NULL, sizeof(struct pack_huffman_entry), UCHAR_MAX / 4);
+        vec_create(&dic->table, NULL, sizeof(jak_pack_huffman_entry), UCHAR_MAX / 4);
         jak_error_init(&dic->err);
 
         return true;
 }
 
-bool coding_huffman_cpy(struct jak_huffman *dst, struct jak_huffman *src)
+bool jak_coding_huffman_cpy(jak_huffman *dst, jak_huffman *src)
 {
         JAK_ERROR_IF_NULL(dst);
         JAK_ERROR_IF_NULL(src);
@@ -52,7 +52,7 @@ bool coding_huffman_cpy(struct jak_huffman *dst, struct jak_huffman *src)
         }
 }
 
-bool coding_huffman_build(struct jak_huffman *encoder, const string_vector_t *strings)
+bool jak_coding_huffman_build(jak_huffman *encoder, const string_vector_t *strings)
 {
         JAK_ERROR_IF_NULL(encoder);
         JAK_ERROR_IF_NULL(strings);
@@ -79,7 +79,7 @@ bool coding_huffman_build(struct jak_huffman *encoder, const string_vector_t *st
         return true;
 }
 
-bool coding_huffman_get_error(jak_error *err, const struct jak_huffman *dic)
+bool jak_coding_huffman_get_error(jak_error *err, const jak_huffman *dic)
 {
         JAK_ERROR_IF_NULL(err)
         JAK_ERROR_IF_NULL(dic)
@@ -87,12 +87,12 @@ bool coding_huffman_get_error(jak_error *err, const struct jak_huffman *dic)
         return true;
 }
 
-bool coding_huffman_drop(struct jak_huffman *dic)
+bool jak_coding_huffman_drop(jak_huffman *dic)
 {
         JAK_ERROR_IF_NULL(dic);
 
         for (size_t i = 0; i < dic->table.num_elems; i++) {
-                struct pack_huffman_entry *entry = vec_get(&dic->table, i, struct pack_huffman_entry);
+                jak_pack_huffman_entry *entry = vec_get(&dic->table, i, jak_pack_huffman_entry);
                 free(entry->blocks);
         }
 
@@ -103,13 +103,13 @@ bool coding_huffman_drop(struct jak_huffman *dic)
         return true;
 }
 
-bool coding_huffman_serialize(struct jak_memfile *file, const struct jak_huffman *dic, char marker_symbol)
+bool jak_coding_huffman_serialize(struct jak_memfile *file, const jak_huffman *dic, char marker_symbol)
 {
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(dic)
 
         for (size_t i = 0; i < dic->table.num_elems; i++) {
-                struct pack_huffman_entry *entry = vec_get(&dic->table, i, struct pack_huffman_entry);
+                jak_pack_huffman_entry *entry = vec_get(&dic->table, i, jak_pack_huffman_entry);
                 memfile_write(file, &marker_symbol, sizeof(char));
                 memfile_write(file, &entry->letter, sizeof(unsigned char));
 
@@ -144,10 +144,10 @@ bool coding_huffman_serialize(struct jak_memfile *file, const struct jak_huffman
         return true;
 }
 
-static struct pack_huffman_entry *find_dic_entry(struct jak_huffman *dic, unsigned char c)
+static jak_pack_huffman_entry *find_dic_entry(jak_huffman *dic, unsigned char c)
 {
         for (size_t i = 0; i < dic->table.num_elems; i++) {
-                struct pack_huffman_entry *entry = vec_get(&dic->table, i, struct pack_huffman_entry);
+                jak_pack_huffman_entry *entry = vec_get(&dic->table, i, jak_pack_huffman_entry);
                 if (entry->letter == c) {
                         return entry;
                 }
@@ -156,12 +156,12 @@ static struct pack_huffman_entry *find_dic_entry(struct jak_huffman *dic, unsign
         return NULL;
 }
 
-static size_t encodeString(struct jak_memfile *file, struct jak_huffman *dic, const char *string)
+static size_t encodeString(struct jak_memfile *file, jak_huffman *dic, const char *string)
 {
         memfile_begin_bit_mode(file);
 
         for (const char *c = string; *c != '\0'; c++) {
-                struct pack_huffman_entry *entry = find_dic_entry(dic, (unsigned char) *c);
+                jak_pack_huffman_entry *entry = find_dic_entry(dic, (unsigned char) *c);
                 if (!entry) {
                         return 0;
                 }
@@ -192,7 +192,7 @@ static size_t encodeString(struct jak_memfile *file, struct jak_huffman *dic, co
         return num_written_bytes;
 }
 
-bool coding_huffman_encode(struct jak_memfile *file, struct jak_huffman *dic, const char *string)
+bool jak_coding_huffman_encode(struct jak_memfile *file, jak_huffman *dic, const char *string)
 {
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(dic)
@@ -215,14 +215,14 @@ bool coding_huffman_encode(struct jak_memfile *file, struct jak_huffman *dic, co
         return true;
 }
 
-bool coding_huffman_read_string(struct pack_huffman_str_info *info, struct jak_memfile *src)
+bool jak_coding_huffman_read_string(jak_pack_huffman_str_info *info, struct jak_memfile *src)
 {
         info->nbytes_encoded = *JAK_MEMFILE_READ_TYPE(src, jak_u32);
         info->encoded_bytes = JAK_MEMFILE_READ(src, info->nbytes_encoded);
         return true;
 }
 
-bool coding_huffman_read_entry(struct pack_huffman_info *info, struct jak_memfile *file, char marker_symbol)
+bool jak_coding_huffman_read_entry(jak_pack_huffman_info *info, struct jak_memfile *file, char marker_symbol)
 {
         char marker = *JAK_MEMFILE_PEEK(file, char);
         if (marker == marker_symbol) {
@@ -239,7 +239,7 @@ bool coding_huffman_read_entry(struct pack_huffman_info *info, struct jak_memfil
         }
 }
 
-static const jak_u32 *get_num_used_blocks(jak_u16 *numUsedBlocks, struct pack_huffman_entry *entry, jak_u16 num_blocks,
+static const jak_u32 *get_num_used_blocks(jak_u16 *numUsedBlocks, jak_pack_huffman_entry *entry, jak_u16 num_blocks,
                                           const jak_u32 *blocks)
 {
         for (entry->nblocks = 0; entry->nblocks < num_blocks; entry->nblocks++) {
@@ -253,7 +253,7 @@ static const jak_u32 *get_num_used_blocks(jak_u16 *numUsedBlocks, struct pack_hu
 }
 
 static void
-import_into_entry(struct pack_huffman_entry *entry, const struct huff_node *node, const jak_bitmap *map)
+import_into_entry(jak_pack_huffman_entry *entry, const struct huff_node *node, const jak_bitmap *map)
 {
         entry->letter = node->letter;
         jak_u32 *blocks, num_blocks;
@@ -325,10 +325,10 @@ static struct huff_node *find_smallest(struct huff_node *begin, jak_u64 lowerBou
 }
 
 static void assign_code(struct huff_node *node, const jak_bitmap *path,
-                        struct jak_vector ofType(struct pack_huffman_entry) *table)
+                        struct jak_vector ofType(jak_pack_huffman_entry) *table)
 {
         if (!node->left && !node->right) {
-                struct pack_huffman_entry *entry = vec_new_and_get(table, struct pack_huffman_entry);
+                jak_pack_huffman_entry *entry = vec_new_and_get(table, jak_pack_huffman_entry);
                 import_into_entry(entry, node, path);
         } else {
                 if (node->left) {
@@ -373,7 +373,7 @@ static struct huff_node *trim_and_begin(struct jak_vector ofType(HuffNode) *cand
         return begin;
 }
 
-static void huff_tree_create(struct jak_vector ofType(struct pack_huffman_entry) *table,
+static void huff_tree_create(struct jak_vector ofType(jak_pack_huffman_entry) *table,
                              const struct jak_vector ofType(jak_u32) *frequencies)
 {
         JAK_ASSERT(UCHAR_MAX == frequencies->num_elems);

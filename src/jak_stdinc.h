@@ -347,7 +347,7 @@ JAK_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum jak_archiv
 #define JAK_optional_set(x, y)                                                                                         \
      JAK_optional(x, *x = y)
 
-#define JAK_optional_set_or_else(x, y, stmt)                                                                           \
+#define JAK_OPTIONAL_SET_OR_ELSE(x, y, stmt)                                                                           \
     if (x) {                                                                                                           \
         *x = y;                                                                                                        \
     } else { stmt; }

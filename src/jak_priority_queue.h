@@ -26,27 +26,23 @@
 
 JAK_BEGIN_DECL
 
-struct priority_queue_element_info {
+typedef struct jak_priority_queue_element_info {
         size_t priority;
         void *element;
-};
+} jak_priority_queue_element_info;
 
-struct jak_priority_queue {
-        struct priority_queue_element_info *data;
+typedef struct jak_priority_queue {
+        jak_priority_queue_element_info *data;
         size_t num_elements;
         size_t capacity;
         pthread_mutex_t mutex;
-};
+} jak_priority_queue;
 
-void priority_queue_init(struct jak_priority_queue *queue);
-
-void priority_queue_free(struct jak_priority_queue *queue);
-
-void priority_queue_push(struct jak_priority_queue *queue, void *data, size_t priority);
-
-void *priority_queue_pop(struct jak_priority_queue *queue);
-
-int priority_queue_is_empty(struct jak_priority_queue *queue);
+void jak_priority_queue_init(jak_priority_queue *queue);
+void jak_priority_queue_free(jak_priority_queue *queue);
+void jak_priority_queue_push(jak_priority_queue *queue, void *data, size_t priority);
+void *jak_priority_queue_pop(jak_priority_queue *queue);
+int jak_priority_queue_is_empty(jak_priority_queue *queue);
 
 JAK_END_DECL
 

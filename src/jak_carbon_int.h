@@ -140,7 +140,7 @@ bool jak_carbon_int_field_remove(struct jak_memfile *memfile, jak_error *err, ja
 /**
  * For <code>mode</code>, see <code>jak_carbon_create_begin</code>
  */
-bool jak_carbon_int_from_json(jak_carbon *doc, const struct jak_json *data, jak_carbon_key_e key_type, const void *primary_key, int mode);
+bool jak_carbon_int_from_json(jak_carbon *doc, const jak_json *data, jak_carbon_key_e key_type, const void *primary_key, int mode);
 
 JAK_END_DECL
 

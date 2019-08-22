@@ -390,7 +390,7 @@ static void prop_iter_state_init(jak_prop_iter *iter)
 }
 
 static bool archive_prop_iter_from_memblock(jak_prop_iter *iter, jak_error *err, jak_u16 mask,
-                                            struct jak_memblock *memblock, jak_offset_t object_offset)
+                                            jak_memblock *memblock, jak_offset_t object_offset)
 {
         JAK_ERROR_IF_NULL(iter)
         JAK_ERROR_IF_NULL(err)

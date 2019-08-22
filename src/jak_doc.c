@@ -36,7 +36,7 @@ static bool print_value(FILE *file, jak_archive_field_e type, const struct jak_v
 static void print_object(FILE *file, const jak_doc_obj *model);
 
 static bool
-import_json_object(jak_doc_obj *target, jak_error *err, const struct jak_json_object_t *json_obj);
+import_json_object(jak_doc_obj *target, jak_error *err, const jak_json_object *json_obj);
 
 static void sort_jak_columndoc_entries(jak_column_doc_obj *columndoc);
 
@@ -266,13 +266,13 @@ bool jak_doc_obj_push_object(jak_doc_obj **out, jak_doc_entries *entry)
 }
 
 static jak_archive_field_e
-value_type_for_json_number(bool *success, jak_error *err, const struct jak_json_number *number)
+value_type_for_json_number(bool *success, jak_error *err, const jak_json_number *number)
 {
         *success = true;
         switch (number->value_type) {
-                case JSON_NUMBER_FLOAT:
+                case JAK_JSON_NUMBER_FLOAT:
                         return JAK_FIELD_FLOAT;
-                case JSON_NUMBER_UNSIGNED: {
+                case JAK_JSON_NUMBER_UNSIGNED: {
                         jak_u64 test = number->value.unsigned_integer;
                         if (test <= JAK_LIMITS_UINT8_MAX) {
                                 return JAK_FIELD_UINT8;
@@ -284,7 +284,7 @@ value_type_for_json_number(bool *success, jak_error *err, const struct jak_json_
                                 return JAK_FIELD_UINT64;
                         }
                 }
-                case JSON_NUMBER_SIGNED: {
+                case JAK_JSON_NUMBER_SIGNED: {
                         jak_i64 test = number->value.signed_integer;
                         if (test >= JAK_LIMITS_INT8_MIN && test <= JAK_LIMITS_INT8_MAX) {
                                 return JAK_FIELD_INT8;
@@ -303,7 +303,7 @@ value_type_for_json_number(bool *success, jak_error *err, const struct jak_json_
 }
 
 static void
-import_json_object_string_prop(jak_doc_obj *target, const char *key, const struct jak_json_string *string)
+import_json_object_string_prop(jak_doc_obj *target, const char *key, const jak_json_string *string)
 {
         jak_doc_entries *entry;
         jak_doc_obj_add_key(&entry, target, key, JAK_FIELD_STRING);
@@ -311,7 +311,7 @@ import_json_object_string_prop(jak_doc_obj *target, const char *key, const struc
 }
 
 static bool import_json_object_number_prop(jak_doc_obj *target, jak_error *err, const char *key,
-                                           const struct jak_json_number *number)
+                                           const jak_json_number *number)
 {
         jak_doc_entries *entry;
         bool success;
@@ -339,7 +339,7 @@ static void import_json_object_null_prop(jak_doc_obj *target, const char *key)
 }
 
 static bool import_json_object_object_prop(jak_doc_obj *target, jak_error *err, const char *key,
-                                           const struct jak_json_object_t *object)
+                                           const jak_json_object *object)
 {
         jak_doc_entries *entry;
         jak_doc_obj *nested_object = NULL;
@@ -349,7 +349,7 @@ static bool import_json_object_object_prop(jak_doc_obj *target, jak_error *err, 
 }
 
 static bool import_json_object_array_prop(jak_doc_obj *target, jak_error *err, const char *key,
-                                          const struct jak_json_array *array)
+                                          const jak_json_array *array)
 {
         jak_doc_entries *entry;
 
@@ -357,30 +357,30 @@ static bool import_json_object_array_prop(jak_doc_obj *target, jak_error *err, c
                 size_t num_elements = array->elements.elements.num_elems;
 
                 /** Find first type that is not null unless the entire array is of type null */
-                enum json_value_type array_data_type = JSON_VALUE_NULL;
+                jak_json_value_type_e array_data_type = JAK_JSON_VALUE_NULL;
                 jak_archive_field_e field_type;
 
-                for (size_t i = 0; i < num_elements && array_data_type == JSON_VALUE_NULL; i++) {
-                        const struct jak_json_element *element = vec_get(&array->elements.elements, i,
-                                                                         struct jak_json_element);
+                for (size_t i = 0; i < num_elements && array_data_type == JAK_JSON_VALUE_NULL; i++) {
+                        const jak_json_element *element = vec_get(&array->elements.elements, i,
+                                                                         jak_json_element);
                         array_data_type = element->value.value_type;
                 }
 
                 switch (array_data_type) {
-                        case JSON_VALUE_OBJECT:
+                        case JAK_JSON_VALUE_OBJECT:
                                 field_type = JAK_FIELD_OBJECT;
                                 break;
-                        case JSON_VALUE_STRING:
+                        case JAK_JSON_VALUE_STRING:
                                 field_type = JAK_FIELD_STRING;
                                 break;
-                        case JSON_VALUE_NUMBER: {
+                        case JAK_JSON_VALUE_NUMBER: {
                                 /** find smallest fitting physical number type */
                                 jak_archive_field_e array_number_type = JAK_FIELD_NULL;
                                 for (size_t i = 0; i < num_elements; i++) {
-                                        const struct jak_json_element
+                                        const jak_json_element
                                                 *element = vec_get(&array->elements.elements, i,
-                                                                   struct jak_json_element);
-                                        if (JAK_UNLIKELY(element->value.value_type == JSON_VALUE_NULL)) {
+                                                                   jak_json_element);
+                                        if (JAK_UNLIKELY(element->value.value_type == JAK_JSON_VALUE_NULL)) {
                                                 continue;
                                         } else {
                                                 bool success;
@@ -446,14 +446,14 @@ static bool import_json_object_array_prop(jak_doc_obj *target, jak_error *err, c
                                 field_type = array_number_type;
                         }
                                 break;
-                        case JSON_VALUE_FALSE:
-                        case JSON_VALUE_TRUE:
+                        case JAK_JSON_VALUE_FALSE:
+                        case JAK_JSON_VALUE_TRUE:
                                 field_type = JAK_FIELD_BOOLEAN;
                                 break;
-                        case JSON_VALUE_NULL:
+                        case JAK_JSON_VALUE_NULL:
                                 field_type = JAK_FIELD_NULL;
                                 break;
-                        case JSON_VALUE_ARRAY: JAK_ERROR(err, JAK_ERR_ERRINTERNAL) /** array type is illegal here */
+                        case JAK_JSON_VALUE_ARRAY: JAK_ERROR(err, JAK_ERR_ERRINTERNAL) /** array type is illegal here */
                                 return false;
                         default: JAK_ERROR(err, JAK_ERR_NOTYPE)
                                 return false;
@@ -462,15 +462,15 @@ static bool import_json_object_array_prop(jak_doc_obj *target, jak_error *err, c
                 jak_doc_obj_add_key(&entry, target, key, field_type);
 
                 for (size_t i = 0; i < num_elements; i++) {
-                        const struct jak_json_element *element = vec_get(&array->elements.elements, i,
-                                                                         struct jak_json_element);
-                        enum json_value_type ast_node_data_type = element->value.value_type;
+                        const jak_json_element *element = vec_get(&array->elements.elements, i,
+                                                                         jak_json_element);
+                        jak_json_value_type_e ast_node_data_type = element->value.value_type;
 
                         switch (field_type) {
                                 case JAK_FIELD_OBJECT: {
                                         jak_doc_obj *nested_object = NULL;
                                         jak_doc_obj_push_object(&nested_object, entry);
-                                        if (ast_node_data_type != JSON_VALUE_NULL) {
+                                        if (ast_node_data_type != JAK_JSON_VALUE_NULL) {
                                                 /** the object is null by definition, if no entries are contained */
                                                 if (!import_json_object(nested_object, err,
                                                                         element->value.value.object)) {
@@ -481,9 +481,9 @@ static bool import_json_object_array_prop(jak_doc_obj *target, jak_error *err, c
                                         break;
                                 case JAK_FIELD_STRING: {
                                         JAK_ASSERT(ast_node_data_type == array_data_type ||
-                                                   ast_node_data_type == JSON_VALUE_NULL);
+                                                   ast_node_data_type == JAK_JSON_VALUE_NULL);
                                         jak_doc_obj_push_primtive(entry,
-                                                              ast_node_data_type == JSON_VALUE_NULL
+                                                              ast_node_data_type == JAK_JSON_VALUE_NULL
                                                               ? JAK_NULL_ENCODED_STRING : element->value
                                                                       .value.string->value);
                                 }
@@ -498,11 +498,11 @@ static bool import_json_object_array_prop(jak_doc_obj *target, jak_error *err, c
                                 case JAK_FIELD_UINT64:
                                 case JAK_FIELD_FLOAT: {
                                         JAK_ASSERT(ast_node_data_type == array_data_type ||
-                                                   ast_node_data_type == JSON_VALUE_NULL);
+                                                   ast_node_data_type == JAK_JSON_VALUE_NULL);
                                         switch (field_type) {
                                                 case JAK_FIELD_INT8: {
                                                         jak_archive_field_i8_t value =
-                                                                ast_node_data_type == JSON_VALUE_NULL ? JAK_NULL_INT8
+                                                                ast_node_data_type == JAK_JSON_VALUE_NULL ? JAK_NULL_INT8
                                                                                                       : (jak_archive_field_i8_t) element
                                                                         ->value.value.number->value.signed_integer;
                                                         jak_doc_obj_push_primtive(entry, &value);
@@ -510,7 +510,7 @@ static bool import_json_object_array_prop(jak_doc_obj *target, jak_error *err, c
                                                         break;
                                                 case JAK_FIELD_INT16: {
                                                         jak_archive_field_i16_t value =
-                                                                ast_node_data_type == JSON_VALUE_NULL ? JAK_NULL_INT16
+                                                                ast_node_data_type == JAK_JSON_VALUE_NULL ? JAK_NULL_INT16
                                                                                                       : (jak_archive_field_i16_t) element
                                                                         ->value.value.number->value.signed_integer;
                                                         jak_doc_obj_push_primtive(entry, &value);
@@ -518,7 +518,7 @@ static bool import_json_object_array_prop(jak_doc_obj *target, jak_error *err, c
                                                         break;
                                                 case JAK_FIELD_INT32: {
                                                         jak_archive_field_i32_t value =
-                                                                ast_node_data_type == JSON_VALUE_NULL ? JAK_NULL_INT32
+                                                                ast_node_data_type == JAK_JSON_VALUE_NULL ? JAK_NULL_INT32
                                                                                                       : (jak_archive_field_i32_t) element
                                                                         ->value.value.number->value.signed_integer;
                                                         jak_doc_obj_push_primtive(entry, &value);
@@ -526,7 +526,7 @@ static bool import_json_object_array_prop(jak_doc_obj *target, jak_error *err, c
                                                         break;
                                                 case JAK_FIELD_INT64: {
                                                         jak_archive_field_i64_t value =
-                                                                ast_node_data_type == JSON_VALUE_NULL ? JAK_NULL_INT64
+                                                                ast_node_data_type == JAK_JSON_VALUE_NULL ? JAK_NULL_INT64
                                                                                                       : (jak_archive_field_i64_t) element
                                                                         ->value.value.number->value.signed_integer;
                                                         jak_doc_obj_push_primtive(entry, &value);
@@ -534,7 +534,7 @@ static bool import_json_object_array_prop(jak_doc_obj *target, jak_error *err, c
                                                         break;
                                                 case JAK_FIELD_UINT8: {
                                                         jak_archive_field_u8_t value =
-                                                                ast_node_data_type == JSON_VALUE_NULL ? JAK_NULL_UINT8
+                                                                ast_node_data_type == JAK_JSON_VALUE_NULL ? JAK_NULL_UINT8
                                                                                                       : (jak_archive_field_u8_t) element
                                                                         ->value.value.number->value.unsigned_integer;
                                                         jak_doc_obj_push_primtive(entry, &value);
@@ -542,7 +542,7 @@ static bool import_json_object_array_prop(jak_doc_obj *target, jak_error *err, c
                                                         break;
                                                 case JAK_FIELD_UINT16: {
                                                         jak_archive_field_u16_t value =
-                                                                ast_node_data_type == JSON_VALUE_NULL ? JAK_NULL_UINT16
+                                                                ast_node_data_type == JAK_JSON_VALUE_NULL ? JAK_NULL_UINT16
                                                                                                       : (jak_archive_field_u16_t) element
                                                                         ->value.value.number->value.unsigned_integer;
                                                         jak_doc_obj_push_primtive(entry, &value);
@@ -550,7 +550,7 @@ static bool import_json_object_array_prop(jak_doc_obj *target, jak_error *err, c
                                                         break;
                                                 case JAK_FIELD_UINT32: {
                                                         jak_archive_field_u32_t value =
-                                                                ast_node_data_type == JSON_VALUE_NULL ? JAK_NULL_UINT32
+                                                                ast_node_data_type == JAK_JSON_VALUE_NULL ? JAK_NULL_UINT32
                                                                                                       : (jak_archive_field_u32_t) element
                                                                         ->value.value.number->value.unsigned_integer;
                                                         jak_doc_obj_push_primtive(entry, &value);
@@ -558,7 +558,7 @@ static bool import_json_object_array_prop(jak_doc_obj *target, jak_error *err, c
                                                         break;
                                                 case JAK_FIELD_UINT64: {
                                                         jak_archive_field_u64_t value =
-                                                                ast_node_data_type == JSON_VALUE_NULL ? JAK_NULL_UINT64
+                                                                ast_node_data_type == JAK_JSON_VALUE_NULL ? JAK_NULL_UINT64
                                                                                                       : (jak_archive_field_u64_t) element
                                                                         ->value.value.number->value.unsigned_integer;
                                                         jak_doc_obj_push_primtive(entry, &value);
@@ -566,15 +566,15 @@ static bool import_json_object_array_prop(jak_doc_obj *target, jak_error *err, c
                                                         break;
                                                 case JAK_FIELD_FLOAT: {
                                                         jak_archive_field_number_t value = JAK_NULL_FLOAT;
-                                                        if (ast_node_data_type != JSON_VALUE_NULL) {
-                                                                enum json_number_type
+                                                        if (ast_node_data_type != JAK_JSON_VALUE_NULL) {
+                                                                json_number_type_e
                                                                         element_number_type = element->value.value.number->value_type;
-                                                                if (element_number_type == JSON_NUMBER_FLOAT) {
+                                                                if (element_number_type == JAK_JSON_NUMBER_FLOAT) {
                                                                         value = element->value.value.number->value.float_number;
                                                                 } else if (element_number_type ==
-                                                                           JSON_NUMBER_UNSIGNED) {
+                                                                           JAK_JSON_NUMBER_UNSIGNED) {
                                                                         value = element->value.value.number->value.unsigned_integer;
-                                                                } else if (element_number_type == JSON_NUMBER_SIGNED) {
+                                                                } else if (element_number_type == JAK_JSON_NUMBER_SIGNED) {
                                                                         value = element->value.value.number->value.signed_integer;
                                                                 } else {
                                                                         JAK_ERROR_PRINT_AND_DIE(
@@ -592,14 +592,14 @@ static bool import_json_object_array_prop(jak_doc_obj *target, jak_error *err, c
                                 }
                                         break;
                                 case JAK_FIELD_BOOLEAN:
-                                        if (JAK_LIKELY(ast_node_data_type == JSON_VALUE_TRUE
-                                                       || ast_node_data_type == JSON_VALUE_FALSE)) {
+                                        if (JAK_LIKELY(ast_node_data_type == JAK_JSON_VALUE_TRUE
+                                                       || ast_node_data_type == JAK_JSON_VALUE_FALSE)) {
                                                 jak_archive_field_boolean_t value =
-                                                        ast_node_data_type == JSON_VALUE_TRUE ? JAK_BOOLEAN_TRUE
+                                                        ast_node_data_type == JAK_JSON_VALUE_TRUE ? JAK_BOOLEAN_TRUE
                                                                                               : JAK_BOOLEAN_FALSE;
                                                 jak_doc_obj_push_primtive(entry, &value);
                                         } else {
-                                                JAK_ASSERT(ast_node_data_type == JSON_VALUE_NULL);
+                                                JAK_ASSERT(ast_node_data_type == JAK_JSON_VALUE_NULL);
                                                 jak_archive_field_boolean_t value = JAK_NULL_BOOLEAN;
                                                 jak_doc_obj_push_primtive(entry, &value);
                                         }
@@ -619,17 +619,17 @@ static bool import_json_object_array_prop(jak_doc_obj *target, jak_error *err, c
 }
 
 static bool
-import_json_object(jak_doc_obj *target, jak_error *err, const struct jak_json_object_t *json_obj)
+import_json_object(jak_doc_obj *target, jak_error *err, const jak_json_object *json_obj)
 {
         for (size_t i = 0; i < json_obj->value->members.num_elems; i++) {
-                struct jak_json_prop *member = vec_get(&json_obj->value->members, i, struct jak_json_prop);
-                enum json_value_type value_type = member->value.value.value_type;
+                jak_json_prop *member = vec_get(&json_obj->value->members, i, jak_json_prop);
+                jak_json_value_type_e value_type = member->value.value.value_type;
                 switch (value_type) {
-                        case JSON_VALUE_STRING:
+                        case JAK_JSON_VALUE_STRING:
                                 import_json_object_string_prop(target, member->key.value,
                                                                member->value.value.value.string);
                                 break;
-                        case JSON_VALUE_NUMBER:
+                        case JAK_JSON_VALUE_NUMBER:
                                 if (!import_json_object_number_prop(target,
                                                                     err,
                                                                     member->key.value,
@@ -637,17 +637,17 @@ import_json_object(jak_doc_obj *target, jak_error *err, const struct jak_json_ob
                                         return false;
                                 }
                                 break;
-                        case JSON_VALUE_TRUE:
-                        case JSON_VALUE_FALSE: {
+                        case JAK_JSON_VALUE_TRUE:
+                        case JAK_JSON_VALUE_FALSE: {
                                 jak_archive_field_boolean_t value =
-                                        value_type == JSON_VALUE_TRUE ? JAK_BOOLEAN_TRUE : JAK_BOOLEAN_FALSE;
+                                        value_type == JAK_JSON_VALUE_TRUE ? JAK_BOOLEAN_TRUE : JAK_BOOLEAN_FALSE;
                                 import_json_object_bool_prop(target, member->key.value, value);
                         }
                                 break;
-                        case JSON_VALUE_NULL:
+                        case JAK_JSON_VALUE_NULL:
                                 import_json_object_null_prop(target, member->key.value);
                                 break;
-                        case JSON_VALUE_OBJECT:
+                        case JAK_JSON_VALUE_OBJECT:
                                 if (!import_json_object_object_prop(target,
                                                                     err,
                                                                     member->key.value,
@@ -655,7 +655,7 @@ import_json_object(jak_doc_obj *target, jak_error *err, const struct jak_json_ob
                                         return false;
                                 }
                                 break;
-                        case JSON_VALUE_ARRAY:
+                        case JAK_JSON_VALUE_ARRAY:
                                 if (!import_json_object_array_prop(target,
                                                                    err,
                                                                    member->key.value,
@@ -671,31 +671,31 @@ import_json_object(jak_doc_obj *target, jak_error *err, const struct jak_json_ob
 }
 
 static bool
-import_json(jak_doc_obj *target, jak_error *err, const struct jak_json *json,
+import_json(jak_doc_obj *target, jak_error *err, const jak_json *jak_json,
             jak_doc_entries *partition)
 {
-        enum json_value_type value_type = json->element->value.value_type;
+        jak_json_value_type_e value_type = jak_json->element->value.value_type;
         switch (value_type) {
-                case JSON_VALUE_OBJECT:
-                        if (!import_json_object(target, err, json->element->value.value.object)) {
+                case JAK_JSON_VALUE_OBJECT:
+                        if (!import_json_object(target, err, jak_json->element->value.value.object)) {
                                 return false;
                         }
                         break;
-                case JSON_VALUE_ARRAY: {
-                        const struct jak_vector ofType(struct jak_json_element)
-                                *arrayContent = &json->element->value.value.array->elements.elements;
+                case JAK_JSON_VALUE_ARRAY: {
+                        const struct jak_vector ofType(jak_json_element)
+                                *arrayContent = &jak_json->element->value.value.array->elements.elements;
                         if (!vec_is_empty(arrayContent)) {
-                                const struct jak_json_element *first = vec_get(arrayContent, 0,
-                                                                               struct jak_json_element);
+                                const jak_json_element *first = vec_get(arrayContent, 0,
+                                                                               jak_json_element);
                                 switch (first->value.value_type) {
-                                        case JSON_VALUE_OBJECT:
+                                        case JAK_JSON_VALUE_OBJECT:
                                                 if (!import_json_object(target, err, first->value.value.object)) {
                                                         return false;
                                                 }
                                                 for (size_t i = 1; i < arrayContent->num_elems; i++) {
-                                                        const struct jak_json_element
+                                                        const jak_json_element
                                                                 *element = vec_get(arrayContent, i,
-                                                                                   struct jak_json_element);
+                                                                                   jak_json_element);
                                                         jak_doc_obj *nested;
                                                         jak_doc_obj_push_object(&nested, partition);
                                                         if (!import_json_object(nested, err,
@@ -704,12 +704,12 @@ import_json(jak_doc_obj *target, jak_error *err, const struct jak_json *json,
                                                         }
                                                 }
                                                 break;
-                                        case JSON_VALUE_ARRAY:
-                                        case JSON_VALUE_STRING:
-                                        case JSON_VALUE_NUMBER:
-                                        case JSON_VALUE_TRUE:
-                                        case JSON_VALUE_FALSE:
-                                        case JSON_VALUE_NULL:
+                                        case JAK_JSON_VALUE_ARRAY:
+                                        case JAK_JSON_VALUE_STRING:
+                                        case JAK_JSON_VALUE_NUMBER:
+                                        case JAK_JSON_VALUE_TRUE:
+                                        case JAK_JSON_VALUE_FALSE:
+                                        case JAK_JSON_VALUE_NULL:
                                         default: JAK_ERROR_PRINT_AND_DIE(
                                                 JAK_ERR_INTERNALERR) /** Unsupported operation in arrays */
                                                 break;
@@ -717,26 +717,26 @@ import_json(jak_doc_obj *target, jak_error *err, const struct jak_json *json,
                         }
                 }
                         break;
-                case JSON_VALUE_STRING:
-                case JSON_VALUE_NUMBER:
-                case JSON_VALUE_TRUE:
-                case JSON_VALUE_FALSE:
-                case JSON_VALUE_NULL:
+                case JAK_JSON_VALUE_STRING:
+                case JAK_JSON_VALUE_NUMBER:
+                case JAK_JSON_VALUE_TRUE:
+                case JAK_JSON_VALUE_FALSE:
+                case JAK_JSON_VALUE_NULL:
                 default: JAK_ERROR(err, JAK_ERR_JSONTYPE);
                         return false;
         }
         return true;
 }
 
-jak_doc_obj *jak_doc_bulk_add_json(jak_doc_entries *partition, struct jak_json *json)
+jak_doc_obj *jak_doc_bulk_add_json(jak_doc_entries *partition, jak_json *jak_json)
 {
-        if (!partition || !json) {
+        if (!partition || !jak_json) {
                 return NULL;
         }
 
         jak_doc_obj *converted_json;
         jak_doc_obj_push_object(&converted_json, partition);
-        if (!import_json(converted_json, &json->err, json, partition)) {
+        if (!import_json(converted_json, &jak_json->err, jak_json, partition)) {
                 return NULL;
         }
 

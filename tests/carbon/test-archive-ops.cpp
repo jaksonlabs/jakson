@@ -6,16 +6,16 @@
 
 TEST(CarbonArchiveOpsTest, CreateStreamFromJsonString)
 {
-    struct jak_memblock *stream;
+    jak_memblock *stream;
     jak_error       err;
 
     const char        *json_string = "{ \"test\": 123 }";
     bool               read_optimized = false;
 
     bool status = jak_archive_stream_from_json(&stream, &err, json_string,
-                                                  PACK_NONE, SYNC, 0, read_optimized, false, NULL);
+                                                  JAK_PACK_NONE, SYNC, 0, read_optimized, false, NULL);
 
-    memblock_drop(stream);
+    jak_memblock_drop(stream);
     ASSERT_TRUE(status);
 }
 
@@ -29,7 +29,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonString)
     bool               read_optimized = false;
 
     bool status = jak_archive_from_json(&archive, archive_file, &err, json_string,
-                                           PACK_NONE, SYNC, 0, read_optimized, false, NULL);
+                                           JAK_PACK_NONE, SYNC, 0, read_optimized, false, NULL);
     ASSERT_TRUE(status);
     bool has_index;
     jak_archive_has_query_index_string_id_to_offset(&has_index, &archive);
@@ -49,7 +49,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonStringWithBakedStringIdIndex)
     bool               read_optimized = false;
 
     bool status = jak_archive_from_json(&archive, archive_file, &err, json_string,
-                                           PACK_NONE, SYNC, 0, read_optimized, true, NULL);
+                                           JAK_PACK_NONE, SYNC, 0, read_optimized, true, NULL);
     ASSERT_TRUE(status);
     bool has_index;
     jak_archive_has_query_index_string_id_to_offset(&has_index, &archive);
@@ -216,7 +216,7 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateContains)
 
     const char *needle = "arg";
 
-    string_pred_contains_init(&pred);
+    jak_string_pred_contains_init(&pred);
     result = jak_query_find_ids(&num_match, &query, &pred, (void *) needle, JAK_QUERY_LIMIT_NONE);
     ASSERT_TRUE(result != NULL);
     ASSERT_TRUE(num_match == 4);
@@ -253,7 +253,7 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateEquals)
 
     const char *needle = "phoneNumbers";
 
-    string_pred_equals_init(&pred);
+    jak_string_pred_equals_init(&pred);
     result = jak_query_find_ids(&num_match, &query, &pred, (void *) needle, JAK_QUERY_LIMIT_NONE);
     ASSERT_TRUE(result != NULL);
 

@@ -302,7 +302,7 @@ static void obj_prop_name(jak_carbon_printer *self, struct jak_string *builder,
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-bool json_compact_printer_create(jak_carbon_printer *printer)
+bool jak_json_compact_printer_create(jak_carbon_printer *printer)
 {
         JAK_ERROR_IF_NULL(printer);
         printer->drop = drop;

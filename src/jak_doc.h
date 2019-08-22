@@ -73,7 +73,7 @@ bool jak_doc_obj_push_primtive(jak_doc_entries *entry, const void *value);
 bool jak_doc_obj_push_object(jak_doc_obj **out, jak_doc_entries *entry);
 
 jak_doc_entries *jak_doc_bulk_new_entries(jak_doc_bulk *dst);
-jak_doc_obj *jak_doc_bulk_add_json(jak_doc_entries *partition, struct jak_json *json);
+jak_doc_obj *jak_doc_bulk_add_json(jak_doc_entries *partition, jak_json *jak_json);
 jak_doc_obj *jak_doc_entries_get_root(const jak_doc_entries *partition);
 jak_column_doc *jak_doc_entries_columndoc(const jak_doc_bulk *bulk, const jak_doc_entries *partition, bool read_optimized);
 bool jak_doc_entries_drop(jak_doc_entries *partition);

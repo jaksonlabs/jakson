@@ -31,7 +31,7 @@ bool jak_hashset_create(jak_hashset *map, jak_error *err, size_t key_size, size_
         map->size = 0;
 
         JAK_success_or_jump(vec_create(&map->key_data, NULL, key_size, capacity), error_handling);
-        JAK_success_or_jump(vec_create(&map->table, NULL, sizeof(jak_jak_hashset_bucket), capacity),
+        JAK_success_or_jump(vec_create(&map->table, NULL, sizeof(jak_hashset_bucket), capacity),
                             cleanup_key_data_and_error);
         JAK_success_or_jump(vec_enlarge_size_to_capacity(&map->table), cleanup_key_value_table_and_error);
         JAK_success_or_jump(vec_zero_memory(&map->table), cleanup_key_value_table_and_error);
@@ -75,7 +75,7 @@ struct jak_vector *jak_hashset_keys(jak_hashset *map)
                 struct jak_vector *result = JAK_MALLOC(sizeof(struct jak_vector));
                 vec_create(result, NULL, map->key_data.elem_size, map->key_data.num_elems);
                 for (jak_u32 i = 0; i < map->table.num_elems; i++) {
-                        jak_jak_hashset_bucket *bucket = vec_get(&map->table, i, jak_jak_hashset_bucket);
+                        jak_hashset_bucket *bucket = vec_get(&map->table, i, jak_hashset_bucket);
                         if (bucket->in_use_flag) {
                                 const void *data = vec_at(&map->key_data, bucket->key_idx);
                                 vec_push(result, data, 1);
@@ -146,7 +146,7 @@ bool jak_hashset_avg_displace(float *displace, const jak_hashset *map)
 
         size_t sum_dis = 0;
         for (size_t i = 0; i < map->table.num_elems; i++) {
-                jak_jak_hashset_bucket *bucket = vec_get(&map->table, i, jak_jak_hashset_bucket);
+                jak_hashset_bucket *bucket = vec_get(&map->table, i, jak_hashset_bucket);
                 sum_dis += abs(bucket->displacement);
         }
         *displace = (sum_dis / (float) map->table.num_elems);
@@ -168,12 +168,12 @@ bool jak_hashset_unlock(jak_hashset *map)
         return true;
 }
 
-static inline const void *get_bucket_key(const jak_jak_hashset_bucket *bucket, const jak_hashset *map)
+static inline const void *get_bucket_key(const jak_hashset_bucket *bucket, const jak_hashset *map)
 {
         return map->key_data.base + bucket->key_idx * map->key_data.elem_size;
 }
 
-static void insert(jak_jak_hashset_bucket *bucket, jak_hashset *map, const void *key, jak_i32 displacement)
+static void insert(jak_hashset_bucket *bucket, jak_hashset *map, const void *key, jak_i32 displacement)
 {
         jak_u64 idx = map->key_data.num_elems;
         void *key_datum = vec_new_and_get(&map->key_data, void *);
@@ -193,13 +193,13 @@ static inline uint_fast32_t insert_or_update(jak_hashset *map, const jak_u32 *bu
 
                 jak_u32 bucket_idx = intended_bucket_idx;
 
-                jak_jak_hashset_bucket *bucket = vec_get(&map->table, bucket_idx, jak_jak_hashset_bucket);
+                jak_hashset_bucket *bucket = vec_get(&map->table, bucket_idx, jak_hashset_bucket);
                 if (bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) != 0) {
                         bool fitting_bucket_found = false;
                         jak_u32 displace_idx;
                         for (displace_idx = bucket_idx + 1; displace_idx < map->table.num_elems; displace_idx++) {
-                                jak_jak_hashset_bucket
-                                        *bucket = vec_get(&map->table, displace_idx, jak_jak_hashset_bucket);
+                                jak_hashset_bucket
+                                        *bucket = vec_get(&map->table, displace_idx, jak_hashset_bucket);
                                 fitting_bucket_found = !bucket->in_use_flag || (bucket->in_use_flag
                                                                                 &&
                                                                                 memcmp(get_bucket_key(bucket, map), key,
@@ -219,8 +219,8 @@ static inline uint_fast32_t insert_or_update(jak_hashset *map, const jak_u32 *bu
                         }
                         if (!fitting_bucket_found) {
                                 for (displace_idx = 0; displace_idx < bucket_idx - 1; displace_idx++) {
-                                        const jak_jak_hashset_bucket
-                                                *bucket = vec_get(&map->table, displace_idx, jak_jak_hashset_bucket);
+                                        const jak_hashset_bucket
+                                                *bucket = vec_get(&map->table, displace_idx, jak_hashset_bucket);
                                         fitting_bucket_found = !bucket->in_use_flag || (bucket->in_use_flag
                                                                                         && memcmp(get_bucket_key(bucket,
                                                                                                                  map),
@@ -235,7 +235,7 @@ static inline uint_fast32_t insert_or_update(jak_hashset *map, const jak_u32 *bu
 
                         JAK_ASSERT(fitting_bucket_found == true);
                         bucket_idx = displace_idx;
-                        bucket = vec_get(&map->table, bucket_idx, jak_jak_hashset_bucket);
+                        bucket = vec_get(&map->table, bucket_idx, jak_hashset_bucket);
                 }
 
                 bool is_update =
@@ -323,20 +323,20 @@ bool jak_hashset_remove_if_contained(jak_hashset *map, const void *keys, size_t 
                 bool bucket_found = false;
 
                 for (jak_u32 k = bucket_idx; !bucket_found && k < map->table.num_elems; k++) {
-                        const jak_jak_hashset_bucket *bucket = vec_get(&map->table, k, jak_jak_hashset_bucket);
+                        const jak_hashset_bucket *bucket = vec_get(&map->table, k, jak_hashset_bucket);
                         bucket_found = bucket->in_use_flag
                                        && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
                         actual_idx = k;
                 }
                 for (jak_u32 k = 0; !bucket_found && k < bucket_idx; k++) {
-                        const jak_jak_hashset_bucket *bucket = vec_get(&map->table, k, jak_jak_hashset_bucket);
+                        const jak_hashset_bucket *bucket = vec_get(&map->table, k, jak_hashset_bucket);
                         bucket_found = bucket->in_use_flag
                                        && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
                         actual_idx = k;
                 }
 
                 if (bucket_found) {
-                        jak_jak_hashset_bucket *bucket = vec_get(&map->table, actual_idx, jak_jak_hashset_bucket);
+                        jak_hashset_bucket *bucket = vec_get(&map->table, actual_idx, jak_hashset_bucket);
                         bucket->in_use_flag = false;
                         bucket->key_idx = 0;
                 }
@@ -362,12 +362,12 @@ bool jak_hashset_contains_key(jak_hashset *map, const void *key)
         bool bucket_found = false;
 
         for (jak_u32 k = bucket_idx; !bucket_found && k < map->table.num_elems; k++) {
-                const jak_jak_hashset_bucket *bucket = vec_get(&map->table, k, jak_jak_hashset_bucket);
+                const jak_hashset_bucket *bucket = vec_get(&map->table, k, jak_hashset_bucket);
                 bucket_found =
                         bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
         }
         for (jak_u32 k = 0; !bucket_found && k < bucket_idx; k++) {
-                const jak_jak_hashset_bucket *bucket = vec_get(&map->table, k, jak_jak_hashset_bucket);
+                const jak_hashset_bucket *bucket = vec_get(&map->table, k, jak_hashset_bucket);
                 bucket_found =
                         bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
         }
@@ -412,7 +412,7 @@ bool jak_hashset_rehash(jak_hashset *map)
         JAK_ASSERT(map->key_data.num_elems <= map->table.num_elems);
 
         for (size_t i = 0; i < cpy->table.num_elems; i++) {
-                jak_jak_hashset_bucket *bucket = vec_get(&cpy->table, i, jak_jak_hashset_bucket);
+                jak_hashset_bucket *bucket = vec_get(&cpy->table, i, jak_hashset_bucket);
                 if (bucket->in_use_flag) {
                         const void *old_key = get_bucket_key(bucket, cpy);
                         if (!jak_hashset_insert_or_update(map, old_key, 1)) {

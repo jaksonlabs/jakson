@@ -44,11 +44,11 @@ static int convertJs2Model(struct js_to_context *context, FILE *file, bool optim
     JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
     JAK_CONSOLE_WRITE(file, "  - Parse JSON file%s", "");
-    struct jak_json_parser parser;
-    struct jak_json_err error_desc;
-    struct jak_json jsonAst;
-    json_parser_create(&parser);
-    int status = json_parse(&jsonAst, &error_desc, &parser, context->jsonContent);
+    jak_json_parser parser;
+    jak_json_err error_desc;
+    jak_json jsonAst;
+    jak_json_parser_create(&parser);
+    int status = jak_json_parse(&jsonAst, &error_desc, &parser, context->jsonContent);
     if (!status) {
         JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
         if (error_desc.token) {
@@ -65,7 +65,7 @@ static int convertJs2Model(struct js_to_context *context, FILE *file, bool optim
 
     JAK_CONSOLE_WRITE(file, "  - Test document restrictions%s", "");
     jak_error err;
-    status = json_test(&err, &jsonAst);
+    status = jak_json_test(&err, &jsonAst);
     if (!status) {
         JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
         jak_error_print_to_stderr(&err);
@@ -82,7 +82,7 @@ static int convertJs2Model(struct js_to_context *context, FILE *file, bool optim
 
     JAK_CONSOLE_WRITE(file, "  - Add file to new partition%s", "");
     jak_doc_bulk_add_json(context->partition, &jsonAst);
-    json_drop(&jsonAst);
+    jak_json_drop(&jsonAst);
     JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 
     JAK_CONSOLE_WRITE(file, "  - Cleanup reserved memory%s", "");
@@ -139,7 +139,7 @@ success:
 
 }
 
-bool moduleCheckJsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
+bool moduleCheckJsInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager)
 {
     JAK_UNUSED(manager);
 
@@ -185,23 +185,23 @@ static void tracker_end_create_from_model()
 
 static void tracker_begin_create_from_json()
 {
-    JAK_CONSOLE_WRITELN(stdout, "%s", "  - Create from json started");
+    JAK_CONSOLE_WRITELN(stdout, "%s", "  - Create from jak_json started");
 }
 
 static void tracker_end_create_from_json()
 {
-    JAK_CONSOLE_WRITELN(stdout, "%s", "  - Create from json finished");
+    JAK_CONSOLE_WRITELN(stdout, "%s", "  - Create from jak_json finished");
 }
 
 static void tracker_begin_jak_archive_stream_from_json()
 {
-    JAK_CONSOLE_WRITELN(stdout, "%s", "  - Create stream from json started");
+    JAK_CONSOLE_WRITELN(stdout, "%s", "  - Create stream from jak_json started");
 }
 
 static void tracker_end_jak_archive_stream_from_json()
 
 {
-    JAK_CONSOLE_WRITELN(stdout, "%s", "  - Create stream from json finished");
+    JAK_CONSOLE_WRITELN(stdout, "%s", "  - Create stream from jak_json finished");
 }
 static void tracker_begin_write_archive_file_to_disk()
 {
@@ -235,12 +235,12 @@ static void tracker_end_setup_string_dictionary()
 
 static void tracker_begin_parse_json()
 {
-    JAK_CONSOLE_WRITELN(stdout, "%s", "  - Parsing json started");
+    JAK_CONSOLE_WRITELN(stdout, "%s", "  - Parsing jak_json started");
 }
 
 static void tracker_end_parse_json()
 {
-    JAK_CONSOLE_WRITELN(stdout, "%s", "  - Parsing json finished");
+    JAK_CONSOLE_WRITELN(stdout, "%s", "  - Parsing jak_json finished");
 }
 
 static void tracker_begin_test_json()
@@ -309,7 +309,7 @@ static void tracker_end_string_id_index_baking()
 }
 
 
-bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
+bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager)
 {
     JAK_UNUSED(manager);
 
@@ -323,7 +323,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
         bool flagReadOptimized = false;
         bool flagForceOverwrite = false;
         bool flagBakeStringIdIndex = true;
-        enum jak_packer_type compressor = PACK_NONE;
+        jak_packer_e compressor = JAK_PACK_NONE;
         enum jak_str_dict_tag dic_type = ASYNC;
         int string_dic_async_nthreads = 8;
 
@@ -335,7 +335,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
             if (strncmp(opt, "--", 2) == 0) {
                 if (strcmp(opt, JS_2_CAB_OPTION_SIZE_OPTIMIZED) == 0) {
                     flagSizeOptimized = true;
-                    compressor = PACK_HUFFMAN;
+                    compressor = JAK_PACK_HUFFMAN;
                 } else if (strcmp(opt, JS_2_CAB_OPTION_READ_OPTIMIZED) == 0) {
                     flagReadOptimized = true;
                 } else if (strcmp(opt, JS_2_CAB_OPTION_NO_STRING_ID_INDEX) == 0) {
@@ -346,7 +346,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
                     flagForceOverwrite = true;
                 } else if (strcmp(opt, JS_2_CAB_OPTION_USE_COMPRESSOR) == 0 && i++ < argc) {
                     const char *compressor_name = argv[i];
-                    if (!pack_by_name(&compressor, compressor_name)) {
+                    if (!jak_pack_by_name(&compressor, compressor_name)) {
                         JAK_CONSOLE_WRITE(file, "unsupported pack requested: '%s'",
                                              compressor_name);
                         JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
@@ -387,7 +387,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
             }
         }
 
-        if (!flagSizeOptimized && compressor != PACK_NONE) {
+        if (!flagSizeOptimized && compressor != JAK_PACK_NONE) {
             JAK_CONSOLE_WRITELN(file, "** WARNING ** a pack was specified but will be ignored because size "
                 "optimization is turned off. Use '--size-optimized' such that a pack has any effect%s", "");
         }
@@ -470,7 +470,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
 
         free(jsonContent);
 
-//        struct jak_memblock *carbonFile;
+//        jak_memblock *carbonFile;
 //        JAK_CONSOLE_WRITE(file, "  - Convert partition into in-memory CARBON file%s", "");
 //        jak_error err;
 //        if (!jak_archive_from_model(&carbonFile, &err, cabContext.partitionMetaModel, pack, flagBakeStringIdIndex)) {
@@ -495,7 +495,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
 //        JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 //
 //        JAK_CONSOLE_WRITE(file, "  - Clean up in-memory CARBON file%s", "");
-//        memblock_drop(carbonFile);
+//        jak_memblock_drop(carbonFile);
 //        JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
 //
 //        cleanup(file, &cabContext);
@@ -506,7 +506,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
     }
 }
 
-bool moduleViewCabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
+bool moduleViewCabInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager)
 {
     JAK_UNUSED(argc);
     JAK_UNUSED(argv);
@@ -526,13 +526,13 @@ bool moduleViewCabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *m
         }
         jak_error err;
         FILE *inputFile = fopen(carbonFilePath, "r");
-        struct jak_memblock *stream;
+        jak_memblock *stream;
         jak_archive_load(&stream, inputFile);
         if (!jak_archive_print(stdout, &err, stream)) {
             jak_error_print_to_stderr(&err);
             jak_error_drop(&err);
         }
-        memblock_drop(stream);
+        jak_memblock_drop(stream);
         fclose(inputFile);
 
     }
@@ -540,7 +540,7 @@ bool moduleViewCabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *m
     return true;
 }
 
-bool moduleInspectInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
+bool moduleInspectInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager)
 {
     JAK_UNUSED(manager);
 
@@ -584,7 +584,7 @@ bool moduleInspectInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *m
     return true;
 }
 
-bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
+bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager)
 {
     JAK_UNUSED(argc);
     JAK_UNUSED(argv);
@@ -626,7 +626,7 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
     }
 }
 
-bool moduleListInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
+bool moduleListInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager)
 {
     JAK_UNUSED(manager);
 
@@ -638,8 +638,8 @@ bool moduleListInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *mana
     } else {
         const char *constant = argv[0];
         if (strcmp(constant, "compressors") == 0) {
-            for (size_t i = 0; i < JAK_ARRAY_LENGTH(compressor_strategy_register); i++) {
-                JAK_CONSOLE_WRITELN(file, "%s", compressor_strategy_register[i].name);
+            for (size_t i = 0; i < JAK_ARRAY_LENGTH(jak_global_pack_strategy_register); i++) {
+                JAK_CONSOLE_WRITELN(file, "%s", jak_global_pack_strategy_register[i].name);
             }
         } else {
             JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
