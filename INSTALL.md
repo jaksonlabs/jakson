@@ -17,21 +17,21 @@ information in a log. To To turn on trace, information, warn or debug log in deb
 with all logs, use `cmake -DBUILD_TYPE=Debug -DLOG_TRACE=on -DLOG_INFO=on -DLOG_WARN=on -DLOG_DEBUG=on .`.
 
 
-A tool to work with Carbon files (called `ark-carbon`) is shipped with this library.
+A tool to work with Carbon files (called `jakson-tool`) is shipped with this library.
 This tool is automatically built when `make` is called, and installed via `make install`. However, to build the tool 
 via its target, type 
 
 ```
 $ cmake .
-$ make ark-carbon
+$ make jakson-tool
 ```
 
 After a successful build, the tool is located in the `build` directory. 
-The tool supports the POSIX standard for its arguments. Type `build/ark-carbon` for usage instructions.
+The tool supports the POSIX standard for its arguments. Type `build/jakson-tool` for usage instructions.
 
 In case `make install` was called, 
 ```
-$ ark-carbon
+$ jakson-tool
 ```
  
 is enough to execute the tool.
