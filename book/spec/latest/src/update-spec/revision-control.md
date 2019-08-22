@@ -26,8 +26,8 @@ bool global_id_create(global_id_t *out)
                 const char *file = __FILE__;
                 const char *time = __TIME__;
 
-                global_build_path_bit = ARK_HASH_BERNSTEIN(strlen(file), file) % 2;
-                global_build_date_bit = ARK_HASH_BERNSTEIN(strlen(time), time) % 2;
+                global_build_path_bit = JAK_HASH_BERNSTEIN(strlen(file), file) % 2;
+                global_build_date_bit = JAK_HASH_BERNSTEIN(strlen(time), time) % 2;
         }
 
         if (!thread_local_init) {
@@ -40,7 +40,7 @@ bool global_id_create(global_id_t *out)
         }
 
         bool capacity_left = (thread_local_counter != thread_local_counter_limit);
-        error_print_if(!capacity_left, ARK_ERR_THREADOOOBJIDS)
+        error_print_if(!capacity_left, JAK_ERR_THREADOOOBJIDS)
         if (likely(capacity_left)) {
                 union global_id internal =
                         {.global_wallclock  = time_now_wallclock(), 

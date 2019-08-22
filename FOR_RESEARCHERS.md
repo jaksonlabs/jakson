@@ -1,9 +1,9 @@
 ### Introduction
 
-Libcarbon is to be used according its [licence agreement](LICENSE), and free of any charge. However, for academic purposes and research in general, there is an extension to this licence which requires you to cite a reference paper describing libcarbon.
+Jakson is to be used according its [licence agreement](LICENSE), and free of any charge. However, for academic purposes and research in general, there is an extension to this licence which requires you to cite a reference paper describing libcarbon.
 
 ### Licence for Academic Purposes
-The [licence agreement](LICENSE) holds. In addition, when you report results in context of any scientific research that uses libcarbon as part of its solution, or introspects the library directly, you are required to mention libcarbon in your publication by citing the following reference:  
+The [licence agreement](LICENSE) holds. In addition, when you report results in context of any scientific research that uses Jakson as part of its solution, or introspects the library directly, you are required to mention libcarbon in your publication by citing the following reference:  
 ```
 @inproceedings{Pinnecke:BTW19,
     author = {Marcus Pinnecke and Gabriel Campero and Roman Zoun and David Broneske and Gunter Saake},
