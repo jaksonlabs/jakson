@@ -6,7 +6,7 @@
 
 ### Version and Enviroment
 
-Libcarbon version: `add version here`
+Jakson version: `add version here`
 
 GitHub Branch (if needed): `add branch name here`
 

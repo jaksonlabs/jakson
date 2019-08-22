@@ -47,8 +47,23 @@ JSON snippet
 [ -4, 2, null ]
 ```
 
-A (compacted) Carbon `carbon-i8`.
+A (compacted) Carbon `column-i8`.
 
 ```
 [5] (3)(3) [-4] [2] [-128]
+```
+
+### Record Container Compatibility
+
+> Note that a `column` container cannot replace a `record` container. If the input Json string is a plain Json array, this array is always stored as `record` (i.e., an array) rather than a column. To force a `column` container, the input Json array must be wrapped with an object.
+
+JSON file
+```json
+[ 1, 2, 3 ]
+```
+
+A (compacted) Carbon `record` with no primary key encoding the JSON file from above as `array` container.
+
+```
+[nokey][[] [1][2][3] []] 
 ```

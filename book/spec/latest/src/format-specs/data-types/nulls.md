@@ -2,7 +2,7 @@
 
 Carbon Type | Description     | Size   | *null*-Value | Marker 
 ------------|-----------------|--------|--------------|------------------------
-`null`      | absence of data | 0<sup>+</sup> byte | `null` value | `[n]` or dedicated value
+`null`      | absence of data (user-defined) | 0<sup>+</sup> byte | `null` value | `[n]` or dedicated value
 
 
 ## Encoding as Field Value

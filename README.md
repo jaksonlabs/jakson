@@ -19,7 +19,7 @@ The latest release can always be found in `master` branch in the
 
 ## Tooling
 
-This library shipped with a tool to work on CARBON files, see [ark-carbon](tools/carbon/). 
+This library shipped with a tool to work on CARBON files, see [jakson-tool](tools/jakson-tool/). 
 
 ## License
 

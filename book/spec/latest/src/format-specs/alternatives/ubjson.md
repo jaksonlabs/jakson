@@ -62,3 +62,5 @@ In direct comparison, Carbon focus more on semantics (e.g., embedding additional
 - Revision numbering as dedicated (variable-length) meta-data field in Carbon
 - Record identification via (optional) primary key as meta-data field in Carbon, and defined semantic about record identity
 - Overall, typically smaller binary size for Carbon files compared to UBJSON files
+- For Carbon, the evaluation of dot-path expressions is well-defined and specified
+- Carbon specificies two way to express absence of data, `null` and `nil` where the first one maps to user-defined data and the second is a dedicated result value for dot-path expressions.
