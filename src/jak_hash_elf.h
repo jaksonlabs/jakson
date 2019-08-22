@@ -29,7 +29,7 @@ JAK_BEGIN_DECL
 
 #define JAK_HASH_ELF(key_size, key)                                                                                    \
 ({                                                                                                                     \
-    assert ((key != NULL) && (key_size > 0));                                                                          \
+    JAK_ASSERT ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
     hash32_t hash = 0, g;                                                                                              \
     for (size_t i = 0; i < key_size; i++) {                                                                            \

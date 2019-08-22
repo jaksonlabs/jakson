@@ -25,8 +25,8 @@ bool string_create(struct jak_string *builder)
 
 bool string_create_ex(struct jak_string *builder, size_t capacity)
 {
-        error_if_null(builder)
-        error_if_null(capacity)
+        JAK_ERROR_IF_NULL(builder)
+        JAK_ERROR_IF_NULL(capacity)
         error_init(&builder->err);
         builder->cap = capacity;
         builder->end = 0;
@@ -38,19 +38,19 @@ bool string_create_ex(struct jak_string *builder, size_t capacity)
 
 bool string_add(struct jak_string *builder, const char *str)
 {
-        error_if_null(builder)
-        error_if_null(str)
+        JAK_ERROR_IF_NULL(builder)
+        JAK_ERROR_IF_NULL(str)
         jak_u64 len = strlen(str);
         return string_add_nchar(builder, str, len);
 }
 
 bool string_add_nchar(struct jak_string *builder, const char *str, jak_u64 strlen)
 {
-        error_if_null(builder)
-        error_if_null(str)
+        JAK_ERROR_IF_NULL(builder)
+        JAK_ERROR_IF_NULL(str)
 
         /* resize if needed */
-        if (unlikely(builder->end + strlen >= builder->cap)) {
+        if (JAK_UNLIKELY(builder->end + strlen >= builder->cap)) {
                 size_t new_cap = (builder->end + strlen) * 1.7f;
                 builder->data = realloc(builder->data, new_cap);
                 error_if_and_return(!builder->data, &builder->err, JAK_ERR_REALLOCERR, false);
@@ -67,7 +67,7 @@ bool string_add_nchar(struct jak_string *builder, const char *str, jak_u64 strle
 
 bool string_add_char(struct jak_string *builder, char c)
 {
-        error_if_null(builder)
+        JAK_ERROR_IF_NULL(builder)
         char buffer[2];
         sprintf(buffer, "%c", c);
         return string_add(builder, buffer);
@@ -154,7 +154,7 @@ bool string_add_float(struct jak_string *builder, float value)
 
 bool string_clear(struct jak_string *builder)
 {
-        error_if_null(builder)
+        JAK_ERROR_IF_NULL(builder)
         JAK_zero_memory(builder->data, builder->cap);
         builder->end = 0;
         return true;
@@ -162,9 +162,9 @@ bool string_clear(struct jak_string *builder)
 
 bool string_ensure_capacity(struct jak_string *builder, jak_u64 cap)
 {
-        error_if_null(builder)
+        JAK_ERROR_IF_NULL(builder)
         /* resize if needed */
-        if (unlikely(cap > builder->cap)) {
+        if (JAK_UNLIKELY(cap > builder->cap)) {
                 size_t new_cap = cap * 1.7f;
                 builder->data = realloc(builder->data, new_cap);
                 error_if_and_return(!builder->data, &builder->err, JAK_ERR_REALLOCERR, false);
@@ -176,13 +176,13 @@ bool string_ensure_capacity(struct jak_string *builder, jak_u64 cap)
 
 size_t string_len(struct jak_string *builder)
 {
-        error_if_null(builder)
+        JAK_ERROR_IF_NULL(builder)
         return builder->end;
 }
 
 bool string_drop(struct jak_string *builder)
 {
-        error_if_null(builder)
+        JAK_ERROR_IF_NULL(builder)
         free(builder->data);
         return true;
 }
@@ -194,8 +194,8 @@ bool string_print(struct jak_string *builder)
 
 bool string_fprint(FILE *file, struct jak_string *builder)
 {
-        error_if_null(file)
-        error_if_null(builder)
+        JAK_ERROR_IF_NULL(file)
+        JAK_ERROR_IF_NULL(builder)
         fprintf(file, "%s\n", string_cstr(builder));
         return true;
 }

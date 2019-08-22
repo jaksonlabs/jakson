@@ -16,7 +16,6 @@
  */
 
 #include <inttypes.h>
-#include <assert.h>
 #include <jak_pack.h>
 #include <jak_pack_none.h>
 
@@ -46,7 +45,7 @@ bool pack_none_drop(struct jak_packer *self)
 }
 
 bool pack_none_write_extra(struct jak_packer *self, struct jak_memfile *dst,
-                           const struct vector ofType (const char *) *strings)
+                           const struct jak_vector ofType (const char *) *strings)
 {
         JAK_check_tag(self->tag, PACK_NONE);
 

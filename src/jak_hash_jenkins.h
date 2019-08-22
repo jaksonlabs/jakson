@@ -43,7 +43,7 @@ JAK_BEGIN_DECL
 #define JAK_HASH_JENKINS(keySizeIn, key)                                                                               \
 ({                                                                                                                     \
     size_t key_size = keySizeIn;                                                                                       \
-    assert ((key != NULL) && (key_size > 0));                                                                          \
+    JAK_ASSERT ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
     unsigned a, b;                                                                                                     \
     unsigned c = 0;                                                                                                    \

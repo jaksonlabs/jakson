@@ -123,7 +123,7 @@ static void const_false(struct printer *self, bool is_null, struct jak_string *b
 static void val_signed(struct printer *self, struct jak_string *builder, const jak_i64 *value)
 {
         JAK_UNUSED(self);
-        if (likely(value != NULL)) {
+        if (JAK_LIKELY(value != NULL)) {
                 string_add_i64(builder, *value);
         } else {
                 string_add(builder, NULL_STR);
@@ -134,7 +134,7 @@ static void val_signed(struct printer *self, struct jak_string *builder, const j
 static void val_unsigned(struct printer *self, struct jak_string *builder, const jak_u64 *value)
 {
         JAK_UNUSED(self);
-        if (likely(value != NULL)) {
+        if (JAK_LIKELY(value != NULL)) {
                 string_add_u64(builder, *value);
         } else {
                 string_add(builder, NULL_STR);
@@ -144,7 +144,7 @@ static void val_unsigned(struct printer *self, struct jak_string *builder, const
 static void val_float(struct printer *self, struct jak_string *builder, const float *value)
 {
         JAK_UNUSED(self);
-        if (likely(value != NULL)) {
+        if (JAK_LIKELY(value != NULL)) {
                 string_add_float(builder, *value);
         } else {
                 string_add(builder, NULL_STR);
@@ -181,7 +181,7 @@ static void print_binary(struct printer *self, struct jak_string *builder, const
                 error_print_if(!extra->buffer, JAK_ERR_REALLOCERR);
         }
 
-        assert(extra->buffer_size >= required_buff_size);
+        JAK_ASSERT(extra->buffer_size >= required_buff_size);
         JAK_zero_memory(extra->buffer, extra->buffer_size);
         /* copy binary data into buffer, and leave one (zero'd) byte free; null-termination is required by libb64 */
         memcpy(data_of(extra->buffer), binary->blob, binary->blob_len);
@@ -304,7 +304,7 @@ static void obj_prop_name(struct printer *self, struct jak_string *builder,
 
 bool json_compact_printer_create(struct printer *printer)
 {
-        error_if_null(printer);
+        JAK_ERROR_IF_NULL(printer);
         printer->drop = drop;
 
         printer->record_begin = nop;

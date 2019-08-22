@@ -30,15 +30,15 @@ bool error_init(struct jak_error *err)
 
 bool error_cpy(struct jak_error *dst, const struct jak_error *src)
 {
-        error_if_null(dst);
-        error_if_null(src);
+        JAK_ERROR_IF_NULL(dst);
+        JAK_ERROR_IF_NULL(src);
         *dst = *src;
         return true;
 }
 
 bool error_drop(struct jak_error *err)
 {
-        error_if_null(err);
+        JAK_ERROR_IF_NULL(err);
         if (err->details) {
                 free(err->details);
                 err->details = NULL;

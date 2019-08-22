@@ -57,7 +57,7 @@ struct path_index_node
     enum carbon_field_type field_type;
     jak_offset_t field_offset;
 
-    struct vector ofType(struct path_index_node) sub_entries;
+    struct jak_vector ofType(struct path_index_node) sub_entries;
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -449,7 +449,7 @@ static void container_field_flat(struct jak_memfile *file, struct path_index_nod
                 case CARBON_JAK_FIELD_TYPE_BINARY:
                 case CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM:
                         /* any path will end with this kind of field, and therefore no subsequent elements exists */
-                        assert(node->sub_entries.num_elems == 0);
+                        JAK_ASSERT(node->sub_entries.num_elems == 0);
                         break;
                 case CARBON_JAK_FIELD_TYPE_OBJECT:
                 case CARBON_JAK_FIELD_TYPE_ARRAY:
@@ -484,7 +484,7 @@ static void array_flat(struct jak_memfile *file, struct path_index_node *node)
 {
         memfile_write_byte(file, PATH_MARKER_ARRAY_NODE);
         field_ref_write(file, node);
-        if (unlikely(node->type == PATH_ROOT)) {
+        if (JAK_UNLIKELY(node->type == PATH_ROOT)) {
                 container_contents_flat(file, node);
         } else {
                 container_field_flat(file, node);
@@ -789,7 +789,7 @@ static void array_into_carbon(struct jak_carbon_insert *ins, struct jak_carbon_p
 
         struct jak_carbon_insert_object_state object;
         struct jak_carbon_insert *oins = carbon_insert_prop_object_begin(&object, ins, "nodes", 1024);
-        if (unlikely(is_root)) {
+        if (JAK_UNLIKELY(is_root)) {
                 container_contents_into_carbon(oins, index);
         } else {
                 container_into_carbon(oins, index, field_type);
@@ -808,7 +808,7 @@ static void array_to_str(struct jak_string *str, struct jak_carbon_path_index *i
 
         jak_u8 field_type = field_ref_to_str(str, index);
 
-        if (unlikely(is_root)) {
+        if (JAK_UNLIKELY(is_root)) {
                 container_contents_to_str(str, index, intent_level);
         } else {
                 container_to_str(str, index, field_type, intent_level);
@@ -819,7 +819,7 @@ static void column_flat(struct jak_memfile *file, struct path_index_node *node)
 {
         memfile_write_byte(file, PATH_MARKER_COLUMN_NODE);
         field_ref_write(file, node);
-        assert(node->sub_entries.num_elems == 0);
+        JAK_ASSERT(node->sub_entries.num_elems == 0);
 }
 
 static void node_flat(struct jak_memfile *file, struct path_index_node *node)
@@ -955,8 +955,8 @@ static void record_ref_to_carbon(struct jak_carbon_insert *roins, struct jak_car
 
 bool carbon_path_index_create(struct jak_carbon_path_index *index, struct jak_carbon *doc)
 {
-        error_if_null(index);
-        error_if_null(doc);
+        JAK_ERROR_IF_NULL(index);
+        JAK_ERROR_IF_NULL(doc);
         memblock_create(&index->memblock, PATH_INDEX_CAPACITY);
         memfile_open(&index->memfile, index->memblock, READ_WRITE);
         error_init(&index->err);
@@ -988,24 +988,24 @@ const void *carbon_path_index_raw_data(jak_u64 *size, struct jak_carbon_path_ind
 
 bool carbon_path_index_commit_hash(jak_u64 *commit_hash, struct jak_carbon_path_index *index)
 {
-        error_if_null(commit_hash)
-        error_if_null(index)
+        JAK_ERROR_IF_NULL(commit_hash)
+        JAK_ERROR_IF_NULL(index)
         record_ref_read(NULL, NULL, commit_hash, &index->memfile);
         return true;
 }
 
 bool carbon_path_index_key_type(enum carbon_key_type *key_type, struct jak_carbon_path_index *index)
 {
-        error_if_null(key_type)
-        error_if_null(index)
+        JAK_ERROR_IF_NULL(key_type)
+        JAK_ERROR_IF_NULL(index)
         record_ref_read(key_type, NULL, NULL, &index->memfile);
         return true;
 }
 
 bool carbon_path_index_key_unsigned_value(jak_u64 *key, struct jak_carbon_path_index *index)
 {
-        error_if_null(key)
-        error_if_null(index)
+        JAK_ERROR_IF_NULL(key)
+        JAK_ERROR_IF_NULL(index)
         enum carbon_key_type key_type;
         jak_u64 ret = *(jak_u64 *)record_ref_read(&key_type, NULL, NULL, &index->memfile);
         error_if(key_type != CARBON_KEY_AUTOKEY && key_type != CARBON_KEY_UKEY, &index->err, JAK_ERR_TYPEMISMATCH);
@@ -1015,8 +1015,8 @@ bool carbon_path_index_key_unsigned_value(jak_u64 *key, struct jak_carbon_path_i
 
 bool carbon_path_index_key_signed_value(jak_i64 *key, struct jak_carbon_path_index *index)
 {
-        error_if_null(key)
-        error_if_null(index)
+        JAK_ERROR_IF_NULL(key)
+        JAK_ERROR_IF_NULL(index)
         enum carbon_key_type key_type;
         jak_i64 ret = *(jak_i64 *)record_ref_read(&key_type, NULL, NULL, &index->memfile);
         error_if(key_type != CARBON_KEY_IKEY, &index->err, JAK_ERR_TYPEMISMATCH);
@@ -1039,16 +1039,16 @@ const char *carbon_path_index_key_string_value(jak_u64 *str_len, struct jak_carb
 
 bool carbon_path_index_indexes_doc(struct jak_carbon_path_index *index, struct jak_carbon *doc)
 {
-        error_if_null(doc);
+        JAK_ERROR_IF_NULL(doc);
 
-        jak_u64 index_hash, doc_hash;
+        jak_u64 index_hash = 0, doc_hash = 0;
         carbon_path_index_commit_hash(&index_hash, index);
         carbon_commit_hash(&doc_hash, doc);
-        if (likely(index_hash == doc_hash)) {
+        if (JAK_LIKELY(index_hash == doc_hash)) {
                 enum carbon_key_type index_key_type, doc_key_type;
                 carbon_path_index_key_type(&index_key_type, index);
                 carbon_key_type(&doc_key_type, doc);
-                if (likely(index_key_type == doc_key_type)) {
+                if (JAK_LIKELY(index_key_type == doc_key_type)) {
                         switch (index_key_type) {
                                 case CARBON_KEY_NOKEY:
                                         return true;
@@ -1089,9 +1089,9 @@ bool carbon_path_index_indexes_doc(struct jak_carbon_path_index *index, struct j
 
 bool carbon_path_index_it_open(struct jak_carbon_path_index_it *it, struct jak_carbon_path_index *index, struct jak_carbon *doc)
 {
-        error_if_null(it)
-        error_if_null(index)
-        error_if_null(doc)
+        JAK_ERROR_IF_NULL(it)
+        JAK_ERROR_IF_NULL(index)
+        JAK_ERROR_IF_NULL(doc)
         if (carbon_path_index_indexes_doc(index, doc)) {
                 JAK_zero_memory(it, sizeof(struct jak_carbon_path_index_it));
                 error_init(&it->err);

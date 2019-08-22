@@ -58,7 +58,7 @@ static void write_skey(struct jak_memfile *file)
 
 bool carbon_key_create(struct jak_memfile *file, enum carbon_key_type type, struct jak_error *err)
 {
-        error_if_null(file)
+        JAK_ERROR_IF_NULL(file)
 
         switch (type) {
                 case CARBON_KEY_NOKEY:
@@ -85,14 +85,14 @@ bool carbon_key_create(struct jak_memfile *file, enum carbon_key_type type, stru
 
 bool carbon_key_skip(enum carbon_key_type *out, struct jak_memfile *file)
 {
-        error_if_null(file)
+        JAK_ERROR_IF_NULL(file)
         carbon_key_read(NULL, out, file);
         return true;
 }
 
 bool carbon_key_write_unsigned(struct jak_memfile *file, jak_u64 key)
 {
-        error_if_null(file)
+        JAK_ERROR_IF_NULL(file)
 
         JAK_declare_and_init(enum carbon_key_type, key_type)
 
@@ -108,7 +108,7 @@ bool carbon_key_write_unsigned(struct jak_memfile *file, jak_u64 key)
 
 bool carbon_key_write_signed(struct jak_memfile *file, jak_i64 key)
 {
-        error_if_null(file)
+        JAK_ERROR_IF_NULL(file)
 
         JAK_declare_and_init(enum carbon_key_type, key_type)
 
@@ -129,7 +129,7 @@ bool carbon_key_update_string(struct jak_memfile *file, const char *key)
 
 bool carbon_key_update_string_wnchar(struct jak_memfile *file, const char *key, size_t length)
 {
-        error_if_null(file)
+        JAK_ERROR_IF_NULL(file)
         JAK_declare_and_init(enum carbon_key_type, key_type)
         carbon_key_read_type(&key_type, file);
         if (carbon_key_is_string_type(key_type)) {
@@ -143,7 +143,7 @@ bool carbon_key_update_string_wnchar(struct jak_memfile *file, const char *key, 
 
 bool carbon_key_write_string(struct jak_memfile *file, const char *key)
 {
-        error_if_null(file)
+        JAK_ERROR_IF_NULL(file)
 
         JAK_declare_and_init(enum carbon_key_type, key_type)
 
@@ -161,7 +161,7 @@ bool carbon_key_read_type(enum carbon_key_type *out, struct jak_memfile *file)
 {
         jak_u8 marker = *JAK_MEMFILE_READ_TYPE(file, jak_u8);
 
-        assert(marker == JAK_CARBON_MARKER_KEY_NOKEY || marker == JAK_CARBON_MARKER_KEY_AUTOKEY || marker ==
+        JAK_ASSERT(marker == JAK_CARBON_MARKER_KEY_NOKEY || marker == JAK_CARBON_MARKER_KEY_AUTOKEY || marker ==
                                                                                                            JAK_CARBON_MARKER_KEY_UKEY ||
                marker == JAK_CARBON_MARKER_KEY_IKEY || marker == JAK_CARBON_MARKER_KEY_SKEY);
 
@@ -189,7 +189,7 @@ bool carbon_key_read_type(enum carbon_key_type *out, struct jak_memfile *file)
 
 const void *carbon_key_read(jak_u64 *len, enum carbon_key_type *out, struct jak_memfile *file)
 {
-        enum carbon_key_type key_type;
+        enum carbon_key_type key_type = 0;
         carbon_key_read_type(&key_type, file);
 
         JAK_optional_set(out, key_type)

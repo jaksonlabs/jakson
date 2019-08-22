@@ -79,21 +79,21 @@ struct jak_encoded_doc_prop {
 
 struct jak_encoded_doc_prop_array {
     struct jak_encoded_doc_prop_header header;
-    struct vector ofType(union encoded_doc_value) values;
+    struct jak_vector ofType(union encoded_doc_value) values;
 };
 
 struct jak_encoded_doc {
     struct jak_encoded_doc_list *context;
     jak_global_id_t object_id;
-    struct vector ofType(struct jak_encoded_doc_prop) props;
-    struct vector ofType(struct jak_encoded_doc_prop_array) props_arrays;
+    struct jak_vector ofType(struct jak_encoded_doc_prop) props;
+    struct jak_vector ofType(struct jak_encoded_doc_prop_array) props_arrays;
     struct hashtable ofMapping(jak_archive_field_sid_t, jak_u32) prop_array_index; /* maps key to index in prop arrays */
     struct jak_error err;
 };
 
 struct jak_encoded_doc_list {
     struct jak_archive *archive;
-    struct vector ofType(struct jak_encoded_doc) flat_object_collection;   /* list of objects; also nested ones */
+    struct jak_vector ofType(struct jak_encoded_doc) flat_object_collection;   /* list of objects; also nested ones */
     struct hashtable ofMapping(object_id_t, jak_u32) index;   /* maps oid to index in collection */
     struct jak_error err;
 };

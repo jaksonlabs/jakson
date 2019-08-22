@@ -36,7 +36,7 @@ struct cmdopt {
 };
 
 struct cmdopt_group {
-    struct vector ofType(struct cmdopt) cmd_options;
+    struct jak_vector ofType(struct cmdopt) cmd_options;
     char *desc;
 };
 
@@ -45,7 +45,7 @@ enum mod_arg_policy {
 };
 
 struct cmdopt_mgr {
-    struct vector ofType(struct cmdopt_group) groups;
+    struct jak_vector ofType(struct cmdopt_group) groups;
 
     enum mod_arg_policy policy;
 

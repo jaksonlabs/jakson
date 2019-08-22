@@ -45,7 +45,7 @@
 #define WRITE_ARRAY_VALUES(memfile, values_vec, type)                                                                  \
 {                                                                                                                      \
     for (jak_u32 i = 0; i < values_vec->num_elems; i++) {                                                             \
-        struct vector ofType(type) *nested_values = vec_get(values_vec, i, struct vector);                     \
+        struct jak_vector ofType(type) *nested_values = vec_get(values_vec, i, struct jak_vector);                     \
         WRITE_PRIMITIVE_VALUES(memfile, nested_values, type);                                                          \
     }                                                                                                                  \
 }
@@ -150,10 +150,10 @@ bool jak_archive_from_json(struct jak_archive *out, const char *file, struct jak
                        bool read_optimized,
                        bool bake_string_id_index, struct jak_archive_callback *callback)
 {
-        error_if_null(out);
-        error_if_null(file);
-        error_if_null(err);
-        error_if_null(json_string);
+        JAK_ERROR_IF_NULL(out);
+        JAK_ERROR_IF_NULL(file);
+        JAK_ERROR_IF_NULL(err);
+        JAK_ERROR_IF_NULL(json_string);
 
         JAK_optional_call(callback, begin_create_from_json);
 
@@ -212,9 +212,9 @@ bool jak_archive_stream_from_json(struct jak_memblock **stream, struct jak_error
                               bool read_optimized,
                               bool bake_id_index, struct jak_archive_callback *callback)
 {
-        error_if_null(stream);
-        error_if_null(err);
-        error_if_null(json_string);
+        JAK_ERROR_IF_NULL(stream);
+        JAK_ERROR_IF_NULL(err);
+        JAK_ERROR_IF_NULL(json_string);
 
         struct jak_string_dict dic;
         struct jak_json_parser parser;
@@ -338,9 +338,9 @@ static bool run_string_id_baking(struct jak_error *err, struct jak_memblock **st
 
         struct jak_sid_to_offset *index;
         struct jak_archive_query query;
-        query_create(&query, &archive);
-        query_create_index_string_id_to_offset(&index, &query);
-        query_drop(&query);
+        jak_query_create(&query, &archive);
+        jak_query_create_index_string_id_to_offset(&index, &query);
+        jak_query_drop(&query);
         jak_archive_close(&archive);
 
         if ((tmp_file = fopen(tmp_file_name, "rb+")) == NULL) {
@@ -350,7 +350,7 @@ static bool run_string_id_baking(struct jak_error *err, struct jak_memblock **st
 
         fseek(tmp_file, 0, SEEK_END);
         jak_offset_t index_pos = ftell(tmp_file);
-        query_index_id_to_offset_serialize(tmp_file, err, index);
+        jak_query_index_id_to_offset_serialize(tmp_file, err, index);
         jak_offset_t file_length = ftell(tmp_file);
         fseek(tmp_file, 0, SEEK_SET);
 
@@ -363,7 +363,7 @@ static bool run_string_id_baking(struct jak_error *err, struct jak_memblock **st
         error_if(nwrite != 1, err, JAK_ERR_FWRITE_FAILED);
         fseek(tmp_file, 0, SEEK_SET);
 
-        query_drop_index_string_id_to_offset(index);
+        jak_query_drop_index_string_id_to_offset(index);
 
         memblock_drop(*stream);
         memblock_from_file(stream, tmp_file, file_length);
@@ -376,9 +376,9 @@ static bool run_string_id_baking(struct jak_error *err, struct jak_memblock **st
 bool jak_archive_from_model(struct jak_memblock **stream, struct jak_error *err, struct jak_column_doc *model, enum jak_packer_type compressor,
                         bool bake_string_id_index, struct jak_archive_callback *callback)
 {
-        error_if_null(model)
-        error_if_null(stream)
-        error_if_null(err)
+        JAK_ERROR_IF_NULL(model)
+        JAK_ERROR_IF_NULL(stream)
+        JAK_ERROR_IF_NULL(err)
 
         JAK_optional_call(callback, begin_create_from_model)
 
@@ -424,7 +424,7 @@ bool jak_archive_from_model(struct jak_memblock **stream, struct jak_error *err,
 
 struct jak_io_context *jak_archive_io_context_create(struct jak_archive *archive)
 {
-        error_if_null(archive);
+        JAK_ERROR_IF_NULL(archive);
         struct jak_io_context *context;
         if (jak_io_context_create(&context, &archive->err, archive->disk_file_path)) {
                 return context;
@@ -506,7 +506,7 @@ static const char *array_value_type_to_string(struct jak_error *err, jak_archive
         }
 }
 
-static void write_primitive_key_column(struct jak_memfile *memfile, struct vector ofType(jak_archive_field_sid_t) *keys)
+static void write_primitive_key_column(struct jak_memfile *memfile, struct jak_vector ofType(jak_archive_field_sid_t) *keys)
 {
         jak_archive_field_sid_t *string_ids = vec_all(keys, jak_archive_field_sid_t);
         memfile_write(memfile, string_ids, keys->num_elems * sizeof(jak_archive_field_sid_t));
@@ -528,9 +528,9 @@ static void write_var_value_offset_column(struct jak_memfile *file, jak_offset_t
 }
 
 static bool write_primitive_fixed_value_column(struct jak_memfile *memfile, struct jak_error *err, jak_archive_field_e type,
-                                               struct vector ofType(T) *values_vec)
+                                               struct jak_vector ofType(T) *values_vec)
 {
-        assert (type != JAK_FIELD_OBJECT); /** use 'write_primitive_var_value_column' instead */
+        JAK_ASSERT (type != JAK_FIELD_OBJECT); /** use 'write_primitive_var_value_column' instead */
 
         switch (type) {
                 case JAK_FIELD_NULL:
@@ -564,7 +564,7 @@ static bool write_primitive_fixed_value_column(struct jak_memfile *memfile, stru
 }
 
 static jak_offset_t *__write_primitive_column(struct jak_memfile *memfile, struct jak_error *err,
-                                          struct vector ofType(struct jak_column_doc_obj) *values_vec,
+                                          struct jak_vector ofType(struct jak_column_doc_obj) *values_vec,
                                           jak_offset_t root_offset)
 {
         jak_offset_t *result = JAK_MALLOC(values_vec->num_elems * sizeof(jak_offset_t));
@@ -580,7 +580,7 @@ static jak_offset_t *__write_primitive_column(struct jak_memfile *memfile, struc
 }
 
 static bool __write_array_len_column(struct jak_error *err, struct jak_memfile *memfile, jak_archive_field_e type,
-                                     struct vector ofType(...) *values)
+                                     struct jak_vector ofType(...) *values)
 {
         switch (type) {
                 case JAK_FIELD_NULL:
@@ -597,7 +597,7 @@ static bool __write_array_len_column(struct jak_error *err, struct jak_memfile *
                 case JAK_FIELD_FLOAT:
                 case JAK_FIELD_STRING:
                         for (jak_u32 i = 0; i < values->num_elems; i++) {
-                                struct vector *arrays = vec_get(values, i, struct vector);
+                                struct jak_vector *arrays = vec_get(values, i, struct jak_vector);
                                 memfile_write(memfile, &arrays->num_elems, sizeof(jak_u32));
                         }
                         break;
@@ -611,7 +611,7 @@ static bool __write_array_len_column(struct jak_error *err, struct jak_memfile *
 }
 
 static bool write_array_value_column(struct jak_memfile *memfile, struct jak_error *err, jak_archive_field_e type,
-                                     struct vector ofType(...) *values_vec)
+                                     struct jak_vector ofType(...) *values_vec)
 {
 
         switch (type) {
@@ -648,10 +648,10 @@ static bool write_array_value_column(struct jak_memfile *memfile, struct jak_err
 }
 
 static bool write_array_prop(jak_offset_t *offset, struct jak_error *err, struct jak_memfile *memfile,
-                             struct vector ofType(jak_archive_field_sid_t) *keys, jak_archive_field_e type, struct vector ofType(...) *values,
+                             struct jak_vector ofType(jak_archive_field_sid_t) *keys, jak_archive_field_e type, struct jak_vector ofType(...) *values,
                              jak_offset_t root_object_header_offset)
 {
-        assert(keys->num_elems == values->num_elems);
+        JAK_ASSERT(keys->num_elems == values->num_elems);
 
         if (keys->num_elems > 0) {
                 struct jak_prop_header header =
@@ -791,10 +791,10 @@ static bool write_array_props(struct jak_memfile *memfile, struct jak_error *err
 /** Fixed-length property lists; value position can be determined by size of value and position of key in key column.
  * In contrast, variable-length property list require an additional offset column (see 'write_var_props') */
 static bool write_fixed_props(jak_offset_t *offset, struct jak_error *err, struct jak_memfile *memfile,
-                              struct vector ofType(jak_archive_field_sid_t) *keys, jak_archive_field_e type, struct vector ofType(T) *values)
+                              struct jak_vector ofType(jak_archive_field_sid_t) *keys, jak_archive_field_e type, struct jak_vector ofType(T) *values)
 {
-        assert(!values || keys->num_elems == values->num_elems);
-        assert(type != JAK_FIELD_OBJECT); /** use 'write_var_props' instead */
+        JAK_ASSERT(!values || keys->num_elems == values->num_elems);
+        JAK_ASSERT(type != JAK_FIELD_OBJECT); /** use 'write_var_props' instead */
 
         if (keys->num_elems > 0) {
                 struct jak_prop_header header =
@@ -821,11 +821,11 @@ static bool write_fixed_props(jak_offset_t *offset, struct jak_error *err, struc
  * the only variable-length value for properties are "JSON objects".
  * In contrast, fixed-length property list doesn't require an additional offset column (see 'write_fixed_props') */
 static bool write_var_props(jak_offset_t *offset, struct jak_error *err, struct jak_memfile *memfile,
-                            struct vector ofType(jak_archive_field_sid_t) *keys,
-                            struct vector ofType(struct jak_column_doc_obj) *objects,
+                            struct jak_vector ofType(jak_archive_field_sid_t) *keys,
+                            struct jak_vector ofType(struct jak_column_doc_obj) *objects,
                             jak_offset_t root_object_header_offset)
 {
-        assert(!objects || keys->num_elems == objects->num_elems);
+        JAK_ASSERT(!objects || keys->num_elems == objects->num_elems);
 
         if (keys->num_elems > 0) {
                 struct jak_prop_header header = {.marker = JAK_MARKER_SYMBOL_PROP_OBJECT, .num_entries = keys->num_elems};
@@ -970,7 +970,7 @@ static bool write_primitive_props(struct jak_memfile *memfile, struct jak_error 
 }
 
 static bool write_column_entry(struct jak_memfile *memfile, struct jak_error *err, jak_archive_field_e type,
-                               struct vector ofType(<T>) *column, jak_offset_t root_object_header_offset)
+                               struct jak_vector ofType(<T>) *column, jak_offset_t root_object_header_offset)
 {
         memfile_write(memfile, &column->num_elems, sizeof(jak_u32));
         switch (type) {
@@ -994,7 +994,7 @@ static bool write_column_entry(struct jak_memfile *memfile, struct jak_error *er
                         jak_offset_t preObjectNext = 0;
                         for (size_t i = 0; i < column->num_elems; i++) {
                                 struct jak_column_doc_obj *object = vec_get(column, i, struct jak_column_doc_obj);
-                                if (likely(preObjectNext != 0)) {
+                                if (JAK_LIKELY(preObjectNext != 0)) {
                                         jak_offset_t continuePos = memfile_tell(memfile);
                                         jak_offset_t relativeContinuePos = continuePos - root_object_header_offset;
                                         memfile_seek(memfile, preObjectNext);
@@ -1016,7 +1016,7 @@ static bool write_column_entry(struct jak_memfile *memfile, struct jak_error *er
 static bool write_column(struct jak_memfile *memfile, struct jak_error *err, struct jak_column_doc_column *column,
                          jak_offset_t root_object_header_offset)
 {
-        assert(column->array_positions.num_elems == column->values.num_elems);
+        JAK_ASSERT(column->array_positions.num_elems == column->values.num_elems);
 
         struct jak_column_header header = {.marker = marker_symbols[JAK_MARKER_TYPE_COLUMN].symbol, .column_name = column
                 ->key_name, .value_type = marker_symbols[value_array_marker_mapping[column->type].marker]
@@ -1031,7 +1031,7 @@ static bool write_column(struct jak_memfile *memfile, struct jak_error *err, str
         memfile_write(memfile, column->array_positions.base, column->array_positions.num_elems * sizeof(jak_u32));
 
         for (size_t i = 0; i < column->values.num_elems; i++) {
-                struct vector ofType(<T>) *column_data = vec_get(&column->values, i, struct vector);
+                struct jak_vector ofType(<T>) *column_data = vec_get(&column->values, i, struct jak_vector);
                 jak_offset_t column_entry_offset = memfile_tell(memfile);
                 jak_offset_t relative_entry_offset = column_entry_offset - root_object_header_offset;
                 memfile_seek(memfile, value_entry_offsets + i * sizeof(jak_offset_t));
@@ -1045,7 +1045,7 @@ static bool write_column(struct jak_memfile *memfile, struct jak_error *err, str
 }
 
 static bool write_object_array_props(struct jak_memfile *memfile, struct jak_error *err,
-                                     struct vector ofType(struct jak_column_doc_group) *object_key_columns,
+                                     struct jak_vector ofType(struct jak_column_doc_group) *object_key_columns,
                                      struct jak_archive_prop_offs *offsets,
                                      jak_offset_t root_object_header_offset)
 {
@@ -1373,7 +1373,7 @@ static char *embedded_dic_flags_to_string(const union jak_string_tab_flags *flag
         if (flags->value == 0) {
                 strcpy(string, " uncompressed");
                 length = strlen(string);
-                assert(length <= max);
+                JAK_ASSERT(length <= max);
         } else {
 
                 for (size_t i = 0; i < JAK_ARRAY_LENGTH(compressor_strategy_register); i++) {
@@ -1398,12 +1398,12 @@ static char *record_header_flags_to_string(const struct jak_record_flags *flags)
         if (flags->value == 0) {
                 strcpy(string, " none");
                 length = strlen(string);
-                assert(length <= max);
+                JAK_ASSERT(length <= max);
         } else {
                 if (flags->bits.is_sorted) {
                         strcpy(string + length, " sorted");
                         length = strlen(string);
-                        assert(length <= max);
+                        JAK_ASSERT(length <= max);
                 }
         }
         string[length] = '\0';
@@ -1417,12 +1417,12 @@ static bool serialize_string_dic(struct jak_memfile *memfile, struct jak_error *
         struct jak_packer strategy;
         struct jak_string_table_header header;
 
-        struct vector ofType (const char *) *strings;
-        struct vector ofType(jak_archive_field_sid_t) *string_ids;
+        struct jak_vector ofType (const char *) *strings;
+        struct jak_vector ofType(jak_archive_field_sid_t) *string_ids;
 
         doc_bulk_get_dic_contents(&strings, &string_ids, context);
 
-        assert(strings->num_elems == string_ids->num_elems);
+        JAK_ASSERT(strings->num_elems == string_ids->num_elems);
 
         flags.value = 0;
         if (!pack_by_type(err, &strategy, compressor)) {
@@ -2161,7 +2161,7 @@ bool print_object(FILE *file, struct jak_error *err, struct jak_memfile *memfile
 
         offset = memfile_tell(memfile);
         char end_marker = *JAK_MEMFILE_READ_TYPE(memfile, char);
-        assert (end_marker == JAK_MARKER_SYMBOL_OBJECT_END);
+        JAK_ASSERT (end_marker == JAK_MARKER_SYMBOL_OBJECT_END);
         nesting_level--;
         fprintf(file, "0x%04x ", offset);
         INTENT_LINE(nesting_level);
@@ -2209,7 +2209,7 @@ static void print_record_header_from_memfile(FILE *file, struct jak_memfile *mem
 static bool print_header_from_memfile(FILE *file, struct jak_error *err, struct jak_memfile *memfile)
 {
         unsigned offset = memfile_tell(memfile);
-        assert(memfile_size(memfile) > sizeof(struct jak_archive_header));
+        JAK_ASSERT(memfile_size(memfile) > sizeof(struct jak_archive_header));
         struct jak_archive_header *header = JAK_MEMFILE_READ_TYPE(memfile, struct jak_archive_header);
         if (!is_valid_file(header)) {
                 error(err, JAK_ERR_NOARCHIVEFILE)
@@ -2322,7 +2322,7 @@ static union jak_object_flags *get_flags(union jak_object_flags *flags, struct j
         flags->bits.has_float_array_props = (columndoc->float_array_prop_keys.num_elems > 0);
         flags->bits.has_string_array_props = (columndoc->string_array_prop_keys.num_elems > 0);
         flags->bits.has_object_array_props = (columndoc->obj_array_props.num_elems > 0);
-        //assert(flags->value != 0);
+        //JAK_ASSERT(flags->value != 0);
         return flags;
 }
 
@@ -2413,7 +2413,7 @@ bool jak_archive_open(struct jak_archive *out, const char *file_path)
                                 out->info.num_embeddded_strings = out->string_table.num_embeddded_strings;
                                 out->info.string_id_index_size = string_id_index;
                                 out->default_query = JAK_MALLOC(sizeof(struct jak_archive_query));
-                                query_create(out->default_query, out);
+                                jak_query_create(out->default_query, out);
 
                         }
                 }
@@ -2424,20 +2424,20 @@ bool jak_archive_open(struct jak_archive *out, const char *file_path)
 
 bool jak_archive_get_info(struct jak_archive_info *info, const struct jak_archive *archive)
 {
-        error_if_null(info);
-        error_if_null(archive);
+        JAK_ERROR_IF_NULL(info);
+        JAK_ERROR_IF_NULL(archive);
         *info = archive->info;
         return true;
 }
 
 bool jak_archive_close(struct jak_archive *archive)
 {
-        error_if_null(archive);
+        JAK_ERROR_IF_NULL(archive);
         jak_archive_drop_indexes(archive);
         jak_archive_drop_query_string_id_cache(archive);
         free(archive->disk_file_path);
         memblock_drop(archive->record_table.record_db);
-        query_drop(archive->default_query);
+        jak_query_drop(archive->default_query);
         free(archive->default_query);
         return true;
 }
@@ -2445,7 +2445,7 @@ bool jak_archive_close(struct jak_archive *archive)
 bool jak_archive_drop_indexes(struct jak_archive *archive)
 {
         if (archive->query_index_string_id_to_offset) {
-                query_drop_index_string_id_to_offset(archive->query_index_string_id_to_offset);
+                jak_query_drop_index_string_id_to_offset(archive->query_index_string_id_to_offset);
                 archive->query_index_string_id_to_offset = NULL;
         }
         return true;
@@ -2453,11 +2453,11 @@ bool jak_archive_drop_indexes(struct jak_archive *archive)
 
 bool jak_archive_query(struct jak_archive_query *query, struct jak_archive *archive)
 {
-        if (query_create(query, archive)) {
+        if (jak_query_create(query, archive)) {
                 bool has_index = false;
                 jak_archive_has_query_index_string_id_to_offset(&has_index, archive);
                 if (!has_index) {
-                        query_create_index_string_id_to_offset(&archive->query_index_string_id_to_offset, query);
+                        jak_query_create_index_string_id_to_offset(&archive->query_index_string_id_to_offset, query);
                 }
                 bool has_cache = false;
                 jak_archive_hash_query_string_id_cache(&has_cache, archive);
@@ -2472,23 +2472,23 @@ bool jak_archive_query(struct jak_archive_query *query, struct jak_archive *arch
 
 bool jak_archive_has_query_index_string_id_to_offset(bool *state, struct jak_archive *archive)
 {
-        error_if_null(state)
-        error_if_null(archive)
+        JAK_ERROR_IF_NULL(state)
+        JAK_ERROR_IF_NULL(archive)
         *state = (archive->query_index_string_id_to_offset != NULL);
         return true;
 }
 
 bool jak_archive_hash_query_string_id_cache(bool *has_cache, struct jak_archive *archive)
 {
-        error_if_null(has_cache)
-        error_if_null(archive)
+        JAK_ERROR_IF_NULL(has_cache)
+        JAK_ERROR_IF_NULL(archive)
         *has_cache = archive->string_id_cache != NULL;
         return true;
 }
 
 bool jak_archive_drop_query_string_id_cache(struct jak_archive *archive)
 {
-        error_if_null(archive)
+        JAK_ERROR_IF_NULL(archive)
         if (archive->string_id_cache) {
                 jak_string_id_cache_drop(archive->string_id_cache);
                 archive->string_id_cache = NULL;
@@ -2516,7 +2516,7 @@ static bool init_decompressor(struct jak_packer *strategy, jak_u8 flags)
 
 static bool read_stringtable(struct jak_string_table *table, struct jak_error *err, FILE *disk_file)
 {
-        assert(disk_file);
+        JAK_ASSERT(disk_file);
 
         struct jak_string_table_header header;
         union jak_string_tab_flags flags;
@@ -2580,7 +2580,7 @@ static bool read_record(struct jak_record_header *header_read, struct jak_archiv
 static bool read_string_id_to_offset_index(struct jak_error *err, struct jak_archive *archive, const char *file_path,
                                            jak_offset_t string_id_to_offset_index_offset)
 {
-        return query_index_id_to_offset_deserialize(&archive->query_index_string_id_to_offset,
+        return jak_query_index_id_to_offset_deserialize(&archive->query_index_string_id_to_offset,
                                                     err,
                                                     file_path,
                                                     string_id_to_offset_index_offset);

@@ -4222,7 +4222,7 @@ TEST(CarbonTest, CarbonKeyTypeSignedKeyRevInc)
 
         jak_u64 test_max = 10000;
 
-        struct vector ofType(struct jak_carbon) files;
+        struct jak_vector ofType(struct jak_carbon) files;
         vec_create(&files, NULL, sizeof(struct jak_carbon), test_max);
         struct jak_carbon* old_f = &doc;
 
@@ -7841,15 +7841,15 @@ TEST(CarbonTest, CarbonFromJsonExample)
 
         carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
 
-//        jak_u32 max = 10000;
-//        timestamp_t t1 = time_now_wallclock();
-//        for (jak_u32 i = 0; i < max; i++) {
-//                struct jak_carbon d;
-//                carbon_from_json(&d, json_in, CARBON_KEY_NOKEY, NULL, &err);
-//                carbon_drop(&d);
-//        }
-//        timestamp_t t2 = time_now_wallclock();
-//        printf("%.2fmsec/opp, %.4f ops/sec\n", (t2-t1)/(float)max, 1.0f/((t2-t1)/(float)max/1000.0f));
+        jak_u32 max = 10000;
+        timestamp_t t1 = time_now_wallclock();
+        for (jak_u32 i = 0; i < max; i++) {
+                struct jak_carbon d;
+                carbon_from_json(&d, json_in, CARBON_KEY_NOKEY, NULL, &err);
+                carbon_drop(&d);
+        }
+        timestamp_t t2 = time_now_wallclock();
+        printf("%.2fmsec/opp, %.4f ops/sec\n", (t2-t1)/(float)max, 1.0f/((t2-t1)/(float)max/1000.0f));
 
 
         json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '[1, null, 3, \"a\"]'

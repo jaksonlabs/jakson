@@ -28,25 +28,25 @@
 
 JAK_BEGIN_DECL
 
-struct strid_info {
+struct jak_strid_info {
     jak_archive_field_sid_t id;
     jak_u32 strlen;
     jak_offset_t offset;
 };
 
-struct strid_iter {
+struct jak_strid_iter {
     FILE *disk_file;
     bool is_open;
     jak_offset_t disk_offset;
-    struct strid_info vector[100000];
+    struct jak_strid_info vector[100000];
 };
 
-bool strid_iter_open(struct strid_iter *it, struct jak_error *err, struct jak_archive *archive);
+bool jak_strid_iter_open(struct jak_strid_iter *it, struct jak_error *err, struct jak_archive *archive);
 
-bool strid_iter_next(bool *success, struct strid_info **info, struct jak_error *err, size_t *info_length,
-                     struct strid_iter *it);
+bool jak_strid_iter_next(bool *success, struct jak_strid_info **info, struct jak_error *err, size_t *info_length,
+                     struct jak_strid_iter *it);
 
-bool strid_iter_close(struct strid_iter *it);
+bool jak_strid_iter_close(struct jak_strid_iter *it);
 
 JAK_END_DECL
 

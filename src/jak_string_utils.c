@@ -20,7 +20,7 @@
 
 bool strings_contains_blank_char(const char *str)
 {
-        if (likely(str != NULL)) {
+        if (JAK_LIKELY(str != NULL)) {
                 for (const char *it = str; *it != '\0'; it++) {
                         if (isspace(*it)) {
                                 return true;
@@ -68,11 +68,11 @@ char *strings_remove_tailing_blanks(char *str_in)
 
 const char *strings_skip_blanks(const char *str)
 {
-        if (likely(str != NULL)) {
+        if (JAK_LIKELY(str != NULL)) {
                 const char *ret = str;
                 while (*ret != '\0') {
                         char c = *ret;
-                        if (likely(!isblank(c))) {
+                        if (JAK_LIKELY(!isblank(c))) {
                                 return ret;
                         }
                         ret++;

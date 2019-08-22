@@ -36,7 +36,7 @@ struct trace_stats {
     size_t num_realloc_calls;
     size_t num_free_calls;
     size_t total_size;
-    struct vector ofType(size_t) *malloc_sizes;
+    struct jak_vector ofType(size_t) *malloc_sizes;
     struct spinlock *spinlock;
     FILE *statistics_file;
     timestamp_t startup_timestamp;
@@ -51,7 +51,7 @@ typedef struct page_##x##b_t                                                    
 } page_##x##b_t;                                                                                                       \
                                                                                                                        \
 JAK_FUNC_UNUSED static inline void *page_##x##b_new(size_t user_size) {                                             \
-    assert (user_size <= x);                                                                                           \
+    JAK_ASSERT (user_size <= x);                                                                                           \
     struct page_##x##b_t *page = malloc(sizeof(struct page_##x##b_t));                                                 \
     page->user_size = user_size;                                                                                       \
     page->capacity = x;                                                                                                \
@@ -184,7 +184,7 @@ static void invoke_clone(struct jak_allocator *dst, const struct jak_allocator *
 
 #define LAZY_INIT()                                                                                                    \
 if (!global_trace_stats.malloc_sizes) {                                                                                \
-    global_trace_stats.malloc_sizes = malloc(sizeof(struct vector));                                                    \
+    global_trace_stats.malloc_sizes = malloc(sizeof(struct jak_vector));                                                    \
     vec_create(global_trace_stats.malloc_sizes, &default_alloc, sizeof(size_t), 1000000);                       \
     global_trace_stats.spinlock = jak_alloc_malloc(&default_alloc, sizeof(struct spinlock));                            \
     spin_init(global_trace_stats.spinlock);                                                                 \
@@ -207,7 +207,7 @@ if (!global_trace_stats.malloc_sizes) {                                         
 
 int jak_trace_alloc_create(struct jak_allocator *alloc)
 {
-        error_if_null(alloc);
+        JAK_ERROR_IF_NULL(alloc);
         struct jak_allocator default_alloc;
         jak_alloc_create_std(&default_alloc);
 

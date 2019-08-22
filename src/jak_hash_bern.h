@@ -33,7 +33,7 @@ JAK_BEGIN_DECL
 
 #define JAK_HASH_BERNSTEIN_WTYPE(key_size, key, hash_type)                                                             \
 ({                                                                                                                     \
-    assert ((key != NULL) && (key_size > 0));                                                                          \
+    JAK_ASSERT ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
     hash_type hash = 0;                                                                                                \
     for (size_t i = 0; i < key_size; i++) {                                                                            \
@@ -44,7 +44,7 @@ JAK_BEGIN_DECL
 
 #define JAK_HASH64_BERNSTEIN_WSEED(key_size, key, seed)                                                                \
 ({                                                                                                                     \
-    assert ((key != NULL) && (key_size > 0));                                                                          \
+    JAK_ASSERT ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
     hash64_t hash = seed;                                                                                              \
     for (size_t i = 0; i < key_size; i++) {                                                                            \

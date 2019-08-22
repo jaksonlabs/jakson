@@ -184,15 +184,7 @@ struct jak_independent_iter_state {
     struct jak_error err;                                /* error information */
 };
 
-typedef struct jak_independent_iter_state archive_collection_iter_t;
-
-typedef struct jak_independent_iter_state archive_column_group_iter_t;
-
-typedef struct jak_independent_iter_state archive_column_iter_t;
-
-typedef struct jak_independent_iter_state archive_column_entry_iter_t;
-
-struct column_object_iter {
+struct jak_column_object_iter {
     struct jak_memfile memfile;
     struct jak_collection_iter_state entry_state;
     struct jak_archive_object obj;
@@ -239,187 +231,185 @@ JAK_DEFINE_GET_ERROR_FUNCTION(archive_value_vector, struct jak_archive_value_vec
 
 JAK_DEFINE_GET_ERROR_FUNCTION(archive_prop_iter, struct jak_prop_iter, iter)
 
-JAK_DEFINE_GET_ERROR_FUNCTION(archive_collection_iter, archive_collection_iter_t, iter)
+JAK_DEFINE_GET_ERROR_FUNCTION(archive_collection_iter, struct jak_independent_iter_state, iter)
 
-JAK_DEFINE_GET_ERROR_FUNCTION(archive_column_group_iter, archive_column_group_iter_t, iter)
+JAK_DEFINE_GET_ERROR_FUNCTION(archive_column_group_iter, struct jak_independent_iter_state, iter)
 
-JAK_DEFINE_GET_ERROR_FUNCTION(archive_column_iter, archive_column_iter_t, iter)
+JAK_DEFINE_GET_ERROR_FUNCTION(archive_column_iter, struct jak_independent_iter_state, iter)
 
-JAK_DEFINE_GET_ERROR_FUNCTION(archive_column_entry_iter, archive_column_entry_iter_t, iter)
+JAK_DEFINE_GET_ERROR_FUNCTION(archive_column_entry_iter, struct jak_independent_iter_state, iter)
 
-JAK_DEFINE_GET_ERROR_FUNCTION(archive_column_entry_object_iter, struct column_object_iter, iter)
+JAK_DEFINE_GET_ERROR_FUNCTION(archive_column_entry_object_iter, struct jak_column_object_iter, iter)
 
 JAK_DEFINE_GET_ERROR_FUNCTION(archive_object, struct jak_archive_object, obj)
 
-bool archive_prop_iter_from_archive(struct jak_prop_iter *iter, struct jak_error *err, jak_u16 mask,
+bool jak_archive_prop_iter_from_archive(struct jak_prop_iter *iter, struct jak_error *err, jak_u16 mask,
                                     struct jak_archive *archive);
 
-bool archive_prop_iter_from_object(struct jak_prop_iter *iter, jak_u16 mask, struct jak_error *err,
+bool jak_archive_prop_iter_from_object(struct jak_prop_iter *iter, jak_u16 mask, struct jak_error *err,
                                    const struct jak_archive_object *obj);
 
-bool archive_value_vector_from_prop_iter(struct jak_archive_value_vector *value, struct jak_error *err,
+bool jak_archive_value_vector_from_prop_iter(struct jak_archive_value_vector *value, struct jak_error *err,
                                          struct jak_prop_iter *prop_iter);
 
-bool archive_prop_iter_next(enum jak_prop_iter_mode *type, struct jak_archive_value_vector *value_vector,
-                            archive_collection_iter_t *collection_iter, struct jak_prop_iter *prop_iter);
+bool jak_archive_prop_iter_next(enum jak_prop_iter_mode *type, struct jak_archive_value_vector *value_vector,
+                            struct jak_independent_iter_state *collection_iter, struct jak_prop_iter *prop_iter);
 
-const jak_archive_field_sid_t *archive_collection_iter_get_keys(jak_u32 *num_keys, archive_collection_iter_t *iter);
+const jak_archive_field_sid_t *jak_archive_collection_iter_get_keys(jak_u32 *num_keys, struct jak_independent_iter_state *iter);
 
-bool archive_collection_next_column_group(archive_column_group_iter_t *group_iter,
-                                          archive_collection_iter_t *iter);
+bool jak_archive_collection_next_column_group(struct jak_independent_iter_state *group_iter,
+                                          struct jak_independent_iter_state *iter);
 
-const jak_global_id_t *archive_column_group_get_object_ids(jak_u32 *num_objects, archive_column_group_iter_t *iter);
+const jak_global_id_t *jak_archive_column_group_get_object_ids(jak_u32 *num_objects, struct jak_independent_iter_state *iter);
 
-bool archive_column_group_next_column(archive_column_iter_t *column_iter,
-                                      archive_column_group_iter_t *iter);
+bool jak_archive_column_group_next_column(struct jak_independent_iter_state *column_iter,
+                                      struct jak_independent_iter_state *iter);
 
-bool archive_column_get_name(jak_archive_field_sid_t *name, enum jak_archive_field_type *type, archive_column_iter_t *column_iter);
+bool jak_archive_column_get_name(jak_archive_field_sid_t *name, enum jak_archive_field_type *type, struct jak_independent_iter_state *column_iter);
 
-const jak_u32 *archive_column_get_entry_positions(jak_u32 *num_entry, archive_column_iter_t *column_iter);
+const jak_u32 *jak_archive_column_get_entry_positions(jak_u32 *num_entry, struct jak_independent_iter_state *column_iter);
 
-bool archive_column_next_entry(archive_column_entry_iter_t *entry_iter, archive_column_iter_t *iter);
+bool jak_archive_column_next_entry(struct jak_independent_iter_state *entry_iter, struct jak_independent_iter_state *iter);
 
-bool archive_column_entry_get_type(enum jak_archive_field_type *type, archive_column_entry_iter_t *entry);
+bool jak_archive_column_entry_get_type(enum jak_archive_field_type *type, struct jak_independent_iter_state *entry);
 
-#define DEFINE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(built_in_type, name)                                            \
+#define JAK_DEFINE_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(built_in_type, name)                                            \
 const built_in_type *                                                                                      \
-archive_column_entry_get_##name(jak_u32 *array_length, archive_column_entry_iter_t *entry);
+jak_archive_column_entry_get_##name(jak_u32 *array_length, struct jak_independent_iter_state *entry);
 
-DEFINE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_i8_t, int8s);
+JAK_DEFINE_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_i8_t, int8s);
 
-DEFINE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_i16_t, int16s);
+JAK_DEFINE_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_i16_t, int16s);
 
-DEFINE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_i32_t, int32s);
+JAK_DEFINE_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_i32_t, int32s);
 
-DEFINE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_i64_t, int64s);
+JAK_DEFINE_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_i64_t, int64s);
 
-DEFINE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_u8_t, uint8s);
+JAK_DEFINE_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_u8_t, uint8s);
 
-DEFINE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_u16_t, uint16s);
+JAK_DEFINE_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_u16_t, uint16s);
 
-DEFINE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_u32_t, uint32s);
+JAK_DEFINE_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_u32_t, uint32s);
 
-DEFINE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_u64_t, uint64s);
+JAK_DEFINE_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_u64_t, uint64s);
 
-DEFINE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_sid_t, strings);
+JAK_DEFINE_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_sid_t, strings);
 
-DEFINE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_number_t, numbers);
+JAK_DEFINE_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_number_t, numbers);
 
-DEFINE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_boolean_t, booleans);
+JAK_DEFINE_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_boolean_t, booleans);
 
-DEFINE_JAK_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_u32_t, nulls);
+JAK_DEFINE_ARCHIVE_COLUMN_ENTRY_GET_BASIC_TYPE(jak_archive_field_u32_t, nulls);
 
-bool archive_column_entry_get_objects(struct column_object_iter *iter, archive_column_entry_iter_t *entry);
+bool jak_archive_column_entry_get_objects(struct jak_column_object_iter *iter, struct jak_independent_iter_state *entry);
 
-const struct jak_archive_object *archive_column_entry_object_iter_next_object(struct column_object_iter *iter);
+const struct jak_archive_object *jak_archive_column_entry_object_iter_next_object(struct jak_column_object_iter *iter);
 
-bool archive_object_get_object_id(jak_global_id_t *id, const struct jak_archive_object *object);
+bool jak_archive_object_get_object_id(jak_global_id_t *id, const struct jak_archive_object *object);
 
-bool archive_object_get_prop_iter(struct jak_prop_iter *iter, const struct jak_archive_object *object);
+bool jak_archive_object_get_prop_iter(struct jak_prop_iter *iter, const struct jak_archive_object *object);
 
-bool archive_value_vector_get_object_id(jak_global_id_t *id, const struct jak_archive_value_vector *iter);
+bool jak_archive_value_vector_get_object_id(jak_global_id_t *id, const struct jak_archive_value_vector *iter);
 
-const jak_archive_field_sid_t *archive_value_vector_get_keys(jak_u32 *num_keys, struct jak_archive_value_vector *iter);
+const jak_archive_field_sid_t *jak_jak_archive_value_vector_get_keys(jak_u32 *num_keys, struct jak_archive_value_vector *iter);
 
-const jak_archive_field_sid_t *archive_value_vector_get_keys(jak_u32 *num_keys, struct jak_archive_value_vector *iter);
+bool jak_jak_archive_value_vector_get_basic_type(enum jak_archive_field_type *type, const struct jak_archive_value_vector *value);
 
-bool archive_value_vector_get_basic_type(enum jak_archive_field_type *type, const struct jak_archive_value_vector *value);
+bool jak_archive_value_vector_is_array_type(bool *is_array, const struct jak_archive_value_vector *value);
 
-bool archive_value_vector_is_array_type(bool *is_array, const struct jak_archive_value_vector *value);
+bool jak_jak_archive_value_vector_get_length(jak_u32 *length, const struct jak_archive_value_vector *value);
 
-bool archive_value_vector_get_length(jak_u32 *length, const struct jak_archive_value_vector *value);
+bool jak_archive_value_vector_is_of_objects(bool *is_object, struct jak_archive_value_vector *value);
 
-bool archive_value_vector_is_of_objects(bool *is_object, struct jak_archive_value_vector *value);
-
-bool archive_value_vector_get_object_at(struct jak_archive_object *object, jak_u32 idx,
+bool jak_jak_archive_value_vector_get_object_at(struct jak_archive_object *object, jak_u32 idx,
                                         struct jak_archive_value_vector *value);
 
-#define DEFINE_JAK_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(name)                                                            \
+#define JAK_DEFINE_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(name)                                                            \
 bool                                                                                                       \
-archive_value_vector_is_##name(bool *type_match, struct jak_archive_value_vector *value);
+jak_archive_value_vector_is_##name(bool *type_match, struct jak_archive_value_vector *value);
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(int8);
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(int8);
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(int16);
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(int16);
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(int32);
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(int32);
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(int64);
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(int64);
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(uint8);
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(uint8);
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(uint16);
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(uint16);
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(uint32);
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(uint32);
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(uint64);
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(uint64);
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(string);
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(string);
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(number);
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(number);
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(boolean);
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(boolean);
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(null);
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_IS_BASIC_TYPE(null);
 
-#define DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(name, built_in_type)                                            \
+#define JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(name, built_in_type)                                            \
 const built_in_type *                                                                                      \
-archive_value_vector_get_##name(jak_u32 *num_values, struct jak_archive_value_vector *value);
+jak_archive_value_vector_get_##name(jak_u32 *num_values, struct jak_archive_value_vector *value);
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int8s, jak_archive_field_i8_t)
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int8s, jak_archive_field_i8_t)
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int16s, jak_archive_field_i16_t)
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int16s, jak_archive_field_i16_t)
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int32s, jak_archive_field_i32_t)
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int32s, jak_archive_field_i32_t)
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int64s, jak_archive_field_i64_t)
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(int64s, jak_archive_field_i64_t)
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint8s, jak_archive_field_u8_t)
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint8s, jak_archive_field_u8_t)
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint16s, jak_archive_field_u16_t)
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint16s, jak_archive_field_u16_t)
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint32s, jak_archive_field_u32_t)
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint32s, jak_archive_field_u32_t)
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint64s, jak_archive_field_u64_t)
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(uint64s, jak_archive_field_u64_t)
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(strings, jak_archive_field_sid_t)
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(strings, jak_archive_field_sid_t)
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(numbers, jak_archive_field_number_t)
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(numbers, jak_archive_field_number_t)
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(booleans, jak_archive_field_boolean_t)
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_BASIC_TYPE(booleans, jak_archive_field_boolean_t)
 
-const jak_archive_field_u32_t *archive_value_vector_get_null_arrays(jak_u32 *num_values,
+const jak_archive_field_u32_t *jak_archive_value_vector_get_null_arrays(jak_u32 *num_values,
                                                         struct jak_archive_value_vector *value);
 
-#define DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(name, built_in_type)                                         \
+#define JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(name, built_in_type)                                         \
 const built_in_type *                                                                                      \
-archive_value_vector_get_##name##_arrays_at(jak_u32 *array_length, jak_u32 idx,                                                \
+jak_archive_value_vector_get_##name##_arrays_at(jak_u32 *array_length, jak_u32 idx,                                                \
                                                struct jak_archive_value_vector *value);                                    \
 
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int8, jak_archive_field_i8_t);
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int8, jak_archive_field_i8_t);
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int16, jak_archive_field_i16_t);
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int16, jak_archive_field_i16_t);
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int32, jak_archive_field_i32_t);
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int32, jak_archive_field_i32_t);
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int64, jak_archive_field_i64_t);
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(int64, jak_archive_field_i64_t);
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint8, jak_archive_field_u8_t);
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint8, jak_archive_field_u8_t);
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint16, jak_archive_field_u16_t);
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint16, jak_archive_field_u16_t);
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint32, jak_archive_field_u32_t);
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint32, jak_archive_field_u32_t);
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint64, jak_archive_field_u64_t);
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(uint64, jak_archive_field_u64_t);
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(string, jak_archive_field_sid_t);
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(string, jak_archive_field_sid_t);
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(number, jak_archive_field_number_t);
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(number, jak_archive_field_number_t);
 
-DEFINE_JAK_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(boolean, jak_archive_field_boolean_t);
+JAK_DEFINE_ARCHIVE_VALUE_VECTOR_GET_ARRAY_TYPE_AT(boolean, jak_archive_field_boolean_t);
 
-void int_reset_cabin_object_mem_file(struct jak_archive_object *object);
+void jak_archive_int_reset_carbon_object_mem_file(struct jak_archive_object *object);
 
 JAK_END_DECL
 

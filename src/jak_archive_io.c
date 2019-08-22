@@ -32,9 +32,9 @@ struct jak_io_context {
 
 bool jak_io_context_create(struct jak_io_context **context, struct jak_error *err, const char *file_path)
 {
-        error_if_null(context);
-        error_if_null(err);
-        error_if_null(file_path);
+        JAK_ERROR_IF_NULL(context);
+        JAK_ERROR_IF_NULL(err);
+        JAK_ERROR_IF_NULL(file_path);
 
         struct jak_io_context *result = JAK_MALLOC(sizeof(struct jak_io_context));
 
@@ -89,7 +89,7 @@ bool jak_io_context_unlock(struct jak_io_context *context)
 
 bool jak_io_context_drop(struct jak_io_context *context)
 {
-        error_if_null(context);
+        JAK_ERROR_IF_NULL(context);
         JAK_optional(context->file != NULL, fclose(context->file);
                 context->file = NULL)
         free(context);

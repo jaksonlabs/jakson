@@ -33,7 +33,7 @@ JAK_BEGIN_DECL
 
 #define JAK_HASH_FNV_WTYPE(key_size, key, hash_type)                                                                   \
 ({                                                                                                                     \
-    assert ((key != NULL) && (key_size > 0));                                                                          \
+    JAK_ASSERT ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
     hash_type hash = (hash_type) 2166136261;                                                                           \
     for (size_t i = 0; i < key_size; i++) {                                                                            \

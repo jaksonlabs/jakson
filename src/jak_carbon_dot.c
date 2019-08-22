@@ -42,8 +42,8 @@ struct dot_token {
 
 static const char *next_token(struct dot_token *token, const char *str)
 {
-        assert(token);
-        assert(str);
+        JAK_ASSERT(token);
+        JAK_ASSERT(str);
 
         str = strings_skip_blanks(str);
         char c = *str;
@@ -114,7 +114,7 @@ static const char *next_token(struct dot_token *token, const char *str)
 
 bool carbon_dot_path_create(struct jak_carbon_dot_path *path)
 {
-        error_if_null(path)
+        JAK_ERROR_IF_NULL(path)
         error_init(&path->err);
         path->path_len = 0;
         JAK_zero_memory(&path->nodes, JAK_ARRAY_LENGTH(path->nodes) * sizeof(struct jak_carbon_dot_node));
@@ -123,7 +123,7 @@ bool carbon_dot_path_create(struct jak_carbon_dot_path *path)
 
 bool carbon_dot_path_from_string(struct jak_carbon_dot_path *path, const char *path_string)
 {
-        error_if_null(path)
+        JAK_ERROR_IF_NULL(path)
         JAK_UNUSED(path_string);
 
         struct dot_token token;
@@ -184,9 +184,9 @@ bool carbon_dot_path_add_key(struct jak_carbon_dot_path *dst, const char *key)
 
 bool carbon_dot_path_add_nkey(struct jak_carbon_dot_path *dst, const char *key, size_t len)
 {
-        error_if_null(dst)
-        error_if_null(key)
-        if (likely(dst->path_len < JAK_ARRAY_LENGTH(dst->nodes))) {
+        JAK_ERROR_IF_NULL(dst)
+        JAK_ERROR_IF_NULL(key)
+        if (JAK_LIKELY(dst->path_len < JAK_ARRAY_LENGTH(dst->nodes))) {
                 struct jak_carbon_dot_node *node = dst->nodes + dst->path_len++;
                 bool enquoted = strings_is_enquoted_wlen(key, len);
                 node->type = DOT_NODE_KEY_NAME;
@@ -196,7 +196,7 @@ bool carbon_dot_path_add_nkey(struct jak_carbon_dot_path *dst, const char *key, 
                         size_t l = strlen(str_wo_rightspaces);
                         node->identifier.string[l - 1] = '\0';
                 }
-                assert(!strings_is_enquoted(node->identifier.string));
+                JAK_ASSERT(!strings_is_enquoted(node->identifier.string));
                 return true;
         } else {
                 error(&dst->err, JAK_ERR_OUTOFBOUNDS)
@@ -206,8 +206,8 @@ bool carbon_dot_path_add_nkey(struct jak_carbon_dot_path *dst, const char *key, 
 
 bool carbon_dot_path_add_idx(struct jak_carbon_dot_path *dst, jak_u32 idx)
 {
-        error_if_null(dst)
-        if (likely(dst->path_len < JAK_ARRAY_LENGTH(dst->nodes))) {
+        JAK_ERROR_IF_NULL(dst)
+        if (JAK_LIKELY(dst->path_len < JAK_ARRAY_LENGTH(dst->nodes))) {
                 struct jak_carbon_dot_node *node = dst->nodes + dst->path_len++;
                 node->type = DOT_NODE_ARRAY_IDX;
                 node->identifier.idx = idx;
@@ -220,23 +220,23 @@ bool carbon_dot_path_add_idx(struct jak_carbon_dot_path *dst, jak_u32 idx)
 
 bool carbon_dot_path_len(jak_u32 *len, const struct jak_carbon_dot_path *path)
 {
-        error_if_null(len)
-        error_if_null(path)
+        JAK_ERROR_IF_NULL(len)
+        JAK_ERROR_IF_NULL(path)
         *len = path->path_len;
         return true;
 }
 
 bool carbon_dot_path_is_empty(const struct jak_carbon_dot_path *path)
 {
-        error_if_null(path)
+        JAK_ERROR_IF_NULL(path)
         return (path->path_len == 0);
 }
 
 bool carbon_dot_path_type_at(enum carbon_dot_node_type *type_out, jak_u32 pos, const struct jak_carbon_dot_path *path)
 {
-        error_if_null(type_out)
-        error_if_null(path)
-        if (likely(pos < JAK_ARRAY_LENGTH(path->nodes))) {
+        JAK_ERROR_IF_NULL(type_out)
+        JAK_ERROR_IF_NULL(path)
+        if (JAK_LIKELY(pos < JAK_ARRAY_LENGTH(path->nodes))) {
                 *type_out = path->nodes[pos].type;
         } else {
                 error(&((struct jak_carbon_dot_path *) path)->err, JAK_ERR_OUTOFBOUNDS)
@@ -247,8 +247,8 @@ bool carbon_dot_path_type_at(enum carbon_dot_node_type *type_out, jak_u32 pos, c
 
 bool carbon_dot_path_idx_at(jak_u32 *idx, jak_u32 pos, const struct jak_carbon_dot_path *path)
 {
-        error_if_null(idx)
-        error_if_null(path)
+        JAK_ERROR_IF_NULL(idx)
+        JAK_ERROR_IF_NULL(path)
         error_if_and_return(pos >= JAK_ARRAY_LENGTH(path->nodes), &((struct jak_carbon_dot_path *) path)->err,
                             JAK_ERR_OUTOFBOUNDS, NULL);
         error_if_and_return(path->nodes[pos].type != DOT_NODE_ARRAY_IDX, &((struct jak_carbon_dot_path *) path)->err,
@@ -260,7 +260,7 @@ bool carbon_dot_path_idx_at(jak_u32 *idx, jak_u32 pos, const struct jak_carbon_d
 
 const char *carbon_dot_path_key_at(jak_u32 pos, const struct jak_carbon_dot_path *path)
 {
-        error_if_null(path)
+        JAK_ERROR_IF_NULL(path)
         error_if_and_return(pos >= JAK_ARRAY_LENGTH(path->nodes), &((struct jak_carbon_dot_path *)path)->err, JAK_ERR_OUTOFBOUNDS, NULL);
         error_if_and_return(path->nodes[pos].type != DOT_NODE_KEY_NAME, &((struct jak_carbon_dot_path *)path)->err, JAK_ERR_TYPEMISMATCH, NULL);
 
@@ -269,7 +269,7 @@ const char *carbon_dot_path_key_at(jak_u32 pos, const struct jak_carbon_dot_path
 
 bool carbon_dot_path_drop(struct jak_carbon_dot_path *path)
 {
-        error_if_null(path)
+        JAK_ERROR_IF_NULL(path)
         for (jak_u32 i = 0; i < path->path_len; i++) {
                 struct jak_carbon_dot_node *node = path->nodes + i;
                 if (node->type == DOT_NODE_KEY_NAME) {
@@ -282,7 +282,7 @@ bool carbon_dot_path_drop(struct jak_carbon_dot_path *path)
 
 bool carbon_dot_path_to_str(struct jak_string *sb, struct jak_carbon_dot_path *path)
 {
-        error_if_null(path)
+        JAK_ERROR_IF_NULL(path)
         for (jak_u32 i = 0; i < path->path_len; i++) {
                 struct jak_carbon_dot_node *node = path->nodes + i;
                 switch (node->type) {
@@ -314,8 +314,8 @@ bool carbon_dot_path_to_str(struct jak_string *sb, struct jak_carbon_dot_path *p
 
 bool carbon_dot_path_fprint(FILE *file, struct jak_carbon_dot_path *path)
 {
-        error_if_null(file);
-        error_if_null(path);
+        JAK_ERROR_IF_NULL(file);
+        JAK_ERROR_IF_NULL(path);
         struct jak_string sb;
         string_create(&sb);
         carbon_dot_path_to_str(&sb, path);

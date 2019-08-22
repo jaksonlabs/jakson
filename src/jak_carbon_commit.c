@@ -27,7 +27,7 @@
 
 bool carbon_commit_hash_create(struct jak_memfile *file)
 {
-        error_if_null(file)
+        JAK_ERROR_IF_NULL(file)
 
         jak_u64 init_rev = 0;
         global_id_create(&init_rev);
@@ -40,32 +40,32 @@ bool carbon_commit_hash_create(struct jak_memfile *file)
 
 bool carbon_commit_hash_skip(struct jak_memfile *file)
 {
-        error_if_null(file)
+        JAK_ERROR_IF_NULL(file)
         memfile_skip(file, sizeof(jak_u64));
         return true;
 }
 
 bool carbon_commit_hash_read(jak_u64 *commit_hash, struct jak_memfile *file)
 {
-        error_if_null(file)
-        error_if_null(commit_hash)
+        JAK_ERROR_IF_NULL(file)
+        JAK_ERROR_IF_NULL(commit_hash)
         *commit_hash = *JAK_MEMFILE_READ_TYPE(file, jak_u64);
         return true;
 }
 
 bool carbon_commit_hash_peek(jak_u64 *commit_hash, struct jak_memfile *file)
 {
-        error_if_null(file)
-        error_if_null(commit_hash)
+        JAK_ERROR_IF_NULL(file)
+        JAK_ERROR_IF_NULL(commit_hash)
         *commit_hash = *JAK_MEMFILE_PEEK(file, jak_u64);
         return true;
 }
 
 bool carbon_commit_hash_update(struct jak_memfile *file, const char *base, jak_u64 len)
 {
-        error_if_null(file)
-        error_if_null(base)
-        error_if_null(len)
+        JAK_ERROR_IF_NULL(file)
+        JAK_ERROR_IF_NULL(base)
+        JAK_ERROR_IF_NULL(len)
         jak_u64 commit_hash;
         carbon_commit_hash_compute(&commit_hash, base, len);
         memfile_write(file, &commit_hash, sizeof(jak_u64));
@@ -74,9 +74,9 @@ bool carbon_commit_hash_update(struct jak_memfile *file, const char *base, jak_u
 
 bool carbon_commit_hash_compute(jak_u64 *commit_hash, const void *base, jak_u64 len)
 {
-        error_if_null(commit_hash)
-        error_if_null(base)
-        error_if_null(len)
+        JAK_ERROR_IF_NULL(commit_hash)
+        JAK_ERROR_IF_NULL(base)
+        JAK_ERROR_IF_NULL(len)
         *commit_hash = JAK_HASH64_FNV(len, base);
         return true;
 }
@@ -94,7 +94,7 @@ const char *carbon_commit_hash_to_str(struct jak_string *dst, jak_u64 commit_has
 
 bool carbon_commit_hash_append_to_str(struct jak_string *dst, jak_u64 commit_hash)
 {
-        error_if_null(dst)
+        JAK_ERROR_IF_NULL(dst)
         string_add_u64_as_hex(dst, commit_hash);
         return true;
 }

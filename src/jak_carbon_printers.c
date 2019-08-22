@@ -24,7 +24,7 @@
 
 bool carbon_printer_by_type(struct printer *printer, int impl)
 {
-        error_if_null(printer)
+        JAK_ERROR_IF_NULL(printer)
 
         switch (impl) {
                 case JSON_EXTENDED:
@@ -41,28 +41,28 @@ bool carbon_printer_by_type(struct printer *printer, int impl)
 
 bool carbon_printer_drop(struct printer *printer)
 {
-        error_if_null(printer->drop);
+        JAK_ERROR_IF_NULL(printer->drop);
         printer->drop(printer);
         return true;
 }
 
 bool carbon_printer_begin(struct printer *printer, struct jak_string *str)
 {
-        error_if_null(printer->record_begin);
+        JAK_ERROR_IF_NULL(printer->record_begin);
         printer->record_begin(printer, str);
         return true;
 }
 
 bool carbon_printer_end(struct printer *printer, struct jak_string *str)
 {
-        error_if_null(printer->record_end);
+        JAK_ERROR_IF_NULL(printer->record_end);
         printer->record_end(printer, str);
         return true;
 }
 
 bool carbon_printer_header_begin(struct printer *printer, struct jak_string *str)
 {
-        error_if_null(printer->meta_begin);
+        JAK_ERROR_IF_NULL(printer->meta_begin);
         printer->meta_begin(printer, str);
         return true;
 }
@@ -71,127 +71,127 @@ bool carbon_printer_header_contents(struct printer *printer, struct jak_string *
                                            int key_type, const void *key, jak_u64 key_length,
                                            jak_u64 rev)
 {
-        error_if_null(printer->drop);
+        JAK_ERROR_IF_NULL(printer->drop);
         printer->meta_data(printer, str, key_type, key, key_length, rev);
         return true;
 }
 
 bool carbon_printer_header_end(struct printer *printer, struct jak_string *str)
 {
-        error_if_null(printer->meta_end);
+        JAK_ERROR_IF_NULL(printer->meta_end);
         printer->meta_end(printer, str);
         return true;
 }
 
 bool carbon_printer_payload_begin(struct printer *printer, struct jak_string *str)
 {
-        error_if_null(printer->doc_begin);
+        JAK_ERROR_IF_NULL(printer->doc_begin);
         printer->doc_begin(printer, str);
         return true;
 }
 
 bool carbon_printer_payload_end(struct printer *printer, struct jak_string *str)
 {
-        error_if_null(printer->doc_end);
+        JAK_ERROR_IF_NULL(printer->doc_end);
         printer->doc_end(printer, str);
         return true;
 }
 
 bool carbon_printer_empty_record(struct printer *printer, struct jak_string *str)
 {
-        error_if_null(printer->empty_record);
+        JAK_ERROR_IF_NULL(printer->empty_record);
         printer->empty_record(printer, str);
         return true;
 }
 
 bool carbon_printer_array_begin(struct printer *printer, struct jak_string *str)
 {
-        error_if_null(printer->array_begin);
+        JAK_ERROR_IF_NULL(printer->array_begin);
         printer->array_begin(printer, str);
         return true;
 }
 
 bool carbon_printer_array_end(struct printer *printer, struct jak_string *str)
 {
-        error_if_null(printer->array_end);
+        JAK_ERROR_IF_NULL(printer->array_end);
         printer->array_end(printer, str);
         return true;
 }
 
 bool carbon_printer_unit_array_begin(struct printer *printer, struct jak_string *str)
 {
-        error_if_null(printer->unit_array_begin);
+        JAK_ERROR_IF_NULL(printer->unit_array_begin);
         printer->unit_array_begin(printer, str);
         return true;
 }
 
 bool carbon_printer_unit_array_end(struct printer *printer, struct jak_string *str)
 {
-        error_if_null(printer->unit_array_end);
+        JAK_ERROR_IF_NULL(printer->unit_array_end);
         printer->unit_array_end(printer, str);
         return true;
 }
 
 bool carbon_printer_object_begin(struct printer *printer, struct jak_string *str)
 {
-        error_if_null(printer->obj_begin);
+        JAK_ERROR_IF_NULL(printer->obj_begin);
         printer->obj_begin(printer, str);
         return true;
 }
 
 bool carbon_printer_object_end(struct printer *printer, struct jak_string *str)
 {
-        error_if_null(printer->obj_end);
+        JAK_ERROR_IF_NULL(printer->obj_end);
         printer->obj_end(printer, str);
         return true;
 }
 
 bool carbon_printer_null(struct printer *printer, struct jak_string *str)
 {
-        error_if_null(printer->const_null);
+        JAK_ERROR_IF_NULL(printer->const_null);
         printer->const_null(printer, str);
         return true;
 }
 
 bool carbon_printer_true(struct printer *printer, bool is_null, struct jak_string *str)
 {
-        error_if_null(printer->const_true);
+        JAK_ERROR_IF_NULL(printer->const_true);
         printer->const_true(printer, is_null, str);
         return true;
 }
 
 bool carbon_printer_false(struct printer *printer, bool is_null, struct jak_string *str)
 {
-        error_if_null(printer->const_false);
+        JAK_ERROR_IF_NULL(printer->const_false);
         printer->const_false(printer, is_null, str);
         return true;
 }
 
 bool carbon_printer_comma(struct printer *printer, struct jak_string *str)
 {
-        error_if_null(printer->comma);
+        JAK_ERROR_IF_NULL(printer->comma);
         printer->comma(printer, str);
         return true;
 }
 
 bool carbon_printer_signed_nonull(struct printer *printer, struct jak_string *str, const jak_i64 *value)
 {
-        error_if_null(printer->val_signed);
+        JAK_ERROR_IF_NULL(printer->val_signed);
         printer->val_signed(printer, str, value);
         return true;
 }
 
 bool carbon_printer_unsigned_nonull(struct printer *printer, struct jak_string *str, const jak_u64 *value)
 {
-        error_if_null(printer->val_unsigned);
+        JAK_ERROR_IF_NULL(printer->val_unsigned);
         printer->val_unsigned(printer, str, value);
         return true;
 }
 
 #define delegate_print_call(printer, str, value, null_test_func, print_func, ctype)                                    \
 ({                                                                                                                     \
-        error_if_null(printer)                                                                                         \
-        error_if_null(str)                                                                                             \
+        JAK_ERROR_IF_NULL(printer)                                                                                         \
+        JAK_ERROR_IF_NULL(str)                                                                                             \
         bool status = false;                                                                                           \
         if (null_test_func(value)) {                                                                                       \
                 status = carbon_printer_null(printer, str);                                                            \
@@ -244,21 +244,21 @@ bool carbon_printer_i64_or_null(struct printer *printer, struct jak_string *str,
 
 bool carbon_printer_float(struct printer *printer, struct jak_string *str, const float *value)
 {
-        error_if_null(printer->val_float);
+        JAK_ERROR_IF_NULL(printer->val_float);
         printer->val_float(printer, str, value);
         return true;
 }
 
 bool carbon_printer_string(struct printer *printer, struct jak_string *str, const char *value, jak_u64 strlen)
 {
-        error_if_null(printer->val_string);
+        JAK_ERROR_IF_NULL(printer->val_string);
         printer->val_string(printer, str, value, strlen);
         return true;
 }
 
 bool carbon_printer_binary(struct printer *printer, struct jak_string *str, const struct jak_carbon_binary *binary)
 {
-        error_if_null(printer->val_binary);
+        JAK_ERROR_IF_NULL(printer->val_binary);
         printer->val_binary(printer, str, binary);
         return true;
 }
@@ -266,7 +266,7 @@ bool carbon_printer_binary(struct printer *printer, struct jak_string *str, cons
 bool carbon_printer_prop_null(struct printer *printer, struct jak_string *str,
                                      const char *key_name, jak_u64 key_len)
 {
-        error_if_null(printer->prop_null);
+        JAK_ERROR_IF_NULL(printer->prop_null);
         printer->prop_null(printer, str, key_name, key_len);
         return true;
 }
@@ -274,7 +274,7 @@ bool carbon_printer_prop_null(struct printer *printer, struct jak_string *str,
 bool carbon_printer_prop_true(struct printer *printer, struct jak_string *str,
                                      const char *key_name, jak_u64 key_len)
 {
-        error_if_null(printer->prop_true);
+        JAK_ERROR_IF_NULL(printer->prop_true);
         printer->prop_true(printer, str, key_name, key_len);
         return true;
 }
@@ -282,7 +282,7 @@ bool carbon_printer_prop_true(struct printer *printer, struct jak_string *str,
 bool carbon_printer_prop_false(struct printer *printer, struct jak_string *str,
                                       const char *key_name, jak_u64 key_len)
 {
-        error_if_null(printer->prop_false);
+        JAK_ERROR_IF_NULL(printer->prop_false);
         printer->prop_false(printer, str, key_name, key_len);
         return true;
 }
@@ -290,7 +290,7 @@ bool carbon_printer_prop_false(struct printer *printer, struct jak_string *str,
 bool carbon_printer_prop_signed(struct printer *printer, struct jak_string *str,
                                        const char *key_name, jak_u64 key_len, const jak_i64 *value)
 {
-        error_if_null(printer->prop_signed);
+        JAK_ERROR_IF_NULL(printer->prop_signed);
         printer->prop_signed(printer, str, key_name, key_len, value);
         return true;
 }
@@ -298,7 +298,7 @@ bool carbon_printer_prop_signed(struct printer *printer, struct jak_string *str,
 bool carbon_printer_prop_unsigned(struct printer *printer, struct jak_string *str,
                                          const char *key_name, jak_u64 key_len, const jak_u64 *value)
 {
-        error_if_null(printer->prop_unsigned);
+        JAK_ERROR_IF_NULL(printer->prop_unsigned);
         printer->prop_unsigned(printer, str, key_name, key_len, value);
         return true;
 }
@@ -306,7 +306,7 @@ bool carbon_printer_prop_unsigned(struct printer *printer, struct jak_string *st
 bool carbon_printer_prop_float(struct printer *printer, struct jak_string *str,
                                       const char *key_name, jak_u64 key_len, const float *value)
 {
-        error_if_null(printer->prop_float);
+        JAK_ERROR_IF_NULL(printer->prop_float);
         printer->prop_float(printer, str, key_name, key_len, value);
         return true;
 }
@@ -314,7 +314,7 @@ bool carbon_printer_prop_float(struct printer *printer, struct jak_string *str,
 bool carbon_printer_prop_string(struct printer *printer, struct jak_string *str,
                                        const char *key_name, jak_u64 key_len, const char *value, jak_u64 strlen)
 {
-        error_if_null(printer->prop_string);
+        JAK_ERROR_IF_NULL(printer->prop_string);
         printer->prop_string(printer, str, key_name, key_len, value, strlen);
         return true;
 }
@@ -322,7 +322,7 @@ bool carbon_printer_prop_string(struct printer *printer, struct jak_string *str,
 bool carbon_printer_prop_binary(struct printer *printer, struct jak_string *str,
                                        const char *key_name, jak_u64 key_len, const struct jak_carbon_binary *binary)
 {
-        error_if_null(printer->prop_binary);
+        JAK_ERROR_IF_NULL(printer->prop_binary);
         printer->prop_binary(printer, str, key_name, key_len, binary);
         return true;
 }
@@ -330,7 +330,7 @@ bool carbon_printer_prop_binary(struct printer *printer, struct jak_string *str,
 bool carbon_printer_array_prop_name(struct printer *printer, struct jak_string *str,
                                            const char *key_name, jak_u64 key_len)
 {
-        error_if_null(printer->array_prop_name);
+        JAK_ERROR_IF_NULL(printer->array_prop_name);
         printer->array_prop_name(printer, str, key_name, key_len);
         return true;
 }
@@ -338,7 +338,7 @@ bool carbon_printer_array_prop_name(struct printer *printer, struct jak_string *
 bool carbon_printer_column_prop_name(struct printer *printer, struct jak_string *str,
                                             const char *key_name, jak_u64 key_len)
 {
-        error_if_null(printer->column_prop_name);
+        JAK_ERROR_IF_NULL(printer->column_prop_name);
         printer->column_prop_name(printer, str, key_name, key_len);
         return true;
 }
@@ -346,22 +346,22 @@ bool carbon_printer_column_prop_name(struct printer *printer, struct jak_string 
 bool carbon_printer_object_prop_name(struct printer *printer, struct jak_string *str,
                                             const char *key_name, jak_u64 key_len)
 {
-        error_if_null(printer->obj_prop_name);
+        JAK_ERROR_IF_NULL(printer->obj_prop_name);
         printer->obj_prop_name(printer, str, key_name, key_len);
         return true;
 }
 
 bool carbon_printer_print_object(struct jak_carbon_object_it *it, struct printer *printer, struct jak_string *builder)
 {
-        assert(it);
-        assert(printer);
-        assert(builder);
+        JAK_ASSERT(it);
+        JAK_ASSERT(printer);
+        JAK_ASSERT(builder);
         bool is_null_value;
         bool first_entry = true;
         carbon_printer_object_begin(printer, builder);
 
         while (carbon_object_it_next(it)) {
-                if (likely(!first_entry)) {
+                if (JAK_LIKELY(!first_entry)) {
                         carbon_printer_comma(printer, builder);
                 }
                 enum carbon_field_type type;
@@ -467,9 +467,9 @@ bool carbon_printer_print_object(struct jak_carbon_object_it *it, struct printer
 bool carbon_printer_print_array(struct jak_carbon_array_it *it, struct printer *printer, struct jak_string *builder,
                         bool is_record_container)
 {
-        assert(it);
-        assert(printer);
-        assert(builder);
+        JAK_ASSERT(it);
+        JAK_ASSERT(printer);
+        JAK_ASSERT(builder);
 
         bool first_entry = true;
         bool has_entries = false;
@@ -478,7 +478,7 @@ bool carbon_printer_print_array(struct jak_carbon_array_it *it, struct printer *
         while (carbon_array_it_next(it)) {
                 bool is_null_value;
 
-                if (likely(!first_entry)) {
+                if (JAK_LIKELY(!first_entry)) {
                         carbon_printer_comma(printer, builder);
                 } else {
                         if (is_single_entry_array && is_record_container) {
@@ -595,9 +595,9 @@ bool carbon_printer_print_array(struct jak_carbon_array_it *it, struct printer *
 
 bool carbon_printer_print_column(struct jak_carbon_column_it *it, struct printer *printer, struct jak_string *builder)
 {
-        error_if_null(it)
-        error_if_null(printer)
-        error_if_null(builder)
+        JAK_ERROR_IF_NULL(it)
+        JAK_ERROR_IF_NULL(printer)
+        JAK_ERROR_IF_NULL(builder)
 
         enum carbon_field_type type;
         jak_u32 nvalues;

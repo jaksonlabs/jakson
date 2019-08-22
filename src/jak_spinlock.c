@@ -22,7 +22,7 @@
 
 bool spin_init(struct spinlock *spinlock)
 {
-        error_if_null(spinlock)
+        JAK_ERROR_IF_NULL(spinlock)
         atomic_flag_clear(&spinlock->lock);
 
         memset(&spinlock->owner, 0, sizeof(pthread_t));
@@ -33,7 +33,7 @@ bool spin_init(struct spinlock *spinlock)
 bool spin_acquire(struct spinlock *spinlock)
 {
         timestamp_t begin = time_now_wallclock();
-        error_if_null(spinlock)
+        JAK_ERROR_IF_NULL(spinlock)
         if (!pthread_equal(spinlock->owner, pthread_self())) {
                 while (atomic_flag_test_and_set(&spinlock->lock)) {}
                 /** remeber the thread that aquires this lock */
@@ -50,7 +50,7 @@ bool spin_acquire(struct spinlock *spinlock)
 
 bool spin_release(struct spinlock *spinlock)
 {
-        error_if_null(spinlock)
+        JAK_ERROR_IF_NULL(spinlock)
         atomic_flag_clear(&spinlock->lock);
         memset(&spinlock->owner, 0, sizeof(pthread_t));
         return true;

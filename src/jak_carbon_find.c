@@ -31,9 +31,9 @@ static inline bool result_from_column(struct jak_carbon_find *find, jak_u32 requ
 
 bool carbon_find_open(struct jak_carbon_find *out, const char *dot_path, struct jak_carbon *doc)
 {
-        error_if_null(out)
-        error_if_null(dot_path)
-        error_if_null(doc)
+        JAK_ERROR_IF_NULL(out)
+        JAK_ERROR_IF_NULL(dot_path)
+        JAK_ERROR_IF_NULL(doc)
         struct jak_carbon_dot_path path;
         carbon_dot_path_from_string(&path, dot_path);
         carbon_find_create(out, &path, doc);
@@ -43,7 +43,7 @@ bool carbon_find_open(struct jak_carbon_find *out, const char *dot_path, struct 
 
 bool carbon_find_close(struct jak_carbon_find *find)
 {
-        error_if_null(find)
+        JAK_ERROR_IF_NULL(find)
         if (carbon_find_has_result(find)) {
                 enum carbon_field_type type;
                 carbon_find_result_type(&type, find);
@@ -75,9 +75,9 @@ bool carbon_find_close(struct jak_carbon_find *find)
 
 bool carbon_find_create(struct jak_carbon_find *find, struct jak_carbon_dot_path *path, struct jak_carbon *doc)
 {
-        error_if_null(find)
-        error_if_null(path)
-        error_if_null(doc)
+        JAK_ERROR_IF_NULL(find)
+        JAK_ERROR_IF_NULL(path)
+        JAK_ERROR_IF_NULL(doc)
 
         JAK_zero_memory(find, sizeof(struct jak_carbon_find));
         error_init(&find->err);
@@ -105,14 +105,14 @@ bool carbon_find_create(struct jak_carbon_find *find, struct jak_carbon_dot_path
 
 bool carbon_find_has_result(struct jak_carbon_find *find)
 {
-        error_if_null(find)
+        JAK_ERROR_IF_NULL(find)
         return carbon_path_evaluator_has_result(&find->path_evaluater);
 }
 
 const char *carbon_find_result_to_str(struct jak_string *dst_str, enum carbon_printer_impl print_type, struct jak_carbon_find *find)
 {
-        error_if_null(dst_str)
-        error_if_null(find)
+        JAK_ERROR_IF_NULL(dst_str)
+        JAK_ERROR_IF_NULL(find)
 
         string_clear(dst_str);
 
@@ -237,8 +237,8 @@ char *carbon_find_result_to_json_compact_dup(struct jak_carbon_find *find)
 
 bool carbon_find_result_type(enum carbon_field_type *type, struct jak_carbon_find *find)
 {
-        error_if_null(type)
-        error_if_null(find)
+        JAK_ERROR_IF_NULL(type)
+        JAK_ERROR_IF_NULL(find)
         error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
         *type = find->type;
         return true;
@@ -246,7 +246,7 @@ bool carbon_find_result_type(enum carbon_field_type *type, struct jak_carbon_fin
 
 struct jak_carbon_array_it *carbon_find_result_array(struct jak_carbon_find *find)
 {
-        error_if_null(find)
+        JAK_ERROR_IF_NULL(find)
         error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
         error_if(find->type != CARBON_JAK_FIELD_TYPE_ARRAY, &find->err, JAK_ERR_TYPEMISMATCH)
         return find->value.array_it;
@@ -254,7 +254,7 @@ struct jak_carbon_array_it *carbon_find_result_array(struct jak_carbon_find *fin
 
 struct jak_carbon_object_it *carbon_find_result_object(struct jak_carbon_find *find)
 {
-        error_if_null(find)
+        JAK_ERROR_IF_NULL(find)
         error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
         error_if(find->type != CARBON_JAK_FIELD_TYPE_OBJECT, &find->err, JAK_ERR_TYPEMISMATCH)
         return find->value.object_it;
@@ -262,7 +262,7 @@ struct jak_carbon_object_it *carbon_find_result_object(struct jak_carbon_find *f
 
 struct jak_carbon_column_it *carbon_find_result_column(struct jak_carbon_find *find)
 {
-        error_if_null(find)
+        JAK_ERROR_IF_NULL(find)
         error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
         error_if(find->type != CARBON_JAK_FIELD_TYPE_COLUMN_U8 &&
                  find->type != CARBON_JAK_FIELD_TYPE_COLUMN_U16 &&
@@ -279,7 +279,7 @@ struct jak_carbon_column_it *carbon_find_result_column(struct jak_carbon_find *f
 
 bool carbon_find_result_boolean(bool *out, struct jak_carbon_find *find)
 {
-        error_if_null(find)
+        JAK_ERROR_IF_NULL(find)
         error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
         error_if(!carbon_field_type_is_boolean(find->type), &find->err, JAK_ERR_TYPEMISMATCH)
         *out = find->value.boolean;
@@ -288,7 +288,7 @@ bool carbon_find_result_boolean(bool *out, struct jak_carbon_find *find)
 
 bool carbon_find_result_unsigned(jak_u64 *out, struct jak_carbon_find *find)
 {
-        error_if_null(find)
+        JAK_ERROR_IF_NULL(find)
         error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
         error_if(!carbon_field_type_is_unsigned_integer(find->type), &find->err, JAK_ERR_TYPEMISMATCH)
         *out = find->value.unsigned_number;
@@ -297,7 +297,7 @@ bool carbon_find_result_unsigned(jak_u64 *out, struct jak_carbon_find *find)
 
 bool carbon_find_result_signed(jak_i64 *out, struct jak_carbon_find *find)
 {
-        error_if_null(find)
+        JAK_ERROR_IF_NULL(find)
         error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
         error_if(!carbon_field_type_is_signed_integer(find->type), &find->err, JAK_ERR_TYPEMISMATCH)
         *out = find->value.signed_number;
@@ -306,7 +306,7 @@ bool carbon_find_result_signed(jak_i64 *out, struct jak_carbon_find *find)
 
 bool carbon_find_result_float(float *out, struct jak_carbon_find *find)
 {
-        error_if_null(find)
+        JAK_ERROR_IF_NULL(find)
         error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
         error_if(!carbon_field_type_is_floating_number(find->type), &find->err, JAK_ERR_TYPEMISMATCH)
         *out = find->value.float_number;
@@ -315,8 +315,8 @@ bool carbon_find_result_float(float *out, struct jak_carbon_find *find)
 
 const char *carbon_find_result_string(jak_u64 *str_len, struct jak_carbon_find *find)
 {
-        error_if_null(find)
-        error_if_null(str_len)
+        JAK_ERROR_IF_NULL(find)
+        JAK_ERROR_IF_NULL(str_len)
         error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
         error_if(find->type != CARBON_JAK_FIELD_TYPE_STRING, &find->err, JAK_ERR_TYPEMISMATCH)
         *str_len = find->value.string.len;
@@ -325,7 +325,7 @@ const char *carbon_find_result_string(jak_u64 *str_len, struct jak_carbon_find *
 
 struct jak_carbon_binary *carbon_find_result_binary(struct jak_carbon_find *find)
 {
-        error_if_null(find)
+        JAK_ERROR_IF_NULL(find)
         error_if(!carbon_path_evaluator_has_result(&find->path_evaluater), &find->err, JAK_ERR_ILLEGALSTATE)
         error_if(!carbon_field_type_is_binary(find->type), &find->err, JAK_ERR_TYPEMISMATCH)
         return &find->value.binary;
@@ -333,7 +333,7 @@ struct jak_carbon_binary *carbon_find_result_binary(struct jak_carbon_find *find
 
 bool carbon_find_drop(struct jak_carbon_find *find)
 {
-        error_if_null(find)
+        JAK_ERROR_IF_NULL(find)
         carbon_path_evaluator_end(&find->path_evaluater);
         return true;
 }
@@ -450,7 +450,7 @@ static inline bool result_from_column(struct jak_carbon_find *find, jak_u32 requ
 {
         jak_u32 num_contained_values;
         carbon_column_it_values_info(&find->type, &num_contained_values, it);
-        assert(requested_idx < num_contained_values);
+        JAK_ASSERT(requested_idx < num_contained_values);
 
         switch (find->type) {
                 case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN: {

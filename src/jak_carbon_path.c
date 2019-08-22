@@ -31,9 +31,9 @@ static inline enum carbon_path_status traverse_array(struct jak_carbon_path_eval
 bool carbon_path_evaluator_begin(struct jak_carbon_path_evaluator *eval, struct jak_carbon_dot_path *path,
                                  struct jak_carbon *doc)
 {
-        error_if_null(eval)
-        error_if_null(path)
-        error_if_null(doc)
+        JAK_ERROR_IF_NULL(eval)
+        JAK_ERROR_IF_NULL(path)
+        JAK_ERROR_IF_NULL(doc)
 
         JAK_zero_memory(eval, sizeof(struct jak_carbon_path_evaluator));
         eval->doc = doc;
@@ -47,9 +47,9 @@ bool carbon_path_evaluator_begin(struct jak_carbon_path_evaluator *eval, struct 
 bool carbon_path_evaluator_begin_mutable(struct jak_carbon_path_evaluator *eval, const struct jak_carbon_dot_path *path,
                                          struct jak_carbon_revise *context)
 {
-        error_if_null(eval)
-        error_if_null(path)
-        error_if_null(context)
+        JAK_ERROR_IF_NULL(eval)
+        JAK_ERROR_IF_NULL(path)
+        JAK_ERROR_IF_NULL(context)
 
         eval->doc = context->revised_doc;
         JAK_check_success(error_init(&eval->err));
@@ -61,21 +61,21 @@ bool carbon_path_evaluator_begin_mutable(struct jak_carbon_path_evaluator *eval,
 
 bool carbon_path_evaluator_status(enum carbon_path_status *status, struct jak_carbon_path_evaluator *state)
 {
-        error_if_null(status)
-        error_if_null(state)
+        JAK_ERROR_IF_NULL(status)
+        JAK_ERROR_IF_NULL(state)
         *status = state->status;
         return true;
 }
 
 bool carbon_path_evaluator_has_result(struct jak_carbon_path_evaluator *state)
 {
-        error_if_null(state)
+        JAK_ERROR_IF_NULL(state)
         return state->status == CARBON_PATH_RESOLVED;
 }
 
 bool carbon_path_evaluator_end(struct jak_carbon_path_evaluator *state)
 {
-        error_if_null(state)
+        JAK_ERROR_IF_NULL(state)
         switch (state->result.container_type) {
                 case CARBON_OBJECT:
                         carbon_object_it_drop(&state->result.containers.object.it);
@@ -218,7 +218,7 @@ static inline enum carbon_path_status traverse_object(struct jak_carbon_path_eva
         bool status;
 
         carbon_dot_path_type_at(&node_type, current_path_pos, path);
-        assert(node_type == DOT_NODE_KEY_NAME);
+        JAK_ASSERT(node_type == DOT_NODE_KEY_NAME);
 
         status = carbon_object_it_next(it);
         carbon_dot_path_len(&path_length, path);
@@ -240,7 +240,7 @@ static inline enum carbon_path_status traverse_object(struct jak_carbon_path_eva
                                         return CARBON_PATH_RESOLVED;
                                 } else {
                                         /* path end not reached, traverse further if possible */
-                                        assert(next_path_pos < path_length);
+                                        JAK_ASSERT(next_path_pos < path_length);
 
                                         enum carbon_field_type prop_type;
                                         carbon_object_it_prop_type(&prop_type, it);
@@ -248,7 +248,7 @@ static inline enum carbon_path_status traverse_object(struct jak_carbon_path_eva
                                         if(!carbon_field_type_is_traversable(prop_type)) {
                                                 return CARBON_PATH_NOTTRAVERSABLE;
                                         } else {
-                                                assert(prop_type == CARBON_JAK_FIELD_TYPE_OBJECT ||
+                                                JAK_ASSERT(prop_type == CARBON_JAK_FIELD_TYPE_OBJECT ||
                                                                prop_type == CARBON_JAK_FIELD_TYPE_ARRAY ||
                                                                prop_type == CARBON_JAK_FIELD_TYPE_COLUMN_U8 ||
                                                                prop_type == CARBON_JAK_FIELD_TYPE_COLUMN_U16 ||
@@ -315,10 +315,10 @@ static inline enum carbon_path_status traverse_array(struct jak_carbon_path_eval
                                                      const struct jak_carbon_dot_path *path, jak_u32 current_path_pos,
                                                      struct jak_carbon_array_it *it, bool is_record)
 {
-        assert(state);
-        assert(path);
-        assert(it);
-        assert(current_path_pos < path->path_len);
+        JAK_ASSERT(state);
+        JAK_ASSERT(path);
+        JAK_ASSERT(it);
+        JAK_ASSERT(current_path_pos < path->path_len);
 
         enum carbon_field_type elem_type;
         enum carbon_dot_node_type node_type;
@@ -341,7 +341,7 @@ static inline enum carbon_path_status traverse_array(struct jak_carbon_path_eval
                                 carbon_dot_path_idx_at(&requested_array_idx, current_path_pos, path);
                                 while (current_array_idx < requested_array_idx &&
                                        carbon_array_it_next(it)) { current_array_idx++; }
-                                assert(current_array_idx <= requested_array_idx);
+                                JAK_ASSERT(current_array_idx <= requested_array_idx);
                                 if (current_array_idx != requested_array_idx) {
                                         /* root array has too less elements to reach the requested index */
                                         return CARBON_PATH_NOSUCHINDEX;
@@ -397,7 +397,7 @@ static inline enum carbon_path_status traverse_array(struct jak_carbon_path_eval
                                                                                                 carbon_array_it_drop(sub_it);
                                                                                                 return status;
                                                                                         } else {
-                                                                                                assert(elem_type ==
+                                                                                                JAK_ASSERT(elem_type ==
                                                                                                        CARBON_JAK_FIELD_TYPE_COLUMN_U8 ||
                                                                                                        elem_type ==
                                                                                                        CARBON_JAK_FIELD_TYPE_COLUMN_U16 ||
@@ -502,7 +502,7 @@ static inline enum carbon_path_status traverse_column(struct jak_carbon_path_eva
                 return CARBON_PATH_NONESTING;
         } else {
                 carbon_dot_path_type_at(&node_type, current_path_pos, path);
-                assert(node_type == DOT_NODE_ARRAY_IDX);
+                JAK_ASSERT(node_type == DOT_NODE_ARRAY_IDX);
                 carbon_dot_path_idx_at(&requested_idx, current_path_pos, path);
                 carbon_column_it_values_info(&column_type, &nun_values_contained, it);
                 if (requested_idx >= nun_values_contained) {

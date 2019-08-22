@@ -70,7 +70,7 @@ static struct jak_encoded_doc *doc_create(struct jak_error *err, jak_global_id_t
 struct jak_encoded_doc *encoded_doc_collection_get_or_append(struct jak_encoded_doc_list *collection,
                                                              jak_global_id_t id)
 {
-        error_if_null(collection);
+        JAK_ERROR_IF_NULL(collection);
         const jak_u32 *doc_pos = hashtable_get_value(&collection->index, &id);
         if (doc_pos) {
                 struct jak_encoded_doc *result = vec_get(&collection->flat_object_collection, *doc_pos, struct jak_encoded_doc);
@@ -121,7 +121,7 @@ bool encoded_doc_drop(struct jak_encoded_doc *doc)
 bool                                                                                                    \
 encoded_doc_add_prop_##value_name(struct jak_encoded_doc *doc, jak_archive_field_sid_t key, built_in_type value)       \
 {                                                                                                                      \
-    error_if_null(doc)                                                                                      \
+    JAK_ERROR_IF_NULL(doc)                                                                                      \
     struct jak_encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct jak_encoded_doc_prop);                      \
     prop->header.context = doc;                                                                                        \
     prop->header.key_type = STRING_ENCODED;                                        \
@@ -136,7 +136,7 @@ encoded_doc_add_prop_##value_name(struct jak_encoded_doc *doc, jak_archive_field
 bool                                                                                                    \
 encoded_doc_add_prop_##value_name##_decoded(struct jak_encoded_doc *doc, const char *key, built_in_type value)    \
 {                                                                                                                      \
-    error_if_null(doc)                                                                                      \
+    JAK_ERROR_IF_NULL(doc)                                                                                      \
     struct jak_encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct jak_encoded_doc_prop);                      \
     prop->header.context = doc;                                                                                        \
     prop->header.key_type = STRING_DECODED;                                        \
@@ -194,7 +194,7 @@ DECLARE_JAK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(jak_archive_field_sid_t, JAK_FIEL
 bool encoded_doc_add_prop_string_decoded_string_value_decoded(struct jak_encoded_doc *doc, const char *key,
                                                               const char *value)
 {
-        error_if_null(doc)
+        JAK_ERROR_IF_NULL(doc)
         struct jak_encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct jak_encoded_doc_prop);
         prop->header.context = doc;
         prop->header.key_type = STRING_DECODED;
@@ -206,7 +206,7 @@ bool encoded_doc_add_prop_string_decoded_string_value_decoded(struct jak_encoded
 
 bool encoded_doc_add_prop_null(struct jak_encoded_doc *doc, jak_archive_field_sid_t key)
 {
-        error_if_null(doc)
+        JAK_ERROR_IF_NULL(doc)
         struct jak_encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct jak_encoded_doc_prop);
         prop->header.context = doc;
         prop->header.key_type = STRING_ENCODED;
@@ -218,7 +218,7 @@ bool encoded_doc_add_prop_null(struct jak_encoded_doc *doc, jak_archive_field_si
 
 bool encoded_doc_add_prop_null_decoded(struct jak_encoded_doc *doc, const char *key)
 {
-        error_if_null(doc)
+        JAK_ERROR_IF_NULL(doc)
         struct jak_encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct jak_encoded_doc_prop);
         prop->header.context = doc;
         prop->header.key_type = STRING_DECODED;
@@ -230,7 +230,7 @@ bool encoded_doc_add_prop_null_decoded(struct jak_encoded_doc *doc, const char *
 
 bool encoded_doc_add_prop_object(struct jak_encoded_doc *doc, jak_archive_field_sid_t key, struct jak_encoded_doc *value)
 {
-        error_if_null(doc)
+        JAK_ERROR_IF_NULL(doc)
         struct jak_encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct jak_encoded_doc_prop);
         prop->header.context = doc;
         prop->header.key_type = STRING_ENCODED;
@@ -243,7 +243,7 @@ bool encoded_doc_add_prop_object(struct jak_encoded_doc *doc, jak_archive_field_
 bool encoded_doc_add_prop_object_decoded(struct jak_encoded_doc *doc, const char *key,
                                          struct jak_encoded_doc *value)
 {
-        error_if_null(doc)
+        JAK_ERROR_IF_NULL(doc)
         struct jak_encoded_doc_prop *prop = vec_new_and_get(&doc->props, struct jak_encoded_doc_prop);
         prop->header.context = doc;
         prop->header.key_type = STRING_DECODED;
@@ -258,7 +258,7 @@ bool                                                                            
 encoded_doc_add_prop_array_##name(struct jak_encoded_doc *doc,                                                    \
                                        jak_archive_field_sid_t key)                                                         \
 {                                                                                                                      \
-    error_if_null(doc)                                                                                      \
+    JAK_ERROR_IF_NULL(doc)                                                                                      \
     jak_u32 new_array_pos = doc->props_arrays.num_elems;                                                              \
     struct jak_encoded_doc_prop_array *array = vec_new_and_get(&doc->props_arrays, struct jak_encoded_doc_prop_array);  \
     array->header.key_type = STRING_ENCODED;                                          \
@@ -275,7 +275,7 @@ bool                                                                            
 encoded_doc_add_prop_array_##name##_decoded(struct jak_encoded_doc *doc,                                          \
                                        const char *key)                                                                \
 {                                                                                                                      \
-    error_if_null(doc)                                                                                      \
+    JAK_ERROR_IF_NULL(doc)                                                                                      \
     struct jak_encoded_doc_prop_array *array = vec_new_and_get(&doc->props_arrays, struct jak_encoded_doc_prop_array);  \
     array->header.key_type = STRING_DECODED;                                          \
     array->header.key.key_str = strdup(key);                                                                           \
@@ -342,7 +342,7 @@ bool                                                                            
 encoded_doc_array_push_##name(struct jak_encoded_doc *doc, jak_archive_field_sid_t key,                                \
                                      const built_in_type *values, jak_u32 values_length)                              \
 {                                                                                                                      \
-    error_if_null(doc)                                                                                      \
+    JAK_ERROR_IF_NULL(doc)                                                                                      \
     const jak_u32 *prop_pos = hashtable_get_value(&doc->prop_array_index, &key);                               \
     error_if(prop_pos == NULL, &doc->err, JAK_ERR_NOTFOUND);                                                 \
     struct jak_encoded_doc_prop_array *array = vec_get(&doc->props_arrays, *prop_pos,                          \
@@ -439,7 +439,7 @@ DECLARE_JAK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, jak_archive_field_u32_t, J
 //bool
 //encoded_doc_array_push_null(struct jak_encoded_doc *doc, jak_archive_field_sid_t key, jak_u32 how_many)
 //{
-//    error_if_null(doc)
+//    JAK_ERROR_IF_NULL(doc)
 //    const jak_u32 *prop_pos = hashtable_get_value(&doc->prop_array_index, &key);
 //    error_if(prop_pos == NULL, &doc->err, JAK_ERR_NOTFOUND);
 //    struct jak_encoded_doc_prop_array *array = vec_get(&doc->props_arrays, *prop_pos,
@@ -461,7 +461,7 @@ bool encoded_doc_array_push_object(struct jak_encoded_doc *doc, jak_archive_fiel
         JAK_UNUSED(key);
         JAK_UNUSED(id);
 
-        error_if_null(doc)
+        JAK_ERROR_IF_NULL(doc)
         const jak_u32 *prop_pos = hashtable_get_value(&doc->prop_array_index, &key);
         error_if(prop_pos == NULL, &doc->err, JAK_ERR_NOTFOUND);
         struct jak_encoded_doc_prop_array *array = vec_get(&doc->props_arrays, *prop_pos, struct jak_encoded_doc_prop_array);
@@ -478,7 +478,7 @@ bool encoded_doc_array_push_object_decoded(struct jak_encoded_doc *doc, const ch
         JAK_UNUSED(key);
         JAK_UNUSED(id);
 
-        error_if_null(doc)
+        JAK_ERROR_IF_NULL(doc)
         jak_u32 prop_pos = (jak_u32) -1;
         for (jak_u32 i = 0; i < doc->props_arrays.num_elems; i++) {
                 struct jak_encoded_doc_prop_array *prop = vec_get(&doc->props_arrays, i, struct jak_encoded_doc_prop_array);
@@ -509,7 +509,7 @@ static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned l
                 struct jak_encoded_doc_prop *prop = vec_get(&doc->props, i, struct jak_encoded_doc_prop);
                 char *key_str = NULL;
                 if (prop->header.key_type == STRING_ENCODED) {
-                        key_str = query_fetch_string_by_id(&query, prop->header.key.key_id);
+                        key_str = jak_query_fetch_string_by_id(&query, prop->header.key.key_id);
                 } else {
                         key_str = strdup(prop->header.key.key_str);
                 }
@@ -549,7 +549,7 @@ static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned l
                                 break;
                         case JAK_FIELD_STRING: {
                                 if (prop->header.value_type == VALUE_BUILTIN) {
-                                        char *value_str = query_fetch_string_by_id(&query, prop->value.builtin.string);
+                                        char *value_str = jak_query_fetch_string_by_id(&query, prop->value.builtin.string);
                                         fprintf(file, "\"%s\"", value_str);
                                         free(value_str);
                                 } else {
@@ -580,7 +580,7 @@ static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned l
                 struct jak_encoded_doc_prop_array *prop = vec_get(&doc->props_arrays, i, struct jak_encoded_doc_prop_array);
                 char *key_str = NULL;
                 if (prop->header.key_type == STRING_ENCODED) {
-                        key_str = query_fetch_string_by_id(&query, prop->header.key.key_id);
+                        key_str = jak_query_fetch_string_by_id(&query, prop->header.key.key_id);
                 } else {
                         key_str = strdup(prop->header.key.key_str);
                 }
@@ -729,7 +729,7 @@ static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned l
                                         if (JAK_IS_NULL_STRING(value)) {
                                                 fprintf(file, "null%s", k + 1 < prop->values.num_elems ? ", " : "");
                                         } else {
-                                                char *value_str = query_fetch_string_by_id(&query, value);
+                                                char *value_str = jak_query_fetch_string_by_id(&query, value);
                                                 fprintf(file,
                                                         "\"%s\"%s",
                                                         value_str,
@@ -794,7 +794,7 @@ static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned l
 
         fprintf(file, "}");
 
-        query_drop(&query);
+        jak_query_drop(&query);
 
         return true;
 }

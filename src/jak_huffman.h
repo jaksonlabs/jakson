@@ -30,7 +30,7 @@
 JAK_BEGIN_DECL
 
 struct jak_huffman {
-    struct vector ofType(struct pack_huffman_entry) table;
+    struct jak_vector ofType(struct pack_huffman_entry) table;
     struct jak_error err;
 };
 

@@ -39,8 +39,8 @@ static bool carbon_header_rev_inc(struct jak_carbon *doc);
 
 bool carbon_revise_try_begin(struct jak_carbon_revise *context, struct jak_carbon *revised_doc, struct jak_carbon *doc)
 {
-        error_if_null(context)
-        error_if_null(doc)
+        JAK_ERROR_IF_NULL(context)
+        JAK_ERROR_IF_NULL(doc)
         if (!doc->versioning.commit_lock) {
                 return carbon_revise_begin(context, revised_doc, doc);
         } else {
@@ -50,10 +50,10 @@ bool carbon_revise_try_begin(struct jak_carbon_revise *context, struct jak_carbo
 
 bool carbon_revise_begin(struct jak_carbon_revise *context, struct jak_carbon *revised_doc, struct jak_carbon *original)
 {
-        error_if_null(context)
-        error_if_null(original)
+        JAK_ERROR_IF_NULL(context)
+        JAK_ERROR_IF_NULL(original)
 
-        if (likely(original->versioning.is_latest)) {
+        if (JAK_LIKELY(original->versioning.is_latest)) {
                 spin_acquire(&original->versioning.write_lock);
                 original->versioning.commit_lock = true;
                 context->original = original;
@@ -70,7 +70,7 @@ bool carbon_revise_begin(struct jak_carbon_revise *context, struct jak_carbon *r
 
 static void key_unsigned_set(struct jak_carbon *doc, jak_u64 key)
 {
-        assert(doc);
+        JAK_ASSERT(doc);
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
 
@@ -81,7 +81,7 @@ static void key_unsigned_set(struct jak_carbon *doc, jak_u64 key)
 
 static void key_signed_set(struct jak_carbon *doc, jak_i64 key)
 {
-        assert(doc);
+        JAK_ASSERT(doc);
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
 
@@ -92,7 +92,7 @@ static void key_signed_set(struct jak_carbon *doc, jak_i64 key)
 
 static void key_string_set(struct jak_carbon *doc, const char *key)
 {
-        assert(doc);
+        JAK_ASSERT(doc);
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
 
@@ -103,7 +103,7 @@ static void key_string_set(struct jak_carbon *doc, const char *key)
 
 bool carbon_revise_key_generate(jak_global_id_t *out, struct jak_carbon_revise *context)
 {
-        error_if_null(context);
+        JAK_ERROR_IF_NULL(context);
         enum carbon_key_type key_type;
         carbon_key_type(&key_type, context->revised_doc);
         if (key_type == CARBON_KEY_AUTOKEY) {
@@ -120,7 +120,7 @@ bool carbon_revise_key_generate(jak_global_id_t *out, struct jak_carbon_revise *
 
 bool carbon_revise_key_set_unsigned(struct jak_carbon_revise *context, jak_u64 key_value)
 {
-        error_if_null(context);
+        JAK_ERROR_IF_NULL(context);
         enum carbon_key_type key_type;
         carbon_key_type(&key_type, context->revised_doc);
         if (key_type == CARBON_KEY_UKEY) {
@@ -134,7 +134,7 @@ bool carbon_revise_key_set_unsigned(struct jak_carbon_revise *context, jak_u64 k
 
 bool carbon_revise_key_set_signed(struct jak_carbon_revise *context, jak_i64 key_value)
 {
-        error_if_null(context);
+        JAK_ERROR_IF_NULL(context);
         enum carbon_key_type key_type;
         carbon_key_type(&key_type, context->revised_doc);
         if (key_type == CARBON_KEY_IKEY) {
@@ -148,7 +148,7 @@ bool carbon_revise_key_set_signed(struct jak_carbon_revise *context, jak_i64 key
 
 bool carbon_revise_key_set_string(struct jak_carbon_revise *context, const char *key_value)
 {
-        error_if_null(context);
+        JAK_ERROR_IF_NULL(context);
         enum carbon_key_type key_type;
         carbon_key_type(&key_type, context->revised_doc);
         if (key_type == CARBON_KEY_SKEY) {
@@ -162,8 +162,8 @@ bool carbon_revise_key_set_string(struct jak_carbon_revise *context, const char 
 
 bool carbon_revise_iterator_open(struct jak_carbon_array_it *it, struct jak_carbon_revise *context)
 {
-        error_if_null(it);
-        error_if_null(context);
+        JAK_ERROR_IF_NULL(it);
+        JAK_ERROR_IF_NULL(context);
         jak_offset_t payload_start = carbon_int_payload_after_header(context->revised_doc);
         error_if(context->revised_doc->memfile.mode != READ_WRITE, &context->original->err, JAK_ERR_INTERNALERR)
         return carbon_array_it_create(it, &context->revised_doc->memfile, &context->original->err, payload_start);
@@ -171,15 +171,15 @@ bool carbon_revise_iterator_open(struct jak_carbon_array_it *it, struct jak_carb
 
 bool carbon_revise_iterator_close(struct jak_carbon_array_it *it)
 {
-        error_if_null(it);
+        JAK_ERROR_IF_NULL(it);
         return carbon_array_it_drop(it);
 }
 
 bool carbon_revise_find_open(struct jak_carbon_find *out, const char *dot_path, struct jak_carbon_revise *context)
 {
-        error_if_null(out)
-        error_if_null(dot_path)
-        error_if_null(context)
+        JAK_ERROR_IF_NULL(out)
+        JAK_ERROR_IF_NULL(dot_path)
+        JAK_ERROR_IF_NULL(context)
         struct jak_carbon_dot_path path;
         carbon_dot_path_from_string(&path, dot_path);
         bool status = carbon_find_create(out, &path, context->revised_doc);
@@ -189,7 +189,7 @@ bool carbon_revise_find_open(struct jak_carbon_find *out, const char *dot_path, 
 
 bool carbon_revise_find_close(struct jak_carbon_find *find)
 {
-        error_if_null(find)
+        JAK_ERROR_IF_NULL(find)
         return carbon_find_drop(find);
 }
 
@@ -204,8 +204,8 @@ bool carbon_revise_remove_one(const char *dot_path, struct jak_carbon *rev_doc, 
 
 bool carbon_revise_remove(const char *dot_path, struct jak_carbon_revise *context)
 {
-        error_if_null(dot_path)
-        error_if_null(context)
+        JAK_ERROR_IF_NULL(dot_path)
+        JAK_ERROR_IF_NULL(context)
 
         struct jak_carbon_dot_path dot;
         struct jak_carbon_path_evaluator eval;
@@ -243,7 +243,7 @@ bool carbon_revise_remove(const char *dot_path, struct jak_carbon_revise *contex
 
 bool carbon_revise_pack(struct jak_carbon_revise *context)
 {
-        error_if_null(context);
+        JAK_ERROR_IF_NULL(context);
         struct jak_carbon_array_it it;
         carbon_revise_iterator_open(&it, context);
         internal_pack_array(&it);
@@ -258,7 +258,7 @@ bool carbon_revise_shrink(struct jak_carbon_revise *context)
         carbon_array_it_fast_forward(&it);
         if (memfile_remain_size(&it.memfile) > 0) {
                 jak_offset_t first_empty_slot = memfile_tell(&it.memfile);
-                assert(memfile_size(&it.memfile) > first_empty_slot);
+                JAK_ASSERT(memfile_size(&it.memfile) > first_empty_slot);
                 jak_offset_t shrink_size = memfile_size(&it.memfile) - first_empty_slot;
                 memfile_cut(&it.memfile, shrink_size);
         }
@@ -271,7 +271,7 @@ bool carbon_revise_shrink(struct jak_carbon_revise *context)
 
 const struct jak_carbon *carbon_revise_end(struct jak_carbon_revise *context)
 {
-        if (likely(context != NULL)) {
+        if (JAK_LIKELY(context != NULL)) {
                 internal_commit_update(context->revised_doc);
 
                 context->original->versioning.is_latest = false;
@@ -288,7 +288,7 @@ const struct jak_carbon *carbon_revise_end(struct jak_carbon_revise *context)
 
 bool carbon_revise_abort(struct jak_carbon_revise *context)
 {
-        error_if_null(context)
+        JAK_ERROR_IF_NULL(context)
 
         carbon_drop(context->revised_doc);
         context->original->versioning.is_latest = true;
@@ -300,7 +300,7 @@ bool carbon_revise_abort(struct jak_carbon_revise *context)
 
 static bool internal_pack_array(struct jak_carbon_array_it *it)
 {
-        assert(it);
+        JAK_ASSERT(it);
 
         /* shrink this array */
         {
@@ -316,16 +316,16 @@ static bool internal_pack_array(struct jak_carbon_array_it *it)
                         jak_offset_t first_empty_slot_offset = memfile_tell(&this_array_it.memfile);
                         char final;
                         while ((final = *memfile_read(&this_array_it.memfile, sizeof(char))) == 0) {}
-                        assert(final == JAK_CARBON_MARKER_ARRAY_END);
+                        JAK_ASSERT(final == JAK_CARBON_MARKER_ARRAY_END);
                         jak_offset_t last_empty_slot_offset = memfile_tell(&this_array_it.memfile) - sizeof(char);
                         memfile_seek(&this_array_it.memfile, first_empty_slot_offset);
-                        assert(last_empty_slot_offset > first_empty_slot_offset);
+                        JAK_ASSERT(last_empty_slot_offset > first_empty_slot_offset);
 
                         memfile_inplace_remove(&this_array_it.memfile,
                                                last_empty_slot_offset - first_empty_slot_offset);
 
                         final = *memfile_read(&this_array_it.memfile, sizeof(char));
-                        assert(final == JAK_CARBON_MARKER_ARRAY_END);
+                        JAK_ASSERT(final == JAK_CARBON_MARKER_ARRAY_END);
                 }
 
                 carbon_array_it_drop(&this_array_it);
@@ -360,7 +360,7 @@ static bool internal_pack_array(struct jak_carbon_array_it *it)
                                                                it->field_access.nested_array_it->payload_start -
                                                                sizeof(jak_u8));
                                         internal_pack_array(&nested_array_it);
-                                        assert(*memfile_peek(&nested_array_it.memfile, sizeof(char)) ==
+                                        JAK_ASSERT(*memfile_peek(&nested_array_it.memfile, sizeof(char)) ==
                                                        JAK_CARBON_MARKER_ARRAY_END);
                                         memfile_skip(&nested_array_it.memfile, sizeof(char));
                                         memfile_seek(&it->memfile, memfile_tell(&nested_array_it.memfile));
@@ -388,7 +388,7 @@ static bool internal_pack_array(struct jak_carbon_array_it *it)
                                                                 it->field_access.nested_object_it->object_contents_off -
                                                                 sizeof(jak_u8));
                                         internal_pack_object(&nested_object_it);
-                                        assert(*memfile_peek(&nested_object_it.memfile, sizeof(char)) ==
+                                        JAK_ASSERT(*memfile_peek(&nested_object_it.memfile, sizeof(char)) ==
                                                        JAK_CARBON_MARKER_OBJECT_END);
                                         memfile_skip(&nested_object_it.memfile, sizeof(char));
                                         memfile_seek(&it->memfile, memfile_tell(&nested_object_it.memfile));
@@ -401,14 +401,14 @@ static bool internal_pack_array(struct jak_carbon_array_it *it)
                 }
         }
 
-        assert(*memfile_peek(&it->memfile, sizeof(char)) == JAK_CARBON_MARKER_ARRAY_END);
+        JAK_ASSERT(*memfile_peek(&it->memfile, sizeof(char)) == JAK_CARBON_MARKER_ARRAY_END);
 
         return true;
 }
 
 static bool internal_pack_object(struct jak_carbon_object_it *it)
 {
-        assert(it);
+        JAK_ASSERT(it);
 
         /* shrink this object */
         {
@@ -424,16 +424,16 @@ static bool internal_pack_object(struct jak_carbon_object_it *it)
                         jak_offset_t first_empty_slot_offset = memfile_tell(&this_object_it.memfile);
                         char final;
                         while ((final = *memfile_read(&this_object_it.memfile, sizeof(char))) == 0) {}
-                        assert(final == JAK_CARBON_MARKER_OBJECT_END);
+                        JAK_ASSERT(final == JAK_CARBON_MARKER_OBJECT_END);
                         jak_offset_t last_empty_slot_offset = memfile_tell(&this_object_it.memfile) - sizeof(char);
                         memfile_seek(&this_object_it.memfile, first_empty_slot_offset);
-                        assert(last_empty_slot_offset > first_empty_slot_offset);
+                        JAK_ASSERT(last_empty_slot_offset > first_empty_slot_offset);
 
                         memfile_inplace_remove(&this_object_it.memfile,
                                                last_empty_slot_offset - first_empty_slot_offset);
 
                         final = *memfile_read(&this_object_it.memfile, sizeof(char));
-                        assert(final == JAK_CARBON_MARKER_OBJECT_END);
+                        JAK_ASSERT(final == JAK_CARBON_MARKER_OBJECT_END);
                 }
 
                 carbon_object_it_drop(&this_object_it);
@@ -468,7 +468,7 @@ static bool internal_pack_object(struct jak_carbon_object_it *it)
                                                                it->field.value.data.nested_array_it->payload_start -
                                                                sizeof(jak_u8));
                                         internal_pack_array(&nested_array_it);
-                                        assert(*memfile_peek(&nested_array_it.memfile, sizeof(char)) ==
+                                        JAK_ASSERT(*memfile_peek(&nested_array_it.memfile, sizeof(char)) ==
                                                        JAK_CARBON_MARKER_ARRAY_END);
                                         memfile_skip(&nested_array_it.memfile, sizeof(char));
                                         memfile_seek(&it->memfile, memfile_tell(&nested_array_it.memfile));
@@ -496,7 +496,7 @@ static bool internal_pack_object(struct jak_carbon_object_it *it)
                                                                 it->field.value.data.nested_object_it->object_contents_off -
                                                                 sizeof(jak_u8));
                                         internal_pack_object(&nested_object_it);
-                                        assert(*memfile_peek(&nested_object_it.memfile, sizeof(char)) ==
+                                        JAK_ASSERT(*memfile_peek(&nested_object_it.memfile, sizeof(char)) ==
                                                        JAK_CARBON_MARKER_OBJECT_END);
                                         memfile_skip(&nested_object_it.memfile, sizeof(char));
                                         memfile_seek(&it->memfile, memfile_tell(&nested_object_it.memfile));
@@ -509,14 +509,14 @@ static bool internal_pack_object(struct jak_carbon_object_it *it)
                 }
         }
 
-        assert(*memfile_peek(&it->memfile, sizeof(char)) == JAK_CARBON_MARKER_OBJECT_END);
+        JAK_ASSERT(*memfile_peek(&it->memfile, sizeof(char)) == JAK_CARBON_MARKER_OBJECT_END);
 
         return true;
 }
 
 static bool internal_pack_column(struct jak_carbon_column_it *it)
 {
-        assert(it);
+        JAK_ASSERT(it);
 
         jak_u32 free_space = (it->column_capacity - it->column_num_elements) * carbon_int_get_type_value_size(it->type);
         jak_offset_t payload_start = carbon_int_column_get_payload_off(it);
@@ -541,13 +541,13 @@ static bool internal_pack_column(struct jak_carbon_column_it *it)
 
 static bool internal_commit_update(struct jak_carbon *doc)
 {
-        assert(doc);
+        JAK_ASSERT(doc);
         return carbon_header_rev_inc(doc);
 }
 
 static bool carbon_header_rev_inc(struct jak_carbon *doc)
 {
-        assert(doc);
+        JAK_ASSERT(doc);
 
         enum carbon_key_type key_type;
         memfile_save_position(&doc->memfile);

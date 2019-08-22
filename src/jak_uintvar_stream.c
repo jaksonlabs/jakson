@@ -26,7 +26,7 @@
 
 jak_u8 uintvar_stream_write(uintvar_stream_t dst, jak_u64 value)
 {
-        if (likely(dst != NULL)) {
+        if (JAK_LIKELY(dst != NULL)) {
                 jak_u8 num_bytes = 0;
                 for (jak_i8 i = 9; i > 0; i--) {
                         char block_data = extract_data(value, i * 7);

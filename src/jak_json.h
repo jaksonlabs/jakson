@@ -169,12 +169,12 @@ struct jak_json_prop {
 
 struct jak_json_members {
     struct jak_json_object_t *parent;
-    struct vector ofType(struct jak_json_prop) members;
+    struct jak_vector ofType(struct jak_json_prop) members;
 };
 
 struct jak_json_elements {
     struct jak_json_array *parent;
-            struct vector ofType(struct jak_json_element) elements;
+            struct jak_vector ofType(struct jak_json_element) elements;
 };
 
 struct jak_json_array {

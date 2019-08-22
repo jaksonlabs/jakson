@@ -24,9 +24,9 @@
 bool hashtable_create(struct hashtable *map, struct jak_error *err, size_t key_size, size_t value_size,
                       size_t capacity)
 {
-        error_if_null(map)
-        error_if_null(key_size)
-        error_if_null(value_size)
+        JAK_ERROR_IF_NULL(map)
+        JAK_ERROR_IF_NULL(key_size)
+        JAK_ERROR_IF_NULL(value_size)
 
         int err_code = JAK_ERR_INITFAILED;
 
@@ -62,7 +62,7 @@ bool hashtable_create(struct hashtable *map, struct jak_error *err, size_t key_s
 
 bool hashtable_drop(struct hashtable *map)
 {
-        error_if_null(map)
+        JAK_ERROR_IF_NULL(map)
 
         bool status = true;
 
@@ -90,9 +90,9 @@ struct hashtable *hashtable_cpy(struct hashtable *src)
                                  src->value_data.elem_size,
                                  src->table.cap_elems);
 
-                assert(src->key_data.cap_elems == src->value_data.cap_elems
+                JAK_ASSERT(src->key_data.cap_elems == src->value_data.cap_elems
                        && src->value_data.cap_elems == src->table.cap_elems);
-                assert((src->key_data.num_elems == src->value_data.num_elems)
+                JAK_ASSERT((src->key_data.num_elems == src->value_data.num_elems)
                        && src->value_data.num_elems <= src->table.num_elems);
 
                 vec_cpy_to(&cpy->key_data, &src->key_data);
@@ -101,9 +101,9 @@ struct hashtable *hashtable_cpy(struct hashtable *src)
                 cpy->size = src->size;
                 error_cpy(&cpy->err, &src->err);
 
-                assert(cpy->key_data.cap_elems == src->value_data.cap_elems
+                JAK_ASSERT(cpy->key_data.cap_elems == src->value_data.cap_elems
                        && src->value_data.cap_elems == cpy->table.cap_elems);
-                assert((cpy->key_data.num_elems == src->value_data.num_elems)
+                JAK_ASSERT((cpy->key_data.num_elems == src->value_data.num_elems)
                        && src->value_data.num_elems <= cpy->table.num_elems);
 
                 hashtable_unlock(src);
@@ -116,10 +116,10 @@ struct hashtable *hashtable_cpy(struct hashtable *src)
 
 bool hashtable_clear(struct hashtable *map)
 {
-        error_if_null(map)
-        assert(map->key_data.cap_elems == map->value_data.cap_elems
+        JAK_ERROR_IF_NULL(map)
+        JAK_ASSERT(map->key_data.cap_elems == map->value_data.cap_elems
                && map->value_data.cap_elems == map->table.cap_elems);
-        assert((map->key_data.num_elems == map->value_data.num_elems)
+        JAK_ASSERT((map->key_data.num_elems == map->value_data.num_elems)
                && map->value_data.num_elems <= map->table.num_elems);
 
         hashtable_lock(map);
@@ -128,9 +128,9 @@ bool hashtable_clear(struct hashtable *map)
 
         map->size = 0;
 
-        assert(map->key_data.cap_elems == map->value_data.cap_elems
+        JAK_ASSERT(map->key_data.cap_elems == map->value_data.cap_elems
                && map->value_data.cap_elems == map->table.cap_elems);
-        assert((map->key_data.num_elems == map->value_data.num_elems)
+        JAK_ASSERT((map->key_data.num_elems == map->value_data.num_elems)
                && map->value_data.num_elems <= map->table.num_elems);
 
         if (!status) {
@@ -144,8 +144,8 @@ bool hashtable_clear(struct hashtable *map)
 
 bool hashtable_avg_displace(float *displace, const struct hashtable *map)
 {
-        error_if_null(displace);
-        error_if_null(map);
+        JAK_ERROR_IF_NULL(displace);
+        JAK_ERROR_IF_NULL(map);
 
         size_t sum_dis = 0;
         for (size_t i = 0; i < map->table.num_elems; i++) {
@@ -159,14 +159,14 @@ bool hashtable_avg_displace(float *displace, const struct hashtable *map)
 
 bool hashtable_lock(struct hashtable *map)
 {
-        error_if_null(map)
+        JAK_ERROR_IF_NULL(map)
         //spin_acquire(&map->lock);
         return true;
 }
 
 bool hashtable_unlock(struct hashtable *map)
 {
-        error_if_null(map)
+        JAK_ERROR_IF_NULL(map)
         //spin_release(&map->lock);
         return true;
 }
@@ -184,7 +184,7 @@ static inline const void *get_bucket_value(const struct hashtable_bucket *bucket
 static void insert(struct hashtable_bucket *bucket, struct hashtable *map, const void *key, const void *value,
                    jak_i32 displacement)
 {
-        assert(map->key_data.num_elems == map->value_data.num_elems);
+        JAK_ASSERT(map->key_data.num_elems == map->value_data.num_elems);
         jak_u64 idx = map->key_data.num_elems;
         void *key_datum = vec_new_and_get(&map->key_data, void *);
         void *value_datum = vec_new_and_get(&map->value_data, void *);
@@ -247,7 +247,7 @@ static inline uint_fast32_t insert_or_update(struct hashtable *map, const jak_u3
                                 }
                         }
 
-                        assert(fitting_bucket_found == true);
+                        JAK_ASSERT(fitting_bucket_found == true);
                         bucket_idx = displace_idx;
                         bucket = vec_get(&map->table, bucket_idx, struct hashtable_bucket);
                 }
@@ -274,13 +274,13 @@ static inline uint_fast32_t insert_or_update(struct hashtable *map, const jak_u3
 bool hashtable_insert_or_update(struct hashtable *map, const void *keys, const void *values,
                                 uint_fast32_t num_pairs)
 {
-        error_if_null(map)
-        error_if_null(keys)
-        error_if_null(values)
+        JAK_ERROR_IF_NULL(map)
+        JAK_ERROR_IF_NULL(keys)
+        JAK_ERROR_IF_NULL(values)
 
-        assert(map->key_data.cap_elems == map->value_data.cap_elems
+        JAK_ASSERT(map->key_data.cap_elems == map->value_data.cap_elems
                && map->value_data.cap_elems == map->table.cap_elems);
-        assert((map->key_data.num_elems == map->value_data.num_elems)
+        JAK_ASSERT((map->key_data.num_elems == map->value_data.num_elems)
                && map->value_data.num_elems <= map->table.num_elems);
 
         hashtable_lock(map);
@@ -364,9 +364,9 @@ bool hashtable_serialize(FILE *file, struct hashtable *table)
 
 bool hashtable_deserialize(struct hashtable *table, struct jak_error *err, FILE *file)
 {
-        error_if_null(table)
-        error_if_null(err)
-        error_if_null(file)
+        JAK_ERROR_IF_NULL(table)
+        JAK_ERROR_IF_NULL(err)
+        JAK_ERROR_IF_NULL(file)
 
         int err_code = JAK_ERR_NOERR;
 
@@ -412,8 +412,8 @@ bool hashtable_deserialize(struct hashtable *table, struct jak_error *err, FILE 
 
 bool hashtable_remove_if_contained(struct hashtable *map, const void *keys, size_t num_pairs)
 {
-        error_if_null(map)
-        error_if_null(keys)
+        JAK_ERROR_IF_NULL(map)
+        JAK_ERROR_IF_NULL(keys)
 
         hashtable_lock(map);
 
@@ -465,8 +465,8 @@ bool hashtable_remove_if_contained(struct hashtable *map, const void *keys, size
 
 const void *hashtable_get_value(struct hashtable *map, const void *key)
 {
-        error_if_null(map)
-        error_if_null(key)
+        JAK_ERROR_IF_NULL(map)
+        JAK_ERROR_IF_NULL(key)
 
         const void *result = NULL;
 
@@ -501,8 +501,8 @@ const void *hashtable_get_value(struct hashtable *map, const void *key)
 
 bool hashtable_get_fload_factor(float *factor, struct hashtable *map)
 {
-        error_if_null(factor)
-        error_if_null(map)
+        JAK_ERROR_IF_NULL(factor)
+        JAK_ERROR_IF_NULL(map)
 
         hashtable_lock(map);
 
@@ -515,7 +515,7 @@ bool hashtable_get_fload_factor(float *factor, struct hashtable *map)
 
 bool hashtable_rehash(struct hashtable *map)
 {
-        error_if_null(map)
+        JAK_ERROR_IF_NULL(map)
 
         hashtable_lock(map);
 
@@ -530,9 +530,9 @@ bool hashtable_rehash(struct hashtable *map)
         vec_enlarge_size_to_capacity(&map->table);
         vec_zero_memory(&map->table);
 
-        assert(map->key_data.cap_elems == map->value_data.cap_elems
+        JAK_ASSERT(map->key_data.cap_elems == map->value_data.cap_elems
                && map->value_data.cap_elems == map->table.cap_elems);
-        assert((map->key_data.num_elems == map->value_data.num_elems)
+        JAK_ASSERT((map->key_data.num_elems == map->value_data.num_elems)
                && map->value_data.num_elems <= map->table.num_elems);
 
         for (size_t i = 0; i < cpy->table.num_elems; i++) {

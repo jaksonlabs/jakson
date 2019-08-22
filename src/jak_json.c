@@ -47,14 +47,14 @@ struct token_memory {
 };
 
 static int process_token(struct jak_error *err, struct jak_json_err *error_desc, const struct jak_json_token *token,
-                         struct vector ofType(enum json_token_type) *brackets, struct token_memory *token_mem);
+                         struct jak_vector ofType(enum json_token_type) *brackets, struct token_memory *token_mem);
 
 static int set_error(struct jak_json_err *error_desc, const struct jak_json_token *token, const char *msg);
 
 bool json_tokenizer_init(struct jak_json_tokenizer *tokenizer, const char *input)
 {
-        error_if_null(tokenizer)
-        error_if_null(input)
+        JAK_ERROR_IF_NULL(tokenizer)
+        JAK_ERROR_IF_NULL(input)
         tokenizer->cursor = input;
         tokenizer->token =
                 (struct jak_json_token) {.type = JSON_UNKNOWN, .length = 0, .column = 0, .line = 1, .string = NULL};
@@ -80,7 +80,7 @@ static void parse_string_token(struct jak_json_tokenizer *tokenizer, char c, cha
                 last_2_c = last_1_c;
                 last_1_c = c;
                 c = *(++tokenizer->cursor);
-                if (unlikely(c == '\\' && last_1_c == '\\')) {
+                if (JAK_UNLIKELY(c == '\\' && last_1_c == '\\')) {
                         goto next_char;
                 }
                 escapeQuote = c == '"' && last_1_c == '\\'
@@ -100,7 +100,7 @@ static void parse_string_token(struct jak_json_tokenizer *tokenizer, char c, cha
 
 const struct jak_json_token *json_tokenizer_next(struct jak_json_tokenizer *tokenizer)
 {
-        if (likely(*tokenizer->cursor != '\0')) {
+        if (JAK_LIKELY(*tokenizer->cursor != '\0')) {
                 char c = *tokenizer->cursor;
                 tokenizer->token.string = tokenizer->cursor;
                 tokenizer->token.column += tokenizer->token.length;
@@ -188,8 +188,8 @@ const struct jak_json_token *json_tokenizer_next(struct jak_json_tokenizer *toke
 
 void json_token_dup(struct jak_json_token *dst, const struct jak_json_token *src)
 {
-        assert(dst);
-        assert(src);
+        JAK_ASSERT(dst);
+        JAK_ASSERT(src);
         memcpy(dst, src, sizeof(struct jak_json_token));
 }
 
@@ -209,27 +209,27 @@ void json_token_print(FILE *file, const struct jak_json_token *token)
 }
 
 static bool parse_object(struct jak_json_object_t *object, struct jak_error *err,
-                         struct vector ofType(struct jak_json_token) *token_stream, size_t *token_idx);
+                         struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx);
 
 static bool parse_array(struct jak_json_array *array, struct jak_error *err,
-                        struct vector ofType(struct jak_json_token) *token_stream, size_t *token_idx);
+                        struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx);
 
-static void parse_string(struct jak_json_string *string, struct vector ofType(struct jak_json_token) *token_stream,
+static void parse_string(struct jak_json_string *string, struct jak_vector ofType(struct jak_json_token) *token_stream,
                          size_t *token_idx);
 
-static void parse_number(struct jak_json_number *number, struct vector ofType(struct jak_json_token) *token_stream,
+static void parse_number(struct jak_json_number *number, struct jak_vector ofType(struct jak_json_token) *token_stream,
                          size_t *token_idx);
 
 static bool parse_element(struct jak_json_element *element, struct jak_error *err,
-                          struct vector ofType(struct jak_json_token) *token_stream, size_t *token_idx);
+                          struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx);
 
 static bool parse_elements(struct jak_json_elements *elements, struct jak_error *err,
-                           struct vector ofType(struct jak_json_token) *token_stream, size_t *token_idx);
+                           struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx);
 
 static bool parse_token_stream(struct jak_json *json, struct jak_error *err,
-                               struct vector ofType(struct jak_json_token) *token_stream);
+                               struct jak_vector ofType(struct jak_json_token) *token_stream);
 
-static struct jak_json_token get_token(struct vector ofType(struct jak_json_token) *token_stream, size_t token_idx);
+static struct jak_json_token get_token(struct jak_vector ofType(struct jak_json_token) *token_stream, size_t token_idx);
 
 static void connect_child_and_parents_member(struct jak_json_prop *member);
 
@@ -262,7 +262,7 @@ static bool json_ast_node_element_print(FILE *file, struct jak_error *err, struc
 
 bool json_parser_create(struct jak_json_parser *parser)
 {
-        error_if_null(parser)
+        JAK_ERROR_IF_NULL(parser)
 
         error_init(&parser->err);
 
@@ -271,11 +271,11 @@ bool json_parser_create(struct jak_json_parser *parser)
 
 bool json_parse(struct jak_json *json, struct jak_json_err *error_desc, struct jak_json_parser *parser, const char *input)
 {
-        error_if_null(parser)
-        error_if_null(input)
+        JAK_ERROR_IF_NULL(parser)
+        JAK_ERROR_IF_NULL(input)
 
-        struct vector ofType(enum json_token_type) brackets;
-        struct vector ofType(struct jak_json_token) token_stream;
+        struct jak_vector ofType(enum json_token_type) brackets;
+        struct jak_vector ofType(struct jak_json_token) token_stream;
 
         struct jak_json retval;
         JAK_zero_memory(&retval, sizeof(struct jak_json))
@@ -291,7 +291,7 @@ bool json_parse(struct jak_json *json, struct jak_json_err *error_desc, struct j
         struct token_memory token_mem = {.init = true, .type = JSON_UNKNOWN};
 
         while ((token = json_tokenizer_next(&parser->tokenizer))) {
-                if (likely(
+                if (JAK_LIKELY(
                         (status = process_token(&parser->err, error_desc, token, &brackets, &token_mem)) == true)) {
                         struct jak_json_token *newToken = vec_new_and_get(&token_stream, struct jak_json_token);
                         json_token_dup(newToken, token);
@@ -403,12 +403,12 @@ bool json_test(struct jak_error *err, struct jak_json *json)
         return (test_condition_value(err, &json->element->value));
 }
 
-static struct jak_json_token get_token(struct vector ofType(struct jak_json_token) *token_stream, size_t token_idx)
+static struct jak_json_token get_token(struct jak_vector ofType(struct jak_json_token) *token_stream, size_t token_idx)
 {
         return *(struct jak_json_token *) vec_at(token_stream, token_idx);
 }
 
-bool parse_members(struct jak_error *err, struct jak_json_members *members, struct vector ofType(struct jak_json_token) *token_stream,
+bool parse_members(struct jak_error *err, struct jak_json_members *members, struct jak_vector ofType(struct jak_json_token) *token_stream,
                    size_t *token_idx)
 {
         vec_create(&members->members, NULL, sizeof(struct jak_json_prop), 20);
@@ -476,9 +476,9 @@ bool parse_members(struct jak_error *err, struct jak_json_members *members, stru
 }
 
 static bool parse_object(struct jak_json_object_t *object, struct jak_error *err,
-                         struct vector ofType(struct jak_json_token) *token_stream, size_t *token_idx)
+                         struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx)
 {
-        assert(get_token(token_stream, *token_idx).type == OBJECT_OPEN);
+        JAK_ASSERT(get_token(token_stream, *token_idx).type == OBJECT_OPEN);
         NEXT_TOKEN(token_idx);  /** Skip '{' */
         object->value = JAK_MALLOC(sizeof(struct jak_json_members));
 
@@ -498,11 +498,11 @@ static bool parse_object(struct jak_json_object_t *object, struct jak_error *err
 }
 
 static bool parse_array(struct jak_json_array *array, struct jak_error *err,
-                        struct vector ofType(struct jak_json_token) *token_stream, size_t *token_idx)
+                        struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx)
 {
         struct jak_json_token token = get_token(token_stream, *token_idx);
         JAK_UNUSED(token);
-        assert(token.type == ARRAY_OPEN);
+        JAK_ASSERT(token.type == ARRAY_OPEN);
         NEXT_TOKEN(token_idx); /** Skip '[' */
 
         vec_create(&array->elements.elements, NULL, sizeof(struct jak_json_element), 250);
@@ -514,25 +514,25 @@ static bool parse_array(struct jak_json_array *array, struct jak_error *err,
         return true;
 }
 
-static void parse_string(struct jak_json_string *string, struct vector ofType(struct jak_json_token) *token_stream,
+static void parse_string(struct jak_json_string *string, struct jak_vector ofType(struct jak_json_token) *token_stream,
                          size_t *token_idx)
 {
         struct jak_json_token token = get_token(token_stream, *token_idx);
-        assert(token.type == LITERAL_STRING);
+        JAK_ASSERT(token.type == LITERAL_STRING);
 
         string->value = JAK_MALLOC(token.length + 1);
-        if (likely(token.length > 0)) {
+        if (JAK_LIKELY(token.length > 0)) {
                 strncpy(string->value, token.string, token.length);
         }
         string->value[token.length] = '\0';
         NEXT_TOKEN(token_idx);
 }
 
-static void parse_number(struct jak_json_number *number, struct vector ofType(struct jak_json_token) *token_stream,
+static void parse_number(struct jak_json_number *number, struct jak_vector ofType(struct jak_json_token) *token_stream,
                          size_t *token_idx)
 {
         struct jak_json_token token = get_token(token_stream, *token_idx);
-        assert(token.type == LITERAL_FLOAT || token.type == LITERAL_INT);
+        JAK_ASSERT(token.type == LITERAL_FLOAT || token.type == LITERAL_INT);
 
         char *value = JAK_MALLOC(token.length + 1);
         strncpy(value, token.string, token.length);
@@ -564,7 +564,7 @@ static void parse_number(struct jak_json_number *number, struct vector ofType(st
 }
 
 static bool parse_element(struct jak_json_element *element, struct jak_error *err,
-                          struct vector ofType(struct jak_json_token) *token_stream, size_t *token_idx)
+                          struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx)
 {
         struct jak_json_token token = get_token(token_stream, *token_idx);
 
@@ -604,7 +604,7 @@ static bool parse_element(struct jak_json_element *element, struct jak_error *er
 }
 
 static bool parse_elements(struct jak_json_elements *elements, struct jak_error *err,
-                           struct vector ofType(struct jak_json_token) *token_stream, size_t *token_idx)
+                           struct jak_vector ofType(struct jak_json_token) *token_stream, size_t *token_idx)
 {
         struct jak_json_token delimiter;
         do {
@@ -625,7 +625,7 @@ static bool parse_elements(struct jak_json_elements *elements, struct jak_error 
 }
 
 static bool parse_token_stream(struct jak_json *json, struct jak_error *err,
-                               struct vector ofType(struct jak_json_token) *token_stream)
+                               struct jak_vector ofType(struct jak_json_token) *token_stream)
 {
         size_t token_idx = 0;
         if (!parse_element(json->element, err, token_stream, &token_idx)) {
@@ -701,7 +701,7 @@ static bool isValue(enum json_token_type token)
 }
 
 static int process_token(struct jak_error *err, struct jak_json_err *error_desc, const struct jak_json_token *token,
-                         struct vector ofType(enum json_token_type) *brackets, struct token_memory *token_mem)
+                         struct jak_vector ofType(enum json_token_type) *brackets, struct token_memory *token_mem)
 {
         switch (token->type) {
                 case OBJECT_OPEN:
@@ -1065,8 +1065,8 @@ bool json_list_is_empty(const struct jak_json_elements *elements)
 
 bool json_list_length(jak_u32 *len, const struct jak_json_elements *elements)
 {
-        error_if_null(len)
-        error_if_null(elements)
+        JAK_ERROR_IF_NULL(len)
+        JAK_ERROR_IF_NULL(elements)
         *len = elements->elements.num_elems;
         return true;
 }
@@ -1325,8 +1325,8 @@ static enum json_list_type number_type_to_list_type(enum number_min_type type)
 
 bool json_array_get_type(enum json_list_type *type, const struct jak_json_array *array)
 {
-        error_if_null(type)
-        error_if_null(array)
+        JAK_ERROR_IF_NULL(type)
+        JAK_ERROR_IF_NULL(array)
         enum json_list_type list_type = JSON_LIST_TYPE_EMPTY;
         for (jak_u32 i = 0; i < array->elements.elements.num_elems; i++) {
                 const struct jak_json_element *elem = vec_get(&array->elements.elements, i, struct jak_json_element);

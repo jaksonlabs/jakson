@@ -37,23 +37,23 @@ struct jak_doc_entries {
     struct jak_doc_obj *context;
     const char *key;
     jak_archive_field_e type;
-    struct vector ofType(<T>) values;
+    struct jak_vector ofType(<T>) values;
 };
 
 struct jak_doc_bulk {
     struct jak_string_dict *dic;
-    struct vector ofType(char *) keys, values;
-    struct vector ofType(struct jak_doc) models;
+    struct jak_vector ofType(char *) keys, values;
+    struct jak_vector ofType(struct jak_doc) models;
 };
 
 struct jak_doc {
     struct jak_doc_bulk *context;
-    struct vector ofType(struct jak_doc_obj) obj_model;
+    struct jak_vector ofType(struct jak_doc_obj) obj_model;
     jak_archive_field_e type;
 };
 
 struct jak_doc_obj {
-    struct vector ofType(struct jak_doc_entries) entries;
+    struct jak_vector ofType(struct jak_doc_entries) entries;
     struct jak_doc *doc;
 };
 
@@ -69,12 +69,12 @@ struct jak_doc *doc_bulk_new_doc(struct jak_doc_bulk *context, jak_archive_field
 
 struct jak_doc_obj *doc_bulk_new_obj(struct jak_doc *model);
 
-bool doc_bulk_get_dic_contents(struct vector ofType (const char *) **strings,
-                               struct vector ofType(jak_archive_field_sid_t) **string_ids, const struct jak_doc_bulk *context);
+bool doc_bulk_get_dic_contents(struct jak_vector ofType (const char *) **strings,
+                               struct jak_vector ofType(jak_archive_field_sid_t) **string_ids, const struct jak_doc_bulk *context);
 
 bool doc_print(FILE *file, const struct jak_doc *doc);
 
-const struct vector ofType(struct jak_doc_entries) *doc_get_entries(const struct jak_doc_obj *model);
+const struct jak_vector ofType(struct jak_doc_entries) *doc_get_entries(const struct jak_doc_obj *model);
 
 void doc_print_entries(FILE *file, const struct jak_doc_entries *entries);
 

@@ -26,7 +26,6 @@
 #include <jak_alloc.h>
 
 #include "stdlib.h"
-#include <assert.h>
 
 JAK_BEGIN_DECL
 

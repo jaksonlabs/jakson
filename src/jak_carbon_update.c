@@ -71,8 +71,8 @@ DEFINE_ARRAY_UPDATE_FUNCTION(float, CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT, carbon_a
 
 #define try_update_generic(context, path, array_exec, column_exec)                                                     \
 ({                                                                                                                     \
-        error_if_null(context)                                                                                         \
-        error_if_null(path)                                                                                            \
+        JAK_ERROR_IF_NULL(context)                                                                                         \
+        JAK_ERROR_IF_NULL(path)                                                                                            \
         bool status = false;                                                                                           \
         struct jak_carbon_update updater;                                                                                   \
         if (create(&updater, context, path)) {                                                                         \
@@ -108,9 +108,9 @@ DEFINE_ARRAY_UPDATE_FUNCTION(float, CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT, carbon_a
 
 static bool create(struct jak_carbon_update *updater, struct jak_carbon_revise *context, const struct jak_carbon_dot_path *path)
 {
-        error_if_null(updater)
-        error_if_null(context)
-        error_if_null(path)
+        JAK_ERROR_IF_NULL(updater)
+        JAK_ERROR_IF_NULL(context)
+        JAK_ERROR_IF_NULL(path)
 
         error_init(&updater->err);
         updater->context = context;
@@ -229,8 +229,8 @@ static inline struct jak_carbon_column_it *column_iterator(jak_u32 *elem_pos, st
 
 #define compile_path_and_delegate(context, path, func)                                                                 \
 ({                                                                                                                     \
-        error_if_null(context)                                                                                         \
-        error_if_null(path)                                                                                            \
+        JAK_ERROR_IF_NULL(context)                                                                                         \
+        JAK_ERROR_IF_NULL(path)                                                                                            \
                                                                                                                        \
         struct jak_carbon_dot_path compiled_path;                                                                           \
         bool status;                                                                                                   \
@@ -246,8 +246,8 @@ static inline struct jak_carbon_column_it *column_iterator(jak_u32 *elem_pos, st
 
 #define compile_path_and_delegate_wargs(context, path, func, ...)                                                      \
 ({                                                                                                                     \
-        error_if_null(context)                                                                                         \
-        error_if_null(path)                                                                                            \
+        JAK_ERROR_IF_NULL(context)                                                                                         \
+        JAK_ERROR_IF_NULL(path)                                                                                            \
                                                                                                                        \
         struct jak_carbon_dot_path compiled_path;                                                                           \
         bool status;                                                                                                   \

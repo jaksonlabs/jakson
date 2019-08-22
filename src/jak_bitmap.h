@@ -28,7 +28,7 @@
 JAK_BEGIN_DECL
 
 struct jak_bitmap {
-    struct vector ofType(jak_u64) data;
+    struct jak_vector ofType(jak_u64) data;
     jak_u16 num_bits;
 };
 

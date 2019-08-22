@@ -28,7 +28,7 @@ JAK_BEGIN_DECL
 
 #define JAK_HASH_BERNSTEIN2(key_size, key)                                                                             \
 ({                                                                                                                     \
-    assert ((key != NULL) && (key_size > 0));                                                                          \
+    JAK_ASSERT ((key != NULL) && (key_size > 0));                                                                          \
                                                                                                                        \
     hash32_t hash = 0;                                                                                                 \
     for (size_t i = 0; i < key_size; i++) {                                                                            \

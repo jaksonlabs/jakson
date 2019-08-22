@@ -19,7 +19,6 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <assert.h>
 #include <jak_archive_int.h>
 
 void jak_int_read_prop_offsets(struct jak_archive_prop_offs *prop_offsets, struct jak_memfile *memfile,

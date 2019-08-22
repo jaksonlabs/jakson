@@ -21,7 +21,7 @@
 
 jak_u64 carbon_prop_size(struct jak_memfile *file)
 {
-        error_if_null(file);
+        JAK_ERROR_IF_NULL(file);
         jak_offset_t prop_start = memfile_save_position(file);
         carbon_string_nomarker_skip(file);
         carbon_field_skip(file);

@@ -46,8 +46,8 @@ struct hashset_bucket {
  * lock implementation.
  */
 struct hashset {
-    struct vector key_data;
-    struct vector ofType(struct hashset_bucket) table;
+    struct jak_vector key_data;
+    struct jak_vector ofType(struct hashset_bucket) table;
     struct spinlock lock;
     jak_u32 size;
     struct jak_error err;
@@ -61,7 +61,7 @@ struct hashset *hashset_cpy(struct hashset *src);
 
 bool hashset_drop(struct hashset *map);
 
-struct vector *hashset_keys(struct hashset *map);
+struct jak_vector *hashset_keys(struct hashset *map);
 
 bool hashset_clear(struct hashset *map);
 

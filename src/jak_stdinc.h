@@ -31,7 +31,6 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <assert.h>
-#include <assert.h>
 #include <inttypes.h>
 #include <errno.h>
 #include <limits.h>
@@ -226,6 +225,8 @@ JAK_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum jak_archiv
     }
 #endif
 
+#define JAK_ASSERT(x) assert(x);
+
 #define JAK_CARBON_ARCHIVE_MAGIC                "MP/CARBON"
 #define JAK_CARBON_ARCHIVE_VERSION               1
 
@@ -291,7 +292,7 @@ JAK_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum jak_archiv
 #define JAK_min(a, b)                                                                                                  \
     ((a) < (b) ? (a) : (b))
 
-#define error_if_null(x)                                                                                               \
+#define JAK_ERROR_IF_NULL(x)                                                                                               \
 {                                                                                                                      \
     if (!(x)) {                                                                                                        \
         struct jak_error err;                                                                                                \
@@ -304,27 +305,27 @@ JAK_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum jak_archiv
 
 #define JAK_check_success(x)                                                                                           \
 {                                                                                                                      \
-    if (unlikely(!x)) {                                                                                                \
+    if (JAK_UNLIKELY(!x)) {                                                                                                \
         return x;                                                                                                      \
     }                                                                                                                  \
 }
 
 #define JAK_success_or_jump(expr, label)                                                                               \
 {                                                                                                                      \
-    if (unlikely(!expr)) {                                                                                             \
+    if (JAK_UNLIKELY(!expr)) {                                                                                             \
         goto label;                                                                                                    \
     }                                                                                                                  \
 }
 
-#define likely(x)                                                                                                      \
+#define JAK_LIKELY(x)                                                                                                      \
     __builtin_expect((x), 1)
-#define unlikely(x)                                                                                                    \
+#define JAK_UNLIKELY(x)                                                                                                    \
     __builtin_expect((x), 0)
 
-#define prefetch_read(adr)                                                                                             \
+#define JAK_PREFETCH_READ(adr)                                                                                             \
     __builtin_prefetch(adr, 0, 3)
 
-#define prefetch_write(adr)                                                                                            \
+#define JAK_PREFETCH_WRITE(adr)                                                                                            \
     __builtin_prefetch(adr, 1, 3)
 
 #define JAK_FORWARD_STRUCT_DECL(x) struct x;
@@ -335,7 +336,7 @@ JAK_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum jak_archiv
 #define JAK_unset_bits(x, mask)       ( x &= ~(mask) )
 #define JAK_are_bits_set(mask, bit)   (((bit) & mask ) == (bit))
 
-#define JAK_implemented_or_error(err, x, func)                                                                         \
+#define JAK_ERROR_IF_NOT_IMPLEMENTED(err, x, func)                                                                         \
     JAK_optional(x->func == NULL, error(err, JAK_ERR_NOTIMPLEMENTED))
 
 #define JAK_optional(expr, stmt)                                                                                       \

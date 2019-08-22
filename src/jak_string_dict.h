@@ -22,8 +22,6 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <assert.h>
-
 #include <jak_stdinc.h>
 #include <jak_alloc.h>
 #include <jak_types.h>
@@ -83,7 +81,7 @@ struct jak_string_dict {
     bool (*remove)(struct jak_string_dict *self, jak_archive_field_sid_t *strings, size_t nstrings);
 
     /**
-     * Get the string ids associated with <code>keys</code> in this parallel_map_exec (if any).
+     * Get the string ids associated with <code>keys</code> in this jak_async_map_exec (if any).
      *
      * Note: Implementation must ensure thread-safeness
      */
@@ -129,8 +127,8 @@ struct jak_string_dict {
     /**
      * Returns all contained (unique) strings and their mapped (unique) ids
      */
-    bool (*get_contents)(struct jak_string_dict *self, struct vector ofType (char *) *strings,
-                         struct vector ofType(jak_archive_field_sid_t) *string_ids);
+    bool (*get_contents)(struct jak_string_dict *self, struct jak_vector ofType (char *) *strings,
+                         struct jak_vector ofType(jak_archive_field_sid_t) *string_ids);
 };
 
 /**
@@ -141,8 +139,8 @@ struct jak_string_dict {
 JAK_FUNC_UNUSED
 static bool strdic_drop(struct jak_string_dict *dic)
 {
-        error_if_null(dic);
-        assert(dic->drop);
+        JAK_ERROR_IF_NULL(dic);
+        JAK_ASSERT(dic->drop);
         return dic->drop(dic);
 }
 
@@ -150,34 +148,34 @@ JAK_FUNC_UNUSED
 static bool
 strdic_insert(struct jak_string_dict *dic, jak_archive_field_sid_t **out, char *const *strings, size_t nstrings, size_t nthreads)
 {
-        error_if_null(dic);
-        error_if_null(strings);
-        assert(dic->insert);
+        JAK_ERROR_IF_NULL(dic);
+        JAK_ERROR_IF_NULL(strings);
+        JAK_ASSERT(dic->insert);
         return dic->insert(dic, out, strings, nstrings, nthreads);
 }
 
 JAK_FUNC_UNUSED
 static bool strdic_reset_counters(struct jak_string_dict *dic)
 {
-        error_if_null(dic);
-        assert(dic->resetCounters);
+        JAK_ERROR_IF_NULL(dic);
+        JAK_ASSERT(dic->resetCounters);
         return dic->resetCounters(dic);
 }
 
 JAK_FUNC_UNUSED
 static bool strdic_get_counters(struct jak_str_hash_counters *counters, struct jak_string_dict *dic)
 {
-        error_if_null(dic);
-        assert(dic->counters);
+        JAK_ERROR_IF_NULL(dic);
+        JAK_ASSERT(dic->counters);
         return dic->counters(dic, counters);
 }
 
 JAK_FUNC_UNUSED
 static bool strdic_remove(struct jak_string_dict *dic, jak_archive_field_sid_t *strings, size_t num_strings)
 {
-        error_if_null(dic);
-        error_if_null(strings);
-        assert(dic->remove);
+        JAK_ERROR_IF_NULL(dic);
+        JAK_ERROR_IF_NULL(strings);
+        JAK_ASSERT(dic->remove);
         return dic->remove(dic, strings, num_strings);
 }
 
@@ -185,22 +183,22 @@ JAK_FUNC_UNUSED
 static bool strdic_locate_safe(jak_archive_field_sid_t **out, bool **found_mask, size_t *num_not_found, struct jak_string_dict *dic,
                                char *const *keys, size_t num_keys)
 {
-        error_if_null(out);
-        error_if_null(found_mask);
-        error_if_null(num_not_found);
-        error_if_null(dic);
-        error_if_null(keys);
-        assert(dic->locate_safe);
+        JAK_ERROR_IF_NULL(out);
+        JAK_ERROR_IF_NULL(found_mask);
+        JAK_ERROR_IF_NULL(num_not_found);
+        JAK_ERROR_IF_NULL(dic);
+        JAK_ERROR_IF_NULL(keys);
+        JAK_ASSERT(dic->locate_safe);
         return dic->locate_safe(dic, out, found_mask, num_not_found, keys, num_keys);
 }
 
 JAK_FUNC_UNUSED
 static bool strdic_locate_fast(jak_archive_field_sid_t **out, struct jak_string_dict *dic, char *const *keys, size_t nkeys)
 {
-        error_if_null(out);
-        error_if_null(dic);
-        error_if_null(keys);
-        assert(dic->locate_fast);
+        JAK_ERROR_IF_NULL(out);
+        JAK_ERROR_IF_NULL(dic);
+        JAK_ERROR_IF_NULL(keys);
+        JAK_ASSERT(dic->locate_fast);
         return dic->locate_fast(dic, out, keys, nkeys);
 }
 
@@ -213,9 +211,9 @@ static char **strdic_extract(struct jak_string_dict *dic, const jak_archive_fiel
 JAK_FUNC_UNUSED
 static bool strdic_free(struct jak_string_dict *dic, void *ptr)
 {
-        error_if_null(dic);
+        JAK_ERROR_IF_NULL(dic);
         if (ptr) {
-                assert(dic->free);
+                JAK_ASSERT(dic->free);
                 return dic->free(dic, ptr);
         } else {
                 return true;
@@ -225,20 +223,20 @@ static bool strdic_free(struct jak_string_dict *dic, void *ptr)
 JAK_FUNC_UNUSED
 static bool strdic_num_distinct(size_t *num, struct jak_string_dict *dic)
 {
-        error_if_null(num);
-        error_if_null(dic);
-        assert(dic->num_distinct);
+        JAK_ERROR_IF_NULL(num);
+        JAK_ERROR_IF_NULL(dic);
+        JAK_ASSERT(dic->num_distinct);
         return dic->num_distinct(dic, num);
 }
 
 JAK_FUNC_UNUSED
-static bool strdic_get_contents(struct vector ofType (char *) *strings, struct vector ofType(jak_archive_field_sid_t) *string_ids,
+static bool strdic_get_contents(struct jak_vector ofType (char *) *strings, struct jak_vector ofType(jak_archive_field_sid_t) *string_ids,
                                 struct jak_string_dict *dic)
 {
-        error_if_null(strings)
-        error_if_null(string_ids)
-        error_if_null(dic);
-        assert(dic->get_contents);
+        JAK_ERROR_IF_NULL(strings)
+        JAK_ERROR_IF_NULL(string_ids)
+        JAK_ERROR_IF_NULL(dic);
+        JAK_ASSERT(dic->get_contents);
         return dic->get_contents(dic, strings, string_ids);
 }
 

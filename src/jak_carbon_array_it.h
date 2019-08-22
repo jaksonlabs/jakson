@@ -68,7 +68,7 @@ struct jak_carbon_array_it {
     jak_i64 mod_size;
     bool array_end_reached;
 
-    struct vector ofType(jak_offset_t) history;
+    struct jak_vector ofType(jak_offset_t) history;
     struct field_access field_access;
     jak_offset_t field_offset;
 };

@@ -38,7 +38,7 @@ struct jak_carbon_object_it
     jak_offset_t object_contents_off;
     bool object_end_reached;
 
-    struct vector ofType(jak_offset_t) history;
+    struct jak_vector ofType(jak_offset_t) history;
 
     struct {
         struct {

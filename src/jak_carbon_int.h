@@ -119,15 +119,15 @@ jak_offset_t carbon_int_payload_after_header(struct jak_carbon *doc);
 
 jak_u64 carbon_int_header_get_commit_hash(struct jak_carbon *doc);
 
-void carbon_int_history_push(struct vector ofType(jak_offset_t) *vec, jak_offset_t off);
+void carbon_int_history_push(struct jak_vector ofType(jak_offset_t) *vec, jak_offset_t off);
 
-void carbon_int_history_clear(struct vector ofType(jak_offset_t) *vec);
+void carbon_int_history_clear(struct jak_vector ofType(jak_offset_t) *vec);
 
-jak_offset_t carbon_int_history_pop(struct vector ofType(jak_offset_t) *vec);
+jak_offset_t carbon_int_history_pop(struct jak_vector ofType(jak_offset_t) *vec);
 
-jak_offset_t carbon_int_history_peek(struct vector ofType(jak_offset_t) *vec);
+jak_offset_t carbon_int_history_peek(struct jak_vector ofType(jak_offset_t) *vec);
 
-bool carbon_int_history_has(struct vector ofType(jak_offset_t) *vec);
+bool carbon_int_history_has(struct jak_vector ofType(jak_offset_t) *vec);
 
 bool carbon_int_field_access_create(struct field_access *field);
 

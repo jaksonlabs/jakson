@@ -21,184 +21,184 @@
 
 #include <jak_async.h>
 
-void *parallel_for_proxy_function(void *args)
+void *jak_async_for_proxy_function(void *args)
 {
-        JAK_cast(struct parallel_func_proxy *, proxy_arg, args);
+        JAK_cast(struct jak_async_func_proxy *, proxy_arg, args);
         proxy_arg->function(proxy_arg->start, proxy_arg->width, proxy_arg->len, proxy_arg->args, proxy_arg->tid);
         return NULL;
 }
 
-#define JAK_parallel_error(msg, retval)                                                                             \
+#define JAK_PARALLEL_ERROR(msg, retval)                                                                             \
 {                                                                                                                      \
     perror(msg);                                                                                                       \
     return retval;                                                                                                     \
 }
 
-#define parallel_match(forSingle, forMulti)                                                                            \
+#define JAK_ASYNC_MATCH(forSingle, forMulti)                                                                            \
 {                                                                                                                      \
-    if (likely(hint == THREADING_HINT_MULTI)) {                                             \
+    if (JAK_LIKELY(hint == JAK_THREADING_HINT_MULTI)) {                                             \
         return (forMulti);                                                                                             \
-    } else if (hint == THREADING_HINT_SINGLE) {                                                           \
+    } else if (hint == JAK_THREADING_HINT_SINGLE) {                                                           \
         return (forSingle);                                                                                            \
-    } else JAK_parallel_error(PARALLEL_MSG_UNKNOWN_HINT, false);                                                    \
+    } else JAK_PARALLEL_ERROR(JAK_ASYNC_MSG_UNKNOWN_HINT, false);                                                    \
 }
 
-bool parallel_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f, void *args,
-                  enum threading_hint hint, uint_fast16_t num_threads);
+bool jak_for(const void *base, size_t width, size_t len, jak_for_body_func_t f, void *args,
+             enum jak_threading_hint hint, uint_fast16_t num_threads);
 
-bool parallel_map(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
-                  parallel_map_body_func_t f, void *args, enum threading_hint hint, uint_fast16_t num_threads);
+bool jak_map(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
+             jak_map_body_func_t f, void *args, enum jak_threading_hint hint, uint_fast16_t num_threads);
 
-bool parallel_gather(void *dst, const void *src, size_t width, const size_t *idx, size_t dstSrcLen,
-                     enum threading_hint hint, uint_fast16_t num_threads);
+bool jak_gather(void *dst, const void *src, size_t width, const size_t *idx, size_t dst_src_len,
+                enum jak_threading_hint hint, uint_fast16_t num_threads);
 
-bool parallel_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx, size_t num,
-                         enum threading_hint hint, uint_fast16_t num_threads);
+bool jak_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx, size_t num,
+                    enum jak_threading_hint hint, uint_fast16_t num_threads);
 
-bool parallel_scatter(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
-                      enum threading_hint hint, uint_fast16_t num_threads);
+bool jak_scatter(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
+                      enum jak_threading_hint hint, uint_fast16_t num_threads);
 
-bool parallel_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
-                      const size_t *src_idx, size_t idxLen, enum threading_hint hint);
+bool jak_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
+                      const size_t *src_idx, size_t idxLen, enum jak_threading_hint hint);
 
-bool parallel_filter_early(void *result, size_t *result_size, const void *src, size_t width, size_t len,
-                           parallel_predicate_func_t pred, void *args, enum threading_hint hint,
+bool jak_filter_early(void *result, size_t *result_size, const void *src, size_t width, size_t len,
+                           jak_pred_func_t pred, void *args, enum jak_threading_hint hint,
                            uint_fast16_t num_threads);
 
-bool parallel_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
-                          parallel_predicate_func_t pred, void *args, enum threading_hint hint, size_t num_threads);
+bool jak_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
+                          jak_pred_func_t pred, void *args, enum jak_threading_hint hint, size_t num_threads);
 
-bool parallel_sequential_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f,
+bool jak_sync_for(const void *base, size_t width, size_t len, jak_for_body_func_t f,
                              void *args);
 
-bool parallel_parallel_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f,
+bool jak_async_for(const void *base, size_t width, size_t len, jak_for_body_func_t f,
                            void *args, uint_fast16_t num_threads);
 
-bool parallel_map_exec(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
-                       parallel_map_body_func_t f, void *args, enum threading_hint hint, uint_fast16_t num_threads);
+bool jak_async_map_exec(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
+                       jak_map_body_func_t f, void *args, enum jak_threading_hint hint, uint_fast16_t num_threads);
 
-bool parallel_sequential_gather(void *dst, const void *src, size_t width, const size_t *idx,
-                                size_t dstSrcLen);
+bool jak_sync_gather(void *dst, const void *src, size_t width, const size_t *idx,
+                                size_t dst_src_len);
 
-bool parallel_parallel_gather(void *dst, const void *src, size_t width, const size_t *idx, size_t dstSrcLen,
+bool jak_async_gather(void *dst, const void *src, size_t width, const size_t *idx, size_t dst_src_len,
                               uint_fast16_t num_threads);
 
-bool parallel_sequential_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx,
+bool jak_sync_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx,
                                     size_t num);
 
-bool parallel_parallel_gather_adr_func(void *dst, const void *src, size_t src_width, const size_t *idx,
+bool jak_int_async_gather_adr_func(void *dst, const void *src, size_t src_width, const size_t *idx,
                                        size_t num, uint_fast16_t num_threads);
 
-bool parallel_sequential_scatter_func(void *dst, const void *src, size_t width, const size_t *idx,
+bool jak_sync_scatter(void *dst, const void *src, size_t width, const size_t *idx,
                                       size_t num);
 
-bool parallel_parallel_scatter_func(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
+bool jak_sync_scatter_func(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
                                     uint_fast16_t num_threads);
 
-bool parallel_sequential_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
+bool jak_sync_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
                                  const size_t *src_idx, size_t idx_len);
 
-bool parallel_parallel_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
+bool jak_async_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
                                const size_t *src_idx, size_t idx_len);
 
-bool parallel_sequential_filter_early(void *result, size_t *result_size, const void *src, size_t width,
-                                      size_t len, parallel_predicate_func_t pred, void *args);
+bool jak_async_filter_early(void *result, size_t *result_size, const void *src, size_t width,
+                                      size_t len, jak_pred_func_t pred, void *args);
 
-bool parallel_parallel_filter_early(void *result, size_t *result_size, const void *src, size_t width,
-                                    size_t len, parallel_predicate_func_t pred, void *args, uint_fast16_t num_threads);
+bool jak_int_async_filter_early(void *result, size_t *result_size, const void *src, size_t width,
+                                    size_t len, jak_pred_func_t pred, void *args, uint_fast16_t num_threads);
 
-bool parallel_sequential_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width,
-                                     size_t len, parallel_predicate_func_t pred, void *args);
+bool jak_int_sync_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width,
+                                     size_t len, jak_pred_func_t pred, void *args);
 
-bool parallel_parallel_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
-                                   parallel_predicate_func_t pred, void *args, size_t num_threads);
+bool jak_async_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
+                                   jak_pred_func_t pred, void *args, size_t num_threads);
 
-bool parallel_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f, void *args,
-                  enum threading_hint hint, uint_fast16_t num_threads)
+bool jak_for(const void *base, size_t width, size_t len, jak_for_body_func_t f, void *args,
+             enum jak_threading_hint hint, uint_fast16_t num_threads)
 {
-        parallel_match(parallel_sequential_for(base, width, len, f, args),
-                       parallel_parallel_for(base, width, len, f, args, num_threads))
+        JAK_ASYNC_MATCH(jak_sync_for(base, width, len, f, args),
+                       jak_async_for(base, width, len, f, args, num_threads))
 }
 
-bool parallel_map(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
-                  parallel_map_body_func_t f, void *args, enum threading_hint hint, uint_fast16_t num_threads)
+bool jak_map(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
+             jak_map_body_func_t f, void *args, enum jak_threading_hint hint, uint_fast16_t num_threads)
 {
-        return parallel_map_exec(dst, src, src_width, len, dst_width, f, args, hint, num_threads);
+        return jak_async_map_exec(dst, src, src_width, len, dst_width, f, args, hint, num_threads);
 }
 
-bool parallel_gather(void *dst, const void *src, size_t width, const size_t *idx, size_t dst_src_len,
-                     enum threading_hint hint, uint_fast16_t num_threads)
+bool jak_gather(void *dst, const void *src, size_t width, const size_t *idx, size_t dst_src_len,
+                enum jak_threading_hint hint, uint_fast16_t num_threads)
 {
-        parallel_match(parallel_sequential_gather(dst, src, width, idx, dst_src_len),
-                       parallel_parallel_gather(dst, src, width, idx, dst_src_len, num_threads))
+        JAK_ASYNC_MATCH(jak_sync_gather(dst, src, width, idx, dst_src_len),
+                       jak_async_gather(dst, src, width, idx, dst_src_len, num_threads))
 }
 
-bool parallel_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx, size_t num,
-                         enum threading_hint hint, uint_fast16_t num_threads)
+bool jak_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx, size_t num,
+                    enum jak_threading_hint hint, uint_fast16_t num_threads)
 {
-        parallel_match(parallel_sequential_gather_adr(dst, src, src_width, idx, num),
-                       parallel_parallel_gather_adr_func(dst, src, src_width, idx, num, num_threads))
+        JAK_ASYNC_MATCH(jak_sync_gather_adr(dst, src, src_width, idx, num),
+                       jak_int_async_gather_adr_func(dst, src, src_width, idx, num, num_threads))
 }
 
-bool parallel_scatter(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
-                      enum threading_hint hint, uint_fast16_t num_threads)
+bool jak_scatter(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
+                      enum jak_threading_hint hint, uint_fast16_t num_threads)
 {
-        parallel_match(parallel_sequential_scatter_func(dst, src, width, idx, num),
-                       parallel_parallel_scatter_func(dst, src, width, idx, num, num_threads))
+        JAK_ASYNC_MATCH(jak_sync_scatter(dst, src, width, idx, num),
+                       jak_sync_scatter_func(dst, src, width, idx, num, num_threads))
 }
 
-bool parallel_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
-                      const size_t *src_idx, size_t idx_len, enum threading_hint hint)
+bool jak_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
+                      const size_t *src_idx, size_t idx_len, enum jak_threading_hint hint)
 {
-        parallel_match(parallel_sequential_shuffle(dst, src, width, dst_idx, src_idx, idx_len),
-                       parallel_parallel_shuffle(dst, src, width, dst_idx, src_idx, idx_len))
+        JAK_ASYNC_MATCH(jak_sync_shuffle(dst, src, width, dst_idx, src_idx, idx_len),
+                       jak_async_shuffle(dst, src, width, dst_idx, src_idx, idx_len))
 }
 
-bool parallel_filter_early(void *result, size_t *result_size, const void *src, size_t width, size_t len,
-                           parallel_predicate_func_t pred, void *args, enum threading_hint hint,
+bool jak_filter_early(void *result, size_t *result_size, const void *src, size_t width, size_t len,
+                           jak_pred_func_t pred, void *args, enum jak_threading_hint hint,
                            uint_fast16_t num_threads)
 {
-        parallel_match(parallel_sequential_filter_early(result, result_size, src, width, len, pred, args),
-                       parallel_parallel_filter_early(result, result_size, src, width, len, pred, args, num_threads))
+        JAK_ASYNC_MATCH(jak_async_filter_early(result, result_size, src, width, len, pred, args),
+                       jak_int_async_filter_early(result, result_size, src, width, len, pred, args, num_threads))
 }
 
-bool parallel_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
-                          parallel_predicate_func_t pred, void *args, enum threading_hint hint, size_t num_threads)
+bool jak_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
+                          jak_pred_func_t pred, void *args, enum jak_threading_hint hint, size_t num_threads)
 {
-        parallel_match(parallel_sequential_filter_late(pos, num_pos, src, width, len, pred, args),
-                       parallel_parallel_filter_late(pos, num_pos, src, width, len, pred, args, num_threads))
+        JAK_ASYNC_MATCH(jak_int_sync_filter_late(pos, num_pos, src, width, len, pred, args),
+                       jak_async_filter_late(pos, num_pos, src, width, len, pred, args, num_threads))
 }
 
-bool parallel_sequential_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f,
+bool jak_sync_for(const void *base, size_t width, size_t len, jak_for_body_func_t f,
                              void *args)
 {
-        error_if_null(base)
-        error_if_null(width)
-        error_if_null(len)
+        JAK_ERROR_IF_NULL(base)
+        JAK_ERROR_IF_NULL(width)
+        JAK_ERROR_IF_NULL(len)
         f(base, width, len, args, 0);
         return true;
 }
 
-bool parallel_parallel_for(const void *base, size_t width, size_t len, parallel_for_body_func_t f,
+bool jak_async_for(const void *base, size_t width, size_t len, jak_for_body_func_t f,
                            void *args, uint_fast16_t num_threads)
 {
-        error_if_null(base)
-        error_if_null(width)
+        JAK_ERROR_IF_NULL(base)
+        JAK_ERROR_IF_NULL(width)
 
         if (len > 0) {
                 uint_fast16_t num_thread = num_threads + 1; /** +1 since one is this thread */
                 pthread_t threads[num_threads];
-                struct parallel_func_proxy proxyArgs[num_thread];
+                struct jak_async_func_proxy proxyArgs[num_thread];
                 size_t chunk_len = len / num_thread;
                 size_t chunk_len_remain = len % num_thread;
                 const void *main_thread_base = base + num_threads * chunk_len * width;
 
-                prefetch_read(f);
-                prefetch_read(args);
+                JAK_PREFETCH_READ(f);
+                JAK_PREFETCH_READ(args);
 
                 /** run f on NTHREADS_FOR additional threads */
                 for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
-                        struct parallel_func_proxy *proxy_arg = proxyArgs + tid;
+                        struct jak_async_func_proxy *proxy_arg = proxyArgs + tid;
                         proxy_arg->start = base + tid * chunk_len * width;
                         proxy_arg->len = chunk_len;
                         proxy_arg->tid = (tid + 1);
@@ -206,11 +206,11 @@ bool parallel_parallel_for(const void *base, size_t width, size_t len, parallel_
                         proxy_arg->args = args;
                         proxy_arg->function = f;
 
-                        prefetch_read(proxy_arg->start);
-                        pthread_create(threads + tid, NULL, parallel_for_proxy_function, proxyArgs + tid);
+                        JAK_PREFETCH_READ(proxy_arg->start);
+                        pthread_create(threads + tid, NULL, jak_async_for_proxy_function, proxyArgs + tid);
                 }
                 /** run f on this thread */
-                prefetch_read(main_thread_base);
+                JAK_PREFETCH_READ(main_thread_base);
                 f(main_thread_base, width, chunk_len + chunk_len_remain, args, 0);
 
                 for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
@@ -220,15 +220,15 @@ bool parallel_parallel_for(const void *base, size_t width, size_t len, parallel_
         return true;
 }
 
-void mapProxy(const void *src, size_t src_width, size_t len, void *args, thread_id_t tid)
+void jak_map_proxy(const void *src, size_t src_width, size_t len, void *args, jak_thread_id_t tid)
 {
         JAK_UNUSED(tid);
         JAK_cast(struct map_args *, mapArgs, args);
         size_t globalStart = (src - mapArgs->src) / src_width;
 
-        prefetch_read(mapArgs->src);
-        prefetch_read(mapArgs->args);
-        prefetch_write(mapArgs->dst);
+        JAK_PREFETCH_READ(mapArgs->src);
+        JAK_PREFETCH_READ(mapArgs->args);
+        JAK_PREFETCH_WRITE(mapArgs->dst);
         mapArgs->map_func(mapArgs->dst + globalStart * mapArgs->dst_width,
                           src,
                           src_width,
@@ -237,31 +237,31 @@ void mapProxy(const void *src, size_t src_width, size_t len, void *args, thread_
                           mapArgs->args);
 }
 
-bool parallel_map_exec(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
-                       parallel_map_body_func_t f, void *args, enum threading_hint hint, uint_fast16_t num_threads)
+bool jak_async_map_exec(void *dst, const void *src, size_t src_width, size_t len, size_t dst_width,
+                       jak_map_body_func_t f, void *args, enum jak_threading_hint hint, uint_fast16_t num_threads)
 {
-        error_if_null(src)
-        error_if_null(src_width)
-        error_if_null(dst_width)
-        error_if_null(f)
+        JAK_ERROR_IF_NULL(src)
+        JAK_ERROR_IF_NULL(src_width)
+        JAK_ERROR_IF_NULL(dst_width)
+        JAK_ERROR_IF_NULL(f)
 
-        prefetch_read(f);
-        prefetch_write(dst);
+        JAK_PREFETCH_READ(f);
+        JAK_PREFETCH_WRITE(dst);
 
         struct map_args mapArgs = {.args = args, .map_func = f, .dst = dst, .dst_width = dst_width, .src = src};
 
-        return parallel_for((void *) src, src_width, len, &mapProxy, &mapArgs, hint, num_threads);
+        return jak_for((void *) src, src_width, len, &jak_map_proxy, &mapArgs, hint, num_threads);
 }
 
-void gather_function(const void *start, size_t width, size_t len, void *args, thread_id_t tid)
+void jak_int_async_gather(const void *start, size_t width, size_t len, void *args, jak_thread_id_t tid)
 {
         JAK_UNUSED(tid);
         JAK_cast(struct gather_scatter_args *, gather_args, args);
         size_t global_index_start = (start - gather_args->dst) / width;
 
-        prefetch_write(gather_args->dst);
-        prefetch_write(gather_args->idx);
-        prefetch_read((len > 0) ? gather_args->src + gather_args->idx[0] * width : NULL);
+        JAK_PREFETCH_WRITE(gather_args->dst);
+        JAK_PREFETCH_WRITE(gather_args->idx);
+        JAK_PREFETCH_READ((len > 0) ? gather_args->src + gather_args->idx[0] * width : NULL);
 
         for (register size_t i = 0, next_i = 1; i < len; next_i = ++i + 1) {
                 size_t global_index_cur = global_index_start + i;
@@ -271,71 +271,71 @@ void gather_function(const void *start, size_t width, size_t len, void *args, th
                        width);
 
                 bool has_next = (next_i < len);
-                prefetch_read(has_next ? gather_args->idx + global_index_next : NULL);
-                prefetch_read(has_next ? gather_args->src + gather_args->idx[global_index_next] * width : NULL);
-                prefetch_write(has_next ? gather_args->dst + global_index_next * width : NULL);
+                JAK_PREFETCH_READ(has_next ? gather_args->idx + global_index_next : NULL);
+                JAK_PREFETCH_READ(has_next ? gather_args->src + gather_args->idx[global_index_next] * width : NULL);
+                JAK_PREFETCH_WRITE(has_next ? gather_args->dst + global_index_next * width : NULL);
         }
 }
 
-bool parallel_sequential_gather(void *dst, const void *src, size_t width, const size_t *idx,
+bool jak_sync_gather(void *dst, const void *src, size_t width, const size_t *idx,
                                 size_t dst_src_len)
 {
-        error_if_null(dst)
-        error_if_null(src)
-        error_if_null(idx)
-        error_if_null(width)
+        JAK_ERROR_IF_NULL(dst)
+        JAK_ERROR_IF_NULL(src)
+        JAK_ERROR_IF_NULL(idx)
+        JAK_ERROR_IF_NULL(width)
 
-        prefetch_read(src);
-        prefetch_read(idx);
-        prefetch_write(dst);
+        JAK_PREFETCH_READ(src);
+        JAK_PREFETCH_READ(idx);
+        JAK_PREFETCH_WRITE(dst);
 
-        prefetch_read(idx);
-        prefetch_write(dst);
-        prefetch_read((dst_src_len > 0) ? src + idx[0] * width : NULL);
+        JAK_PREFETCH_READ(idx);
+        JAK_PREFETCH_WRITE(dst);
+        JAK_PREFETCH_READ((dst_src_len > 0) ? src + idx[0] * width : NULL);
 
         for (register size_t i = 0, next_i = 1; i < dst_src_len; next_i = ++i + 1) {
                 memcpy(dst + i * width, src + idx[i] * width, width);
 
                 bool has_next = (next_i < dst_src_len);
-                prefetch_read(has_next ? idx + next_i : NULL);
-                prefetch_read(has_next ? src + idx[next_i] * width : NULL);
-                prefetch_write(has_next ? dst + next_i * width : NULL);
+                JAK_PREFETCH_READ(has_next ? idx + next_i : NULL);
+                JAK_PREFETCH_READ(has_next ? src + idx[next_i] * width : NULL);
+                JAK_PREFETCH_WRITE(has_next ? dst + next_i * width : NULL);
         }
 
         return true;
 }
 
-bool parallel_parallel_gather(void *dst, const void *src, size_t width, const size_t *idx,
+bool jak_async_gather(void *dst, const void *src, size_t width, const size_t *idx,
                               size_t dst_src_len, uint_fast16_t num_threads)
 {
-        error_if_null(dst)
-        error_if_null(src)
-        error_if_null(idx)
-        error_if_null(width)
+        JAK_ERROR_IF_NULL(dst)
+        JAK_ERROR_IF_NULL(src)
+        JAK_ERROR_IF_NULL(idx)
+        JAK_ERROR_IF_NULL(width)
 
-        prefetch_read(src);
-        prefetch_read(idx);
-        prefetch_write(dst);
+        JAK_PREFETCH_READ(src);
+        JAK_PREFETCH_READ(idx);
+        JAK_PREFETCH_WRITE(dst);
 
         struct gather_scatter_args args = {.idx           = idx, .src           = src, .dst           = dst,};
-        return parallel_parallel_for(dst, width, dst_src_len, gather_function, &args, num_threads);
+        return jak_async_for(dst, width, dst_src_len, jak_int_async_gather, &args, num_threads);
 }
 
-bool parallel_sequential_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx,
+bool jak_sync_gather_adr(void *dst, const void *src, size_t src_width, const size_t *idx,
                                     size_t num)
 {
-        error_if_null(dst)
-        error_if_null(src)
-        error_if_null(idx)
-        error_if_null(src_width)
+        JAK_ERROR_IF_NULL(dst)
+        JAK_ERROR_IF_NULL(src)
+        JAK_ERROR_IF_NULL(idx)
+        JAK_ERROR_IF_NULL(src_width)
 
-        prefetch_read(src);
-        prefetch_read(idx);
-        prefetch_write(dst);
+        JAK_PREFETCH_READ(src);
+        JAK_PREFETCH_READ(idx);
+        JAK_PREFETCH_WRITE(dst);
 
-        prefetch_read(idx);
-        prefetch_write(dst);
-        prefetch_read(num > 0 ? src + idx[0] * src_width : NULL);
+        JAK_PREFETCH_READ(idx);
+        JAK_PREFETCH_WRITE(dst);
+        JAK_PREFETCH_READ(num > 0 ? src + idx[0] * src_width : NULL);
 
         for (register size_t i = 0, next_i = 1; i < num; next_i = ++i + 1) {
                 const void *ptr = src + idx[i] * src_width;
@@ -343,21 +343,21 @@ bool parallel_sequential_gather_adr(void *dst, const void *src, size_t src_width
                 memcpy(dst + i * sizeof(void *), &adr, sizeof(size_t));
 
                 bool has_next = (next_i < num);
-                prefetch_read(has_next ? idx + next_i : NULL);
-                prefetch_read(has_next ? src + idx[next_i] * src_width : NULL);
-                prefetch_write(has_next ? dst + next_i * sizeof(void *) : NULL);
+                JAK_PREFETCH_READ(has_next ? idx + next_i : NULL);
+                JAK_PREFETCH_READ(has_next ? src + idx[next_i] * src_width : NULL);
+                JAK_PREFETCH_WRITE(has_next ? dst + next_i * sizeof(void *) : NULL);
         }
         return true;
 }
 
-void parallel_gather_adr_func(const void *start, size_t width, size_t len, void *args, thread_id_t tid)
+void jak_async_gather_adr_func(const void *start, size_t width, size_t len, void *args, jak_thread_id_t tid)
 {
         JAK_UNUSED(tid);
         JAK_cast(struct gather_scatter_args *, gather_args, args);
 
-        prefetch_read(gather_args->idx);
-        prefetch_write(gather_args->dst);
-        prefetch_read((len > 0) ? gather_args->src + gather_args->idx[0] * width : NULL);
+        JAK_PREFETCH_READ(gather_args->idx);
+        JAK_PREFETCH_WRITE(gather_args->dst);
+        JAK_PREFETCH_READ((len > 0) ? gather_args->src + gather_args->idx[0] * width : NULL);
 
         size_t global_index_start = (start - gather_args->dst) / width;
         for (register size_t i = 0, next_i = 1; i < len; next_i = ++i + 1) {
@@ -368,36 +368,36 @@ void parallel_gather_adr_func(const void *start, size_t width, size_t len, void 
                 memcpy(gather_args->dst + global_index_cur * sizeof(void *), &adr, sizeof(size_t));
 
                 bool has_next = (next_i < len);
-                prefetch_read(has_next ? gather_args->idx + global_index_next : NULL);
-                prefetch_read(has_next ? gather_args->src + gather_args->idx[global_index_next] * width : NULL);
-                prefetch_write(has_next ? gather_args->dst + global_index_next * sizeof(void *) : NULL);
+                JAK_PREFETCH_READ(has_next ? gather_args->idx + global_index_next : NULL);
+                JAK_PREFETCH_READ(has_next ? gather_args->src + gather_args->idx[global_index_next] * width : NULL);
+                JAK_PREFETCH_WRITE(has_next ? gather_args->dst + global_index_next * sizeof(void *) : NULL);
         }
 }
 
-bool parallel_parallel_gather_adr_func(void *dst, const void *src, size_t src_width, const size_t *idx,
+bool jak_int_async_gather_adr_func(void *dst, const void *src, size_t src_width, const size_t *idx,
                                        size_t num, uint_fast16_t num_threads)
 {
-        error_if_null(dst)
-        error_if_null(src)
-        error_if_null(idx)
-        error_if_null(src_width)
+        JAK_ERROR_IF_NULL(dst)
+        JAK_ERROR_IF_NULL(src)
+        JAK_ERROR_IF_NULL(idx)
+        JAK_ERROR_IF_NULL(src_width)
 
-        prefetch_read(src);
-        prefetch_read(idx);
-        prefetch_write(dst);
+        JAK_PREFETCH_READ(src);
+        JAK_PREFETCH_READ(idx);
+        JAK_PREFETCH_WRITE(dst);
 
         struct gather_scatter_args args = {.idx = idx, .src = src, .dst = dst};
-        return parallel_parallel_for(dst, src_width, num, parallel_gather_adr_func, &args, num_threads);
+        return jak_async_for(dst, src_width, num, jak_async_gather_adr_func, &args, num_threads);
 }
 
-void parallel_scatter_func(const void *start, size_t width, size_t len, void *args, thread_id_t tid)
+void jak_async_scatter(const void *start, size_t width, size_t len, void *args, jak_thread_id_t tid)
 {
         JAK_UNUSED(tid);
         JAK_cast(struct gather_scatter_args *, scatter_args, args);
 
-        prefetch_read(scatter_args->idx);
-        prefetch_read(scatter_args->src);
-        prefetch_write((len > 0) ? scatter_args->dst + scatter_args->idx[0] * width : NULL);
+        JAK_PREFETCH_READ(scatter_args->idx);
+        JAK_PREFETCH_READ(scatter_args->src);
+        JAK_PREFETCH_WRITE((len > 0) ? scatter_args->dst + scatter_args->idx[0] * width : NULL);
 
         size_t global_index_start = (start - scatter_args->dst) / width;
         for (register size_t i = 0, next_i = 1; i < len; next_i = ++i + 1) {
@@ -409,80 +409,80 @@ void parallel_scatter_func(const void *start, size_t width, size_t len, void *ar
                        width);
 
                 bool has_next = (next_i < len);
-                prefetch_read(has_next ? scatter_args->idx + global_index_next : NULL);
-                prefetch_read(has_next ? scatter_args->src + global_index_next * width : NULL);
-                prefetch_write(has_next ? scatter_args->dst + scatter_args->idx[global_index_next] * width : NULL);
+                JAK_PREFETCH_READ(has_next ? scatter_args->idx + global_index_next : NULL);
+                JAK_PREFETCH_READ(has_next ? scatter_args->src + global_index_next * width : NULL);
+                JAK_PREFETCH_WRITE(has_next ? scatter_args->dst + scatter_args->idx[global_index_next] * width : NULL);
         }
 }
 
-bool parallel_sequential_scatter_func(void *dst, const void *src, size_t width, const size_t *idx,
+bool jak_sync_scatter(void *dst, const void *src, size_t width, const size_t *idx,
                                       size_t num)
 {
-        error_if_null(dst)
-        error_if_null(src)
-        error_if_null(idx)
-        error_if_null(width)
+        JAK_ERROR_IF_NULL(dst)
+        JAK_ERROR_IF_NULL(src)
+        JAK_ERROR_IF_NULL(idx)
+        JAK_ERROR_IF_NULL(width)
 
-        prefetch_read(idx);
-        prefetch_read(src);
-        prefetch_write((num > 0) ? dst + idx[0] * width : NULL);
+        JAK_PREFETCH_READ(idx);
+        JAK_PREFETCH_READ(src);
+        JAK_PREFETCH_WRITE((num > 0) ? dst + idx[0] * width : NULL);
 
         for (register size_t i = 0, next_i = 1; i < num; next_i = ++i + 1) {
                 memcpy(dst + idx[i] * width, src + i * width, width);
 
                 bool has_next = (next_i < num);
-                prefetch_read(has_next ? idx + next_i : NULL);
-                prefetch_read(has_next ? src + next_i * width : NULL);
-                prefetch_write(has_next ? dst + idx[next_i] * width : NULL);
+                JAK_PREFETCH_READ(has_next ? idx + next_i : NULL);
+                JAK_PREFETCH_READ(has_next ? src + next_i * width : NULL);
+                JAK_PREFETCH_WRITE(has_next ? dst + idx[next_i] * width : NULL);
         }
         return true;
 }
 
-bool parallel_parallel_scatter_func(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
+bool jak_sync_scatter_func(void *dst, const void *src, size_t width, const size_t *idx, size_t num,
                                     uint_fast16_t num_threads)
 {
-        error_if_null(dst)
-        error_if_null(src)
-        error_if_null(idx)
-        error_if_null(width)
+        JAK_ERROR_IF_NULL(dst)
+        JAK_ERROR_IF_NULL(src)
+        JAK_ERROR_IF_NULL(idx)
+        JAK_ERROR_IF_NULL(width)
 
-        prefetch_read(src);
-        prefetch_read(idx);
-        prefetch_write(dst);
+        JAK_PREFETCH_READ(src);
+        JAK_PREFETCH_READ(idx);
+        JAK_PREFETCH_WRITE(dst);
 
         struct gather_scatter_args args = {.idx = idx, .src = src, .dst = dst};
-        return parallel_parallel_for(dst, width, num, parallel_scatter_func, &args, num_threads);
+        return jak_async_for(dst, width, num, jak_async_scatter, &args, num_threads);
 }
 
-bool parallel_sequential_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
+bool jak_sync_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
                                  const size_t *src_idx, size_t idx_len)
 {
-        error_if_null(dst)
-        error_if_null(src)
-        error_if_null(dst_idx)
-        error_if_null(src_idx)
-        error_if_null(width)
+        JAK_ERROR_IF_NULL(dst)
+        JAK_ERROR_IF_NULL(src)
+        JAK_ERROR_IF_NULL(dst_idx)
+        JAK_ERROR_IF_NULL(src_idx)
+        JAK_ERROR_IF_NULL(width)
 
         bool has_first = (idx_len > 0);
-        prefetch_read(src_idx);
-        prefetch_read(dst_idx);
-        prefetch_read(has_first ? src + src_idx[0] * width : NULL);
-        prefetch_write(has_first ? dst + dst_idx[0] * width : NULL);
+        JAK_PREFETCH_READ(src_idx);
+        JAK_PREFETCH_READ(dst_idx);
+        JAK_PREFETCH_READ(has_first ? src + src_idx[0] * width : NULL);
+        JAK_PREFETCH_WRITE(has_first ? dst + dst_idx[0] * width : NULL);
 
         for (register size_t i = 0, next_i = 1; i < idx_len; next_i = ++i + 1) {
                 memcpy(dst + dst_idx[i] * width, src + src_idx[i] * width, width);
 
                 bool has_next = (next_i < idx_len);
-                prefetch_read(has_next ? src_idx + next_i : NULL);
-                prefetch_read(has_next ? dst_idx + next_i : NULL);
-                prefetch_read(has_next ? src + src_idx[next_i] * width : NULL);
-                prefetch_write(has_next ? dst + dst_idx[next_i] * width : NULL);
+                JAK_PREFETCH_READ(has_next ? src_idx + next_i : NULL);
+                JAK_PREFETCH_READ(has_next ? dst_idx + next_i : NULL);
+                JAK_PREFETCH_READ(has_next ? src + src_idx[next_i] * width : NULL);
+                JAK_PREFETCH_WRITE(has_next ? dst + dst_idx[next_i] * width : NULL);
         }
 
         return true;
 }
 
-bool parallel_parallel_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
+bool jak_async_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
                                const size_t *src_idx, size_t idx_len)
 {
         JAK_UNUSED(dst);
@@ -494,25 +494,25 @@ bool parallel_parallel_shuffle(void *dst, const void *src, size_t width, const s
         JAK_NOT_IMPLEMENTED
 }
 
-bool parallel_sequential_filter_late(size_t *positions, size_t *num_positions, const void *source,
-                                     size_t width, size_t length, parallel_predicate_func_t predicate,
+bool jak_int_sync_filter_late(size_t *positions, size_t *num_positions, const void *source,
+                                     size_t width, size_t length, jak_pred_func_t predicate,
                                      void *arguments)
 {
-        error_if_null(positions);
-        error_if_null(num_positions);
-        error_if_null(source);
-        error_if_null(width);
-        error_if_null(length);
-        error_if_null(predicate);
+        JAK_ERROR_IF_NULL(positions);
+        JAK_ERROR_IF_NULL(num_positions);
+        JAK_ERROR_IF_NULL(source);
+        JAK_ERROR_IF_NULL(width);
+        JAK_ERROR_IF_NULL(length);
+        JAK_ERROR_IF_NULL(predicate);
 
         predicate(positions, num_positions, source, width, length, arguments, 0);
 
         return true;
 }
 
-void *parallel_filter_proxy_func(void *args)
+void *jak_int_sync_filter_procy_func(void *args)
 {
-        JAK_cast(struct filter_arg *, proxy_arg, args);
+        JAK_cast(struct jak_filter_arg  *, proxy_arg, args);
         proxy_arg->pred(proxy_arg->src_positions,
                         &proxy_arg->num_positions,
                         proxy_arg->start,
@@ -523,16 +523,16 @@ void *parallel_filter_proxy_func(void *args)
         return NULL;
 }
 
-bool parallel_parallel_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
-                                   parallel_predicate_func_t pred, void *args, size_t num_threads)
+bool jak_async_filter_late(size_t *pos, size_t *num_pos, const void *src, size_t width, size_t len,
+                                   jak_pred_func_t pred, void *args, size_t num_threads)
 {
-        error_if_null(pos);
-        error_if_null(num_pos);
-        error_if_null(src);
-        error_if_null(width);
-        error_if_null(pred);
+        JAK_ERROR_IF_NULL(pos);
+        JAK_ERROR_IF_NULL(num_pos);
+        JAK_ERROR_IF_NULL(src);
+        JAK_ERROR_IF_NULL(width);
+        JAK_ERROR_IF_NULL(pred);
 
-        if (unlikely(len == 0)) {
+        if (JAK_UNLIKELY(len == 0)) {
                 *num_pos = 0;
                 return true;
         }
@@ -540,20 +540,20 @@ bool parallel_parallel_filter_late(size_t *pos, size_t *num_pos, const void *src
         uint_fast16_t num_thread = num_threads + 1; /** +1 since one is this thread */
 
         pthread_t threads[num_threads];
-        struct filter_arg thread_args[num_thread];
+        struct jak_filter_arg  thread_args[num_thread];
 
         register size_t chunk_len = len / num_thread;
         size_t chunk_len_remain = len % num_thread;
         size_t main_position_offset_to_add = num_threads * chunk_len;
         const void *main_thread_base = src + main_position_offset_to_add * width;
 
-        prefetch_read(pred);
-        prefetch_read(args);
+        JAK_PREFETCH_READ(pred);
+        JAK_PREFETCH_READ(args);
 
         /** run f on NTHREADS_FOR additional threads */
-        if (likely(chunk_len > 0)) {
+        if (JAK_LIKELY(chunk_len > 0)) {
                 for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
-                        struct filter_arg *arg = thread_args + tid;
+                        struct jak_filter_arg  *arg = thread_args + tid;
                         arg->num_positions = 0;
                         arg->src_positions = JAK_MALLOC(chunk_len * sizeof(size_t));
                         arg->position_offset_to_add = tid * chunk_len;
@@ -563,12 +563,12 @@ bool parallel_parallel_filter_late(size_t *pos, size_t *num_pos, const void *src
                         arg->args = args;
                         arg->pred = pred;
 
-                        prefetch_read(arg->start);
-                        pthread_create(threads + tid, NULL, parallel_filter_proxy_func, arg);
+                        JAK_PREFETCH_READ(arg->start);
+                        pthread_create(threads + tid, NULL, jak_int_sync_filter_procy_func, arg);
                 }
         }
         /** run f on this thread */
-        prefetch_read(main_thread_base);
+        JAK_PREFETCH_READ(main_thread_base);
         size_t main_chunk_len = chunk_len + chunk_len_remain;
         size_t *main_src_positions = JAK_MALLOC(main_chunk_len * sizeof(size_t));
         size_t main_num_positions = 0;
@@ -583,10 +583,10 @@ bool parallel_parallel_filter_late(size_t *pos, size_t *num_pos, const void *src
 
         size_t total_num_matching_positions = 0;
 
-        if (likely(chunk_len > 0)) {
+        if (JAK_LIKELY(chunk_len > 0)) {
                 for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
                         pthread_join(threads[tid], NULL);
-                        const struct filter_arg *thread_arg = (thread_args + tid);
+                        const struct jak_filter_arg  *thread_arg = (thread_args + tid);
                         if (thread_arg->num_positions > 0) {
                                 memcpy(pos + total_num_matching_positions,
                                        thread_arg->src_positions,
@@ -597,7 +597,7 @@ bool parallel_parallel_filter_late(size_t *pos, size_t *num_pos, const void *src
                 }
         }
 
-        if (likely(main_num_positions > 0)) {
+        if (JAK_LIKELY(main_num_positions > 0)) {
                 memcpy(pos + total_num_matching_positions, main_src_positions, main_num_positions * sizeof(size_t));
                 total_num_matching_positions += main_num_positions;
         }
@@ -608,22 +608,22 @@ bool parallel_parallel_filter_late(size_t *pos, size_t *num_pos, const void *src
         return true;
 }
 
-bool parallel_sequential_filter_early(void *result, size_t *result_size, const void *src, size_t width,
-                                      size_t len, parallel_predicate_func_t pred, void *args)
+bool jak_async_filter_early(void *result, size_t *result_size, const void *src, size_t width,
+                                      size_t len, jak_pred_func_t pred, void *args)
 {
-        error_if_null(result);
-        error_if_null(result_size);
-        error_if_null(src);
-        error_if_null(width);
-        error_if_null(len);
-        error_if_null(pred);
+        JAK_ERROR_IF_NULL(result);
+        JAK_ERROR_IF_NULL(result_size);
+        JAK_ERROR_IF_NULL(src);
+        JAK_ERROR_IF_NULL(width);
+        JAK_ERROR_IF_NULL(len);
+        JAK_ERROR_IF_NULL(pred);
 
         size_t num_matching_positions;
         size_t *matching_positions = JAK_MALLOC(len * sizeof(size_t));
 
         pred(matching_positions, &num_matching_positions, src, width, len, args, 0);
 
-        parallel_gather(result, src, width, matching_positions, num_matching_positions, THREADING_HINT_SINGLE, 0);
+        jak_gather(result, src, width, matching_positions, num_matching_positions, JAK_THREADING_HINT_SINGLE, 0);
         *result_size = num_matching_positions;
 
         free(matching_positions);
@@ -631,32 +631,32 @@ bool parallel_sequential_filter_early(void *result, size_t *result_size, const v
         return true;
 }
 
-bool parallel_parallel_filter_early(void *result, size_t *result_size, const void *src, size_t width,
-                                    size_t len, parallel_predicate_func_t pred, void *args, uint_fast16_t num_threads)
+bool jak_int_async_filter_early(void *result, size_t *result_size, const void *src, size_t width,
+                                    size_t len, jak_pred_func_t pred, void *args, uint_fast16_t num_threads)
 {
-        error_if_null(result);
-        error_if_null(result_size);
-        error_if_null(src);
-        error_if_null(width);
-        error_if_null(len);
-        error_if_null(pred);
+        JAK_ERROR_IF_NULL(result);
+        JAK_ERROR_IF_NULL(result_size);
+        JAK_ERROR_IF_NULL(src);
+        JAK_ERROR_IF_NULL(width);
+        JAK_ERROR_IF_NULL(len);
+        JAK_ERROR_IF_NULL(pred);
 
         uint_fast16_t num_thread = num_threads + 1; /** +1 since one is this thread */
 
         pthread_t threads[num_threads];
-        struct filter_arg thread_args[num_thread];
+        struct jak_filter_arg  thread_args[num_thread];
 
         register size_t chunk_len = len / num_thread;
         size_t chunk_len_remain = len % num_thread;
         size_t main_position_offset_to_add = num_threads * chunk_len;
         const void *main_thread_base = src + main_position_offset_to_add * width;
 
-        prefetch_read(pred);
-        prefetch_read(args);
+        JAK_PREFETCH_READ(pred);
+        JAK_PREFETCH_READ(args);
 
         /** run f on NTHREADS_FOR additional threads */
         for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
-                struct filter_arg *arg = thread_args + tid;
+                struct jak_filter_arg  *arg = thread_args + tid;
                 arg->num_positions = 0;
                 arg->src_positions = JAK_MALLOC(chunk_len * sizeof(size_t));
                 arg->position_offset_to_add = tid * chunk_len;
@@ -666,11 +666,11 @@ bool parallel_parallel_filter_early(void *result, size_t *result_size, const voi
                 arg->args = args;
                 arg->pred = pred;
 
-                prefetch_read(arg->start);
-                pthread_create(threads + tid, NULL, parallel_filter_proxy_func, arg);
+                JAK_PREFETCH_READ(arg->start);
+                pthread_create(threads + tid, NULL, jak_int_sync_filter_procy_func, arg);
         }
         /** run f on this thread */
-        prefetch_read(main_thread_base);
+        JAK_PREFETCH_READ(main_thread_base);
         size_t main_chunk_len = chunk_len + chunk_len_remain;
         size_t *main_src_positions = JAK_MALLOC(main_chunk_len * sizeof(size_t));
         size_t main_num_positions = 0;
@@ -688,36 +688,36 @@ bool parallel_parallel_filter_early(void *result, size_t *result_size, const voi
 
         for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
                 pthread_join(threads[tid], NULL);
-                const struct filter_arg *thread_arg = (thread_args + tid);
+                const struct jak_filter_arg  *thread_arg = (thread_args + tid);
                 total_num_matching_positions += thread_arg->num_positions;
-                prefetch_read(thread_arg->src_positions);
+                JAK_PREFETCH_READ(thread_arg->src_positions);
         }
 
         for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
-                const struct filter_arg *thread_arg = (thread_args + tid);
+                const struct jak_filter_arg  *thread_arg = (thread_args + tid);
 
-                if (likely(thread_arg->num_positions > 0)) {
-                        parallel_gather(result + partial_num_matching_positions * width,
-                                        src,
-                                        width,
-                                        thread_arg->src_positions,
-                                        thread_arg->num_positions,
-                                        THREADING_HINT_MULTI,
-                                        num_threads);
+                if (JAK_LIKELY(thread_arg->num_positions > 0)) {
+                        jak_gather(result + partial_num_matching_positions * width,
+                                   src,
+                                   width,
+                                   thread_arg->src_positions,
+                                   thread_arg->num_positions,
+                                   JAK_THREADING_HINT_MULTI,
+                                   num_threads);
                 }
 
                 partial_num_matching_positions += thread_arg->num_positions;
                 free(thread_arg->src_positions);
         }
 
-        if (likely(main_num_positions > 0)) {
-                parallel_gather(result + partial_num_matching_positions * width,
-                                src,
-                                width,
-                                main_src_positions,
-                                main_num_positions,
-                                THREADING_HINT_MULTI,
-                                num_threads);
+        if (JAK_LIKELY(main_num_positions > 0)) {
+                jak_gather(result + partial_num_matching_positions * width,
+                           src,
+                           width,
+                           main_src_positions,
+                           main_num_positions,
+                           JAK_THREADING_HINT_MULTI,
+                           num_threads);
         }
         free(main_src_positions);
 

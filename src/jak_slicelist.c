@@ -15,7 +15,6 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <assert.h>
 #include <math.h>
 
 #include <jak_slicelist.h>
@@ -33,8 +32,8 @@
 #define SLICE_SCAN(slice, needle_hash, needle_str)                                                                     \
 ({                                                                                                                     \
     JAK_trace(JAK_SLICE_LIST_TAG, "SLICE_SCAN for '%s' started", needle_str);                                    \
-    assert(slice);                                                                                                     \
-    assert(needle_str);                                                                                                \
+    JAK_ASSERT(slice);                                                                                                     \
+    JAK_ASSERT(needle_str);                                                                                                \
                                                                                                                        \
     register bool continueScan, keysMatch, keyHashsNoMatch, endReached;                                                \
     register bool cacheAvailable = (slice->cacheIdx != (jak_u32) -1);                                                 \
@@ -70,8 +69,8 @@ static void unlock(slice_list_t *list);
 
 bool slice_list_create(slice_list_t *list, const struct jak_allocator *alloc, size_t sliceCapacity)
 {
-        error_if_null(list)
-        error_if_null(sliceCapacity)
+        JAK_ERROR_IF_NULL(list)
+        JAK_ERROR_IF_NULL(sliceCapacity)
 
         jak_alloc_this_or_std(&list->alloc, alloc);
         spin_init(&list->lock);
@@ -123,14 +122,14 @@ bool slice_list_insert(slice_list_t *list, char **strings, jak_archive_field_sid
                 slice_handle_t handle;
                 int status;
 
-                assert (key);
+                JAK_ASSERT (key);
 
                 /** check whether the keys-values pair is already contained in one slice */
                 status = slice_list_lookup(&handle, list, key);
 
                 if (status == true) {
                         /** pair was found, do not insert it twice */
-                        assert (value == handle.value);
+                        JAK_ASSERT (value == handle.value);
                         continue;
                 } else {
                         /** pair is not found; append it */
@@ -146,7 +145,7 @@ bool slice_list_insert(slice_list_t *list, char **strings, jak_archive_field_sid
                                   "appender # of elems: %zu, limit: %zu",
                                   appender->num_elems,
                                   SLICE_KEY_COLUMN_MAX_ELEMS);
-                        assert(appender->num_elems < SLICE_KEY_COLUMN_MAX_ELEMS);
+                        JAK_ASSERT(appender->num_elems < SLICE_KEY_COLUMN_MAX_ELEMS);
                         appender->key_column[appender->num_elems] = key;
                         appender->keyHashColumn[appender->num_elems] = keyHash;
                         appender->string_id_tColumn[appender->num_elems] = value;
@@ -154,7 +153,7 @@ bool slice_list_insert(slice_list_t *list, char **strings, jak_archive_field_sid
                         appenderBounds->maxHash = appenderBounds->maxHash > keyHash ? appenderBounds->maxHash : keyHash;
                         JAK_BLOOM_SET(appenderFilter, &keyHash, sizeof(hash32_t));
                         appender->num_elems++;
-                        if (unlikely(appender->num_elems == SLICE_KEY_COLUMN_MAX_ELEMS)) {
+                        if (JAK_UNLIKELY(appender->num_elems == SLICE_KEY_COLUMN_MAX_ELEMS)) {
                                 appenderSeal(appender);
                                 appenderNew(list);
                         }
@@ -258,7 +257,7 @@ static void appenderNew(slice_list_t *list)
         jak_u32 numSlices = vec_length(&list->slices);
         vec_push(&list->slices, &slice, 1);
 
-        assert(SLICE_KEY_COLUMN_MAX_ELEMS > 0);
+        JAK_ASSERT(SLICE_KEY_COLUMN_MAX_ELEMS > 0);
 
         /** the descriptor */
         SliceDescriptor desc = {.numReadsHit  = 0, .numReadsAll  = 0,};
@@ -266,7 +265,7 @@ static void appenderNew(slice_list_t *list)
         vec_push(&list->descriptors, &desc, 1);
 
         /** the lookup guards */
-        assert(sizeof(bloom_t) <= JAK_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE);
+        JAK_ASSERT(sizeof(bloom_t) <= JAK_SLICE_LIST_BLOOMFILTER_TARGET_MEMORY_SIZE_IN_BYTE);
         bloom_t filter;
 
         /** NOTE: the size of each bloom_t lead to a false positive probability of 100%, i.e., number of items in the

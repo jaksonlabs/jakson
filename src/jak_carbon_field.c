@@ -164,7 +164,7 @@ bool carbon_field_type_is_constant(enum carbon_field_type type)
 
 bool carbon_field_skip(struct jak_memfile *file)
 {
-        error_if_null(file)
+        JAK_ERROR_IF_NULL(file)
         jak_u8 type_marker = *JAK_MEMFILE_PEEK(file, jak_u8);
 
         switch (type_marker) {
@@ -350,7 +350,7 @@ bool carbon_field_skip_8(struct jak_memfile *file)
 
         error_if(type_marker != CARBON_JAK_FIELD_TYPE_NUMBER_I8 && type_marker != CARBON_JAK_FIELD_TYPE_NUMBER_U8,
                  &file->err, JAK_ERR_TYPEMISMATCH);
-        assert(sizeof(jak_u8) == sizeof(jak_i8));
+        JAK_ASSERT(sizeof(jak_u8) == sizeof(jak_i8));
         memfile_skip(file, sizeof(jak_u8));
         return true;
 }
@@ -361,7 +361,7 @@ bool carbon_field_skip_16(struct jak_memfile *file)
 
         error_if(type_marker != CARBON_JAK_FIELD_TYPE_NUMBER_I16 && type_marker != CARBON_JAK_FIELD_TYPE_NUMBER_U16,
                  &file->err, JAK_ERR_TYPEMISMATCH);
-        assert(sizeof(jak_u16) == sizeof(jak_i16));
+        JAK_ASSERT(sizeof(jak_u16) == sizeof(jak_i16));
         memfile_skip(file, sizeof(jak_u16));
         return true;
 }
@@ -372,7 +372,7 @@ bool carbon_field_skip_32(struct jak_memfile *file)
 
         error_if(type_marker != CARBON_JAK_FIELD_TYPE_NUMBER_I32 && type_marker != CARBON_JAK_FIELD_TYPE_NUMBER_U32,
                  &file->err, JAK_ERR_TYPEMISMATCH);
-        assert(sizeof(jak_u32) == sizeof(jak_i32));
+        JAK_ASSERT(sizeof(jak_u32) == sizeof(jak_i32));
         memfile_skip(file, sizeof(jak_u32));
         return true;
 }
@@ -383,7 +383,7 @@ bool carbon_field_skip_64(struct jak_memfile *file)
 
         error_if(type_marker != CARBON_JAK_FIELD_TYPE_NUMBER_I64 && type_marker != CARBON_JAK_FIELD_TYPE_NUMBER_U64,
                  &file->err, JAK_ERR_TYPEMISMATCH);
-        assert(sizeof(jak_u64) == sizeof(jak_i64));
+        JAK_ASSERT(sizeof(jak_u64) == sizeof(jak_i64));
         memfile_skip(file, sizeof(jak_u64));
         return true;
 }

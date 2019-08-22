@@ -67,7 +67,7 @@ DECLARE_PRINTER_FUNC(size_t)
 /**
  * An implementation of the concrete data type Vector, a resizeable dynamic array.
  */
-struct vector {
+struct jak_vector {
     /**
     *  Memory allocator that is used to get memory for user data
     */
@@ -107,7 +107,7 @@ struct vector {
 /**
  * Utility implementation of generic vector to specialize for type of 'char *'
  */
-typedef struct vector ofType(const char *) string_vector_t;
+typedef struct jak_vector ofType(const char *) string_vector_t;
 
 /**
  * Constructs a new vector for elements of size 'elem_size', reserving memory for 'cap_elems' elements using
@@ -119,11 +119,11 @@ typedef struct vector ofType(const char *) string_vector_t;
  * @param cap_elems number of elements for which memory should be reserved
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
-bool vec_create(struct vector *out, const struct jak_allocator *alloc, size_t elem_size, size_t cap_elems);
+bool vec_create(struct jak_vector *out, const struct jak_allocator *alloc, size_t elem_size, size_t cap_elems);
 
-bool vec_serialize(FILE *file, struct vector *vec);
+bool vec_serialize(FILE *file, struct jak_vector *vec);
 
-bool vec_deserialize(struct vector *vec, struct jak_error *err, FILE *file);
+bool vec_deserialize(struct jak_vector *vec, struct jak_error *err, FILE *file);
 
 /**
  * Provides hints on the OS kernel how to deal with memory inside this vector.
@@ -133,7 +133,7 @@ bool vec_deserialize(struct vector *vec, struct jak_error *err, FILE *file);
  * of <code>madvise</code>
  * @return STATUS_OK if success, otherwise a value indicating the error
  */
-bool vec_memadvice(struct vector *vec, int madviseAdvice);
+bool vec_memadvice(struct jak_vector *vec, int madviseAdvice);
 
 /**
  * Sets the factor for determining the reallocation size in case of a resizing operation.
@@ -144,7 +144,7 @@ bool vec_memadvice(struct vector *vec, int madviseAdvice);
  * @param factor a positive real number larger than 1
  * @return STATUS_OK if success, otherwise a value indicating the error
  */
-bool vec_set_grow_factor(struct vector *vec, float factor);
+bool vec_set_grow_factor(struct jak_vector *vec, float factor);
 
 /**
  * Frees up memory requested via the allocator.
@@ -155,7 +155,7 @@ bool vec_set_grow_factor(struct vector *vec, float factor);
  * @param vec vector to be freed
  * @return STATUS_OK if success, and STATUS_NULL_PTR in case of NULL pointer to 'vec'
  */
-bool vec_drop(struct vector *vec);
+bool vec_drop(struct jak_vector *vec);
 
 /**
  * Returns information on whether elements are stored in this vector or not.
@@ -164,7 +164,7 @@ bool vec_drop(struct vector *vec);
  *         an error occurs. In case an error is occured, the return value is neither <code>STATUS_TRUE</code> nor
  *         <code>STATUS_FALSE</code> but an value indicating that error.
  */
-bool vec_is_empty(const struct vector *vec);
+bool vec_is_empty(const struct jak_vector *vec);
 
 /**
  * Appends 'num_elems' elements stored in 'data' into the vector by copying num_elems * vec->elem_size into the
@@ -177,9 +177,9 @@ bool vec_is_empty(const struct vector *vec);
  * @param num_elems number of elements stored in data
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
-bool vec_push(struct vector *vec, const void *data, size_t num_elems);
+bool vec_push(struct jak_vector *vec, const void *data, size_t num_elems);
 
-const void *vec_peek(struct vector *vec);
+const void *vec_peek(struct jak_vector *vec);
 
 #define VECTOR_PEEK(vec, type) (type *)(vec_peek(vec))
 
@@ -194,7 +194,7 @@ const void *vec_peek(struct vector *vec);
  * @param num_elems number of elements stored in data
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
-bool vec_repeated_push(struct vector *vec, const void *data, size_t how_often);
+bool vec_repeated_push(struct jak_vector *vec, const void *data, size_t how_often);
 
 /**
  * Returns a pointer to the last element in this vector, or <code>NULL</code> is the vector is already empty.
@@ -203,9 +203,9 @@ bool vec_repeated_push(struct vector *vec, const void *data, size_t how_often);
  * @param vec non-null pointer to the vector
  * @return Pointer to last element, or <code>NULL</code> if vector is empty
  */
-const void *vec_pop(struct vector *vec);
+const void *vec_pop(struct jak_vector *vec);
 
-bool vec_clear(struct vector *vec);
+bool vec_clear(struct jak_vector *vec);
 
 /**
  * Shinks the vector's internal data block to fits its real size, i.e., remove reserved memory
@@ -213,7 +213,7 @@ bool vec_clear(struct vector *vec);
  * @param vec
  * @return
  */
-bool vec_shrink(struct vector *vec);
+bool vec_shrink(struct jak_vector *vec);
 
 /**
  * Increases the capacity of that vector according the internal grow factor
@@ -222,9 +222,9 @@ bool vec_shrink(struct vector *vec);
  * @param vec non-null pointer to the vector that should be grown
  * @return STATUS_OK in case of success, and another value indicating an error otherwise.
  */
-bool vec_grow(size_t *numNewSlots, struct vector *vec);
+bool vec_grow(size_t *numNewSlots, struct jak_vector *vec);
 
-bool vec_grow_to(struct vector *vec, size_t capacity);
+bool vec_grow_to(struct jak_vector *vec, size_t capacity);
 
 /**
  * Returns the number of elements currently stored in the vector
@@ -232,7 +232,7 @@ bool vec_grow_to(struct vector *vec, size_t capacity);
  * @param vec the vector for which the operation is started
  * @return 0 in case of NULL pointer to 'vec', or the number of elements otherwise.
  */
-size_t vec_length(const struct vector *vec);
+size_t vec_length(const struct jak_vector *vec);
 
 #define vec_get(vec, pos, type) (type *) vec_at(vec, pos)
 
@@ -244,7 +244,7 @@ size_t vec_length(const struct vector *vec);
     vec_get(vec, vectorLength, type);                                                                                  \
 })
 
-const void *vec_at(const struct vector *vec, size_t pos);
+const void *vec_at(const struct jak_vector *vec, size_t pos);
 
 /**
  * Returns the number of elements for which memory is currently reserved in the vector
@@ -252,22 +252,22 @@ const void *vec_at(const struct vector *vec, size_t pos);
  * @param vec the vector for which the operation is started
  * @return 0 in case of NULL pointer to 'vec', or the number of elements otherwise.
  */
-size_t vec_capacity(const struct vector *vec);
+size_t vec_capacity(const struct jak_vector *vec);
 
 /**
  * Set the internal size of <code>vec</code> to its capacity.
  */
-bool vec_enlarge_size_to_capacity(struct vector *vec);
+bool vec_enlarge_size_to_capacity(struct jak_vector *vec);
 
-bool vec_zero_memory(struct vector *vec);
+bool vec_zero_memory(struct jak_vector *vec);
 
-bool vec_zero_memory_in_range(struct vector *vec, size_t from, size_t to);
+bool vec_zero_memory_in_range(struct jak_vector *vec, size_t from, size_t to);
 
-bool vec_set(struct vector *vec, size_t pos, const void *data);
+bool vec_set(struct jak_vector *vec, size_t pos, const void *data);
 
-bool vec_cpy(struct vector *dst, const struct vector *src);
+bool vec_cpy(struct jak_vector *dst, const struct jak_vector *src);
 
-bool vec_cpy_to(struct vector *dst, struct vector *src);
+bool vec_cpy_to(struct jak_vector *dst, struct jak_vector *src);
 
 /**
  * Gives raw data access to data stored in the vector; do not manipulate this data since otherwise the vector
@@ -276,9 +276,9 @@ bool vec_cpy_to(struct vector *dst, struct vector *src);
  * @param vec the vector for which the operation is started
  * @return pointer to user-data managed by this vector
  */
-const void *vec_data(const struct vector *vec);
+const void *vec_data(const struct jak_vector *vec);
 
-char *vector_string(const struct vector ofType(T) *vec,
+char *vector_string(const struct jak_vector ofType(T) *vec,
                     void (*printerFunc)(struct jak_memfile *dst, void ofType(T) *values, size_t num_elems));
 
 #define vec_all(vec, type) (type *) vec_data(vec)

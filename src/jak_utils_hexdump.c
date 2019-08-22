@@ -20,8 +20,8 @@
 
 bool hexdump(struct jak_string *dst, const void *base, jak_u64 nbytes)
 {
-        error_if_null(dst);
-        error_if_null(base);
+        JAK_ERROR_IF_NULL(dst);
+        JAK_ERROR_IF_NULL(base);
         char buffer[11];
 
         sprintf(buffer, "%08x  ", 0);
@@ -40,11 +40,11 @@ bool hexdump(struct jak_string *dst, const void *base, jak_u64 nbytes)
                         }
                 }
 
-                if (unlikely(step == 7)) {
+                if (JAK_UNLIKELY(step == 7)) {
                         string_add_char(dst, ' ');
                 }
 
-                if (unlikely(step < 16)) {
+                if (JAK_UNLIKELY(step < 16)) {
                         for (jak_u8 pad = 0; pad < 16 - step; pad++) {
                                 sprintf(buffer, "   ");
                                 string_add(dst, buffer);
@@ -64,7 +64,7 @@ bool hexdump(struct jak_string *dst, const void *base, jak_u64 nbytes)
                         string_add(dst, buffer);
                 }
 
-                if (unlikely(step < 16)) {
+                if (JAK_UNLIKELY(step < 16)) {
                         for (jak_u8 pad = 0; pad < 16 - step; pad++) {
                                 sprintf(buffer, " ");
                                 string_add(dst, buffer);
@@ -74,7 +74,7 @@ bool hexdump(struct jak_string *dst, const void *base, jak_u64 nbytes)
                 string_add_char(dst, '|');
 
 
-                if (likely(hex_block_id + step < nbytes)) {
+                if (JAK_LIKELY(hex_block_id + step < nbytes)) {
                         string_add(dst, "\n");
                         sprintf(buffer, "%08x  ", ((jak_u32) hex_block_id + 16));
                         string_add(dst, buffer);

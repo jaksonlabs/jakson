@@ -15,7 +15,6 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <assert.h>
 #include <inttypes.h>
 
 #include <jak_bitmap.h>
@@ -112,7 +111,7 @@ bool huffman_dump_string_table_entry(FILE *file, struct jak_memfile *memfile)
 }
 
 bool pack_huffman_write_extra(struct jak_packer *self, struct jak_memfile *dst,
-                              const struct vector ofType (const char *) *strings)
+                              const struct jak_vector ofType (const char *) *strings)
 {
         JAK_check_tag(self->tag, PACK_HUFFMAN);
 

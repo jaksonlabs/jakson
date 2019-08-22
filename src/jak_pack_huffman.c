@@ -16,7 +16,6 @@
  */
 
 #include <limits.h>
-#include <assert.h>
 #include <inttypes.h>
 
 #include <jak_huffman.h>
@@ -28,12 +27,12 @@ struct huff_node {
     unsigned char letter;
 };
 
-static void huff_tree_create(struct vector ofType(struct pack_huffman_entry) *table,
-                             const struct vector ofType(jak_u32) *frequencies);
+static void huff_tree_create(struct jak_vector ofType(struct pack_huffman_entry) *table,
+                             const struct jak_vector ofType(jak_u32) *frequencies);
 
 bool coding_huffman_create(struct jak_huffman *dic)
 {
-        error_if_null(dic);
+        JAK_ERROR_IF_NULL(dic);
 
         vec_create(&dic->table, NULL, sizeof(struct pack_huffman_entry), UCHAR_MAX / 4);
         error_init(&dic->err);
@@ -43,8 +42,8 @@ bool coding_huffman_create(struct jak_huffman *dic)
 
 bool coding_huffman_cpy(struct jak_huffman *dst, struct jak_huffman *src)
 {
-        error_if_null(dst);
-        error_if_null(src);
+        JAK_ERROR_IF_NULL(dst);
+        JAK_ERROR_IF_NULL(src);
         if (!vec_cpy(&dst->table, &src->table)) {
                 error(&src->err, JAK_ERR_HARDCOPYFAILED);
                 return false;
@@ -55,10 +54,10 @@ bool coding_huffman_cpy(struct jak_huffman *dst, struct jak_huffman *src)
 
 bool coding_huffman_build(struct jak_huffman *encoder, const string_vector_t *strings)
 {
-        error_if_null(encoder);
-        error_if_null(strings);
+        JAK_ERROR_IF_NULL(encoder);
+        JAK_ERROR_IF_NULL(strings);
 
-        struct vector ofType(jak_u32) frequencies;
+        struct jak_vector ofType(jak_u32) frequencies;
         vec_create(&frequencies, NULL, sizeof(jak_u32), UCHAR_MAX);
         vec_enlarge_size_to_capacity(&frequencies);
 
@@ -82,15 +81,15 @@ bool coding_huffman_build(struct jak_huffman *encoder, const string_vector_t *st
 
 bool coding_huffman_get_error(struct jak_error *err, const struct jak_huffman *dic)
 {
-        error_if_null(err)
-        error_if_null(dic)
+        JAK_ERROR_IF_NULL(err)
+        JAK_ERROR_IF_NULL(dic)
         error_cpy(err, &dic->err);
         return true;
 }
 
 bool coding_huffman_drop(struct jak_huffman *dic)
 {
-        error_if_null(dic);
+        JAK_ERROR_IF_NULL(dic);
 
         for (size_t i = 0; i < dic->table.num_elems; i++) {
                 struct pack_huffman_entry *entry = vec_get(&dic->table, i, struct pack_huffman_entry);
@@ -106,8 +105,8 @@ bool coding_huffman_drop(struct jak_huffman *dic)
 
 bool coding_huffman_serialize(struct jak_memfile *file, const struct jak_huffman *dic, char marker_symbol)
 {
-        error_if_null(file)
-        error_if_null(dic)
+        JAK_ERROR_IF_NULL(file)
+        JAK_ERROR_IF_NULL(dic)
 
         for (size_t i = 0; i < dic->table.num_elems; i++) {
                 struct pack_huffman_entry *entry = vec_get(&dic->table, i, struct pack_huffman_entry);
@@ -195,9 +194,9 @@ static size_t encodeString(struct jak_memfile *file, struct jak_huffman *dic, co
 
 bool coding_huffman_encode(struct jak_memfile *file, struct jak_huffman *dic, const char *string)
 {
-        error_if_null(file)
-        error_if_null(dic)
-        error_if_null(string)
+        JAK_ERROR_IF_NULL(file)
+        JAK_ERROR_IF_NULL(dic)
+        JAK_ERROR_IF_NULL(string)
 
         jak_u32 num_bytes_encoded = 0;
 
@@ -326,7 +325,7 @@ static struct huff_node *find_smallest(struct huff_node *begin, jak_u64 lowerBou
 }
 
 static void assign_code(struct huff_node *node, const struct jak_bitmap *path,
-                        struct vector ofType(struct pack_huffman_entry) *table)
+                        struct jak_vector ofType(struct pack_huffman_entry) *table)
 {
         if (!node->left && !node->right) {
                 struct pack_huffman_entry *entry = vec_new_and_get(table, struct pack_huffman_entry);
@@ -351,7 +350,7 @@ static void assign_code(struct huff_node *node, const struct jak_bitmap *path,
         }
 }
 
-static struct huff_node *trim_and_begin(struct vector ofType(HuffNode) *candidates)
+static struct huff_node *trim_and_begin(struct jak_vector ofType(HuffNode) *candidates)
 {
         struct huff_node *begin = NULL;
         for (struct huff_node *it = vec_get(candidates, 0, struct huff_node);; it++) {
@@ -374,12 +373,12 @@ static struct huff_node *trim_and_begin(struct vector ofType(HuffNode) *candidat
         return begin;
 }
 
-static void huff_tree_create(struct vector ofType(struct pack_huffman_entry) *table,
-                             const struct vector ofType(jak_u32) *frequencies)
+static void huff_tree_create(struct jak_vector ofType(struct pack_huffman_entry) *table,
+                             const struct jak_vector ofType(jak_u32) *frequencies)
 {
-        assert(UCHAR_MAX == frequencies->num_elems);
+        JAK_ASSERT(UCHAR_MAX == frequencies->num_elems);
 
-        struct vector ofType(HuffNode) candidates;
+        struct jak_vector ofType(HuffNode) candidates;
         vec_create(&candidates, NULL, sizeof(struct huff_node), UCHAR_MAX * UCHAR_MAX);
         size_t appender_idx = UCHAR_MAX;
 
@@ -445,9 +444,9 @@ static void huff_tree_create(struct vector ofType(struct pack_huffman_entry) *ta
                         print_error_and_die(JAK_ERR_INTERNALERR);
                 }
 
-                assert (!handle->prev);
+                JAK_ASSERT (!handle->prev);
                 struct huff_node *end = seek_to_end(handle);
-                assert(!end->next);
+                JAK_ASSERT(!end->next);
                 end->next = new_node;
                 new_node->prev = end;
                 new_node->next = NULL;

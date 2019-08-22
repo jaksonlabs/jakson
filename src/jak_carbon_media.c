@@ -40,7 +40,7 @@
 
 bool carbon_media_write(struct jak_memfile *dst, enum carbon_field_type type)
 {
-        error_if_null(dst);
+        JAK_ERROR_IF_NULL(dst);
         media_type_t t = type;
         memfile_write(dst, &t, sizeof(media_type_t));
         return true;
@@ -49,30 +49,30 @@ bool carbon_media_write(struct jak_memfile *dst, enum carbon_field_type type)
 jak_u32 carbon_media_mime_type_by_ext(const char *ext)
 {
         jak_u32 id;
-        if (likely(ext != NULL)) {
-                if (likely((id = find_mime_by_ext(ext)) < (jak_u32) _nmime_type_register)) {
+        if (JAK_LIKELY(ext != NULL)) {
+                if (JAK_LIKELY((id = find_mime_by_ext(ext)) < (jak_u32) _nmime_type_register)) {
                         return id;
                 }
         }
         id = find_mime_by_ext("bin");
-        assert(id < _nmime_type_register);
+        JAK_ASSERT(id < _nmime_type_register);
         return id;
 }
 
 const char *carbon_media_mime_type_by_id(jak_u32 id)
 {
-        if (unlikely(id >= _nmime_type_register)) {
+        if (JAK_UNLIKELY(id >= _nmime_type_register)) {
                 id = find_mime_by_ext("bin");
-                assert(id < _nmime_type_register);
+                JAK_ASSERT(id < _nmime_type_register);
         }
         return mime_type_register[id].type;
 }
 
 const char *carbon_media_mime_ext_by_id(jak_u32 id)
 {
-        if (unlikely(id >= _nmime_type_register)) {
+        if (JAK_UNLIKELY(id >= _nmime_type_register)) {
                 id = find_mime_by_ext("bin");
-                assert(id < _nmime_type_register);
+                JAK_ASSERT(id < _nmime_type_register);
         }
         return mime_type_register[id].ext;
 }

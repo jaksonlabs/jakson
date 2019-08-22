@@ -37,7 +37,7 @@ struct lru_list {
 };
 
 struct jak_string_cache {
-    struct vector ofType(struct lru_list) list_entries;
+    struct jak_vector ofType(struct lru_list) list_entries;
     struct jak_sid_cache_stats statistics;
     struct jak_archive_query query;
     struct jak_error err;
@@ -66,12 +66,12 @@ bool jak_string_id_cache_create_lru(struct jak_string_cache **cache, struct jak_
 
 bool jak_string_id_cache_create_lru_ex(struct jak_string_cache **cache, struct jak_archive *archive, size_t capacity)
 {
-        error_if_null(cache)
-        error_if_null(archive)
+        JAK_ERROR_IF_NULL(cache)
+        JAK_ERROR_IF_NULL(archive)
 
         struct jak_string_cache *result = JAK_MALLOC(sizeof(struct jak_string_cache));
 
-        query_create(&result->query, archive);
+        jak_query_create(&result->query, archive);
         result->capacity = capacity;
 
         size_t num_buckets = JAK_max(1, capacity);
@@ -91,16 +91,16 @@ bool jak_string_id_cache_create_lru_ex(struct jak_string_cache **cache, struct j
 
 bool jak_string_id_cache_get_error(struct jak_error *err, const struct jak_string_cache *cache)
 {
-        error_if_null(err)
-        error_if_null(cache)
+        JAK_ERROR_IF_NULL(err)
+        JAK_ERROR_IF_NULL(cache)
         *err = cache->err;
         return true;
 }
 
 bool jak_string_id_cache_get_size(size_t *size, const struct jak_string_cache *cache)
 {
-        error_if_null(size)
-        error_if_null(cache)
+        JAK_ERROR_IF_NULL(size)
+        JAK_ERROR_IF_NULL(cache)
         *size = cache->capacity;
         return true;
 }
@@ -126,7 +126,7 @@ static void make_most_recent(struct lru_list *list, struct cache_entry *entry)
 
 char *jak_string_id_cache_get(struct jak_string_cache *cache, jak_archive_field_sid_t id)
 {
-        error_if_null(cache)
+        JAK_ERROR_IF_NULL(cache)
         hash32_t id_hash = JAK_HASH_BERNSTEIN(sizeof(jak_archive_field_sid_t), &id);
         size_t bucket_pos = id_hash % cache->list_entries.num_elems;
         struct lru_list *list = vec_get(&cache->list_entries, bucket_pos, struct lru_list);
@@ -139,8 +139,8 @@ char *jak_string_id_cache_get(struct jak_string_cache *cache, jak_archive_field_
                 }
                 cursor = cursor->next;
         }
-        char *result = query_fetch_string_by_id_nocache(&cache->query, id);
-        assert(result);
+        char *result = jak_query_fetch_string_by_id_nocache(&cache->query, id);
+        JAK_ASSERT(result);
         if (list->lest_recent->string != NULL) {
                 cache->statistics.num_evicted++;
         }
@@ -153,22 +153,22 @@ char *jak_string_id_cache_get(struct jak_string_cache *cache, jak_archive_field_
 
 bool jak_string_id_cache_get_statistics(struct jak_sid_cache_stats *statistics, struct jak_string_cache *cache)
 {
-        error_if_null(statistics);
-        error_if_null(cache);
+        JAK_ERROR_IF_NULL(statistics);
+        JAK_ERROR_IF_NULL(cache);
         *statistics = cache->statistics;
         return true;
 }
 
 bool jak_string_id_cache_reset_statistics(struct jak_string_cache *cache)
 {
-        error_if_null(cache);
+        JAK_ERROR_IF_NULL(cache);
         JAK_zero_memory(&cache->statistics, sizeof(struct jak_sid_cache_stats));
         return true;
 }
 
 bool jak_string_id_cache_drop(struct jak_string_cache *cache)
 {
-        error_if_null(cache);
+        JAK_ERROR_IF_NULL(cache);
         for (size_t i = 0; i < cache->list_entries.num_elems; i++) {
                 struct lru_list *entry = vec_get(&cache->list_entries, i, struct lru_list);
                 for (size_t k = 0; k < sizeof(entry->entries) / sizeof(entry->entries[0]); k++) {

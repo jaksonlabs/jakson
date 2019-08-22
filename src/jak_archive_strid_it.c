@@ -21,10 +21,10 @@
 
 #include <jak_archive_strid_it.h>
 
-bool strid_iter_open(struct strid_iter *it, struct jak_error *err, struct jak_archive *archive)
+bool jak_strid_iter_open(struct jak_strid_iter *it, struct jak_error *err, struct jak_archive *archive)
 {
-        error_if_null(it)
-        error_if_null(archive)
+        JAK_ERROR_IF_NULL(it)
+        JAK_ERROR_IF_NULL(archive)
 
         memset(&it->vector, 0, sizeof(it->vector));
         it->disk_file = fopen(archive->disk_file_path, "r");
@@ -39,12 +39,12 @@ bool strid_iter_open(struct strid_iter *it, struct jak_error *err, struct jak_ar
         return true;
 }
 
-bool strid_iter_next(bool *success, struct strid_info **info, struct jak_error *err, size_t *info_length,
-                     struct strid_iter *it)
+bool jak_strid_iter_next(bool *success, struct jak_strid_info **info, struct jak_error *err, size_t *info_length,
+                     struct jak_strid_iter *it)
 {
-        error_if_null(info)
-        error_if_null(info_length)
-        error_if_null(it)
+        JAK_ERROR_IF_NULL(info)
+        JAK_ERROR_IF_NULL(info_length)
+        JAK_ERROR_IF_NULL(it)
 
         if (it->disk_offset != 0 && it->is_open) {
                 struct jak_string_entry_header header;
@@ -78,9 +78,9 @@ bool strid_iter_next(bool *success, struct strid_info **info, struct jak_error *
         }
 }
 
-bool strid_iter_close(struct strid_iter *it)
+bool jak_strid_iter_close(struct jak_strid_iter *it)
 {
-        error_if_null(it)
+        JAK_ERROR_IF_NULL(it)
         if (it->is_open) {
                 fclose(it->disk_file);
                 it->is_open = false;

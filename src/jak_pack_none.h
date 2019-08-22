@@ -38,7 +38,7 @@ bool pack_none_cpy(const struct jak_packer *self, struct jak_packer *dst);
 bool pack_none_drop(struct jak_packer *self);
 
 bool pack_none_write_extra(struct jak_packer *self, struct jak_memfile *dst,
-                           const struct vector ofType (const char *) *strings);
+                           const struct jak_vector ofType (const char *) *strings);
 
 bool pack_none_read_extra(struct jak_packer *self, FILE *src, size_t nbytes);
 

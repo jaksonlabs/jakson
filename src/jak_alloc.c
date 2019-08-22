@@ -20,7 +20,6 @@
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <errno.h>
-#include <assert.h>
 
 #include <jak_alloc.h>
 
@@ -58,7 +57,7 @@ bool jak_alloc_this_or_std(struct jak_allocator *dst, const struct jak_allocator
 
 void *jak_alloc_malloc(struct jak_allocator *alloc, size_t size)
 {
-        assert(alloc);
+        JAK_ASSERT(alloc);
         return alloc->malloc(alloc, size);
 }
 
@@ -69,15 +68,15 @@ void *jak_alloc_realloc(struct jak_allocator *alloc, void *ptr, size_t size)
 
 bool jak_alloc_free(struct jak_allocator *alloc, void *ptr)
 {
-        error_if_null(alloc);
-        error_if_null(ptr);
+        JAK_ERROR_IF_NULL(alloc);
+        JAK_ERROR_IF_NULL(ptr);
         alloc->free(alloc, ptr);
         return true;
 }
 
 bool jak_alloc_clone(struct jak_allocator *dst, const struct jak_allocator *src)
 {
-        error_if_null(dst && src)
+        JAK_ERROR_IF_NULL(dst && src)
         src->clone(dst, src);
         return true;
 }

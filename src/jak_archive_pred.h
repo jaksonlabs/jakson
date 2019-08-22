@@ -27,35 +27,35 @@
 JAK_BEGIN_DECL
 
 typedef bool
-(*string_pred_func_t)(size_t *idxs_matching, size_t *num_matching, char **strings, size_t num_strings, void *capture);
+(*jak_string_pred_func_t)(size_t *idxs_matching, size_t *num_matching, char **strings, size_t num_strings, void *capture);
 
-struct string_pred_t {
-    string_pred_func_t func;
+struct jak_string_pred_t {
+    jak_string_pred_func_t func;
     jak_i64 limit;
 };
 
-JAK_BUILT_IN(static bool) string_pred_validate(struct jak_error *err, const struct string_pred_t *pred)
+JAK_BUILT_IN(static bool) jak_string_pred_validate(struct jak_error *err, const struct jak_string_pred_t *pred)
 {
-        error_if_null(pred);
-        JAK_implemented_or_error(err, pred, func)
+        JAK_ERROR_IF_NULL(pred);
+        JAK_ERROR_IF_NOT_IMPLEMENTED(err, pred, func)
         return true;
 }
 
-JAK_BUILT_IN(static bool) string_pred_eval(const struct string_pred_t *pred, size_t *idxs_matching,
+JAK_BUILT_IN(static bool) jak_string_pred_eval(const struct jak_string_pred_t *pred, size_t *idxs_matching,
                                            size_t *num_matching, char **strings, size_t num_strings, void *capture)
 {
-        assert(pred);
-        assert(idxs_matching);
-        assert(num_matching);
-        assert(strings);
-        assert(pred->func);
+        JAK_ASSERT(pred);
+        JAK_ASSERT(idxs_matching);
+        JAK_ASSERT(num_matching);
+        JAK_ASSERT(strings);
+        JAK_ASSERT(pred->func);
         return pred->func(idxs_matching, num_matching, strings, num_strings, capture);
 }
 
-JAK_BUILT_IN(static bool) string_pred_get_limit(jak_i64 *limit, const struct string_pred_t *pred)
+JAK_BUILT_IN(static bool) jak_string_pred_get_limit(jak_i64 *limit, const struct jak_string_pred_t *pred)
 {
-        error_if_null(limit);
-        error_if_null(pred);
+        JAK_ERROR_IF_NULL(limit);
+        JAK_ERROR_IF_NULL(pred);
         *limit = pred->limit;
         return true;
 }

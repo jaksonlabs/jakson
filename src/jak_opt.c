@@ -22,9 +22,9 @@ static struct cmdopt *option_by_name(struct cmdopt_mgr *manager, const char *nam
 bool opt_mgr_create(struct cmdopt_mgr *manager, char *module_name, char *module_desc, enum mod_arg_policy policy,
                     bool (*fallback)(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager))
 {
-        error_if_null(manager)
-        error_if_null(module_name)
-        error_if_null(fallback)
+        JAK_ERROR_IF_NULL(manager)
+        JAK_ERROR_IF_NULL(module_name)
+        JAK_ERROR_IF_NULL(fallback)
         manager->module_name = strdup(module_name);
         manager->module_desc = module_desc ? strdup(module_desc) : NULL;
         manager->policy = policy;
@@ -35,7 +35,7 @@ bool opt_mgr_create(struct cmdopt_mgr *manager, char *module_name, char *module_
 
 bool opt_mgr_drop(struct cmdopt_mgr *manager)
 {
-        error_if_null(manager);
+        JAK_ERROR_IF_NULL(manager);
         for (size_t i = 0; i < manager->groups.num_elems; i++) {
                 struct cmdopt_group *cmdGroup = vec_get(&manager->groups, i, struct cmdopt_group);
                 for (size_t j = 0; j < cmdGroup->cmd_options.num_elems; j++) {
@@ -58,9 +58,9 @@ bool opt_mgr_drop(struct cmdopt_mgr *manager)
 
 bool opt_mgr_process(struct cmdopt_mgr *manager, int argc, char **argv, FILE *file)
 {
-        error_if_null(manager)
-        error_if_null(argv)
-        error_if_null(file)
+        JAK_ERROR_IF_NULL(manager)
+        JAK_ERROR_IF_NULL(argv)
+        JAK_ERROR_IF_NULL(file)
 
         if (argc == 0) {
                 if (manager->policy == JAK_MOD_ARG_REQUIRED) {
@@ -83,9 +83,9 @@ bool opt_mgr_process(struct cmdopt_mgr *manager, int argc, char **argv, FILE *fi
 
 bool opt_mgr_create_group(struct cmdopt_group **group, const char *desc, struct cmdopt_mgr *manager)
 {
-        error_if_null(group)
-        error_if_null(desc)
-        error_if_null(manager)
+        JAK_ERROR_IF_NULL(group)
+        JAK_ERROR_IF_NULL(desc)
+        JAK_ERROR_IF_NULL(manager)
         struct cmdopt_group *cmdGroup = vec_new_and_get(&manager->groups, struct cmdopt_group);
         cmdGroup->desc = strdup(desc);
         JAK_check_success(vec_create(&cmdGroup->cmd_options, NULL, sizeof(struct cmdopt), 10));
@@ -96,11 +96,11 @@ bool opt_mgr_create_group(struct cmdopt_group **group, const char *desc, struct 
 bool opt_group_add_cmd(struct cmdopt_group *group, const char *opt_name, char *opt_desc, char *opt_manfile,
                        int (*callback)(int argc, char **argv, FILE *file))
 {
-        error_if_null(group)
-        error_if_null(opt_name)
-        error_if_null(opt_desc)
-        error_if_null(opt_manfile)
-        error_if_null(callback)
+        JAK_ERROR_IF_NULL(group)
+        JAK_ERROR_IF_NULL(opt_name)
+        JAK_ERROR_IF_NULL(opt_desc)
+        JAK_ERROR_IF_NULL(opt_manfile)
+        JAK_ERROR_IF_NULL(callback)
 
         struct cmdopt *command = vec_new_and_get(&group->cmd_options, struct cmdopt);
         command->opt_desc = strdup(opt_desc);
@@ -113,8 +113,8 @@ bool opt_group_add_cmd(struct cmdopt_group *group, const char *opt_name, char *o
 
 bool opt_mgr_show_help(FILE *file, struct cmdopt_mgr *manager)
 {
-        error_if_null(file)
-        error_if_null(manager)
+        JAK_ERROR_IF_NULL(file)
+        JAK_ERROR_IF_NULL(manager)
 
         if (manager->groups.num_elems > 0) {
                 fprintf(file,

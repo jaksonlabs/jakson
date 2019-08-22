@@ -115,7 +115,7 @@ struct jak_packer {
      * @since 0.1.00.05
      * */
     bool (*write_extra)(struct jak_packer *self, struct jak_memfile *dst,
-                        const struct vector ofType (const char *) *strings);
+                        const struct jak_vector ofType (const char *) *strings);
 
     /**
      * Function to reconstruct implementation-specific dictionary, book-keeping or extra data by deserialization (
@@ -242,7 +242,7 @@ bool pack_cpy(struct jak_error *err, struct jak_packer *dst, const struct jak_pa
 bool pack_drop(struct jak_error *err, struct jak_packer *self);
 
 bool pack_write_extra(struct jak_error *err, struct jak_packer *self, struct jak_memfile *dst,
-                      const struct vector ofType (const char *) *strings);
+                      const struct jak_vector ofType (const char *) *strings);
 
 bool pack_read_extra(struct jak_error *err, struct jak_packer *self, FILE *src, size_t nbytes);
 

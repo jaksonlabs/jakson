@@ -2453,7 +2453,7 @@ typedef struct duk_hthread duk_context;
  *  used, and at the end we check if any of them worked.  This allows generic
  *  approaches to be tried first, and platform/compiler specific hacks tried
  *  last.  As a last resort, the user can force a specific endianness, as it's
- *  not likely that automatic detection will work on the most exotic platforms.
+ *  not JAK_LIKELY that automatic detection will work on the most exotic platforms.
  *
  *  Duktape supports little and big endian machines.  There's also support
  *  for a hybrid used by some ARM machines where integers are little endian
@@ -2587,7 +2587,7 @@ typedef struct duk_hthread duk_context;
 #if !defined(DUK_VA_COPY)
 /* We need va_copy() which is defined in C99 / C++11, so an awkward
  * replacement is needed for pre-C99 / pre-C++11 environments.  This
- * will quite likely need portability hacks for some non-C99
+ * will quite JAK_LIKELY need portability hacks for some non-C99
  * environments.
  */
 #if defined(DUK_F_C99) || defined(DUK_F_CPP11)

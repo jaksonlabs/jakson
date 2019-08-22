@@ -23,8 +23,8 @@
 
 bool hashset_create(struct hashset *map, struct jak_error *err, size_t key_size, size_t capacity)
 {
-        error_if_null(map)
-        error_if_null(key_size)
+        JAK_ERROR_IF_NULL(map)
+        JAK_ERROR_IF_NULL(key_size)
 
         int err_code = JAK_ERR_INITFAILED;
 
@@ -55,7 +55,7 @@ bool hashset_create(struct hashset *map, struct jak_error *err, size_t key_size,
 
 bool hashset_drop(struct hashset *map)
 {
-        error_if_null(map)
+        JAK_ERROR_IF_NULL(map)
 
         bool status = true;
 
@@ -69,10 +69,10 @@ bool hashset_drop(struct hashset *map)
         return status;
 }
 
-struct vector *hashset_keys(struct hashset *map)
+struct jak_vector *hashset_keys(struct hashset *map)
 {
         if (map) {
-                struct vector *result = JAK_MALLOC(sizeof(struct vector));
+                struct jak_vector *result = JAK_MALLOC(sizeof(struct jak_vector));
                 vec_create(result, NULL, map->key_data.elem_size, map->key_data.num_elems);
                 for (jak_u32 i = 0; i < map->table.num_elems; i++) {
                         struct hashset_bucket *bucket = vec_get(&map->table, i, struct hashset_bucket);
@@ -96,16 +96,16 @@ struct hashset *hashset_cpy(struct hashset *src)
 
                 hashset_create(cpy, &src->err, src->key_data.elem_size, src->table.cap_elems);
 
-                assert(src->key_data.cap_elems == src->table.cap_elems);
-                assert(src->key_data.num_elems <= src->table.num_elems);
+                JAK_ASSERT(src->key_data.cap_elems == src->table.cap_elems);
+                JAK_ASSERT(src->key_data.num_elems <= src->table.num_elems);
 
                 vec_cpy_to(&cpy->key_data, &src->key_data);
                 vec_cpy_to(&cpy->table, &src->table);
                 cpy->size = src->size;
                 error_cpy(&cpy->err, &src->err);
 
-                assert(cpy->key_data.cap_elems == cpy->table.cap_elems);
-                assert(cpy->key_data.num_elems <= cpy->table.num_elems);
+                JAK_ASSERT(cpy->key_data.cap_elems == cpy->table.cap_elems);
+                JAK_ASSERT(cpy->key_data.num_elems <= cpy->table.num_elems);
 
                 hashset_unlock(src);
                 return cpy;
@@ -117,9 +117,9 @@ struct hashset *hashset_cpy(struct hashset *src)
 
 bool hashset_clear(struct hashset *map)
 {
-        error_if_null(map)
-        assert(map->key_data.cap_elems == map->table.cap_elems);
-        assert(map->key_data.num_elems <= map->table.num_elems);
+        JAK_ERROR_IF_NULL(map)
+        JAK_ASSERT(map->key_data.cap_elems == map->table.cap_elems);
+        JAK_ASSERT(map->key_data.num_elems <= map->table.num_elems);
 
         hashset_lock(map);
 
@@ -127,8 +127,8 @@ bool hashset_clear(struct hashset *map)
 
         map->size = 0;
 
-        assert(map->key_data.cap_elems == map->table.cap_elems);
-        assert(map->key_data.num_elems <= map->table.num_elems);
+        JAK_ASSERT(map->key_data.cap_elems == map->table.cap_elems);
+        JAK_ASSERT(map->key_data.num_elems <= map->table.num_elems);
 
         if (!status) {
                 error(&map->err, JAK_ERR_OPPFAILED);
@@ -141,8 +141,8 @@ bool hashset_clear(struct hashset *map)
 
 bool hashset_avg_displace(float *displace, const struct hashset *map)
 {
-        error_if_null(displace);
-        error_if_null(map);
+        JAK_ERROR_IF_NULL(displace);
+        JAK_ERROR_IF_NULL(map);
 
         size_t sum_dis = 0;
         for (size_t i = 0; i < map->table.num_elems; i++) {
@@ -156,14 +156,14 @@ bool hashset_avg_displace(float *displace, const struct hashset *map)
 
 bool hashset_lock(struct hashset *map)
 {
-        error_if_null(map)
+        JAK_ERROR_IF_NULL(map)
         spin_acquire(&map->lock);
         return true;
 }
 
 bool hashset_unlock(struct hashset *map)
 {
-        error_if_null(map)
+        JAK_ERROR_IF_NULL(map)
         spin_release(&map->lock);
         return true;
 }
@@ -233,7 +233,7 @@ static inline uint_fast32_t insert_or_update(struct hashset *map, const jak_u32 
                                 }
                         }
 
-                        assert(fitting_bucket_found == true);
+                        JAK_ASSERT(fitting_bucket_found == true);
                         bucket_idx = displace_idx;
                         bucket = vec_get(&map->table, bucket_idx, struct hashset_bucket);
                 }
@@ -256,11 +256,11 @@ static inline uint_fast32_t insert_or_update(struct hashset *map, const jak_u32 
 
 bool hashset_insert_or_update(struct hashset *map, const void *keys, uint_fast32_t num_pairs)
 {
-        error_if_null(map)
-        error_if_null(keys)
+        JAK_ERROR_IF_NULL(map)
+        JAK_ERROR_IF_NULL(keys)
 
-        assert(map->key_data.cap_elems == map->table.cap_elems);
-        assert(map->key_data.num_elems <= map->table.num_elems);
+        JAK_ASSERT(map->key_data.cap_elems == map->table.cap_elems);
+        JAK_ASSERT(map->key_data.num_elems <= map->table.num_elems);
 
         hashset_lock(map);
 
@@ -299,8 +299,8 @@ bool hashset_insert_or_update(struct hashset *map, const void *keys, uint_fast32
 
 bool hashset_remove_if_contained(struct hashset *map, const void *keys, size_t num_pairs)
 {
-        error_if_null(map)
-        error_if_null(keys)
+        JAK_ERROR_IF_NULL(map)
+        JAK_ERROR_IF_NULL(keys)
 
         hashset_lock(map);
 
@@ -351,8 +351,8 @@ bool hashset_remove_if_contained(struct hashset *map, const void *keys, size_t n
 
 bool hashset_contains_key(struct hashset *map, const void *key)
 {
-        error_if_null(map)
-        error_if_null(key)
+        JAK_ERROR_IF_NULL(map)
+        JAK_ERROR_IF_NULL(key)
 
         bool result = false;
 
@@ -380,8 +380,8 @@ bool hashset_contains_key(struct hashset *map, const void *key)
 
 bool hashset_get_fload_factor(float *factor, struct hashset *map)
 {
-        error_if_null(factor)
-        error_if_null(map)
+        JAK_ERROR_IF_NULL(factor)
+        JAK_ERROR_IF_NULL(map)
 
         hashset_lock(map);
 
@@ -394,7 +394,7 @@ bool hashset_get_fload_factor(float *factor, struct hashset *map)
 
 bool hashset_rehash(struct hashset *map)
 {
-        error_if_null(map)
+        JAK_ERROR_IF_NULL(map)
 
         hashset_lock(map);
 
@@ -408,8 +408,8 @@ bool hashset_rehash(struct hashset *map)
         vec_enlarge_size_to_capacity(&map->table);
         vec_zero_memory(&map->table);
 
-        assert(map->key_data.cap_elems == map->table.cap_elems);
-        assert(map->key_data.num_elems <= map->table.num_elems);
+        JAK_ASSERT(map->key_data.cap_elems == map->table.cap_elems);
+        JAK_ASSERT(map->key_data.num_elems <= map->table.num_elems);
 
         for (size_t i = 0; i < cpy->table.num_elems; i++) {
                 struct hashset_bucket *bucket = vec_get(&cpy->table, i, struct hashset_bucket);

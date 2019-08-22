@@ -20,8 +20,8 @@
 bool sort_qsort_indicies(size_t *indices, const void *base, size_t width, less_eq_func_t comp,
                          size_t nelemns, struct jak_allocator *alloc)
 {
-        error_if_null(base);
-        error_if_null(alloc);
+        JAK_ERROR_IF_NULL(base);
+        JAK_ERROR_IF_NULL(alloc);
 
         if (nelemns <= 1) {
                 return true;
@@ -59,8 +59,8 @@ bool sort_qsort_indicies(size_t *indices, const void *base, size_t width, less_e
 int sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width, less_eq_wargs_func_t comp,
                               size_t nelemens, struct jak_allocator *alloc, void *args)
 {
-        error_if_null(base);
-        error_if_null(alloc);
+        JAK_ERROR_IF_NULL(base);
+        JAK_ERROR_IF_NULL(alloc);
 
         if (nelemens <= 1) {
                 return true;
@@ -68,7 +68,7 @@ int sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width, l
 
         jak_i64 h = nelemens - 1;
         jak_i64 *stack = jak_alloc_malloc(alloc, (h + 1) * sizeof(jak_i64));
-        assert (stack);
+        JAK_ASSERT (stack);
 
         jak_i64 top = -1;
         jak_i64 l = 0;

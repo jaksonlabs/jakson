@@ -15,7 +15,6 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <assert.h>
 #include <inttypes.h>
 #include <sys/mman.h>
 
@@ -66,9 +65,9 @@ DEFINE_PRINTER_FUNCTION(jak_u64, "%"
 
 DEFINE_PRINTER_FUNCTION(size_t, "%zu")
 
-bool vec_create(struct vector *out, const struct jak_allocator *alloc, size_t elem_size, size_t cap_elems)
+bool vec_create(struct jak_vector *out, const struct jak_allocator *alloc, size_t elem_size, size_t cap_elems)
 {
-        error_if_null(out)
+        JAK_ERROR_IF_NULL(out)
         out->allocator = JAK_MALLOC(sizeof(struct jak_allocator));
         jak_alloc_this_or_std(out->allocator, alloc);
         out->base = jak_alloc_malloc(out->allocator, cap_elems * elem_size);
@@ -88,10 +87,10 @@ struct vector_serialize_header {
     float grow_factor;
 };
 
-bool vec_serialize(FILE *file, struct vector *vec)
+bool vec_serialize(FILE *file, struct jak_vector *vec)
 {
-        error_if_null(file)
-        error_if_null(vec)
+        JAK_ERROR_IF_NULL(file)
+        JAK_ERROR_IF_NULL(vec)
 
         struct vector_serialize_header header =
                 {.marker = JAK_MARKER_SYMBOL_VECTOR_HEADER, .elem_size = vec->elem_size, .num_elems = vec
@@ -104,11 +103,11 @@ bool vec_serialize(FILE *file, struct vector *vec)
         return true;
 }
 
-bool vec_deserialize(struct vector *vec, struct jak_error *err, FILE *file)
+bool vec_deserialize(struct jak_vector *vec, struct jak_error *err, FILE *file)
 {
-        error_if_null(file)
-        error_if_null(err)
-        error_if_null(vec)
+        JAK_ERROR_IF_NULL(file)
+        JAK_ERROR_IF_NULL(err)
+        JAK_ERROR_IF_NULL(vec)
 
         jak_offset_t start = ftell(file);
         int err_code = JAK_ERR_NOERR;
@@ -146,41 +145,41 @@ bool vec_deserialize(struct vector *vec, struct jak_error *err, FILE *file)
         return false;
 }
 
-bool vec_memadvice(struct vector *vec, int madviseAdvice)
+bool vec_memadvice(struct jak_vector *vec, int madviseAdvice)
 {
-        error_if_null(vec);
+        JAK_ERROR_IF_NULL(vec);
         JAK_UNUSED(vec);
         JAK_UNUSED(madviseAdvice);
         madvise(vec->base, vec->cap_elems * vec->elem_size, madviseAdvice);
         return true;
 }
 
-bool vec_set_grow_factor(struct vector *vec, float factor)
+bool vec_set_grow_factor(struct jak_vector *vec, float factor)
 {
-        error_if_null(vec);
+        JAK_ERROR_IF_NULL(vec);
         error_print_if(factor <= 1.01f, JAK_ERR_ILLEGALARG)
         vec->grow_factor = factor;
         return true;
 }
 
-bool vec_drop(struct vector *vec)
+bool vec_drop(struct jak_vector *vec)
 {
-        error_if_null(vec)
+        JAK_ERROR_IF_NULL(vec)
         jak_alloc_free(vec->allocator, vec->base);
         free(vec->allocator);
         vec->base = NULL;
         return true;
 }
 
-bool vec_is_empty(const struct vector *vec)
+bool vec_is_empty(const struct jak_vector *vec)
 {
-        error_if_null(vec)
+        JAK_ERROR_IF_NULL(vec)
         return vec->num_elems == 0 ? true : false;
 }
 
-bool vec_push(struct vector *vec, const void *data, size_t num_elems)
+bool vec_push(struct jak_vector *vec, const void *data, size_t num_elems)
 {
-        error_if_null(vec && data)
+        JAK_ERROR_IF_NULL(vec && data)
         size_t next_num = vec->num_elems + num_elems;
         while (next_num > vec->cap_elems) {
                 size_t more = next_num - vec->cap_elems;
@@ -192,7 +191,7 @@ bool vec_push(struct vector *vec, const void *data, size_t num_elems)
         return true;
 }
 
-const void *vec_peek(struct vector *vec)
+const void *vec_peek(struct jak_vector *vec)
 {
         if (!vec) {
                 return NULL;
@@ -201,9 +200,9 @@ const void *vec_peek(struct vector *vec)
         }
 }
 
-bool vec_repeated_push(struct vector *vec, const void *data, size_t how_often)
+bool vec_repeated_push(struct jak_vector *vec, const void *data, size_t how_often)
 {
-        error_if_null(vec && data)
+        JAK_ERROR_IF_NULL(vec && data)
         size_t next_num = vec->num_elems + how_often;
         while (next_num > vec->cap_elems) {
                 size_t more = next_num - vec->cap_elems;
@@ -218,26 +217,26 @@ bool vec_repeated_push(struct vector *vec, const void *data, size_t how_often)
         return true;
 }
 
-const void *vec_pop(struct vector *vec)
+const void *vec_pop(struct jak_vector *vec)
 {
         void *result;
-        if (likely((result = (vec ? (vec->num_elems > 0 ? vec->base + (vec->num_elems - 1) * vec->elem_size : NULL)
+        if (JAK_LIKELY((result = (vec ? (vec->num_elems > 0 ? vec->base + (vec->num_elems - 1) * vec->elem_size : NULL)
                                   : NULL)) != NULL)) {
                 vec->num_elems--;
         }
         return result;
 }
 
-bool vec_clear(struct vector *vec)
+bool vec_clear(struct jak_vector *vec)
 {
-        error_if_null(vec)
+        JAK_ERROR_IF_NULL(vec)
         vec->num_elems = 0;
         return true;
 }
 
-bool vec_shrink(struct vector *vec)
+bool vec_shrink(struct jak_vector *vec)
 {
-        error_if_null(vec);
+        JAK_ERROR_IF_NULL(vec);
         if (vec->num_elems < vec->cap_elems) {
                 vec->cap_elems = JAK_max(1, vec->num_elems);
                 vec->base = jak_alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
@@ -245,77 +244,77 @@ bool vec_shrink(struct vector *vec)
         return true;
 }
 
-bool vec_grow(size_t *numNewSlots, struct vector *vec)
+bool vec_grow(size_t *numNewSlots, struct jak_vector *vec)
 {
-        error_if_null(vec)
+        JAK_ERROR_IF_NULL(vec)
         size_t freeSlotsBefore = vec->cap_elems - vec->num_elems;
 
         vec->cap_elems = (vec->cap_elems * vec->grow_factor) + 1;
         vec->base = jak_alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
         size_t freeSlotsAfter = vec->cap_elems - vec->num_elems;
-        if (likely(numNewSlots != NULL)) {
+        if (JAK_LIKELY(numNewSlots != NULL)) {
                 *numNewSlots = freeSlotsAfter - freeSlotsBefore;
         }
         return true;
 }
 
-bool vec_grow_to(struct vector *vec, size_t capacity)
+bool vec_grow_to(struct jak_vector *vec, size_t capacity)
 {
-        error_if_null(vec);
+        JAK_ERROR_IF_NULL(vec);
         vec->cap_elems = JAK_max(vec->cap_elems, capacity);
         vec->base = jak_alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
         return true;
 }
 
-size_t vec_length(const struct vector *vec)
+size_t vec_length(const struct jak_vector *vec)
 {
-        error_if_null(vec)
+        JAK_ERROR_IF_NULL(vec)
         return vec->num_elems;
 }
 
-const void *vec_at(const struct vector *vec, size_t pos)
+const void *vec_at(const struct jak_vector *vec, size_t pos)
 {
         return (vec && pos < vec->num_elems) ? vec->base + pos * vec->elem_size : NULL;
 }
 
-size_t vec_capacity(const struct vector *vec)
+size_t vec_capacity(const struct jak_vector *vec)
 {
-        error_if_null(vec)
+        JAK_ERROR_IF_NULL(vec)
         return vec->cap_elems;
 }
 
-bool vec_enlarge_size_to_capacity(struct vector *vec)
+bool vec_enlarge_size_to_capacity(struct jak_vector *vec)
 {
-        error_if_null(vec);
+        JAK_ERROR_IF_NULL(vec);
         vec->num_elems = vec->cap_elems;
         return true;
 }
 
-bool vec_zero_memory(struct vector *vec)
+bool vec_zero_memory(struct jak_vector *vec)
 {
-        error_if_null(vec);
+        JAK_ERROR_IF_NULL(vec);
         JAK_zero_memory(vec->base, vec->elem_size * vec->num_elems);
         return true;
 }
 
-bool vec_zero_memory_in_range(struct vector *vec, size_t from, size_t to)
+bool vec_zero_memory_in_range(struct jak_vector *vec, size_t from, size_t to)
 {
-        error_if_null(vec);
-        assert(from < to);
-        assert(to <= vec->cap_elems);
+        JAK_ERROR_IF_NULL(vec);
+        JAK_ASSERT(from < to);
+        JAK_ASSERT(to <= vec->cap_elems);
         JAK_zero_memory(vec->base + from * vec->elem_size, vec->elem_size * (to - from));
         return true;
 }
 
-bool vec_set(struct vector *vec, size_t pos, const void *data)
+bool vec_set(struct jak_vector *vec, size_t pos, const void *data)
 {
-        error_if_null(vec)
-        assert(pos < vec->num_elems);
+        JAK_ERROR_IF_NULL(vec)
+        JAK_ASSERT(pos < vec->num_elems);
         memcpy(vec->base + pos * vec->elem_size, data, vec->elem_size);
         return true;
 }
 
-bool vec_cpy(struct vector *dst, const struct vector *src)
+bool vec_cpy(struct jak_vector *dst, const struct jak_vector *src)
 {
         JAK_check_success(vec_create(dst, NULL, src->elem_size, src->num_elems));
         dst->num_elems = src->num_elems;
@@ -325,10 +324,10 @@ bool vec_cpy(struct vector *dst, const struct vector *src)
         return true;
 }
 
-bool vec_cpy_to(struct vector *dst, struct vector *src)
+bool vec_cpy_to(struct jak_vector *dst, struct jak_vector *src)
 {
-        error_if_null(dst)
-        error_if_null(src)
+        JAK_ERROR_IF_NULL(dst)
+        JAK_ERROR_IF_NULL(src)
         void *handle = realloc(dst->base, src->cap_elems * src->elem_size);
         if (handle) {
                 dst->elem_size = src->elem_size;
@@ -345,12 +344,12 @@ bool vec_cpy_to(struct vector *dst, struct vector *src)
         }
 }
 
-const void *vec_data(const struct vector *vec)
+const void *vec_data(const struct jak_vector *vec)
 {
         return vec ? vec->base : NULL;
 }
 
-char *vector_string(const struct vector ofType(T) *vec,
+char *vector_string(const struct jak_vector ofType(T) *vec,
                     void (*printerFunc)(struct jak_memfile *dst, void ofType(T) *values, size_t num_elems))
 {
         struct jak_memblock *block;

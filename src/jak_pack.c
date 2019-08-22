@@ -15,20 +15,19 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <assert.h>
 #include <jak_pack.h>
 
 static bool create_strategy(size_t i, struct jak_packer *strategy)
 {
-        assert(strategy);
+        JAK_ASSERT(strategy);
         compressor_strategy_register[i].create(strategy);
-        assert (strategy->create);
-        assert (strategy->cpy);
-        assert (strategy->drop);
-        assert (strategy->write_extra);
-        assert (strategy->encode_string);
-        assert (strategy->decode_string);
-        assert (strategy->print_extra);
+        JAK_ASSERT (strategy->create);
+        JAK_ASSERT (strategy->cpy);
+        JAK_ASSERT (strategy->drop);
+        JAK_ASSERT (strategy->write_extra);
+        JAK_ASSERT (strategy->encode_string);
+        JAK_ASSERT (strategy->decode_string);
+        JAK_ASSERT (strategy->print_extra);
         return strategy->create(strategy);
 }
 
@@ -76,59 +75,59 @@ bool pack_by_name(enum jak_packer_type *type, const char *name)
 
 bool pack_cpy(struct jak_error *err, struct jak_packer *dst, const struct jak_packer *src)
 {
-        error_if_null(dst)
-        error_if_null(src)
-        JAK_implemented_or_error(err, src, cpy)
+        JAK_ERROR_IF_NULL(dst)
+        JAK_ERROR_IF_NULL(src)
+        JAK_ERROR_IF_NOT_IMPLEMENTED(err, src, cpy)
         return src->cpy(src, dst);
 }
 
 bool pack_drop(struct jak_error *err, struct jak_packer *self)
 {
-        error_if_null(self)
-        JAK_implemented_or_error(err, self, drop)
+        JAK_ERROR_IF_NULL(self)
+        JAK_ERROR_IF_NOT_IMPLEMENTED(err, self, drop)
         return self->drop(self);
 }
 
 bool pack_write_extra(struct jak_error *err, struct jak_packer *self, struct jak_memfile *dst,
-                      const struct vector ofType (const char *) *strings)
+                      const struct jak_vector ofType (const char *) *strings)
 {
-        error_if_null(self)
-        JAK_implemented_or_error(err, self, write_extra)
+        JAK_ERROR_IF_NULL(self)
+        JAK_ERROR_IF_NOT_IMPLEMENTED(err, self, write_extra)
         return self->write_extra(self, dst, strings);
 }
 
 bool pack_read_extra(struct jak_error *err, struct jak_packer *self, FILE *src, size_t nbytes)
 {
-        error_if_null(self)
-        JAK_implemented_or_error(err, self, read_extra)
+        JAK_ERROR_IF_NULL(self)
+        JAK_ERROR_IF_NOT_IMPLEMENTED(err, self, read_extra)
         return self->read_extra(self, src, nbytes);
 }
 
 bool pack_encode(struct jak_error *err, struct jak_packer *self, struct jak_memfile *dst, const char *string)
 {
-        error_if_null(self)
-        JAK_implemented_or_error(err, self, encode_string)
+        JAK_ERROR_IF_NULL(self)
+        JAK_ERROR_IF_NOT_IMPLEMENTED(err, self, encode_string)
         return self->encode_string(self, dst, err, string);
 }
 
 bool pack_decode(struct jak_error *err, struct jak_packer *self, char *dst, size_t strlen, FILE *src)
 {
-        error_if_null(self)
-        JAK_implemented_or_error(err, self, decode_string)
+        JAK_ERROR_IF_NULL(self)
+        JAK_ERROR_IF_NOT_IMPLEMENTED(err, self, decode_string)
         return self->decode_string(self, dst, strlen, src);
 }
 
 bool pack_print_extra(struct jak_error *err, struct jak_packer *self, FILE *file, struct jak_memfile *src)
 {
-        error_if_null(self)
-        JAK_implemented_or_error(err, self, print_extra)
+        JAK_ERROR_IF_NULL(self)
+        JAK_ERROR_IF_NOT_IMPLEMENTED(err, self, print_extra)
         return self->print_extra(self, file, src);
 }
 
 bool pack_print_encoded(struct jak_error *err, struct jak_packer *self, FILE *file, struct jak_memfile *src,
                         jak_u32 decompressed_strlen)
 {
-        error_if_null(self)
-        JAK_implemented_or_error(err, self, print_encoded)
+        JAK_ERROR_IF_NULL(self)
+        JAK_ERROR_IF_NOT_IMPLEMENTED(err, self, print_encoded)
         return self->print_encoded(self, file, src, decompressed_strlen);
 }

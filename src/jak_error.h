@@ -253,10 +253,10 @@ bool error_print_and_abort(const struct jak_error *err);
 
 #define JAK_DEFINE_GET_ERROR_FUNCTION(type_name, type, arg)                                                            \
 JAK_FUNC_UNUSED static bool                                                                                            \
-type_name##_get_error(struct jak_error *err, const type *arg)                                                                \
+jak_##type_name##_get_error(struct jak_error *err, const type *arg)                                                                \
 {                                                                                                                      \
-    error_if_null(err)                                                                                                 \
-    error_if_null(arg)                                                                                                 \
+    JAK_ERROR_IF_NULL(err)                                                                                                 \
+    JAK_ERROR_IF_NULL(arg)                                                                                                 \
     error_cpy(err, &arg->err);                                                                                         \
     return true;                                                                                                       \
 }

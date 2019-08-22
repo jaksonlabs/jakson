@@ -42,13 +42,13 @@ struct jak_memfile {
 
 #define JAK_MEMFILE_PEEK(file, type)                                                                                   \
 ({                                                                                                                     \
-    assert (memfile_remain_size(file) >= sizeof(type));                                                                \
+    JAK_ASSERT (memfile_remain_size(file) >= sizeof(type));                                                                \
     (type*) memfile_peek(file, sizeof(type));                                                                          \
 })
 
 #define JAK_MEMFILE_READ_TYPE(file, type)                                                                              \
 ({                                                                                                                     \
-    assert (memfile_remain_size(file) >= sizeof(type));                                                                \
+    JAK_ASSERT (memfile_remain_size(file) >= sizeof(type));                                                                \
     (type*) memfile_read(file, sizeof(type));                                                                          \
 })
 
@@ -57,7 +57,7 @@ struct jak_memfile {
 
 #define JAK_MEMFILE_READ(file, nbytes)                                                                                 \
 ({                                                                                                                     \
-    assert (memfile_remain_size(file) >= nbytes);                                                                      \
+    JAK_ASSERT (memfile_remain_size(file) >= nbytes);                                                                      \
     memfile_read(file, nbytes);                                                                                        \
 })
 

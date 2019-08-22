@@ -37,9 +37,9 @@
 bool carbon_column_it_create(struct jak_carbon_column_it *it, struct jak_memfile *memfile, struct jak_error *err,
                              jak_offset_t column_start_offset)
 {
-        error_if_null(it);
-        error_if_null(memfile);
-        error_if_null(err);
+        JAK_ERROR_IF_NULL(it);
+        JAK_ERROR_IF_NULL(memfile);
+        JAK_ERROR_IF_NULL(err);
 
         it->column_start_offset = column_start_offset;
         it->mod_size = 0;
@@ -92,21 +92,21 @@ bool carbon_column_it_clone(struct jak_carbon_column_it *dst, struct jak_carbon_
 
 bool carbon_column_it_insert(struct jak_carbon_insert *inserter, struct jak_carbon_column_it *it)
 {
-        error_if_null(inserter)
-        error_if_null(it)
+        JAK_ERROR_IF_NULL(inserter)
+        JAK_ERROR_IF_NULL(it)
         return carbon_int_insert_create_for_column(inserter, it);
 }
 
 bool carbon_column_it_fast_forward(struct jak_carbon_column_it *it)
 {
-        error_if_null(it);
+        JAK_ERROR_IF_NULL(it);
         carbon_column_it_values(NULL, NULL, it);
         return true;
 }
 
 jak_offset_t carbon_column_it_memfilepos(struct jak_carbon_column_it *it)
 {
-        if (likely(it != NULL)) {
+        if (JAK_LIKELY(it != NULL)) {
                 return memfile_tell(&it->memfile);
         } else {
                 error(&it->err, JAK_ERR_NULLPTR);
@@ -134,7 +134,7 @@ jak_offset_t carbon_column_it_tell(struct jak_carbon_column_it *it, jak_u32 elem
 
 bool carbon_column_it_values_info(enum carbon_field_type *type, jak_u32 *nvalues, struct jak_carbon_column_it *it)
 {
-        error_if_null(it);
+        JAK_ERROR_IF_NULL(it);
 
         if (nvalues) {
                 memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
@@ -149,7 +149,7 @@ bool carbon_column_it_values_info(enum carbon_field_type *type, jak_u32 *nvalues
 
 bool carbon_column_it_value_is_null(struct jak_carbon_column_it *it, jak_u32 pos)
 {
-        error_if_null(it);
+        JAK_ERROR_IF_NULL(it);
         enum carbon_field_type type;
         jak_u32 nvalues = 0;
         carbon_column_it_values_info(&type, &nvalues, it);
@@ -183,7 +183,7 @@ bool carbon_column_it_value_is_null(struct jak_carbon_column_it *it, jak_u32 pos
 
 const void *carbon_column_it_values(enum carbon_field_type *type, jak_u32 *nvalues, struct jak_carbon_column_it *it)
 {
-        error_if_null(it);
+        JAK_ERROR_IF_NULL(it);
         memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
         jak_u32 num_elements = (jak_u32) memfile_read_uintvar_stream(NULL, &it->memfile);
         jak_u32 cap_elements = (jak_u32) memfile_read_uintvar_stream(NULL, &it->memfile);
@@ -252,7 +252,7 @@ const float *carbon_column_it_float_values(jak_u32 *nvalues, struct jak_carbon_c
 
 bool carbon_column_it_remove(struct jak_carbon_column_it *it, jak_u32 pos)
 {
-        error_if_null(it);
+        JAK_ERROR_IF_NULL(it);
 
         error_if(pos >= it->column_num_elements, &it->err, JAK_ERR_OUTOFBOUNDS);
         memfile_save_position(&it->memfile);
@@ -271,7 +271,7 @@ bool carbon_column_it_remove(struct jak_carbon_column_it *it, jak_u32 pos)
         /* update element counter */
         memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
         jak_u32 num_elems = memfile_peek_uintvar_stream(NULL, &it->memfile);
-        assert(num_elems > 0);
+        JAK_ASSERT(num_elems > 0);
         num_elems--;
         signed_offset_t shift = memfile_update_uintvar_stream(&it->memfile, num_elems);
         it->column_num_elements = num_elems;
@@ -284,7 +284,7 @@ bool carbon_column_it_remove(struct jak_carbon_column_it *it, jak_u32 pos)
 
 bool carbon_column_it_update_set_null(struct jak_carbon_column_it *it, jak_u32 pos)
 {
-        error_if_null(it)
+        JAK_ERROR_IF_NULL(it)
         error_if(pos >= it->column_num_elements, &it->err, JAK_ERR_OUTOFBOUNDS)
 
         memfile_save_position(&it->memfile);
@@ -377,7 +377,7 @@ bool carbon_column_it_update_set_null(struct jak_carbon_column_it *it, jak_u32 p
 #define push_array_element(num_values, data, data_cast_type, null_check, insert_func)                                  \
 for (jak_u32 i = 0; i < num_values; i++) {                                                                                 \
         data_cast_type datum = ((data_cast_type *)data)[i];                                                            \
-        if (likely(null_check(datum) == false)) {                                                                      \
+        if (JAK_LIKELY(null_check(datum) == false)) {                                                                      \
                 insert_func(&array_ins);                                                                               \
         } else {                                                                                                       \
                 carbon_insert_null(&array_ins);                                                                         \
@@ -387,7 +387,7 @@ for (jak_u32 i = 0; i < num_values; i++) {                                      
 #define push_array_element_wvalue(num_values, data, data_cast_type, null_check, insert_func)                           \
 for (jak_u32 i = 0; i < num_values; i++) {                                                                                 \
         data_cast_type datum = ((data_cast_type *)data)[i];                                                            \
-        if (likely(null_check(datum) == false)) {                                                                      \
+        if (JAK_LIKELY(null_check(datum) == false)) {                                                                      \
                 insert_func(&array_ins, datum);                                                                        \
         } else {                                                                                                       \
                 carbon_insert_null(&array_ins);                                                                         \
@@ -457,7 +457,7 @@ static bool rewrite_column_to_array(struct jak_carbon_column_it *it)
         }
 
         carbon_array_it_insert_end(&array_ins);
-        assert(array_marker_begin < carbon_array_it_memfilepos(&array_it));
+        JAK_ASSERT(array_marker_begin < carbon_array_it_memfilepos(&array_it));
         carbon_array_it_drop(&array_it);
 
         memfile_restore_position(&it->memfile);
@@ -466,7 +466,7 @@ static bool rewrite_column_to_array(struct jak_carbon_column_it *it)
 
 bool carbon_column_it_update_set_true(struct jak_carbon_column_it *it, jak_u32 pos)
 {
-        error_if_null(it)
+        JAK_ERROR_IF_NULL(it)
         error_if(pos >= it->column_num_elements, &it->err, JAK_ERR_OUTOFBOUNDS)
 
         memfile_save_position(&it->memfile);
@@ -653,7 +653,7 @@ bool carbon_column_it_update_set_float(struct jak_carbon_column_it *it, jak_u32 
  */
 bool carbon_column_it_lock(struct jak_carbon_column_it *it)
 {
-        error_if_null(it);
+        JAK_ERROR_IF_NULL(it);
         spin_acquire(&it->lock);
         return true;
 }
@@ -663,14 +663,14 @@ bool carbon_column_it_lock(struct jak_carbon_column_it *it)
  */
 bool carbon_column_it_unlock(struct jak_carbon_column_it *it)
 {
-        error_if_null(it);
+        JAK_ERROR_IF_NULL(it);
         spin_release(&it->lock);
         return true;
 }
 
 bool carbon_column_it_rewind(struct jak_carbon_column_it *it)
 {
-        error_if_null(it);
+        JAK_ERROR_IF_NULL(it);
         jak_offset_t playload_start = carbon_int_column_get_payload_off(it);
         error_if(playload_start >= memfile_size(&it->memfile), &it->err, JAK_ERR_OUTOFBOUNDS);
         return memfile_seek(&it->memfile, playload_start);

@@ -47,9 +47,9 @@ struct hashtable_bucket {
  * lock implementation.
  */
 struct hashtable {
-    struct vector key_data;
-    struct vector value_data;
-    struct vector ofType(struct hashtable_bucket) table;
+    struct jak_vector key_data;
+    struct jak_vector value_data;
+    struct jak_vector ofType(struct hashtable_bucket) table;
     struct spinlock lock;
     jak_u32 size;
     struct jak_error err;
