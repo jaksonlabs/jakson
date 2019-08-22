@@ -21,7 +21,7 @@
 #define HASHCODE_OF(size, x) JAK_HASH_BERNSTEIN(size, x)
 #define FIX_MAP_AUTO_REHASH_LOADFACTOR 0.9f
 
-bool hashset_create(struct hashset *map, struct err *err, size_t key_size, size_t capacity)
+bool hashset_create(struct hashset *map, struct jak_error *err, size_t key_size, size_t capacity)
 {
         error_if_null(map)
         error_if_null(key_size)
@@ -72,9 +72,9 @@ bool hashset_drop(struct hashset *map)
 struct vector *hashset_keys(struct hashset *map)
 {
         if (map) {
-                struct vector *result = JAK_malloc(sizeof(struct vector));
+                struct vector *result = JAK_MALLOC(sizeof(struct vector));
                 vec_create(result, NULL, map->key_data.elem_size, map->key_data.num_elems);
-                for (u32 i = 0; i < map->table.num_elems; i++) {
+                for (jak_u32 i = 0; i < map->table.num_elems; i++) {
                         struct hashset_bucket *bucket = vec_get(&map->table, i, struct hashset_bucket);
                         if (bucket->in_use_flag) {
                                 const void *data = vec_at(&map->key_data, bucket->key_idx);
@@ -90,7 +90,7 @@ struct vector *hashset_keys(struct hashset *map)
 struct hashset *hashset_cpy(struct hashset *src)
 {
         if (src) {
-                struct hashset *cpy = JAK_malloc(sizeof(struct hashset));
+                struct hashset *cpy = JAK_MALLOC(sizeof(struct hashset));
 
                 hashset_lock(src);
 
@@ -173,9 +173,9 @@ static inline const void *get_bucket_key(const struct hashset_bucket *bucket, co
         return map->key_data.base + bucket->key_idx * map->key_data.elem_size;
 }
 
-static void insert(struct hashset_bucket *bucket, struct hashset *map, const void *key, i32 displacement)
+static void insert(struct hashset_bucket *bucket, struct hashset *map, const void *key, jak_i32 displacement)
 {
-        u64 idx = map->key_data.num_elems;
+        jak_u64 idx = map->key_data.num_elems;
         void *key_datum = vec_new_and_get(&map->key_data, void *);
         memcpy(key_datum, key, map->key_data.elem_size);
         bucket->key_idx = idx;
@@ -184,19 +184,19 @@ static void insert(struct hashset_bucket *bucket, struct hashset *map, const voi
         map->size++;
 }
 
-static inline uint_fast32_t insert_or_update(struct hashset *map, const u32 *bucket_idxs, const void *keys,
+static inline uint_fast32_t insert_or_update(struct hashset *map, const jak_u32 *bucket_idxs, const void *keys,
                                              uint_fast32_t num_pairs)
 {
         for (uint_fast32_t i = 0; i < num_pairs; i++) {
                 const void *key = keys + i * map->key_data.elem_size;
-                u32 intended_bucket_idx = bucket_idxs[i];
+                jak_u32 intended_bucket_idx = bucket_idxs[i];
 
-                u32 bucket_idx = intended_bucket_idx;
+                jak_u32 bucket_idx = intended_bucket_idx;
 
                 struct hashset_bucket *bucket = vec_get(&map->table, bucket_idx, struct hashset_bucket);
                 if (bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) != 0) {
                         bool fitting_bucket_found = false;
-                        u32 displace_idx;
+                        jak_u32 displace_idx;
                         for (displace_idx = bucket_idx + 1; displace_idx < map->table.num_elems; displace_idx++) {
                                 struct hashset_bucket
                                         *bucket = vec_get(&map->table, displace_idx, struct hashset_bucket);
@@ -207,7 +207,7 @@ static inline uint_fast32_t insert_or_update(struct hashset *map, const u32 *buc
                                 if (fitting_bucket_found) {
                                         break;
                                 } else {
-                                        i32 displacement = displace_idx - bucket_idx;
+                                        jak_i32 displacement = displace_idx - bucket_idx;
                                         const void *swap_key = get_bucket_key(bucket, map);
 
                                         if (bucket->displacement < displacement) {
@@ -241,7 +241,7 @@ static inline uint_fast32_t insert_or_update(struct hashset *map, const u32 *buc
                 bool is_update =
                         bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
                 if (!is_update) {
-                        i32 displacement = intended_bucket_idx - bucket_idx;
+                        jak_i32 displacement = intended_bucket_idx - bucket_idx;
                         insert(bucket, map, key, displacement);
                 }
 
@@ -264,7 +264,7 @@ bool hashset_insert_or_update(struct hashset *map, const void *keys, uint_fast32
 
         hashset_lock(map);
 
-        u32 *bucket_idxs = JAK_malloc(num_pairs * sizeof(u32));
+        jak_u32 *bucket_idxs = JAK_MALLOC(num_pairs * sizeof(jak_u32));
         if (!bucket_idxs) {
                 error(&map->err, JAK_ERR_MALLOCERR);
                 return false;
@@ -304,7 +304,7 @@ bool hashset_remove_if_contained(struct hashset *map, const void *keys, size_t n
 
         hashset_lock(map);
 
-        u32 *bucket_idxs = JAK_malloc(num_pairs * sizeof(u32));
+        jak_u32 *bucket_idxs = JAK_MALLOC(num_pairs * sizeof(jak_u32));
         if (!bucket_idxs) {
                 error(&map->err, JAK_ERR_MALLOCERR);
                 hashset_unlock(map);
@@ -318,17 +318,17 @@ bool hashset_remove_if_contained(struct hashset *map, const void *keys, size_t n
 
         for (uint_fast32_t i = 0; i < num_pairs; i++) {
                 const void *key = keys + i * map->key_data.elem_size;
-                u32 bucket_idx = bucket_idxs[i];
-                u32 actual_idx = bucket_idx;
+                jak_u32 bucket_idx = bucket_idxs[i];
+                jak_u32 actual_idx = bucket_idx;
                 bool bucket_found = false;
 
-                for (u32 k = bucket_idx; !bucket_found && k < map->table.num_elems; k++) {
+                for (jak_u32 k = bucket_idx; !bucket_found && k < map->table.num_elems; k++) {
                         const struct hashset_bucket *bucket = vec_get(&map->table, k, struct hashset_bucket);
                         bucket_found = bucket->in_use_flag
                                        && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
                         actual_idx = k;
                 }
-                for (u32 k = 0; !bucket_found && k < bucket_idx; k++) {
+                for (jak_u32 k = 0; !bucket_found && k < bucket_idx; k++) {
                         const struct hashset_bucket *bucket = vec_get(&map->table, k, struct hashset_bucket);
                         bucket_found = bucket->in_use_flag
                                        && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
@@ -358,15 +358,15 @@ bool hashset_contains_key(struct hashset *map, const void *key)
 
         hashset_lock(map);
 
-        u32 bucket_idx = HASHCODE_OF(map->key_data.elem_size, key) % map->table.num_elems;
+        jak_u32 bucket_idx = HASHCODE_OF(map->key_data.elem_size, key) % map->table.num_elems;
         bool bucket_found = false;
 
-        for (u32 k = bucket_idx; !bucket_found && k < map->table.num_elems; k++) {
+        for (jak_u32 k = bucket_idx; !bucket_found && k < map->table.num_elems; k++) {
                 const struct hashset_bucket *bucket = vec_get(&map->table, k, struct hashset_bucket);
                 bucket_found =
                         bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
         }
-        for (u32 k = 0; !bucket_found && k < bucket_idx; k++) {
+        for (jak_u32 k = 0; !bucket_found && k < bucket_idx; k++) {
                 const struct hashset_bucket *bucket = vec_get(&map->table, k, struct hashset_bucket);
                 bucket_found =
                         bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;

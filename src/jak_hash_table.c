@@ -21,7 +21,7 @@
 #define HASHCODE_OF(size, x) JAK_HASH_BERNSTEIN(size, x)
 #define FIX_MAP_AUTO_REHASH_LOADFACTOR 0.9f
 
-bool hashtable_create(struct hashtable *map, struct err *err, size_t key_size, size_t value_size,
+bool hashtable_create(struct hashtable *map, struct jak_error *err, size_t key_size, size_t value_size,
                       size_t capacity)
 {
         error_if_null(map)
@@ -80,7 +80,7 @@ bool hashtable_drop(struct hashtable *map)
 struct hashtable *hashtable_cpy(struct hashtable *src)
 {
         if (src) {
-                struct hashtable *cpy = JAK_malloc(sizeof(struct hashtable));
+                struct hashtable *cpy = JAK_MALLOC(sizeof(struct hashtable));
 
                 hashtable_lock(src);
 
@@ -182,10 +182,10 @@ static inline const void *get_bucket_value(const struct hashtable_bucket *bucket
 }
 
 static void insert(struct hashtable_bucket *bucket, struct hashtable *map, const void *key, const void *value,
-                   i32 displacement)
+                   jak_i32 displacement)
 {
         assert(map->key_data.num_elems == map->value_data.num_elems);
-        u64 idx = map->key_data.num_elems;
+        jak_u64 idx = map->key_data.num_elems;
         void *key_datum = vec_new_and_get(&map->key_data, void *);
         void *value_datum = vec_new_and_get(&map->value_data, void *);
         memcpy(key_datum, key, map->key_data.elem_size);
@@ -196,20 +196,20 @@ static void insert(struct hashtable_bucket *bucket, struct hashtable *map, const
         map->size++;
 }
 
-static inline uint_fast32_t insert_or_update(struct hashtable *map, const u32 *bucket_idxs, const void *keys,
+static inline uint_fast32_t insert_or_update(struct hashtable *map, const jak_u32 *bucket_idxs, const void *keys,
                                              const void *values, uint_fast32_t num_pairs)
 {
         for (uint_fast32_t i = 0; i < num_pairs; i++) {
                 const void *key = keys + i * map->key_data.elem_size;
                 const void *value = values + i * map->key_data.elem_size;
-                u32 intended_bucket_idx = bucket_idxs[i];
+                jak_u32 intended_bucket_idx = bucket_idxs[i];
 
-                u32 bucket_idx = intended_bucket_idx;
+                jak_u32 bucket_idx = intended_bucket_idx;
 
                 struct hashtable_bucket *bucket = vec_get(&map->table, bucket_idx, struct hashtable_bucket);
                 if (bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) != 0) {
                         bool fitting_bucket_found = false;
-                        u32 displace_idx;
+                        jak_u32 displace_idx;
                         for (displace_idx = bucket_idx + 1; displace_idx < map->table.num_elems; displace_idx++) {
                                 struct hashtable_bucket
                                         *bucket = vec_get(&map->table, displace_idx, struct hashtable_bucket);
@@ -220,7 +220,7 @@ static inline uint_fast32_t insert_or_update(struct hashtable *map, const u32 *b
                                 if (fitting_bucket_found) {
                                         break;
                                 } else {
-                                        i32 displacement = displace_idx - bucket_idx;
+                                        jak_i32 displacement = displace_idx - bucket_idx;
                                         const void *swap_key = get_bucket_key(bucket, map);
                                         const void *swap_value = get_bucket_value(bucket, map);
 
@@ -258,7 +258,7 @@ static inline uint_fast32_t insert_or_update(struct hashtable *map, const u32 *b
                         void *bucket_value = (void *) get_bucket_value(bucket, map);
                         memcpy(bucket_value, value, map->value_data.elem_size);
                 } else {
-                        i32 displacement = intended_bucket_idx - bucket_idx;
+                        jak_i32 displacement = intended_bucket_idx - bucket_idx;
                         insert(bucket, map, key, value, displacement);
                 }
 
@@ -285,7 +285,7 @@ bool hashtable_insert_or_update(struct hashtable *map, const void *keys, const v
 
         hashtable_lock(map);
 
-        u32 *bucket_idxs = JAK_malloc(num_pairs * sizeof(u32));
+        jak_u32 *bucket_idxs = JAK_MALLOC(num_pairs * sizeof(jak_u32));
         if (!bucket_idxs) {
                 error(&map->err, JAK_ERR_MALLOCERR);
                 return false;
@@ -321,36 +321,36 @@ bool hashtable_insert_or_update(struct hashtable *map, const void *keys, const v
 
 struct hashtable_header {
     char marker;
-    offset_t key_data_off;
-    offset_t value_data_off;
-    offset_t table_off;
-    u32 size;
+    jak_offset_t key_data_off;
+    jak_offset_t value_data_off;
+    jak_offset_t table_off;
+    jak_u32 size;
 };
 
 bool hashtable_serialize(FILE *file, struct hashtable *table)
 {
-        offset_t header_pos = ftell(file);
+        jak_offset_t header_pos = ftell(file);
         fseek(file, sizeof(struct hashtable_header), SEEK_CUR);
 
-        offset_t key_data_off = ftell(file);
+        jak_offset_t key_data_off = ftell(file);
         if (!vec_serialize(file, &table->key_data)) {
                 goto error_handling;
         }
 
-        offset_t value_data_off = ftell(file);
+        jak_offset_t value_data_off = ftell(file);
         if (!vec_serialize(file, &table->value_data)) {
                 goto error_handling;
         }
 
-        offset_t table_off = ftell(file);
+        jak_offset_t table_off = ftell(file);
         if (!vec_serialize(file, &table->table)) {
                 goto error_handling;
         }
 
-        offset_t end = ftell(file);
+        jak_offset_t end = ftell(file);
 
         fseek(file, header_pos, SEEK_SET);
-        struct hashtable_header header = {.marker = MARKER_SYMBOL_HASHTABLE_HEADER, .size = table
+        struct hashtable_header header = {.marker = JAK_MARKER_SYMBOL_HASHTABLE_HEADER, .size = table
                 ->size, .key_data_off = key_data_off, .value_data_off = value_data_off, .table_off = table_off};
         int nwrite = fwrite(&header, sizeof(struct hashtable_header), 1, file);
         error_if(nwrite != 1, &table->err, JAK_ERR_FWRITE_FAILED);
@@ -362,7 +362,7 @@ bool hashtable_serialize(FILE *file, struct hashtable *table)
         return false;
 }
 
-bool hashtable_deserialize(struct hashtable *table, struct err *err, FILE *file)
+bool hashtable_deserialize(struct hashtable *table, struct jak_error *err, FILE *file)
 {
         error_if_null(table)
         error_if_null(err)
@@ -371,13 +371,13 @@ bool hashtable_deserialize(struct hashtable *table, struct err *err, FILE *file)
         int err_code = JAK_ERR_NOERR;
 
         struct hashtable_header header;
-        offset_t start = ftell(file);
+        jak_offset_t start = ftell(file);
         int nread = fread(&header, sizeof(struct hashtable_header), 1, file);
         if (nread != 1) {
                 err_code = JAK_ERR_FREAD_FAILED;
                 goto error_handling;
         }
-        if (header.marker != MARKER_SYMBOL_HASHTABLE_HEADER) {
+        if (header.marker != JAK_MARKER_SYMBOL_HASHTABLE_HEADER) {
                 err_code = JAK_ERR_CORRUPTED;
                 goto error_handling;
         }
@@ -417,7 +417,7 @@ bool hashtable_remove_if_contained(struct hashtable *map, const void *keys, size
 
         hashtable_lock(map);
 
-        u32 *bucket_idxs = JAK_malloc(num_pairs * sizeof(u32));
+        jak_u32 *bucket_idxs = JAK_MALLOC(num_pairs * sizeof(jak_u32));
         if (!bucket_idxs) {
                 error(&map->err, JAK_ERR_MALLOCERR);
                 hashtable_unlock(map);
@@ -431,17 +431,17 @@ bool hashtable_remove_if_contained(struct hashtable *map, const void *keys, size
 
         for (uint_fast32_t i = 0; i < num_pairs; i++) {
                 const void *key = keys + i * map->key_data.elem_size;
-                u32 bucket_idx = bucket_idxs[i];
-                u32 actual_idx = bucket_idx;
+                jak_u32 bucket_idx = bucket_idxs[i];
+                jak_u32 actual_idx = bucket_idx;
                 bool bucket_found = false;
 
-                for (u32 k = bucket_idx; !bucket_found && k < map->table.num_elems; k++) {
+                for (jak_u32 k = bucket_idx; !bucket_found && k < map->table.num_elems; k++) {
                         const struct hashtable_bucket *bucket = vec_get(&map->table, k, struct hashtable_bucket);
                         bucket_found = bucket->in_use_flag
                                        && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
                         actual_idx = k;
                 }
-                for (u32 k = 0; !bucket_found && k < bucket_idx; k++) {
+                for (jak_u32 k = 0; !bucket_found && k < bucket_idx; k++) {
                         const struct hashtable_bucket *bucket = vec_get(&map->table, k, struct hashtable_bucket);
                         bucket_found = bucket->in_use_flag
                                        && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
@@ -472,17 +472,17 @@ const void *hashtable_get_value(struct hashtable *map, const void *key)
 
         hashtable_lock(map);
 
-        u32 bucket_idx = HASHCODE_OF(map->key_data.elem_size, key) % map->table.num_elems;
-        u32 actual_idx = bucket_idx;
+        jak_u32 bucket_idx = HASHCODE_OF(map->key_data.elem_size, key) % map->table.num_elems;
+        jak_u32 actual_idx = bucket_idx;
         bool bucket_found = false;
 
-        for (u32 k = bucket_idx; !bucket_found && k < map->table.num_elems; k++) {
+        for (jak_u32 k = bucket_idx; !bucket_found && k < map->table.num_elems; k++) {
                 const struct hashtable_bucket *bucket = vec_get(&map->table, k, struct hashtable_bucket);
                 bucket_found =
                         bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;
                 actual_idx = k;
         }
-        for (u32 k = 0; !bucket_found && k < bucket_idx; k++) {
+        for (jak_u32 k = 0; !bucket_found && k < bucket_idx; k++) {
                 const struct hashtable_bucket *bucket = vec_get(&map->table, k, struct hashtable_bucket);
                 bucket_found =
                         bucket->in_use_flag && memcmp(get_bucket_key(bucket, map), key, map->key_data.elem_size) == 0;

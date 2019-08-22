@@ -6,13 +6,13 @@
 
 TEST(CarbonArchiveOpsTest, CreateStreamFromJsonString)
 {
-    struct memblock *stream;
-    struct err       err;
+    struct jak_memblock *stream;
+    struct jak_error       err;
 
     const char        *json_string = "{ \"test\": 123 }";
     bool               read_optimized = false;
 
-    bool status = archive_stream_from_json(&stream, &err, json_string,
+    bool status = jak_archive_stream_from_json(&stream, &err, json_string,
                                                   PACK_NONE, SYNC, 0, read_optimized, false, NULL);
 
     memblock_drop(stream);
@@ -22,46 +22,46 @@ TEST(CarbonArchiveOpsTest, CreateStreamFromJsonString)
 TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonString)
 {
     struct jak_archive   archive;
-    struct err       err;
+    struct jak_error       err;
 
     const char        *json_string = "{ \"test\": 123 }";
     const char        *archive_file = "tmp-test-archive.carbon";
     bool               read_optimized = false;
 
-    bool status = archive_from_json(&archive, archive_file, &err, json_string,
+    bool status = jak_archive_from_json(&archive, archive_file, &err, json_string,
                                            PACK_NONE, SYNC, 0, read_optimized, false, NULL);
     ASSERT_TRUE(status);
     bool has_index;
-    archive_has_query_index_string_id_to_offset(&has_index, &archive);
+    jak_archive_has_query_index_string_id_to_offset(&has_index, &archive);
     ASSERT_TRUE(has_index == false);
 
-    archive_close(&archive);
+    jak_archive_close(&archive);
 
 }
 
 TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonStringWithBakedStringIdIndex)
 {
     struct jak_archive   archive;
-    struct err       err;
+    struct jak_error       err;
 
     const char        *json_string = "{ \"test\": 123 }";
     const char        *archive_file = "tmp-test-archive.carbon";
     bool               read_optimized = false;
 
-    bool status = archive_from_json(&archive, archive_file, &err, json_string,
+    bool status = jak_archive_from_json(&archive, archive_file, &err, json_string,
                                            PACK_NONE, SYNC, 0, read_optimized, true, NULL);
     ASSERT_TRUE(status);
     bool has_index;
-    archive_has_query_index_string_id_to_offset(&has_index, &archive);
+    jak_archive_has_query_index_string_id_to_offset(&has_index, &archive);
     ASSERT_TRUE(has_index == true);
 
-    archive_close(&archive);
+    jak_archive_close(&archive);
 
 }
 
 TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
 {
-    std::set<field_sid_t> haystack;
+    std::set<jak_field_sid> haystack;
 
     struct jak_archive     archive;
     struct strid_iter  strid_iter;
@@ -69,15 +69,15 @@ TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
     size_t               vector_len;
     bool                 status;
     bool                 success;
-    struct err         err;
+    struct jak_error         err;
     struct jak_archive_query       query;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
-    status = archive_open(&archive, "./assets/test-archive.carbon");
+    status = jak_archive_open(&archive, "./assets/test-archive.carbon");
     ASSERT_TRUE(status);
 
-    status = archive_query(&query, &archive);
+    status = jak_archive_query(&query, &archive);
     ASSERT_TRUE(status);
 
     status = query_scan_strids(&strid_iter, &query);
@@ -102,13 +102,13 @@ TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
     status = query_drop(&query);
     ASSERT_TRUE(status);
 
-    status = archive_close(&archive);
+    status = jak_archive_close(&archive);
     ASSERT_TRUE(status);
 }
 
 TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
 {
-    std::set<field_sid_t> all_str_ids;
+    std::set<jak_field_sid> all_str_ids;
 
     struct jak_archive     archive;
     struct strid_iter  strid_iter;
@@ -116,15 +116,15 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
     size_t               vector_len;
     bool                 status;
     bool                 success;
-    struct err         err;
+    struct jak_error         err;
     struct jak_archive_query       query;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
-    status = archive_open(&archive, "./assets/test-archive.carbon");
+    status = jak_archive_open(&archive, "./assets/test-archive.carbon");
     ASSERT_TRUE(status);
 
-    status = archive_query(&query, &archive);
+    status = jak_archive_query(&query, &archive);
     ASSERT_TRUE(status);
 
     status = query_scan_strids(&strid_iter, &query);
@@ -139,8 +139,8 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
     status = strid_iter_close(&strid_iter);
     ASSERT_TRUE(status);
 
-    for (std::set<field_sid_t>::iterator it = all_str_ids.begin(); it != all_str_ids.end(); it++) {
-        field_sid_t string_id = *it;
+    for (std::set<jak_field_sid>::iterator it = all_str_ids.begin(); it != all_str_ids.end(); it++) {
+        jak_field_sid string_id = *it;
         char *string = query_fetch_string_by_id(&query, string_id);
         ASSERT_TRUE(string != NULL);
         printf("DecodeStringByIdFullScan: %" PRIu64 " -> '%s'\n", string_id, string);
@@ -150,7 +150,7 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
     status = query_drop(&query);
     ASSERT_TRUE(status);
 
-    status = archive_close(&archive);
+    status = jak_archive_close(&archive);
     ASSERT_TRUE(status);
 }
 
@@ -162,15 +162,15 @@ TEST(CarbonArchiveOpsTest, DecodeStringByFastUnsafeAccess)
     size_t                           vector_len;
     bool                             status;
     bool                             success;
-    struct err                     err;
+    struct jak_error                     err;
     struct jak_archive_query                   query;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
-    status = archive_open(&archive, "./assets/test-archive.carbon");
+    status = jak_archive_open(&archive, "./assets/test-archive.carbon");
     ASSERT_TRUE(status);
 
-    status = archive_query(&query, &archive);
+    status = jak_archive_query(&query, &archive);
     ASSERT_TRUE(status);
 
     status = query_scan_strids(&strid_iter, &query);
@@ -193,7 +193,7 @@ TEST(CarbonArchiveOpsTest, DecodeStringByFastUnsafeAccess)
     status = strid_iter_close(&strid_iter);
     ASSERT_TRUE(status);
 
-    status = archive_close(&archive);
+    status = jak_archive_close(&archive);
     ASSERT_TRUE(status);
 }
 
@@ -204,14 +204,14 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateContains)
     bool                  status;
     size_t                num_match;
     struct string_pred_t  pred;
-    field_sid_t   *result;
+    jak_field_sid   *result;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
-    status = archive_open(&archive, "./assets/test-archive.carbon");
+    status = jak_archive_open(&archive, "./assets/test-archive.carbon");
     ASSERT_TRUE(status);
 
-    status = archive_query(&query, &archive);
+    status = jak_archive_query(&query, &archive);
     ASSERT_TRUE(status);
 
     const char *needle = "arg";
@@ -231,7 +231,7 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateContains)
 
     free(result);
 
-    archive_close(&archive);
+    jak_archive_close(&archive);
 }
 
 TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateEquals)
@@ -241,14 +241,14 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateEquals)
     bool                  status;
     size_t                num_match;
     struct string_pred_t  pred;
-    field_sid_t   *result;
+    jak_field_sid   *result;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
-    status = archive_open(&archive, "./assets/test-archive.carbon");
+    status = jak_archive_open(&archive, "./assets/test-archive.carbon");
     ASSERT_TRUE(status);
 
-    status = archive_query(&query, &archive);
+    status = jak_archive_query(&query, &archive);
     ASSERT_TRUE(status);
 
     const char *needle = "phoneNumbers";
@@ -267,7 +267,7 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateEquals)
 
     free(result);
 
-    archive_close(&archive);
+    jak_archive_close(&archive);
 }
 
 int main(int argc, char **argv)

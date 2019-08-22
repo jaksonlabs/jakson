@@ -37,7 +37,7 @@ JAK_FORWARD_STRUCT_DECL(Vector)
 
 struct jak_str_hash_counters;
 
-enum strdic_tag {
+enum jak_str_dict_tag {
     SYNC, ASYNC
 };
 
@@ -53,12 +53,12 @@ struct jak_string_dict {
     /**
      * Tag determining the current implementation
      */
-    enum strdic_tag tag;
+    enum jak_str_dict_tag tag;
 
     /**
      * Memory allocator that is used to get memory for user data
      */
-    struct allocator alloc;
+    struct jak_allocator alloc;
 
     /**
      * Frees up implementation-specific resources.
@@ -72,7 +72,7 @@ struct jak_string_dict {
      *
      * Note: Implementation must ensure thread-safeness
     */
-    bool (*insert)(struct jak_string_dict *self, field_sid_t **out, char *const *strings, size_t nstrings, size_t nthreads);
+    bool (*insert)(struct jak_string_dict *self, jak_field_sid **out, char *const *strings, size_t nstrings, size_t nthreads);
 
     /**
      * Removes a particular number of strings from this dictionary by their ids. The caller must ensure that
@@ -80,14 +80,14 @@ struct jak_string_dict {
      *
      * Note: Implementation must ensure thread-safeness
      */
-    bool (*remove)(struct jak_string_dict *self, field_sid_t *strings, size_t nstrings);
+    bool (*remove)(struct jak_string_dict *self, jak_field_sid *strings, size_t nstrings);
 
     /**
      * Get the string ids associated with <code>keys</code> in this parallel_map_exec (if any).
      *
      * Note: Implementation must ensure thread-safeness
      */
-    bool (*locate_safe)(struct jak_string_dict *self, field_sid_t **out, bool **found_mask, size_t *num_not_found,
+    bool (*locate_safe)(struct jak_string_dict *self, jak_field_sid **out, bool **found_mask, size_t *num_not_found,
                         char *const *keys, size_t num_keys);
 
     /**
@@ -95,14 +95,14 @@ struct jak_string_dict {
      *
      * Note: Implementation must ensure thread-safeness
     */
-    bool (*locate_fast)(struct jak_string_dict *self, field_sid_t **out, char *const *keys, size_t num_keys);
+    bool (*locate_fast)(struct jak_string_dict *self, jak_field_sid **out, char *const *keys, size_t num_keys);
 
     /**
      * Extracts strings given their string identifier. All <code>ids</code> must be known.
      *
      * Note: Implementation must ensure thread-safeness
      */
-    char **(*extract)(struct jak_string_dict *self, const field_sid_t *ids, size_t num_ids);
+    char **(*extract)(struct jak_string_dict *self, const jak_field_sid *ids, size_t num_ids);
 
     /**
      * Frees up memory allocated inside a function call via the allocator given in the constructor
@@ -130,7 +130,7 @@ struct jak_string_dict {
      * Returns all contained (unique) strings and their mapped (unique) ids
      */
     bool (*get_contents)(struct jak_string_dict *self, struct vector ofType (char *) *strings,
-                         struct vector ofType(field_sid_t) *string_ids);
+                         struct vector ofType(jak_field_sid) *string_ids);
 };
 
 /**
@@ -138,7 +138,7 @@ struct jak_string_dict {
  * @param dic
  * @return
  */
-JAK_func_unused
+JAK_FUNC_UNUSED
 static bool strdic_drop(struct jak_string_dict *dic)
 {
         error_if_null(dic);
@@ -146,9 +146,9 @@ static bool strdic_drop(struct jak_string_dict *dic)
         return dic->drop(dic);
 }
 
-JAK_func_unused
+JAK_FUNC_UNUSED
 static bool
-strdic_insert(struct jak_string_dict *dic, field_sid_t **out, char *const *strings, size_t nstrings, size_t nthreads)
+strdic_insert(struct jak_string_dict *dic, jak_field_sid **out, char *const *strings, size_t nstrings, size_t nthreads)
 {
         error_if_null(dic);
         error_if_null(strings);
@@ -156,7 +156,7 @@ strdic_insert(struct jak_string_dict *dic, field_sid_t **out, char *const *strin
         return dic->insert(dic, out, strings, nstrings, nthreads);
 }
 
-JAK_func_unused
+JAK_FUNC_UNUSED
 static bool strdic_reset_counters(struct jak_string_dict *dic)
 {
         error_if_null(dic);
@@ -164,7 +164,7 @@ static bool strdic_reset_counters(struct jak_string_dict *dic)
         return dic->resetCounters(dic);
 }
 
-JAK_func_unused
+JAK_FUNC_UNUSED
 static bool strdic_get_counters(struct jak_str_hash_counters *counters, struct jak_string_dict *dic)
 {
         error_if_null(dic);
@@ -172,8 +172,8 @@ static bool strdic_get_counters(struct jak_str_hash_counters *counters, struct j
         return dic->counters(dic, counters);
 }
 
-JAK_func_unused
-static bool strdic_remove(struct jak_string_dict *dic, field_sid_t *strings, size_t num_strings)
+JAK_FUNC_UNUSED
+static bool strdic_remove(struct jak_string_dict *dic, jak_field_sid *strings, size_t num_strings)
 {
         error_if_null(dic);
         error_if_null(strings);
@@ -181,8 +181,8 @@ static bool strdic_remove(struct jak_string_dict *dic, field_sid_t *strings, siz
         return dic->remove(dic, strings, num_strings);
 }
 
-JAK_func_unused
-static bool strdic_locate_safe(field_sid_t **out, bool **found_mask, size_t *num_not_found, struct jak_string_dict *dic,
+JAK_FUNC_UNUSED
+static bool strdic_locate_safe(jak_field_sid **out, bool **found_mask, size_t *num_not_found, struct jak_string_dict *dic,
                                char *const *keys, size_t num_keys)
 {
         error_if_null(out);
@@ -194,8 +194,8 @@ static bool strdic_locate_safe(field_sid_t **out, bool **found_mask, size_t *num
         return dic->locate_safe(dic, out, found_mask, num_not_found, keys, num_keys);
 }
 
-JAK_func_unused
-static bool strdic_locate_fast(field_sid_t **out, struct jak_string_dict *dic, char *const *keys, size_t nkeys)
+JAK_FUNC_UNUSED
+static bool strdic_locate_fast(jak_field_sid **out, struct jak_string_dict *dic, char *const *keys, size_t nkeys)
 {
         error_if_null(out);
         error_if_null(dic);
@@ -204,13 +204,13 @@ static bool strdic_locate_fast(field_sid_t **out, struct jak_string_dict *dic, c
         return dic->locate_fast(dic, out, keys, nkeys);
 }
 
-JAK_func_unused
-static char **strdic_extract(struct jak_string_dict *dic, const field_sid_t *ids, size_t nids)
+JAK_FUNC_UNUSED
+static char **strdic_extract(struct jak_string_dict *dic, const jak_field_sid *ids, size_t nids)
 {
         return dic->extract(dic, ids, nids);
 }
 
-JAK_func_unused
+JAK_FUNC_UNUSED
 static bool strdic_free(struct jak_string_dict *dic, void *ptr)
 {
         error_if_null(dic);
@@ -222,7 +222,7 @@ static bool strdic_free(struct jak_string_dict *dic, void *ptr)
         }
 }
 
-JAK_func_unused
+JAK_FUNC_UNUSED
 static bool strdic_num_distinct(size_t *num, struct jak_string_dict *dic)
 {
         error_if_null(num);
@@ -231,8 +231,8 @@ static bool strdic_num_distinct(size_t *num, struct jak_string_dict *dic)
         return dic->num_distinct(dic, num);
 }
 
-JAK_func_unused
-static bool strdic_get_contents(struct vector ofType (char *) *strings, struct vector ofType(field_sid_t) *string_ids,
+JAK_FUNC_UNUSED
+static bool strdic_get_contents(struct vector ofType (char *) *strings, struct vector ofType(jak_field_sid) *string_ids,
                                 struct jak_string_dict *dic)
 {
         error_if_null(strings)

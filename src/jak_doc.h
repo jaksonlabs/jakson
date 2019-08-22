@@ -36,7 +36,7 @@ struct jak_column_doc;
 struct jak_doc_entries {
     struct jak_doc_obj *context;
     const char *key;
-    field_e type;
+    jak_archive_field_e type;
     struct vector ofType(<T>) values;
 };
 
@@ -49,7 +49,7 @@ struct jak_doc_bulk {
 struct jak_doc {
     struct jak_doc_bulk *context;
     struct vector ofType(struct jak_doc_obj) obj_model;
-    field_e type;
+    jak_archive_field_e type;
 };
 
 struct jak_doc_obj {
@@ -65,12 +65,12 @@ bool doc_bulk_shrink(struct jak_doc_bulk *bulk);
 
 bool doc_bulk_print(FILE *file, struct jak_doc_bulk *bulk);
 
-struct jak_doc *doc_bulk_new_doc(struct jak_doc_bulk *context, field_e type);
+struct jak_doc *doc_bulk_new_doc(struct jak_doc_bulk *context, jak_archive_field_e type);
 
 struct jak_doc_obj *doc_bulk_new_obj(struct jak_doc *model);
 
 bool doc_bulk_get_dic_contents(struct vector ofType (const char *) **strings,
-                               struct vector ofType(field_sid_t) **string_ids, const struct jak_doc_bulk *context);
+                               struct vector ofType(jak_field_sid) **string_ids, const struct jak_doc_bulk *context);
 
 bool doc_print(FILE *file, const struct jak_doc *doc);
 
@@ -80,7 +80,7 @@ void doc_print_entries(FILE *file, const struct jak_doc_entries *entries);
 
 void doc_drop(struct jak_doc_obj *model);
 
-bool doc_obj_add_key(struct jak_doc_entries **out, struct jak_doc_obj *obj, const char *key, field_e type);
+bool doc_obj_add_key(struct jak_doc_entries **out, struct jak_doc_obj *obj, const char *key, jak_archive_field_e type);
 
 bool doc_obj_push_primtive(struct jak_doc_entries *entry, const void *value);
 

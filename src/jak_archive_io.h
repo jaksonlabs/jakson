@@ -30,9 +30,9 @@ JAK_BEGIN_DECL
 struct jak_archive; /* forwarded */
 struct io_context; /* forwarded */
 
-bool io_context_create(struct io_context **context, struct err *err, const char *file_path);
+bool io_context_create(struct io_context **context, struct jak_error *err, const char *file_path);
 
-struct err *io_context_get_error(struct io_context *context);
+struct jak_error *io_context_get_error(struct io_context *context);
 
 FILE *io_context_lock_and_access(struct io_context *context);
 

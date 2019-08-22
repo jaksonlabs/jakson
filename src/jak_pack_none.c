@@ -20,14 +20,14 @@
 #include <jak_pack.h>
 #include <jak_pack_none.h>
 
-bool pack_none_init(struct packer *self)
+bool pack_none_init(struct jak_packer *self)
 {
-        unused(self);
+        JAK_UNUSED(self);
         /* nothing to do for uncompressed dictionaries */
         return true;
 }
 
-bool pack_none_cpy(const struct packer *self, struct packer *dst)
+bool pack_none_cpy(const struct jak_packer *self, struct jak_packer *dst)
 {
         JAK_check_tag(self->tag, PACK_NONE);
 
@@ -36,59 +36,59 @@ bool pack_none_cpy(const struct packer *self, struct packer *dst)
         return true;
 }
 
-bool pack_none_drop(struct packer *self)
+bool pack_none_drop(struct jak_packer *self)
 {
         JAK_check_tag(self->tag, PACK_NONE);
 
-        unused(self);
+        JAK_UNUSED(self);
         /* nothing to do for uncompressed dictionaries */
         return true;
 }
 
-bool pack_none_write_extra(struct packer *self, struct memfile *dst,
+bool pack_none_write_extra(struct jak_packer *self, struct jak_memfile *dst,
                            const struct vector ofType (const char *) *strings)
 {
         JAK_check_tag(self->tag, PACK_NONE);
 
-        unused(self);
-        unused(dst);
-        unused(strings);
+        JAK_UNUSED(self);
+        JAK_UNUSED(dst);
+        JAK_UNUSED(strings);
         /* nothing to do for uncompressed dictionaries */
         return true;
 }
 
-bool pack_none_read_extra(struct packer *self, FILE *src, size_t nbytes)
+bool pack_none_read_extra(struct jak_packer *self, FILE *src, size_t nbytes)
 {
         JAK_check_tag(self->tag, PACK_NONE);
 
-        unused(self);
-        unused(src);
-        unused(nbytes);
+        JAK_UNUSED(self);
+        JAK_UNUSED(src);
+        JAK_UNUSED(nbytes);
         /* nothing to do for uncompressed dictionaries */
         return true;
 }
 
-bool pack_none_print_extra(struct packer *self, FILE *file, struct memfile *src)
+bool pack_none_print_extra(struct jak_packer *self, FILE *file, struct jak_memfile *src)
 {
         JAK_check_tag(self->tag, PACK_NONE);
 
-        unused(self);
-        unused(file);
-        unused(src);
+        JAK_UNUSED(self);
+        JAK_UNUSED(file);
+        JAK_UNUSED(src);
         /* nothing to do for uncompressed dictionaries */
         return true;
 }
 
-bool pack_none_print_encoded_string(struct packer *self, FILE *file, struct memfile *src,
-                                    u32 decompressed_strlen)
+bool pack_none_print_encoded_string(struct jak_packer *self, FILE *file, struct jak_memfile *src,
+                                    jak_u32 decompressed_strlen)
 {
         JAK_check_tag(self->tag, PACK_NONE);
 
-        unused(self);
+        JAK_UNUSED(self);
 
         const char *string = JAK_MEMFILE_READ(src, decompressed_strlen);
 
-        char *printableString = JAK_malloc(decompressed_strlen + 1);
+        char *printableString = JAK_MALLOC(decompressed_strlen + 1);
         memcpy(printableString, string, decompressed_strlen);
         printableString[decompressed_strlen] = '\0';
 
@@ -99,14 +99,14 @@ bool pack_none_print_encoded_string(struct packer *self, FILE *file, struct memf
         return true;
 }
 
-bool pack_none_encode_string(struct packer *self, struct memfile *dst, struct err *err,
+bool pack_none_encode_string(struct jak_packer *self, struct jak_memfile *dst, struct jak_error *err,
                              const char *string)
 {
         JAK_check_tag(self->tag, PACK_NONE);
 
-        unused(self);
+        JAK_UNUSED(self);
 
-        u32 string_length = strlen(string);
+        jak_u32 string_length = strlen(string);
 
         JAK_success_or_jump(memfile_write(dst, string, string_length), error_handling)
 
@@ -117,11 +117,11 @@ bool pack_none_encode_string(struct packer *self, struct memfile *dst, struct er
         return false;
 }
 
-bool pack_none_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src)
+bool pack_none_decode_string(struct jak_packer *self, char *dst, size_t strlen, FILE *src)
 {
         JAK_check_tag(self->tag, PACK_NONE);
 
-        unused(self);
+        JAK_UNUSED(self);
 
         size_t num_read = fread(dst, sizeof(char), strlen, src);
         return (num_read == strlen);

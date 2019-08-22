@@ -31,25 +31,25 @@
 JAK_BEGIN_DECL
 
 #define DECLARE_PRINTER_FUNC(type)                                                                                     \
-    void vector_##type##_PrinterFunc(struct memfile *dst, void ofType(T) *values, size_t num_elems);
+    void vector_##type##_PrinterFunc(struct jak_memfile *dst, void ofType(T) *values, size_t num_elems);
 
 DECLARE_PRINTER_FUNC(u_char)
 
-DECLARE_PRINTER_FUNC(i8)
+DECLARE_PRINTER_FUNC(jak_i8)
 
-DECLARE_PRINTER_FUNC(i16)
+DECLARE_PRINTER_FUNC(jak_i16)
 
-DECLARE_PRINTER_FUNC(i32)
+DECLARE_PRINTER_FUNC(jak_i32)
 
-DECLARE_PRINTER_FUNC(i64)
+DECLARE_PRINTER_FUNC(jak_i64)
 
-DECLARE_PRINTER_FUNC(u8)
+DECLARE_PRINTER_FUNC(jak_u8)
 
-DECLARE_PRINTER_FUNC(u16)
+DECLARE_PRINTER_FUNC(jak_u16)
 
-DECLARE_PRINTER_FUNC(u32)
+DECLARE_PRINTER_FUNC(jak_u32)
 
-DECLARE_PRINTER_FUNC(u64)
+DECLARE_PRINTER_FUNC(jak_u64)
 
 DECLARE_PRINTER_FUNC(size_t)
 
@@ -71,7 +71,7 @@ struct vector {
     /**
     *  Memory allocator that is used to get memory for user data
     */
-    struct allocator *allocator;
+    struct jak_allocator *allocator;
 
     /**
      *  Fixed number of bytes for a single element that should be stored in the vector
@@ -81,12 +81,12 @@ struct vector {
     /**
      *  The number of elements currently stored in the vector
      */
-    u32 num_elems;
+    jak_u32 num_elems;
 
     /**
      *  The number of elements for which currently memory is reserved
      */
-    u32 cap_elems;
+    jak_u32 cap_elems;
 
     /**
     * The grow factor considered for resize operations
@@ -101,7 +101,7 @@ struct vector {
     /**
      *  Error information
      */
-    struct err err;
+    struct jak_error err;
 };
 
 /**
@@ -119,11 +119,11 @@ typedef struct vector ofType(const char *) string_vector_t;
  * @param cap_elems number of elements for which memory should be reserved
  * @return STATUS_OK if success, and STATUS_NULLPTR in case of NULL pointer parameters
  */
-bool vec_create(struct vector *out, const struct allocator *alloc, size_t elem_size, size_t cap_elems);
+bool vec_create(struct vector *out, const struct jak_allocator *alloc, size_t elem_size, size_t cap_elems);
 
 bool vec_serialize(FILE *file, struct vector *vec);
 
-bool vec_deserialize(struct vector *vec, struct err *err, FILE *file);
+bool vec_deserialize(struct vector *vec, struct jak_error *err, FILE *file);
 
 /**
  * Provides hints on the OS kernel how to deal with memory inside this vector.
@@ -279,7 +279,7 @@ bool vec_cpy_to(struct vector *dst, struct vector *src);
 const void *vec_data(const struct vector *vec);
 
 char *vector_string(const struct vector ofType(T) *vec,
-                    void (*printerFunc)(struct memfile *dst, void ofType(T) *values, size_t num_elems));
+                    void (*printerFunc)(struct jak_memfile *dst, void ofType(T) *values, size_t num_elems));
 
 #define vec_all(vec, type) (type *) vec_data(vec)
 

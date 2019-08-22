@@ -37,7 +37,7 @@ enum dot_token_type {
 struct dot_token {
     enum dot_token_type type;
     const char *str;
-    u32 len;
+    jak_u32 len;
 };
 
 static const char *next_token(struct dot_token *token, const char *str)
@@ -52,7 +52,7 @@ static const char *next_token(struct dot_token *token, const char *str)
                         token->type = TOKEN_STRING;
                         token->str = str;
                         bool skip_esc = false;
-                        u32 strlen = 0;
+                        jak_u32 strlen = 0;
                         while (c && (isalpha(c) && (c != '\n') && (c != '\t') && (c != '\r') && (c != ' '))) {
                                 if (!skip_esc) {
                                         if (c == '\\') {
@@ -71,7 +71,7 @@ static const char *next_token(struct dot_token *token, const char *str)
                         c = *(++str);
                         bool skip_esc = false;
                         bool end_found = false;
-                        u32 strlen = 1;
+                        jak_u32 strlen = 1;
                         while (c && !end_found) {
                                 if (!skip_esc) {
                                         if (c == '\\') {
@@ -95,7 +95,7 @@ static const char *next_token(struct dot_token *token, const char *str)
                 } else if (isdigit(c)) {
                         token->type = TOKEN_NUMBER;
                         token->str = str;
-                        u32 strlen = 0;
+                        jak_u32 strlen = 0;
                         while (c && isdigit(c)) {
                                 c = *(++str);
                                 strlen++;
@@ -124,7 +124,7 @@ bool carbon_dot_path_create(struct jak_carbon_dot_path *path)
 bool carbon_dot_path_from_string(struct jak_carbon_dot_path *path, const char *path_string)
 {
         error_if_null(path)
-        unused(path_string);
+        JAK_UNUSED(path_string);
 
         struct dot_token token;
         int status = JAK_ERR_NOERR;
@@ -156,7 +156,7 @@ bool carbon_dot_path_from_string(struct jak_carbon_dot_path *path, const char *p
                                         status = JAK_ERR_PARSE_ENTRY_EXPECTED;
                                         goto cleanup_and_error;
                                 } else {
-                                        u64 num = convert_atoiu64(token.str);
+                                        jak_u64 num = convert_atoiu64(token.str);
                                         carbon_dot_path_add_idx(path, num);
                                 }
                                 break;
@@ -204,7 +204,7 @@ bool carbon_dot_path_add_nkey(struct jak_carbon_dot_path *dst, const char *key, 
         }
 }
 
-bool carbon_dot_path_add_idx(struct jak_carbon_dot_path *dst, u32 idx)
+bool carbon_dot_path_add_idx(struct jak_carbon_dot_path *dst, jak_u32 idx)
 {
         error_if_null(dst)
         if (likely(dst->path_len < JAK_ARRAY_LENGTH(dst->nodes))) {
@@ -218,7 +218,7 @@ bool carbon_dot_path_add_idx(struct jak_carbon_dot_path *dst, u32 idx)
         }
 }
 
-bool carbon_dot_path_len(u32 *len, const struct jak_carbon_dot_path *path)
+bool carbon_dot_path_len(jak_u32 *len, const struct jak_carbon_dot_path *path)
 {
         error_if_null(len)
         error_if_null(path)
@@ -232,7 +232,7 @@ bool carbon_dot_path_is_empty(const struct jak_carbon_dot_path *path)
         return (path->path_len == 0);
 }
 
-bool carbon_dot_path_type_at(enum carbon_dot_node_type *type_out, u32 pos, const struct jak_carbon_dot_path *path)
+bool carbon_dot_path_type_at(enum carbon_dot_node_type *type_out, jak_u32 pos, const struct jak_carbon_dot_path *path)
 {
         error_if_null(type_out)
         error_if_null(path)
@@ -245,7 +245,7 @@ bool carbon_dot_path_type_at(enum carbon_dot_node_type *type_out, u32 pos, const
         return true;
 }
 
-bool carbon_dot_path_idx_at(u32 *idx, u32 pos, const struct jak_carbon_dot_path *path)
+bool carbon_dot_path_idx_at(jak_u32 *idx, jak_u32 pos, const struct jak_carbon_dot_path *path)
 {
         error_if_null(idx)
         error_if_null(path)
@@ -258,7 +258,7 @@ bool carbon_dot_path_idx_at(u32 *idx, u32 pos, const struct jak_carbon_dot_path 
         return true;
 }
 
-const char *carbon_dot_path_key_at(u32 pos, const struct jak_carbon_dot_path *path)
+const char *carbon_dot_path_key_at(jak_u32 pos, const struct jak_carbon_dot_path *path)
 {
         error_if_null(path)
         error_if_and_return(pos >= JAK_ARRAY_LENGTH(path->nodes), &((struct jak_carbon_dot_path *)path)->err, JAK_ERR_OUTOFBOUNDS, NULL);
@@ -270,7 +270,7 @@ const char *carbon_dot_path_key_at(u32 pos, const struct jak_carbon_dot_path *pa
 bool carbon_dot_path_drop(struct jak_carbon_dot_path *path)
 {
         error_if_null(path)
-        for (u32 i = 0; i < path->path_len; i++) {
+        for (jak_u32 i = 0; i < path->path_len; i++) {
                 struct jak_carbon_dot_node *node = path->nodes + i;
                 if (node->type == DOT_NODE_KEY_NAME) {
                         free(node->identifier.string);
@@ -283,7 +283,7 @@ bool carbon_dot_path_drop(struct jak_carbon_dot_path *path)
 bool carbon_dot_path_to_str(struct jak_string *sb, struct jak_carbon_dot_path *path)
 {
         error_if_null(path)
-        for (u32 i = 0; i < path->path_len; i++) {
+        for (jak_u32 i = 0; i < path->path_len; i++) {
                 struct jak_carbon_dot_node *node = path->nodes + i;
                 switch (node->type) {
                         case DOT_NODE_KEY_NAME: {

@@ -28,11 +28,11 @@
 JAK_BEGIN_DECL
 
 struct jak_bitmap {
-    struct vector ofType(u64) data;
-    u16 num_bits;
+    struct vector ofType(jak_u64) data;
+    jak_u16 num_bits;
 };
 
-bool bitmap_create(struct jak_bitmap *bitmap, u16 num_bits);
+bool bitmap_create(struct jak_bitmap *bitmap, jak_u16 num_bits);
 
 bool bitmap_cpy(struct jak_bitmap *dst, const struct jak_bitmap *src);
 
@@ -42,17 +42,17 @@ size_t bitmap_nbits(const struct jak_bitmap *map);
 
 bool bitmap_clear(struct jak_bitmap *map);
 
-bool bitmap_set(struct jak_bitmap *map, u16 bit_position, bool on);
+bool bitmap_set(struct jak_bitmap *map, jak_u16 bit_position, bool on);
 
-bool bitmap_get(struct jak_bitmap *map, u16 bit_position);
+bool bitmap_get(struct jak_bitmap *map, jak_u16 bit_position);
 
 bool bitmap_lshift(struct jak_bitmap *map);
 
 bool bitmap_print(FILE *file, const struct jak_bitmap *map);
 
-bool bitmap_blocks(u32 **blocks, u32 *num_blocks, const struct jak_bitmap *map);
+bool bitmap_blocks(jak_u32 **blocks, jak_u32 *num_blocks, const struct jak_bitmap *map);
 
-void bitmap_print_bits(FILE *file, u32 n);
+void bitmap_print_bits(FILE *file, jak_u32 n);
 
 void bitmap_print_bits_in_char(FILE *file, char n);
 

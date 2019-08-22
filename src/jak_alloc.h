@@ -31,16 +31,16 @@ JAK_BEGIN_DECL
  * Allocates <code>num</code> elements of size <code>sizeof(type)</code> using the allocator <code>alloc</code> and
  * creates a new stack variable <code>type *name</code>.
  */
-#define ALLOC_MALLOC(type, name, num, alloc)                                                                          \
-    type *name = alloc_malloc(alloc, num *sizeof(type))
+#define JAK_ALLOC_MALLOC(type, name, num, alloc)                                                                          \
+    type *name = jak_alloc_malloc(alloc, num *sizeof(type))
 
 /**
  * Invokes a free operation in <code>alloc</code> allocator to free up memory assigned to pointer <code>name</code>
  */
-#define JAK_free(name, alloc)                                                                                       \
-    alloc_free(alloc, name)
+#define JAK_ALLOC_FREE(name, alloc)                                                                                       \
+    jak_alloc_free(alloc, name)
 
-struct allocator {
+struct jak_allocator {
     /**
      *  Implementation-specific data (private fields etc.)
      *  This pointer may point to NULL.
@@ -50,23 +50,23 @@ struct allocator {
     /**
      *  Error information
      */
-    struct err err;
+    struct jak_error err;
 
     /**
      *  Implementation to call memory allocation.
      */
-    void *(*malloc)(struct allocator *self, size_t size);
+    void *(*malloc)(struct jak_allocator *self, size_t size);
 
     /**
      *  Implementation to call memory re-allocation.
      */
-    void *(*realloc)(struct allocator *self, void *ptr, size_t size);
+    void *(*realloc)(struct jak_allocator *self, void *ptr, size_t size);
 
     /**
      *  Implementation to call freeing up memory.
      *  Depending on the strategy, freeing up memory might be lazy.
      */
-    void (*free)(struct allocator *self, void *ptr);
+    void (*free)(struct jak_allocator *self, void *ptr);
 
     /**
      *  Perform a deep copy of this allocator including implementation-specific data stored in 'extra'
@@ -74,7 +74,7 @@ struct allocator {
      * @param dst non-null target in which 'self' should be cloned
      * @param self non-null source which should be clones in 'dst'
      */
-    void (*clone)(struct allocator *dst, const struct allocator *self);
+    void (*clone)(struct jak_allocator *dst, const struct jak_allocator *self);
 };
 
 /**
@@ -83,7 +83,7 @@ struct allocator {
  * @param alloc must be non-null
  * @return STATUS_OK in case of non-null parameter alloc, STATUS_NULLPTR otherwise
  */
-bool alloc_create_std(struct allocator *alloc);
+bool jak_alloc_create_std(struct jak_allocator *alloc);
 
 /**
  * Creates a new allocator 'dst' with default constructor (in case of 'this' is null), or as copy of
@@ -92,7 +92,7 @@ bool alloc_create_std(struct allocator *alloc);
  * @param self possibly null-pointer to an allocator implementation
  * @return a value unequal to STATUS_OK in case the operation is not successful
  */
-bool alloc_this_or_std(struct allocator *dst, const struct allocator *self);
+bool jak_alloc_this_or_std(struct jak_allocator *dst, const struct jak_allocator *self);
 
 /**
  * Performs a deep copy of the allocator 'src' into the allocator 'dst'.
@@ -101,7 +101,7 @@ bool alloc_this_or_std(struct allocator *dst, const struct allocator *self);
  * @param src non-null pointer to allocator implementation (of same implementation as dst)
  * @return STATUS_OK in case of success, otherwise a value unequal to STATUS_OK describing the error
  */
-bool alloc_clone(struct allocator *dst, const struct allocator *src);
+bool jak_alloc_clone(struct jak_allocator *dst, const struct jak_allocator *src);
 
 /**
  * Invokes memory allocation of 'size' bytes using the allocator 'alloc'.
@@ -112,7 +112,7 @@ bool alloc_clone(struct allocator *dst, const struct allocator *src);
  * @param size number of bytes requested
  * @return non-null pointer to memory allocated with 'alloc'
  */
-void *alloc_malloc(struct allocator *alloc, size_t size);
+void *jak_alloc_malloc(struct jak_allocator *alloc, size_t size);
 
 /**
  * Invokes memory re-allocation for pointer 'ptr' (that is managed by 'alloc') to size 'size' in bytes.
@@ -122,7 +122,7 @@ void *alloc_malloc(struct allocator *alloc, size_t size);
  * @param size new number of bytes for 'ptr'
  * @return non-null pointer that points to reallocated memory for 'ptr'
  */
-void *alloc_realloc(struct allocator *alloc, void *ptr, size_t size);
+void *jak_alloc_realloc(struct jak_allocator *alloc, void *ptr, size_t size);
 
 /**
  * Invokes memory freeing for pointer 'ptr' (that is managed by 'alloc').
@@ -132,7 +132,7 @@ void *alloc_realloc(struct allocator *alloc, void *ptr, size_t size);
  * @param ptr non-null pointer manged by 'alloc'
  * @return STATUS_OK if success, STATUS_NULLPTR if <code>alloc</code> or <code>ptr</ptr> is <b>NULL</b>
  */
-bool alloc_free(struct allocator *alloc, void *ptr);
+bool jak_alloc_free(struct jak_allocator *alloc, void *ptr);
 
 JAK_END_DECL
 

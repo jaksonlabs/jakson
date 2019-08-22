@@ -41,9 +41,9 @@ union encoded_doc_value {
     field_u64_t uint64;
     field_number_t number;
     field_boolean_t boolean;
-    field_sid_t string;
+    jak_field_sid string;
     global_id_t object;
-    u32 null;
+    jak_u32 null;
 };
 
 enum encoded_doc_string_type {
@@ -59,7 +59,7 @@ struct jak_encoded_doc_prop_header {
 
     enum encoded_doc_string_type key_type;
     union {
-        field_sid_t key_id;
+        jak_field_sid key_id;
         char *key_str;
     } key;
 
@@ -87,18 +87,18 @@ struct jak_encoded_doc {
     global_id_t object_id;
     struct vector ofType(struct jak_encoded_doc_prop) props;
     struct vector ofType(struct jak_encoded_doc_prop_array) props_arrays;
-    struct hashtable ofMapping(field_sid_t, u32) prop_array_index; /* maps key to index in prop arrays */
-    struct err err;
+    struct hashtable ofMapping(jak_field_sid, jak_u32) prop_array_index; /* maps key to index in prop arrays */
+    struct jak_error err;
 };
 
 struct jak_encoded_doc_list {
     struct jak_archive *archive;
     struct vector ofType(struct jak_encoded_doc) flat_object_collection;   /* list of objects; also nested ones */
-    struct hashtable ofMapping(object_id_t, u32) index;   /* maps oid to index in collection */
-    struct err err;
+    struct hashtable ofMapping(object_id_t, jak_u32) index;   /* maps oid to index in collection */
+    struct jak_error err;
 };
 
-bool encoded_doc_collection_create(struct jak_encoded_doc_list *collection, struct err *err,
+bool encoded_doc_collection_create(struct jak_encoded_doc_list *collection, struct jak_error *err,
                                    struct jak_archive *archive);
 
 bool encoded_doc_collection_drop(struct jak_encoded_doc_list *collection);
@@ -112,7 +112,7 @@ bool encoded_doc_drop(struct jak_encoded_doc *doc);
 
 #define DEFINE_JAK_ENCODED_DOC_ADD_PROP_BASIC(name, built_in_type)                                                  \
 bool                                                                                                    \
-encoded_doc_add_prop_##name(struct jak_encoded_doc *doc, field_sid_t key, built_in_type value);
+encoded_doc_add_prop_##name(struct jak_encoded_doc *doc, jak_field_sid key, built_in_type value);
 
 #define DEFINE_JAK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(name, built_in_type)                                          \
 bool                                                                                                    \
@@ -138,7 +138,7 @@ DEFINE_JAK_ENCODED_DOC_ADD_PROP_BASIC(number, field_number_t)
 
 DEFINE_JAK_ENCODED_DOC_ADD_PROP_BASIC(boolean, field_boolean_t)
 
-DEFINE_JAK_ENCODED_DOC_ADD_PROP_BASIC(string, field_sid_t)
+DEFINE_JAK_ENCODED_DOC_ADD_PROP_BASIC(string, jak_field_sid)
 
 DEFINE_JAK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(int8, field_i8_t)
 
@@ -160,23 +160,23 @@ DEFINE_JAK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(number, field_number_t)
 
 DEFINE_JAK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(boolean, field_boolean_t)
 
-DEFINE_JAK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(string, field_sid_t)
+DEFINE_JAK_ENCODED_DOC_ADD_PROP_BASIC_DECODED(string, jak_field_sid)
 
 bool encoded_doc_add_prop_string_decoded_string_value_decoded(struct jak_encoded_doc *doc, const char *key,
                                                               const char *value);
 
-bool encoded_doc_add_prop_null(struct jak_encoded_doc *doc, field_sid_t key);
+bool encoded_doc_add_prop_null(struct jak_encoded_doc *doc, jak_field_sid key);
 
 bool encoded_doc_add_prop_null_decoded(struct jak_encoded_doc *doc, const char *key);
 
-bool encoded_doc_add_prop_object(struct jak_encoded_doc *doc, field_sid_t key, struct jak_encoded_doc *value);
+bool encoded_doc_add_prop_object(struct jak_encoded_doc *doc, jak_field_sid key, struct jak_encoded_doc *value);
 
 bool encoded_doc_add_prop_object_decoded(struct jak_encoded_doc *doc, const char *key,
                                          struct jak_encoded_doc *value);
 
 #define DEFINE_JAK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE(name)                                                            \
 bool                                                                                                    \
-encoded_doc_add_prop_array_##name(struct jak_encoded_doc *doc, field_sid_t key);
+encoded_doc_add_prop_array_##name(struct jak_encoded_doc *doc, jak_field_sid key);
 
 #define DEFINE_JAK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(name)                                                    \
 bool                                                                                                    \
@@ -236,13 +236,13 @@ DEFINE_JAK_ENCODED_DOC_ADD_PROP_ARRAY_TYPE_DECODED(object)
 
 #define DEFINE_JAK_ENCODED_DOC_ARRAY_PUSH_TYPE(name, built_in_type)                                                    \
 bool                                                                                                       \
-encoded_doc_array_push_##name(struct jak_encoded_doc *doc, field_sid_t key,                                                \
-                                     const built_in_type *array, u32 array_length);
+encoded_doc_array_push_##name(struct jak_encoded_doc *doc, jak_field_sid key,                                                \
+                                     const built_in_type *array, jak_u32 array_length);
 
 #define DEFINE_JAK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(name, built_in_type)                                            \
 bool                                                                                                       \
 encoded_doc_array_push_##name##_decoded(struct jak_encoded_doc *doc, const char *key,                                      \
-                                     const built_in_type *array, u32 array_length);
+                                     const built_in_type *array, jak_u32 array_length);
 
 DEFINE_JAK_ENCODED_DOC_ARRAY_PUSH_TYPE(int8, field_i8_t)
 
@@ -264,7 +264,7 @@ DEFINE_JAK_ENCODED_DOC_ARRAY_PUSH_TYPE(number, field_number_t)
 
 DEFINE_JAK_ENCODED_DOC_ARRAY_PUSH_TYPE(boolean, field_boolean_t)
 
-DEFINE_JAK_ENCODED_DOC_ARRAY_PUSH_TYPE(string, field_sid_t)
+DEFINE_JAK_ENCODED_DOC_ARRAY_PUSH_TYPE(string, jak_field_sid)
 
 DEFINE_JAK_ENCODED_DOC_ARRAY_PUSH_TYPE(null, field_u32_t)
 
@@ -288,11 +288,11 @@ DEFINE_JAK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(number, field_number_t)
 
 DEFINE_JAK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(boolean, field_boolean_t)
 
-DEFINE_JAK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(string, field_sid_t)
+DEFINE_JAK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(string, jak_field_sid)
 
 DEFINE_JAK_ENCODED_DOC_ARRAY_PUSH_TYPE_DECODED(null, field_u32_t)
 
-bool encoded_doc_array_push_object(struct jak_encoded_doc *doc, field_sid_t key, global_id_t id);
+bool encoded_doc_array_push_object(struct jak_encoded_doc *doc, jak_field_sid key, global_id_t id);
 
 bool encoded_doc_array_push_object_decoded(struct jak_encoded_doc *doc, const char *key, global_id_t id);
 

@@ -28,27 +28,27 @@
 
 JAK_BEGIN_DECL
 
-struct sid_cache_stats {
+struct jak_sid_cache_stats {
     size_t num_hits;
     size_t num_misses;
     size_t num_evicted;
 };
 
-bool string_id_cache_create_LRU(struct string_cache **cache, struct jak_archive *archive);
+bool jak_string_id_cache_create_lru(struct jak_string_cache **cache, struct jak_archive *archive);
 
-bool string_id_cache_create_LRU_ex(struct string_cache **cache, struct jak_archive *archive, size_t capacity);
+bool jak_string_id_cache_create_lru_ex(struct jak_string_cache **cache, struct jak_archive *archive, size_t capacity);
 
-bool string_id_cache_get_error(struct err *err, const struct string_cache *cache);
+bool jak_string_id_cache_get_error(struct jak_error *err, const struct jak_string_cache *cache);
 
-bool string_id_cache_get_size(size_t *size, const struct string_cache *cache);
+bool jak_string_id_cache_get_size(size_t *size, const struct jak_string_cache *cache);
 
-char *string_id_cache_get(struct string_cache *cache, field_sid_t id);
+char *jak_string_id_cache_get(struct jak_string_cache *cache, jak_field_sid id);
 
-bool string_id_cache_get_statistics(struct sid_cache_stats *statistics, struct string_cache *cache);
+bool jak_string_id_cache_get_statistics(struct jak_sid_cache_stats *statistics, struct jak_string_cache *cache);
 
-bool string_id_cache_reset_statistics(struct string_cache *cache);
+bool jak_string_id_cache_reset_statistics(struct jak_string_cache *cache);
 
-bool string_id_cache_drop(struct string_cache *cache);
+bool jak_string_id_cache_drop(struct jak_string_cache *cache);
 
 JAK_END_DECL
 

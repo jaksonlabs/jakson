@@ -17,7 +17,7 @@
 
 #include <jak_error.h>
 
-bool error_init(struct err *err)
+bool error_init(struct jak_error *err)
 {
         if (err) {
                 err->code = JAK_ERR_NOERR;
@@ -28,7 +28,7 @@ bool error_init(struct err *err)
         return (err != NULL);
 }
 
-bool error_cpy(struct err *dst, const struct err *src)
+bool error_cpy(struct jak_error *dst, const struct jak_error *src)
 {
         error_if_null(dst);
         error_if_null(src);
@@ -36,7 +36,7 @@ bool error_cpy(struct err *dst, const struct err *src)
         return true;
 }
 
-bool error_drop(struct err *err)
+bool error_drop(struct jak_error *err)
 {
         error_if_null(err);
         if (err->details) {
@@ -46,12 +46,12 @@ bool error_drop(struct err *err)
         return true;
 }
 
-bool error_set(struct err *err, int code, const char *file, u32 line)
+bool error_set(struct jak_error *err, int code, const char *file, jak_u32 line)
 {
         return error_set_wdetails(err, code, file, line, NULL);
 }
 
-bool error_set_wdetails(struct err *err, int code, const char *file, u32 line, const char *details)
+bool error_set_wdetails(struct jak_error *err, int code, const char *file, jak_u32 line, const char *details)
 {
         if (err) {
                 err->code = code;
@@ -65,12 +65,12 @@ bool error_set_wdetails(struct err *err, int code, const char *file, u32 line, c
         return (err != NULL);
 }
 
-bool error_set_no_abort(struct err *err, int code, const char *file, u32 line)
+bool error_set_no_abort(struct jak_error *err, int code, const char *file, jak_u32 line)
 {
         return error_set_wdetails_no_abort(err, code, file, line, NULL);
 }
 
-bool error_set_wdetails_no_abort(struct err *err, int code, const char *file, u32 line, const char *details)
+bool error_set_wdetails_no_abort(struct jak_error *err, int code, const char *file, jak_u32 line, const char *details)
 {
         if (err) {
                 err->code = code;
@@ -84,8 +84,8 @@ bool error_set_wdetails_no_abort(struct err *err, int code, const char *file, u3
         return (err != NULL);
 }
 
-bool error_str(const char **errstr, const char **file, u32 *line, bool *details, const char **detailsstr,
-               const struct err *err)
+bool error_str(const char **errstr, const char **file, jak_u32 *line, bool *details, const char **detailsstr,
+               const struct jak_error *err)
 {
         if (err) {
                 if (err->code >= _nerr_str) {
@@ -102,12 +102,12 @@ bool error_str(const char **errstr, const char **file, u32 *line, bool *details,
         return false;
 }
 
-bool error_print_to_stderr(const struct err *err)
+bool error_print_to_stderr(const struct jak_error *err)
 {
         if (err) {
                 const char *errstr;
                 const char *file;
-                u32 line;
+                jak_u32 line;
                 bool has_details;
                 const char *details;
                 if (error_str(&errstr, &file, &line, &has_details, &details, err)) {
@@ -122,7 +122,7 @@ bool error_print_to_stderr(const struct err *err)
         return (err != NULL);
 }
 
-bool error_print_and_abort(const struct err *err)
+bool error_print_and_abort(const struct jak_error *err)
 {
         error_print_to_stderr(err);
         abort();

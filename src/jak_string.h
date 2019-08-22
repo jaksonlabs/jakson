@@ -31,7 +31,7 @@ struct jak_string {
     char *data;
     size_t cap;
     size_t end;
-    struct err err;
+    struct jak_error err;
 };
 
 JAK_DEFINE_GET_ERROR_FUNCTION(string, struct jak_string, builder);
@@ -42,35 +42,35 @@ bool string_create_ex(struct jak_string *builder, size_t capacity);
 
 bool string_add(struct jak_string *builder, const char *str);
 
-bool string_add_nchar(struct jak_string *builder, const char *str, u64 strlen);
+bool string_add_nchar(struct jak_string *builder, const char *str, jak_u64 strlen);
 
 bool string_add_char(struct jak_string *builder, char c);
 
-bool string_add_u8(struct jak_string *builder, u8 value);
+bool string_add_u8(struct jak_string *builder, jak_u8 value);
 
-bool string_add_u16(struct jak_string *builder, u16 value);
+bool string_add_u16(struct jak_string *builder, jak_u16 value);
 
-bool string_add_u32(struct jak_string *builder, u32 value);
+bool string_add_u32(struct jak_string *builder, jak_u32 value);
 
-bool string_add_u64(struct jak_string *builder, u64 value);
+bool string_add_u64(struct jak_string *builder, jak_u64 value);
 
-bool string_add_i8(struct jak_string *builder, i8 value);
+bool string_add_i8(struct jak_string *builder, jak_i8 value);
 
-bool string_add_i16(struct jak_string *builder, i16 value);
+bool string_add_i16(struct jak_string *builder, jak_i16 value);
 
-bool string_add_i32(struct jak_string *builder, i32 value);
+bool string_add_i32(struct jak_string *builder, jak_i32 value);
 
-bool string_add_i64(struct jak_string *builder, i64 value);
+bool string_add_i64(struct jak_string *builder, jak_i64 value);
 
-bool string_add_u64_as_hex(struct jak_string *builder, u64 value);
+bool string_add_u64_as_hex(struct jak_string *builder, jak_u64 value);
 
-bool string_add_u64_as_hex_0x_prefix_compact(struct jak_string *builder, u64 value);
+bool string_add_u64_as_hex_0x_prefix_compact(struct jak_string *builder, jak_u64 value);
 
 bool string_add_float(struct jak_string *builder, float value);
 
 bool string_clear(struct jak_string *builder);
 
-bool string_ensure_capacity(struct jak_string *builder, u64 cap);
+bool string_ensure_capacity(struct jak_string *builder, jak_u64 cap);
 
 size_t string_len(struct jak_string *builder);
 

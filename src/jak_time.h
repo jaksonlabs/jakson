@@ -27,7 +27,7 @@
 
 JAK_BEGIN_DECL
 
-typedef u64 timestamp_t;
+typedef jak_u64 timestamp_t;
 
 timestamp_t time_now_wallclock();
 

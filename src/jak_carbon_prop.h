@@ -27,7 +27,7 @@
 
 JAK_BEGIN_DECL
 
-u64 carbon_prop_size(struct memfile *file);
+jak_u64 carbon_prop_size(struct jak_memfile *file);
 
 JAK_END_DECL
 

@@ -29,23 +29,23 @@
 
 JAK_BEGIN_DECL
 
-bool carbon_commit_hash_create(struct memfile *file);
+bool carbon_commit_hash_create(struct jak_memfile *file);
 
-bool carbon_commit_hash_skip(struct memfile *file);
+bool carbon_commit_hash_skip(struct jak_memfile *file);
 
-bool carbon_commit_hash_read(u64 *commit_hash, struct memfile *file);
+bool carbon_commit_hash_read(jak_u64 *commit_hash, struct jak_memfile *file);
 
-bool carbon_commit_hash_peek(u64 *commit_hash, struct memfile *file);
+bool carbon_commit_hash_peek(jak_u64 *commit_hash, struct jak_memfile *file);
 
-bool carbon_commit_hash_update(struct memfile *file, const char *base, u64 len);
+bool carbon_commit_hash_update(struct jak_memfile *file, const char *base, jak_u64 len);
 
-bool carbon_commit_hash_compute(u64 *commit_hash, const void *base, u64 len);
+bool carbon_commit_hash_compute(jak_u64 *commit_hash, const void *base, jak_u64 len);
 
-const char *carbon_commit_hash_to_str(struct jak_string *dst, u64 commit_hash);
+const char *carbon_commit_hash_to_str(struct jak_string *dst, jak_u64 commit_hash);
 
-bool carbon_commit_hash_append_to_str(struct jak_string *dst, u64 commit_hash);
+bool carbon_commit_hash_append_to_str(struct jak_string *dst, jak_u64 commit_hash);
 
-u64 carbon_commit_hash_from_str(const char *commit_str, struct err *err);
+jak_u64 carbon_commit_hash_from_str(const char *commit_str, struct jak_error *err);
 
 JAK_END_DECL
 

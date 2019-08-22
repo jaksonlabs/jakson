@@ -46,7 +46,7 @@ struct token_memory {
     bool init;
 };
 
-static int process_token(struct err *err, struct jak_json_err *error_desc, const struct jak_json_token *token,
+static int process_token(struct jak_error *err, struct jak_json_err *error_desc, const struct jak_json_token *token,
                          struct vector ofType(enum json_token_type) *brackets, struct token_memory *token_mem);
 
 static int set_error(struct jak_json_err *error_desc, const struct jak_json_token *token, const char *msg);
@@ -195,7 +195,7 @@ void json_token_dup(struct jak_json_token *dst, const struct jak_json_token *src
 
 void json_token_print(FILE *file, const struct jak_json_token *token)
 {
-        char *string = JAK_malloc(token->length + 1);
+        char *string = JAK_MALLOC(token->length + 1);
         strncpy(string, token->string, token->length);
         string[token->length] = '\0';
         fprintf(file,
@@ -208,10 +208,10 @@ void json_token_print(FILE *file, const struct jak_json_token *token)
         free(string);
 }
 
-static bool parse_object(struct jak_json_object_t *object, struct err *err,
+static bool parse_object(struct jak_json_object_t *object, struct jak_error *err,
                          struct vector ofType(struct jak_json_token) *token_stream, size_t *token_idx);
 
-static bool parse_array(struct jak_json_array *array, struct err *err,
+static bool parse_array(struct jak_json_array *array, struct jak_error *err,
                         struct vector ofType(struct jak_json_token) *token_stream, size_t *token_idx);
 
 static void parse_string(struct jak_json_string *string, struct vector ofType(struct jak_json_token) *token_stream,
@@ -220,13 +220,13 @@ static void parse_string(struct jak_json_string *string, struct vector ofType(st
 static void parse_number(struct jak_json_number *number, struct vector ofType(struct jak_json_token) *token_stream,
                          size_t *token_idx);
 
-static bool parse_element(struct jak_json_element *element, struct err *err,
+static bool parse_element(struct jak_json_element *element, struct jak_error *err,
                           struct vector ofType(struct jak_json_token) *token_stream, size_t *token_idx);
 
-static bool parse_elements(struct jak_json_elements *elements, struct err *err,
+static bool parse_elements(struct jak_json_elements *elements, struct jak_error *err,
                            struct vector ofType(struct jak_json_token) *token_stream, size_t *token_idx);
 
-static bool parse_token_stream(struct jak_json *json, struct err *err,
+static bool parse_token_stream(struct jak_json *json, struct jak_error *err,
                                struct vector ofType(struct jak_json_token) *token_stream);
 
 static struct jak_json_token get_token(struct vector ofType(struct jak_json_token) *token_stream, size_t token_idx);
@@ -243,19 +243,19 @@ static void connect_child_and_parents_element(struct jak_json_element *element);
 
 static void connect_child_and_parents(struct jak_json *json);
 
-static bool json_ast_node_member_print(FILE *file, struct err *err, struct jak_json_prop *member);
+static bool json_ast_node_member_print(FILE *file, struct jak_error *err, struct jak_json_prop *member);
 
-static bool json_ast_node_object_print(FILE *file, struct err *err, struct jak_json_object_t *object);
+static bool json_ast_node_object_print(FILE *file, struct jak_error *err, struct jak_json_object_t *object);
 
-static bool json_ast_node_array_print(FILE *file, struct err *err, struct jak_json_array *array);
+static bool json_ast_node_array_print(FILE *file, struct jak_error *err, struct jak_json_array *array);
 
 static void json_ast_node_string_print(FILE *file, struct jak_json_string *string);
 
-static bool json_ast_node_number_print(FILE *file, struct err *err, struct jak_json_number *number);
+static bool json_ast_node_number_print(FILE *file, struct jak_error *err, struct jak_json_number *number);
 
-static bool json_ast_node_value_print(FILE *file, struct err *err, struct jak_json_node_value *value);
+static bool json_ast_node_value_print(FILE *file, struct jak_error *err, struct jak_json_node_value *value);
 
-static bool json_ast_node_element_print(FILE *file, struct err *err, struct jak_json_element *element);
+static bool json_ast_node_element_print(FILE *file, struct jak_error *err, struct jak_json_element *element);
 
 #define NEXT_TOKEN(x) { *x = *x + 1; }
 #define PREV_TOKEN(x) { *x = *x - 1; }
@@ -279,7 +279,7 @@ bool json_parse(struct jak_json *json, struct jak_json_err *error_desc, struct j
 
         struct jak_json retval;
         JAK_zero_memory(&retval, sizeof(struct jak_json))
-        retval.element = JAK_malloc(sizeof(struct jak_json_element));
+        retval.element = JAK_MALLOC(sizeof(struct jak_json_element));
         error_init(&retval.err);
         const struct jak_json_token *token;
         int status;
@@ -323,7 +323,7 @@ bool json_parse(struct jak_json *json, struct jak_json_err *error_desc, struct j
         return status;
 }
 
-bool test_condition_value(struct err *err, struct jak_json_node_value *value)
+bool test_condition_value(struct jak_error *err, struct jak_json_node_value *value)
 {
         switch (value->value_type) {
                 case JSON_VALUE_OBJECT:
@@ -358,7 +358,7 @@ bool test_condition_value(struct err *err, struct jak_json_node_value *value)
                                     && ((value_type != JSON_VALUE_TRUE && value_type != JSON_VALUE_FALSE)
                                         && value_type != element->value.value_type)) {
                                         char message[] = "JSON file constraint broken: arrays of mixed types detected";
-                                        char *result = JAK_malloc(strlen(message) + 1);
+                                        char *result = JAK_MALLOC(strlen(message) + 1);
                                         strcpy(result, &message[0]);
                                         error_with_details(err, JAK_ERR_ARRAYOFMIXEDTYPES, result);
                                         free(result);
@@ -380,7 +380,7 @@ bool test_condition_value(struct err *err, struct jak_json_node_value *value)
                                                 break;
                                         case JSON_VALUE_ARRAY: {/** Test "No Array of Arrays" condition */
                                                 char message[] = "JSON file constraint broken: arrays of arrays detected";
-                                                char *result = JAK_malloc(strlen(message) + 1);
+                                                char *result = JAK_MALLOC(strlen(message) + 1);
                                                 strcpy(result, &message[0]);
                                                 error_with_details(err, JAK_ERR_ARRAYOFARRAYS, result);
                                                 free(result);
@@ -398,7 +398,7 @@ bool test_condition_value(struct err *err, struct jak_json_node_value *value)
         return true;
 }
 
-bool json_test(struct err *err, struct jak_json *json)
+bool json_test(struct jak_error *err, struct jak_json *json)
 {
         return (test_condition_value(err, &json->element->value));
 }
@@ -408,7 +408,7 @@ static struct jak_json_token get_token(struct vector ofType(struct jak_json_toke
         return *(struct jak_json_token *) vec_at(token_stream, token_idx);
 }
 
-bool parse_members(struct err *err, struct jak_json_members *members, struct vector ofType(struct jak_json_token) *token_stream,
+bool parse_members(struct jak_error *err, struct jak_json_members *members, struct vector ofType(struct jak_json_token) *token_stream,
                    size_t *token_idx)
 {
         vec_create(&members->members, NULL, sizeof(struct jak_json_prop), 20);
@@ -418,7 +418,7 @@ bool parse_members(struct err *err, struct jak_json_members *members, struct vec
                 struct jak_json_prop *member = vec_new_and_get(&members->members, struct jak_json_prop);
                 struct jak_json_token keyNameToken = get_token(token_stream, *token_idx);
 
-                member->key.value = JAK_malloc(keyNameToken.length + 1);
+                member->key.value = JAK_MALLOC(keyNameToken.length + 1);
                 strncpy(member->key.value, keyNameToken.string, keyNameToken.length);
                 member->key.value[keyNameToken.length] = '\0';
 
@@ -429,27 +429,27 @@ bool parse_members(struct err *err, struct jak_json_members *members, struct vec
                 switch (valueToken.type) {
                         case OBJECT_OPEN:
                                 member->value.value.value_type = JSON_VALUE_OBJECT;
-                                member->value.value.value.object = JAK_malloc(sizeof(struct jak_json_object_t));
+                                member->value.value.value.object = JAK_MALLOC(sizeof(struct jak_json_object_t));
                                 if (!parse_object(member->value.value.value.object, err, token_stream, token_idx)) {
                                         return false;
                                 }
                                 break;
                         case ARRAY_OPEN:
                                 member->value.value.value_type = JSON_VALUE_ARRAY;
-                                member->value.value.value.array = JAK_malloc(sizeof(struct jak_json_array));
+                                member->value.value.value.array = JAK_MALLOC(sizeof(struct jak_json_array));
                                 if (!parse_array(member->value.value.value.array, err, token_stream, token_idx)) {
                                         return false;
                                 }
                                 break;
                         case LITERAL_STRING:
                                 member->value.value.value_type = JSON_VALUE_STRING;
-                                member->value.value.value.string = JAK_malloc(sizeof(struct jak_json_string));
+                                member->value.value.value.string = JAK_MALLOC(sizeof(struct jak_json_string));
                                 parse_string(member->value.value.value.string, token_stream, token_idx);
                                 break;
                         case LITERAL_INT:
                         case LITERAL_FLOAT:
                                 member->value.value.value_type = JSON_VALUE_NUMBER;
-                                member->value.value.value.number = JAK_malloc(sizeof(struct jak_json_number));
+                                member->value.value.value.number = JAK_MALLOC(sizeof(struct jak_json_number));
                                 parse_number(member->value.value.value.number, token_stream, token_idx);
                                 break;
                         case LITERAL_TRUE:
@@ -475,12 +475,12 @@ bool parse_members(struct err *err, struct jak_json_members *members, struct vec
         return true;
 }
 
-static bool parse_object(struct jak_json_object_t *object, struct err *err,
+static bool parse_object(struct jak_json_object_t *object, struct jak_error *err,
                          struct vector ofType(struct jak_json_token) *token_stream, size_t *token_idx)
 {
         assert(get_token(token_stream, *token_idx).type == OBJECT_OPEN);
         NEXT_TOKEN(token_idx);  /** Skip '{' */
-        object->value = JAK_malloc(sizeof(struct jak_json_members));
+        object->value = JAK_MALLOC(sizeof(struct jak_json_members));
 
         /** test whether this is an empty object */
         struct jak_json_token token = get_token(token_stream, *token_idx);
@@ -497,11 +497,11 @@ static bool parse_object(struct jak_json_object_t *object, struct err *err,
         return true;
 }
 
-static bool parse_array(struct jak_json_array *array, struct err *err,
+static bool parse_array(struct jak_json_array *array, struct jak_error *err,
                         struct vector ofType(struct jak_json_token) *token_stream, size_t *token_idx)
 {
         struct jak_json_token token = get_token(token_stream, *token_idx);
-        unused(token);
+        JAK_UNUSED(token);
         assert(token.type == ARRAY_OPEN);
         NEXT_TOKEN(token_idx); /** Skip '[' */
 
@@ -520,7 +520,7 @@ static void parse_string(struct jak_json_string *string, struct vector ofType(st
         struct jak_json_token token = get_token(token_stream, *token_idx);
         assert(token.type == LITERAL_STRING);
 
-        string->value = JAK_malloc(token.length + 1);
+        string->value = JAK_MALLOC(token.length + 1);
         if (likely(token.length > 0)) {
                 strncpy(string->value, token.string, token.length);
         }
@@ -534,18 +534,18 @@ static void parse_number(struct jak_json_number *number, struct vector ofType(st
         struct jak_json_token token = get_token(token_stream, *token_idx);
         assert(token.type == LITERAL_FLOAT || token.type == LITERAL_INT);
 
-        char *value = JAK_malloc(token.length + 1);
+        char *value = JAK_MALLOC(token.length + 1);
         strncpy(value, token.string, token.length);
         value[token.length] = '\0';
 
         if (token.type == LITERAL_INT) {
-                i64 assumeSigned = convert_atoi64(value);
+                jak_i64 assumeSigned = convert_atoi64(value);
                 if (value[0] == '-') {
                         number->value_type = JSON_NUMBER_SIGNED;
                         number->value.signed_integer = assumeSigned;
                 } else {
-                        u64 assumeUnsigned = convert_atoiu64(value);
-                        if (assumeUnsigned >= (u64) assumeSigned) {
+                        jak_u64 assumeUnsigned = convert_atoiu64(value);
+                        if (assumeUnsigned >= (jak_u64) assumeSigned) {
                                 number->value_type = JSON_NUMBER_UNSIGNED;
                                 number->value.unsigned_integer = assumeUnsigned;
                         } else {
@@ -563,30 +563,30 @@ static void parse_number(struct jak_json_number *number, struct vector ofType(st
         NEXT_TOKEN(token_idx);
 }
 
-static bool parse_element(struct jak_json_element *element, struct err *err,
+static bool parse_element(struct jak_json_element *element, struct jak_error *err,
                           struct vector ofType(struct jak_json_token) *token_stream, size_t *token_idx)
 {
         struct jak_json_token token = get_token(token_stream, *token_idx);
 
         if (token.type == OBJECT_OPEN) { /** Parse object */
                 element->value.value_type = JSON_VALUE_OBJECT;
-                element->value.value.object = JAK_malloc(sizeof(struct jak_json_object_t));
+                element->value.value.object = JAK_MALLOC(sizeof(struct jak_json_object_t));
                 if (!parse_object(element->value.value.object, err, token_stream, token_idx)) {
                         return false;
                 }
         } else if (token.type == ARRAY_OPEN) { /** Parse array */
                 element->value.value_type = JSON_VALUE_ARRAY;
-                element->value.value.array = JAK_malloc(sizeof(struct jak_json_array));
+                element->value.value.array = JAK_MALLOC(sizeof(struct jak_json_array));
                 if (!parse_array(element->value.value.array, err, token_stream, token_idx)) {
                         return false;
                 }
         } else if (token.type == LITERAL_STRING) { /** Parse string */
                 element->value.value_type = JSON_VALUE_STRING;
-                element->value.value.string = JAK_malloc(sizeof(struct jak_json_string));
+                element->value.value.string = JAK_MALLOC(sizeof(struct jak_json_string));
                 parse_string(element->value.value.string, token_stream, token_idx);
         } else if (token.type == LITERAL_FLOAT || token.type == LITERAL_INT) { /** Parse number */
                 element->value.value_type = JSON_VALUE_NUMBER;
-                element->value.value.number = JAK_malloc(sizeof(struct jak_json_number));
+                element->value.value.number = JAK_MALLOC(sizeof(struct jak_json_number));
                 parse_number(element->value.value.number, token_stream, token_idx);
         } else if (token.type == LITERAL_TRUE) {
                 element->value.value_type = JSON_VALUE_TRUE;
@@ -603,7 +603,7 @@ static bool parse_element(struct jak_json_element *element, struct err *err,
         return true;
 }
 
-static bool parse_elements(struct jak_json_elements *elements, struct err *err,
+static bool parse_elements(struct jak_json_elements *elements, struct jak_error *err,
                            struct vector ofType(struct jak_json_token) *token_stream, size_t *token_idx)
 {
         struct jak_json_token delimiter;
@@ -624,7 +624,7 @@ static bool parse_elements(struct jak_json_elements *elements, struct err *err,
         return true;
 }
 
-static bool parse_token_stream(struct jak_json *json, struct err *err,
+static bool parse_token_stream(struct jak_json *json, struct jak_error *err,
                                struct vector ofType(struct jak_json_token) *token_stream)
 {
         size_t token_idx = 0;
@@ -700,7 +700,7 @@ static bool isValue(enum json_token_type token)
                 || token == LITERAL_FALSE || token == LITERAL_NULL);
 }
 
-static int process_token(struct err *err, struct jak_json_err *error_desc, const struct jak_json_token *token,
+static int process_token(struct jak_error *err, struct jak_json_err *error_desc, const struct jak_json_token *token,
                          struct vector ofType(enum json_token_type) *brackets, struct token_memory *token_mem)
 {
         switch (token->type) {
@@ -846,13 +846,13 @@ static int set_error(struct jak_json_err *error_desc, const struct jak_json_toke
         return false;
 }
 
-static bool json_ast_node_member_print(FILE *file, struct err *err, struct jak_json_prop *member)
+static bool json_ast_node_member_print(FILE *file, struct jak_error *err, struct jak_json_prop *member)
 {
         fprintf(file, "\"%s\": ", member->key.value);
         return json_ast_node_value_print(file, err, &member->value.value);
 }
 
-static bool json_ast_node_object_print(FILE *file, struct err *err, struct jak_json_object_t *object)
+static bool json_ast_node_object_print(FILE *file, struct jak_error *err, struct jak_json_object_t *object)
 {
         fprintf(file, "{");
         for (size_t i = 0; i < object->value->members.num_elems; i++) {
@@ -866,7 +866,7 @@ static bool json_ast_node_object_print(FILE *file, struct err *err, struct jak_j
         return true;
 }
 
-static bool json_ast_node_array_print(FILE *file, struct err *err, struct jak_json_array *array)
+static bool json_ast_node_array_print(FILE *file, struct jak_error *err, struct jak_json_array *array)
 {
         fprintf(file, "[");
         for (size_t i = 0; i < array->elements.elements.num_elems; i++) {
@@ -885,7 +885,7 @@ static void json_ast_node_string_print(FILE *file, struct jak_json_string *strin
         fprintf(file, "\"%s\"", string->value);
 }
 
-static bool json_ast_node_number_print(FILE *file, struct err *err, struct jak_json_number *number)
+static bool json_ast_node_number_print(FILE *file, struct jak_error *err, struct jak_json_number *number)
 {
         switch (number->value_type) {
                 case JSON_NUMBER_FLOAT:
@@ -903,7 +903,7 @@ static bool json_ast_node_number_print(FILE *file, struct err *err, struct jak_j
         return true;
 }
 
-static bool json_ast_node_value_print(FILE *file, struct err *err, struct jak_json_node_value *value)
+static bool json_ast_node_value_print(FILE *file, struct jak_error *err, struct jak_json_node_value *value)
 {
         switch (value->value_type) {
                 case JSON_VALUE_OBJECT:
@@ -939,25 +939,25 @@ static bool json_ast_node_value_print(FILE *file, struct err *err, struct jak_js
         return true;
 }
 
-static bool json_ast_node_element_print(FILE *file, struct err *err, struct jak_json_element *element)
+static bool json_ast_node_element_print(FILE *file, struct jak_error *err, struct jak_json_element *element)
 {
         return json_ast_node_value_print(file, err, &element->value);
 }
 
-static bool json_ast_node_value_drop(struct jak_json_node_value *value, struct err *err);
+static bool json_ast_node_value_drop(struct jak_json_node_value *value, struct jak_error *err);
 
-static bool json_ast_node_element_drop(struct jak_json_element *element, struct err *err)
+static bool json_ast_node_element_drop(struct jak_json_element *element, struct jak_error *err)
 {
         return json_ast_node_value_drop(&element->value, err);
 }
 
-static bool json_ast_node_member_drop(struct jak_json_prop *member, struct err *err)
+static bool json_ast_node_member_drop(struct jak_json_prop *member, struct jak_error *err)
 {
         free(member->key.value);
         return json_ast_node_element_drop(&member->value, err);
 }
 
-static bool json_ast_node_members_drop(struct jak_json_members *members, struct err *err)
+static bool json_ast_node_members_drop(struct jak_json_members *members, struct jak_error *err)
 {
         for (size_t i = 0; i < members->members.num_elems; i++) {
                 struct jak_json_prop *member = vec_get(&members->members, i, struct jak_json_prop);
@@ -969,7 +969,7 @@ static bool json_ast_node_members_drop(struct jak_json_members *members, struct 
         return true;
 }
 
-static bool json_ast_node_elements_drop(struct jak_json_elements *elements, struct err *err)
+static bool json_ast_node_elements_drop(struct jak_json_elements *elements, struct jak_error *err)
 {
         for (size_t i = 0; i < elements->elements.num_elems; i++) {
                 struct jak_json_element *element = vec_get(&elements->elements, i, struct jak_json_element);
@@ -981,7 +981,7 @@ static bool json_ast_node_elements_drop(struct jak_json_elements *elements, stru
         return true;
 }
 
-static bool json_ast_node_object_drop(struct jak_json_object_t *object, struct err *err)
+static bool json_ast_node_object_drop(struct jak_json_object_t *object, struct jak_error *err)
 {
         if (!json_ast_node_members_drop(object->value, err)) {
                 return false;
@@ -991,7 +991,7 @@ static bool json_ast_node_object_drop(struct jak_json_object_t *object, struct e
         }
 }
 
-static bool json_ast_node_array_drop(struct jak_json_array *array, struct err *err)
+static bool json_ast_node_array_drop(struct jak_json_array *array, struct jak_error *err)
 {
         return json_ast_node_elements_drop(&array->elements, err);
 }
@@ -1003,10 +1003,10 @@ static void json_ast_node_string_drop(struct jak_json_string *string)
 
 static void json_ast_node_number_drop(struct jak_json_number *number)
 {
-        unused(number);
+        JAK_UNUSED(number);
 }
 
-static bool json_ast_node_value_drop(struct jak_json_node_value *value, struct err *err)
+static bool json_ast_node_value_drop(struct jak_json_node_value *value, struct jak_error *err)
 {
         switch (value->value_type) {
                 case JSON_VALUE_OBJECT:
@@ -1063,7 +1063,7 @@ bool json_list_is_empty(const struct jak_json_elements *elements)
         return elements->elements.num_elems == 0;
 }
 
-bool json_list_length(u32 *len, const struct jak_json_elements *elements)
+bool json_list_length(jak_u32 *len, const struct jak_json_elements *elements)
 {
         error_if_null(len)
         error_if_null(elements)
@@ -1328,7 +1328,7 @@ bool json_array_get_type(enum json_list_type *type, const struct jak_json_array 
         error_if_null(type)
         error_if_null(array)
         enum json_list_type list_type = JSON_LIST_TYPE_EMPTY;
-        for (u32 i = 0; i < array->elements.elements.num_elems; i++) {
+        for (jak_u32 i = 0; i < array->elements.elements.num_elems; i++) {
                 const struct jak_json_element *elem = vec_get(&array->elements.elements, i, struct jak_json_element);
                 switch (elem->value.value_type) {
                         case JSON_VALUE_OBJECT:

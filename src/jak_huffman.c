@@ -22,11 +22,11 @@
 #include <jak_pack.h>
 #include <jak_huffman.h>
 
-#define  MARKER_SYMBOL_HUFFMAN_DIC_ENTRY   'd'
+#define  JAK_MARKER_SYMBOL_HUFFMAN_DIC_ENTRY   'd'
 
-bool pack_huffman_init(struct packer *self)
+bool pack_huffman_init(struct jak_packer *self)
 {
-        self->extra = JAK_malloc(sizeof(struct jak_huffman));
+        self->extra = JAK_MALLOC(sizeof(struct jak_huffman));
         if (self->extra != NULL) {
                 struct jak_huffman *encoder = (struct jak_huffman *) self->extra;
                 coding_huffman_create(encoder);
@@ -36,12 +36,12 @@ bool pack_huffman_init(struct packer *self)
         }
 }
 
-bool pack_coding_huffman_cpy(const struct packer *self, struct packer *dst)
+bool pack_coding_huffman_cpy(const struct jak_packer *self, struct jak_packer *dst)
 {
         JAK_check_tag(self->tag, PACK_HUFFMAN);
 
         *dst = *self;
-        dst->extra = JAK_malloc(sizeof(struct jak_huffman));
+        dst->extra = JAK_MALLOC(sizeof(struct jak_huffman));
         if (dst->extra != NULL) {
                 struct jak_huffman *self_encoder = (struct jak_huffman *) self->extra;
                 struct jak_huffman *dst_encoder = (struct jak_huffman *) dst->extra;
@@ -51,7 +51,7 @@ bool pack_coding_huffman_cpy(const struct packer *self, struct packer *dst)
         }
 }
 
-bool pack_coding_huffman_drop(struct packer *self)
+bool pack_coding_huffman_drop(struct jak_packer *self)
 {
         JAK_check_tag(self->tag, PACK_HUFFMAN);
 
@@ -61,24 +61,24 @@ bool pack_coding_huffman_drop(struct packer *self)
         return true;
 }
 
-bool huffman_dump_dictionary(FILE *file, struct memfile *memfile)
+bool huffman_dump_dictionary(FILE *file, struct jak_memfile *memfile)
 {
         struct pack_huffman_info entry_info;
-        offset_t offset;
+        jak_offset_t offset;
 
-        while ((*JAK_MEMFILE_PEEK(memfile, char)) == MARKER_SYMBOL_HUFFMAN_DIC_ENTRY) {
+        while ((*JAK_MEMFILE_PEEK(memfile, char)) == JAK_MARKER_SYMBOL_HUFFMAN_DIC_ENTRY) {
                 memfile_get_offset(&offset, memfile);
-                coding_huffman_read_entry(&entry_info, memfile, MARKER_SYMBOL_HUFFMAN_DIC_ENTRY);
+                coding_huffman_read_entry(&entry_info, memfile, JAK_MARKER_SYMBOL_HUFFMAN_DIC_ENTRY);
 
                 fprintf(file, "0x%04x ", (unsigned) offset);
                 fprintf(file,
                         "[marker: %c] [letter: '%c'] [nbytes_prefix: %d] [code: ",
-                        MARKER_SYMBOL_HUFFMAN_DIC_ENTRY,
+                        JAK_MARKER_SYMBOL_HUFFMAN_DIC_ENTRY,
                         entry_info.letter,
                         entry_info.nbytes_prefix);
 
                 if (entry_info.nbytes_prefix > 0) {
-                        for (u16 i = 0; i < entry_info.nbytes_prefix; i++) {
+                        for (jak_u16 i = 0; i < entry_info.nbytes_prefix; i++) {
                                 bitmap_print_bits_in_char(file, entry_info.prefix_code[i]);
                                 fprintf(file, "%s", i + 1 < entry_info.nbytes_prefix ? ", " : "");
                         }
@@ -91,10 +91,10 @@ bool huffman_dump_dictionary(FILE *file, struct memfile *memfile)
         return true;
 }
 
-bool huffman_dump_string_table_entry(FILE *file, struct memfile *memfile)
+bool huffman_dump_string_table_entry(FILE *file, struct jak_memfile *memfile)
 {
-        unused(file);
-        unused(memfile);
+        JAK_UNUSED(file);
+        JAK_UNUSED(memfile);
 
         struct pack_huffman_str_info info;
 
@@ -111,7 +111,7 @@ bool huffman_dump_string_table_entry(FILE *file, struct memfile *memfile)
         return true;
 }
 
-bool pack_huffman_write_extra(struct packer *self, struct memfile *dst,
+bool pack_huffman_write_extra(struct jak_packer *self, struct jak_memfile *dst,
                               const struct vector ofType (const char *) *strings)
 {
         JAK_check_tag(self->tag, PACK_HUFFMAN);
@@ -119,46 +119,46 @@ bool pack_huffman_write_extra(struct packer *self, struct memfile *dst,
         struct jak_huffman *encoder = (struct jak_huffman *) self->extra;
 
         coding_huffman_build(encoder, strings);
-        coding_huffman_serialize(dst, encoder, MARKER_SYMBOL_HUFFMAN_DIC_ENTRY);
+        coding_huffman_serialize(dst, encoder, JAK_MARKER_SYMBOL_HUFFMAN_DIC_ENTRY);
 
         return true;
 }
 
-bool pack_huffman_read_extra(struct packer *self, FILE *src, size_t nbytes)
+bool pack_huffman_read_extra(struct jak_packer *self, FILE *src, size_t nbytes)
 {
         JAK_check_tag(self->tag, PACK_HUFFMAN);
 
-        unused(self);
-        unused(src);
-        unused(nbytes);
+        JAK_UNUSED(self);
+        JAK_UNUSED(src);
+        JAK_UNUSED(nbytes);
 
         abort(); /* not implemented */
         return false;
 }
 
-bool pack_huffman_print_extra(struct packer *self, FILE *file, struct memfile *src)
+bool pack_huffman_print_extra(struct jak_packer *self, FILE *file, struct jak_memfile *src)
 {
-        unused(self);
+        JAK_UNUSED(self);
 
         huffman_dump_dictionary(file, src);
 
         return true;
 }
 
-bool pack_huffman_print_encoded(struct packer *self, FILE *file, struct memfile *src,
-                                u32 decompressed_strlen)
+bool pack_huffman_print_encoded(struct jak_packer *self, FILE *file, struct jak_memfile *src,
+                                jak_u32 decompressed_strlen)
 {
-        unused(self);
-        unused(file);
-        unused(src);
-        unused(decompressed_strlen);
+        JAK_UNUSED(self);
+        JAK_UNUSED(file);
+        JAK_UNUSED(src);
+        JAK_UNUSED(decompressed_strlen);
 
         huffman_dump_string_table_entry(file, src);
 
         return true;
 }
 
-bool pack_huffman_encode_string(struct packer *self, struct memfile *dst, struct err *err, const char *string)
+bool pack_huffman_encode_string(struct jak_packer *self, struct jak_memfile *dst, struct jak_error *err, const char *string)
 {
         JAK_check_tag(self->tag, PACK_HUFFMAN);
 
@@ -169,12 +169,12 @@ bool pack_huffman_encode_string(struct packer *self, struct memfile *dst, struct
         return status;
 }
 
-bool pack_huffman_decode_string(struct packer *self, char *dst, size_t strlen, FILE *src)
+bool pack_huffman_decode_string(struct jak_packer *self, char *dst, size_t strlen, FILE *src)
 {
-        unused(self);
-        unused(dst);
-        unused(strlen);
-        unused(src);
+        JAK_UNUSED(self);
+        JAK_UNUSED(dst);
+        JAK_UNUSED(strlen);
+        JAK_UNUSED(src);
         abort(); /* not implemented */
         return false;
 }

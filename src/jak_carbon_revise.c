@@ -68,7 +68,7 @@ bool carbon_revise_begin(struct jak_carbon_revise *context, struct jak_carbon *r
 }
 
 
-static void key_unsigned_set(struct jak_carbon *doc, u64 key)
+static void key_unsigned_set(struct jak_carbon *doc, jak_u64 key)
 {
         assert(doc);
         memfile_save_position(&doc->memfile);
@@ -79,7 +79,7 @@ static void key_unsigned_set(struct jak_carbon *doc, u64 key)
         memfile_restore_position(&doc->memfile);
 }
 
-static void key_signed_set(struct jak_carbon *doc, i64 key)
+static void key_signed_set(struct jak_carbon *doc, jak_i64 key)
 {
         assert(doc);
         memfile_save_position(&doc->memfile);
@@ -118,7 +118,7 @@ bool carbon_revise_key_generate(global_id_t *out, struct jak_carbon_revise *cont
         }
 }
 
-bool carbon_revise_key_set_unsigned(struct jak_carbon_revise *context, u64 key_value)
+bool carbon_revise_key_set_unsigned(struct jak_carbon_revise *context, jak_u64 key_value)
 {
         error_if_null(context);
         enum carbon_key_type key_type;
@@ -132,7 +132,7 @@ bool carbon_revise_key_set_unsigned(struct jak_carbon_revise *context, u64 key_v
         }
 }
 
-bool carbon_revise_key_set_signed(struct jak_carbon_revise *context, i64 key_value)
+bool carbon_revise_key_set_signed(struct jak_carbon_revise *context, jak_i64 key_value)
 {
         error_if_null(context);
         enum carbon_key_type key_type;
@@ -164,7 +164,7 @@ bool carbon_revise_iterator_open(struct jak_carbon_array_it *it, struct jak_carb
 {
         error_if_null(it);
         error_if_null(context);
-        offset_t payload_start = carbon_int_payload_after_header(context->revised_doc);
+        jak_offset_t payload_start = carbon_int_payload_after_header(context->revised_doc);
         error_if(context->revised_doc->memfile.mode != READ_WRITE, &context->original->err, JAK_ERR_INTERNALERR)
         return carbon_array_it_create(it, &context->revised_doc->memfile, &context->original->err, payload_start);
 }
@@ -225,7 +225,7 @@ bool carbon_revise_remove(const char *dot_path, struct jak_carbon_revise *contex
                                         break;
                                 case CARBON_COLUMN: {
                                         struct jak_carbon_column_it *it = &eval.result.containers.column.it;
-                                        u32 elem_pos = eval.result.containers.column.elem_pos;
+                                        jak_u32 elem_pos = eval.result.containers.column.elem_pos;
                                         result = carbon_column_it_remove(it, elem_pos);
                                 }
                                         break;
@@ -257,13 +257,13 @@ bool carbon_revise_shrink(struct jak_carbon_revise *context)
         carbon_revise_iterator_open(&it, context);
         carbon_array_it_fast_forward(&it);
         if (memfile_remain_size(&it.memfile) > 0) {
-                offset_t first_empty_slot = memfile_tell(&it.memfile);
+                jak_offset_t first_empty_slot = memfile_tell(&it.memfile);
                 assert(memfile_size(&it.memfile) > first_empty_slot);
-                offset_t shrink_size = memfile_size(&it.memfile) - first_empty_slot;
+                jak_offset_t shrink_size = memfile_size(&it.memfile) - first_empty_slot;
                 memfile_cut(&it.memfile, shrink_size);
         }
 
-        offset_t size;
+        jak_offset_t size;
         memblock_size(&size, it.memfile.memblock);
         carbon_revise_iterator_close(&it);
         return true;
@@ -313,11 +313,11 @@ static bool internal_pack_array(struct jak_carbon_array_it *it)
                 if (!is_array_end) {
 
                         error_if(!is_empty_slot, &it->err, JAK_ERR_CORRUPTED);
-                        offset_t first_empty_slot_offset = memfile_tell(&this_array_it.memfile);
+                        jak_offset_t first_empty_slot_offset = memfile_tell(&this_array_it.memfile);
                         char final;
                         while ((final = *memfile_read(&this_array_it.memfile, sizeof(char))) == 0) {}
                         assert(final == JAK_CARBON_MARKER_ARRAY_END);
-                        offset_t last_empty_slot_offset = memfile_tell(&this_array_it.memfile) - sizeof(char);
+                        jak_offset_t last_empty_slot_offset = memfile_tell(&this_array_it.memfile) - sizeof(char);
                         memfile_seek(&this_array_it.memfile, first_empty_slot_offset);
                         assert(last_empty_slot_offset > first_empty_slot_offset);
 
@@ -337,28 +337,28 @@ static bool internal_pack_array(struct jak_carbon_array_it *it)
                         enum carbon_field_type type;
                         carbon_array_it_field_type(&type, it);
                         switch (type) {
-                                case CARBON_FIELD_TYPE_NULL:
-                                case CARBON_FIELD_TYPE_TRUE:
-                                case CARBON_FIELD_TYPE_FALSE:
-                                case CARBON_FIELD_TYPE_STRING:
-                                case CARBON_FIELD_TYPE_NUMBER_U8:
-                                case CARBON_FIELD_TYPE_NUMBER_U16:
-                                case CARBON_FIELD_TYPE_NUMBER_U32:
-                                case CARBON_FIELD_TYPE_NUMBER_U64:
-                                case CARBON_FIELD_TYPE_NUMBER_I8:
-                                case CARBON_FIELD_TYPE_NUMBER_I16:
-                                case CARBON_FIELD_TYPE_NUMBER_I32:
-                                case CARBON_FIELD_TYPE_NUMBER_I64:
-                                case CARBON_FIELD_TYPE_NUMBER_FLOAT:
-                                case CARBON_FIELD_TYPE_BINARY:
-                                case CARBON_FIELD_TYPE_BINARY_CUSTOM:
+                                case CARBON_JAK_FIELD_TYPE_NULL:
+                                case CARBON_JAK_FIELD_TYPE_TRUE:
+                                case CARBON_JAK_FIELD_TYPE_FALSE:
+                                case CARBON_JAK_FIELD_TYPE_STRING:
+                                case CARBON_JAK_FIELD_TYPE_NUMBER_U8:
+                                case CARBON_JAK_FIELD_TYPE_NUMBER_U16:
+                                case CARBON_JAK_FIELD_TYPE_NUMBER_U32:
+                                case CARBON_JAK_FIELD_TYPE_NUMBER_U64:
+                                case CARBON_JAK_FIELD_TYPE_NUMBER_I8:
+                                case CARBON_JAK_FIELD_TYPE_NUMBER_I16:
+                                case CARBON_JAK_FIELD_TYPE_NUMBER_I32:
+                                case CARBON_JAK_FIELD_TYPE_NUMBER_I64:
+                                case CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT:
+                                case CARBON_JAK_FIELD_TYPE_BINARY:
+                                case CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM:
                                         /* nothing to shrink, because there are no padded zeros here */
                                         break;
-                                case CARBON_FIELD_TYPE_ARRAY: {
+                                case CARBON_JAK_FIELD_TYPE_ARRAY: {
                                         struct jak_carbon_array_it nested_array_it;
                                         carbon_array_it_create(&nested_array_it, &it->memfile, &it->err,
                                                                it->field_access.nested_array_it->payload_start -
-                                                               sizeof(u8));
+                                                               sizeof(jak_u8));
                                         internal_pack_array(&nested_array_it);
                                         assert(*memfile_peek(&nested_array_it.memfile, sizeof(char)) ==
                                                        JAK_CARBON_MARKER_ARRAY_END);
@@ -367,26 +367,26 @@ static bool internal_pack_array(struct jak_carbon_array_it *it)
                                         carbon_array_it_drop(&nested_array_it);
                                 }
                                         break;
-                                case CARBON_FIELD_TYPE_COLUMN_U8:
-                                case CARBON_FIELD_TYPE_COLUMN_U16:
-                                case CARBON_FIELD_TYPE_COLUMN_U32:
-                                case CARBON_FIELD_TYPE_COLUMN_U64:
-                                case CARBON_FIELD_TYPE_COLUMN_I8:
-                                case CARBON_FIELD_TYPE_COLUMN_I16:
-                                case CARBON_FIELD_TYPE_COLUMN_I32:
-                                case CARBON_FIELD_TYPE_COLUMN_I64:
-                                case CARBON_FIELD_TYPE_COLUMN_FLOAT:
-                                case CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
+                                case CARBON_JAK_FIELD_TYPE_COLUMN_U8:
+                                case CARBON_JAK_FIELD_TYPE_COLUMN_U16:
+                                case CARBON_JAK_FIELD_TYPE_COLUMN_U32:
+                                case CARBON_JAK_FIELD_TYPE_COLUMN_U64:
+                                case CARBON_JAK_FIELD_TYPE_COLUMN_I8:
+                                case CARBON_JAK_FIELD_TYPE_COLUMN_I16:
+                                case CARBON_JAK_FIELD_TYPE_COLUMN_I32:
+                                case CARBON_JAK_FIELD_TYPE_COLUMN_I64:
+                                case CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT:
+                                case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN:
                                         carbon_column_it_rewind(it->field_access.nested_column_it);
                                         internal_pack_column(it->field_access.nested_column_it);
                                         memfile_seek(&it->memfile,
                                                      memfile_tell(&it->field_access.nested_column_it->memfile));
                                         break;
-                                case CARBON_FIELD_TYPE_OBJECT: {
+                                case CARBON_JAK_FIELD_TYPE_OBJECT: {
                                         struct jak_carbon_object_it nested_object_it;
                                         carbon_object_it_create(&nested_object_it, &it->memfile, &it->err,
                                                                 it->field_access.nested_object_it->object_contents_off -
-                                                                sizeof(u8));
+                                                                sizeof(jak_u8));
                                         internal_pack_object(&nested_object_it);
                                         assert(*memfile_peek(&nested_object_it.memfile, sizeof(char)) ==
                                                        JAK_CARBON_MARKER_OBJECT_END);
@@ -421,11 +421,11 @@ static bool internal_pack_object(struct jak_carbon_object_it *it)
                 if (!is_object_end) {
 
                         error_if(!is_empty_slot, &it->err, JAK_ERR_CORRUPTED);
-                        offset_t first_empty_slot_offset = memfile_tell(&this_object_it.memfile);
+                        jak_offset_t first_empty_slot_offset = memfile_tell(&this_object_it.memfile);
                         char final;
                         while ((final = *memfile_read(&this_object_it.memfile, sizeof(char))) == 0) {}
                         assert(final == JAK_CARBON_MARKER_OBJECT_END);
-                        offset_t last_empty_slot_offset = memfile_tell(&this_object_it.memfile) - sizeof(char);
+                        jak_offset_t last_empty_slot_offset = memfile_tell(&this_object_it.memfile) - sizeof(char);
                         memfile_seek(&this_object_it.memfile, first_empty_slot_offset);
                         assert(last_empty_slot_offset > first_empty_slot_offset);
 
@@ -445,28 +445,28 @@ static bool internal_pack_object(struct jak_carbon_object_it *it)
                         enum carbon_field_type type;
                         carbon_object_it_prop_type(&type, it);
                         switch (type) {
-                                case CARBON_FIELD_TYPE_NULL:
-                                case CARBON_FIELD_TYPE_TRUE:
-                                case CARBON_FIELD_TYPE_FALSE:
-                                case CARBON_FIELD_TYPE_STRING:
-                                case CARBON_FIELD_TYPE_NUMBER_U8:
-                                case CARBON_FIELD_TYPE_NUMBER_U16:
-                                case CARBON_FIELD_TYPE_NUMBER_U32:
-                                case CARBON_FIELD_TYPE_NUMBER_U64:
-                                case CARBON_FIELD_TYPE_NUMBER_I8:
-                                case CARBON_FIELD_TYPE_NUMBER_I16:
-                                case CARBON_FIELD_TYPE_NUMBER_I32:
-                                case CARBON_FIELD_TYPE_NUMBER_I64:
-                                case CARBON_FIELD_TYPE_NUMBER_FLOAT:
-                                case CARBON_FIELD_TYPE_BINARY:
-                                case CARBON_FIELD_TYPE_BINARY_CUSTOM:
+                                case CARBON_JAK_FIELD_TYPE_NULL:
+                                case CARBON_JAK_FIELD_TYPE_TRUE:
+                                case CARBON_JAK_FIELD_TYPE_FALSE:
+                                case CARBON_JAK_FIELD_TYPE_STRING:
+                                case CARBON_JAK_FIELD_TYPE_NUMBER_U8:
+                                case CARBON_JAK_FIELD_TYPE_NUMBER_U16:
+                                case CARBON_JAK_FIELD_TYPE_NUMBER_U32:
+                                case CARBON_JAK_FIELD_TYPE_NUMBER_U64:
+                                case CARBON_JAK_FIELD_TYPE_NUMBER_I8:
+                                case CARBON_JAK_FIELD_TYPE_NUMBER_I16:
+                                case CARBON_JAK_FIELD_TYPE_NUMBER_I32:
+                                case CARBON_JAK_FIELD_TYPE_NUMBER_I64:
+                                case CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT:
+                                case CARBON_JAK_FIELD_TYPE_BINARY:
+                                case CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM:
                                         /* nothing to shrink, because there are no padded zeros here */
                                         break;
-                                case CARBON_FIELD_TYPE_ARRAY: {
+                                case CARBON_JAK_FIELD_TYPE_ARRAY: {
                                         struct jak_carbon_array_it nested_array_it;
                                         carbon_array_it_create(&nested_array_it, &it->memfile, &it->err,
                                                                it->field.value.data.nested_array_it->payload_start -
-                                                               sizeof(u8));
+                                                               sizeof(jak_u8));
                                         internal_pack_array(&nested_array_it);
                                         assert(*memfile_peek(&nested_array_it.memfile, sizeof(char)) ==
                                                        JAK_CARBON_MARKER_ARRAY_END);
@@ -475,26 +475,26 @@ static bool internal_pack_object(struct jak_carbon_object_it *it)
                                         carbon_array_it_drop(&nested_array_it);
                                 }
                                         break;
-                                case CARBON_FIELD_TYPE_COLUMN_U8:
-                                case CARBON_FIELD_TYPE_COLUMN_U16:
-                                case CARBON_FIELD_TYPE_COLUMN_U32:
-                                case CARBON_FIELD_TYPE_COLUMN_U64:
-                                case CARBON_FIELD_TYPE_COLUMN_I8:
-                                case CARBON_FIELD_TYPE_COLUMN_I16:
-                                case CARBON_FIELD_TYPE_COLUMN_I32:
-                                case CARBON_FIELD_TYPE_COLUMN_I64:
-                                case CARBON_FIELD_TYPE_COLUMN_FLOAT:
-                                case CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
+                                case CARBON_JAK_FIELD_TYPE_COLUMN_U8:
+                                case CARBON_JAK_FIELD_TYPE_COLUMN_U16:
+                                case CARBON_JAK_FIELD_TYPE_COLUMN_U32:
+                                case CARBON_JAK_FIELD_TYPE_COLUMN_U64:
+                                case CARBON_JAK_FIELD_TYPE_COLUMN_I8:
+                                case CARBON_JAK_FIELD_TYPE_COLUMN_I16:
+                                case CARBON_JAK_FIELD_TYPE_COLUMN_I32:
+                                case CARBON_JAK_FIELD_TYPE_COLUMN_I64:
+                                case CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT:
+                                case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN:
                                         carbon_column_it_rewind(it->field.value.data.nested_column_it);
                                         internal_pack_column(it->field.value.data.nested_column_it);
                                         memfile_seek(&it->memfile,
                                                      memfile_tell(&it->field.value.data.nested_column_it->memfile));
                                         break;
-                                case CARBON_FIELD_TYPE_OBJECT: {
+                                case CARBON_JAK_FIELD_TYPE_OBJECT: {
                                         struct jak_carbon_object_it nested_object_it;
                                         carbon_object_it_create(&nested_object_it, &it->memfile, &it->err,
                                                                 it->field.value.data.nested_object_it->object_contents_off -
-                                                                sizeof(u8));
+                                                                sizeof(jak_u8));
                                         internal_pack_object(&nested_object_it);
                                         assert(*memfile_peek(&nested_object_it.memfile, sizeof(char)) ==
                                                        JAK_CARBON_MARKER_OBJECT_END);
@@ -518,9 +518,9 @@ static bool internal_pack_column(struct jak_carbon_column_it *it)
 {
         assert(it);
 
-        u32 free_space = (it->column_capacity - it->column_num_elements) * carbon_int_get_type_value_size(it->type);
-        offset_t payload_start = carbon_int_column_get_payload_off(it);
-        u64 payload_size = it->column_num_elements * carbon_int_get_type_value_size(it->type);
+        jak_u32 free_space = (it->column_capacity - it->column_num_elements) * carbon_int_get_type_value_size(it->type);
+        jak_offset_t payload_start = carbon_int_column_get_payload_off(it);
+        jak_u64 payload_size = it->column_num_elements * carbon_int_get_type_value_size(it->type);
         memfile_seek(&it->memfile, payload_start);
         memfile_skip(&it->memfile, payload_size);
 
@@ -554,7 +554,7 @@ static bool carbon_header_rev_inc(struct jak_carbon *doc)
         memfile_seek(&doc->memfile, 0);
         carbon_key_read(NULL, &key_type, &doc->memfile);
         if (carbon_has_key(key_type)) {
-                u64 raw_data_len = 0;
+                jak_u64 raw_data_len = 0;
                 const void *raw_data = carbon_raw_data(&raw_data_len, doc);
                 carbon_commit_hash_update(&doc->memfile, raw_data, raw_data_len);
         }

@@ -30,15 +30,15 @@
 #include <jak_carbon_int.h>
 
 #define DEFINE_IN_PLACE_UPDATE_FUNCTION(type_name, field_type)                                                         \
-bool carbon_array_it_update_in_place_##type_name(struct jak_carbon_array_it *it, type_name value)                \
+bool carbon_array_it_update_in_place_##type_name(struct jak_carbon_array_it *it, jak_##type_name value)                \
 {                                                                                                                      \
-        offset_t datum = 0;                                                                                                \
+        jak_offset_t datum = 0;                                                                                                \
         error_if_null(it);                                                                                             \
         if (likely(it->field_access.it_field_type == field_type)) {                                                    \
                 memfile_save_position(&it->memfile);                                                                   \
                 carbon_int_array_it_offset(&datum, it);                                                                 \
-                memfile_seek(&it->memfile, datum + sizeof(u8));                                                        \
-                memfile_write(&it->memfile, &value, sizeof(type_name));                                                \
+                memfile_seek(&it->memfile, datum + sizeof(jak_u8));                                                        \
+                memfile_write(&it->memfile, &value, sizeof(jak_##type_name));                                                \
                 memfile_restore_position(&it->memfile);                                                                \
                 return true;                                                                                           \
         } else {                                                                                                       \
@@ -47,23 +47,23 @@ bool carbon_array_it_update_in_place_##type_name(struct jak_carbon_array_it *it,
         }                                                                                                              \
 }
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(u8, CARBON_FIELD_TYPE_NUMBER_U8)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(u8, CARBON_JAK_FIELD_TYPE_NUMBER_U8)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(u16, CARBON_FIELD_TYPE_NUMBER_U16)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(u16, CARBON_JAK_FIELD_TYPE_NUMBER_U16)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(u32, CARBON_FIELD_TYPE_NUMBER_U32)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(u32, CARBON_JAK_FIELD_TYPE_NUMBER_U32)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(u64, CARBON_FIELD_TYPE_NUMBER_U64)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(u64, CARBON_JAK_FIELD_TYPE_NUMBER_U64)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(i8, CARBON_FIELD_TYPE_NUMBER_I8)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(i8, CARBON_JAK_FIELD_TYPE_NUMBER_I8)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(i16, CARBON_FIELD_TYPE_NUMBER_I16)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(i16, CARBON_JAK_FIELD_TYPE_NUMBER_I16)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(i32, CARBON_FIELD_TYPE_NUMBER_I32)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(i32, CARBON_JAK_FIELD_TYPE_NUMBER_I32)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(i64, CARBON_FIELD_TYPE_NUMBER_I64)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(i64, CARBON_JAK_FIELD_TYPE_NUMBER_I64)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(float, CARBON_FIELD_TYPE_NUMBER_FLOAT)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(float, CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT)
 
 static bool update_in_place_constant(struct jak_carbon_array_it *it, enum carbon_constant constant)
 {
@@ -72,24 +72,24 @@ static bool update_in_place_constant(struct jak_carbon_array_it *it, enum carbon
         memfile_save_position(&it->memfile);
 
         if (carbon_field_type_is_constant(it->field_access.it_field_type)) {
-                u8 value;
+                jak_u8 value;
                 switch (constant) {
                         case CARBON_CONSTANT_TRUE:
-                                value = CARBON_FIELD_TYPE_TRUE;
+                                value = CARBON_JAK_FIELD_TYPE_TRUE;
                                 break;
                         case CARBON_CONSTANT_FALSE:
-                                value = CARBON_FIELD_TYPE_FALSE;
+                                value = CARBON_JAK_FIELD_TYPE_FALSE;
                                 break;
                         case CARBON_CONSTANT_NULL:
-                                value = CARBON_FIELD_TYPE_NULL;
+                                value = CARBON_JAK_FIELD_TYPE_NULL;
                                 break;
                         default: error(&it->err, JAK_ERR_INTERNALERR);
                                 break;
                 }
-                offset_t datum = 0;
+                jak_offset_t datum = 0;
                 carbon_int_array_it_offset(&datum, it);
                 memfile_seek(&it->memfile, datum);
-                memfile_write(&it->memfile, &value, sizeof(u8));
+                memfile_write(&it->memfile, &value, sizeof(jak_u8));
         } else {
                 struct jak_carbon_insert ins;
                 carbon_array_it_remove(it);
@@ -131,8 +131,8 @@ bool carbon_array_it_update_in_place_null(struct jak_carbon_array_it *it)
         return update_in_place_constant(it, CARBON_CONSTANT_NULL);
 }
 
-bool carbon_array_it_create(struct jak_carbon_array_it *it, struct memfile *memfile, struct err *err,
-                            offset_t payload_start)
+bool carbon_array_it_create(struct jak_carbon_array_it *it, struct jak_memfile *memfile, struct jak_error *err,
+                            jak_offset_t payload_start)
 {
         error_if_null(it);
         error_if_null(memfile);
@@ -147,17 +147,17 @@ bool carbon_array_it_create(struct jak_carbon_array_it *it, struct memfile *memf
 
         error_init(&it->err);
         spin_init(&it->lock);
-        vec_create(&it->history, NULL, sizeof(offset_t), 40);
+        vec_create(&it->history, NULL, sizeof(jak_offset_t), 40);
         memfile_open(&it->memfile, memfile->memblock, memfile->mode);
         memfile_seek(&it->memfile, payload_start);
 
-        error_if(memfile_remain_size(&it->memfile) < sizeof(u8), err, JAK_ERR_CORRUPTED);
+        error_if(memfile_remain_size(&it->memfile) < sizeof(jak_u8), err, JAK_ERR_CORRUPTED);
 
-        u8 marker = *memfile_read(&it->memfile, sizeof(u8));
+        jak_u8 marker = *memfile_read(&it->memfile, sizeof(jak_u8));
         error_if_with_details(marker != JAK_CARBON_MARKER_ARRAY_BEGIN, err, JAK_ERR_ILLEGALOP,
                               "array begin marker ('[') not found");
 
-        it->payload_start += sizeof(u8);
+        it->payload_start += sizeof(jak_u8);
 
         carbon_int_field_access_create(&it->field_access);
 
@@ -170,7 +170,7 @@ bool carbon_array_it_copy(struct jak_carbon_array_it *dst, struct jak_carbon_arr
 {
         error_if_null(dst);
         error_if_null(src);
-        carbon_array_it_create(dst, &src->memfile, &src->err, src->payload_start - sizeof(u8));
+        carbon_array_it_create(dst, &src->memfile, &src->err, src->payload_start - sizeof(jak_u8));
         return true;
 }
 
@@ -195,12 +195,12 @@ bool carbon_array_it_readonly(struct jak_carbon_array_it *it)
         return true;
 }
 
-bool carbon_array_it_length(u64 *len, struct jak_carbon_array_it *it)
+bool carbon_array_it_length(jak_u64 *len, struct jak_carbon_array_it *it)
 {
         error_if_null(len)
         error_if_null(it)
 
-        u64 num_elem = 0;
+        jak_u64 num_elem = 0;
         carbon_array_it_rewind(it);
         while (carbon_array_it_next(it)) {
                 num_elem++;
@@ -288,7 +288,7 @@ bool carbon_array_it_next(struct jak_carbon_array_it *it)
         bool is_empty_slot = true;
 
         auto_adjust_pos_after_mod(it);
-        offset_t last_off = memfile_tell(&it->memfile);
+        jak_offset_t last_off = memfile_tell(&it->memfile);
 
         if (carbon_int_array_it_next(&is_empty_slot, &it->array_end_reached, it)) {
                 carbon_int_history_push(&it->history, last_off);
@@ -312,7 +312,7 @@ bool carbon_array_it_prev(struct jak_carbon_array_it *it)
 {
         error_if_null(it);
         if (carbon_int_history_has(&it->history)) {
-                offset_t prev_off = carbon_int_history_pop(&it->history);
+                jak_offset_t prev_off = carbon_int_history_pop(&it->history);
                 memfile_seek(&it->memfile, prev_off);
                 return carbon_int_array_it_refresh(NULL, NULL, it);
         } else {
@@ -320,7 +320,7 @@ bool carbon_array_it_prev(struct jak_carbon_array_it *it)
         }
 }
 
-offset_t carbon_array_it_memfilepos(struct jak_carbon_array_it *it)
+jak_offset_t carbon_array_it_memfilepos(struct jak_carbon_array_it *it)
 {
         if (likely(it != NULL)) {
                 return memfile_tell(&it->memfile);
@@ -330,12 +330,12 @@ offset_t carbon_array_it_memfilepos(struct jak_carbon_array_it *it)
         }
 }
 
-offset_t carbon_array_it_tell(struct jak_carbon_array_it *it)
+jak_offset_t carbon_array_it_tell(struct jak_carbon_array_it *it)
 {
         return it ? it->field_offset : 0;
 }
 
-bool carbon_int_array_it_offset(offset_t *off, struct jak_carbon_array_it *it)
+bool carbon_int_array_it_offset(jak_offset_t *off, struct jak_carbon_array_it *it)
 {
         error_if_null(off)
         error_if_null(it)
@@ -361,42 +361,42 @@ bool carbon_array_it_field_type(enum carbon_field_type *type, struct jak_carbon_
         return carbon_int_field_access_field_type(type, &it->field_access);
 }
 
-bool carbon_array_it_u8_value(u8 *value, struct jak_carbon_array_it *it)
+bool carbon_array_it_u8_value(jak_u8 *value, struct jak_carbon_array_it *it)
 {
         return carbon_int_field_access_u8_value(value, &it->field_access, &it->err);
 }
 
-bool carbon_array_it_u16_value(u16 *value, struct jak_carbon_array_it *it)
+bool carbon_array_it_u16_value(jak_u16 *value, struct jak_carbon_array_it *it)
 {
         return carbon_int_field_access_u16_value(value, &it->field_access, &it->err);
 }
 
-bool carbon_array_it_u32_value(u32 *value, struct jak_carbon_array_it *it)
+bool carbon_array_it_u32_value(jak_u32 *value, struct jak_carbon_array_it *it)
 {
         return carbon_int_field_access_u32_value(value, &it->field_access, &it->err);
 }
 
-bool carbon_array_it_u64_value(u64 *value, struct jak_carbon_array_it *it)
+bool carbon_array_it_u64_value(jak_u64 *value, struct jak_carbon_array_it *it)
 {
         return carbon_int_field_access_u64_value(value, &it->field_access, &it->err);
 }
 
-bool carbon_array_it_i8_value(i8 *value, struct jak_carbon_array_it *it)
+bool carbon_array_it_i8_value(jak_i8 *value, struct jak_carbon_array_it *it)
 {
         return carbon_int_field_access_i8_value(value, &it->field_access, &it->err);
 }
 
-bool carbon_array_it_i16_value(i16 *value, struct jak_carbon_array_it *it)
+bool carbon_array_it_i16_value(jak_i16 *value, struct jak_carbon_array_it *it)
 {
         return carbon_int_field_access_i16_value(value, &it->field_access, &it->err);
 }
 
-bool carbon_array_it_i32_value(i32 *value, struct jak_carbon_array_it *it)
+bool carbon_array_it_i32_value(jak_i32 *value, struct jak_carbon_array_it *it)
 {
         return carbon_int_field_access_i32_value(value, &it->field_access, &it->err);
 }
 
-bool carbon_array_it_i64_value(i64 *value, struct jak_carbon_array_it *it)
+bool carbon_array_it_i64_value(jak_i64 *value, struct jak_carbon_array_it *it)
 {
         return carbon_int_field_access_i64_value(value, &it->field_access, &it->err);
 }
@@ -406,17 +406,17 @@ bool carbon_array_it_float_value(bool *is_null_in, float *value, struct jak_carb
         return carbon_int_field_access_float_value(is_null_in, value, &it->field_access, &it->err);
 }
 
-bool carbon_array_it_signed_value(bool *is_null_in, i64 *value, struct jak_carbon_array_it *it)
+bool carbon_array_it_signed_value(bool *is_null_in, jak_i64 *value, struct jak_carbon_array_it *it)
 {
         return carbon_int_field_access_signed_value(is_null_in, value, &it->field_access, &it->err);
 }
 
-bool carbon_array_it_unsigned_value(bool *is_null_in, u64 *value, struct jak_carbon_array_it *it)
+bool carbon_array_it_unsigned_value(bool *is_null_in, jak_u64 *value, struct jak_carbon_array_it *it)
 {
         return carbon_int_field_access_unsigned_value(is_null_in, value, &it->field_access, &it->err);
 }
 
-const char *carbon_array_it_string_value(u64 *strlen, struct jak_carbon_array_it *it)
+const char *carbon_array_it_string_value(jak_u64 *strlen, struct jak_carbon_array_it *it)
 {
         return carbon_int_field_access_string_value(strlen, &it->field_access, &it->err);
 }
@@ -459,7 +459,7 @@ bool carbon_array_it_remove(struct jak_carbon_array_it *it)
         error_if_null(it);
         enum carbon_field_type type;
         if (carbon_array_it_field_type(&type, it)) {
-                offset_t prev_off = carbon_int_history_pop(&it->history);
+                jak_offset_t prev_off = carbon_int_history_pop(&it->history);
                 memfile_seek(&it->memfile, prev_off);
                 if (carbon_int_field_remove(&it->memfile, &it->err, type)) {
                         carbon_int_array_it_refresh(NULL, NULL, it);

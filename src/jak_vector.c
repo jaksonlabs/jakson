@@ -23,7 +23,7 @@
 #include <jak_vector.h>
 
 #define DEFINE_PRINTER_FUNCTION_WCAST(type, castType, format_string)                                                   \
-void vector_##type##_PrinterFunc(struct memfile *dst, void ofType(T) *values, size_t num_elems)                      \
+void vector_##type##_PrinterFunc(struct jak_memfile *dst, void ofType(T) *values, size_t num_elems)                      \
 {                                                                                                                      \
     char *data;                                                                                                        \
     type *typedValues = (type *) values;                                                                               \
@@ -44,34 +44,34 @@ void vector_##type##_PrinterFunc(struct memfile *dst, void ofType(T) *values, si
 #define DEFINE_PRINTER_FUNCTION(type, format_string)                                                                   \
     DEFINE_PRINTER_FUNCTION_WCAST(type, type, format_string)
 
-DEFINE_PRINTER_FUNCTION_WCAST(u_char, i8, "%d")
+DEFINE_PRINTER_FUNCTION_WCAST(u_char, jak_i8, "%d")
 
-DEFINE_PRINTER_FUNCTION(i8, "%d")
+DEFINE_PRINTER_FUNCTION(jak_i8, "%d")
 
-DEFINE_PRINTER_FUNCTION(i16, "%d")
+DEFINE_PRINTER_FUNCTION(jak_i16, "%d")
 
-DEFINE_PRINTER_FUNCTION(i32, "%d")
+DEFINE_PRINTER_FUNCTION(jak_i32, "%d")
 
-DEFINE_PRINTER_FUNCTION(i64, "%"
+DEFINE_PRINTER_FUNCTION(jak_i64, "%"
         PRIi64)
 
-DEFINE_PRINTER_FUNCTION(u8, "%d")
+DEFINE_PRINTER_FUNCTION(jak_u8, "%d")
 
-DEFINE_PRINTER_FUNCTION(u16, "%d")
+DEFINE_PRINTER_FUNCTION(jak_u16, "%d")
 
-DEFINE_PRINTER_FUNCTION(u32, "%d")
+DEFINE_PRINTER_FUNCTION(jak_u32, "%d")
 
-DEFINE_PRINTER_FUNCTION(u64, "%"
+DEFINE_PRINTER_FUNCTION(jak_u64, "%"
         PRIu64)
 
 DEFINE_PRINTER_FUNCTION(size_t, "%zu")
 
-bool vec_create(struct vector *out, const struct allocator *alloc, size_t elem_size, size_t cap_elems)
+bool vec_create(struct vector *out, const struct jak_allocator *alloc, size_t elem_size, size_t cap_elems)
 {
         error_if_null(out)
-        out->allocator = JAK_malloc(sizeof(struct allocator));
-        alloc_this_or_std(out->allocator, alloc);
-        out->base = alloc_malloc(out->allocator, cap_elems * elem_size);
+        out->allocator = JAK_MALLOC(sizeof(struct jak_allocator));
+        jak_alloc_this_or_std(out->allocator, alloc);
+        out->base = jak_alloc_malloc(out->allocator, cap_elems * elem_size);
         out->num_elems = 0;
         out->cap_elems = cap_elems;
         out->elem_size = elem_size;
@@ -82,9 +82,9 @@ bool vec_create(struct vector *out, const struct allocator *alloc, size_t elem_s
 
 struct vector_serialize_header {
     char marker;
-    u32 elem_size;
-    u32 num_elems;
-    u32 cap_elems;
+    jak_u32 elem_size;
+    jak_u32 num_elems;
+    jak_u32 cap_elems;
     float grow_factor;
 };
 
@@ -94,7 +94,7 @@ bool vec_serialize(FILE *file, struct vector *vec)
         error_if_null(vec)
 
         struct vector_serialize_header header =
-                {.marker = MARKER_SYMBOL_VECTOR_HEADER, .elem_size = vec->elem_size, .num_elems = vec
+                {.marker = JAK_MARKER_SYMBOL_VECTOR_HEADER, .elem_size = vec->elem_size, .num_elems = vec
                         ->num_elems, .cap_elems = vec->cap_elems, .grow_factor = vec->grow_factor};
         int nwrite = fwrite(&header, sizeof(struct vector_serialize_header), 1, file);
         error_if(nwrite != 1, &vec->err, JAK_ERR_FWRITE_FAILED);
@@ -104,13 +104,13 @@ bool vec_serialize(FILE *file, struct vector *vec)
         return true;
 }
 
-bool vec_deserialize(struct vector *vec, struct err *err, FILE *file)
+bool vec_deserialize(struct vector *vec, struct jak_error *err, FILE *file)
 {
         error_if_null(file)
         error_if_null(err)
         error_if_null(vec)
 
-        offset_t start = ftell(file);
+        jak_offset_t start = ftell(file);
         int err_code = JAK_ERR_NOERR;
 
         struct vector_serialize_header header;
@@ -119,14 +119,14 @@ bool vec_deserialize(struct vector *vec, struct err *err, FILE *file)
                 goto error_handling;
         }
 
-        if (header.marker != MARKER_SYMBOL_VECTOR_HEADER) {
+        if (header.marker != JAK_MARKER_SYMBOL_VECTOR_HEADER) {
                 err_code = JAK_ERR_CORRUPTED;
                 goto error_handling;
         }
 
-        vec->allocator = JAK_malloc(sizeof(struct allocator));
-        alloc_this_or_std(vec->allocator, NULL);
-        vec->base = alloc_malloc(vec->allocator, header.cap_elems * header.elem_size);
+        vec->allocator = JAK_MALLOC(sizeof(struct jak_allocator));
+        jak_alloc_this_or_std(vec->allocator, NULL);
+        vec->base = jak_alloc_malloc(vec->allocator, header.cap_elems * header.elem_size);
         vec->num_elems = header.num_elems;
         vec->cap_elems = header.cap_elems;
         vec->elem_size = header.elem_size;
@@ -149,8 +149,8 @@ bool vec_deserialize(struct vector *vec, struct err *err, FILE *file)
 bool vec_memadvice(struct vector *vec, int madviseAdvice)
 {
         error_if_null(vec);
-        unused(vec);
-        unused(madviseAdvice);
+        JAK_UNUSED(vec);
+        JAK_UNUSED(madviseAdvice);
         madvise(vec->base, vec->cap_elems * vec->elem_size, madviseAdvice);
         return true;
 }
@@ -166,7 +166,7 @@ bool vec_set_grow_factor(struct vector *vec, float factor)
 bool vec_drop(struct vector *vec)
 {
         error_if_null(vec)
-        alloc_free(vec->allocator, vec->base);
+        jak_alloc_free(vec->allocator, vec->base);
         free(vec->allocator);
         vec->base = NULL;
         return true;
@@ -185,7 +185,7 @@ bool vec_push(struct vector *vec, const void *data, size_t num_elems)
         while (next_num > vec->cap_elems) {
                 size_t more = next_num - vec->cap_elems;
                 vec->cap_elems = (vec->cap_elems + more) * vec->grow_factor;
-                vec->base = alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
+                vec->base = jak_alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
         }
         memcpy(vec->base + vec->num_elems * vec->elem_size, data, num_elems * vec->elem_size);
         vec->num_elems += num_elems;
@@ -208,7 +208,7 @@ bool vec_repeated_push(struct vector *vec, const void *data, size_t how_often)
         while (next_num > vec->cap_elems) {
                 size_t more = next_num - vec->cap_elems;
                 vec->cap_elems = (vec->cap_elems + more) * vec->grow_factor;
-                vec->base = alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
+                vec->base = jak_alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
         }
         for (size_t i = 0; i < how_often; i++) {
                 memcpy(vec->base + (vec->num_elems + i) * vec->elem_size, data, vec->elem_size);
@@ -240,7 +240,7 @@ bool vec_shrink(struct vector *vec)
         error_if_null(vec);
         if (vec->num_elems < vec->cap_elems) {
                 vec->cap_elems = JAK_max(1, vec->num_elems);
-                vec->base = alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
+                vec->base = jak_alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
         }
         return true;
 }
@@ -251,7 +251,7 @@ bool vec_grow(size_t *numNewSlots, struct vector *vec)
         size_t freeSlotsBefore = vec->cap_elems - vec->num_elems;
 
         vec->cap_elems = (vec->cap_elems * vec->grow_factor) + 1;
-        vec->base = alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
+        vec->base = jak_alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
         size_t freeSlotsAfter = vec->cap_elems - vec->num_elems;
         if (likely(numNewSlots != NULL)) {
                 *numNewSlots = freeSlotsAfter - freeSlotsBefore;
@@ -263,7 +263,7 @@ bool vec_grow_to(struct vector *vec, size_t capacity)
 {
         error_if_null(vec);
         vec->cap_elems = JAK_max(vec->cap_elems, capacity);
-        vec->base = alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
+        vec->base = jak_alloc_realloc(vec->allocator, vec->base, vec->cap_elems * vec->elem_size);
         return true;
 }
 
@@ -351,10 +351,10 @@ const void *vec_data(const struct vector *vec)
 }
 
 char *vector_string(const struct vector ofType(T) *vec,
-                    void (*printerFunc)(struct memfile *dst, void ofType(T) *values, size_t num_elems))
+                    void (*printerFunc)(struct jak_memfile *dst, void ofType(T) *values, size_t num_elems))
 {
-        struct memblock *block;
-        struct memfile file;
+        struct jak_memblock *block;
+        struct jak_memfile file;
         memblock_create(&block, vec->num_elems * vec->elem_size);
         memfile_open(&file, block, READ_WRITE);
         printerFunc(&file, vec->base, vec->num_elems);

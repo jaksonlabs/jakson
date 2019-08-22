@@ -28,29 +28,29 @@
 static void iterate_props(struct jak_archive *archive, struct prop_iter *prop_iter,
                           struct vector ofType(struct path_entry) *path_stack, struct jak_archive_visitor *visitor,
                           int mask, void *capture,
-                          bool is_root_object, field_sid_t parent_key, u32 parent_key_array_idx);
+                          bool is_root_object, jak_field_sid parent_key, jak_u32 parent_key_array_idx);
 
-static void iterate_objects(struct jak_archive *archive, const field_sid_t *keys, u32 num_pairs,
+static void iterate_objects(struct jak_archive *archive, const jak_field_sid *keys, jak_u32 num_pairs,
                             struct jak_archive_value_vector *value_iter,
                             struct vector ofType(struct path_entry) *path_stack,
                             struct jak_archive_visitor *visitor, int mask, void *capture, bool is_root_object)
 {
-        unused(num_pairs);
+        JAK_UNUSED(num_pairs);
 
-        u32 vector_length;
+        jak_u32 vector_length;
         struct jak_archive_object object;
         global_id_t parent_object_id;
         global_id_t object_id;
         struct prop_iter prop_iter;
-        struct err err;
+        struct jak_error err;
 
         archive_value_vector_get_object_id(&parent_object_id, value_iter);
         archive_value_vector_get_length(&vector_length, value_iter);
         assert(num_pairs == vector_length);
 
-        for (u32 i = 0; i < vector_length; i++) {
-                field_sid_t parent_key = keys[i];
-                u32 parent_key_array_idx = i;
+        for (jak_u32 i = 0; i < vector_length; i++) {
+                jak_field_sid parent_key = keys[i];
+                jak_u32 parent_key_array_idx = i;
 
 //        struct path_entry e = { .key = parent_key, .idx = 0 };
 //        vec_push(path_stack, &e, 1);
@@ -119,9 +119,9 @@ static void iterate_objects(struct jak_archive *archive, const field_sid_t *keys
             visit = visitor->visit_enter_##name##_array_pairs(archive, path_stack, this_object_oid, keys, num_pairs, capture);     \
         }                                                                                                              \
         if (visit == VISIT_INCLUDE) {                                                                  \
-            for (u32 prop_idx = 0; prop_idx < num_pairs; prop_idx++)                                              \
+            for (jak_u32 prop_idx = 0; prop_idx < num_pairs; prop_idx++)                                              \
             {                                                                                                          \
-                u32 array_length;                                                                                 \
+                jak_u32 array_length;                                                                                 \
                 const built_in_type *values = archive_value_vector_get_##name##_arrays_at(&array_length,        \
                                                                                              prop_idx,                 \
                                                                                              &value_iter);             \
@@ -154,20 +154,20 @@ static void iterate_objects(struct jak_archive *archive, const field_sid_t *keys
 static void iterate_props(struct jak_archive *archive, struct prop_iter *prop_iter,
                           struct vector ofType(struct path_entry) *path_stack, struct jak_archive_visitor *visitor,
                           int mask, void *capture,
-                          bool is_root_object, field_sid_t parent_key, u32 parent_key_array_idx)
+                          bool is_root_object, jak_field_sid parent_key, jak_u32 parent_key_array_idx)
 {
         global_id_t this_object_oid;
         struct jak_archive_value_vector value_iter;
         enum field_type type;
         bool is_array;
-        const field_sid_t *keys;
-        u32 num_pairs;
+        const jak_field_sid *keys;
+        jak_u32 num_pairs;
         enum prop_iter_mode iter_type;
         archive_collection_iter_t collection_iter;
         bool first_type_group = true;
 
-        unused(parent_key);
-        unused(parent_key_array_idx);
+        JAK_UNUSED(parent_key);
+        JAK_UNUSED(parent_key_array_idx);
 
         struct path_entry e = {.key = parent_key, .idx = parent_key_array_idx};
         vec_push(path_stack, &e, 1);
@@ -183,7 +183,7 @@ static void iterate_props(struct jak_archive *archive, struct prop_iter *prop_it
                         archive_value_vector_get_basic_type(&type, &value_iter);
                         archive_value_vector_get_object_id(&this_object_oid, &value_iter);
 
-                        for (u32 i = 0; i < num_pairs; i++) {
+                        for (jak_u32 i = 0; i < num_pairs; i++) {
                                 JAK_optional_call(visitor,
                                                   visit_object_property,
                                                   archive,
@@ -233,7 +233,7 @@ static void iterate_props(struct jak_archive *archive, struct prop_iter *prop_it
                         }
 
                         switch (type) {
-                                case FIELD_OBJECT:
+                                case JAK_FIELD_OBJECT:
                                         assert (!is_array);
                                         iterate_objects(archive,
                                                         keys,
@@ -248,7 +248,7 @@ static void iterate_props(struct jak_archive *archive, struct prop_iter *prop_it
                                         //    iterate_objects(archive, &keys[i], 1, &value_iter, path_stack, visitor, mask, capture, is_root_object, keys[i], i);
                                         //}
                                         break;
-                                case FIELD_NULL:
+                                case JAK_FIELD_NULL:
                                         if (is_array) {
                                                 enum visit_policy visit = VISIT_INCLUDE;
                                                 if (visitor->visit_enter_null_array_pairs) {
@@ -262,7 +262,7 @@ static void iterate_props(struct jak_archive *archive, struct prop_iter *prop_it
                                                 if (visit == VISIT_INCLUDE) {
                                                         const field_u32_t *num_values =
                                                                 archive_value_vector_get_null_arrays(NULL, &value_iter);
-                                                        for (u32 prop_idx = 0; prop_idx < num_pairs; prop_idx++) {
+                                                        for (jak_u32 prop_idx = 0; prop_idx < num_pairs; prop_idx++) {
                                                                 JAK_optional_call(visitor,
                                                                                   visit_enter_null_array_pair,
                                                                                   archive,
@@ -309,27 +309,27 @@ static void iterate_props(struct jak_archive *archive, struct prop_iter *prop_it
                                                 }
                                         }
                                         break;
-                                case FIELD_INT8: SET_TYPE_SWITCH_CASE(int8, field_i8_t)
+                                case JAK_FIELD_INT8: SET_TYPE_SWITCH_CASE(int8, field_i8_t)
                                         break;
-                                case FIELD_INT16: SET_TYPE_SWITCH_CASE(int16, field_i16_t)
+                                case JAK_FIELD_INT16: SET_TYPE_SWITCH_CASE(int16, field_i16_t)
                                         break;
-                                case FIELD_INT32: SET_TYPE_SWITCH_CASE(int32, field_i32_t)
+                                case JAK_FIELD_INT32: SET_TYPE_SWITCH_CASE(int32, field_i32_t)
                                         break;
-                                case FIELD_INT64: SET_TYPE_SWITCH_CASE(int64, field_i64_t)
+                                case JAK_FIELD_INT64: SET_TYPE_SWITCH_CASE(int64, field_i64_t)
                                         break;
-                                case FIELD_UINT8: SET_TYPE_SWITCH_CASE(uint8, field_u8_t)
+                                case JAK_FIELD_UINT8: SET_TYPE_SWITCH_CASE(uint8, field_u8_t)
                                         break;
-                                case FIELD_UINT16: SET_TYPE_SWITCH_CASE(uint16, field_u16_t)
+                                case JAK_FIELD_UINT16: SET_TYPE_SWITCH_CASE(uint16, field_u16_t)
                                         break;
-                                case FIELD_UINT32: SET_TYPE_SWITCH_CASE(uint32, field_u32_t)
+                                case JAK_FIELD_UINT32: SET_TYPE_SWITCH_CASE(uint32, field_u32_t)
                                         break;
-                                case FIELD_UINT64: SET_TYPE_SWITCH_CASE(uint64, field_u64_t)
+                                case JAK_FIELD_UINT64: SET_TYPE_SWITCH_CASE(uint64, field_u64_t)
                                         break;
-                                case FIELD_FLOAT: SET_TYPE_SWITCH_CASE(number, field_number_t)
+                                case JAK_FIELD_FLOAT: SET_TYPE_SWITCH_CASE(number, field_number_t)
                                         break;
-                                case FIELD_STRING: SET_TYPE_SWITCH_CASE(string, field_sid_t)
+                                case JAK_FIELD_STRING: SET_TYPE_SWITCH_CASE(string, jak_field_sid)
                                         break;
-                                case FIELD_BOOLEAN: SET_TYPE_SWITCH_CASE(boolean, field_boolean_t)
+                                case JAK_FIELD_BOOLEAN: SET_TYPE_SWITCH_CASE(boolean, field_boolean_t)
                                         break;
                                 default:
                                         break;
@@ -338,14 +338,14 @@ static void iterate_props(struct jak_archive *archive, struct prop_iter *prop_it
                         first_type_group = false;
                 } else {
                         archive_column_group_iter_t group_iter;
-                        u32 num_column_groups;
+                        jak_u32 num_column_groups;
                         keys = archive_collection_iter_get_keys(&num_column_groups, &collection_iter);
 
-                        bool *skip_groups_by_key = JAK_malloc(num_column_groups * sizeof(bool));
+                        bool *skip_groups_by_key = JAK_MALLOC(num_column_groups * sizeof(bool));
                         JAK_zero_memory(skip_groups_by_key, num_column_groups * sizeof(bool));
 
                         if (visitor->before_visit_object_array) {
-                                for (u32 i = 0; i < num_column_groups; i++) {
+                                for (jak_u32 i = 0; i < num_column_groups; i++) {
 
                                         //     struct path_entry e = { .key = parent_key, .idx = i };
                                         //vec_push(path_stack, &e, 1);
@@ -363,18 +363,18 @@ static void iterate_props(struct jak_archive *archive, struct prop_iter *prop_it
                                 }
                         }
 
-                        u32 current_group_idx = 0;
+                        jak_u32 current_group_idx = 0;
 
                         while (archive_collection_next_column_group(&group_iter, &collection_iter)) {
                                 if (!skip_groups_by_key[current_group_idx]) {
 
-                                        u32 num_column_group_objs;
+                                        jak_u32 num_column_group_objs;
                                         archive_column_iter_t column_iter;
-                                        field_sid_t group_key = keys[current_group_idx];
+                                        jak_field_sid group_key = keys[current_group_idx];
                                         const global_id_t *column_group_object_ids =
                                                 archive_column_group_get_object_ids(&num_column_group_objs,
                                                                                     &group_iter);
-                                        bool *skip_objects = JAK_malloc(num_column_group_objs * sizeof(bool));
+                                        bool *skip_objects = JAK_MALLOC(num_column_group_objs * sizeof(bool));
                                         JAK_zero_memory(skip_objects, num_column_group_objs * sizeof(bool));
 
                                         if (visitor->before_visit_object_array_objects) {
@@ -388,12 +388,12 @@ static void iterate_props(struct jak_archive *archive, struct prop_iter *prop_it
                                                                                            capture);
                                         }
 
-                                        u32 current_column_group_obj_idx = 0;
+                                        jak_u32 current_column_group_obj_idx = 0;
 
                                         while (archive_column_group_next_column(&column_iter, &group_iter)) {
 
                                                 if (!skip_objects[current_column_group_obj_idx]) {
-                                                        field_sid_t current_column_name;
+                                                        jak_field_sid current_column_name;
                                                         enum field_type current_column_entry_type;
 
                                                         archive_column_get_name(&current_column_name,
@@ -439,16 +439,16 @@ static void iterate_props(struct jak_archive *archive, struct prop_iter *prop_it
                                                         }
 
                                                         if (!skip_column) {
-                                                                u32 num_positions;
-                                                                const u32 *entry_positions =
+                                                                jak_u32 num_positions;
+                                                                const jak_u32 *entry_positions =
                                                                         archive_column_get_entry_positions(
                                                                                 &num_positions,
                                                                                 &column_iter);
                                                                 archive_column_entry_iter_t entry_iter;
 
                                                                 global_id_t *entry_object_containments =
-                                                                        JAK_malloc(num_positions * sizeof(global_id_t));
-                                                                for (u32 m = 0; m < num_positions; m++) {
+                                                                        JAK_MALLOC(num_positions * sizeof(global_id_t));
+                                                                for (jak_u32 m = 0; m < num_positions; m++) {
                                                                         entry_object_containments[m] =
                                                                                 column_group_object_ids[entry_positions[m]];
                                                                 }
@@ -466,88 +466,88 @@ static void iterate_props(struct jak_archive *archive, struct prop_iter *prop_it
                                                                         }
                                                                 }
 
-                                                                u32 current_entry_idx = 0;
+                                                                jak_u32 current_entry_idx = 0;
                                                                 while (archive_column_next_entry(&entry_iter,
                                                                                                  &column_iter)) {
 
                                                                         global_id_t current_nested_object_id =
                                                                                 entry_object_containments[current_entry_idx];
-                                                                        u32 entry_length;
+                                                                        jak_u32 entry_length;
 
                                                                         switch (current_column_entry_type) {
-                                                                                case FIELD_INT8: {
+                                                                                case JAK_FIELD_INT8: {
                                                                                         SET_NESTED_ARRAY_SWITCH_CASE(
                                                                                                 int8s,
                                                                                                 field_i8_t)
                                                                                 }
                                                                                         break;
-                                                                                case FIELD_INT16: {
+                                                                                case JAK_FIELD_INT16: {
                                                                                         SET_NESTED_ARRAY_SWITCH_CASE(
                                                                                                 int16s,
                                                                                                 field_i16_t)
                                                                                 }
                                                                                         break;
-                                                                                case FIELD_INT32: {
+                                                                                case JAK_FIELD_INT32: {
                                                                                         SET_NESTED_ARRAY_SWITCH_CASE(
                                                                                                 int32s,
                                                                                                 field_i32_t)
                                                                                 }
                                                                                         break;
-                                                                                case FIELD_INT64: {
+                                                                                case JAK_FIELD_INT64: {
                                                                                         SET_NESTED_ARRAY_SWITCH_CASE(
                                                                                                 int64s,
                                                                                                 field_i64_t)
                                                                                 }
                                                                                         break;
-                                                                                case FIELD_UINT8: {
+                                                                                case JAK_FIELD_UINT8: {
                                                                                         SET_NESTED_ARRAY_SWITCH_CASE(
                                                                                                 uint8s,
                                                                                                 field_u8_t)
                                                                                 }
                                                                                         break;
-                                                                                case FIELD_UINT16: {
+                                                                                case JAK_FIELD_UINT16: {
                                                                                         SET_NESTED_ARRAY_SWITCH_CASE(
                                                                                                 uint16s,
                                                                                                 field_u16_t)
                                                                                 }
                                                                                         break;
-                                                                                case FIELD_UINT32: {
+                                                                                case JAK_FIELD_UINT32: {
                                                                                         SET_NESTED_ARRAY_SWITCH_CASE(
                                                                                                 uint32s,
                                                                                                 field_u32_t)
                                                                                 }
                                                                                         break;
-                                                                                case FIELD_UINT64: {
+                                                                                case JAK_FIELD_UINT64: {
                                                                                         SET_NESTED_ARRAY_SWITCH_CASE(
                                                                                                 uint64s,
                                                                                                 field_u64_t)
                                                                                 }
                                                                                         break;
-                                                                                case FIELD_FLOAT: {
+                                                                                case JAK_FIELD_FLOAT: {
                                                                                         SET_NESTED_ARRAY_SWITCH_CASE(
                                                                                                 numbers,
                                                                                                 field_number_t)
                                                                                 }
                                                                                         break;
-                                                                                case FIELD_STRING: {
+                                                                                case JAK_FIELD_STRING: {
                                                                                         SET_NESTED_ARRAY_SWITCH_CASE(
                                                                                                 strings,
-                                                                                                field_sid_t)
+                                                                                                jak_field_sid)
                                                                                 }
                                                                                         break;
-                                                                                case FIELD_BOOLEAN: {
+                                                                                case JAK_FIELD_BOOLEAN: {
                                                                                         SET_NESTED_ARRAY_SWITCH_CASE(
                                                                                                 booleans,
                                                                                                 field_boolean_t)
                                                                                 }
                                                                                         break;
-                                                                                case FIELD_NULL: {
+                                                                                case JAK_FIELD_NULL: {
                                                                                         SET_NESTED_ARRAY_SWITCH_CASE(
                                                                                                 nulls,
                                                                                                 field_u32_t)
                                                                                 }
                                                                                         break;
-                                                                                case FIELD_OBJECT: {
+                                                                                case JAK_FIELD_OBJECT: {
                                                                                         struct column_object_iter iter;
                                                                                         const struct jak_archive_object
                                                                                                 *archive_object;
@@ -594,7 +594,7 @@ static void iterate_props(struct jak_archive *archive, struct prop_iter *prop_it
 
                                                                                                         vec_pop(path_stack);
 
-                                                                                                        struct err err;
+                                                                                                        struct jak_error err;
                                                                                                         struct prop_iter
                                                                                                                 nested_obj_prop_iter;
                                                                                                         archive_prop_iter_from_object(
@@ -679,9 +679,9 @@ void archive_visitor_path_to_string(char path_buffer[2048], struct jak_archive *
                                     const struct vector ofType(struct path_entry) *path_stack)
 {
 
-        struct jak_archive_query *query = archive_query_default(archive);
+        struct jak_archive_query *query = jak_archive_query_default(archive);
 
-        for (u32 i = 0; i < path_stack->num_elems; i++) {
+        for (jak_u32 i = 0; i < path_stack->num_elems; i++) {
                 const struct path_entry *entry = vec_get(path_stack, i, struct path_entry);
                 if (entry->key != 0) {
                         char *key = query_fetch_string_by_id(query, entry->key);
@@ -701,9 +701,9 @@ bool archive_visitor_print_path(FILE *file, struct jak_archive *archive,
         error_if_null(path_stack)
         error_if_null(archive)
 
-        struct jak_archive_query *query = archive_query_default(archive);
+        struct jak_archive_query *query = jak_archive_query_default(archive);
 
-        for (u32 i = 0; i < path_stack->num_elems; i++) {
+        for (jak_u32 i = 0; i < path_stack->num_elems; i++) {
                 const struct path_entry *entry = vec_get(path_stack, i, struct path_entry);
                 if (entry->key != 0) {
                         char *key = query_fetch_string_by_id(query, entry->key);
@@ -724,15 +724,15 @@ bool archive_visitor_print_path(FILE *file, struct jak_archive *archive,
 }
 
 bool archive_visitor_path_compare(const struct vector ofType(struct path_entry) *path,
-                                  field_sid_t *group_name, const char *path_str, struct jak_archive *archive)
+                                  jak_field_sid *group_name, const char *path_str, struct jak_archive *archive)
 {
         char path_buffer[2048];
         memset(path_buffer, 0, sizeof(path_buffer));
         sprintf(path_buffer, "/");
 
-        struct jak_archive_query *query = archive_query_default(archive);
+        struct jak_archive_query *query = jak_archive_query_default(archive);
 
-        for (u32 i = 1; i < path->num_elems; i++) {
+        for (jak_u32 i = 1; i < path->num_elems; i++) {
                 const struct path_entry *entry = vec_get(path, i, struct path_entry);
                 if (entry->key != 0) {
                         char *key = query_fetch_string_by_id(query, entry->key);

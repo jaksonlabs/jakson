@@ -29,15 +29,15 @@
 
 JAK_BEGIN_DECL
 
-struct memfile {
-    struct memblock *memblock;
-    offset_t pos;
-    offset_t saved_pos[10];
-    i8 saved_pos_ptr;
+struct jak_memfile {
+    struct jak_memblock *memblock;
+    jak_offset_t pos;
+    jak_offset_t saved_pos[10];
+    jak_i8 saved_pos_ptr;
     bool bit_mode;
     size_t current_read_bit, current_write_bit, bytes_completed;
     enum access_mode mode;
-    struct err err;
+    struct jak_error err;
 };
 
 #define JAK_MEMFILE_PEEK(file, type)                                                                                   \
@@ -63,99 +63,99 @@ struct memfile {
 
 #define memfile_tell(file)                                                                                             \
 ({                                                                                                                     \
-    offset_t offset = 0;                                                                                               \
+    jak_offset_t offset = 0;                                                                                               \
     memfile_get_offset(&offset, file);                                                                                 \
     offset;                                                                                                            \
 })
 
-bool memfile_open(struct memfile *file, struct memblock *block, enum access_mode mode);
+bool memfile_open(struct jak_memfile *file, struct jak_memblock *block, enum access_mode mode);
 
-bool memfile_clone(struct memfile *dst, struct memfile *src);
+bool memfile_clone(struct jak_memfile *dst, struct jak_memfile *src);
 
-bool memfile_seek(struct memfile *file, offset_t pos);
+bool memfile_seek(struct jak_memfile *file, jak_offset_t pos);
 
-bool memfile_seek_from_here(struct memfile *file, signed_offset_t where);
+bool memfile_seek_from_here(struct jak_memfile *file, signed_offset_t where);
 
-bool memfile_rewind(struct memfile *file);
+bool memfile_rewind(struct jak_memfile *file);
 
-bool memfile_grow(struct memfile *file_in, size_t grow_by_bytes);
+bool memfile_grow(struct jak_memfile *file_in, size_t grow_by_bytes);
 
-bool memfile_get_offset(offset_t *pos, const struct memfile *file);
+bool memfile_get_offset(jak_offset_t *pos, const struct jak_memfile *file);
 
-size_t memfile_size(struct memfile *file);
+size_t memfile_size(struct jak_memfile *file);
 
-bool memfile_cut(struct memfile *file, size_t how_many_bytes);
+bool memfile_cut(struct jak_memfile *file, size_t how_many_bytes);
 
-size_t memfile_remain_size(struct memfile *file);
+size_t memfile_remain_size(struct jak_memfile *file);
 
-bool memfile_shrink(struct memfile *file);
+bool memfile_shrink(struct jak_memfile *file);
 
-const char *memfile_read(struct memfile *file, offset_t nbytes);
+const char *memfile_read(struct jak_memfile *file, jak_offset_t nbytes);
 
-u8 memfile_read_byte(struct memfile *file);
+jak_u8 memfile_read_byte(struct jak_memfile *file);
 
-u8 memfile_peek_byte(struct memfile *file);
+jak_u8 memfile_peek_byte(struct jak_memfile *file);
 
-u64 memfile_read_u64(struct memfile *file);
+jak_u64 memfile_read_u64(struct jak_memfile *file);
 
-i64 memfile_read_i64(struct memfile *file);
+jak_i64 memfile_read_i64(struct jak_memfile *file);
 
-bool memfile_skip(struct memfile *file, signed_offset_t nbytes);
+bool memfile_skip(struct jak_memfile *file, signed_offset_t nbytes);
 
-#define memfile_skip_byte(file) memfile_skip(file, sizeof(u8))
+#define memfile_skip_byte(file) memfile_skip(file, sizeof(jak_u8))
 
-const char *memfile_peek(struct memfile *file, offset_t nbytes);
+const char *memfile_peek(struct jak_memfile *file, jak_offset_t nbytes);
 
-bool memfile_write_byte(struct memfile *file, u8 data);
+bool memfile_write_byte(struct jak_memfile *file, jak_u8 data);
 
-bool memfile_write(struct memfile *file, const void *data, offset_t nbytes);
+bool memfile_write(struct jak_memfile *file, const void *data, jak_offset_t nbytes);
 
-bool memfile_write_zero(struct memfile *file, size_t how_many);
+bool memfile_write_zero(struct jak_memfile *file, size_t how_many);
 
-bool memfile_begin_bit_mode(struct memfile *file);
+bool memfile_begin_bit_mode(struct jak_memfile *file);
 
-bool memfile_write_bit(struct memfile *file, bool flag);
+bool memfile_write_bit(struct jak_memfile *file, bool flag);
 
-bool memfile_read_bit(struct memfile *file);
+bool memfile_read_bit(struct jak_memfile *file);
 
-offset_t memfile_save_position(struct memfile *file);
+jak_offset_t memfile_save_position(struct jak_memfile *file);
 
-bool memfile_restore_position(struct memfile *file);
+bool memfile_restore_position(struct jak_memfile *file);
 
-signed_offset_t memfile_ensure_space(struct memfile *memfile, u64 nbytes);
+signed_offset_t memfile_ensure_space(struct jak_memfile *memfile, jak_u64 nbytes);
 
-u64 memfile_read_uintvar_stream(u8 *nbytes, struct memfile *memfile);
+jak_u64 memfile_read_uintvar_stream(jak_u8 *nbytes, struct jak_memfile *memfile);
 
-bool memfile_skip_uintvar_stream(struct memfile *memfile);
+bool memfile_skip_uintvar_stream(struct jak_memfile *memfile);
 
-u64 memfile_peek_uintvar_stream(u8 *nbytes, struct memfile *memfile);
+jak_u64 memfile_peek_uintvar_stream(jak_u8 *nbytes, struct jak_memfile *memfile);
 
-u64 memfile_write_uintvar_stream(u64 *nbytes_moved, struct memfile *memfile, u64 value);
+jak_u64 memfile_write_uintvar_stream(jak_u64 *nbytes_moved, struct jak_memfile *memfile, jak_u64 value);
 
-signed_offset_t memfile_update_uintvar_stream(struct memfile *memfile, u64 value);
+signed_offset_t memfile_update_uintvar_stream(struct jak_memfile *memfile, jak_u64 value);
 
-bool memfile_seek_to_start(struct memfile *file);
+bool memfile_seek_to_start(struct jak_memfile *file);
 
-bool memfile_seek_to_end(struct memfile *file);
+bool memfile_seek_to_end(struct jak_memfile *file);
 
 /**
  * Moves the contents of the underlying memory block <code>nbytes</code> towards the end of the file.
  * The offset in the memory block from where this move is done is the current position stored in this file.
  * In case of not enough space, the underlying memory block is resized.
  */
-bool memfile_inplace_insert(struct memfile *file, size_t nbytes);
+bool memfile_inplace_insert(struct jak_memfile *file, size_t nbytes);
 
-bool memfile_inplace_remove(struct memfile *file, size_t nbytes_from_here);
+bool memfile_inplace_remove(struct jak_memfile *file, size_t nbytes_from_here);
 
-bool memfile_end_bit_mode(size_t *num_bytes_written, struct memfile *file);
+bool memfile_end_bit_mode(size_t *num_bytes_written, struct jak_memfile *file);
 
-void *memfile_current_pos(struct memfile *file, offset_t nbytes);
+void *memfile_current_pos(struct jak_memfile *file, jak_offset_t nbytes);
 
-bool memfile_hexdump(struct jak_string *sb, struct memfile *file);
+bool memfile_hexdump(struct jak_string *sb, struct jak_memfile *file);
 
-bool memfile_hexdump_printf(FILE *file, struct memfile *memfile);
+bool memfile_hexdump_printf(FILE *file, struct jak_memfile *memfile);
 
-bool memfile_hexdump_print(struct memfile *memfile);
+bool memfile_hexdump_print(struct jak_memfile *memfile);
 
 JAK_END_DECL
 

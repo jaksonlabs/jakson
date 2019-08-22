@@ -117,7 +117,7 @@ struct jak_str_hash {
     /**
     *  Memory allocator that is used to get memory for user data
     */
-    struct allocator allocator;
+    struct jak_allocator allocator;
 
     /**
      *  Frees resources bound to <code>self</code> via the allocator specified by the constructor
@@ -127,44 +127,44 @@ struct jak_str_hash {
     /**
      * Put <code>num_pair</code> objects into this parallel_map_exec maybe updating old objects with the same key.
      */
-    int (*put_bulk_safe)(struct jak_str_hash *self, char *const *keys, const field_sid_t *values, size_t npairs);
+    int (*put_bulk_safe)(struct jak_str_hash *self, char *const *keys, const jak_field_sid *values, size_t npairs);
 
     /**
      * Put <code>num_pair</code> objects into this parallel_map_exec maybe without checking for updates.
      */
-    int (*put_bulk_fast)(struct jak_str_hash *self, char *const *keys, const field_sid_t *values, size_t npairs);
+    int (*put_bulk_fast)(struct jak_str_hash *self, char *const *keys, const jak_field_sid *values, size_t npairs);
 
     /**
      * Same as 'put_safe_bulk' but specialized for a single element
      */
-    int (*put_exact_safe)(struct jak_str_hash *self, const char *key, field_sid_t value);
+    int (*put_exact_safe)(struct jak_str_hash *self, const char *key, jak_field_sid value);
 
     /**
      * Same as 'put_fast_bulk' but specialized for a single element
      */
-    int (*put_exact_fast)(struct jak_str_hash *self, const char *key, field_sid_t value);
+    int (*put_exact_fast)(struct jak_str_hash *self, const char *key, jak_field_sid value);
 
     /**
      * Get the values associated with <code>keys</code> in this parallel_map_exec (if any).
      */
-    int (*get_bulk_safe)(struct jak_str_hash *self, field_sid_t **out, bool **found_mask, size_t *nnot_found,
+    int (*get_bulk_safe)(struct jak_str_hash *self, jak_field_sid **out, bool **found_mask, size_t *nnot_found,
                          char *const *keys, size_t nkeys);
 
     /**
      * The same as 'get_safe_bulk' but optimized for a single element
      */
-    int (*get_exact_safe)(struct jak_str_hash *self, field_sid_t *out, bool *found_mask, const char *key);
+    int (*get_exact_safe)(struct jak_str_hash *self, jak_field_sid *out, bool *found_mask, const char *key);
 
     /**
      * Get the values associated with <code>keys</code> in this parallel_map_exec. All keys <u>must</u> exist.
      */
-    int (*get_fast)(struct jak_str_hash *self, field_sid_t **out, char *const *keys, size_t nkeys);
+    int (*get_fast)(struct jak_str_hash *self, jak_field_sid **out, char *const *keys, size_t nkeys);
 
     /**
      * Updates keys associated with <code>values</code> in this parallel_map_exec. All values <u>must</u> exist, and the
      * mapping between keys and values must be bidirectional.
      */
-    int (*update_key_fast)(struct jak_str_hash *self, const field_sid_t *values, char *const *keys, size_t nkeys);
+    int (*update_key_fast)(struct jak_str_hash *self, const jak_field_sid *values, char *const *keys, size_t nkeys);
 
     /**
      * Removes the objects with the gives keys from this parallel_map_exec
@@ -180,7 +180,7 @@ struct jak_str_hash {
     /**
      *  Error information
      */
-    struct err err;
+    struct jak_error err;
 
 };
 
@@ -238,7 +238,7 @@ inline static int strhash_get_counters(struct jak_str_hash_counters *out, const 
  * @param num_pairs the number of pairs that are read via <code>keys</code> and <code>values</code>
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
-inline static int strhash_put_safe(struct jak_str_hash *parallel_map_exec, char *const *keys, const field_sid_t *values,
+inline static int strhash_put_safe(struct jak_str_hash *parallel_map_exec, char *const *keys, const jak_field_sid *values,
                                    size_t npairs)
 {
         error_if_null(parallel_map_exec);
@@ -264,7 +264,7 @@ inline static int strhash_put_safe(struct jak_str_hash *parallel_map_exec, char 
  * @param num_pairs the number of pairs that are read via <code>keys</code> and <code>values</code>
  * @return <code>true</code> in case of success, otherwise a value indiciating the error.
  */
-inline static int strhash_put_bulk_fast(struct jak_str_hash *parallel_map_exec, char *const *keys, const field_sid_t *values,
+inline static int strhash_put_bulk_fast(struct jak_str_hash *parallel_map_exec, char *const *keys, const jak_field_sid *values,
                                         size_t npairs)
 {
         error_if_null(parallel_map_exec);
@@ -278,7 +278,7 @@ inline static int strhash_put_bulk_fast(struct jak_str_hash *parallel_map_exec, 
 /**
  * Same as 'string_lookup_put_bulk' but specialized for a single pair
  */
-inline static int strhash_put_exact(struct jak_str_hash *parallel_map_exec, const char *key, field_sid_t value)
+inline static int strhash_put_exact(struct jak_str_hash *parallel_map_exec, const char *key, jak_field_sid value)
 {
         error_if_null(parallel_map_exec);
         error_if_null(key);
@@ -290,7 +290,7 @@ inline static int strhash_put_exact(struct jak_str_hash *parallel_map_exec, cons
 /**
  * Same as 'string_lookup_put_fast_bulk' but specialized for a single pair
  */
-inline static int strhash_put_exact_fast(struct jak_str_hash *parallel_map_exec, const char *key, field_sid_t value)
+inline static int strhash_put_exact_fast(struct jak_str_hash *parallel_map_exec, const char *key, jak_field_sid value)
 {
         error_if_null(parallel_map_exec);
         error_if_null(key);
@@ -327,7 +327,7 @@ inline static int strhash_put_exact_fast(struct jak_str_hash *parallel_map_exec,
  * @param num_keys the number of keys
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
-inline static int strhash_get_bulk_safe(field_sid_t **out, bool **found_mask, size_t *num_not_found,
+inline static int strhash_get_bulk_safe(jak_field_sid **out, bool **found_mask, size_t *num_not_found,
                                         struct jak_str_hash *parallel_map_exec, char *const *keys, size_t nkeys)
 {
         error_if_null(out);
@@ -345,7 +345,7 @@ inline static int strhash_get_bulk_safe(field_sid_t **out, bool **found_mask, si
         return result;
 }
 
-inline static int strhash_get_bulk_safe_exact(field_sid_t *out, bool *found, struct jak_str_hash *parallel_map_exec,
+inline static int strhash_get_bulk_safe_exact(jak_field_sid *out, bool *found, struct jak_str_hash *parallel_map_exec,
                                               const char *key)
 {
         error_if_null(out);
@@ -370,14 +370,14 @@ inline static int strhash_get_bulk_safe_exact(field_sid_t *out, bool *found, str
  * <code>string_id_map_get_test</code> instead.
  *
  * @param out A non-null pointer to an unallocated memory address. The parallel_map_exec will allocate <code>num_keys</code>
- *            times <code>sizeof(field_sid_t)</code> bytes memory to store the result. There are <code>num_keys</code>
+ *            times <code>sizeof(jak_field_sid)</code> bytes memory to store the result. There are <code>num_keys</code>
  *            elements returned, and all of them are guaranteed to contain a particular value.
  * @param parallel_map_exec a non-null pointer to the parallel_map_exec
  * @param keys a non-null pointer to a list of at least <code>num_keys</code> strings
  * @param num_keys the number of keys
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
-inline static int strhash_get_bulk_fast(field_sid_t **out, struct jak_str_hash *parallel_map_exec, char *const *keys,
+inline static int strhash_get_bulk_fast(jak_field_sid **out, struct jak_str_hash *parallel_map_exec, char *const *keys,
                                         size_t nkeys)
 {
         error_if_null(out);
@@ -396,14 +396,14 @@ inline static int strhash_get_bulk_fast(field_sid_t **out, struct jak_str_hash *
  * <code>string_hashtable_put_blind</code> instead.
  *
  * @param out A non-null pointer to an unallocated memory address. The parallel_map_exec will allocate <code>num_keys</code>
- *            times <code>sizeof(field_sid_t)</code> bytes memory to store the result. There are <code>num_keys</code>
+ *            times <code>sizeof(jak_field_sid)</code> bytes memory to store the result. There are <code>num_keys</code>
  *            elements returned, and all of them are guaranteed to contain a particular value.
  * @param parallel_map_exec a non-null pointer to the parallel_map_exec
  * @param keys a non-null pointer to a list of at least <code>num_keys</code> strings
  * @param num_keys the number of keys
  * @return <code>true</code> in case of success, otherwise a value indicating the error.
  */
-inline static int strhash_update_fast(struct jak_str_hash *parallel_map_exec, const field_sid_t *values, char *const *keys,
+inline static int strhash_update_fast(struct jak_str_hash *parallel_map_exec, const jak_field_sid *values, char *const *keys,
                                       size_t nkeys)
 {
         error_if_null(parallel_map_exec);

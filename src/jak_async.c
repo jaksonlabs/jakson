@@ -222,7 +222,7 @@ bool parallel_parallel_for(const void *base, size_t width, size_t len, parallel_
 
 void mapProxy(const void *src, size_t src_width, size_t len, void *args, thread_id_t tid)
 {
-        unused(tid);
+        JAK_UNUSED(tid);
         JAK_cast(struct map_args *, mapArgs, args);
         size_t globalStart = (src - mapArgs->src) / src_width;
 
@@ -255,7 +255,7 @@ bool parallel_map_exec(void *dst, const void *src, size_t src_width, size_t len,
 
 void gather_function(const void *start, size_t width, size_t len, void *args, thread_id_t tid)
 {
-        unused(tid);
+        JAK_UNUSED(tid);
         JAK_cast(struct gather_scatter_args *, gather_args, args);
         size_t global_index_start = (start - gather_args->dst) / width;
 
@@ -352,7 +352,7 @@ bool parallel_sequential_gather_adr(void *dst, const void *src, size_t src_width
 
 void parallel_gather_adr_func(const void *start, size_t width, size_t len, void *args, thread_id_t tid)
 {
-        unused(tid);
+        JAK_UNUSED(tid);
         JAK_cast(struct gather_scatter_args *, gather_args, args);
 
         prefetch_read(gather_args->idx);
@@ -392,7 +392,7 @@ bool parallel_parallel_gather_adr_func(void *dst, const void *src, size_t src_wi
 
 void parallel_scatter_func(const void *start, size_t width, size_t len, void *args, thread_id_t tid)
 {
-        unused(tid);
+        JAK_UNUSED(tid);
         JAK_cast(struct gather_scatter_args *, scatter_args, args);
 
         prefetch_read(scatter_args->idx);
@@ -485,12 +485,12 @@ bool parallel_sequential_shuffle(void *dst, const void *src, size_t width, const
 bool parallel_parallel_shuffle(void *dst, const void *src, size_t width, const size_t *dst_idx,
                                const size_t *src_idx, size_t idx_len)
 {
-        unused(dst);
-        unused(src);
-        unused(width);
-        unused(dst_idx);
-        unused(src_idx);
-        unused(idx_len);
+        JAK_UNUSED(dst);
+        JAK_UNUSED(src);
+        JAK_UNUSED(width);
+        JAK_UNUSED(dst_idx);
+        JAK_UNUSED(src_idx);
+        JAK_UNUSED(idx_len);
         JAK_NOT_IMPLEMENTED
 }
 
@@ -555,7 +555,7 @@ bool parallel_parallel_filter_late(size_t *pos, size_t *num_pos, const void *src
                 for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
                         struct filter_arg *arg = thread_args + tid;
                         arg->num_positions = 0;
-                        arg->src_positions = JAK_malloc(chunk_len * sizeof(size_t));
+                        arg->src_positions = JAK_MALLOC(chunk_len * sizeof(size_t));
                         arg->position_offset_to_add = tid * chunk_len;
                         arg->start = src + arg->position_offset_to_add * width;
                         arg->len = chunk_len;
@@ -570,7 +570,7 @@ bool parallel_parallel_filter_late(size_t *pos, size_t *num_pos, const void *src
         /** run f on this thread */
         prefetch_read(main_thread_base);
         size_t main_chunk_len = chunk_len + chunk_len_remain;
-        size_t *main_src_positions = JAK_malloc(main_chunk_len * sizeof(size_t));
+        size_t *main_src_positions = JAK_MALLOC(main_chunk_len * sizeof(size_t));
         size_t main_num_positions = 0;
 
         pred(main_src_positions,
@@ -619,7 +619,7 @@ bool parallel_sequential_filter_early(void *result, size_t *result_size, const v
         error_if_null(pred);
 
         size_t num_matching_positions;
-        size_t *matching_positions = JAK_malloc(len * sizeof(size_t));
+        size_t *matching_positions = JAK_MALLOC(len * sizeof(size_t));
 
         pred(matching_positions, &num_matching_positions, src, width, len, args, 0);
 
@@ -658,7 +658,7 @@ bool parallel_parallel_filter_early(void *result, size_t *result_size, const voi
         for (register uint_fast16_t tid = 0; tid < num_threads; tid++) {
                 struct filter_arg *arg = thread_args + tid;
                 arg->num_positions = 0;
-                arg->src_positions = JAK_malloc(chunk_len * sizeof(size_t));
+                arg->src_positions = JAK_MALLOC(chunk_len * sizeof(size_t));
                 arg->position_offset_to_add = tid * chunk_len;
                 arg->start = src + arg->position_offset_to_add * width;
                 arg->len = chunk_len;
@@ -672,7 +672,7 @@ bool parallel_parallel_filter_early(void *result, size_t *result_size, const voi
         /** run f on this thread */
         prefetch_read(main_thread_base);
         size_t main_chunk_len = chunk_len + chunk_len_remain;
-        size_t *main_src_positions = JAK_malloc(main_chunk_len * sizeof(size_t));
+        size_t *main_src_positions = JAK_MALLOC(main_chunk_len * sizeof(size_t));
         size_t main_num_positions = 0;
 
         pred(main_src_positions,

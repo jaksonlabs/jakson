@@ -21,13 +21,13 @@
 
 #include <jak_archive_strid_it.h>
 
-bool strid_iter_open(struct strid_iter *it, struct err *err, struct jak_archive *archive)
+bool strid_iter_open(struct strid_iter *it, struct jak_error *err, struct jak_archive *archive)
 {
         error_if_null(it)
         error_if_null(archive)
 
         memset(&it->vector, 0, sizeof(it->vector));
-        it->disk_file = fopen(archive->diskFilePath, "r");
+        it->disk_file = fopen(archive->disk_file_path, "r");
         if (!it->disk_file) {
                 JAK_optional(err, error(err, JAK_ERR_FOPEN_FAILED))
                 it->is_open = false;
@@ -39,7 +39,7 @@ bool strid_iter_open(struct strid_iter *it, struct err *err, struct jak_archive 
         return true;
 }
 
-bool strid_iter_next(bool *success, struct strid_info **info, struct err *err, size_t *info_length,
+bool strid_iter_next(bool *success, struct strid_info **info, struct jak_error *err, size_t *info_length,
                      struct strid_iter *it)
 {
         error_if_null(info)
@@ -47,11 +47,11 @@ bool strid_iter_next(bool *success, struct strid_info **info, struct err *err, s
         error_if_null(it)
 
         if (it->disk_offset != 0 && it->is_open) {
-                struct string_entry_header header;
+                struct jak_string_entry_header header;
                 size_t vec_pos = 0;
                 do {
                         fseek(it->disk_file, it->disk_offset, SEEK_SET);
-                        int num_read = fread(&header, sizeof(struct string_entry_header), 1, it->disk_file);
+                        int num_read = fread(&header, sizeof(struct jak_string_entry_header), 1, it->disk_file);
                         if (header.marker != '-') {
                                 error_print(JAK_ERR_INTERNALERR);
                                 return false;

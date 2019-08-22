@@ -30,232 +30,231 @@
 
 JAK_BEGIN_DECL
 
-
 struct __attribute__((packed)) jak_archive_header {
     char magic[9];
-    u8 version;
-    offset_t root_object_header_offset;
-    offset_t string_id_to_offset_index_offset;
+    jak_u8 version;
+    jak_offset_t root_object_header_offset;
+    jak_offset_t string_id_to_offset_index_offset;
 };
 
-struct __attribute__((packed)) record_header {
+struct __attribute__((packed)) jak_record_header {
     char marker;
-    u8 flags;
-    u64 record_size;
+    jak_u8 flags;
+    jak_u64 record_size;
 };
 
-struct __attribute__((packed)) object_header {
+struct __attribute__((packed)) jak_object_header {
     char marker;
     global_id_t oid;
-    u32 flags;
+    jak_u32 flags;
 };
 
-struct __attribute__((packed)) prop_header {
+struct __attribute__((packed)) jak_prop_header {
     char marker;
-    u32 num_entries;
+    jak_u32 num_entries;
 };
 
-union __attribute__((packed)) string_tab_flags {
+union __attribute__((packed)) jak_string_tab_flags {
     struct {
-        u8 compressor_none
+        jak_u8 compressor_none
                 : 1;
-        u8 compressed_huffman
+        jak_u8 compressed_huffman
                 : 1;
     } bits;
-    u8 value;
+    jak_u8 value;
 };
 
-struct __attribute__((packed)) string_table_header {
+struct __attribute__((packed)) jak_string_table_header {
     char marker;
-    u32 num_entries;
-    u8 flags;
-    offset_t first_entry;
-    offset_t compressor_extra_size;
+    jak_u32 num_entries;
+    jak_u8 flags;
+    jak_offset_t first_entry;
+    jak_offset_t compressor_extra_size;
 };
 
-struct __attribute__((packed)) object_array_header {
+struct __attribute__((packed)) jak_object_array_header {
     char marker;
-    u8 num_entries;
+    jak_u8 num_entries;
 };
 
-struct __attribute__((packed)) column_group_header {
+struct __attribute__((packed)) jak_column_group_header {
     char marker;
-    u32 num_columns;
-    u32 num_objects;
+    jak_u32 num_columns;
+    jak_u32 num_objects;
 };
 
-struct __attribute__((packed)) column_header {
+struct __attribute__((packed)) jak_column_header {
     char marker;
-    field_sid_t column_name;
+    jak_field_sid column_name;
     char value_type;
-    u32 num_entries;
+    jak_u32 num_entries;
 };
 
-union object_flags {
+union jak_object_flags {
     struct {
-        u32 has_null_props
+        jak_u32 has_null_props
                 : 1;
-        u32 has_bool_props
+        jak_u32 has_bool_props
                 : 1;
-        u32 has_int8_props
+        jak_u32 has_int8_props
                 : 1;
-        u32 has_int16_props
+        jak_u32 has_int16_props
                 : 1;
-        u32 has_int32_props
+        jak_u32 has_int32_props
                 : 1;
-        u32 has_int64_props
+        jak_u32 has_int64_props
                 : 1;
-        u32 has_uint8_props
+        jak_u32 has_uint8_props
                 : 1;
-        u32 has_uint16_props
+        jak_u32 has_uint16_props
                 : 1;
-        u32 has_uint32_props
+        jak_u32 has_uint32_props
                 : 1;
-        u32 has_uint64_props
+        jak_u32 has_uint64_props
                 : 1;
-        u32 has_float_props
+        jak_u32 has_float_props
                 : 1;
-        u32 has_string_props
+        jak_u32 has_string_props
                 : 1;
-        u32 has_object_props
+        jak_u32 has_object_props
                 : 1;
-        u32 has_null_array_props
+        jak_u32 has_null_array_props
                 : 1;
-        u32 has_bool_array_props
+        jak_u32 has_bool_array_props
                 : 1;
-        u32 has_int8_array_props
+        jak_u32 has_int8_array_props
                 : 1;
-        u32 has_int16_array_props
+        jak_u32 has_int16_array_props
                 : 1;
-        u32 has_int32_array_props
+        jak_u32 has_int32_array_props
                 : 1;
-        u32 has_int64_array_props
+        jak_u32 has_int64_array_props
                 : 1;
-        u32 has_uint8_array_props
+        jak_u32 has_uint8_array_props
                 : 1;
-        u32 has_uint16_array_props
+        jak_u32 has_uint16_array_props
                 : 1;
-        u32 has_uint32_array_props
+        jak_u32 has_uint32_array_props
                 : 1;
-        u32 has_uint64_array_props
+        jak_u32 has_uint64_array_props
                 : 1;
-        u32 has_float_array_props
+        jak_u32 has_float_array_props
                 : 1;
-        u32 has_string_array_props
+        jak_u32 has_string_array_props
                 : 1;
-        u32 has_object_array_props
+        jak_u32 has_object_array_props
                 : 1;
-        u32 RESERVED_27
+        jak_u32 RESERVED_27
                 : 1;
-        u32 RESERVED_28
+        jak_u32 RESERVED_28
                 : 1;
-        u32 RESERVED_29
+        jak_u32 RESERVED_29
                 : 1;
-        u32 RESERVED_30
+        jak_u32 RESERVED_30
                 : 1;
-        u32 RESERVED_31
+        jak_u32 RESERVED_31
                 : 1;
-        u32 RESERVED_32
+        jak_u32 RESERVED_32
                 : 1;
     } bits;
-    u32 value;
+    jak_u32 value;
 };
 
 struct jak_archive_prop_offs {
-    offset_t nulls;
-    offset_t bools;
-    offset_t int8s;
-    offset_t int16s;
-    offset_t int32s;
-    offset_t int64s;
-    offset_t uint8s;
-    offset_t uint16s;
-    offset_t uint32s;
-    offset_t uint64s;
-    offset_t floats;
-    offset_t strings;
-    offset_t objects;
-    offset_t null_arrays;
-    offset_t bool_arrays;
-    offset_t int8_arrays;
-    offset_t int16_arrays;
-    offset_t int32_arrays;
-    offset_t int64_arrays;
-    offset_t uint8_arrays;
-    offset_t uint16_arrays;
-    offset_t uint32_arrays;
-    offset_t uint64_arrays;
-    offset_t float_arrays;
-    offset_t string_arrays;
-    offset_t object_arrays;
+    jak_offset_t nulls;
+    jak_offset_t bools;
+    jak_offset_t int8s;
+    jak_offset_t int16s;
+    jak_offset_t int32s;
+    jak_offset_t int64s;
+    jak_offset_t uint8s;
+    jak_offset_t uint16s;
+    jak_offset_t uint32s;
+    jak_offset_t uint64s;
+    jak_offset_t floats;
+    jak_offset_t strings;
+    jak_offset_t objects;
+    jak_offset_t null_arrays;
+    jak_offset_t bool_arrays;
+    jak_offset_t int8_arrays;
+    jak_offset_t int16_arrays;
+    jak_offset_t int32_arrays;
+    jak_offset_t int64_arrays;
+    jak_offset_t uint8_arrays;
+    jak_offset_t uint16_arrays;
+    jak_offset_t uint32_arrays;
+    jak_offset_t uint64_arrays;
+    jak_offset_t float_arrays;
+    jak_offset_t string_arrays;
+    jak_offset_t object_arrays;
 };
 
-struct fixed_prop {
-    struct prop_header *header;
-    const field_sid_t *keys;
+struct jak_fixed_prop {
+    struct jak_prop_header *header;
+    const jak_field_sid *keys;
     const void *values;
 };
 
-struct table_prop {
-    struct prop_header *header;
-    const field_sid_t *keys;
-    const offset_t *groupOffs;
+struct jak_table_prop {
+    struct jak_prop_header *header;
+    const jak_field_sid *keys;
+    const jak_offset_t *group_offs;
 };
 
-struct var_prop {
-    struct prop_header *header;
-    const field_sid_t *keys;
-    const offset_t *offsets;
+struct jak_var_prop {
+    struct jak_prop_header *header;
+    const jak_field_sid *keys;
+    const jak_offset_t *offsets;
     const void *values;
 };
 
-struct array_prop {
-    struct prop_header *header;
-    const field_sid_t *keys;
-    const u32 *lengths;
-    offset_t values_begin;
+struct jak_array_prop  {
+    struct jak_prop_header *header;
+    const jak_field_sid *keys;
+    const jak_u32 *lengths;
+    jak_offset_t values_begin;
 };
 
-struct null_prop {
-    struct prop_header *header;
-    const field_sid_t *keys;
+struct jak_null_prop  {
+    struct jak_prop_header *header;
+    const jak_field_sid *keys;
 };
 
-enum marker_type {
-    MARKER_TYPE_OBJECT_BEGIN = 0,
-    MARKER_TYPE_OBJECT_END = 1,
-    MARKER_TYPE_PROP_NULL = 2,
-    MARKER_TYPE_PROP_BOOLEAN = 3,
-    MARKER_TYPE_PROP_INT8 = 4,
-    MARKER_TYPE_PROP_INT16 = 5,
-    MARKER_TYPE_PROP_INT32 = 6,
-    MARKER_TYPE_PROP_INT64 = 7,
-    MARKER_TYPE_PROP_UINT8 = 8,
-    MARKER_TYPE_PROP_UINT16 = 9,
-    MARKER_TYPE_PROP_UINT32 = 10,
-    MARKER_TYPE_PROP_UINT64 = 11,
-    MARKER_TYPE_PROP_REAL = 12,
-    MARKER_TYPE_PROP_TEXT = 13,
-    MARKER_TYPE_PROP_OBJECT = 14,
-    MARKER_TYPE_PROP_NULL_ARRAY = 15,
-    MARKER_TYPE_PROP_BOOLEAN_ARRAY = 16,
-    MARKER_TYPE_PROP_INT8_ARRAY = 17,
-    MARKER_TYPE_PROP_INT16_ARRAY = 18,
-    MARKER_TYPE_PROP_INT32_ARRAY = 19,
-    MARKER_TYPE_PROP_INT64_ARRAY = 20,
-    MARKER_TYPE_PROP_UINT8_ARRAY = 21,
-    MARKER_TYPE_PROP_UINT16_ARRAY = 22,
-    MARKER_TYPE_PROP_UINT32_ARRAY = 23,
-    MARKER_TYPE_PROP_UINT64_ARRAY = 24,
-    MARKER_TYPE_PROP_REAL_ARRAY = 25,
-    MARKER_TYPE_PROP_TEXT_ARRAY = 26,
-    MARKER_TYPE_PROP_OBJECT_ARRAY = 27,
-    MARKER_TYPE_EMBEDDED_STR_DIC = 28,
-    MARKER_TYPE_EMBEDDED_UNCOMP_STR = 29,
-    MARKER_TYPE_COLUMN_GROUP = 30,
-    MARKER_TYPE_COLUMN = 31,
-    MARKER_TYPE_HUFFMAN_DIC_ENTRY = 32,
-    MARKER_TYPE_RECORD_HEADER = 33,
+enum jak_archive_marker {
+    JAK_MARKER_TYPE_OBJECT_BEGIN = 0,
+    JAK_MARKER_TYPE_OBJECT_END = 1,
+    JAK_MARKER_TYPE_PROP_NULL = 2,
+    JAK_MARKER_TYPE_PROP_BOOLEAN = 3,
+    JAK_MARKER_TYPE_PROP_INT8 = 4,
+    JAK_MARKER_TYPE_PROP_INT16 = 5,
+    JAK_MARKER_TYPE_PROP_INT32 = 6,
+    JAK_MARKER_TYPE_PROP_INT64 = 7,
+    JAK_MARKER_TYPE_PROP_UINT8 = 8,
+    JAK_MARKER_TYPE_PROP_UINT16 = 9,
+    JAK_MARKER_TYPE_PROP_UINT32 = 10,
+    JAK_MARKER_TYPE_PROP_UINT64 = 11,
+    JAK_MARKER_TYPE_PROP_REAL = 12,
+    JAK_MARKER_TYPE_PROP_TEXT = 13,
+    JAK_MARKER_TYPE_PROP_OBJECT = 14,
+    JAK_MARKER_TYPE_PROP_NULL_ARRAY = 15,
+    JAK_MARKER_TYPE_PROP_BOOLEAN_ARRAY = 16,
+    JAK_MARKER_TYPE_PROP_INT8_ARRAY = 17,
+    JAK_MARKER_TYPE_PROP_INT16_ARRAY = 18,
+    JAK_MARKER_TYPE_PROP_INT32_ARRAY = 19,
+    JAK_MARKER_TYPE_PROP_INT64_ARRAY = 20,
+    JAK_MARKER_TYPE_PROP_UINT8_ARRAY = 21,
+    JAK_MARKER_TYPE_PROP_UINT16_ARRAY = 22,
+    JAK_MARKER_TYPE_PROP_UINT32_ARRAY = 23,
+    JAK_MARKER_TYPE_PROP_UINT64_ARRAY = 24,
+    JAK_MARKER_TYPE_PROP_REAL_ARRAY = 25,
+    JAK_MARKER_TYPE_PROP_TEXT_ARRAY = 26,
+    JAK_MARKER_TYPE_PROP_OBJECT_ARRAY = 27,
+    JAK_MARKER_TYPE_EMBEDDED_STR_DIC = 28,
+    JAK_MARKER_TYPE_EMBEDDED_UNCOMP_STR = 29,
+    JAK_MARKER_TYPE_COLUMN_GROUP = 30,
+    JAK_MARKER_TYPE_COLUMN = 31,
+    JAK_MARKER_TYPE_HUFFMAN_DIC_ENTRY = 32,
+    JAK_MARKER_TYPE_RECORD_HEADER = 33,
 };
 
 #pragma GCC diagnostic push
@@ -264,140 +263,140 @@ enum marker_type {
 static struct jak_archive_header this_file_header = {.version = JAK_CARBON_ARCHIVE_VERSION, .root_object_header_offset = 0};
 
 static struct {
-    enum marker_type type;
+    enum jak_archive_marker type;
     char symbol;
 } marker_symbols[] =
-        {{MARKER_TYPE_OBJECT_BEGIN,        MARKER_SYMBOL_OBJECT_BEGIN},
-         {MARKER_TYPE_OBJECT_END,          MARKER_SYMBOL_OBJECT_END},
-         {MARKER_TYPE_PROP_NULL,           MARKER_SYMBOL_PROP_NULL},
-         {MARKER_TYPE_PROP_BOOLEAN,        MARKER_SYMBOL_PROP_BOOLEAN},
-         {MARKER_TYPE_PROP_INT8,           MARKER_SYMBOL_PROP_INT8},
-         {MARKER_TYPE_PROP_INT16,          MARKER_SYMBOL_PROP_INT16},
-         {MARKER_TYPE_PROP_INT32,          MARKER_SYMBOL_PROP_INT32},
-         {MARKER_TYPE_PROP_INT64,          MARKER_SYMBOL_PROP_INT64},
-         {MARKER_TYPE_PROP_UINT8,          MARKER_SYMBOL_PROP_UINT8},
-         {MARKER_TYPE_PROP_UINT16,         MARKER_SYMBOL_PROP_UINT16},
-         {MARKER_TYPE_PROP_UINT32,         MARKER_SYMBOL_PROP_UINT32},
-         {MARKER_TYPE_PROP_UINT64,         MARKER_SYMBOL_PROP_UINT64},
-         {MARKER_TYPE_PROP_REAL,           MARKER_SYMBOL_PROP_REAL},
-         {MARKER_TYPE_PROP_TEXT,           MARKER_SYMBOL_PROP_TEXT},
-         {MARKER_TYPE_PROP_OBJECT,         MARKER_SYMBOL_PROP_OBJECT},
-         {MARKER_TYPE_PROP_NULL_ARRAY,     MARKER_SYMBOL_PROP_NULL_ARRAY},
-         {MARKER_TYPE_PROP_BOOLEAN_ARRAY,  MARKER_SYMBOL_PROP_BOOLEAN_ARRAY},
-         {MARKER_TYPE_PROP_INT8_ARRAY,     MARKER_SYMBOL_PROP_INT8_ARRAY},
-         {MARKER_TYPE_PROP_INT16_ARRAY,    MARKER_SYMBOL_PROP_INT16_ARRAY},
-         {MARKER_TYPE_PROP_INT32_ARRAY,    MARKER_SYMBOL_PROP_INT32_ARRAY},
-         {MARKER_TYPE_PROP_INT64_ARRAY,    MARKER_SYMBOL_PROP_INT64_ARRAY},
-         {MARKER_TYPE_PROP_UINT8_ARRAY,    MARKER_SYMBOL_PROP_UINT8_ARRAY},
-         {MARKER_TYPE_PROP_UINT16_ARRAY,   MARKER_SYMBOL_PROP_UINT16_ARRAY},
-         {MARKER_TYPE_PROP_UINT32_ARRAY,   MARKER_SYMBOL_PROP_UINT32_ARRAY},
-         {MARKER_TYPE_PROP_UINT64_ARRAY,   MARKER_SYMBOL_PROP_UINT64_ARRAY},
-         {MARKER_TYPE_PROP_REAL_ARRAY,     MARKER_SYMBOL_PROP_REAL_ARRAY},
-         {MARKER_TYPE_PROP_TEXT_ARRAY,     MARKER_SYMBOL_PROP_TEXT_ARRAY},
-         {MARKER_TYPE_PROP_OBJECT_ARRAY,   MARKER_SYMBOL_PROP_OBJECT_ARRAY},
-         {MARKER_TYPE_EMBEDDED_STR_DIC,    MARKER_SYMBOL_EMBEDDED_STR_DIC},
-         {MARKER_TYPE_EMBEDDED_UNCOMP_STR, MARKER_SYMBOL_EMBEDDED_STR},
-         {MARKER_TYPE_COLUMN_GROUP,        MARKER_SYMBOL_COLUMN_GROUP},
-         {MARKER_TYPE_COLUMN,              MARKER_SYMBOL_COLUMN},
-         {MARKER_TYPE_HUFFMAN_DIC_ENTRY,   MARKER_SYMBOL_HUFFMAN_DIC_ENTRY},
-         {MARKER_TYPE_RECORD_HEADER,       MARKER_SYMBOL_RECORD_HEADER}};
+        {{JAK_MARKER_TYPE_OBJECT_BEGIN,        JAK_MARKER_SYMBOL_OBJECT_BEGIN},
+         {JAK_MARKER_TYPE_OBJECT_END,          JAK_MARKER_SYMBOL_OBJECT_END},
+         {JAK_MARKER_TYPE_PROP_NULL,           JAK_MARKER_SYMBOL_PROP_NULL},
+         {JAK_MARKER_TYPE_PROP_BOOLEAN,        JAK_MARKER_SYMBOL_PROP_BOOLEAN},
+         {JAK_MARKER_TYPE_PROP_INT8,           JAK_MARKER_SYMBOL_PROP_INT8},
+         {JAK_MARKER_TYPE_PROP_INT16,          JAK_MARKER_SYMBOL_PROP_INT16},
+         {JAK_MARKER_TYPE_PROP_INT32,          JAK_MARKER_SYMBOL_PROP_INT32},
+         {JAK_MARKER_TYPE_PROP_INT64,          JAK_MARKER_SYMBOL_PROP_INT64},
+         {JAK_MARKER_TYPE_PROP_UINT8,          JAK_MARKER_SYMBOL_PROP_UINT8},
+         {JAK_MARKER_TYPE_PROP_UINT16,         JAK_MARKER_SYMBOL_PROP_UINT16},
+         {JAK_MARKER_TYPE_PROP_UINT32,         JAK_MARKER_SYMBOL_PROP_UINT32},
+         {JAK_MARKER_TYPE_PROP_UINT64,         JAK_MARKER_SYMBOL_PROP_UINT64},
+         {JAK_MARKER_TYPE_PROP_REAL,           JAK_MARKER_SYMBOL_PROP_REAL},
+         {JAK_MARKER_TYPE_PROP_TEXT,           JAK_MARKER_SYMBOL_PROP_TEXT},
+         {JAK_MARKER_TYPE_PROP_OBJECT,         JAK_MARKER_SYMBOL_PROP_OBJECT},
+         {JAK_MARKER_TYPE_PROP_NULL_ARRAY,     JAK_MARKER_SYMBOL_PROP_NULL_ARRAY},
+         {JAK_MARKER_TYPE_PROP_BOOLEAN_ARRAY,  JAK_MARKER_SYMBOL_PROP_BOOLEAN_ARRAY},
+         {JAK_MARKER_TYPE_PROP_INT8_ARRAY,     JAK_MARKER_SYMBOL_PROP_INT8_ARRAY},
+         {JAK_MARKER_TYPE_PROP_INT16_ARRAY,    JAK_MARKER_SYMBOL_PROP_INT16_ARRAY},
+         {JAK_MARKER_TYPE_PROP_INT32_ARRAY,    JAK_MARKER_SYMBOL_PROP_INT32_ARRAY},
+         {JAK_MARKER_TYPE_PROP_INT64_ARRAY,    JAK_MARKER_SYMBOL_PROP_INT64_ARRAY},
+         {JAK_MARKER_TYPE_PROP_UINT8_ARRAY,    JAK_MARKER_SYMBOL_PROP_UINT8_ARRAY},
+         {JAK_MARKER_TYPE_PROP_UINT16_ARRAY,   JAK_MARKER_SYMBOL_PROP_UINT16_ARRAY},
+         {JAK_MARKER_TYPE_PROP_UINT32_ARRAY,   JAK_MARKER_SYMBOL_PROP_UINT32_ARRAY},
+         {JAK_MARKER_TYPE_PROP_UINT64_ARRAY,   JAK_MARKER_SYMBOL_PROP_UINT64_ARRAY},
+         {JAK_MARKER_TYPE_PROP_REAL_ARRAY,     JAK_MARKER_SYMBOL_PROP_REAL_ARRAY},
+         {JAK_MARKER_TYPE_PROP_TEXT_ARRAY,     JAK_MARKER_SYMBOL_PROP_TEXT_ARRAY},
+         {JAK_MARKER_TYPE_PROP_OBJECT_ARRAY,   JAK_MARKER_SYMBOL_PROP_OBJECT_ARRAY},
+         {JAK_MARKER_TYPE_EMBEDDED_STR_DIC,    JAK_MARKER_SYMBOL_EMBEDDED_STR_DIC},
+         {JAK_MARKER_TYPE_EMBEDDED_UNCOMP_STR, JAK_MARKER_SYMBOL_EMBEDDED_STR},
+         {JAK_MARKER_TYPE_COLUMN_GROUP,        JAK_MARKER_SYMBOL_COLUMN_GROUP},
+         {JAK_MARKER_TYPE_COLUMN,              JAK_MARKER_SYMBOL_COLUMN},
+         {JAK_MARKER_TYPE_HUFFMAN_DIC_ENTRY,   JAK_MARKER_SYMBOL_HUFFMAN_DIC_ENTRY},
+         {JAK_MARKER_TYPE_RECORD_HEADER,       JAK_MARKER_SYMBOL_RECORD_HEADER}};
 
 static struct {
-    field_e value_type;
-    enum marker_type marker;
+    jak_archive_field_e value_type;
+    enum jak_archive_marker marker;
 } value_array_marker_mapping[] =
-        {{FIELD_NULL,    MARKER_TYPE_PROP_NULL_ARRAY},
-         {FIELD_BOOLEAN, MARKER_TYPE_PROP_BOOLEAN_ARRAY},
-         {FIELD_INT8,    MARKER_TYPE_PROP_INT8_ARRAY},
-         {FIELD_INT16,   MARKER_TYPE_PROP_INT16_ARRAY},
-         {FIELD_INT32,   MARKER_TYPE_PROP_INT32_ARRAY},
-         {FIELD_INT64,   MARKER_TYPE_PROP_INT64_ARRAY},
-         {FIELD_UINT8,   MARKER_TYPE_PROP_UINT8_ARRAY},
-         {FIELD_UINT16,  MARKER_TYPE_PROP_UINT16_ARRAY},
-         {FIELD_UINT32,  MARKER_TYPE_PROP_UINT32_ARRAY},
-         {FIELD_UINT64,  MARKER_TYPE_PROP_UINT64_ARRAY},
-         {FIELD_FLOAT,   MARKER_TYPE_PROP_REAL_ARRAY},
-         {FIELD_STRING,  MARKER_TYPE_PROP_TEXT_ARRAY},
-         {FIELD_OBJECT,  MARKER_TYPE_PROP_OBJECT_ARRAY}}, valueMarkerMapping[] =
-        {{FIELD_NULL,    MARKER_TYPE_PROP_NULL},
-         {FIELD_BOOLEAN, MARKER_TYPE_PROP_BOOLEAN},
-         {FIELD_INT8,    MARKER_TYPE_PROP_INT8},
-         {FIELD_INT16,   MARKER_TYPE_PROP_INT16},
-         {FIELD_INT32,   MARKER_TYPE_PROP_INT32},
-         {FIELD_INT64,   MARKER_TYPE_PROP_INT64},
-         {FIELD_UINT8,   MARKER_TYPE_PROP_UINT8},
-         {FIELD_UINT16,  MARKER_TYPE_PROP_UINT16},
-         {FIELD_UINT32,  MARKER_TYPE_PROP_UINT32},
-         {FIELD_UINT64,  MARKER_TYPE_PROP_UINT64},
-         {FIELD_FLOAT,   MARKER_TYPE_PROP_REAL},
-         {FIELD_STRING,  MARKER_TYPE_PROP_TEXT},
-         {FIELD_OBJECT,  MARKER_TYPE_PROP_OBJECT}};
+        {{JAK_FIELD_NULL,    JAK_MARKER_TYPE_PROP_NULL_ARRAY},
+         {JAK_FIELD_BOOLEAN, JAK_MARKER_TYPE_PROP_BOOLEAN_ARRAY},
+         {JAK_FIELD_INT8,    JAK_MARKER_TYPE_PROP_INT8_ARRAY},
+         {JAK_FIELD_INT16,   JAK_MARKER_TYPE_PROP_INT16_ARRAY},
+         {JAK_FIELD_INT32,   JAK_MARKER_TYPE_PROP_INT32_ARRAY},
+         {JAK_FIELD_INT64,   JAK_MARKER_TYPE_PROP_INT64_ARRAY},
+         {JAK_FIELD_UINT8,   JAK_MARKER_TYPE_PROP_UINT8_ARRAY},
+         {JAK_FIELD_UINT16,  JAK_MARKER_TYPE_PROP_UINT16_ARRAY},
+         {JAK_FIELD_UINT32,  JAK_MARKER_TYPE_PROP_UINT32_ARRAY},
+         {JAK_FIELD_UINT64,  JAK_MARKER_TYPE_PROP_UINT64_ARRAY},
+         {JAK_FIELD_FLOAT,   JAK_MARKER_TYPE_PROP_REAL_ARRAY},
+         {JAK_FIELD_STRING,  JAK_MARKER_TYPE_PROP_TEXT_ARRAY},
+         {JAK_FIELD_OBJECT,  JAK_MARKER_TYPE_PROP_OBJECT_ARRAY}}, valueMarkerMapping[] =
+        {{JAK_FIELD_NULL,    JAK_MARKER_TYPE_PROP_NULL},
+         {JAK_FIELD_BOOLEAN, JAK_MARKER_TYPE_PROP_BOOLEAN},
+         {JAK_FIELD_INT8,    JAK_MARKER_TYPE_PROP_INT8},
+         {JAK_FIELD_INT16,   JAK_MARKER_TYPE_PROP_INT16},
+         {JAK_FIELD_INT32,   JAK_MARKER_TYPE_PROP_INT32},
+         {JAK_FIELD_INT64,   JAK_MARKER_TYPE_PROP_INT64},
+         {JAK_FIELD_UINT8,   JAK_MARKER_TYPE_PROP_UINT8},
+         {JAK_FIELD_UINT16,  JAK_MARKER_TYPE_PROP_UINT16},
+         {JAK_FIELD_UINT32,  JAK_MARKER_TYPE_PROP_UINT32},
+         {JAK_FIELD_UINT64,  JAK_MARKER_TYPE_PROP_UINT64},
+         {JAK_FIELD_FLOAT,   JAK_MARKER_TYPE_PROP_REAL},
+         {JAK_FIELD_STRING,  JAK_MARKER_TYPE_PROP_TEXT},
+         {JAK_FIELD_OBJECT,  JAK_MARKER_TYPE_PROP_OBJECT}};
 
 #pragma GCC diagnostic pop
 
-struct record_flags {
+struct jak_record_flags {
     struct {
-        u8 is_sorted
+        jak_u8 is_sorted
                 : 1;
-        u8 RESERVED_2
+        jak_u8 RESERVED_2
                 : 1;
-        u8 RESERVED_3
+        jak_u8 RESERVED_3
                 : 1;
-        u8 RESERVED_4
+        jak_u8 RESERVED_4
                 : 1;
-        u8 RESERVED_5
+        jak_u8 RESERVED_5
                 : 1;
-        u8 RESERVED_6
+        jak_u8 RESERVED_6
                 : 1;
-        u8 RESERVED_7
+        jak_u8 RESERVED_7
                 : 1;
-        u8 RESERVED_8
+        jak_u8 RESERVED_8
                 : 1;
     } bits;
-    u8 value;
+    jak_u8 value;
 };
 
-struct string_table {
-    struct packer compressor;
-    offset_t first_entry_off;
-    u32 num_embeddded_strings;
+struct jak_string_table {
+    struct jak_packer compressor;
+    jak_offset_t first_entry_off;
+    jak_u32 num_embeddded_strings;
 };
 
-struct record_table {
-    struct record_flags flags;
-    struct memblock *recordDataBase;
+struct jak_record_table {
+    struct jak_record_flags flags;
+    struct jak_memblock *record_db;
 };
 
 struct jak_archive_info {
     size_t string_table_size;
     size_t record_table_size;
     size_t string_id_index_size;
-    u32 num_embeddded_strings;
+    jak_u32 num_embeddded_strings;
 };
 
-struct __attribute__((packed)) string_entry_header {
+struct __attribute__((packed)) jak_string_entry_header {
     char marker;
-    offset_t next_entry_off;
-    field_sid_t string_id;
-    u32 string_len;
+    jak_offset_t next_entry_off;
+    jak_field_sid string_id;
+    jak_u32 string_len;
 };
 
-void int_read_prop_offsets(struct jak_archive_prop_offs *prop_offsets, struct memfile *memfile,
-                           const union object_flags *flags);
+void jak_int_read_prop_offsets(struct jak_archive_prop_offs *prop_offsets, struct jak_memfile *memfile,
+                           const union jak_object_flags *flags);
 
-void int_embedded_fixed_props_read(struct fixed_prop *prop, struct memfile *memfile);
+void jak_int_embedded_fixed_props_read(struct jak_fixed_prop *prop, struct jak_memfile *memfile);
 
-void int_embedded_var_props_read(struct var_prop *prop, struct memfile *memfile);
+void jak_int_embedded_var_props_read(struct jak_var_prop *prop, struct jak_memfile *memfile);
 
-void int_embedded_null_props_read(struct null_prop *prop, struct memfile *memfile);
+void jak_int_embedded_null_props_read(struct jak_null_prop  *prop, struct jak_memfile *memfile);
 
-void int_embedded_array_props_read(struct array_prop *prop, struct memfile *memfile);
+void jak_int_embedded_array_props_read(struct jak_array_prop  *prop, struct jak_memfile *memfile);
 
-void int_embedded_table_props_read(struct table_prop *prop, struct memfile *memfile);
+void jak_int_embedded_table_props_read(struct jak_table_prop *prop, struct jak_memfile *memfile);
 
-field_e int_get_value_type_of_char(char c);
+jak_archive_field_e jak_int_get_value_type_of_char(char c);
 
-field_e int_marker_to_field_type(char symbol);
+jak_archive_field_e jak_int_marker_to_field_type(char symbol);
 
 JAK_END_DECL
 

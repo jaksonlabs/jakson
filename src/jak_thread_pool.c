@@ -26,7 +26,7 @@ static inline void __execute_task();
 
 struct thread_pool *thread_pool_create(size_t num_threads, int enable_monitoring)
 {
-        struct thread_pool *pool = JAK_malloc(sizeof(struct thread_pool));
+        struct thread_pool *pool = JAK_MALLOC(sizeof(struct thread_pool));
 
         pool->name = NULL;
         pool->size = num_threads;
@@ -39,7 +39,7 @@ struct thread_pool *thread_pool_create(size_t num_threads, int enable_monitoring
         pool->task_group_states = calloc(pool->task_state_capacity, sizeof(struct task_state));
         pool->enable_monitoring = enable_monitoring;
 
-        pthread_t *threads = JAK_malloc(sizeof(pthread_t) * pool->capacity);
+        pthread_t *threads = JAK_MALLOC(sizeof(pthread_t) * pool->capacity);
         pool->pool = threads;
 
         if (enable_monitoring) {
@@ -48,7 +48,7 @@ struct thread_pool *thread_pool_create(size_t num_threads, int enable_monitoring
 
         for (size_t i = 0; i < pool->capacity; i++) {
                 // one block per thread to reduce risk of two threads sharing the same cache line
-                struct thread_info *thread_info = JAK_malloc(sizeof(struct thread_info));
+                struct thread_info *thread_info = JAK_MALLOC(sizeof(struct thread_info));
                 pool->thread_infos[i] = thread_info;
                 thread_info->pool = pool;
                 thread_info->id = i;
@@ -122,7 +122,7 @@ void thread_pool_set_name(struct thread_pool *pool, const char *name)
         }
 
         size_t s = strlen(name);
-        char *str = JAK_malloc(s + 1);
+        char *str = JAK_MALLOC(s + 1);
         strcpy(str, name);
         pool->name = str;
 }
@@ -163,7 +163,7 @@ bool thread_pool_resize(struct thread_pool *pool, size_t num_threads)
 bool thread_pool_enqueue_tasks(struct thread_task *tasks, struct thread_pool *pool, size_t num_tasks,
                                struct task_handle *hndl)
 {
-        // find unused slot
+        // find JAK_UNUSED slot
         size_t ind = 0;
 
         for (; pool->task_group_states[ind].task_count; ind = (ind + 8) % MAX_NUM_TASKS) {}

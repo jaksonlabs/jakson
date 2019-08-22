@@ -34,7 +34,7 @@ JAK_BEGIN_DECL
  * Unique tag identifying a specific implementation for compressing/decompressing string in a CARBON archives
  * string table.
  */
-enum packer_type {
+enum jak_packer_type {
     PACK_NONE, PACK_HUFFMAN
 };
 
@@ -42,9 +42,9 @@ enum packer_type {
  * Main interface for the compressor framework. A compressor is used to encode/decode strings stored in a
  * CARBON archive.
  */
-struct packer {
+struct jak_packer {
     /** Tag identifying the implementation of this compressor */
-    enum packer_type tag;
+    enum jak_packer_type tag;
 
     /** Implementation-specific storage */
     void *extra;
@@ -61,7 +61,7 @@ struct packer {
      * @author Marcus Pinnecke
      * @since 0.1.00.05
      */
-    bool (*create)(struct packer *self);
+    bool (*create)(struct jak_packer *self);
 
     /**
      * Destructor for implementation-dependent deinitialization of the compressor at hand.
@@ -75,7 +75,7 @@ struct packer {
      * @author Marcus Pinnecke
      * @since 0.1.00.05
      */
-    bool (*drop)(struct packer *self);
+    bool (*drop)(struct jak_packer *self);
 
     /**
      * Perform a hard-copy of this compressor to dst
@@ -88,7 +88,7 @@ struct packer {
      * @author Marcus Pinnecke
      * @since 0.1.00.05
      */
-    bool (*cpy)(const struct packer *self, struct packer *dst);
+    bool (*cpy)(const struct jak_packer *self, struct jak_packer *dst);
 
     /**
      * Function to construct and serialize an implementation-specific dictionary, book-keeping data, or extra data
@@ -114,7 +114,7 @@ struct packer {
      * @author Marcus Pinnecke
      * @since 0.1.00.05
      * */
-    bool (*write_extra)(struct packer *self, struct memfile *dst,
+    bool (*write_extra)(struct jak_packer *self, struct jak_memfile *dst,
                         const struct vector ofType (const char *) *strings);
 
     /**
@@ -128,7 +128,7 @@ struct packer {
      * @param nbytes Number of bytes written when 'write_extra' was called. Intended to read read to restore the extra field.
      * @return The implementer must return <code>true</code> on success, and <code>false</code> otherwise.
      */
-    bool (*read_extra)(struct packer *self, FILE *src, size_t nbytes);
+    bool (*read_extra)(struct jak_packer *self, FILE *src, size_t nbytes);
 
     /**
      * Encodes an input string and writes its encoded version into a memory file.
@@ -143,9 +143,9 @@ struct packer {
      * @author Marcus Pinnecke
      * @since 0.1.00.05
      */
-    bool (*encode_string)(struct packer *self, struct memfile *dst, struct err *err, const char *string);
+    bool (*encode_string)(struct jak_packer *self, struct jak_memfile *dst, struct jak_error *err, const char *string);
 
-    bool (*decode_string)(struct packer *self, char *dst, size_t strlen, FILE *src);
+    bool (*decode_string)(struct jak_packer *self, char *dst, size_t strlen, FILE *src);
 
     /**
      * Reads implementation-specific book-keeping, meta or extra data from the input memory file and
@@ -162,7 +162,7 @@ struct packer {
      * @author Marcus Pinnecke
      * @since 0.1.00.05
      */
-    bool (*print_extra)(struct packer *self, FILE *file, struct memfile *src);
+    bool (*print_extra)(struct jak_packer *self, FILE *file, struct jak_memfile *src);
 
     /**
      * Reads an implementation-specific encoded string from a memory file <code>src</code>, and prints
@@ -180,11 +180,11 @@ struct packer {
      * @author Marcus Pinnecke
      * @since 0.1.00.05
      */
-    bool (*print_encoded)(struct packer *self, FILE *file, struct memfile *src, u32 decompressed_strlen);
+    bool (*print_encoded)(struct jak_packer *self, FILE *file, struct jak_memfile *src, jak_u32 decompressed_strlen);
 
 };
 
-static void pack_none_create(struct packer *strategy)
+static void pack_none_create(struct jak_packer *strategy)
 {
         strategy->tag = PACK_NONE;
         strategy->create = pack_none_init;
@@ -198,7 +198,7 @@ static void pack_none_create(struct packer *strategy)
         strategy->print_encoded = pack_none_print_encoded_string;
 }
 
-static void pack_huffman_create(struct packer *strategy)
+static void pack_huffman_create(struct jak_packer *strategy)
 {
         strategy->tag = PACK_HUFFMAN;
         strategy->create = pack_huffman_init;
@@ -216,44 +216,44 @@ static void pack_huffman_create(struct packer *strategy)
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
 static struct {
-    enum packer_type type;
+    enum jak_packer_type type;
 
     const char *name;
 
-    void (*create)(struct packer *strategy);
+    void (*create)(struct jak_packer *strategy);
 
-    u8 flag_bit;
+    jak_u8 flag_bit;
 } compressor_strategy_register[] =
         {{.type = PACK_NONE, .name = "none", .create = pack_none_create, .flag_bit = 1 << 0},
          {.type = PACK_HUFFMAN, .name = "huffman", .create = pack_huffman_create, .flag_bit = 1 << 1}};
 
 #pragma GCC diagnostic pop
 
-bool pack_by_type(struct err *err, struct packer *strategy, enum packer_type type);
+bool pack_by_type(struct jak_error *err, struct jak_packer *strategy, enum jak_packer_type type);
 
-u8 pack_flagbit_by_type(enum packer_type type);
+jak_u8 pack_flagbit_by_type(enum jak_packer_type type);
 
-bool pack_by_flags(struct packer *strategy, u8 flags);
+bool pack_by_flags(struct jak_packer *strategy, jak_u8 flags);
 
-bool pack_by_name(enum packer_type *type, const char *name);
+bool pack_by_name(enum jak_packer_type *type, const char *name);
 
-bool pack_cpy(struct err *err, struct packer *dst, const struct packer *src);
+bool pack_cpy(struct jak_error *err, struct jak_packer *dst, const struct jak_packer *src);
 
-bool pack_drop(struct err *err, struct packer *self);
+bool pack_drop(struct jak_error *err, struct jak_packer *self);
 
-bool pack_write_extra(struct err *err, struct packer *self, struct memfile *dst,
+bool pack_write_extra(struct jak_error *err, struct jak_packer *self, struct jak_memfile *dst,
                       const struct vector ofType (const char *) *strings);
 
-bool pack_read_extra(struct err *err, struct packer *self, FILE *src, size_t nbytes);
+bool pack_read_extra(struct jak_error *err, struct jak_packer *self, FILE *src, size_t nbytes);
 
-bool pack_encode(struct err *err, struct packer *self, struct memfile *dst, const char *string);
+bool pack_encode(struct jak_error *err, struct jak_packer *self, struct jak_memfile *dst, const char *string);
 
-bool pack_decode(struct err *err, struct packer *self, char *dst, size_t strlen, FILE *src);
+bool pack_decode(struct jak_error *err, struct jak_packer *self, char *dst, size_t strlen, FILE *src);
 
-bool pack_print_extra(struct err *err, struct packer *self, FILE *file, struct memfile *src);
+bool pack_print_extra(struct jak_error *err, struct jak_packer *self, FILE *file, struct jak_memfile *src);
 
-bool pack_print_encoded(struct err *err, struct packer *self, FILE *file, struct memfile *src,
-                        u32 decompressed_strlen);
+bool pack_print_encoded(struct jak_error *err, struct jak_packer *self, FILE *file, struct jak_memfile *src,
+                        jak_u32 decompressed_strlen);
 
 JAK_END_DECL
 

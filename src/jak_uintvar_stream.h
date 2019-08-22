@@ -73,7 +73,7 @@ typedef void *uintvar_stream_t;
 
 #define uintvar_stream_max_blocks()    (4)
 
-u8 uintvar_stream_write(uintvar_stream_t dst, u64 value);
+jak_u8 uintvar_stream_write(uintvar_stream_t dst, jak_u64 value);
 
 #define uintvar_stream_sizeof(value)                                                                                   \
 ({                                                                                                                     \
@@ -84,7 +84,7 @@ u8 uintvar_stream_write(uintvar_stream_t dst, u64 value);
 
 #define uintvar_stream_required_blocks(value)           \
 ({                                                      \
-        u8 num_blocks_required;                         \
+        jak_u8 num_blocks_required;                         \
         if (value < 128u) {                             \
                 num_blocks_required = 1;                \
         } else if (value < 16384u) {                    \
@@ -109,7 +109,7 @@ u8 uintvar_stream_write(uintvar_stream_t dst, u64 value);
         num_blocks_required;                            \
 })
 
-u64 uintvar_stream_read(u8 *nbytes, uintvar_stream_t src);
+jak_u64 uintvar_stream_read(jak_u8 *nbytes, uintvar_stream_t src);
 
 JAK_END_DECL
 

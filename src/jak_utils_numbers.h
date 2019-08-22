@@ -37,8 +37,8 @@ enum number_min_type
     NUMBER_UNKNOWN
 };
 
-enum number_min_type number_min_type_unsigned(u64 value);
+enum number_min_type number_min_type_unsigned(jak_u64 value);
 
-enum number_min_type number_min_type_signed(i64 value);
+enum number_min_type number_min_type_signed(jak_i64 value);
 
 #endif

@@ -29,9 +29,9 @@ static int convertJs2Model(struct js_to_context *context, FILE *file, bool optim
     fseek(f, 0, SEEK_END);
     long fsize = ftell(f);
     fseek(f, 0, SEEK_SET);
-    context->jsonContent = JAK_malloc(fsize + 1);
+    context->jsonContent = JAK_MALLOC(fsize + 1);
     size_t nread = fread(context->jsonContent, fsize, 1, f);
-    unused(nread);
+    JAK_UNUSED(nread);
     fclose(f);
     context->jsonContent[fsize] = 0;
 
@@ -64,7 +64,7 @@ static int convertJs2Model(struct js_to_context *context, FILE *file, bool optim
     }
 
     JAK_CONSOLE_WRITE(file, "  - Test document restrictions%s", "");
-    struct err err;
+    struct jak_error err;
     status = json_test(&err, &jsonAst);
     if (!status) {
         JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
@@ -141,7 +141,7 @@ success:
 
 bool moduleCheckJsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
-    unused(manager);
+    JAK_UNUSED(manager);
 
     struct js_to_context cabContext;
 
@@ -193,12 +193,12 @@ static void tracker_end_create_from_json()
     JAK_CONSOLE_WRITELN(stdout, "%s", "  - Create from json finished");
 }
 
-static void tracker_begin_archive_stream_from_json()
+static void tracker_begin_jak_archive_stream_from_json()
 {
     JAK_CONSOLE_WRITELN(stdout, "%s", "  - Create stream from json started");
 }
 
-static void tracker_end_archive_stream_from_json()
+static void tracker_end_jak_archive_stream_from_json()
 
 {
     JAK_CONSOLE_WRITELN(stdout, "%s", "  - Create stream from json finished");
@@ -311,7 +311,7 @@ static void tracker_end_string_id_index_baking()
 
 bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
-    unused(manager);
+    JAK_UNUSED(manager);
 
     if (argc < 2) {
         JAK_CONSOLE_WRITE(file, "Require at least <output> and <input> parameters for <args>.%s", "");
@@ -323,8 +323,8 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
         bool flagReadOptimized = false;
         bool flagForceOverwrite = false;
         bool flagBakeStringIdIndex = true;
-        enum packer_type compressor = PACK_NONE;
-        enum strdic_tag dic_type = ASYNC;
+        enum jak_packer_type compressor = PACK_NONE;
+        enum jak_str_dict_tag dic_type = ASYNC;
         int string_dic_async_nthreads = 8;
 
         int outputIdx = 0, inputIdx = 1;
@@ -421,22 +421,22 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
         fseek(f, 0, SEEK_END);
         long fsize = ftell(f);
         fseek(f, 0, SEEK_SET);
-        char *jsonContent = JAK_malloc(fsize + 1);
+        char *jsonContent = JAK_MALLOC(fsize + 1);
         size_t nread = fread(jsonContent, fsize, 1, f);
-        unused(nread);
+        JAK_UNUSED(nread);
         fclose(f);
         jsonContent[fsize] = 0;
 
         struct jak_archive archive;
-        struct err err;
+        struct jak_error err;
 
         struct jak_archive_callback progress_tracker = { 0 };
         progress_tracker.begin_create_from_model = tracker_begin_create_from_model;
         progress_tracker.end_create_from_model = tracker_end_create_from_model;
         progress_tracker.begin_create_from_json = tracker_begin_create_from_json;
         progress_tracker.end_create_from_json = tracker_end_create_from_json;
-        progress_tracker.begin_archive_stream_from_json = tracker_begin_archive_stream_from_json;
-        progress_tracker.end_archive_stream_from_json = tracker_end_archive_stream_from_json;
+        progress_tracker.begin_jak_archive_stream_from_json = tracker_begin_jak_archive_stream_from_json;
+        progress_tracker.end_jak_archive_stream_from_json = tracker_end_jak_archive_stream_from_json;
         progress_tracker.begin_write_archive_file_to_disk = tracker_begin_write_archive_file_to_disk;
         progress_tracker.end_write_archive_file_to_disk = tracker_end_write_archive_file_to_disk;
         progress_tracker.begin_load_archive = tracker_begin_load_archive;
@@ -459,21 +459,21 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
         progress_tracker.begin_string_id_index_baking = tracker_begin_string_id_index_baking;
         progress_tracker.end_string_id_index_baking = tracker_end_string_id_index_baking;
 
-        if (!archive_from_json(&archive, pathCarbonFileOut, &err, jsonContent,
+        if (!jak_archive_from_json(&archive, pathCarbonFileOut, &err, jsonContent,
                                       compressor, dic_type, string_dic_async_nthreads, flagReadOptimized,
                                       flagBakeStringIdIndex, &progress_tracker)) {
             error_print_and_abort(&err);
         } else {
-            archive_close(&archive);
+            jak_archive_close(&archive);
         }
 
 
         free(jsonContent);
 
-//        struct memblock *carbonFile;
+//        struct jak_memblock *carbonFile;
 //        JAK_CONSOLE_WRITE(file, "  - Convert partition into in-memory CARBON file%s", "");
-//        struct err err;
-//        if (!archive_from_model(&carbonFile, &err, cabContext.partitionMetaModel, pack, flagBakeStringIdIndex)) {
+//        struct jak_error err;
+//        if (!jak_archive_from_model(&carbonFile, &err, cabContext.partitionMetaModel, pack, flagBakeStringIdIndex)) {
 //            error_print_and_abort(&err);
 //        }
 //        JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "OK");
@@ -485,7 +485,7 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
 //            JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
 //            return false;
 //        } else {
-//            if (archive_write(outputFile, carbonFile) != true) {
+//            if (jak_archive_write(outputFile, carbonFile) != true) {
 //                JAK_CONSOLE_WRITE(file, "Unable to write to file: '%s'", pathCarbonFileOut);
 //                JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
 //                return false;
@@ -508,10 +508,10 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
 
 bool moduleViewCabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
-    unused(argc);
-    unused(argv);
-    unused(file);
-    unused(manager);
+    JAK_UNUSED(argc);
+    JAK_UNUSED(argv);
+    JAK_UNUSED(file);
+    JAK_UNUSED(manager);
 
     JAK_CONSOLE_OUTPUT_OFF()
 
@@ -524,11 +524,11 @@ bool moduleViewCabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *m
             JAK_CONSOLE_WRITELN(file, "Input file '%s' cannot be found. STOP", carbonFilePath);
             return false;
         }
-        struct err err;
+        struct jak_error err;
         FILE *inputFile = fopen(carbonFilePath, "r");
-        struct memblock *stream;
-        archive_load(&stream, inputFile);
-        if (!archive_print(stdout, &err, stream)) {
+        struct jak_memblock *stream;
+        jak_archive_load(&stream, inputFile);
+        if (!jak_archive_print(stdout, &err, stream)) {
             error_print_to_stderr(&err);
             error_drop(&err);
         }
@@ -542,7 +542,7 @@ bool moduleViewCabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *m
 
 bool moduleInspectInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
-    unused(manager);
+    JAK_UNUSED(manager);
 
     if (argc < 1) {
         JAK_CONSOLE_WRITE(file, "Require input file <input> as parameter for <args>.%s", "");
@@ -563,14 +563,14 @@ bool moduleInspectInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *m
 
         struct jak_archive archive;
         struct jak_archive_info info;
-        if ((archive_open(&archive, pathCarbonFileIn)) != true) {
+        if ((jak_archive_open(&archive, pathCarbonFileIn)) != true) {
             JAK_CONSOLE_WRITE(file, "Cannot open requested CARBON file: %s", pathCarbonFileIn);
             return false;
         } else {
-            archive_get_info(&info, &archive);
+            jak_archive_get_info(&info, &archive);
             FILE *f = fopen(pathCarbonFileIn, "r");
             fseek(f, 0, SEEK_END);
-            offset_t fileLength = ftell(f);
+            jak_offset_t fileLength = ftell(f);
             fclose(f);
             printf("file:\t\t\t'%s'\n", pathCarbonFileIn);
             printf("file-size:\t\t%" PRIu64 " B\n", fileLength);
@@ -586,10 +586,10 @@ bool moduleInspectInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *m
 
 bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
-    unused(argc);
-    unused(argv);
-    unused(file);
-    unused(manager);
+    JAK_UNUSED(argc);
+    JAK_UNUSED(argv);
+    JAK_UNUSED(file);
+    JAK_UNUSED(manager);
 
     if (argc != 1) {
         JAK_CONSOLE_WRITE(file, "Require exactly one <input> parameter for <args>.%s", "");
@@ -610,9 +610,9 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
 
         struct jak_archive archive;
         int status;
-        if ((status = archive_open(&archive, pathCarbonFileIn))) {
+        if ((status = jak_archive_open(&archive, pathCarbonFileIn))) {
             struct jak_encoded_doc_list collection;
-            archive_converter(&collection, &archive);
+            jak_archive_converter(&collection, &archive);
             encoded_doc_collection_print(stdout, &collection);
             printf("\n");
             encoded_doc_collection_drop(&collection);
@@ -620,7 +620,7 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
             error_print(archive.err.code);
         }
 
-        archive_close(&archive);
+        jak_archive_close(&archive);
 
         return true;
     }
@@ -628,7 +628,7 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *ma
 
 bool moduleListInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
-    unused(manager);
+    JAK_UNUSED(manager);
 
     if (argc != 1) {
         JAK_CONSOLE_WRITE(file, "Require one constant for <args> parameter.%s", "");

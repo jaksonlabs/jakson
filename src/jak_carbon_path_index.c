@@ -46,16 +46,16 @@ struct path_index_node
     enum path_index_node_type type;
 
     union {
-        u64 pos;
+        jak_u64 pos;
         struct {
             const char *name;
-            u64 name_len;
-            offset_t offset;
+            jak_u64 name_len;
+            jak_offset_t offset;
         } key;
     } entry;
 
     enum carbon_field_type field_type;
-    offset_t field_offset;
+    jak_offset_t field_offset;
 
     struct vector ofType(struct path_index_node) sub_entries;
 };
@@ -77,7 +77,7 @@ static void object_build_index(struct path_index_node *parent, struct jak_carbon
 
 static void array_build_index(struct path_index_node *parent, struct jak_carbon_array_it *elem_it);
 
-static void node_flat(struct memfile *file, struct path_index_node *node);
+static void node_flat(struct jak_memfile *file, struct path_index_node *node);
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  helper
@@ -100,14 +100,14 @@ static void path_index_node_init(struct path_index_node *node)
 
 static void path_index_node_drop(struct path_index_node *node)
 {
-        for (u32 i = 0; i < node->sub_entries.num_elems; i++) {
+        for (jak_u32 i = 0; i < node->sub_entries.num_elems; i++) {
                 struct path_index_node *sub = vec_get(&node->sub_entries, i, struct path_index_node);
                 path_index_node_drop(sub);
         }
         vec_drop(&node->sub_entries);
 }
 
-static void path_index_node_new_array_element(struct path_index_node *node, u64 pos, offset_t value_off)
+static void path_index_node_new_array_element(struct path_index_node *node, jak_u64 pos, jak_offset_t value_off)
 {
         path_index_node_init(node);
         node->type = PATH_INDEX_ARRAY_INDEX;
@@ -115,7 +115,7 @@ static void path_index_node_new_array_element(struct path_index_node *node, u64 
         node->field_offset = value_off;
 }
 
-static void path_index_node_new_column_element(struct path_index_node *node, u64 pos, offset_t value_off)
+static void path_index_node_new_column_element(struct path_index_node *node, jak_u64 pos, jak_offset_t value_off)
 {
         path_index_node_init(node);
         node->type = PATH_INDEX_COLUMN_INDEX;
@@ -123,8 +123,8 @@ static void path_index_node_new_column_element(struct path_index_node *node, u64
         node->field_offset = value_off;
 }
 
-static void path_index_node_new_object_prop(struct path_index_node *node, offset_t key_off, const char *name,
-        u64 name_len, offset_t value_off)
+static void path_index_node_new_object_prop(struct path_index_node *node, jak_offset_t key_off, const char *name,
+        jak_u64 name_len, jak_offset_t value_off)
 {
         path_index_node_init(node);
         node->type = PATH_INDEX_PROP_KEY;
@@ -139,7 +139,7 @@ static void path_index_node_set_field_type(struct path_index_node *node, enum ca
         node->field_type = field_type;
 }
 
-static struct path_index_node *path_index_node_add_array_elem(struct path_index_node *parent, u64 pos, offset_t value_off)
+static struct path_index_node *path_index_node_add_array_elem(struct path_index_node *parent, jak_u64 pos, jak_offset_t value_off)
 {
         /* For elements in array, the type marker (e.g., [c]) is contained. That is needed since the element might
          * be a container */
@@ -148,7 +148,7 @@ static struct path_index_node *path_index_node_add_array_elem(struct path_index_
         return sub;
 }
 
-static struct path_index_node *path_index_node_add_column_elem(struct path_index_node *parent, u64 pos, offset_t value_off)
+static struct path_index_node *path_index_node_add_column_elem(struct path_index_node *parent, jak_u64 pos, jak_offset_t value_off)
 {
         /* For elements in column, there is no type marker since no value is allowed to be a container */
         struct path_index_node *sub = vec_new_and_get(&parent->sub_entries, struct path_index_node);
@@ -156,8 +156,8 @@ static struct path_index_node *path_index_node_add_column_elem(struct path_index
         return sub;
 }
 
-static struct path_index_node *path_index_node_add_key_elem(struct path_index_node *parent, offset_t key_off,
-                                                            const char *name, u64 name_len, offset_t value_off)
+static struct path_index_node *path_index_node_add_key_elem(struct path_index_node *parent, jak_offset_t key_off,
+                                                            const char *name, jak_u64 name_len, jak_offset_t value_off)
 {
         struct path_index_node *sub = vec_new_and_get(&parent->sub_entries, struct path_index_node);
         path_index_node_new_object_prop(sub, key_off, name, name_len, value_off);
@@ -186,27 +186,27 @@ static void path_index_node_print_level(FILE *file, struct path_index_node *node
                 fprintf(file, "\n");
         }
 
-        for (u32 i = 0; i < node->sub_entries.num_elems; i++) {
+        for (jak_u32 i = 0; i < node->sub_entries.num_elems; i++) {
                 struct path_index_node *sub = vec_get(&node->sub_entries, i, struct path_index_node);
                 path_index_node_print_level(file, sub, level + 1);
         }
 }
 
-static const void *record_ref_read(enum carbon_key_type *key_type, u64 *key_length, u64 *commit_hash, struct memfile *memfile)
+static const void *record_ref_read(enum carbon_key_type *key_type, jak_u64 *key_length, jak_u64 *commit_hash, struct jak_memfile *memfile)
 {
         memfile_save_position(memfile);
         memfile_seek(memfile, 0);
         const void *ret = carbon_key_read(key_length, key_type, memfile);
-        u64 *hash = JAK_MEMFILE_READ_TYPE(memfile, u64);
+        jak_u64 *hash = JAK_MEMFILE_READ_TYPE(memfile, jak_u64);
         JAK_optional_set(commit_hash, *hash);
         memfile_restore_position(memfile);
         return ret;
 }
 
-static void record_ref_create(struct memfile *memfile, struct jak_carbon *doc)
+static void record_ref_create(struct jak_memfile *memfile, struct jak_carbon *doc)
 {
         enum carbon_key_type key_type;
-        u64 commit_hash;
+        jak_u64 commit_hash;
         carbon_key_type(&key_type, doc);
         carbon_commit_hash(&commit_hash, doc);
 
@@ -219,19 +219,19 @@ static void record_ref_create(struct memfile *memfile, struct jak_carbon *doc)
                 } break;
                 case CARBON_KEY_AUTOKEY:
                 case CARBON_KEY_UKEY: {
-                        u64 key;
+                        jak_u64 key;
                         carbon_key_unsigned_value(&key, doc);
                         memfile_seek(memfile, 0);
                         carbon_key_write_unsigned(memfile, key);
                 } break;
                 case CARBON_KEY_IKEY: {
-                        i64 key;
+                        jak_i64 key;
                         carbon_key_signed_value(&key, doc);
                         memfile_seek(memfile, 0);
                         carbon_key_write_signed(memfile, key);
                 } break;
                 case CARBON_KEY_SKEY: {
-                        u64 len;
+                        jak_u64 len;
                         const char *key = carbon_key_string_value(&len, doc);
                         memfile_seek(memfile, 0);
                         carbon_key_update_string_wnchar(memfile, key, len);
@@ -241,14 +241,14 @@ static void record_ref_create(struct memfile *memfile, struct jak_carbon *doc)
         }
 
         /* write record version */
-        memfile_write(memfile, &commit_hash, sizeof(u64));
+        memfile_write(memfile, &commit_hash, sizeof(jak_u64));
 }
 
 static void array_traverse(struct path_index_node *parent, struct jak_carbon_array_it *it)
 {
-        u64 sub_elem_pos = 0;
+        jak_u64 sub_elem_pos = 0;
         while (carbon_array_it_next(it)) {
-                offset_t sub_elem_off = carbon_array_it_tell(it);
+                jak_offset_t sub_elem_off = carbon_array_it_tell(it);
                 struct path_index_node *elem_node = path_index_node_add_array_elem(parent, sub_elem_pos, sub_elem_off);
                 array_build_index(elem_node, it);
 
@@ -259,18 +259,18 @@ static void array_traverse(struct path_index_node *parent, struct jak_carbon_arr
 static void column_traverse(struct path_index_node *parent, struct jak_carbon_column_it *it)
 {
         enum carbon_field_type column_type, entry_type;
-        u32 nvalues;
+        jak_u32 nvalues;
 
         carbon_column_it_values_info(&column_type, &nvalues, it);
 
-        for (u32 i = 0; i < nvalues; i++) {
+        for (jak_u32 i = 0; i < nvalues; i++) {
                 bool is_null = carbon_column_it_value_is_null(it, i);
                 bool is_true = false;
-                if (column_type == CARBON_FIELD_TYPE_COLUMN_BOOLEAN) {
+                if (column_type == CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN) {
                         is_true = carbon_column_it_boolean_values(NULL, it)[i];
                 }
                 entry_type = carbon_field_type_column_entry_to_regular_type(column_type, is_null, is_true);
-                offset_t sub_elem_off = carbon_column_it_tell(it, i);
+                jak_offset_t sub_elem_off = carbon_column_it_tell(it, i);
 
                 struct path_index_node *node = path_index_node_add_column_elem(parent, i, sub_elem_off);
                 path_index_node_set_field_type(node, entry_type);
@@ -280,8 +280,8 @@ static void column_traverse(struct path_index_node *parent, struct jak_carbon_co
 static void object_traverse(struct path_index_node *parent, struct jak_carbon_object_it *it)
 {
         while (carbon_object_it_next(it)) {
-                u64 prop_name_len = 0;
-                offset_t key_off, value_off;
+                jak_u64 prop_name_len = 0;
+                jak_offset_t key_off, value_off;
                 carbon_object_it_tell(&key_off, &value_off, it);
                 const char *prop_name = carbon_object_it_prop_name(&prop_name_len, it);
                 struct path_index_node *elem_node = path_index_node_add_key_elem(parent, key_off,
@@ -297,43 +297,43 @@ static void object_build_index(struct path_index_node *parent, struct jak_carbon
         path_index_node_set_field_type(parent, field_type);
 
         switch (field_type) {
-                case CARBON_FIELD_TYPE_NULL:
-                case CARBON_FIELD_TYPE_TRUE:
-                case CARBON_FIELD_TYPE_FALSE:
-                case CARBON_FIELD_TYPE_STRING:
-                case CARBON_FIELD_TYPE_NUMBER_U8:
-                case CARBON_FIELD_TYPE_NUMBER_U16:
-                case CARBON_FIELD_TYPE_NUMBER_U32:
-                case CARBON_FIELD_TYPE_NUMBER_U64:
-                case CARBON_FIELD_TYPE_NUMBER_I8:
-                case CARBON_FIELD_TYPE_NUMBER_I16:
-                case CARBON_FIELD_TYPE_NUMBER_I32:
-                case CARBON_FIELD_TYPE_NUMBER_I64:
-                case CARBON_FIELD_TYPE_NUMBER_FLOAT:
-                case CARBON_FIELD_TYPE_BINARY:
-                case CARBON_FIELD_TYPE_BINARY_CUSTOM:
+                case CARBON_JAK_FIELD_TYPE_NULL:
+                case CARBON_JAK_FIELD_TYPE_TRUE:
+                case CARBON_JAK_FIELD_TYPE_FALSE:
+                case CARBON_JAK_FIELD_TYPE_STRING:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_U8:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_U16:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_U32:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_U64:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_I8:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_I16:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_I32:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_I64:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT:
+                case CARBON_JAK_FIELD_TYPE_BINARY:
+                case CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM:
                         /* path ends here */
                         break;
-                case CARBON_FIELD_TYPE_COLUMN_FLOAT:
-                case CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
-                case CARBON_FIELD_TYPE_COLUMN_U8:
-                case CARBON_FIELD_TYPE_COLUMN_U16:
-                case CARBON_FIELD_TYPE_COLUMN_U32:
-                case CARBON_FIELD_TYPE_COLUMN_U64:
-                case CARBON_FIELD_TYPE_COLUMN_I8:
-                case CARBON_FIELD_TYPE_COLUMN_I16:
-                case CARBON_FIELD_TYPE_COLUMN_I32:
-                case CARBON_FIELD_TYPE_COLUMN_I64: {
+                case CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_U8:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_U16:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_U32:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_U64:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_I8:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_I16:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_I32:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_I64: {
                         struct jak_carbon_column_it *it = carbon_object_it_column_value(elem_it);
                         column_traverse(parent, it);
 
                 } break;
-                case CARBON_FIELD_TYPE_ARRAY: {
+                case CARBON_JAK_FIELD_TYPE_ARRAY: {
                         struct jak_carbon_array_it *it = carbon_object_it_array_value(elem_it);
                         array_traverse(parent, it);
                         carbon_array_it_drop(it);
                 } break;
-                case CARBON_FIELD_TYPE_OBJECT: {
+                case CARBON_JAK_FIELD_TYPE_OBJECT: {
                         struct jak_carbon_object_it *it = carbon_object_it_object_value(elem_it);
                         object_traverse(parent, it);
                         carbon_object_it_drop(it);
@@ -350,43 +350,43 @@ static void array_build_index(struct path_index_node *parent, struct jak_carbon_
         path_index_node_set_field_type(parent, field_type);
 
         switch (field_type) {
-                case CARBON_FIELD_TYPE_NULL:
-                case CARBON_FIELD_TYPE_TRUE:
-                case CARBON_FIELD_TYPE_FALSE:
-                case CARBON_FIELD_TYPE_STRING:
-                case CARBON_FIELD_TYPE_NUMBER_U8:
-                case CARBON_FIELD_TYPE_NUMBER_U16:
-                case CARBON_FIELD_TYPE_NUMBER_U32:
-                case CARBON_FIELD_TYPE_NUMBER_U64:
-                case CARBON_FIELD_TYPE_NUMBER_I8:
-                case CARBON_FIELD_TYPE_NUMBER_I16:
-                case CARBON_FIELD_TYPE_NUMBER_I32:
-                case CARBON_FIELD_TYPE_NUMBER_I64:
-                case CARBON_FIELD_TYPE_NUMBER_FLOAT:
-                case CARBON_FIELD_TYPE_BINARY:
-                case CARBON_FIELD_TYPE_BINARY_CUSTOM:
+                case CARBON_JAK_FIELD_TYPE_NULL:
+                case CARBON_JAK_FIELD_TYPE_TRUE:
+                case CARBON_JAK_FIELD_TYPE_FALSE:
+                case CARBON_JAK_FIELD_TYPE_STRING:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_U8:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_U16:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_U32:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_U64:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_I8:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_I16:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_I32:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_I64:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT:
+                case CARBON_JAK_FIELD_TYPE_BINARY:
+                case CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM:
                         /* path ends here */
                 break;
-                case CARBON_FIELD_TYPE_COLUMN_FLOAT:
-                case CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
-                case CARBON_FIELD_TYPE_COLUMN_U8:
-                case CARBON_FIELD_TYPE_COLUMN_U16:
-                case CARBON_FIELD_TYPE_COLUMN_U32:
-                case CARBON_FIELD_TYPE_COLUMN_U64:
-                case CARBON_FIELD_TYPE_COLUMN_I8:
-                case CARBON_FIELD_TYPE_COLUMN_I16:
-                case CARBON_FIELD_TYPE_COLUMN_I32:
-                case CARBON_FIELD_TYPE_COLUMN_I64: {
+                case CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_U8:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_U16:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_U32:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_U64:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_I8:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_I16:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_I32:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_I64: {
                         struct jak_carbon_column_it *it = carbon_array_it_column_value(elem_it);
                         column_traverse(parent, it);
 
                 } break;
-                case CARBON_FIELD_TYPE_ARRAY: {
+                case CARBON_JAK_FIELD_TYPE_ARRAY: {
                         struct jak_carbon_array_it *it = carbon_array_it_array_value(elem_it);
                         array_traverse(parent, it);
                         carbon_array_it_drop(it);
                 } break;
-                case CARBON_FIELD_TYPE_OBJECT: {
+                case CARBON_JAK_FIELD_TYPE_OBJECT: {
                         struct jak_carbon_object_it *it = carbon_array_it_object_value(elem_it);
                         object_traverse(parent, it);
                         carbon_object_it_drop(it);
@@ -396,29 +396,29 @@ static void array_build_index(struct path_index_node *parent, struct jak_carbon_
         }
 }
 
-static void field_ref_write(struct memfile *file, struct path_index_node *node)
+static void field_ref_write(struct jak_memfile *file, struct path_index_node *node)
 {
         memfile_write_byte(file, node->field_type);
-        if (node->field_type != CARBON_FIELD_TYPE_NULL && node->field_type != CARBON_FIELD_TYPE_TRUE &&
-                node->field_type != CARBON_FIELD_TYPE_FALSE) {
+        if (node->field_type != CARBON_JAK_FIELD_TYPE_NULL && node->field_type != CARBON_JAK_FIELD_TYPE_TRUE &&
+                node->field_type != CARBON_JAK_FIELD_TYPE_FALSE) {
                 /* only in case of field type that is not null, true, or false, there is more information behind
                  * the field offset */
                 memfile_write_uintvar_stream(NULL, file, node->field_offset);
         }
 }
 
-static void container_contents_flat(struct memfile *file, struct path_index_node *node)
+static void container_contents_flat(struct jak_memfile *file, struct path_index_node *node)
 {
         memfile_write_uintvar_stream(NULL, file, node->sub_entries.num_elems);
 
         /* write position offsets */
-        offset_t position_off_latest = memfile_tell(file);
-        for (u32 i = 0; i < node->sub_entries.num_elems; i++) {
+        jak_offset_t position_off_latest = memfile_tell(file);
+        for (jak_u32 i = 0; i < node->sub_entries.num_elems; i++) {
                 memfile_write_uintvar_stream(NULL, file, 0);
         }
 
-        for (u32 i = 0; i < node->sub_entries.num_elems; i++) {
-                offset_t node_off = memfile_tell(file);
+        for (jak_u32 i = 0; i < node->sub_entries.num_elems; i++) {
+                jak_offset_t node_off = memfile_tell(file);
                 struct path_index_node *sub = vec_get(&node->sub_entries, i, struct path_index_node);
                 node_flat(file, sub);
                 memfile_save_position(file);
@@ -430,39 +430,39 @@ static void container_contents_flat(struct memfile *file, struct path_index_node
         }
 }
 
-static void container_field_flat(struct memfile *file, struct path_index_node *node)
+static void container_field_flat(struct jak_memfile *file, struct path_index_node *node)
 {
         switch (node->field_type) {
-                case CARBON_FIELD_TYPE_NULL:
-                case CARBON_FIELD_TYPE_TRUE:
-                case CARBON_FIELD_TYPE_FALSE:
-                case CARBON_FIELD_TYPE_STRING:
-                case CARBON_FIELD_TYPE_NUMBER_U8:
-                case CARBON_FIELD_TYPE_NUMBER_U16:
-                case CARBON_FIELD_TYPE_NUMBER_U32:
-                case CARBON_FIELD_TYPE_NUMBER_U64:
-                case CARBON_FIELD_TYPE_NUMBER_I8:
-                case CARBON_FIELD_TYPE_NUMBER_I16:
-                case CARBON_FIELD_TYPE_NUMBER_I32:
-                case CARBON_FIELD_TYPE_NUMBER_I64:
-                case CARBON_FIELD_TYPE_NUMBER_FLOAT:
-                case CARBON_FIELD_TYPE_BINARY:
-                case CARBON_FIELD_TYPE_BINARY_CUSTOM:
+                case CARBON_JAK_FIELD_TYPE_NULL:
+                case CARBON_JAK_FIELD_TYPE_TRUE:
+                case CARBON_JAK_FIELD_TYPE_FALSE:
+                case CARBON_JAK_FIELD_TYPE_STRING:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_U8:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_U16:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_U32:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_U64:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_I8:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_I16:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_I32:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_I64:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT:
+                case CARBON_JAK_FIELD_TYPE_BINARY:
+                case CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM:
                         /* any path will end with this kind of field, and therefore no subsequent elements exists */
                         assert(node->sub_entries.num_elems == 0);
                         break;
-                case CARBON_FIELD_TYPE_OBJECT:
-                case CARBON_FIELD_TYPE_ARRAY:
-                case CARBON_FIELD_TYPE_COLUMN_U8:
-                case CARBON_FIELD_TYPE_COLUMN_U16:
-                case CARBON_FIELD_TYPE_COLUMN_U32:
-                case CARBON_FIELD_TYPE_COLUMN_U64:
-                case CARBON_FIELD_TYPE_COLUMN_I8:
-                case CARBON_FIELD_TYPE_COLUMN_I16:
-                case CARBON_FIELD_TYPE_COLUMN_I32:
-                case CARBON_FIELD_TYPE_COLUMN_I64:
-                case CARBON_FIELD_TYPE_COLUMN_FLOAT:
-                case CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
+                case CARBON_JAK_FIELD_TYPE_OBJECT:
+                case CARBON_JAK_FIELD_TYPE_ARRAY:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_U8:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_U16:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_U32:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_U64:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_I8:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_I16:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_I32:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_I64:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN:
                         /* each of these field types allows for further path traversals, and therefore at least one
                          * subsequent path element must exist */
                         container_contents_flat(file, node);
@@ -472,7 +472,7 @@ static void container_field_flat(struct memfile *file, struct path_index_node *n
         }
 }
 
-static void prop_flat(struct memfile *file, struct path_index_node *node)
+static void prop_flat(struct jak_memfile *file, struct path_index_node *node)
 {
         memfile_write_byte(file, PATH_MARKER_PROP_NODE);
         field_ref_write(file, node);
@@ -480,7 +480,7 @@ static void prop_flat(struct memfile *file, struct path_index_node *node)
         container_field_flat(file, node);
 }
 
-static void array_flat(struct memfile *file, struct path_index_node *node)
+static void array_flat(struct jak_memfile *file, struct path_index_node *node)
 {
         memfile_write_byte(file, PATH_MARKER_ARRAY_NODE);
         field_ref_write(file, node);
@@ -491,10 +491,10 @@ static void array_flat(struct memfile *file, struct path_index_node *node)
         }
 }
 
-JAK_func_unused
+JAK_FUNC_UNUSED
 static void node_into_carbon(struct jak_carbon_insert *ins, struct jak_carbon_path_index *index)
 {
-        u8 next = memfile_peek_byte(&index->memfile);
+        jak_u8 next = memfile_peek_byte(&index->memfile);
         switch (next) {
                 case PATH_MARKER_PROP_NODE:
                         prop_into_carbon(ins, index);
@@ -512,7 +512,7 @@ static void node_into_carbon(struct jak_carbon_insert *ins, struct jak_carbon_pa
 
 static void node_to_str(struct jak_string *str, struct jak_carbon_path_index *index, unsigned intent_level)
 {
-        u8 next = memfile_peek_byte(&index->memfile);
+        jak_u8 next = memfile_peek_byte(&index->memfile);
         intent_level++;
 
         switch (next) {
@@ -530,9 +530,9 @@ static void node_to_str(struct jak_string *str, struct jak_carbon_path_index *in
         }
 }
 
-static u8 field_ref_into_carbon(struct jak_carbon_insert *ins, struct jak_carbon_path_index *index, bool is_root)
+static jak_u8 field_ref_into_carbon(struct jak_carbon_insert *ins, struct jak_carbon_path_index *index, bool is_root)
 {
-        u8 field_type = memfile_read_byte(&index->memfile);
+        jak_u8 field_type = memfile_read_byte(&index->memfile);
 
         if (is_root) {
                 carbon_insert_prop_null(ins, "container");
@@ -541,11 +541,11 @@ static u8 field_ref_into_carbon(struct jak_carbon_insert *ins, struct jak_carbon
         }
 
 
-        if (field_type != CARBON_FIELD_TYPE_NULL && field_type != CARBON_FIELD_TYPE_TRUE &&
-            field_type != CARBON_FIELD_TYPE_FALSE) {
+        if (field_type != CARBON_JAK_FIELD_TYPE_NULL && field_type != CARBON_JAK_FIELD_TYPE_TRUE &&
+            field_type != CARBON_JAK_FIELD_TYPE_FALSE) {
                 /* only in case of field type that is not null, true, or false, there is more information behind
                  * the field offset */
-                u64 field_offset = memfile_read_uintvar_stream(NULL, &index->memfile);
+                jak_u64 field_offset = memfile_read_uintvar_stream(NULL, &index->memfile);
                 if (is_root) {
                         carbon_insert_prop_null(ins, "offset");
                 } else {
@@ -561,19 +561,19 @@ static u8 field_ref_into_carbon(struct jak_carbon_insert *ins, struct jak_carbon
         return field_type;
 }
 
-static u8 field_ref_to_str(struct jak_string *str, struct jak_carbon_path_index *index)
+static jak_u8 field_ref_to_str(struct jak_string *str, struct jak_carbon_path_index *index)
 {
-        u8 field_type = memfile_read_byte(&index->memfile);
+        jak_u8 field_type = memfile_read_byte(&index->memfile);
 
         string_add_char(str, '[');
         string_add_char(str, field_type);
         string_add_char(str, ']');
 
-        if (field_type != CARBON_FIELD_TYPE_NULL && field_type != CARBON_FIELD_TYPE_TRUE &&
-                field_type != CARBON_FIELD_TYPE_FALSE) {
+        if (field_type != CARBON_JAK_FIELD_TYPE_NULL && field_type != CARBON_JAK_FIELD_TYPE_TRUE &&
+                field_type != CARBON_JAK_FIELD_TYPE_FALSE) {
                 /* only in case of field type that is not null, true, or false, there is more information behind
                  * the field offset */
-                u64 field_offset = memfile_read_uintvar_stream(NULL, &index->memfile);
+                jak_u64 field_offset = memfile_read_uintvar_stream(NULL, &index->memfile);
                 string_add_char(str, '(');
                 string_add_u64_as_hex_0x_prefix_compact(str, field_offset);
                 string_add_char(str, ')');
@@ -585,7 +585,7 @@ static u8 field_ref_to_str(struct jak_string *str, struct jak_carbon_path_index 
 static void column_to_str(struct jak_string *str, struct jak_carbon_path_index *index, unsigned intent_level)
 {
         intent(str, intent_level);
-        u8 marker = memfile_read_byte(&index->memfile);
+        jak_u8 marker = memfile_read_byte(&index->memfile);
         string_add_char(str, '[');
         string_add_char(str, marker);
         string_add_char(str, ']');
@@ -593,16 +593,16 @@ static void column_to_str(struct jak_string *str, struct jak_carbon_path_index *
         field_ref_to_str(str, index);
 }
 
-static u8 _insert_field_ref(struct jak_carbon_insert *ins, struct jak_carbon_path_index *index, bool is_root)
+static jak_u8 _insert_field_ref(struct jak_carbon_insert *ins, struct jak_carbon_path_index *index, bool is_root)
 {
         struct jak_carbon_insert_object_state object;
         struct jak_carbon_insert *oins = carbon_insert_prop_object_begin(&object, ins, "record-reference", 1024);
-        u8 ret = field_ref_into_carbon(oins, index, is_root);
+        jak_u8 ret = field_ref_into_carbon(oins, index, is_root);
         carbon_insert_prop_object_end(&object);
         return ret;
 }
 
-JAK_func_unused
+JAK_FUNC_UNUSED
 static void column_into_carbon(struct jak_carbon_insert *ins, struct jak_carbon_path_index *index)
 {
         memfile_skip_byte(&index->memfile);
@@ -612,7 +612,7 @@ static void column_into_carbon(struct jak_carbon_insert *ins, struct jak_carbon_
 
 static void container_contents_into_carbon(struct jak_carbon_insert *ins, struct jak_carbon_path_index *index)
 {
-        u64 num_elems = memfile_read_uintvar_stream(NULL, &index->memfile);
+        jak_u64 num_elems = memfile_read_uintvar_stream(NULL, &index->memfile);
         carbon_insert_prop_unsigned(ins, "element-count", num_elems);
 
         struct jak_carbon_insert_array_state array;
@@ -620,8 +620,8 @@ static void container_contents_into_carbon(struct jak_carbon_insert *ins, struct
 
         struct jak_string str;
         string_create(&str);
-        for (u32 i = 0; i < num_elems; i++) {
-                u64 pos_offs = memfile_read_uintvar_stream(NULL, &index->memfile);
+        for (jak_u32 i = 0; i < num_elems; i++) {
+                jak_u64 pos_offs = memfile_read_uintvar_stream(NULL, &index->memfile);
                 string_clear(&str);
                 string_add_u64_as_hex_0x_prefix_compact(&str, pos_offs);
                 carbon_insert_string(ains, string_cstr(&str));
@@ -631,8 +631,8 @@ static void container_contents_into_carbon(struct jak_carbon_insert *ins, struct
         carbon_insert_prop_array_end(&array);
 
         ains = carbon_insert_prop_array_begin(&array, ins, "elements", 1024);
-        unused(ains)
-        for (u32 i = 0; i < num_elems; i++) {
+        JAK_UNUSED(ains)
+        for (jak_u32 i = 0; i < num_elems; i++) {
                 struct jak_carbon_insert_object_state node_obj;
                 struct jak_carbon_insert *node_obj_ins = carbon_insert_object_begin(&node_obj, ains, 1024);
                 node_into_carbon(node_obj_ins, index);
@@ -644,55 +644,55 @@ static void container_contents_into_carbon(struct jak_carbon_insert *ins, struct
 
 static void container_contents_to_str(struct jak_string *str, struct jak_carbon_path_index *index, unsigned intent_level)
 {
-        u64 num_elems = memfile_read_uintvar_stream(NULL, &index->memfile);
+        jak_u64 num_elems = memfile_read_uintvar_stream(NULL, &index->memfile);
         string_add_char(str, '(');
         string_add_u64(str, num_elems);
         string_add_char(str, ')');
 
-        for (u32 i = 0; i < num_elems; i++) {
-                u64 pos_offs = memfile_read_uintvar_stream(NULL, &index->memfile);
+        for (jak_u32 i = 0; i < num_elems; i++) {
+                jak_u64 pos_offs = memfile_read_uintvar_stream(NULL, &index->memfile);
                 string_add_char(str, '(');
                 string_add_u64_as_hex_0x_prefix_compact(str, pos_offs);
                 string_add_char(str, ')');
         }
 
-        for (u32 i = 0; i < num_elems; i++) {
+        for (jak_u32 i = 0; i < num_elems; i++) {
                 node_to_str(str, index, intent_level);
         }
 }
 
-static void container_to_str(struct jak_string *str, struct jak_carbon_path_index *index, u8 field_type, unsigned intent_level)
+static void container_to_str(struct jak_string *str, struct jak_carbon_path_index *index, jak_u8 field_type, unsigned intent_level)
 {
         switch (field_type) {
-                case CARBON_FIELD_TYPE_NULL:
-                case CARBON_FIELD_TYPE_TRUE:
-                case CARBON_FIELD_TYPE_FALSE:
-                case CARBON_FIELD_TYPE_STRING:
-                case CARBON_FIELD_TYPE_NUMBER_U8:
-                case CARBON_FIELD_TYPE_NUMBER_U16:
-                case CARBON_FIELD_TYPE_NUMBER_U32:
-                case CARBON_FIELD_TYPE_NUMBER_U64:
-                case CARBON_FIELD_TYPE_NUMBER_I8:
-                case CARBON_FIELD_TYPE_NUMBER_I16:
-                case CARBON_FIELD_TYPE_NUMBER_I32:
-                case CARBON_FIELD_TYPE_NUMBER_I64:
-                case CARBON_FIELD_TYPE_NUMBER_FLOAT:
-                case CARBON_FIELD_TYPE_BINARY:
-                case CARBON_FIELD_TYPE_BINARY_CUSTOM:
+                case CARBON_JAK_FIELD_TYPE_NULL:
+                case CARBON_JAK_FIELD_TYPE_TRUE:
+                case CARBON_JAK_FIELD_TYPE_FALSE:
+                case CARBON_JAK_FIELD_TYPE_STRING:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_U8:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_U16:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_U32:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_U64:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_I8:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_I16:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_I32:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_I64:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT:
+                case CARBON_JAK_FIELD_TYPE_BINARY:
+                case CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM:
                         /* nothing to do */
                         break;
-                case CARBON_FIELD_TYPE_OBJECT:
-                case CARBON_FIELD_TYPE_ARRAY:
-                case CARBON_FIELD_TYPE_COLUMN_U8:
-                case CARBON_FIELD_TYPE_COLUMN_U16:
-                case CARBON_FIELD_TYPE_COLUMN_U32:
-                case CARBON_FIELD_TYPE_COLUMN_U64:
-                case CARBON_FIELD_TYPE_COLUMN_I8:
-                case CARBON_FIELD_TYPE_COLUMN_I16:
-                case CARBON_FIELD_TYPE_COLUMN_I32:
-                case CARBON_FIELD_TYPE_COLUMN_I64:
-                case CARBON_FIELD_TYPE_COLUMN_FLOAT:
-                case CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
+                case CARBON_JAK_FIELD_TYPE_OBJECT:
+                case CARBON_JAK_FIELD_TYPE_ARRAY:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_U8:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_U16:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_U32:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_U64:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_I8:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_I16:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_I32:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_I64:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN: {
                         /* subsequent path elements to be printed */
                         container_contents_to_str(str, index, ++intent_level);
                 } break;
@@ -701,38 +701,38 @@ static void container_to_str(struct jak_string *str, struct jak_carbon_path_inde
         }
 }
 
-static void container_into_carbon(struct jak_carbon_insert *ins, struct jak_carbon_path_index *index, u8 field_type)
+static void container_into_carbon(struct jak_carbon_insert *ins, struct jak_carbon_path_index *index, jak_u8 field_type)
 {
         switch (field_type) {
-                case CARBON_FIELD_TYPE_NULL:
-                case CARBON_FIELD_TYPE_TRUE:
-                case CARBON_FIELD_TYPE_FALSE:
-                case CARBON_FIELD_TYPE_STRING:
-                case CARBON_FIELD_TYPE_NUMBER_U8:
-                case CARBON_FIELD_TYPE_NUMBER_U16:
-                case CARBON_FIELD_TYPE_NUMBER_U32:
-                case CARBON_FIELD_TYPE_NUMBER_U64:
-                case CARBON_FIELD_TYPE_NUMBER_I8:
-                case CARBON_FIELD_TYPE_NUMBER_I16:
-                case CARBON_FIELD_TYPE_NUMBER_I32:
-                case CARBON_FIELD_TYPE_NUMBER_I64:
-                case CARBON_FIELD_TYPE_NUMBER_FLOAT:
-                case CARBON_FIELD_TYPE_BINARY:
-                case CARBON_FIELD_TYPE_BINARY_CUSTOM:
+                case CARBON_JAK_FIELD_TYPE_NULL:
+                case CARBON_JAK_FIELD_TYPE_TRUE:
+                case CARBON_JAK_FIELD_TYPE_FALSE:
+                case CARBON_JAK_FIELD_TYPE_STRING:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_U8:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_U16:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_U32:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_U64:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_I8:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_I16:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_I32:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_I64:
+                case CARBON_JAK_FIELD_TYPE_NUMBER_FLOAT:
+                case CARBON_JAK_FIELD_TYPE_BINARY:
+                case CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM:
                         /* nothing to do */
                         break;
-                case CARBON_FIELD_TYPE_OBJECT:
-                case CARBON_FIELD_TYPE_ARRAY:
-                case CARBON_FIELD_TYPE_COLUMN_U8:
-                case CARBON_FIELD_TYPE_COLUMN_U16:
-                case CARBON_FIELD_TYPE_COLUMN_U32:
-                case CARBON_FIELD_TYPE_COLUMN_U64:
-                case CARBON_FIELD_TYPE_COLUMN_I8:
-                case CARBON_FIELD_TYPE_COLUMN_I16:
-                case CARBON_FIELD_TYPE_COLUMN_I32:
-                case CARBON_FIELD_TYPE_COLUMN_I64:
-                case CARBON_FIELD_TYPE_COLUMN_FLOAT:
-                case CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
+                case CARBON_JAK_FIELD_TYPE_OBJECT:
+                case CARBON_JAK_FIELD_TYPE_ARRAY:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_U8:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_U16:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_U32:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_U64:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_I8:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_I16:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_I32:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_I64:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT:
+                case CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN: {
                         /* subsequent path elements to be printed */
                         container_contents_into_carbon(ins, index);
                 } break;
@@ -745,14 +745,14 @@ static void prop_to_str(struct jak_string *str, struct jak_carbon_path_index *in
 {
         intent(str, intent_level++);
 
-        u8 marker = memfile_read_byte(&index->memfile);
+        jak_u8 marker = memfile_read_byte(&index->memfile);
         string_add_char(str, '[');
         string_add_char(str, marker);
         string_add_char(str, ']');
 
-        u8 field_type = field_ref_to_str(str, index);
+        jak_u8 field_type = field_ref_to_str(str, index);
 
-        u64 key_offset = memfile_read_uintvar_stream(NULL, &index->memfile);
+        jak_u64 key_offset = memfile_read_uintvar_stream(NULL, &index->memfile);
 
         string_add_char(str, '(');
         string_add_u64_as_hex_0x_prefix_compact(str, key_offset);
@@ -761,17 +761,17 @@ static void prop_to_str(struct jak_string *str, struct jak_carbon_path_index *in
         container_to_str(str, index, field_type, intent_level);
 }
 
-JAK_func_unused
+JAK_FUNC_UNUSED
 static void prop_into_carbon(struct jak_carbon_insert *ins, struct jak_carbon_path_index *index)
 {
         memfile_skip_byte(&index->memfile);
         carbon_insert_prop_string(ins, "type", "key");
-        u8 field_type = _insert_field_ref(ins, index, false);
+        jak_u8 field_type = _insert_field_ref(ins, index, false);
 
         struct jak_string str;
         string_create(&str);
 
-        u64 key_offset = memfile_read_uintvar_stream(NULL, &index->memfile);
+        jak_u64 key_offset = memfile_read_uintvar_stream(NULL, &index->memfile);
         string_add_u64_as_hex_0x_prefix_compact(&str, key_offset);
         carbon_insert_prop_string(ins, "key", string_cstr(&str));
         string_drop(&str);
@@ -782,7 +782,7 @@ static void prop_into_carbon(struct jak_carbon_insert *ins, struct jak_carbon_pa
 static void array_into_carbon(struct jak_carbon_insert *ins, struct jak_carbon_path_index *index, bool is_root)
 {
         memfile_skip_byte(&index->memfile);
-        u8 field_type;
+        jak_u8 field_type;
 
         carbon_insert_prop_string(ins, "parent", is_root ? "record" : "array");
         field_type = _insert_field_ref(ins, index, is_root);
@@ -801,12 +801,12 @@ static void array_to_str(struct jak_string *str, struct jak_carbon_path_index *i
 {
         intent(str, intent_level++);
 
-        u8 marker = memfile_read_byte(&index->memfile);
+        jak_u8 marker = memfile_read_byte(&index->memfile);
         string_add_char(str, '[');
         string_add_char(str, marker);
         string_add_char(str, ']');
 
-        u8 field_type = field_ref_to_str(str, index);
+        jak_u8 field_type = field_ref_to_str(str, index);
 
         if (unlikely(is_root)) {
                 container_contents_to_str(str, index, intent_level);
@@ -815,14 +815,14 @@ static void array_to_str(struct jak_string *str, struct jak_carbon_path_index *i
         }
 }
 
-static void column_flat(struct memfile *file, struct path_index_node *node)
+static void column_flat(struct jak_memfile *file, struct path_index_node *node)
 {
         memfile_write_byte(file, PATH_MARKER_COLUMN_NODE);
         field_ref_write(file, node);
         assert(node->sub_entries.num_elems == 0);
 }
 
-static void node_flat(struct memfile *file, struct path_index_node *node)
+static void node_flat(struct jak_memfile *file, struct path_index_node *node)
 {
         switch (node->type) {
                 case PATH_INDEX_PROP_KEY:
@@ -840,12 +840,12 @@ static void node_flat(struct memfile *file, struct path_index_node *node)
         }
 }
 
-static void index_flat(struct memfile *file, struct path_index_node *root_array)
+static void index_flat(struct jak_memfile *file, struct path_index_node *root_array)
 {
         array_flat(file, root_array);
 }
 
-static void index_build(struct memfile *file, struct jak_carbon *doc)
+static void index_build(struct jak_memfile *file, struct jak_carbon *doc)
 {
         struct path_index_node root_array;
 
@@ -853,12 +853,12 @@ static void index_build(struct memfile *file, struct jak_carbon *doc)
         path_index_node_init(&root_array);
 
         struct jak_carbon_array_it it;
-        u64 array_pos = 0;
+        jak_u64 array_pos = 0;
         carbon_iterator_open(&it, doc);
 
         /* build index as tree structure */
         while (carbon_array_it_next(&it)) {
-                offset_t entry_offset = carbon_array_it_tell(&it);
+                jak_offset_t entry_offset = carbon_array_it_tell(&it);
                 struct path_index_node *node = path_index_node_add_array_elem(&root_array, array_pos, entry_offset);
                 array_build_index(node, &it);
                 array_pos++;
@@ -877,7 +877,7 @@ static void index_build(struct memfile *file, struct jak_carbon *doc)
 
 static void record_ref_to_str(struct jak_string *str, struct jak_carbon_path_index *index)
 {
-        u8 key_type = memfile_read_byte(&index->memfile);
+        jak_u8 key_type = memfile_read_byte(&index->memfile);
         string_add_char(str, '[');
         string_add_char(str, key_type);
         string_add_char(str, ']');
@@ -888,19 +888,19 @@ static void record_ref_to_str(struct jak_string *str, struct jak_carbon_path_ind
                         break;
                 case CARBON_KEY_AUTOKEY:
                 case CARBON_KEY_UKEY: {
-                        u64 key = memfile_read_u64(&index->memfile);
+                        jak_u64 key = memfile_read_u64(&index->memfile);
                         string_add_char(str, '[');
                         string_add_u64(str, key);
                         string_add_char(str, ']');
                 } break;
                 case CARBON_KEY_IKEY: {
-                        i64 key = memfile_read_i64(&index->memfile);
+                        jak_i64 key = memfile_read_i64(&index->memfile);
                         string_add_char(str, '[');;
                         string_add_i64(str, key);
                         string_add_char(str, ']');
                 } break;
                 case CARBON_KEY_SKEY: {
-                        u64 key_len;
+                        jak_u64 key_len;
                         const char *key = carbon_string_read(&key_len, &index->memfile);
                         string_add_char(str, '(');
                         string_add_nchar(str, key, key_len);
@@ -909,7 +909,7 @@ static void record_ref_to_str(struct jak_string *str, struct jak_carbon_path_ind
                 default:
                 error(&index->err, JAK_ERR_INTERNALERR);
         }
-        u64 commit_hash = memfile_read_u64(&index->memfile);
+        jak_u64 commit_hash = memfile_read_u64(&index->memfile);
         string_add_char(str, '[');
         string_add_u64(str, commit_hash);
         string_add_char(str, ']');
@@ -926,22 +926,22 @@ static void record_ref_to_carbon(struct jak_carbon_insert *roins, struct jak_car
                         break;
                 case CARBON_KEY_AUTOKEY:
                 case CARBON_KEY_UKEY: {
-                        u64 key = memfile_read_u64(&index->memfile);
+                        jak_u64 key = memfile_read_u64(&index->memfile);
                         carbon_insert_prop_unsigned(roins, "key-value", key);
                 } break;
                 case CARBON_KEY_IKEY: {
-                        i64 key = memfile_read_i64(&index->memfile);
+                        jak_i64 key = memfile_read_i64(&index->memfile);
                         carbon_insert_prop_signed(roins, "key-value", key);
                 } break;
                 case CARBON_KEY_SKEY: {
-                        u64 key_len;
+                        jak_u64 key_len;
                         const char *key = carbon_string_read(&key_len, &index->memfile);
                         carbon_insert_prop_nchar(roins, "key-value", key, key_len);
                 } break;
                 default:
                 error(&index->err, JAK_ERR_INTERNALERR);
         }
-        u64 commit_hash = memfile_read_u64(&index->memfile);
+        jak_u64 commit_hash = memfile_read_u64(&index->memfile);
         struct jak_string str;
         string_create(&str);
         carbon_commit_hash_to_str(&str, commit_hash);
@@ -967,7 +967,7 @@ bool carbon_path_index_create(struct jak_carbon_path_index *index, struct jak_ca
 
 bool carbon_path_index_drop(struct jak_carbon_path_index *index)
 {
-        unused(index)
+        JAK_UNUSED(index)
         return false;
 }
 
@@ -975,7 +975,7 @@ bool carbon_path_index_drop(struct jak_carbon_path_index *index)
 //  index data access and meta information
 // ---------------------------------------------------------------------------------------------------------------------
 
-const void *carbon_path_index_raw_data(u64 *size, struct jak_carbon_path_index *index)
+const void *carbon_path_index_raw_data(jak_u64 *size, struct jak_carbon_path_index *index)
 {
         if (size && index) {
                 const char *raw = memblock_raw_data(index->memfile.memblock);
@@ -986,7 +986,7 @@ const void *carbon_path_index_raw_data(u64 *size, struct jak_carbon_path_index *
         }
 }
 
-bool carbon_path_index_commit_hash(u64 *commit_hash, struct jak_carbon_path_index *index)
+bool carbon_path_index_commit_hash(jak_u64 *commit_hash, struct jak_carbon_path_index *index)
 {
         error_if_null(commit_hash)
         error_if_null(index)
@@ -1002,29 +1002,29 @@ bool carbon_path_index_key_type(enum carbon_key_type *key_type, struct jak_carbo
         return true;
 }
 
-bool carbon_path_index_key_unsigned_value(u64 *key, struct jak_carbon_path_index *index)
+bool carbon_path_index_key_unsigned_value(jak_u64 *key, struct jak_carbon_path_index *index)
 {
         error_if_null(key)
         error_if_null(index)
         enum carbon_key_type key_type;
-        u64 ret = *(u64 *)record_ref_read(&key_type, NULL, NULL, &index->memfile);
+        jak_u64 ret = *(jak_u64 *)record_ref_read(&key_type, NULL, NULL, &index->memfile);
         error_if(key_type != CARBON_KEY_AUTOKEY && key_type != CARBON_KEY_UKEY, &index->err, JAK_ERR_TYPEMISMATCH);
         *key = ret;
         return true;
 }
 
-bool carbon_path_index_key_signed_value(i64 *key, struct jak_carbon_path_index *index)
+bool carbon_path_index_key_signed_value(jak_i64 *key, struct jak_carbon_path_index *index)
 {
         error_if_null(key)
         error_if_null(index)
         enum carbon_key_type key_type;
-        i64 ret = *(i64 *)record_ref_read(&key_type, NULL, NULL, &index->memfile);
+        jak_i64 ret = *(jak_i64 *)record_ref_read(&key_type, NULL, NULL, &index->memfile);
         error_if(key_type != CARBON_KEY_IKEY, &index->err, JAK_ERR_TYPEMISMATCH);
         *key = ret;
         return true;
 }
 
-const char *carbon_path_index_key_string_value(u64 *str_len, struct jak_carbon_path_index *index)
+const char *carbon_path_index_key_string_value(jak_u64 *str_len, struct jak_carbon_path_index *index)
 {
         if (str_len && index) {
                 enum carbon_key_type key_type;
@@ -1041,7 +1041,7 @@ bool carbon_path_index_indexes_doc(struct jak_carbon_path_index *index, struct j
 {
         error_if_null(doc);
 
-        u64 index_hash, doc_hash;
+        jak_u64 index_hash, doc_hash;
         carbon_path_index_commit_hash(&index_hash, index);
         carbon_commit_hash(&doc_hash, doc);
         if (likely(index_hash == doc_hash)) {
@@ -1054,19 +1054,19 @@ bool carbon_path_index_indexes_doc(struct jak_carbon_path_index *index, struct j
                                         return true;
                                 case CARBON_KEY_AUTOKEY:
                                 case CARBON_KEY_UKEY: {
-                                        u64 index_key, doc_key;
+                                        jak_u64 index_key, doc_key;
                                         carbon_path_index_key_unsigned_value(&index_key, index);
                                         carbon_key_unsigned_value(&doc_key, doc);
                                         return index_key == doc_key;
                                 }
                                 case CARBON_KEY_IKEY: {
-                                        i64 index_key, doc_key;
+                                        jak_i64 index_key, doc_key;
                                         carbon_path_index_key_signed_value(&index_key, index);
                                         carbon_key_signed_value(&doc_key, doc);
                                         return index_key == doc_key;
                                 }
                                 case CARBON_KEY_SKEY: {
-                                        u64 index_key_len, doc_key_len;
+                                        jak_u64 index_key_len, doc_key_len;
                                         const char *index_key = carbon_path_index_key_string_value(&index_key_len, index);
                                         const char *doc_key = carbon_key_string_value(&doc_key_len, doc);
                                         return (index_key_len == doc_key_len) && (strcmp(index_key, doc_key) == 0);
@@ -1114,17 +1114,17 @@ bool carbon_path_index_it_open(struct jak_carbon_path_index_it *it, struct jak_c
 ////  array and column container functions
 //// ---------------------------------------------------------------------------------------------------------------------
 //
-//bool carbon_path_index_it_list_length(u64 *key_len, struct jak_carbon_path_index_it *it)
+//bool carbon_path_index_it_list_length(jak_u64 *key_len, struct jak_carbon_path_index_it *it)
 //{
 //
 //}
 //
-//bool carbon_path_index_it_list_goto(u64 pos, struct jak_carbon_path_index_it *it)
+//bool carbon_path_index_it_list_goto(jak_u64 pos, struct jak_carbon_path_index_it *it)
 //{
 //
 //}
 //
-//bool carbon_path_index_it_list_pos(u64 *pos, struct jak_carbon_path_index_it *it)
+//bool carbon_path_index_it_list_pos(jak_u64 *pos, struct jak_carbon_path_index_it *it)
 //{
 //
 //}
@@ -1143,7 +1143,7 @@ bool carbon_path_index_it_open(struct jak_carbon_path_index_it *it, struct jak_c
 ////  object container functions
 //// ---------------------------------------------------------------------------------------------------------------------
 //
-//bool carbon_path_index_it_obj_num_props(u64 *num_props, struct jak_carbon_path_index_it *it)
+//bool carbon_path_index_it_obj_num_props(jak_u64 *num_props, struct jak_carbon_path_index_it *it)
 //{
 //
 //}
@@ -1153,7 +1153,7 @@ bool carbon_path_index_it_open(struct jak_carbon_path_index_it *it, struct jak_c
 //
 //}
 //
-//const char *carbon_path_index_it_key_name(u64 *name_len, struct jak_carbon_path_index_it *it)
+//const char *carbon_path_index_it_key_name(jak_u64 *name_len, struct jak_carbon_path_index_it *it)
 //{
 //
 //}
@@ -1177,42 +1177,42 @@ bool carbon_path_index_it_open(struct jak_carbon_path_index_it *it, struct jak_c
 //
 //}
 //
-//bool carbon_path_index_it_field_u8_value(u8 *value, struct jak_carbon_path_index_it *it)
+//bool carbon_path_index_it_field_u8_value(jak_u8 *value, struct jak_carbon_path_index_it *it)
 //{
 //
 //}
 //
-//bool carbon_path_index_it_field_u16_value(u16 *value, struct jak_carbon_path_index_it *it)
+//bool carbon_path_index_it_field_u16_value(jak_u16 *value, struct jak_carbon_path_index_it *it)
 //{
 //
 //}
 //
-//bool carbon_path_index_it_field_u32_value(u32 *value, struct jak_carbon_path_index_it *it)
+//bool carbon_path_index_it_field_u32_value(jak_u32 *value, struct jak_carbon_path_index_it *it)
 //{
 //
 //}
 //
-//bool carbon_path_index_it_field_u64_value(u64 *value, struct jak_carbon_path_index_it *it)
+//bool carbon_path_index_it_field_u64_value(jak_u64 *value, struct jak_carbon_path_index_it *it)
 //{
 //
 //}
 //
-//bool carbon_path_index_it_field_i8_value(i8 *value, struct jak_carbon_path_index_it *it)
+//bool carbon_path_index_it_field_i8_value(jak_i8 *value, struct jak_carbon_path_index_it *it)
 //{
 //
 //}
 //
-//bool carbon_path_index_it_field_i16_value(i16 *value, struct jak_carbon_path_index_it *it)
+//bool carbon_path_index_it_field_i16_value(jak_i16 *value, struct jak_carbon_path_index_it *it)
 //{
 //
 //}
 //
-//bool carbon_path_index_it_field_i32_value(i32 *value, struct jak_carbon_path_index_it *it)
+//bool carbon_path_index_it_field_i32_value(jak_i32 *value, struct jak_carbon_path_index_it *it)
 //{
 //
 //}
 //
-//bool carbon_path_index_it_field_i64_value(i64 *value, struct jak_carbon_path_index_it *it)
+//bool carbon_path_index_it_field_i64_value(jak_i64 *value, struct jak_carbon_path_index_it *it)
 //{
 //
 //}
@@ -1222,17 +1222,17 @@ bool carbon_path_index_it_open(struct jak_carbon_path_index_it *it, struct jak_c
 //
 //}
 //
-//bool carbon_path_index_it_field_signed_value(bool *is_null_in, i64 *value, struct jak_carbon_path_index_it *it)
+//bool carbon_path_index_it_field_signed_value(bool *is_null_in, jak_i64 *value, struct jak_carbon_path_index_it *it)
 //{
 //
 //}
 //
-//bool carbon_path_index_it_field_unsigned_value(bool *is_null_in, u64 *value, struct jak_carbon_path_index_it *it)
+//bool carbon_path_index_it_field_unsigned_value(bool *is_null_in, jak_u64 *value, struct jak_carbon_path_index_it *it)
 //{
 //
 //}
 //
-//const char *carbon_path_index_it_field_string_value(u64 *strlen, struct jak_carbon_path_index_it *it)
+//const char *carbon_path_index_it_field_string_value(jak_u64 *strlen, struct jak_carbon_path_index_it *it)
 //{
 //
 //}

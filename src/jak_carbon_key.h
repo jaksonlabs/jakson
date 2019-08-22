@@ -29,23 +29,23 @@
 
 JAK_BEGIN_DECL
 
-bool carbon_key_create(struct memfile *file, enum carbon_key_type type, struct err *err);
+bool carbon_key_create(struct jak_memfile *file, enum carbon_key_type type, struct jak_error *err);
 
-bool carbon_key_skip(enum carbon_key_type *out, struct memfile *file);
+bool carbon_key_skip(enum carbon_key_type *out, struct jak_memfile *file);
 
-bool carbon_key_read_type(enum carbon_key_type *out, struct memfile *file);
+bool carbon_key_read_type(enum carbon_key_type *out, struct jak_memfile *file);
 
-bool carbon_key_write_unsigned(struct memfile *file, u64 key);
+bool carbon_key_write_unsigned(struct jak_memfile *file, jak_u64 key);
 
-bool carbon_key_write_signed(struct memfile *file, i64 key);
+bool carbon_key_write_signed(struct jak_memfile *file, jak_i64 key);
 
-bool carbon_key_write_string(struct memfile *file, const char *key);
+bool carbon_key_write_string(struct jak_memfile *file, const char *key);
 
-bool carbon_key_update_string(struct memfile *file, const char *key);
+bool carbon_key_update_string(struct jak_memfile *file, const char *key);
 
-bool carbon_key_update_string_wnchar(struct memfile *file, const char *key, size_t length);
+bool carbon_key_update_string_wnchar(struct jak_memfile *file, const char *key, size_t length);
 
-const void *carbon_key_read(u64 *len, enum carbon_key_type *out, struct memfile *file);
+const void *carbon_key_read(jak_u64 *len, enum carbon_key_type *out, struct jak_memfile *file);
 
 const char *carbon_key_type_str(enum carbon_key_type type);
 

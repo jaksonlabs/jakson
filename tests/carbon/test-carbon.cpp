@@ -19,7 +19,7 @@
 TEST(CarbonTest, CreateCarbon) {
         struct jak_carbon doc;
         global_id_t oid;
-        u64 rev;
+        jak_u64 rev;
         struct jak_string builder;
         bool status;
 
@@ -49,7 +49,7 @@ TEST(CarbonTest, CreateCarbonRevisionNumberingNoKey) {
         struct jak_carbon_new context;
         struct jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
-        u64 commit_new, commit_mod;
+        jak_u64 commit_new, commit_mod;
 
         carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
         carbon_create_end(&context);
@@ -71,7 +71,7 @@ TEST(CarbonTest, CreateCarbonRevisionNumberingWithKey) {
         struct jak_carbon_new context;
         struct jak_carbon doc, rev_doc;
         struct jak_carbon_revise revise;
-        u64 commit_new, commit_mod, commit_mod_cmpr;
+        jak_u64 commit_new, commit_mod, commit_mod_cmpr;
 
         carbon_create_begin(&context, &doc, CARBON_KEY_AUTOKEY, JAK_CARBON_OPTIMIZE);
         carbon_create_end(&context);
@@ -86,7 +86,7 @@ TEST(CarbonTest, CreateCarbonRevisionNumberingWithKey) {
         ASSERT_NE(commit_new, 0);
         ASSERT_NE(commit_new, commit_mod);
 
-        u64 raw_data_len = 0;
+        jak_u64 raw_data_len = 0;
         const void *raw_data = carbon_raw_data(&raw_data_len, &doc);
         carbon_commit_hash_compute(&commit_mod_cmpr, raw_data, raw_data_len);
 
@@ -95,7 +95,7 @@ TEST(CarbonTest, CreateCarbonRevisionNumberingWithKey) {
 
 TEST(CarbonTest, CreateCarbonRevisionNumbering) {
         struct jak_carbon doc, rev_doc;
-        u64 rev;
+        jak_u64 rev;
         struct jak_string builder;
         bool status;
 
@@ -136,7 +136,7 @@ TEST(CarbonTest, CreateCarbonRevisionNumbering) {
 
 TEST(CarbonTest, CreateCarbonRevisionAbort) {
         struct jak_carbon doc, rev_doc;
-        u64 rev;
+        jak_u64 rev;
         struct jak_string builder;
         bool status;
 
@@ -166,7 +166,7 @@ TEST(CarbonTest, CreateCarbonRevisionAbort) {
 
 TEST(CarbonTest, CreateCarbonRevisionAsyncReading) {
         struct jak_carbon doc, rev_doc;
-        u64 rev;
+        jak_u64 rev;
         struct jak_string builder;
         bool status;
 
@@ -205,7 +205,7 @@ TEST(CarbonTest, ModifyCarbonObjectId) {
         global_id_t oid;
         global_id_t new_oid;
         struct jak_carbon_revise revise;
-        u64 commit_hash_old, commit_hash_new;
+        jak_u64 commit_hash_old, commit_hash_new;
 
         carbon_create_empty(&doc, CARBON_KEY_AUTOKEY);
 
@@ -288,7 +288,7 @@ TEST(CarbonTest, CarbonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
         carbon_array_it_insert_begin(&inserter, &it);
-        for (i32 i = 0; i < 10; i++) {
+        for (jak_i32 i = 0; i < 10; i++) {
                 // fprintf(stdout, "before:\n");
                 //carbon_hexdump_print(stdout, &rev_doc);
                 bool status;
@@ -326,7 +326,7 @@ TEST(CarbonTest, CarbonArrayIteratorOverwriteLiterals) {
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
         carbon_array_it_insert_begin(&inserter, &it);
-        for (i32 i = 0; i < 3; i++) {
+        for (jak_i32 i = 0; i < 3; i++) {
                 if (i % 3 == 0) {
                         carbon_insert_null(&inserter);
                 } else if (i % 3 == 1) {
@@ -342,7 +342,7 @@ TEST(CarbonTest, CarbonArrayIteratorOverwriteLiterals) {
         carbon_revise_begin(&revise, &rev_doc2, &rev_doc);
         carbon_revise_iterator_open(&it, &revise);
         carbon_array_it_insert_begin(&inserter, &it);
-        for (i32 i = 0; i < 2; i++) {
+        for (jak_i32 i = 0; i < 2; i++) {
                 carbon_insert_true(&inserter);
         }
         carbon_insert_drop(&inserter);
@@ -367,7 +367,7 @@ TEST(CarbonTest, CarbonArrayIteratorOverwriteLiteralsWithDocOverflow) {
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
         carbon_array_it_insert_begin(&inserter, &it);
-        for (i32 i = 0; i < 22; i++) {
+        for (jak_i32 i = 0; i < 22; i++) {
                 if (i % 3 == 0) {
                         carbon_insert_null(&inserter);
                 } else if (i % 3 == 1) {
@@ -385,7 +385,7 @@ TEST(CarbonTest, CarbonArrayIteratorOverwriteLiteralsWithDocOverflow) {
         carbon_revise_begin(&revise, &rev_doc2, &rev_doc);
         carbon_revise_iterator_open(&it, &revise);
         carbon_array_it_insert_begin(&inserter, &it);
-        for (i32 i = 0; i < 2; i++) {
+        for (jak_i32 i = 0; i < 2; i++) {
                 // fprintf(stdout, "before:\n");
                 //carbon_hexdump_print(stdout, &rev_doc2);
                 carbon_insert_true(&inserter);
@@ -412,7 +412,7 @@ TEST(CarbonTest, CarbonArrayIteratorUnsignedAndConstants) {
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
         carbon_array_it_insert_begin(&inserter, &it);
-        for (i32 i = 0; i < 500; i++) {
+        for (jak_i32 i = 0; i < 500; i++) {
                 if (i % 6 == 0) {
                         carbon_insert_null(&inserter);
                 } else if (i % 6 == 1) {
@@ -420,10 +420,10 @@ TEST(CarbonTest, CarbonArrayIteratorUnsignedAndConstants) {
                 } else if (i % 6 == 2) {
                         carbon_insert_false(&inserter);
                 } else if (i % 6 == 3) {
-                        u64 rand_value = random();
+                        jak_u64 rand_value = random();
                         carbon_insert_unsigned(&inserter, rand_value);
                 } else if (i % 6 == 4) {
-                        i64 rand_value = random();
+                        jak_i64 rand_value = random();
                         carbon_insert_signed(&inserter, rand_value);
                 } else {
                         float rand_value = (float)rand()/(float)(RAND_MAX/INT32_MAX);
@@ -453,10 +453,10 @@ TEST(CarbonTest, CarbonArrayIteratorStrings) {
         carbon_revise_begin(&revise, &rev_doc, &doc);
         carbon_revise_iterator_open(&it, &revise);
         carbon_array_it_insert_begin(&inserter, &it);
-        for (i32 i = 0; i < 10; i++) {
-                u64 strlen = rand() % (100 + 1 - 4) + 4;
+        for (jak_i32 i = 0; i < 10; i++) {
+                jak_u64 strlen = rand() % (100 + 1 - 4) + 4;
                 char buffer[strlen];
-                for (u64 j = 0; j < strlen; j++) {
+                for (jak_u64 j = 0; j < strlen; j++) {
                         buffer[j] = 65 + (rand() % 25);
                 }
                 buffer[0] = '!';
@@ -567,7 +567,7 @@ TEST(CarbonTest, CarbonInsertMimeTypedBlobsWithOverflow) {
         carbon_array_it_insert_begin(&inserter, &it);
         const char *data1 = "{ \"Message\": \"Hello World\" }";
         const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
-        for (u32 i = 0; i < 100; i++) {
+        for (jak_u32 i = 0; i < 100; i++) {
                 bool status = carbon_insert_binary(&inserter, i % 2 == 0 ? data1 : data2,
                         strlen(i % 2 == 0 ? data1 : data2), "json", NULL);
                 ASSERT_TRUE(status);
@@ -597,7 +597,7 @@ TEST(CarbonTest, CarbonInsertMixedTypedBlobsWithOverflow) {
         carbon_array_it_insert_begin(&inserter, &it);
         const char *data1 = "{ \"Message\": \"Hello World\" }";
         const char *data2 = "{ \"Blog-Header\": \"My Fancy Blog\" }";
-        for (u32 i = 0; i < 100; i++) {
+        for (jak_u32 i = 0; i < 100; i++) {
                 bool status = carbon_insert_binary(&inserter, i % 2 == 0 ? data1 : data2,
                         strlen(i % 2 == 0 ? data1 : data2), i % 3 == 0 ? "json" : NULL, i % 5 == 0 ? "user/app" : NULL);
                 ASSERT_TRUE(status);
@@ -1109,7 +1109,7 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersWithHighOverflow) {
         struct jak_carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U32, 1);
 
         ASSERT_TRUE(nested_inserter_l1 != NULL);
-        for (u32 i = 0; i < 100; i++) {
+        for (jak_u32 i = 0; i < 100; i++) {
                 carbon_insert_u32(nested_inserter_l1, i);
                 carbon_insert_u32(nested_inserter_l1, i);
                 carbon_insert_u32(nested_inserter_l1, i);
@@ -1149,11 +1149,11 @@ TEST(CarbonTest, CarbonInsertInsertMultipleColumnsNumbersWithHighOverflow) {
         carbon_revise_iterator_open(&it, &revise);
         carbon_array_it_insert_begin(&inserter, &it);
 
-        for (u32 k = 0; k < 3; k++) {
+        for (jak_u32 k = 0; k < 3; k++) {
                 struct jak_carbon_insert *nested_inserter_l1 = carbon_insert_column_begin(&column_state, &inserter, CARBON_COLUMN_TYPE_U32, 1);
 
                 ASSERT_TRUE(nested_inserter_l1 != NULL);
-                for (u32 i = 0; i < 4; i++) {
+                for (jak_u32 i = 0; i < 4; i++) {
                         carbon_insert_u32(nested_inserter_l1, 'a' + i);
                         carbon_insert_u32(nested_inserter_l1, 'a' + i);
                         carbon_insert_u32(nested_inserter_l1, 'a' + i);
@@ -1693,7 +1693,7 @@ TEST(CarbonTest, CarbonFind) {
         struct jak_carbon_array_it it;
         struct jak_carbon_insert ins;
         struct jak_carbon_find finder;
-        u64 result_unsigned;
+        jak_u64 result_unsigned;
         enum carbon_field_type type;
         carbon_create_empty(&doc, CARBON_KEY_NOKEY);
 
@@ -1715,7 +1715,7 @@ TEST(CarbonTest, CarbonFind) {
                 ASSERT_TRUE(carbon_find_has_result(&finder));
 
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U8);
+                ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_NUMBER_U8);
 
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 'a');
@@ -1729,7 +1729,7 @@ TEST(CarbonTest, CarbonFind) {
                 ASSERT_TRUE(carbon_find_has_result(&finder));
 
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U8);
+                ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_NUMBER_U8);
 
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 'b');
@@ -1743,7 +1743,7 @@ TEST(CarbonTest, CarbonFind) {
                 ASSERT_TRUE(carbon_find_has_result(&finder));
 
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U8);
+                ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_NUMBER_U8);
 
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 'c');
@@ -1772,7 +1772,7 @@ TEST(CarbonTest, CarbonFindTypes) {
         struct jak_carbon_insert_column_state column_state;
         struct jak_carbon_insert_array_state array_state, nested_array_state;
         struct jak_carbon_find finder;
-        u64 result_unsigned;
+        jak_u64 result_unsigned;
         enum carbon_field_type type;
         carbon_create_empty(&doc, CARBON_KEY_NOKEY);
 
@@ -1815,7 +1815,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "0", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U64);
+                ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_NUMBER_U64);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 4223);
                 carbon_find_close(&finder);
@@ -1825,7 +1825,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_ARRAY);
+                ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_ARRAY);
                 struct jak_carbon_array_it *retval = carbon_find_result_array(&finder);
                 ASSERT_TRUE(retval != NULL);
                 carbon_find_close(&finder);
@@ -1835,16 +1835,16 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.0", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_TRUE(type == CARBON_FIELD_TYPE_COLUMN_U8 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_U16 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_U32 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_U64 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_I8 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_I16 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_I32 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_I64 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_FLOAT ||
-                        type == CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
+                ASSERT_TRUE(type == CARBON_JAK_FIELD_TYPE_COLUMN_U8 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_U16 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_U32 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_U64 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_I8 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_I16 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_I32 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_I64 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN);
                 struct jak_carbon_column_it *retval = carbon_find_result_column(&finder);
                 ASSERT_TRUE(retval != NULL);
                 carbon_find_close(&finder);
@@ -1854,7 +1854,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.0.0", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U32);
+                ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 88);
                 carbon_find_close(&finder);
@@ -1864,7 +1864,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.0.1", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U32);
+                ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 89);
                 carbon_find_close(&finder);
@@ -1874,7 +1874,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.0.2", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U32);
+                ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 90);
                 carbon_find_close(&finder);
@@ -1890,7 +1890,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.1", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_ARRAY);
+                ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_ARRAY);
                 struct jak_carbon_array_it *retval = carbon_find_result_array(&finder);
                 ASSERT_TRUE(retval != NULL);
                 carbon_find_close(&finder);
@@ -1900,8 +1900,8 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.1.0", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_STRING);
-                u64 str_len;
+                ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_STRING);
+                jak_u64 str_len;
                 const char *retval = carbon_find_result_string(&str_len, &finder);
                 ASSERT_TRUE(strncmp(retval, "Hello", str_len) == 0);
                 carbon_find_close(&finder);
@@ -1911,16 +1911,16 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.1.1", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_TRUE(type == CARBON_FIELD_TYPE_COLUMN_U8 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_U16 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_U32 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_U64 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_I8 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_I16 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_I32 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_I64 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_FLOAT ||
-                        type == CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
+                ASSERT_TRUE(type == CARBON_JAK_FIELD_TYPE_COLUMN_U8 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_U16 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_U32 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_U64 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_I8 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_I16 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_I32 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_I64 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN);
                 struct jak_carbon_column_it *retval = carbon_find_result_column(&finder);
                 ASSERT_TRUE(retval != NULL);
                 carbon_find_close(&finder);
@@ -1930,7 +1930,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.1.1.0", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U32);
+                ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 65);
                 carbon_find_close(&finder);
@@ -1940,7 +1940,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.1.1.1", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U32);
+                ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 66);
                 carbon_find_close(&finder);
@@ -1950,7 +1950,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.1.1.2", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U32);
+                ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 67);
                 carbon_find_close(&finder);
@@ -1965,8 +1965,8 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.1.2", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_STRING);
-                u64 str_len;
+                ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_STRING);
+                jak_u64 str_len;
                 const char *retval = carbon_find_result_string(&str_len, &finder);
                 ASSERT_TRUE(strncmp(retval, "World", str_len) == 0);
                 carbon_find_close(&finder);
@@ -1982,7 +1982,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.2", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U8);
+                ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_NUMBER_U8);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 1);
                 carbon_find_close(&finder);
@@ -1992,7 +1992,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.3", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U8);
+                ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_NUMBER_U8);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 1);
                 carbon_find_close(&finder);
@@ -2002,16 +2002,16 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.4", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_TRUE(type == CARBON_FIELD_TYPE_COLUMN_U8 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_U16 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_U32 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_U64 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_I8 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_I16 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_I32 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_I64 ||
-                        type == CARBON_FIELD_TYPE_COLUMN_FLOAT ||
-                        type == CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
+                ASSERT_TRUE(type == CARBON_JAK_FIELD_TYPE_COLUMN_U8 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_U16 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_U32 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_U64 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_I8 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_I16 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_I32 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_I64 ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_FLOAT ||
+                        type == CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN);
                 struct jak_carbon_column_it *retval = carbon_find_result_column(&finder);
                 ASSERT_TRUE(retval != NULL);
                 carbon_find_close(&finder);
@@ -2021,7 +2021,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.4.0", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U32);
+                ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 23);
                 carbon_find_close(&finder);
@@ -2031,7 +2031,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.4.1", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U32);
+                ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 24);
                 carbon_find_close(&finder);
@@ -2041,7 +2041,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.4.2", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U32);
+                ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 25);
                 carbon_find_close(&finder);
@@ -2057,7 +2057,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 carbon_find_open(&finder, "1.5", &rev_doc);
                 ASSERT_TRUE(carbon_find_has_result(&finder));
                 carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U8);
+                ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_NUMBER_U8);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 1);
                 carbon_find_close(&finder);
@@ -2223,8 +2223,8 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesSimple)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        u64 e1 = carbon_get_or_default_unsigned(&rev_doc2, "0", 0);
-        i64 e2 = carbon_get_or_default_signed(&rev_doc2, "1", 0);
+        jak_u64 e1 = carbon_get_or_default_unsigned(&rev_doc2, "0", 0);
+        jak_i64 e2 = carbon_get_or_default_signed(&rev_doc2, "1", 0);
         float e3 = carbon_get_or_default_float(&rev_doc2, "2", NAN);
 
         ASSERT_EQ(e1, 1);
@@ -2321,7 +2321,7 @@ TEST(CarbonTest, CarbonRemoveFirstConstants)
         ASSERT_TRUE(has_next);
         carbon_field_type next_type;
         carbon_array_it_field_type(&next_type, &rev_it);
-        ASSERT_EQ(next_type, CARBON_FIELD_TYPE_FALSE);
+        ASSERT_EQ(next_type, CARBON_JAK_FIELD_TYPE_FALSE);
         carbon_revise_iterator_close(&rev_it);
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
@@ -2429,7 +2429,7 @@ TEST(CarbonTest, CarbonRemoveMiddleConstants)
         ASSERT_TRUE(has_next);
         enum carbon_field_type type;
         carbon_array_it_field_type(&type, &rev_it);
-        ASSERT_EQ(type, CARBON_FIELD_TYPE_FALSE);
+        ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_FALSE);
         has_next = carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
         carbon_revise_iterator_close(&rev_it);
@@ -2532,7 +2532,7 @@ TEST(CarbonTest, CarbonRemoveFirstNumber)
         ASSERT_TRUE(has_next);
         carbon_field_type next_type;
         carbon_array_it_field_type(&next_type, &rev_it);
-        ASSERT_EQ(next_type, CARBON_FIELD_TYPE_NUMBER_U32);
+        ASSERT_EQ(next_type, CARBON_JAK_FIELD_TYPE_NUMBER_U32);
         carbon_revise_iterator_close(&rev_it);
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
@@ -2640,7 +2640,7 @@ TEST(CarbonTest, CarbonRemoveMiddleNumber)
         ASSERT_TRUE(has_next);
         enum carbon_field_type type;
         carbon_array_it_field_type(&type, &rev_it);
-        ASSERT_EQ(type, CARBON_FIELD_TYPE_NUMBER_U32);
+        ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_NUMBER_U32);
         has_next = carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
         carbon_revise_iterator_close(&rev_it);
@@ -2744,7 +2744,7 @@ TEST(CarbonTest, CarbonRemoveFirstString)
         ASSERT_TRUE(has_next);
         carbon_field_type next_type;
         carbon_array_it_field_type(&next_type, &rev_it);
-        ASSERT_EQ(next_type, CARBON_FIELD_TYPE_STRING);
+        ASSERT_EQ(next_type, CARBON_JAK_FIELD_TYPE_STRING);
         carbon_revise_iterator_close(&rev_it);
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
@@ -2852,7 +2852,7 @@ TEST(CarbonTest, CarbonRemoveMiddleString)
         ASSERT_TRUE(has_next);
         enum carbon_field_type type;
         carbon_array_it_field_type(&type, &rev_it);
-        ASSERT_EQ(type, CARBON_FIELD_TYPE_STRING);
+        ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_STRING);
         has_next = carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
         carbon_revise_iterator_close(&rev_it);
@@ -2963,7 +2963,7 @@ TEST(CarbonTest, CarbonRemoveFirstBinary)
         ASSERT_TRUE(has_next);
         carbon_field_type next_type;
         carbon_array_it_field_type(&next_type, &rev_it);
-        ASSERT_EQ(next_type, CARBON_FIELD_TYPE_BINARY);
+        ASSERT_EQ(next_type, CARBON_JAK_FIELD_TYPE_BINARY);
         carbon_revise_iterator_close(&rev_it);
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
@@ -3079,7 +3079,7 @@ TEST(CarbonTest, CarbonRemoveMiddleBinary)
         ASSERT_TRUE(has_next);
         enum carbon_field_type type;
         carbon_array_it_field_type(&type, &rev_it);
-        ASSERT_EQ(type, CARBON_FIELD_TYPE_BINARY);
+        ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_BINARY);
         has_next = carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
         carbon_revise_iterator_close(&rev_it);
@@ -3198,7 +3198,7 @@ TEST(CarbonTest, CarbonRemoveFirstCustomBinary)
         ASSERT_TRUE(has_next);
         carbon_field_type next_type;
         carbon_array_it_field_type(&next_type, &rev_it);
-        ASSERT_EQ(next_type, CARBON_FIELD_TYPE_BINARY_CUSTOM);
+        ASSERT_EQ(next_type, CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM);
         carbon_revise_iterator_close(&rev_it);
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
@@ -3314,7 +3314,7 @@ TEST(CarbonTest, CarbonRemoveMiddleCustomBinary)
         ASSERT_TRUE(has_next);
         enum carbon_field_type type;
         carbon_array_it_field_type(&type, &rev_it);
-        ASSERT_EQ(type, CARBON_FIELD_TYPE_BINARY_CUSTOM);
+        ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_BINARY_CUSTOM);
         has_next = carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
         carbon_revise_iterator_close(&rev_it);
@@ -3446,7 +3446,7 @@ TEST(CarbonTest, CarbonRemoveFirstArray)
         ASSERT_TRUE(has_next);
         carbon_field_type next_type;
         carbon_array_it_field_type(&next_type, &rev_it);
-        ASSERT_EQ(next_type, CARBON_FIELD_TYPE_ARRAY);
+        ASSERT_EQ(next_type, CARBON_JAK_FIELD_TYPE_ARRAY);
         carbon_revise_iterator_close(&rev_it);
         carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
@@ -3583,7 +3583,7 @@ TEST(CarbonTest, CarbonRemoveMiddleArray)
         ASSERT_TRUE(has_next);
         enum carbon_field_type type;
         carbon_array_it_field_type(&type, &rev_it);
-        ASSERT_EQ(type, CARBON_FIELD_TYPE_ARRAY);
+        ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_ARRAY);
         has_next = carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
         carbon_revise_iterator_close(&rev_it);
@@ -3616,7 +3616,7 @@ TEST(CarbonTest, CarbonColumnRemoveTest)
         bool has_next;
         string_create(&sb);
         bool status;
-        const u16 *values;
+        const jak_u16 *values;
 
         struct jak_carbon_insert_column_state state;
         struct jak_carbon_insert *array_ins;
@@ -3643,15 +3643,15 @@ TEST(CarbonTest, CarbonColumnRemoveTest)
         ASSERT_TRUE(has_next);
         struct jak_carbon_column_it *cit = carbon_array_it_column_value(&rev_it);
         enum carbon_field_type type;
-        u32 num_elems;
+        jak_u32 num_elems;
         carbon_column_it_values_info(&type, &num_elems, cit);
-        ASSERT_EQ(type, CARBON_FIELD_TYPE_COLUMN_U16);
+        ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_COLUMN_U16);
         ASSERT_EQ(num_elems, 3);
 
         status = carbon_column_it_remove(cit, 1);
         ASSERT_TRUE(status);
         carbon_column_it_values_info(&type, &num_elems, cit);
-        ASSERT_EQ(type, CARBON_FIELD_TYPE_COLUMN_U16);
+        ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_COLUMN_U16);
         ASSERT_EQ(num_elems, 2);
         values = carbon_column_it_u16_values(&num_elems, cit);
         ASSERT_EQ(values[0], 1);
@@ -3662,7 +3662,7 @@ TEST(CarbonTest, CarbonColumnRemoveTest)
         status = carbon_column_it_remove(cit, 0);
         ASSERT_TRUE(status);
         carbon_column_it_values_info(&type, &num_elems, cit);
-        ASSERT_EQ(type, CARBON_FIELD_TYPE_COLUMN_U16);
+        ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_COLUMN_U16);
         ASSERT_EQ(num_elems, 1);
         values = carbon_column_it_u16_values(&num_elems, cit);
         ASSERT_EQ(values[0], 3);
@@ -3672,7 +3672,7 @@ TEST(CarbonTest, CarbonColumnRemoveTest)
         status = carbon_column_it_remove(cit, 0);
         ASSERT_TRUE(status);
         carbon_column_it_values_info(&type, &num_elems, cit);
-        ASSERT_EQ(type, CARBON_FIELD_TYPE_COLUMN_U16);
+        ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_COLUMN_U16);
         ASSERT_EQ(num_elems, 0);
 
         char *json_4 = strdup(carbon_to_json_extended(&sb, &rev_doc));
@@ -3967,7 +3967,7 @@ TEST(CarbonTest, CarbonKeyTypeNoKeyNoRevInc)
         struct jak_carbon doc, rev_doc;
         struct jak_carbon_new context;
         struct jak_carbon_revise revise;
-        u64 rev_old, rev_new;
+        jak_u64 rev_old, rev_new;
 
         // -------------------------------------------------------------------------------------------------------------
         struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
@@ -4023,7 +4023,7 @@ TEST(CarbonTest, CarbonKeyTypeAutoKeyRevInc)
         struct jak_carbon doc, rev_doc;
         struct jak_carbon_new context;
         struct jak_carbon_revise revise;
-        u64 rev_old, rev_new;
+        jak_u64 rev_old, rev_new;
 
         // -------------------------------------------------------------------------------------------------------------
         struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_NOKEY, JAK_CARBON_OPTIMIZE);
@@ -4089,7 +4089,7 @@ TEST(CarbonTest, CarbonKeyTypeUnsignedKeyUpdate)
 
         string_create(&sb);
 
-        u64 id_read;
+        jak_u64 id_read;
 
         // -------------------------------------------------------------------------------------------------------------
         struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_UKEY, JAK_CARBON_OPTIMIZE);
@@ -4123,7 +4123,7 @@ TEST(CarbonTest, CarbonKeyTypeSignedKeyUpdate)
 
         string_create(&sb);
 
-        i64 id_read;
+        jak_i64 id_read;
 
         // -------------------------------------------------------------------------------------------------------------
         struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_IKEY, JAK_CARBON_OPTIMIZE);
@@ -4157,7 +4157,7 @@ TEST(CarbonTest, CarbonKeyTypeStringKeyUpdate)
 
         string_create(&sb);
 
-        u64 key_len;
+        jak_u64 key_len;
 
         // -------------------------------------------------------------------------------------------------------------
         struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_SKEY, JAK_CARBON_OPTIMIZE);
@@ -4208,7 +4208,7 @@ TEST(CarbonTest, CarbonKeyTypeSignedKeyRevInc)
         struct jak_carbon doc;
         struct jak_carbon_new context;
         struct jak_carbon_revise revise;
-        u64 rev_old, rev_new;
+        jak_u64 rev_old, rev_new;
 
         // -------------------------------------------------------------------------------------------------------------
         struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_IKEY, JAK_CARBON_OPTIMIZE);
@@ -4220,7 +4220,7 @@ TEST(CarbonTest, CarbonKeyTypeSignedKeyRevInc)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        u64 test_max = 10000;
+        jak_u64 test_max = 10000;
 
         struct vector ofType(struct jak_carbon) files;
         vec_create(&files, NULL, sizeof(struct jak_carbon), test_max);
@@ -4251,7 +4251,7 @@ TEST(CarbonTest, CarbonKeyTypeUnsignedKeyRevInc)
         struct jak_carbon doc, rev_doc;
         struct jak_carbon_new context;
         struct jak_carbon_revise revise;
-        u64 rev_old, rev_new;
+        jak_u64 rev_old, rev_new;
 
         // -------------------------------------------------------------------------------------------------------------
         struct jak_carbon_insert *ins = carbon_create_begin(&context, &doc, CARBON_KEY_UKEY, JAK_CARBON_OPTIMIZE);
@@ -5650,7 +5650,7 @@ TEST(CarbonTest, CarbonObjectRemoveTest)
 
         enum carbon_field_type field_type;
         carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_JAK_FIELD_TYPE_OBJECT);
 
         carbon_array_it_remove(&rev_it);
         has_next = carbon_array_it_next(&rev_it);
@@ -5740,7 +5740,7 @@ TEST(CarbonTest, CarbonObjectRemoveSkipOneTest)
 
         enum carbon_field_type field_type;
         carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_JAK_FIELD_TYPE_OBJECT);
 
         has_next = carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
@@ -5779,7 +5779,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringIt)
         struct jak_string sb;
         bool has_next;
         string_create(&sb);
-        u64 key_len;
+        jak_u64 key_len;
 
         struct jak_carbon_insert_object_state state;
         struct jak_carbon_insert nested_ins;
@@ -5813,7 +5813,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringIt)
 
         enum carbon_field_type field_type;
         carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_JAK_FIELD_TYPE_OBJECT);
         struct jak_carbon_object_it *obj_it = carbon_array_it_object_value(&rev_it);
         has_next = carbon_object_it_next(obj_it);
         ASSERT_TRUE(has_next);
@@ -5891,7 +5891,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex1)
 
         enum carbon_field_type field_type;
         carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_JAK_FIELD_TYPE_OBJECT);
         struct jak_carbon_object_it *obj_it = carbon_array_it_object_value(&rev_it);
         ASSERT_TRUE(carbon_object_it_next(obj_it));
         ASSERT_TRUE(carbon_object_it_next(obj_it));
@@ -5966,7 +5966,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex2)
 
         enum carbon_field_type field_type;
         carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_JAK_FIELD_TYPE_OBJECT);
         struct jak_carbon_object_it *obj_it = carbon_array_it_object_value(&rev_it);
         ASSERT_TRUE(carbon_object_it_next(obj_it));
         ASSERT_TRUE(carbon_object_it_next(obj_it));
@@ -6041,7 +6041,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex3)
 
         enum carbon_field_type field_type;
         carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_JAK_FIELD_TYPE_OBJECT);
         struct jak_carbon_object_it *obj_it = carbon_array_it_object_value(&rev_it);
         ASSERT_TRUE(carbon_object_it_next(obj_it));
         ASSERT_TRUE(carbon_object_it_next(obj_it));
@@ -6117,7 +6117,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex4)
 
         enum carbon_field_type field_type;
         carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_JAK_FIELD_TYPE_OBJECT);
         struct jak_carbon_object_it *obj_it = carbon_array_it_object_value(&rev_it);
         ASSERT_TRUE(carbon_object_it_next(obj_it));
         ASSERT_TRUE(carbon_object_it_next(obj_it));
@@ -6194,7 +6194,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex5)
 
         enum carbon_field_type field_type;
         carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_JAK_FIELD_TYPE_OBJECT);
         struct jak_carbon_object_it *obj_it = carbon_array_it_object_value(&rev_it);
         ASSERT_TRUE(carbon_object_it_next(obj_it));
         ASSERT_TRUE(carbon_object_it_next(obj_it));
@@ -6239,7 +6239,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKey)
         struct jak_string sb;
         bool has_next;
         string_create(&sb);
-        u64 key_len;
+        jak_u64 key_len;
 
         struct jak_carbon_insert_object_state state;
 
@@ -6272,7 +6272,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKey)
 
         enum carbon_field_type field_type;
         carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_JAK_FIELD_TYPE_OBJECT);
         struct jak_carbon_object_it *obj_it = carbon_array_it_object_value(&rev_it);
         has_next = carbon_object_it_next(obj_it);
         ASSERT_TRUE(has_next);
@@ -6313,7 +6313,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectNonEmpty)
         struct jak_string sb;
         bool has_next;
         string_create(&sb);
-        u64 key_len;
+        jak_u64 key_len;
 
         struct jak_carbon_insert_object_state state;
         struct jak_carbon_insert_object_state nested_obj;
@@ -6353,7 +6353,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectNonEmpty)
 
         enum carbon_field_type field_type;
         carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_JAK_FIELD_TYPE_OBJECT);
         struct jak_carbon_object_it *obj_it = carbon_array_it_object_value(&rev_it);
         has_next = carbon_object_it_next(obj_it);
         ASSERT_TRUE(has_next);
@@ -6394,7 +6394,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayEmpty)
         struct jak_string sb;
         bool has_next;
         string_create(&sb);
-        u64 key_len;
+        jak_u64 key_len;
 
         struct jak_carbon_insert_object_state state;
         struct jak_carbon_insert_array_state nested_arr;
@@ -6431,7 +6431,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayEmpty)
 
         enum carbon_field_type field_type;
         carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_JAK_FIELD_TYPE_OBJECT);
         struct jak_carbon_object_it *obj_it = carbon_array_it_object_value(&rev_it);
         has_next = carbon_object_it_next(obj_it);
         ASSERT_TRUE(has_next);
@@ -6474,7 +6474,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayNonEmpty)
         struct jak_string sb;
         bool has_next;
         string_create(&sb);
-        u64 key_len;
+        jak_u64 key_len;
 
         struct jak_carbon_insert_object_state state;
         struct jak_carbon_insert_array_state nested_arr;
@@ -6514,7 +6514,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayNonEmpty)
 
         enum carbon_field_type field_type;
         carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_JAK_FIELD_TYPE_OBJECT);
         struct jak_carbon_object_it *obj_it = carbon_array_it_object_value(&rev_it);
         has_next = carbon_object_it_next(obj_it);
         ASSERT_TRUE(has_next);
@@ -6555,7 +6555,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeColumnEmpty)
         struct jak_string sb;
         bool has_next;
         string_create(&sb);
-        u64 key_len;
+        jak_u64 key_len;
 
         struct jak_carbon_insert_object_state state;
         struct jak_carbon_insert_column_state nested_col;
@@ -6592,7 +6592,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeColumnEmpty)
 
         enum carbon_field_type field_type;
         carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_JAK_FIELD_TYPE_OBJECT);
         struct jak_carbon_object_it *obj_it = carbon_array_it_object_value(&rev_it);
         has_next = carbon_object_it_next(obj_it);
         ASSERT_TRUE(has_next);
@@ -6633,7 +6633,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectEmpty)
         struct jak_string sb;
         bool has_next;
         string_create(&sb);
-        u64 key_len;
+        jak_u64 key_len;
 
         struct jak_carbon_insert_object_state state;
         struct jak_carbon_insert_object_state nested_obj;
@@ -6669,7 +6669,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectEmpty)
 
         enum carbon_field_type field_type;
         carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_JAK_FIELD_TYPE_OBJECT);
         struct jak_carbon_object_it *obj_it = carbon_array_it_object_value(&rev_it);
         has_next = carbon_object_it_next(obj_it);
         ASSERT_TRUE(has_next);
@@ -7207,7 +7207,7 @@ TEST(CarbonTest, CarbonUpdateSetToNull)
 TEST(CarbonTest, CarbonFromEmptyJson)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7233,7 +7233,7 @@ TEST(CarbonTest, CarbonFromEmptyJson)
 TEST(CarbonTest, CarbonFromEmptyArray)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7259,7 +7259,7 @@ TEST(CarbonTest, CarbonFromEmptyArray)
 TEST(CarbonTest, CarbonFromJsonNull)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7286,7 +7286,7 @@ TEST(CarbonTest, CarbonFromJsonNull)
 TEST(CarbonTest, CarbonFromJsonTrue)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7313,7 +7313,7 @@ TEST(CarbonTest, CarbonFromJsonTrue)
 TEST(CarbonTest, CarbonFromJsonFalse)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7340,7 +7340,7 @@ TEST(CarbonTest, CarbonFromJsonFalse)
 TEST(CarbonTest, CarbonFromJsonNumberSigned)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7367,7 +7367,7 @@ TEST(CarbonTest, CarbonFromJsonNumberSigned)
 TEST(CarbonTest, CarbonFromJsonNumberUnsigned)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7394,7 +7394,7 @@ TEST(CarbonTest, CarbonFromJsonNumberUnsigned)
 TEST(CarbonTest, CarbonFromJsonNumberFloat)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7421,7 +7421,7 @@ TEST(CarbonTest, CarbonFromJsonNumberFloat)
 TEST(CarbonTest, CarbonFromJsonString)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7448,7 +7448,7 @@ TEST(CarbonTest, CarbonFromJsonString)
 TEST(CarbonTest, CarbonFromJsonObjectSingle)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7476,7 +7476,7 @@ TEST(CarbonTest, CarbonFromJsonObjectSingle)
 TEST(CarbonTest, CarbonFromJsonObjectEmptyArrayProp)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7503,7 +7503,7 @@ TEST(CarbonTest, CarbonFromJsonObjectEmptyArrayProp)
 TEST(CarbonTest, CarbonFromJsonObjectEmptyObjectProp)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7530,7 +7530,7 @@ TEST(CarbonTest, CarbonFromJsonObjectEmptyObjectProp)
 TEST(CarbonTest, CarbonFromJsonObjectTrueProp)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7557,7 +7557,7 @@ TEST(CarbonTest, CarbonFromJsonObjectTrueProp)
 TEST(CarbonTest, CarbonFromJsonObjectFalseProp)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7584,7 +7584,7 @@ TEST(CarbonTest, CarbonFromJsonObjectFalseProp)
 TEST(CarbonTest, CarbonFromJsonObjectNullProp)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7611,7 +7611,7 @@ TEST(CarbonTest, CarbonFromJsonObjectNullProp)
 TEST(CarbonTest, CarbonFromJsonObjectUnsignedProp)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7638,7 +7638,7 @@ TEST(CarbonTest, CarbonFromJsonObjectUnsignedProp)
 TEST(CarbonTest, CarbonFromJsonObjectSignedProp)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7665,7 +7665,7 @@ TEST(CarbonTest, CarbonFromJsonObjectSignedProp)
 TEST(CarbonTest, CarbonFromJsonObjectFloatProp)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7692,7 +7692,7 @@ TEST(CarbonTest, CarbonFromJsonObjectFloatProp)
 TEST(CarbonTest, CarbonFromJsonColumnNumber)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7706,12 +7706,12 @@ TEST(CarbonTest, CarbonFromJsonColumnNumber)
         carbon_iterator_open(&it, &doc);
         ASSERT_TRUE(carbon_array_it_next(&it));
         carbon_array_it_field_type(&field_type, &it);
-        ASSERT_TRUE(field_type == CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_TRUE(field_type == CARBON_JAK_FIELD_TYPE_OBJECT);
         struct jak_carbon_object_it *oit = carbon_array_it_object_value(&it);
         ASSERT_TRUE(carbon_object_it_next(oit));
         carbon_object_it_prop_type(&field_type, oit);
         ASSERT_TRUE(carbon_field_type_is_column(field_type));
-        ASSERT_TRUE(field_type == CARBON_FIELD_TYPE_COLUMN_U8);
+        ASSERT_TRUE(field_type == CARBON_JAK_FIELD_TYPE_COLUMN_U8);
         carbon_object_it_drop(oit);
         carbon_iterator_close(&it);
 
@@ -7733,7 +7733,7 @@ TEST(CarbonTest, CarbonFromJsonColumnNumber)
 TEST(CarbonTest, CarbonFromJsonColumnNullableNumber)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7747,12 +7747,12 @@ TEST(CarbonTest, CarbonFromJsonColumnNullableNumber)
         carbon_iterator_open(&it, &doc);
         ASSERT_TRUE(carbon_array_it_next(&it));
         carbon_array_it_field_type(&field_type, &it);
-        ASSERT_TRUE(field_type == CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_TRUE(field_type == CARBON_JAK_FIELD_TYPE_OBJECT);
         struct jak_carbon_object_it *oit = carbon_array_it_object_value(&it);
         ASSERT_TRUE(carbon_object_it_next(oit));
         carbon_object_it_prop_type(&field_type, oit);
         ASSERT_TRUE(carbon_field_type_is_column(field_type));
-        ASSERT_TRUE(field_type == CARBON_FIELD_TYPE_COLUMN_U8);
+        ASSERT_TRUE(field_type == CARBON_JAK_FIELD_TYPE_COLUMN_U8);
         carbon_object_it_drop(oit);
         carbon_iterator_close(&it);
 
@@ -7775,7 +7775,7 @@ TEST(CarbonTest, CarbonFromJsonColumnNullableNumber)
 TEST(CarbonTest, CarbonFromJsonNonColumn)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact, *json_out_extended;
@@ -7831,7 +7831,7 @@ TEST(CarbonTest, CarbonColumnOptimizeFix)
 TEST(CarbonTest, CarbonFromJsonExample)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact;
@@ -7841,9 +7841,9 @@ TEST(CarbonTest, CarbonFromJsonExample)
 
         carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
 
-//        u32 max = 10000;
+//        jak_u32 max = 10000;
 //        timestamp_t t1 = time_now_wallclock();
-//        for (u32 i = 0; i < max; i++) {
+//        for (jak_u32 i = 0; i < max; i++) {
 //                struct jak_carbon d;
 //                carbon_from_json(&d, json_in, CARBON_KEY_NOKEY, NULL, &err);
 //                carbon_drop(&d);
@@ -7858,7 +7858,7 @@ TEST(CarbonTest, CarbonFromJsonExample)
         //printf("SRT:\t%s\n", json_out_compact);
 
         //carbon_hexdump_print(stdout, &doc);
-        //u64 carbon_len = 0;
+        //jak_u64 carbon_len = 0;
         //carbon_raw_data(&carbon_len, &doc);
         //printf("INS len: %zu\n", strlen(json_in));
         //printf("SRT len: %zu\n", carbon_len);
@@ -7874,7 +7874,7 @@ TEST(CarbonTest, CarbonFromJsonExample)
 TEST(CarbonTest, CarbonFromJsonUnitArrayPrimitive)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact;
@@ -7898,7 +7898,7 @@ TEST(CarbonTest, CarbonFromJsonUnitArrayPrimitive)
 TEST(CarbonTest, CarbonFromJsonUnitArrayObject)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in;
         char *json_out_compact;
@@ -7922,7 +7922,7 @@ TEST(CarbonTest, CarbonFromJsonUnitArrayObject)
 TEST(CarbonTest, CarbonFromJsonSimpleExample)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in = "{\"k\": {\"x\": [1,2,3], \"y\": \"z\"}}";
         carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
@@ -7934,7 +7934,7 @@ TEST(CarbonTest, CarbonFromJsonSimpleExample)
 TEST(CarbonTest, CarbonFromJsonFromExcerpt)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         /* the working directory must be 'tests/carbon' to find this file */
         int fd = open("./assets/ms-academic-graph.json", O_RDONLY);
@@ -7944,7 +7944,7 @@ TEST(CarbonTest, CarbonFromJsonFromExcerpt)
 
         carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
 
-        u64 carbon_out_len = 0;
+        jak_u64 carbon_out_len = 0;
         carbon_raw_data(&carbon_out_len, &doc);
 
         ASSERT_LT(carbon_out_len, json_in_len);
@@ -7960,10 +7960,10 @@ TEST(CarbonTest, CarbonFromJsonFromExcerpt)
 TEST(CarbonTest, CarbonResolveDotPathForObjects)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
         struct jak_carbon_find find;
         enum carbon_field_type result_type;
-        u64 number;
+        jak_u64 number;
 
         const char *json_in = "{\"a\": 1, \"b\": {\"c\": [1,2,3], \"d\": [\"Hello\", \"World\"], \"e\": [4], \"f\": [\"!\"], \"the key\": \"x\"}}";
         carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
@@ -7971,7 +7971,7 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
         ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
         ASSERT_TRUE(carbon_find_has_result(&find));
         ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(result_type, CARBON_JAK_FIELD_TYPE_OBJECT);
         ASSERT_TRUE(carbon_find_close(&find));
 
         ASSERT_TRUE(carbon_find_open(&find, "1", &doc));
@@ -7981,13 +7981,13 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
         ASSERT_TRUE(carbon_find_open(&find, "0.a", &doc));
         ASSERT_TRUE(carbon_find_has_result(&find));
         ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_NUMBER_U8);
+        ASSERT_EQ(result_type, CARBON_JAK_FIELD_TYPE_NUMBER_U8);
         ASSERT_TRUE(carbon_find_close(&find));
 
         ASSERT_TRUE(carbon_find_open(&find, "0.b", &doc));
         ASSERT_TRUE(carbon_find_has_result(&find));
         ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(result_type, CARBON_JAK_FIELD_TYPE_OBJECT);
         ASSERT_TRUE(carbon_find_close(&find));
 
         ASSERT_TRUE(carbon_find_open(&find, "0.c", &doc));
@@ -7997,13 +7997,13 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
         ASSERT_TRUE(carbon_find_open(&find, "0.b.c", &doc));
         ASSERT_TRUE(carbon_find_has_result(&find));
         ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_COLUMN_U8);
+        ASSERT_EQ(result_type, CARBON_JAK_FIELD_TYPE_COLUMN_U8);
         ASSERT_TRUE(carbon_find_close(&find));
 
         ASSERT_TRUE(carbon_find_open(&find, "0.b.c.0", &doc));
         ASSERT_TRUE(carbon_find_has_result(&find));
         ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_NUMBER_U8);
+        ASSERT_EQ(result_type, CARBON_JAK_FIELD_TYPE_NUMBER_U8);
         ASSERT_TRUE(carbon_find_result_unsigned(&number, &find));
         ASSERT_EQ(number, 1);
         ASSERT_TRUE(carbon_find_close(&find));
@@ -8011,7 +8011,7 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
         ASSERT_TRUE(carbon_find_open(&find, "0.b.c.1", &doc));
         ASSERT_TRUE(carbon_find_has_result(&find));
         ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_NUMBER_U8);
+        ASSERT_EQ(result_type, CARBON_JAK_FIELD_TYPE_NUMBER_U8);
         ASSERT_TRUE(carbon_find_result_unsigned(&number, &find));
         ASSERT_EQ(number, 2);
         ASSERT_TRUE(carbon_find_close(&find));
@@ -8019,7 +8019,7 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
         ASSERT_TRUE(carbon_find_open(&find, "0.b.c.2", &doc));
         ASSERT_TRUE(carbon_find_has_result(&find));
         ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_NUMBER_U8);
+        ASSERT_EQ(result_type, CARBON_JAK_FIELD_TYPE_NUMBER_U8);
         ASSERT_TRUE(carbon_find_result_unsigned(&number, &find));
         ASSERT_EQ(number, 3);
         ASSERT_TRUE(carbon_find_close(&find));
@@ -8031,20 +8031,20 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
         ASSERT_TRUE(carbon_find_open(&find, "0.b.d", &doc));
         ASSERT_TRUE(carbon_find_has_result(&find));
         ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_ARRAY);
+        ASSERT_EQ(result_type, CARBON_JAK_FIELD_TYPE_ARRAY);
         ASSERT_TRUE(carbon_find_close(&find));
 
         ASSERT_TRUE(carbon_find_open(&find, "0.b.d.0", &doc));
         ASSERT_TRUE(carbon_find_has_result(&find));
         ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_STRING);
+        ASSERT_EQ(result_type, CARBON_JAK_FIELD_TYPE_STRING);
         ASSERT_TRUE(strncmp(carbon_find_result_string(&number, &find), "Hello", number) == 0);
         ASSERT_TRUE(carbon_find_close(&find));
 
         ASSERT_TRUE(carbon_find_open(&find, "0.b.d.1", &doc));
         ASSERT_TRUE(carbon_find_has_result(&find));
         ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_STRING);
+        ASSERT_EQ(result_type, CARBON_JAK_FIELD_TYPE_STRING);
         ASSERT_TRUE(strncmp(carbon_find_result_string(&number, &find), "World", number) == 0);
         ASSERT_TRUE(carbon_find_close(&find));
 
@@ -8055,13 +8055,13 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
         ASSERT_TRUE(carbon_find_open(&find, "0.b.e", &doc));
         ASSERT_TRUE(carbon_find_has_result(&find));
         ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_COLUMN_U8);
+        ASSERT_EQ(result_type, CARBON_JAK_FIELD_TYPE_COLUMN_U8);
         ASSERT_TRUE(carbon_find_close(&find));
 
         ASSERT_TRUE(carbon_find_open(&find, "0.b.e.0", &doc));
         ASSERT_TRUE(carbon_find_has_result(&find));
         ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_NUMBER_U8);
+        ASSERT_EQ(result_type, CARBON_JAK_FIELD_TYPE_NUMBER_U8);
         ASSERT_TRUE(carbon_find_result_unsigned(&number, &find));
         ASSERT_EQ(number, 4);
         ASSERT_TRUE(carbon_find_close(&find));
@@ -8073,13 +8073,13 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
         ASSERT_TRUE(carbon_find_open(&find, "0.b.f", &doc));
         ASSERT_TRUE(carbon_find_has_result(&find));
         ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_ARRAY);
+        ASSERT_EQ(result_type, CARBON_JAK_FIELD_TYPE_ARRAY);
         ASSERT_TRUE(carbon_find_close(&find));
 
         ASSERT_TRUE(carbon_find_open(&find, "0.b.f.0", &doc));
         ASSERT_TRUE(carbon_find_has_result(&find));
         ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_STRING);
+        ASSERT_EQ(result_type, CARBON_JAK_FIELD_TYPE_STRING);
         ASSERT_TRUE(strncmp(carbon_find_result_string(&number, &find), "!", number) == 0);
         ASSERT_TRUE(carbon_find_close(&find));
 
@@ -8090,7 +8090,7 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
         ASSERT_TRUE(carbon_find_open(&find, "0.b.\"the key\"", &doc));
         ASSERT_TRUE(carbon_find_has_result(&find));
         ASSERT_TRUE(carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_STRING);
+        ASSERT_EQ(result_type, CARBON_JAK_FIELD_TYPE_STRING);
         ASSERT_TRUE(strncmp(carbon_find_result_string(&number, &find), "x", number) == 0);
         ASSERT_TRUE(carbon_find_close(&find));
 
@@ -8100,7 +8100,7 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
 TEST(CarbonTest, CarbonResolveDotPathForObjectsBench)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
         struct jak_carbon_find find;
 
         const char *json_in = "{\"a\": 1, \"b\": {\"c\": [1,2,3], \"d\": [\"Hello\", \"World\"], \"e\": [4], \"f\": [\"!\"], \"the key\": \"x\"}}";
@@ -8131,9 +8131,9 @@ TEST(CarbonTest, CarbonResolveDotPathForObjectsBench)
         ASSERT_TRUE(carbon_dot_path_from_string(&path20, "0.b.f.1"));
         ASSERT_TRUE(carbon_dot_path_from_string(&path21, "0.b.\"the key\""));
 
-        u32 max = 10000;
+        jak_u32 max = 10000;
         timestamp_t t1 = time_now_wallclock();
-        for (u32 i = 0; i < max; i++) {
+        for (jak_u32 i = 0; i < max; i++) {
                 ASSERT_TRUE(carbon_find_create(&find, &path1, &doc));
                 ASSERT_TRUE(carbon_find_has_result(&find));
                 ASSERT_TRUE(carbon_find_close(&find));
@@ -8251,7 +8251,7 @@ TEST(CarbonTest, CarbonFromJsonShortenedDotPath)
         struct jak_carbon doc;
         struct jak_carbon_find find;
         enum carbon_field_type result_type;
-        struct err err;
+        struct jak_error err;
 
         const char *json_in = "{\"x\": \"y\"}";
         carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
@@ -8261,14 +8261,14 @@ TEST(CarbonTest, CarbonFromJsonShortenedDotPath)
         carbon_find_open(&find, "0.x", &doc);
         ASSERT_TRUE(carbon_find_has_result(&find));
         carbon_find_result_type(&result_type, &find);
-        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_STRING);
+        ASSERT_EQ(result_type, CARBON_JAK_FIELD_TYPE_STRING);
         carbon_find_close(&find);
 
         /* with shortened dot path rule, the json object can be referenced without providing its index in the record */
         carbon_find_open(&find, "x", &doc);
         ASSERT_TRUE(carbon_find_has_result(&find));
         carbon_find_result_type(&result_type, &find);
-        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_STRING);
+        ASSERT_EQ(result_type, CARBON_JAK_FIELD_TYPE_STRING);
         carbon_find_close(&find);
 
         carbon_drop(&doc);
@@ -8280,13 +8280,13 @@ TEST(CarbonTest, CarbonFromJsonShortenedDotPath)
         carbon_find_open(&find, "0.x", &doc);
         ASSERT_TRUE(carbon_find_has_result(&find));
         carbon_find_result_type(&result_type, &find);
-        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_STRING);
+        ASSERT_EQ(result_type, CARBON_JAK_FIELD_TYPE_STRING);
         carbon_find_close(&find);
 
         carbon_find_open(&find, "1.x", &doc);
         ASSERT_TRUE(carbon_find_has_result(&find));
         carbon_find_result_type(&result_type, &find);
-        ASSERT_EQ(result_type, CARBON_FIELD_TYPE_ARRAY);
+        ASSERT_EQ(result_type, CARBON_JAK_FIELD_TYPE_ARRAY);
         carbon_find_close(&find);
 
         carbon_find_open(&find, "x", &doc);
@@ -8308,7 +8308,7 @@ TEST(CarbonTest, CarbonFromJsonShortenedDotPath)
 TEST(CarbonTest, CarbonFindPrint)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
         struct jak_carbon_find find;
         char *result;
 
@@ -8625,7 +8625,7 @@ TEST(CarbonTest, CarbonFindPrint)
 TEST(CarbonTest, CarbonFindPrintExamples)
 {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
         struct jak_carbon_find find;
         struct jak_string result;
 
@@ -8666,7 +8666,7 @@ TEST(CarbonTest, CarbonFindPrintExamples)
 
 TEST(CarbonTest, ParseBooleanArray) {
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
         struct jak_carbon_find find;
         enum carbon_field_type type;
         const char *json = "[{\"col\": [true, null, false]}]";
@@ -8676,25 +8676,25 @@ TEST(CarbonTest, ParseBooleanArray) {
         ASSERT_TRUE(carbon_find_open(&find, "0.col", &doc));
         ASSERT_TRUE(carbon_find_has_result(&find));
         carbon_find_result_type(&type, &find);
-        ASSERT_EQ(type, CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
+        ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_COLUMN_BOOLEAN);
         carbon_find_close(&find);
 
         ASSERT_TRUE(carbon_find_open(&find, "0.col.0", &doc));
         ASSERT_TRUE(carbon_find_has_result(&find));
         carbon_find_result_type(&type, &find);
-        ASSERT_EQ(type, CARBON_FIELD_TYPE_TRUE);
+        ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_TRUE);
         carbon_find_close(&find);
 
         ASSERT_TRUE(carbon_find_open(&find, "0.col.1", &doc));
         ASSERT_TRUE(carbon_find_has_result(&find));
         carbon_find_result_type(&type, &find);
-        ASSERT_EQ(type, CARBON_FIELD_TYPE_NULL);
+        ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_NULL);
         carbon_find_close(&find);
 
         ASSERT_TRUE(carbon_find_open(&find, "0.col.2", &doc));
         ASSERT_TRUE(carbon_find_has_result(&find));
         carbon_find_result_type(&type, &find);
-        ASSERT_EQ(type, CARBON_FIELD_TYPE_FALSE);
+        ASSERT_EQ(type, CARBON_JAK_FIELD_TYPE_FALSE);
         carbon_find_close(&find);
 
         carbon_drop(&doc);
@@ -8703,7 +8703,7 @@ TEST(CarbonTest, ParseBooleanArray) {
 TEST(CarbonTest, PathIndex) {
         struct jak_carbon_path_index index;
         struct jak_carbon doc;
-        struct err err;
+        struct jak_error err;
 
         const char *json = "[\n"
                            "   {\n"

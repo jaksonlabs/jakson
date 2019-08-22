@@ -122,8 +122,8 @@ int main (int argc, char **argv)
 
 static bool showHelp(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager)
 {
-    unused(argc);
-    unused(argv);
+    JAK_UNUSED(argc);
+    JAK_UNUSED(argv);
     opt_mgr_show_help(file, manager);
     return true;
 }

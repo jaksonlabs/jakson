@@ -37,15 +37,15 @@
 })
 
 
-u64 carbon_get_or_default_unsigned(struct jak_carbon *doc, const char *path, u64 default_val)
+jak_u64 carbon_get_or_default_unsigned(struct jak_carbon *doc, const char *path, jak_u64 default_val)
 {
-        return get_or_default(doc, path, u64, default_val, carbon_field_type_is_unsigned_integer,
+        return get_or_default(doc, path, jak_u64, default_val, carbon_field_type_is_unsigned_integer,
                               carbon_find_result_unsigned);
 }
 
-i64 carbon_get_or_default_signed(struct jak_carbon *doc, const char *path, i64 default_val)
+jak_i64 carbon_get_or_default_signed(struct jak_carbon *doc, const char *path, jak_i64 default_val)
 {
-        return get_or_default(doc, path, i64, default_val, carbon_field_type_is_signed_integer,
+        return get_or_default(doc, path, jak_i64, default_val, carbon_field_type_is_signed_integer,
                               carbon_find_result_signed);
 }
 
@@ -60,7 +60,7 @@ bool carbon_get_or_default_boolean(struct jak_carbon *doc, const char *path, boo
         return get_or_default(doc, path, bool, default_val, carbon_field_type_is_boolean, carbon_find_result_boolean);
 }
 
-const char *carbon_get_or_default_string(u64 *len_out, struct jak_carbon *doc, const char *path, const char *default_val)
+const char *carbon_get_or_default_string(jak_u64 *len_out, struct jak_carbon *doc, const char *path, const char *default_val)
 {
         struct jak_carbon_find find;
         enum carbon_field_type field_type;

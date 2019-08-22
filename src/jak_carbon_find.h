@@ -36,7 +36,7 @@ JAK_BEGIN_DECL
 struct jak_carbon_find {
     struct jak_carbon *doc;
     enum carbon_field_type type;
-    struct err err;
+    struct jak_error err;
     struct jak_carbon_path_evaluator path_evaluater;
 
     bool value_is_nulled;
@@ -46,13 +46,13 @@ struct jak_carbon_find {
         struct jak_carbon_column_it *column_it;
         struct jak_carbon_object_it *object_it;
         bool boolean;
-        u64 unsigned_number;
-        i64 signed_number;
+        jak_u64 unsigned_number;
+        jak_i64 signed_number;
         float float_number;
 
         struct {
             const char *base;
-            u64 len;
+            jak_u64 len;
         } string;
 
         struct jak_carbon_binary binary;
@@ -85,13 +85,13 @@ struct jak_carbon_column_it *carbon_find_result_column(struct jak_carbon_find *f
 
 bool carbon_find_result_boolean(bool *out, struct jak_carbon_find *find);
 
-bool carbon_find_result_unsigned(u64 *out, struct jak_carbon_find *find);
+bool carbon_find_result_unsigned(jak_u64 *out, struct jak_carbon_find *find);
 
-bool carbon_find_result_signed(i64 *out, struct jak_carbon_find *find);
+bool carbon_find_result_signed(jak_i64 *out, struct jak_carbon_find *find);
 
 bool carbon_find_result_float(float *out, struct jak_carbon_find *find);
 
-const char *carbon_find_result_string(u64 *str_len, struct jak_carbon_find *find);
+const char *carbon_find_result_string(jak_u64 *str_len, struct jak_carbon_find *find);
 
 struct jak_carbon_binary *carbon_find_result_binary(struct jak_carbon_find *find);
 

@@ -31,15 +31,15 @@ struct jak_carbon_column_it; /* forwarded from carbon-column-it.h */
 
 JAK_BEGIN_DECL
 
-u64 carbon_get_or_default_unsigned(struct jak_carbon *doc, const char *path, u64 default_val);
+jak_u64 carbon_get_or_default_unsigned(struct jak_carbon *doc, const char *path, jak_u64 default_val);
 
-i64 carbon_get_or_default_signed(struct jak_carbon *doc, const char *path, i64 default_val);
+jak_i64 carbon_get_or_default_signed(struct jak_carbon *doc, const char *path, jak_i64 default_val);
 
 float carbon_get_or_default_float(struct jak_carbon *doc, const char *path, float default_val);
 
 bool carbon_get_or_default_boolean(struct jak_carbon *doc, const char *path, bool default_val);
 
-const char *carbon_get_or_default_string(u64 *len_out, struct jak_carbon *doc, const char *path, const char *default_val);
+const char *carbon_get_or_default_string(jak_u64 *len_out, struct jak_carbon *doc, const char *path, const char *default_val);
 
 struct jak_carbon_binary *
 carbon_get_or_default_binary(struct jak_carbon *doc, const char *path, struct jak_carbon_binary *default_val);

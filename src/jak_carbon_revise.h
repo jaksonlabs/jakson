@@ -50,9 +50,9 @@ const struct jak_carbon *carbon_revise_end(struct jak_carbon_revise *context);
 
 bool carbon_revise_key_generate(global_id_t *out, struct jak_carbon_revise *context);
 
-bool carbon_revise_key_set_unsigned(struct jak_carbon_revise *context, u64 key_value);
+bool carbon_revise_key_set_unsigned(struct jak_carbon_revise *context, jak_u64 key_value);
 
-bool carbon_revise_key_set_signed(struct jak_carbon_revise *context, i64 key_value);
+bool carbon_revise_key_set_signed(struct jak_carbon_revise *context, jak_i64 key_value);
 
 bool carbon_revise_key_set_string(struct jak_carbon_revise *context, const char *key_value);
 

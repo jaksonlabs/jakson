@@ -50,9 +50,9 @@ typedef bool (*less_func_t)(const void *lhs, const void *rhs);
 #define JAK_QSORT_INDICIES_PARTITION(indices, base, width, comp, l, h)                                                 \
 ({                                                                                                                     \
     const void   *x       = base + indices[h] * width;                                                                 \
-    i64        i       = (l - 1);                                                                                      \
+    jak_i64        i       = (l - 1);                                                                                      \
                                                                                                                        \
-    for (i64 j = l; j <= h - 1; j++)                                                                                   \
+    for (jak_i64 j = l; j <= h - 1; j++)                                                                                   \
     {                                                                                                                  \
         if (comp(base + indices[j] * width, x))                                                                        \
         {                                                                                                              \
@@ -67,9 +67,9 @@ typedef bool (*less_func_t)(const void *lhs, const void *rhs);
 #define JAK_QSORT_INDICIES_PARTITION_WARGS(indices, base, width, comp, l, h, args)                                     \
 ({                                                                                                                     \
     const void   *x       = base + indices[h] * width;                                                                 \
-    i64        i       = (l - 1);                                                                                      \
+    jak_i64        i       = (l - 1);                                                                                      \
                                                                                                                        \
-    for (i64 j = l; j <= h - 1; j++)                                                                                   \
+    for (jak_i64 j = l; j <= h - 1; j++)                                                                                   \
     {                                                                                                                  \
         if (comp(base + indices[j] * width, x, args))                                                                  \
         {                                                                                                              \
@@ -82,10 +82,10 @@ typedef bool (*less_func_t)(const void *lhs, const void *rhs);
 })
 
 bool sort_qsort_indicies(size_t *indices, const void *base, size_t width, less_eq_func_t comp,
-                         size_t nelemns, struct allocator *alloc);
+                         size_t nelemns, struct jak_allocator *alloc);
 
 int sort_qsort_indicies_wargs(size_t *indices, const void *base, size_t width, less_eq_wargs_func_t comp,
-                              size_t nelemens, struct allocator *alloc, void *args);
+                              size_t nelemens, struct jak_allocator *alloc, void *args);
 
 size_t sort_bsearch_indicies(const size_t *indicies, const void *base, size_t width, size_t nelemens,
                              const void *neelde, eq_func_t compEq, less_func_t compLess);

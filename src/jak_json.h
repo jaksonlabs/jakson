@@ -80,12 +80,12 @@ struct jak_json_err {
 struct jak_json_tokenizer {
     const char *cursor;
     struct jak_json_token token;
-    struct err err;
+    struct jak_error err;
 };
 
 struct jak_json_parser {
     struct jak_json_tokenizer tokenizer;
-    struct err err;
+    struct jak_error err;
 };
 
 enum json_parent {
@@ -120,7 +120,7 @@ enum json_list_type {
 
 struct jak_json {
     struct jak_json_element *element;
-    struct err err;
+    struct jak_error err;
 };
 
 struct jak_json_node_value {
@@ -192,8 +192,8 @@ struct jak_json_number {
 
     union {
         float float_number;
-        i64 signed_integer;
-        u64 unsigned_integer;
+        jak_i64 signed_integer;
+        jak_u64 unsigned_integer;
     } value;
 };
 
@@ -210,7 +210,7 @@ bool json_parser_create(struct jak_json_parser *parser);
 bool json_parse(struct jak_json *json, struct jak_json_err *error_desc, struct jak_json_parser *parser,
                 const char *input);
 
-bool json_test(struct err *err, struct jak_json *json);
+bool json_test(struct jak_error *err, struct jak_json *json);
 
 bool json_drop(struct jak_json *json);
 
@@ -218,7 +218,7 @@ bool json_print(FILE *file, struct jak_json *json);
 
 bool json_list_is_empty(const struct jak_json_elements *elements);
 
-bool json_list_length(u32 *len, const struct jak_json_elements *elements);
+bool json_list_length(jak_u32 *len, const struct jak_json_elements *elements);
 
 enum json_list_type json_fitting_type(enum json_list_type current, enum json_list_type to_add);
 

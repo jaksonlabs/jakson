@@ -27,7 +27,7 @@
 
 JAK_BEGIN_DECL
 
-typedef u64 global_id_t;
+typedef jak_u64 global_id_t;
 
 bool global_id_create(global_id_t *out);
 

@@ -30,15 +30,15 @@ JAK_BEGIN_DECL
 
 struct hashset_bucket {
     bool in_use_flag;  /* flag indicating if bucket is in use */
-    i32 displacement; /* difference between intended position during insert, and actual position in table */
-    u64 key_idx;      /* position of key element in owning struct hashset structure */
+    jak_i32 displacement; /* difference between intended position during insert, and actual position in table */
+    jak_u64 key_idx;      /* position of key element in owning struct hashset structure */
 };
 
 /**
  * Hashset implementation specialized for key of fixed-length size, and where comparision
  * for equals is byte-compare. With this, calling a (type-dependent) compare function becomes obsolete.
  *
- * Example: u64.
+ * Example: jak_u64.
  *
  * This hashset is optimized to reduce access time to elements. Internally, a robin-hood hashing technique is used.
  *
@@ -49,13 +49,13 @@ struct hashset {
     struct vector key_data;
     struct vector ofType(struct hashset_bucket) table;
     struct spinlock lock;
-    u32 size;
-    struct err err;
+    jak_u32 size;
+    struct jak_error err;
 };
 
 JAK_DEFINE_GET_ERROR_FUNCTION(hashset, struct hashset, set);
 
-bool hashset_create(struct hashset *map, struct err *err, size_t key_size, size_t capacity);
+bool hashset_create(struct hashset *map, struct jak_error *err, size_t key_size, size_t capacity);
 
 struct hashset *hashset_cpy(struct hashset *src);
 

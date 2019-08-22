@@ -18,7 +18,7 @@
 #include <ctype.h>
 #include <jak_utils_hexdump.h>
 
-bool hexdump(struct jak_string *dst, const void *base, u64 nbytes)
+bool hexdump(struct jak_string *dst, const void *base, jak_u64 nbytes)
 {
         error_if_null(dst);
         error_if_null(base);
@@ -27,11 +27,11 @@ bool hexdump(struct jak_string *dst, const void *base, u64 nbytes)
         sprintf(buffer, "%08x  ", 0);
         string_add(dst, buffer);
 
-        for (u64 hex_block_id = 0; hex_block_id < nbytes;) {
+        for (jak_u64 hex_block_id = 0; hex_block_id < nbytes;) {
 
-                u8 step = JAK_min(16, nbytes - hex_block_id);
+                jak_u8 step = JAK_min(16, nbytes - hex_block_id);
 
-                for (u64 i = 0; i < step; i++) {
+                for (jak_u64 i = 0; i < step; i++) {
                         char c = *((const char *) (base + hex_block_id + i));
                         sprintf(buffer, "%02x ", (unsigned char) c);
                         string_add(dst, buffer);
@@ -45,7 +45,7 @@ bool hexdump(struct jak_string *dst, const void *base, u64 nbytes)
                 }
 
                 if (unlikely(step < 16)) {
-                        for (u8 pad = 0; pad < 16 - step; pad++) {
+                        for (jak_u8 pad = 0; pad < 16 - step; pad++) {
                                 sprintf(buffer, "   ");
                                 string_add(dst, buffer);
                         }
@@ -53,7 +53,7 @@ bool hexdump(struct jak_string *dst, const void *base, u64 nbytes)
 
                 string_add(dst, " | ");
 
-                for (u64 i = 0; i < step; i++) {
+                for (jak_u64 i = 0; i < step; i++) {
                         char c = *((const char *) (base + hex_block_id + i));
                         if (isgraph(c)) {
                                 sprintf(buffer, "%c", c);
@@ -65,7 +65,7 @@ bool hexdump(struct jak_string *dst, const void *base, u64 nbytes)
                 }
 
                 if (unlikely(step < 16)) {
-                        for (u8 pad = 0; pad < 16 - step; pad++) {
+                        for (jak_u8 pad = 0; pad < 16 - step; pad++) {
                                 sprintf(buffer, " ");
                                 string_add(dst, buffer);
                         }
@@ -76,7 +76,7 @@ bool hexdump(struct jak_string *dst, const void *base, u64 nbytes)
 
                 if (likely(hex_block_id + step < nbytes)) {
                         string_add(dst, "\n");
-                        sprintf(buffer, "%08x  ", ((u32) hex_block_id + 16));
+                        sprintf(buffer, "%08x  ", ((jak_u32) hex_block_id + 16));
                         string_add(dst, buffer);
                 }
 
@@ -89,7 +89,7 @@ bool hexdump(struct jak_string *dst, const void *base, u64 nbytes)
         return true;
 }
 
-bool hexdump_print(FILE *file, const void *base, u64 nbytes)
+bool hexdump_print(FILE *file, const void *base, jak_u64 nbytes)
 {
         bool status;
         struct jak_string sb;

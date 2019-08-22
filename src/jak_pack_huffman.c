@@ -24,12 +24,12 @@
 
 struct huff_node {
     struct huff_node *prev, *next, *left, *right;
-    u64 freq;
+    jak_u64 freq;
     unsigned char letter;
 };
 
 static void huff_tree_create(struct vector ofType(struct pack_huffman_entry) *table,
-                             const struct vector ofType(u32) *frequencies);
+                             const struct vector ofType(jak_u32) *frequencies);
 
 bool coding_huffman_create(struct jak_huffman *dic)
 {
@@ -58,12 +58,12 @@ bool coding_huffman_build(struct jak_huffman *encoder, const string_vector_t *st
         error_if_null(encoder);
         error_if_null(strings);
 
-        struct vector ofType(u32) frequencies;
-        vec_create(&frequencies, NULL, sizeof(u32), UCHAR_MAX);
+        struct vector ofType(jak_u32) frequencies;
+        vec_create(&frequencies, NULL, sizeof(jak_u32), UCHAR_MAX);
         vec_enlarge_size_to_capacity(&frequencies);
 
-        u32 *freq_data = vec_all(&frequencies, u32);
-        JAK_zero_memory(freq_data, UCHAR_MAX * sizeof(u32));
+        jak_u32 *freq_data = vec_all(&frequencies, jak_u32);
+        JAK_zero_memory(freq_data, UCHAR_MAX * sizeof(jak_u32));
 
         for (size_t i = 0; i < strings->num_elems; i++) {
                 const char *string = *vec_get(strings, i, const char *);
@@ -80,7 +80,7 @@ bool coding_huffman_build(struct jak_huffman *encoder, const string_vector_t *st
         return true;
 }
 
-bool coding_huffman_get_error(struct err *err, const struct jak_huffman *dic)
+bool coding_huffman_get_error(struct jak_error *err, const struct jak_huffman *dic)
 {
         error_if_null(err)
         error_if_null(dic)
@@ -104,7 +104,7 @@ bool coding_huffman_drop(struct jak_huffman *dic)
         return true;
 }
 
-bool coding_huffman_serialize(struct memfile *file, const struct jak_huffman *dic, char marker_symbol)
+bool coding_huffman_serialize(struct jak_memfile *file, const struct jak_huffman *dic, char marker_symbol)
 {
         error_if_null(file)
         error_if_null(dic)
@@ -115,16 +115,16 @@ bool coding_huffman_serialize(struct memfile *file, const struct jak_huffman *di
                 memfile_write(file, &entry->letter, sizeof(unsigned char));
 
                 /** block one is the block that holds the significant part of the prefix code */
-                offset_t offset_meta, offset_continue;
+                jak_offset_t offset_meta, offset_continue;
                 memfile_get_offset(&offset_meta, file);
                 /** this will be the number of bytes used to encode the significant part of the prefix code */
-                memfile_skip(file, sizeof(u8));
+                memfile_skip(file, sizeof(jak_u8));
 
                 memfile_begin_bit_mode(file);
                 bool first_bit_found = false;
                 for (int i = 31; entry->blocks && i >= 0; i--) {
-                        u32 mask = 1 << i;
-                        u32 k = entry->blocks[0] & mask;
+                        jak_u32 mask = 1 << i;
+                        jak_u32 k = entry->blocks[0] & mask;
                         bool bit_state = k != 0;
                         first_bit_found |= bit_state;
 
@@ -136,8 +136,8 @@ bool coding_huffman_serialize(struct memfile *file, const struct jak_huffman *di
                 memfile_end_bit_mode(&num_bytes_written, file);
                 memfile_get_offset(&offset_continue, file);
                 memfile_seek(file, offset_meta);
-                u8 num_bytes_written_uint8 = (u8) num_bytes_written;
-                memfile_write(file, &num_bytes_written_uint8, sizeof(u8));
+                jak_u8 num_bytes_written_uint8 = (jak_u8) num_bytes_written;
+                memfile_write(file, &num_bytes_written_uint8, sizeof(jak_u8));
 
                 memfile_seek(file, offset_continue);
         }
@@ -157,7 +157,7 @@ static struct pack_huffman_entry *find_dic_entry(struct jak_huffman *dic, unsign
         return NULL;
 }
 
-static size_t encodeString(struct memfile *file, struct jak_huffman *dic, const char *string)
+static size_t encodeString(struct jak_memfile *file, struct jak_huffman *dic, const char *string)
 {
         memfile_begin_bit_mode(file);
 
@@ -171,12 +171,12 @@ static size_t encodeString(struct memfile *file, struct jak_huffman *dic, const 
                         memfile_write_bit(file, false);
                 } else {
                         for (size_t j = 0; j < entry->nblocks; j++) {
-                                u32 block = entry->blocks[j];
+                                jak_u32 block = entry->blocks[j];
 
                                 bool first_bit_found = false;
                                 for (int i = 31; i >= 0; i--) {
-                                        u32 mask = 1 << i;
-                                        u32 k = block & mask;
+                                        jak_u32 mask = 1 << i;
+                                        jak_u32 k = block & mask;
                                         bool bit_state = k != 0;
                                         first_bit_found |= bit_state;
 
@@ -193,43 +193,43 @@ static size_t encodeString(struct memfile *file, struct jak_huffman *dic, const 
         return num_written_bytes;
 }
 
-bool coding_huffman_encode(struct memfile *file, struct jak_huffman *dic, const char *string)
+bool coding_huffman_encode(struct jak_memfile *file, struct jak_huffman *dic, const char *string)
 {
         error_if_null(file)
         error_if_null(dic)
         error_if_null(string)
 
-        u32 num_bytes_encoded = 0;
+        jak_u32 num_bytes_encoded = 0;
 
-        offset_t num_bytes_encoded_off = memfile_tell(file);
-        memfile_skip(file, sizeof(u32));
+        jak_offset_t num_bytes_encoded_off = memfile_tell(file);
+        memfile_skip(file, sizeof(jak_u32));
 
-        if ((num_bytes_encoded = (u32) encodeString(file, dic, string)) == 0) {
+        if ((num_bytes_encoded = (jak_u32) encodeString(file, dic, string)) == 0) {
                 return false;
         }
 
-        offset_t continue_off = memfile_tell(file);
+        jak_offset_t continue_off = memfile_tell(file);
         memfile_seek(file, num_bytes_encoded_off);
-        memfile_write(file, &num_bytes_encoded, sizeof(u32));
+        memfile_write(file, &num_bytes_encoded, sizeof(jak_u32));
         memfile_seek(file, continue_off);
 
         return true;
 }
 
-bool coding_huffman_read_string(struct pack_huffman_str_info *info, struct memfile *src)
+bool coding_huffman_read_string(struct pack_huffman_str_info *info, struct jak_memfile *src)
 {
-        info->nbytes_encoded = *JAK_MEMFILE_READ_TYPE(src, u32);
+        info->nbytes_encoded = *JAK_MEMFILE_READ_TYPE(src, jak_u32);
         info->encoded_bytes = JAK_MEMFILE_READ(src, info->nbytes_encoded);
         return true;
 }
 
-bool coding_huffman_read_entry(struct pack_huffman_info *info, struct memfile *file, char marker_symbol)
+bool coding_huffman_read_entry(struct pack_huffman_info *info, struct jak_memfile *file, char marker_symbol)
 {
         char marker = *JAK_MEMFILE_PEEK(file, char);
         if (marker == marker_symbol) {
                 memfile_skip(file, sizeof(char));
                 info->letter = *JAK_MEMFILE_READ_TYPE(file, unsigned char);
-                info->nbytes_prefix = *JAK_MEMFILE_READ_TYPE(file, u8);
+                info->nbytes_prefix = *JAK_MEMFILE_READ_TYPE(file, jak_u8);
                 info->prefix_code = JAK_MEMFILE_PEEK(file, char);
 
                 memfile_skip(file, info->nbytes_prefix);
@@ -240,11 +240,11 @@ bool coding_huffman_read_entry(struct pack_huffman_info *info, struct memfile *f
         }
 }
 
-static const u32 *get_num_used_blocks(u16 *numUsedBlocks, struct pack_huffman_entry *entry, u16 num_blocks,
-                                      const u32 *blocks)
+static const jak_u32 *get_num_used_blocks(jak_u16 *numUsedBlocks, struct pack_huffman_entry *entry, jak_u16 num_blocks,
+                                      const jak_u32 *blocks)
 {
         for (entry->nblocks = 0; entry->nblocks < num_blocks; entry->nblocks++) {
-                const u32 *block = blocks + entry->nblocks;
+                const jak_u32 *block = blocks + entry->nblocks;
                 if (*block != 0) {
                         *numUsedBlocks = (num_blocks - entry->nblocks);
                         return block;
@@ -257,13 +257,13 @@ static void
 import_into_entry(struct pack_huffman_entry *entry, const struct huff_node *node, const struct jak_bitmap *map)
 {
         entry->letter = node->letter;
-        u32 *blocks, num_blocks;
-        const u32 *used_blocks;
+        jak_u32 *blocks, num_blocks;
+        const jak_u32 *used_blocks;
         bitmap_blocks(&blocks, &num_blocks, map);
         used_blocks = get_num_used_blocks(&entry->nblocks, entry, num_blocks, blocks);
-        entry->blocks = JAK_malloc(entry->nblocks * sizeof(u32));
+        entry->blocks = JAK_MALLOC(entry->nblocks * sizeof(jak_u32));
         if (num_blocks > 0) {
-                memcpy(entry->blocks, used_blocks, entry->nblocks * sizeof(u32));
+                memcpy(entry->blocks, used_blocks, entry->nblocks * sizeof(jak_u32));
         } else {
                 entry->blocks = NULL;
         }
@@ -282,7 +282,7 @@ static struct huff_node *seek_to_end(struct huff_node *handle)
         return handle;
 }
 
-JAK_func_unused
+JAK_FUNC_UNUSED
 static void __diag_print_insight(struct huff_node *n)
 {
         printf("(");
@@ -301,7 +301,7 @@ static void __diag_print_insight(struct huff_node *n)
         printf(": %"PRIu64"", n->freq);
 }
 
-JAK_func_unused
+JAK_FUNC_UNUSED
 static void __diag_dump_remaining_candidates(struct huff_node *n)
 {
         struct huff_node *it = seek_to_begin(n);
@@ -312,9 +312,9 @@ static void __diag_dump_remaining_candidates(struct huff_node *n)
         }
 }
 
-static struct huff_node *find_smallest(struct huff_node *begin, u64 lowerBound, struct huff_node *skip)
+static struct huff_node *find_smallest(struct huff_node *begin, jak_u64 lowerBound, struct huff_node *skip)
 {
-        u64 smallest = UINT64_MAX;
+        jak_u64 smallest = UINT64_MAX;
         struct huff_node *result = NULL;
         for (struct huff_node *it = begin; it != NULL; it = it->next) {
                 if (it != skip && it->freq >= lowerBound && it->freq <= smallest) {
@@ -375,7 +375,7 @@ static struct huff_node *trim_and_begin(struct vector ofType(HuffNode) *candidat
 }
 
 static void huff_tree_create(struct vector ofType(struct pack_huffman_entry) *table,
-                             const struct vector ofType(u32) *frequencies)
+                             const struct vector ofType(jak_u32) *frequencies)
 {
         assert(UCHAR_MAX == frequencies->num_elems);
 
@@ -386,7 +386,7 @@ static void huff_tree_create(struct vector ofType(struct pack_huffman_entry) *ta
         for (unsigned char i = 0; i < UCHAR_MAX; i++) {
                 struct huff_node *node = vec_new_and_get(&candidates, struct huff_node);
                 node->letter = i;
-                node->freq = *vec_get(frequencies, i, u32);
+                node->freq = *vec_get(frequencies, i, jak_u32);
         }
 
         for (unsigned char i = 0; i < UCHAR_MAX; i++) {

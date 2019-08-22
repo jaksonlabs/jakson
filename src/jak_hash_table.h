@@ -30,16 +30,16 @@ JAK_BEGIN_DECL
 
 struct hashtable_bucket {
     bool in_use_flag;  /* flag indicating if bucket is in use */
-    i32 displacement; /* difference between intended position during insert, and actual position in table */
-    u32 num_probs;    /* number of probe calls to this bucket */
-    u64 data_idx;      /* position of key element in owning struct hashtable structure */
+    jak_i32 displacement; /* difference between intended position during insert, and actual position in table */
+    jak_u32 num_probs;    /* number of probe calls to this bucket */
+    jak_u64 data_idx;      /* position of key element in owning struct hashtable structure */
 };
 
 /**
  * Hash table implementation specialized for key and value types of fixed-length size, and where comparision
  * for equals is byte-compare. With this, calling a (type-dependent) compare function becomes obsolete.
  *
- * Example: mapping of u64 to u32.
+ * Example: mapping of jak_u64 to jak_u32.
  *
  * This hash table is optimized to reduce access time to elements. Internally, a robin-hood hashing technique is used.
  *
@@ -51,13 +51,13 @@ struct hashtable {
     struct vector value_data;
     struct vector ofType(struct hashtable_bucket) table;
     struct spinlock lock;
-    u32 size;
-    struct err err;
+    jak_u32 size;
+    struct jak_error err;
 };
 
 JAK_DEFINE_GET_ERROR_FUNCTION(hashtable, struct hashtable, table);
 
-bool hashtable_create(struct hashtable *map, struct err *err, size_t key_size, size_t value_size,
+bool hashtable_create(struct hashtable *map, struct jak_error *err, size_t key_size, size_t value_size,
                       size_t capacity);
 
 struct hashtable *hashtable_cpy(struct hashtable *src);
@@ -77,7 +77,7 @@ bool hashtable_insert_or_update(struct hashtable *map, const void *keys, const v
 
 bool hashtable_serialize(FILE *file, struct hashtable *table);
 
-bool hashtable_deserialize(struct hashtable *table, struct err *err, FILE *file);
+bool hashtable_deserialize(struct hashtable *table, struct jak_error *err, FILE *file);
 
 bool hashtable_remove_if_contained(struct hashtable *map, const void *keys, size_t num_pairs);
 

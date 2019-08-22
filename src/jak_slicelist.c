@@ -37,7 +37,7 @@
     assert(needle_str);                                                                                                \
                                                                                                                        \
     register bool continueScan, keysMatch, keyHashsNoMatch, endReached;                                                \
-    register bool cacheAvailable = (slice->cacheIdx != (u32) -1);                                                 \
+    register bool cacheAvailable = (slice->cacheIdx != (jak_u32) -1);                                                 \
     register bool hashsEq = cacheAvailable && (slice->keyHashColumn[slice->cacheIdx] == needle_hash);                  \
     register bool cacheHit = hashsEq && (strcmp(slice->key_column[slice->cacheIdx], needle_str) == 0);                 \
     register uint_fast32_t i = 0;                                                                                      \
@@ -68,12 +68,12 @@ static void lock(slice_list_t *list);
 
 static void unlock(slice_list_t *list);
 
-bool slice_list_create(slice_list_t *list, const struct allocator *alloc, size_t sliceCapacity)
+bool slice_list_create(slice_list_t *list, const struct jak_allocator *alloc, size_t sliceCapacity)
 {
         error_if_null(list)
         error_if_null(sliceCapacity)
 
-        alloc_this_or_std(&list->alloc, alloc);
+        jak_alloc_this_or_std(&list->alloc, alloc);
         spin_init(&list->lock);
         error_init(&list->err);
 
@@ -94,7 +94,7 @@ bool slice_list_create(slice_list_t *list, const struct allocator *alloc, size_t
 
 bool SliceListDrop(slice_list_t *list)
 {
-        unused(list);
+        JAK_UNUSED(list);
 
         vec_drop(&list->slices);
         vec_drop(&list->descriptors);
@@ -112,13 +112,13 @@ bool SliceListIsEmpty(const slice_list_t *list)
         return (vec_is_empty(&list->slices));
 }
 
-bool slice_list_insert(slice_list_t *list, char **strings, field_sid_t *ids, size_t num_pairs)
+bool slice_list_insert(slice_list_t *list, char **strings, jak_field_sid *ids, size_t num_pairs)
 {
         lock(list);
 
         while (num_pairs--) {
                 const char *key = *strings++;
-                field_sid_t value = *ids++;
+                jak_field_sid value = *ids++;
                 hash32_t keyHash = get_hashcode(key);
                 slice_handle_t handle;
                 int status;
@@ -167,12 +167,12 @@ bool slice_list_insert(slice_list_t *list, char **strings, field_sid_t *ids, siz
 
 bool slice_list_lookup(slice_handle_t *handle, slice_list_t *list, const char *needle)
 {
-        unused(list);
-        unused(handle);
-        unused(needle);
+        JAK_UNUSED(list);
+        JAK_UNUSED(handle);
+        JAK_UNUSED(needle);
 
         hash32_t keyHash = get_hashcode(needle);
-        u32 numSlices = vec_length(&list->slices);
+        jak_u32 numSlices = vec_length(&list->slices);
 
         /** check whether the keys-values pair is already contained in one slice */
         HashBounds *restrict bounds = vec_all(&list->bounds, HashBounds);
@@ -180,7 +180,7 @@ bool slice_list_lookup(slice_handle_t *handle, slice_list_t *list, const char *n
         Slice *restrict slices = vec_all(&list->slices, Slice);
         SliceDescriptor *restrict descs = vec_all(&list->descriptors, SliceDescriptor);
 
-        for (register u32 i = 0; i < numSlices; i++) {
+        for (register jak_u32 i = 0; i < numSlices; i++) {
                 SliceDescriptor *restrict desc = descs + i;
                 HashBounds *restrict bound = bounds + i;
                 Slice *restrict slice = slices + i;
@@ -196,7 +196,7 @@ bool slice_list_lookup(slice_handle_t *handle, slice_list_t *list, const char *n
                                         JAK_debug(JAK_SLICE_LIST_TAG,
                                                   "JAK_slice_list_lookup_by_key keys(%s) -> ?",
                                                   needle);
-                                        u32 pairPosition;
+                                        jak_u32 pairPosition;
 
                                         switch (slice->strat) {
                                                 case SLICE_LOOKUP_SCAN:
@@ -243,8 +243,8 @@ bool slice_list_lookup(slice_handle_t *handle, slice_list_t *list, const char *n
 
 bool SliceListRemove(slice_list_t *list, slice_handle_t *handle)
 {
-        unused(list);
-        unused(handle);
+        JAK_UNUSED(list);
+        JAK_UNUSED(handle);
         JAK_NOT_IMPLEMENTED
 }
 
@@ -253,9 +253,9 @@ static void appenderNew(slice_list_t *list)
         /** ANTI-OPTIMIZATION: madvising sequential access to columns in slice decrease performance */
 
         /** the slice itself */
-        Slice slice = {.strat     = SLICE_LOOKUP_SCAN, .num_elems = 0, .cacheIdx = (u32) -1};
+        Slice slice = {.strat     = SLICE_LOOKUP_SCAN, .num_elems = 0, .cacheIdx = (jak_u32) -1};
 
-        u32 numSlices = vec_length(&list->slices);
+        jak_u32 numSlices = vec_length(&list->slices);
         vec_push(&list->slices, &slice, 1);
 
         assert(SLICE_KEY_COLUMN_MAX_ELEMS > 0);
@@ -303,7 +303,7 @@ static void appenderNew(slice_list_t *list)
                  sizeof(Slice),
                  (sizeof(slice_list_t) + list->slices.num_elems
                                          * (sizeof(Slice) + sizeof(SliceDescriptor) +
-                                            (sizeof(u32) * list->descriptors.num_elems)
+                                            (sizeof(jak_u32) * list->descriptors.num_elems)
                                             + sizeof(bloom_t) + bitmap_nbits(&filter) / 8 + sizeof(HashBounds))) /
                  1024.0 / 1024.0);
 
@@ -313,7 +313,7 @@ static void appenderNew(slice_list_t *list)
 
 static void appenderSeal(Slice *slice)
 {
-        unused(slice);
+        JAK_UNUSED(slice);
         // TODO: sealing means sort and then replace 'find' with bsearch or something.
         // Not yet implemented: sealed slices are also search in a linear fashion
 }

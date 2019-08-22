@@ -27,10 +27,10 @@
 
 JAK_BEGIN_DECL
 
-typedef u8 hash8_t;
-typedef u16 hash16_t;
-typedef u32 hash32_t;
-typedef u64 hash64_t;
+typedef jak_u8 hash8_t;
+typedef jak_u16 hash16_t;
+typedef jak_u32 hash32_t;
+typedef jak_u64 hash64_t;
 
 JAK_END_DECL
 

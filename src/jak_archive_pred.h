@@ -31,10 +31,10 @@ typedef bool
 
 struct string_pred_t {
     string_pred_func_t func;
-    i64 limit;
+    jak_i64 limit;
 };
 
-JAK_BUILT_IN(static bool) string_pred_validate(struct err *err, const struct string_pred_t *pred)
+JAK_BUILT_IN(static bool) string_pred_validate(struct jak_error *err, const struct string_pred_t *pred)
 {
         error_if_null(pred);
         JAK_implemented_or_error(err, pred, func)
@@ -52,7 +52,7 @@ JAK_BUILT_IN(static bool) string_pred_eval(const struct string_pred_t *pred, siz
         return pred->func(idxs_matching, num_matching, strings, num_strings, capture);
 }
 
-JAK_BUILT_IN(static bool) string_pred_get_limit(i64 *limit, const struct string_pred_t *pred)
+JAK_BUILT_IN(static bool) string_pred_get_limit(jak_i64 *limit, const struct string_pred_t *pred)
 {
         error_if_null(limit);
         error_if_null(pred);

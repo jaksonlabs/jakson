@@ -48,7 +48,7 @@ JAK_FORWARD_STRUCT_DECL(Slice)
 #define JAK_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE (32768/10)
 #endif
 
-#define SLICE_DATA_SIZE (JAK_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE - sizeof(slice_lookup_strat_e) - sizeof(u32))
+#define SLICE_DATA_SIZE (JAK_SLICE_LIST_TARGET_MEMORY_SIZE_IN_BYTE - sizeof(slice_lookup_strat_e) - sizeof(jak_u32))
 
 #define SLICE_KEY_COLUMN_MAX_ELEMS (SLICE_DATA_SIZE / 8 / 3) /** one array with elements of 64 bits each, 3 of them */
 
@@ -73,12 +73,12 @@ typedef struct Slice {
      * particular values. However, a remove operation is expensive. */
     const char *key_column[SLICE_KEY_COLUMN_MAX_ELEMS];
     hash32_t keyHashColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
-    field_sid_t string_id_tColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
+    jak_field_sid string_id_tColumn[SLICE_KEY_COLUMN_MAX_ELEMS];
 
     /** The number of elements stored in 'key_colum', 'key_hash_column', and 'string_id_column' */
-    u32 num_elems;
+    jak_u32 num_elems;
 
-    u32 cacheIdx;
+    jak_u32 cacheIdx;
 } Slice;
 
 typedef struct JAK_hash_bounds_t {
@@ -97,7 +97,7 @@ typedef struct SliceDescriptor {
 } SliceDescriptor;
 
 typedef struct JAK_slice_list_t {
-    struct allocator alloc;
+    struct jak_allocator alloc;
     struct spinlock lock;
 
     struct vector ofType(JAK_slice_t) slices;
@@ -105,19 +105,19 @@ typedef struct JAK_slice_list_t {
     struct vector ofType(JAK_bloomfilter_t) filters;
     struct vector ofType(JAK_hash_bounds_t) bounds;
 
-    u32 appender_idx;
+    jak_u32 appender_idx;
 
-    struct err err;
+    struct jak_error err;
 } slice_list_t;
 
 typedef struct JAK_slice_handle_t {
     Slice *container;
     const char *key;
-    field_sid_t value;
+    jak_field_sid value;
     bool is_contained;
 } slice_handle_t;
 
-bool slice_list_create(slice_list_t *list, const struct allocator *alloc, size_t sliceCapacity);
+bool slice_list_create(slice_list_t *list, const struct jak_allocator *alloc, size_t sliceCapacity);
 
 bool SliceListDrop(slice_list_t *list);
 
@@ -125,7 +125,7 @@ bool slice_list_lookup(slice_handle_t *handle, slice_list_t *list, const char *n
 
 bool SliceListIsEmpty(const slice_list_t *list);
 
-bool slice_list_insert(slice_list_t *list, char **strings, field_sid_t *ids, size_t npairs);
+bool slice_list_insert(slice_list_t *list, char **strings, jak_field_sid *ids, size_t npairs);
 
 bool SliceListRemove(slice_list_t *list, slice_handle_t *handle);
 

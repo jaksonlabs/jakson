@@ -117,8 +117,8 @@ JAK_BEGIN_DECL
                                              * integers with this function into an column container that is bound
                                              * to a specific type, any insertion function call will fail once the
                                              * integer value requires a larger (or smaller) type than the fist value
-                                             * added to the container. Use '*_insert_X' instead, where X is u8, u16,...
-                                             * , u32 resp. i8, i16,..., i32. */
+                                             * added to the container. Use '*_insert_X' instead, where X is jak_u8, jak_u16,...
+                                             * , jak_u32 resp. jak_i8, jak_i16,..., jak_i32. */
 #define JAK_ERR_PARSE_DOT_EXPECTED 84       /** parsing error: dot ('.') expected */
 #define JAK_ERR_PARSE_ENTRY_EXPECTED 85     /** parsing error: key name or array index expected */
 #define JAK_ERR_PARSE_UNKNOWN_TOKEN 86      /** parsing error: unknown token */
@@ -175,7 +175,7 @@ static const char *const _err_str[] =
          "the integer value. Since you push integers with this function into an column container that is bound "
          "to a specific type, any insertion function call will fail once the integer value requires a larger "
          "(or smaller) type than the fist value added to the container. Use '*_insert_X' instead, where X is "
-         "u8, u16,..., u32 resp. i8, i16,..., i32. ", "parsing error dot ('.') expected",
+         "jak_u8, jak_u16,..., jak_u32 resp. jak_i8, jak_i16,..., jak_i32. ", "parsing error dot ('.') expected",
          "parsing error key name or array index expected", "parsing error: unknown token",
          "dot-notated path could not be parsed", "Illegal state", "Unsupported data type", "Operation failed",
          "Cleanup operation failed; potentially a memory leak occurred", "dot-notated path could not be compiled",
@@ -185,33 +185,33 @@ static const char *const _err_str[] =
 
 static const int _nerr_str = JAK_ARRAY_LENGTH(_err_str);
 
-struct err {
+struct jak_error {
     int code;
     const char *file;
-    u32 line;
+    jak_u32 line;
     char *details;
 };
 
-bool error_init(struct err *err);
+bool error_init(struct jak_error *err);
 
-bool error_cpy(struct err *dst, const struct err *src);
+bool error_cpy(struct jak_error *dst, const struct jak_error *src);
 
-bool error_drop(struct err *err);
+bool error_drop(struct jak_error *err);
 
-bool error_set(struct err *err, int code, const char *file, u32 line);
+bool error_set(struct jak_error *err, int code, const char *file, jak_u32 line);
 
-bool error_set_wdetails(struct err *err, int code, const char *file, u32 line, const char *details);
+bool error_set_wdetails(struct jak_error *err, int code, const char *file, jak_u32 line, const char *details);
 
-bool error_set_no_abort(struct err *err, int code, const char *file, u32 line);
+bool error_set_no_abort(struct jak_error *err, int code, const char *file, jak_u32 line);
 
-bool error_set_wdetails_no_abort(struct err *err, int code, const char *file, u32 line, const char *details);
+bool error_set_wdetails_no_abort(struct jak_error *err, int code, const char *file, jak_u32 line, const char *details);
 
-bool error_str(const char **errstr, const char **file, u32 *line, bool *details, const char **detailsstr,
-               const struct err *err);
+bool error_str(const char **errstr, const char **file, jak_u32 *line, bool *details, const char **detailsstr,
+               const struct jak_error *err);
 
-bool error_print_to_stderr(const struct err *err);
+bool error_print_to_stderr(const struct jak_error *err);
 
-bool error_print_and_abort(const struct err *err);
+bool error_print_and_abort(const struct jak_error *err);
 
 #define error_occurred(x)                   ((x)->err.code != JAK_ERR_NOERR)
 
@@ -242,7 +242,7 @@ bool error_print_and_abort(const struct err *err);
 #define error_print_if(expr, code)                                                                                     \
 {                                                                                                                      \
     if (expr) {                                                                                                        \
-        struct err err;                                                                                                \
+        struct jak_error err;                                                                                                \
         error_init(&err);                                                                                              \
         error(&err, code);                                                                                             \
         error_print_to_stderr(&err);                                                                                   \
@@ -252,8 +252,8 @@ bool error_print_and_abort(const struct err *err);
 #define JAK_DEFINE_ERROR_GETTER(type_tag_name)  JAK_DEFINE_GET_ERROR_FUNCTION(type_tag_name, struct type_tag_name, e)
 
 #define JAK_DEFINE_GET_ERROR_FUNCTION(type_name, type, arg)                                                            \
-JAK_func_unused static bool                                                                                            \
-type_name##_get_error(struct err *err, const type *arg)                                                                \
+JAK_FUNC_UNUSED static bool                                                                                            \
+type_name##_get_error(struct jak_error *err, const type *arg)                                                                \
 {                                                                                                                      \
     error_if_null(err)                                                                                                 \
     error_if_null(arg)                                                                                                 \

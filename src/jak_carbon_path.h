@@ -31,7 +31,7 @@ struct jak_carbon_path_evaluator {
     struct jak_carbon *doc;
     struct jak_carbon_array_it root_it;
     enum carbon_path_status status;
-    struct err err;
+    struct jak_error err;
 
     struct {
         enum carbon_container_type container_type;
@@ -46,7 +46,7 @@ struct jak_carbon_path_evaluator {
 
             struct {
                 struct jak_carbon_column_it it;
-                u32 elem_pos;
+                jak_u32 elem_pos;
             } column;
 
         } containers;

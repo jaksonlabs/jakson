@@ -31,23 +31,23 @@ JAK_BEGIN_DECL
 
 struct jak_huffman {
     struct vector ofType(struct pack_huffman_entry) table;
-    struct err err;
+    struct jak_error err;
 };
 
 struct pack_huffman_entry {
     unsigned char letter;
-    u32 *blocks;
-    u16 nblocks;
+    jak_u32 *blocks;
+    jak_u16 nblocks;
 };
 
 struct pack_huffman_info {
     unsigned char letter;
-    u8 nbytes_prefix;
+    jak_u8 nbytes_prefix;
     char *prefix_code;
 };
 
 struct pack_huffman_str_info {
-    u32 nbytes_encoded;
+    jak_u32 nbytes_encoded;
     const char *encoded_bytes;
 };
 
@@ -57,17 +57,17 @@ bool coding_huffman_cpy(struct jak_huffman *dst, struct jak_huffman *src);
 
 bool coding_huffman_build(struct jak_huffman *encoder, const string_vector_t *strings);
 
-bool coding_huffman_get_error(struct err *err, const struct jak_huffman *dic);
+bool coding_huffman_get_error(struct jak_error *err, const struct jak_huffman *dic);
 
-bool coding_huffman_encode(struct memfile *file, struct jak_huffman *dic, const char *string);
+bool coding_huffman_encode(struct jak_memfile *file, struct jak_huffman *dic, const char *string);
 
-bool coding_huffman_read_string(struct pack_huffman_str_info *info, struct memfile *src);
+bool coding_huffman_read_string(struct pack_huffman_str_info *info, struct jak_memfile *src);
 
 bool coding_huffman_drop(struct jak_huffman *dic);
 
-bool coding_huffman_serialize(struct memfile *file, const struct jak_huffman *dic, char marker_symbol);
+bool coding_huffman_serialize(struct jak_memfile *file, const struct jak_huffman *dic, char marker_symbol);
 
-bool coding_huffman_read_entry(struct pack_huffman_info *info, struct memfile *file, char marker_symbol);
+bool coding_huffman_read_entry(struct pack_huffman_info *info, struct jak_memfile *file, char marker_symbol);
 
 JAK_END_DECL
 

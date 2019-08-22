@@ -26,7 +26,7 @@
 
 struct cache_entry {
     struct cache_entry *prev, *next;
-    field_sid_t id;
+    jak_field_sid id;
     char *string;
 };
 
@@ -36,11 +36,11 @@ struct lru_list {
     struct cache_entry entries[1024];
 };
 
-struct string_cache {
+struct jak_string_cache {
     struct vector ofType(struct lru_list) list_entries;
-    struct sid_cache_stats statistics;
+    struct jak_sid_cache_stats statistics;
     struct jak_archive_query query;
-    struct err err;
+    struct jak_error err;
     size_t capacity;
 };
 
@@ -56,20 +56,20 @@ static void init_list(struct lru_list *list)
         }
 }
 
-bool string_id_cache_create_LRU(struct string_cache **cache, struct jak_archive *archive)
+bool jak_string_id_cache_create_lru(struct jak_string_cache **cache, struct jak_archive *archive)
 {
         struct jak_archive_info archive_info;
-        archive_get_info(&archive_info, archive);
-        u32 capacity = archive_info.num_embeddded_strings * 0.25f;
-        return string_id_cache_create_LRU_ex(cache, archive, capacity);
+        jak_archive_get_info(&archive_info, archive);
+        jak_u32 capacity = archive_info.num_embeddded_strings * 0.25f;
+        return jak_string_id_cache_create_lru_ex(cache, archive, capacity);
 }
 
-bool string_id_cache_create_LRU_ex(struct string_cache **cache, struct jak_archive *archive, size_t capacity)
+bool jak_string_id_cache_create_lru_ex(struct jak_string_cache **cache, struct jak_archive *archive, size_t capacity)
 {
         error_if_null(cache)
         error_if_null(archive)
 
-        struct string_cache *result = JAK_malloc(sizeof(struct string_cache));
+        struct jak_string_cache *result = JAK_MALLOC(sizeof(struct jak_string_cache));
 
         query_create(&result->query, archive);
         result->capacity = capacity;
@@ -83,13 +83,13 @@ bool string_id_cache_create_LRU_ex(struct string_cache **cache, struct jak_archi
         }
 
         error_init(&result->err);
-        string_id_cache_reset_statistics(result);
+        jak_string_id_cache_reset_statistics(result);
         *cache = result;
 
         return true;
 }
 
-bool string_id_cache_get_error(struct err *err, const struct string_cache *cache)
+bool jak_string_id_cache_get_error(struct jak_error *err, const struct jak_string_cache *cache)
 {
         error_if_null(err)
         error_if_null(cache)
@@ -97,7 +97,7 @@ bool string_id_cache_get_error(struct err *err, const struct string_cache *cache
         return true;
 }
 
-bool string_id_cache_get_size(size_t *size, const struct string_cache *cache)
+bool jak_string_id_cache_get_size(size_t *size, const struct jak_string_cache *cache)
 {
         error_if_null(size)
         error_if_null(cache)
@@ -124,10 +124,10 @@ static void make_most_recent(struct lru_list *list, struct cache_entry *entry)
         }
 }
 
-char *string_id_cache_get(struct string_cache *cache, field_sid_t id)
+char *jak_string_id_cache_get(struct jak_string_cache *cache, jak_field_sid id)
 {
         error_if_null(cache)
-        hash32_t id_hash = JAK_HASH_BERNSTEIN(sizeof(field_sid_t), &id);
+        hash32_t id_hash = JAK_HASH_BERNSTEIN(sizeof(jak_field_sid), &id);
         size_t bucket_pos = id_hash % cache->list_entries.num_elems;
         struct lru_list *list = vec_get(&cache->list_entries, bucket_pos, struct lru_list);
         struct cache_entry *cursor = list->most_recent;
@@ -151,7 +151,7 @@ char *string_id_cache_get(struct string_cache *cache, field_sid_t id)
         return strdup(result);
 }
 
-bool string_id_cache_get_statistics(struct sid_cache_stats *statistics, struct string_cache *cache)
+bool jak_string_id_cache_get_statistics(struct jak_sid_cache_stats *statistics, struct jak_string_cache *cache)
 {
         error_if_null(statistics);
         error_if_null(cache);
@@ -159,14 +159,14 @@ bool string_id_cache_get_statistics(struct sid_cache_stats *statistics, struct s
         return true;
 }
 
-bool string_id_cache_reset_statistics(struct string_cache *cache)
+bool jak_string_id_cache_reset_statistics(struct jak_string_cache *cache)
 {
         error_if_null(cache);
-        JAK_zero_memory(&cache->statistics, sizeof(struct sid_cache_stats));
+        JAK_zero_memory(&cache->statistics, sizeof(struct jak_sid_cache_stats));
         return true;
 }
 
-bool string_id_cache_drop(struct string_cache *cache)
+bool jak_string_id_cache_drop(struct jak_string_cache *cache)
 {
         error_if_null(cache);
         for (size_t i = 0; i < cache->list_entries.num_elems; i++) {

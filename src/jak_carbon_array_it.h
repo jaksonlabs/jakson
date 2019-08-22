@@ -40,10 +40,10 @@ struct field_access {
     enum carbon_field_type it_field_type;
 
     const void *it_field_data;
-    u64 it_field_len;
+    jak_u64 it_field_len;
 
     const char *it_mime_type;
-    u64 it_mime_type_strlen;
+    jak_u64 it_mime_type_strlen;
 
     bool nested_array_it_is_created;
     bool nested_array_it_accessed;
@@ -59,24 +59,24 @@ struct field_access {
 };
 
 struct jak_carbon_array_it {
-    struct memfile memfile;
-    offset_t payload_start;
+    struct jak_memfile memfile;
+    jak_offset_t payload_start;
     struct spinlock lock;
-    struct err err;
+    struct jak_error err;
 
     /* in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
-    i64 mod_size;
+    jak_i64 mod_size;
     bool array_end_reached;
 
-    struct vector ofType(offset_t) history;
+    struct vector ofType(jak_offset_t) history;
     struct field_access field_access;
-    offset_t field_offset;
+    jak_offset_t field_offset;
 };
 
 JAK_DEFINE_ERROR_GETTER(jak_carbon_array_it);
 
 #define DECLARE_IN_PLACE_UPDATE_FUNCTION(type_name)                                                                    \
-bool carbon_array_it_update_in_place_##type_name(struct jak_carbon_array_it *it, type_name value);
+bool carbon_array_it_update_in_place_##type_name(struct jak_carbon_array_it *it, jak_##type_name value);
 
 DECLARE_IN_PLACE_UPDATE_FUNCTION(u8)
 
@@ -107,8 +107,8 @@ bool carbon_array_it_update_in_place_null(struct jak_carbon_array_it *it);
  * that starts with the first (potentially empty) array entry. If there is some data before the array contents
  * (e.g., a header), <code>payload_start</code> must not include this data.
  */
-bool carbon_array_it_create(struct jak_carbon_array_it *it, struct memfile *memfile, struct err *err,
-                            offset_t payload_start);
+bool carbon_array_it_create(struct jak_carbon_array_it *it, struct jak_memfile *memfile, struct jak_error *err,
+                            jak_offset_t payload_start);
 
 bool carbon_array_it_copy(struct jak_carbon_array_it *dst, struct jak_carbon_array_it *src);
 
@@ -116,7 +116,7 @@ bool carbon_array_it_clone(struct jak_carbon_array_it *dst, struct jak_carbon_ar
 
 bool carbon_array_it_readonly(struct jak_carbon_array_it *it);
 
-bool carbon_array_it_length(u64 *len, struct jak_carbon_array_it *it);
+bool carbon_array_it_length(jak_u64 *len, struct jak_carbon_array_it *it);
 
 bool carbon_array_it_is_empty(struct jak_carbon_array_it *it);
 
@@ -152,39 +152,39 @@ bool carbon_array_it_is_unit(struct jak_carbon_array_it *it);
 
 bool carbon_array_it_prev(struct jak_carbon_array_it *it);
 
-offset_t carbon_array_it_memfilepos(struct jak_carbon_array_it *it);
+jak_offset_t carbon_array_it_memfilepos(struct jak_carbon_array_it *it);
 
-offset_t carbon_array_it_tell(struct jak_carbon_array_it *it);
+jak_offset_t carbon_array_it_tell(struct jak_carbon_array_it *it);
 
-bool carbon_int_array_it_offset(offset_t *off, struct jak_carbon_array_it *it);
+bool carbon_int_array_it_offset(jak_offset_t *off, struct jak_carbon_array_it *it);
 
 bool carbon_array_it_fast_forward(struct jak_carbon_array_it *it);
 
 bool carbon_array_it_field_type(enum carbon_field_type *type, struct jak_carbon_array_it *it);
 
-bool carbon_array_it_u8_value(u8 *value, struct jak_carbon_array_it *it);
+bool carbon_array_it_u8_value(jak_u8 *value, struct jak_carbon_array_it *it);
 
-bool carbon_array_it_u16_value(u16 *value, struct jak_carbon_array_it *it);
+bool carbon_array_it_u16_value(jak_u16 *value, struct jak_carbon_array_it *it);
 
-bool carbon_array_it_u32_value(u32 *value, struct jak_carbon_array_it *it);
+bool carbon_array_it_u32_value(jak_u32 *value, struct jak_carbon_array_it *it);
 
-bool carbon_array_it_u64_value(u64 *value, struct jak_carbon_array_it *it);
+bool carbon_array_it_u64_value(jak_u64 *value, struct jak_carbon_array_it *it);
 
-bool carbon_array_it_i8_value(i8 *value, struct jak_carbon_array_it *it);
+bool carbon_array_it_i8_value(jak_i8 *value, struct jak_carbon_array_it *it);
 
-bool carbon_array_it_i16_value(i16 *value, struct jak_carbon_array_it *it);
+bool carbon_array_it_i16_value(jak_i16 *value, struct jak_carbon_array_it *it);
 
-bool carbon_array_it_i32_value(i32 *value, struct jak_carbon_array_it *it);
+bool carbon_array_it_i32_value(jak_i32 *value, struct jak_carbon_array_it *it);
 
-bool carbon_array_it_i64_value(i64 *value, struct jak_carbon_array_it *it);
+bool carbon_array_it_i64_value(jak_i64 *value, struct jak_carbon_array_it *it);
 
 bool carbon_array_it_float_value(bool *is_null_in, float *value, struct jak_carbon_array_it *it);
 
-bool carbon_array_it_signed_value(bool *is_null_in, i64 *value, struct jak_carbon_array_it *it);
+bool carbon_array_it_signed_value(bool *is_null_in, jak_i64 *value, struct jak_carbon_array_it *it);
 
-bool carbon_array_it_unsigned_value(bool *is_null_in, u64 *value, struct jak_carbon_array_it *it);
+bool carbon_array_it_unsigned_value(bool *is_null_in, jak_u64 *value, struct jak_carbon_array_it *it);
 
-const char *carbon_array_it_string_value(u64 *strlen, struct jak_carbon_array_it *it);
+const char *carbon_array_it_string_value(jak_u64 *strlen, struct jak_carbon_array_it *it);
 
 bool carbon_array_it_binary_value(struct jak_carbon_binary *out, struct jak_carbon_array_it *it);
 
@@ -204,7 +204,7 @@ bool carbon_array_it_insert_end(struct jak_carbon_insert *inserter);
 bool carbon_array_it_remove(struct jak_carbon_array_it *it);
 
 
-//bool carbon_array_it_update_in_place_u8(struct jak_carbon_array_it *it, u8 value);
+//bool carbon_array_it_update_in_place_u8(struct jak_carbon_array_it *it, jak_u8 value);
 
 JAK_END_DECL
 

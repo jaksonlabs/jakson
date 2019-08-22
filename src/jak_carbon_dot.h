@@ -44,14 +44,14 @@ struct jak_carbon_dot_node {
     enum carbon_dot_node_type type;
     union {
         char *string;
-        u32 idx;
+        jak_u32 idx;
     } identifier;
 };
 
 struct jak_carbon_dot_path {
     struct jak_carbon_dot_node nodes[256];
-    u32 path_len;
-    struct err err;
+    jak_u32 path_len;
+    struct jak_error err;
 };
 
 enum carbon_path_status {
@@ -76,17 +76,17 @@ bool carbon_dot_path_add_key(struct jak_carbon_dot_path *dst, const char *key);
 
 bool carbon_dot_path_add_nkey(struct jak_carbon_dot_path *dst, const char *key, size_t len);
 
-bool carbon_dot_path_add_idx(struct jak_carbon_dot_path *dst, u32 idx);
+bool carbon_dot_path_add_idx(struct jak_carbon_dot_path *dst, jak_u32 idx);
 
-bool carbon_dot_path_len(u32 *len, const struct jak_carbon_dot_path *path);
+bool carbon_dot_path_len(jak_u32 *len, const struct jak_carbon_dot_path *path);
 
 bool carbon_dot_path_is_empty(const struct jak_carbon_dot_path *path);
 
-bool carbon_dot_path_type_at(enum carbon_dot_node_type *type_out, u32 pos, const struct jak_carbon_dot_path *path);
+bool carbon_dot_path_type_at(enum carbon_dot_node_type *type_out, jak_u32 pos, const struct jak_carbon_dot_path *path);
 
-bool carbon_dot_path_idx_at(u32 *idx, u32 pos, const struct jak_carbon_dot_path *path);
+bool carbon_dot_path_idx_at(jak_u32 *idx, jak_u32 pos, const struct jak_carbon_dot_path *path);
 
-const char *carbon_dot_path_key_at(u32 pos, const struct jak_carbon_dot_path *path);
+const char *carbon_dot_path_key_at(jak_u32 pos, const struct jak_carbon_dot_path *path);
 
 bool carbon_dot_path_drop(struct jak_carbon_dot_path *path);
 

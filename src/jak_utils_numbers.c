@@ -17,7 +17,7 @@
 
 #include <jak_utils_numbers.h>
 
-enum number_min_type number_min_type_unsigned(u64 value)
+enum number_min_type number_min_type_unsigned(jak_u64 value)
 {
         if (value <= JAK_CARBON_U8_MAX) {
                 return NUMBER_U8;
@@ -32,7 +32,7 @@ enum number_min_type number_min_type_unsigned(u64 value)
         }
 }
 
-enum number_min_type number_min_type_signed(i64 value)
+enum number_min_type number_min_type_signed(jak_i64 value)
 {
         if (value >= JAK_CARBON_I8_MIN && value <= JAK_CARBON_I8_MAX) {
                 return NUMBER_I8;

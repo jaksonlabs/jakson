@@ -54,7 +54,7 @@
 #define JAK_END_DECL
 #endif
 
-#define JAK_malloc(size)                \
+#define JAK_MALLOC(size)                \
 ({                                      \
         void *ptr = malloc(size);       \
         JAK_zero_memory(ptr, size);     \
@@ -67,89 +67,89 @@
 #define JAK_ARRAY_LENGTH(x)                                                                                            \
     sizeof(x)/sizeof(x[0])
 
-typedef uint64_t offset_t;
+typedef uint64_t jak_offset_t;
 typedef int64_t signed_offset_t;
 
 typedef unsigned char u_char;
 
 typedef enum field_type {
-    FIELD_NULL = 0,
-    FIELD_BOOLEAN = 1,
-    FIELD_INT8 = 2,
-    FIELD_INT16 = 3,
-    FIELD_INT32 = 4,
-    FIELD_INT64 = 5,
-    FIELD_UINT8 = 6,
-    FIELD_UINT16 = 7,
-    FIELD_UINT32 = 8,
-    FIELD_UINT64 = 9,
-    FIELD_FLOAT = 10,
-    FIELD_STRING = 11,
-    FIELD_OBJECT = 12
-} field_e;
+    JAK_FIELD_NULL = 0,
+    JAK_FIELD_BOOLEAN = 1,
+    JAK_FIELD_INT8 = 2,
+    JAK_FIELD_INT16 = 3,
+    JAK_FIELD_INT32 = 4,
+    JAK_FIELD_INT64 = 5,
+    JAK_FIELD_UINT8 = 6,
+    JAK_FIELD_UINT16 = 7,
+    JAK_FIELD_UINT32 = 8,
+    JAK_FIELD_UINT64 = 9,
+    JAK_FIELD_FLOAT = 10,
+    JAK_FIELD_STRING = 11,
+    JAK_FIELD_OBJECT = 12
+} jak_archive_field_e;
 
 enum access_mode {
     READ_WRITE,
     READ_ONLY
 };
 
-#define JAK_func_unused __attribute__((unused))
+#define JAK_FUNC_UNUSED __attribute__((unused))
 
-JAK_func_unused static const char *basic_type_to_json_type_str(enum field_type t)
+JAK_FUNC_UNUSED static const char *basic_type_to_json_type_str(enum field_type t)
 {
         switch (t) {
-                case FIELD_INT8:
-                case FIELD_INT16:
-                case FIELD_INT32:
-                case FIELD_INT64:
-                case FIELD_UINT8:
-                case FIELD_UINT16:
-                case FIELD_UINT32:
-                case FIELD_UINT64:
+                case JAK_FIELD_INT8:
+                case JAK_FIELD_INT16:
+                case JAK_FIELD_INT32:
+                case JAK_FIELD_INT64:
+                case JAK_FIELD_UINT8:
+                case JAK_FIELD_UINT16:
+                case JAK_FIELD_UINT32:
+                case JAK_FIELD_UINT64:
                         return "integer";
-                case FIELD_FLOAT:
+                case JAK_FIELD_FLOAT:
                         return "float";
-                case FIELD_STRING:
+                case JAK_FIELD_STRING:
                         return "string";
-                case FIELD_BOOLEAN:
+                case JAK_FIELD_BOOLEAN:
                         return "boolean";
-                case FIELD_NULL:
+                case JAK_FIELD_NULL:
                         return "null";
-                case FIELD_OBJECT:
+                case JAK_FIELD_OBJECT:
                         return "object";
                 default:
                         return "(unknown)";
         }
 }
 
-JAK_func_unused static const char *basic_type_to_system_type_str(enum field_type t)
+JAK_FUNC_UNUSED static const char *basic_type_to_system_type_str(enum field_type t)
 {
         switch (t) {
-                case FIELD_INT8:
+                case JAK_FIELD_INT8:
                         return "int8";
-                case FIELD_INT16:
+                case JAK_FIELD_INT16:
                         return "int16";
-                case FIELD_INT32:
+                case JAK_FIELD_INT32:
                         return "int32";
-                case FIELD_INT64:
+                case JAK_FIELD_INT64:
                         return "int64";
-                case FIELD_UINT8:
+                case JAK_FIELD_UINT8:
                         return "uint8";
-                case FIELD_UINT16:
+                case JAK_FIELD_UINT16:
                         return "uint16";
-                case FIELD_UINT32:
+                case JAK_FIELD_UINT32:
                         return "uint32";
-                case FIELD_UINT64:
+                case JAK_FIELD_UINT64:
                         return "uint64";
-                case FIELD_FLOAT:
+                case JAK_FIELD_FLOAT:
                         return "float32";
-                case FIELD_STRING:
+                case JAK_FIELD_STRING:
                         return "string64";
-                case FIELD_BOOLEAN:
+                case JAK_FIELD_BOOLEAN:
                         return "bool8";
-                case FIELD_NULL:
+                case JAK_FIELD_NULL:
                         return "void";
-                case FIELD_OBJECT:
+                case JAK_FIELD_OBJECT:
                         return "variable";
                 default:
                         return "(unknown)";
@@ -158,7 +158,7 @@ JAK_func_unused static const char *basic_type_to_system_type_str(enum field_type
 
 #define JAK_NOT_IMPLEMENTED                                                                                            \
 {                                                                                                                      \
-    struct err err;                                                                                                    \
+    struct jak_error err;                                                                                                    \
     error_init(&err);                                                                                                  \
     error(&err, JAK_ERR_NOTIMPLEMENTED)                                                                                \
     error_print_and_abort(&err);                                                                                       \
@@ -229,42 +229,42 @@ JAK_func_unused static const char *basic_type_to_system_type_str(enum field_type
 #define JAK_CARBON_ARCHIVE_MAGIC                "MP/CARBON"
 #define JAK_CARBON_ARCHIVE_VERSION               1
 
-#define  MARKER_SYMBOL_OBJECT_BEGIN        '{'
-#define  MARKER_SYMBOL_OBJECT_END          '}'
-#define  MARKER_SYMBOL_PROP_NULL           'n'
-#define  MARKER_SYMBOL_PROP_BOOLEAN        'b'
-#define  MARKER_SYMBOL_PROP_INT8           'c'
-#define  MARKER_SYMBOL_PROP_INT16          's'
-#define  MARKER_SYMBOL_PROP_INT32          'i'
-#define  MARKER_SYMBOL_PROP_INT64          'l'
-#define  MARKER_SYMBOL_PROP_UINT8          'r'
-#define  MARKER_SYMBOL_PROP_UINT16         'h'
-#define  MARKER_SYMBOL_PROP_UINT32         'e'
-#define  MARKER_SYMBOL_PROP_UINT64         'g'
-#define  MARKER_SYMBOL_PROP_REAL           'f'
-#define  MARKER_SYMBOL_PROP_TEXT           't'
-#define  MARKER_SYMBOL_PROP_OBJECT         'o'
-#define  MARKER_SYMBOL_PROP_NULL_ARRAY     'N'
-#define  MARKER_SYMBOL_PROP_BOOLEAN_ARRAY  'B'
-#define  MARKER_SYMBOL_PROP_INT8_ARRAY     'C'
-#define  MARKER_SYMBOL_PROP_INT16_ARRAY    'S'
-#define  MARKER_SYMBOL_PROP_INT32_ARRAY    'I'
-#define  MARKER_SYMBOL_PROP_INT64_ARRAY    'L'
-#define  MARKER_SYMBOL_PROP_UINT8_ARRAY    'R'
-#define  MARKER_SYMBOL_PROP_UINT16_ARRAY   'H'
-#define  MARKER_SYMBOL_PROP_UINT32_ARRAY   'E'
-#define  MARKER_SYMBOL_PROP_UINT64_ARRAY   'G'
-#define  MARKER_SYMBOL_PROP_REAL_ARRAY     'F'
-#define  MARKER_SYMBOL_PROP_TEXT_ARRAY     'T'
-#define  MARKER_SYMBOL_PROP_OBJECT_ARRAY   'O'
-#define  MARKER_SYMBOL_EMBEDDED_STR_DIC    'D'
-#define  MARKER_SYMBOL_EMBEDDED_STR        '-'
-#define  MARKER_SYMBOL_COLUMN_GROUP        'X'
-#define  MARKER_SYMBOL_COLUMN              'x'
-#define  MARKER_SYMBOL_HUFFMAN_DIC_ENTRY   'd'
-#define  MARKER_SYMBOL_RECORD_HEADER       'r'
-#define  MARKER_SYMBOL_HASHTABLE_HEADER    '#'
-#define  MARKER_SYMBOL_VECTOR_HEADER       '|'
+#define  JAK_MARKER_SYMBOL_OBJECT_BEGIN        '{'
+#define  JAK_MARKER_SYMBOL_OBJECT_END          '}'
+#define  JAK_MARKER_SYMBOL_PROP_NULL           'n'
+#define  JAK_MARKER_SYMBOL_PROP_BOOLEAN        'b'
+#define  JAK_MARKER_SYMBOL_PROP_INT8           'c'
+#define  JAK_MARKER_SYMBOL_PROP_INT16          's'
+#define  JAK_MARKER_SYMBOL_PROP_INT32          'i'
+#define  JAK_MARKER_SYMBOL_PROP_INT64          'l'
+#define  JAK_MARKER_SYMBOL_PROP_UINT8          'r'
+#define  JAK_MARKER_SYMBOL_PROP_UINT16         'h'
+#define  JAK_MARKER_SYMBOL_PROP_UINT32         'e'
+#define  JAK_MARKER_SYMBOL_PROP_UINT64         'g'
+#define  JAK_MARKER_SYMBOL_PROP_REAL           'f'
+#define  JAK_MARKER_SYMBOL_PROP_TEXT           't'
+#define  JAK_MARKER_SYMBOL_PROP_OBJECT         'o'
+#define  JAK_MARKER_SYMBOL_PROP_NULL_ARRAY     'N'
+#define  JAK_MARKER_SYMBOL_PROP_BOOLEAN_ARRAY  'B'
+#define  JAK_MARKER_SYMBOL_PROP_INT8_ARRAY     'C'
+#define  JAK_MARKER_SYMBOL_PROP_INT16_ARRAY    'S'
+#define  JAK_MARKER_SYMBOL_PROP_INT32_ARRAY    'I'
+#define  JAK_MARKER_SYMBOL_PROP_INT64_ARRAY    'L'
+#define  JAK_MARKER_SYMBOL_PROP_UINT8_ARRAY    'R'
+#define  JAK_MARKER_SYMBOL_PROP_UINT16_ARRAY   'H'
+#define  JAK_MARKER_SYMBOL_PROP_UINT32_ARRAY   'E'
+#define  JAK_MARKER_SYMBOL_PROP_UINT64_ARRAY   'G'
+#define  JAK_MARKER_SYMBOL_PROP_REAL_ARRAY     'F'
+#define  JAK_MARKER_SYMBOL_PROP_TEXT_ARRAY     'T'
+#define  JAK_MARKER_SYMBOL_PROP_OBJECT_ARRAY   'O'
+#define  JAK_MARKER_SYMBOL_EMBEDDED_STR_DIC    'D'
+#define  JAK_MARKER_SYMBOL_EMBEDDED_STR        '-'
+#define  JAK_MARKER_SYMBOL_COLUMN_GROUP        'X'
+#define  JAK_MARKER_SYMBOL_COLUMN              'x'
+#define  JAK_MARKER_SYMBOL_HUFFMAN_DIC_ENTRY   'd'
+#define  JAK_MARKER_SYMBOL_RECORD_HEADER       'r'
+#define  JAK_MARKER_SYMBOL_HASHTABLE_HEADER    '#'
+#define  JAK_MARKER_SYMBOL_VECTOR_HEADER       '|'
 
 #define JAK_declare_and_init(type, name)                                                                               \
         type name;                                                                                                     \
@@ -276,9 +276,9 @@ JAK_func_unused static const char *basic_type_to_system_type_str(enum field_type
 #define JAK_cast(type, name, src)                                                                                      \
       type name = (type) src
 
-#define unused(x)   (void)(x);
+#define JAK_UNUSED(x)   (void)(x);
 
-#define JAK_BUILT_IN(x)   JAK_func_unused x
+#define JAK_BUILT_IN(x)   JAK_FUNC_UNUSED x
 
 #define ofType(x) /** a convenience way to write types for generic containers; no effect than just a visual one */
 #define ofMapping(x, y) /** a convenience way to write types for generic containers; no effect than just a visual one */
@@ -294,7 +294,7 @@ JAK_func_unused static const char *basic_type_to_system_type_str(enum field_type
 #define error_if_null(x)                                                                                               \
 {                                                                                                                      \
     if (!(x)) {                                                                                                        \
-        struct err err;                                                                                                \
+        struct jak_error err;                                                                                                \
         error_init(&err);                                                                                              \
         error(&err, JAK_ERR_NULLPTR);                                                                                  \
         error_print_to_stderr(&err);                                                                                   \
@@ -330,7 +330,7 @@ JAK_func_unused static const char *basic_type_to_system_type_str(enum field_type
 #define JAK_FORWARD_STRUCT_DECL(x) struct x;
 
 #define JAK_bit_num_of(x)             (sizeof(x) * 8)
-#define JAK_set_bit(n)                ( ((u32) 1) << (n) )
+#define JAK_set_bit(n)                ( ((jak_u32) 1) << (n) )
 #define JAK_set_bits(x, mask)         ( x |=  (mask) )
 #define JAK_unset_bits(x, mask)       ( x &= ~(mask) )
 #define JAK_are_bits_set(mask, bit)   (((bit) & mask ) == (bit))

@@ -24,19 +24,19 @@
 #include <jak_archive_io.h>
 
 struct io_context {
-    struct err err;
+    struct jak_error err;
     FILE *file;
     struct spinlock lock;
-    offset_t last_pos;
+    jak_offset_t last_pos;
 };
 
-bool io_context_create(struct io_context **context, struct err *err, const char *file_path)
+bool io_context_create(struct io_context **context, struct jak_error *err, const char *file_path)
 {
         error_if_null(context);
         error_if_null(err);
         error_if_null(file_path);
 
-        struct io_context *result = JAK_malloc(sizeof(struct io_context));
+        struct io_context *result = JAK_MALLOC(sizeof(struct io_context));
 
         if (!result) {
                 error(err, JAK_ERR_MALLOCERR);
@@ -58,7 +58,7 @@ bool io_context_create(struct io_context **context, struct err *err, const char 
         }
 }
 
-struct err *io_context_get_error(struct io_context *context)
+struct jak_error *io_context_get_error(struct io_context *context)
 {
         return context ? &context->err : NULL;
 }

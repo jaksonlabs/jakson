@@ -35,7 +35,7 @@ void priority_queue_free(struct jak_priority_queue *queue)
 
 void priority_queue_resize(struct jak_priority_queue *queue, size_t size)
 {
-        struct priority_queue_element_info *new_data = JAK_malloc(sizeof(struct priority_queue_element_info) * size);
+        struct priority_queue_element_info *new_data = JAK_MALLOC(sizeof(struct priority_queue_element_info) * size);
 
         memcpy(new_data, queue->data, sizeof(struct priority_queue_element_info) * queue->num_elements);
         free(queue->data);

@@ -44,17 +44,17 @@ struct sync_extra {
 
 static bool this_drop(struct jak_string_dict *self);
 
-static bool this_insert(struct jak_string_dict *self, field_sid_t **out, char *const *strings, size_t num_strings,
+static bool this_insert(struct jak_string_dict *self, jak_field_sid **out, char *const *strings, size_t num_strings,
                         size_t num_threads);
 
-static bool this_remove(struct jak_string_dict *self, field_sid_t *strings, size_t num_strings);
+static bool this_remove(struct jak_string_dict *self, jak_field_sid *strings, size_t num_strings);
 
-static bool this_locate_safe(struct jak_string_dict *self, field_sid_t **out, bool **found_mask, size_t *num_not_found,
+static bool this_locate_safe(struct jak_string_dict *self, jak_field_sid **out, bool **found_mask, size_t *num_not_found,
                              char *const *keys, size_t num_keys);
 
-static bool this_locate_fast(struct jak_string_dict *self, field_sid_t **out, char *const *keys, size_t num_keys);
+static bool this_locate_fast(struct jak_string_dict *self, jak_field_sid **out, char *const *keys, size_t num_keys);
 
-static char **this_extract(struct jak_string_dict *self, const field_sid_t *ids, size_t num_ids);
+static char **this_extract(struct jak_string_dict *self, const jak_field_sid *ids, size_t num_ids);
 
 static bool this_free(struct jak_string_dict *self, void *ptr);
 
@@ -65,7 +65,7 @@ static bool this_counters(struct jak_string_dict *self, struct jak_str_hash_coun
 static bool this_num_distinct(struct jak_string_dict *self, size_t *num);
 
 static bool this_get_contents(struct jak_string_dict *self, struct vector ofType (char *) *strings,
-                              struct vector ofType(field_sid_t) *string_ids);
+                              struct vector ofType(jak_field_sid) *string_ids);
 
 static void lock(struct jak_string_dict *self);
 
@@ -76,16 +76,16 @@ static int create_extra(struct jak_string_dict *self, size_t capacity, size_t nu
 
 static struct sync_extra *this_extra(struct jak_string_dict *self);
 
-static int freelist_pop(field_sid_t *out, struct jak_string_dict *self);
+static int freelist_pop(jak_field_sid *out, struct jak_string_dict *self);
 
-static int freelist_push(struct jak_string_dict *self, field_sid_t idx);
+static int freelist_push(struct jak_string_dict *self, jak_field_sid idx);
 
 int encode_sync_create(struct jak_string_dict *dic, size_t capacity, size_t num_indx_buckets, size_t num_index_bucket_cap,
-                       size_t num_threads, const struct allocator *alloc)
+                       size_t num_threads, const struct jak_allocator *alloc)
 {
         error_if_null(dic);
 
-        JAK_check_success(alloc_this_or_std(&dic->alloc, alloc));
+        JAK_check_success(jak_alloc_this_or_std(&dic->alloc, alloc));
 
         dic->tag = SYNC;
         dic->drop = this_drop;
@@ -121,23 +121,23 @@ static void unlock(struct jak_string_dict *self)
 static int create_extra(struct jak_string_dict *self, size_t capacity, size_t num_index_buckets, size_t num_index_bucket_cap,
                         size_t num_threads)
 {
-        self->extra = alloc_malloc(&self->alloc, sizeof(struct sync_extra));
+        self->extra = jak_alloc_malloc(&self->alloc, sizeof(struct sync_extra));
         struct sync_extra *extra = this_extra(self);
         spin_init(&extra->lock);
         JAK_check_success(vec_create(&extra->contents, &self->alloc, sizeof(struct entry), capacity));
-        JAK_check_success(vec_create(&extra->freelist, &self->alloc, sizeof(field_sid_t), capacity));
+        JAK_check_success(vec_create(&extra->freelist, &self->alloc, sizeof(jak_field_sid), capacity));
         struct entry empty = {.str    = NULL, .in_use = false};
         for (size_t i = 0; i < capacity; i++) {
                 JAK_check_success(vec_push(&extra->contents, &empty, 1));
                 freelist_push(self, i);
         }
-        unused(num_threads);
+        JAK_UNUSED(num_threads);
 
-        struct allocator hashtable_alloc;
+        struct jak_allocator hashtable_alloc;
 #if defined(JAK_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
         CHECK_SUCCESS(allocatorTrace(&hashtable_alloc));
 #else
-        JAK_check_success(alloc_this_or_std(&hashtable_alloc, &self->alloc));
+        JAK_check_success(jak_alloc_this_or_std(&hashtable_alloc, &self->alloc));
 #endif
 
         JAK_check_success(strhash_create_inmemory(&extra->index,
@@ -153,7 +153,7 @@ static struct sync_extra *this_extra(struct jak_string_dict *self)
         return (struct sync_extra *) self->extra;
 }
 
-static int freelist_pop(field_sid_t *out, struct jak_string_dict *self)
+static int freelist_pop(jak_field_sid *out, struct jak_string_dict *self)
 {
         assert (self->tag == SYNC);
         struct sync_extra *extra = this_extra(self);
@@ -169,11 +169,11 @@ static int freelist_pop(field_sid_t *out, struct jak_string_dict *self)
                         JAK_check_success(vec_push(&extra->contents, &empty, 1));
                 }
         }
-        *out = *(field_sid_t *) vec_pop(&extra->freelist);
+        *out = *(jak_field_sid *) vec_pop(&extra->freelist);
         return true;
 }
 
-static int freelist_push(struct jak_string_dict *self, field_sid_t idx)
+static int freelist_push(struct jak_string_dict *self, jak_field_sid idx)
 {
         assert (self->tag == SYNC);
         struct sync_extra *extra = this_extra(self);
@@ -193,7 +193,7 @@ static bool this_drop(struct jak_string_dict *self)
                 struct entry *entry = entries + i;
                 if (entry->in_use) {
                         assert (entry->str);
-                        alloc_free(&self->alloc, entry->str);
+                        jak_alloc_free(&self->alloc, entry->str);
                         entry->str = NULL;
                 }
         }
@@ -201,34 +201,34 @@ static bool this_drop(struct jak_string_dict *self)
         vec_drop(&extra->freelist);
         vec_drop(&extra->contents);
         strhash_drop(&extra->index);
-        alloc_free(&self->alloc, self->extra);
+        jak_alloc_free(&self->alloc, self->extra);
 
         return true;
 }
 
-static bool this_insert(struct jak_string_dict *self, field_sid_t **out, char *const *strings, size_t num_strings,
+static bool this_insert(struct jak_string_dict *self, jak_field_sid **out, char *const *strings, size_t num_strings,
                         size_t num_threads)
 {
         JAK_trace(STRING_DIC_SYNC_TAG, "local string dictionary insertion invoked for %zu strings", num_strings);
         timestamp_t begin = time_now_wallclock();
 
-        unused(num_threads);
+        JAK_UNUSED(num_threads);
 
         JAK_check_tag(self->tag, SYNC)
         lock(self);
 
         struct sync_extra *extra = this_extra(self);
 
-        struct allocator hashtable_alloc;
+        struct jak_allocator hashtable_alloc;
 #if defined(JAK_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
         CHECK_SUCCESS(allocatorTrace(&hashtable_alloc));
 #else
-        JAK_check_success(alloc_this_or_std(&hashtable_alloc, &self->alloc));
+        JAK_check_success(jak_alloc_this_or_std(&hashtable_alloc, &self->alloc));
 #endif
 
-        field_sid_t *ids_out = alloc_malloc(&hashtable_alloc, num_strings * sizeof(field_sid_t));
+        jak_field_sid *ids_out = jak_alloc_malloc(&hashtable_alloc, num_strings * sizeof(jak_field_sid));
         bool *found_mask;
-        field_sid_t *values;
+        jak_field_sid *values;
         size_t num_not_found;
 
         /** query index for strings to get a boolean mask which strings are new and which must be added */
@@ -255,11 +255,11 @@ static bool this_insert(struct jak_string_dict *self, field_sid_t **out, char *c
                          * since this insertion batch may contain duplicate string, querying for already inserted strings
                          * must be done anyway for each string in the insertion batch that is inserted. */
 
-                        field_sid_t string_id = 0;
+                        jak_field_sid string_id = 0;
                         const char *key = (const char *) (strings[i]);
 
                         bool found = false;
-                        field_sid_t value;
+                        jak_field_sid value;
 
                         /** Query the bloom_t if the keys was already seend. If the filter returns "yes", a lookup
                          * is requried since the filter maybe made a mistake. Of the filter returns "no", the
@@ -301,25 +301,25 @@ static bool this_insert(struct jak_string_dict *self, field_sid_t **out, char *c
         }
 
         /** set potential non-null out parameters */
-        JAK_optional_set_or_else(out, ids_out, alloc_free(&self->alloc, ids_out));
+        JAK_optional_set_or_else(out, ids_out, jak_alloc_free(&self->alloc, ids_out));
 
         /** cleanup */
-        alloc_free(&hashtable_alloc, found_mask);
-        alloc_free(&hashtable_alloc, values);
+        jak_alloc_free(&hashtable_alloc, found_mask);
+        jak_alloc_free(&hashtable_alloc, values);
         bloom_drop(&bloom_t);
 
         unlock(self);
 
         timestamp_t end = time_now_wallclock();
-        unused(begin);
-        unused(end);
+        JAK_UNUSED(begin);
+        JAK_UNUSED(end);
         JAK_info(STRING_DIC_SYNC_TAG, "insertion operation done: %f seconds spent here", (end - begin) / 1000.0f)
 
         return true;
 
 }
 
-static bool this_remove(struct jak_string_dict *self, field_sid_t *strings, size_t num_strings)
+static bool this_remove(struct jak_string_dict *self, jak_field_sid *strings, size_t num_strings)
 {
         error_if_null(self);
         error_if_null(strings);
@@ -330,20 +330,20 @@ static bool this_remove(struct jak_string_dict *self, field_sid_t *strings, size
         struct sync_extra *extra = this_extra(self);
 
         size_t num_strings_to_delete = 0;
-        char **string_to_delete = alloc_malloc(&self->alloc, num_strings * sizeof(char *));
-        field_sid_t *string_ids_to_delete = alloc_malloc(&self->alloc, num_strings * sizeof(field_sid_t));
+        char **string_to_delete = jak_alloc_malloc(&self->alloc, num_strings * sizeof(char *));
+        jak_field_sid *string_ids_to_delete = jak_alloc_malloc(&self->alloc, num_strings * sizeof(jak_field_sid));
 
         /** remove strings from contents JAK_vector, and skip duplicates */
         for (size_t i = 0; i < num_strings; i++) {
-                field_sid_t field_sid_t = strings[i];
-                struct entry *entry = (struct entry *) vec_data(&extra->contents) + field_sid_t;
+                jak_field_sid jak_field_sid = strings[i];
+                struct entry *entry = (struct entry *) vec_data(&extra->contents) + jak_field_sid;
                 if (likely(entry->in_use)) {
                         string_to_delete[num_strings_to_delete] = entry->str;
                         string_ids_to_delete[num_strings_to_delete] = strings[i];
                         entry->str = NULL;
                         entry->in_use = false;
                         num_strings_to_delete++;
-                        JAK_check_success(freelist_push(self, field_sid_t));
+                        JAK_check_success(freelist_push(self, jak_field_sid));
                 }
         }
 
@@ -356,14 +356,14 @@ static bool this_remove(struct jak_string_dict *self, field_sid_t *strings, size
         }
 
         /** cleanup */
-        alloc_free(&self->alloc, string_to_delete);
-        alloc_free(&self->alloc, string_ids_to_delete);
+        jak_alloc_free(&self->alloc, string_to_delete);
+        jak_alloc_free(&self->alloc, string_ids_to_delete);
 
         unlock(self);
         return true;
 }
 
-static bool this_locate_safe(struct jak_string_dict *self, field_sid_t **out, bool **found_mask, size_t *num_not_found,
+static bool this_locate_safe(struct jak_string_dict *self, jak_field_sid **out, bool **found_mask, size_t *num_not_found,
                              char *const *keys, size_t num_keys)
 {
         timestamp_t begin = time_now_wallclock();
@@ -383,14 +383,14 @@ static bool this_locate_safe(struct jak_string_dict *self, field_sid_t **out, bo
         unlock(self);
 
         timestamp_t end = time_now_wallclock();
-        unused(begin);
-        unused(end);
+        JAK_UNUSED(begin);
+        JAK_UNUSED(end);
         JAK_trace(STRING_DIC_SYNC_TAG, "'locate_safe' function done: %f seconds spent here", (end - begin) / 1000.0f)
 
         return status;
 }
 
-static bool this_locate_fast(struct jak_string_dict *self, field_sid_t **out, char *const *keys, size_t num_keys)
+static bool this_locate_fast(struct jak_string_dict *self, jak_field_sid **out, char *const *keys, size_t num_keys)
 {
         JAK_check_tag(self->tag, SYNC)
 
@@ -406,7 +406,7 @@ static bool this_locate_fast(struct jak_string_dict *self, field_sid_t **out, ch
         return result;
 }
 
-static char **this_extract(struct jak_string_dict *self, const field_sid_t *ids, size_t num_ids)
+static char **this_extract(struct jak_string_dict *self, const jak_field_sid *ids, size_t num_ids)
 {
         if (unlikely(!self || !ids || num_ids == 0 || self->tag != SYNC)) {
                 return NULL;
@@ -414,25 +414,25 @@ static char **this_extract(struct jak_string_dict *self, const field_sid_t *ids,
 
         lock(self);
 
-        struct allocator hashtable_alloc;
+        struct jak_allocator hashtable_alloc;
 #if defined(JAK_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
         allocatorTrace(&hashtable_alloc);
 #else
-        alloc_this_or_std(&hashtable_alloc, &self->alloc);
+        jak_alloc_this_or_std(&hashtable_alloc, &self->alloc);
 #endif
 
         struct sync_extra *extra = this_extra(self);
-        char **result = alloc_malloc(&hashtable_alloc, num_ids * sizeof(char *));
+        char **result = jak_alloc_malloc(&hashtable_alloc, num_ids * sizeof(char *));
         struct entry *entries = (struct entry *) vec_data(&extra->contents);
 
         /** Optimization: notify the kernel that the content list is accessed randomly (since hash based access)*/
         vec_memadvice(&extra->contents, MADV_RANDOM | MADV_WILLNEED);
 
         for (size_t i = 0; i < num_ids; i++) {
-                field_sid_t field_sid_t = ids[i];
-                assert(field_sid_t < vec_length(&extra->contents));
-                assert(field_sid_t == JAK_NULL_ENCODED_STRING || entries[field_sid_t].in_use);
-                result[i] = field_sid_t != JAK_NULL_ENCODED_STRING ? entries[field_sid_t].str : JAK_NULL_TEXT;
+                jak_field_sid jak_field_sid = ids[i];
+                assert(jak_field_sid < vec_length(&extra->contents));
+                assert(jak_field_sid == JAK_NULL_ENCODED_STRING || entries[jak_field_sid].in_use);
+                result[i] = jak_field_sid != JAK_NULL_ENCODED_STRING ? entries[jak_field_sid].str : JAK_NULL_TEXT;
         }
 
         unlock(self);
@@ -441,16 +441,16 @@ static char **this_extract(struct jak_string_dict *self, const field_sid_t *ids,
 
 static bool this_free(struct jak_string_dict *self, void *ptr)
 {
-        unused(self);
+        JAK_UNUSED(self);
 
-        struct allocator hashtable_alloc;
+        struct jak_allocator hashtable_alloc;
 #if defined(JAK_CONFIG_TRACE_STRING_DIC_ALLOC) && !defined(NDEBUG)
         CHECK_SUCCESS(allocatorTrace(&hashtable_alloc));
 #else
-        JAK_check_success(alloc_this_or_std(&hashtable_alloc, &self->alloc));
+        JAK_check_success(jak_alloc_this_or_std(&hashtable_alloc, &self->alloc));
 #endif
 
-        return alloc_free(&hashtable_alloc, ptr);
+        return jak_alloc_free(&hashtable_alloc, ptr);
 }
 
 static bool this_reset_counters(struct jak_string_dict *self)
@@ -478,12 +478,12 @@ static bool this_num_distinct(struct jak_string_dict *self, size_t *num)
 }
 
 static bool this_get_contents(struct jak_string_dict *self, struct vector ofType (char *) *strings,
-                              struct vector ofType(field_sid_t) *string_ids)
+                              struct vector ofType(jak_field_sid) *string_ids)
 {
         JAK_check_tag(self->tag, SYNC);
         struct sync_extra *extra = this_extra(self);
 
-        for (field_sid_t i = 0; i < extra->contents.num_elems; i++) {
+        for (jak_field_sid i = 0; i < extra->contents.num_elems; i++) {
                 const struct entry *e = vec_get(&extra->contents, i, struct entry);
                 if (e->in_use) {
                         vec_push(strings, &e->str, 1);

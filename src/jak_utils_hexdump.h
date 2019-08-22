@@ -27,9 +27,9 @@
 
 JAK_BEGIN_DECL
 
-bool hexdump(struct jak_string *dst, const void *base, u64 nbytes);
+bool hexdump(struct jak_string *dst, const void *base, jak_u64 nbytes);
 
-bool hexdump_print(FILE *file, const void *base, u64 nbytes);
+bool hexdump_print(FILE *file, const void *base, jak_u64 nbytes);
 
 JAK_END_DECL
 
