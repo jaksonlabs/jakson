@@ -3,14 +3,14 @@
 #include <cmath>
 #include <fstream>
 
-#include <ark-js/shared/stdx/priority_queue.h>
-#include <ark-js/shared/async/thread-pool.h>
-#include <ark-js/shared/async/thread-pool-monitor.h>
+#include <jak_priority_queue.h>
+#include <jak_thread_pool.h>
+#include <jak_thread_pool_monitor.h>
 
 // Test if push and isEmpty works correkt
 TEST(PriorityQueue, IsEmpty)
 {
-        struct priority_queue queue;
+        struct jak_priority_queue queue;
         priority_queue_init(&queue);
 
         EXPECT_EQ(priority_queue_is_empty(&queue), 1);
@@ -27,7 +27,7 @@ TEST(PriorityQueue, IsEmpty)
 // Test if push with Prio works correktly
 TEST(PriorityQueue, PushPrio)
 {
-        struct priority_queue queue;
+        struct jak_priority_queue queue;
         priority_queue_init(&queue);
 
         for (size_t i = 1; i < 5; ++i) {

@@ -8512,18 +8512,18 @@ struct duk_hproxy {
  * only during init phases).
  */
 #if defined(DUK_USE_REFERENCE_COUNTING)
-#define DUK_HEAP_MARK_AND_SWEEP_TRIGGER_MULT              12800L  /* 50x heap size */
-#define DUK_HEAP_MARK_AND_SWEEP_TRIGGER_ADD               1024L
-#define DUK_HEAP_MARK_AND_SWEEP_TRIGGER_SKIP              256L
+#define DUK_HEAP_MJAK_AND_SWEEP_TRIGGER_MULT              12800L  /* 50x heap size */
+#define DUK_HEAP_MJAK_AND_SWEEP_TRIGGER_ADD               1024L
+#define DUK_HEAP_MJAK_AND_SWEEP_TRIGGER_SKIP              256L
 #else
-#define DUK_HEAP_MARK_AND_SWEEP_TRIGGER_MULT              256L    /* 1x heap size */
-#define DUK_HEAP_MARK_AND_SWEEP_TRIGGER_ADD               1024L
-#define DUK_HEAP_MARK_AND_SWEEP_TRIGGER_SKIP              256L
+#define DUK_HEAP_MJAK_AND_SWEEP_TRIGGER_MULT              256L    /* 1x heap size */
+#define DUK_HEAP_MJAK_AND_SWEEP_TRIGGER_ADD               1024L
+#define DUK_HEAP_MJAK_AND_SWEEP_TRIGGER_SKIP              256L
 #endif
 
 /* GC torture. */
 #if defined(DUK_USE_GC_TORTURE)
-#define DUK_GC_TORTURE(heap) do { duk_heap_mark_and_sweep((heap), 0); } while (0)
+#define DUK_GC_TORTURE(heap) do { duk_heap_mJAK_and_sweep((heap), 0); } while (0)
 #else
 #define DUK_GC_TORTURE(heap) do { } while (0)
 #endif
@@ -9105,7 +9105,7 @@ DUK_INTERNAL_DECL void duk_heap_run_finalizer(duk_heap *heap, duk_hobject *obj);
 DUK_INTERNAL_DECL void duk_heap_process_finalize_list(duk_heap *heap);
 #endif  /* DUK_USE_FINALIZER_SUPPORT */
 
-DUK_INTERNAL_DECL void duk_heap_mark_and_sweep(duk_heap *heap, duk_small_uint_t flags);
+DUK_INTERNAL_DECL void duk_heap_mJAK_and_sweep(duk_heap *heap, duk_small_uint_t flags);
 
 DUK_INTERNAL_DECL duk_uint32_t duk_heap_hashstring(duk_heap *heap, const duk_uint8_t *str, duk_size_t len);
 
@@ -16625,7 +16625,7 @@ DUK_EXTERNAL void duk_gc(duk_hthread *thr, duk_uint_t flags) {
 	DUK_D(DUK_DPRINT("mark-and-sweep requested by application"));
 	DUK_ASSERT(DUK_GC_COMPACT == DUK_MS_FLAG_EMERGENCY);  /* Compact flag is 1:1 with emergency flag which forces compaction. */
 	ms_flags = (duk_small_uint_t) flags;
-	duk_heap_mark_and_sweep(heap, ms_flags);
+	duk_heap_mJAK_and_sweep(heap, ms_flags);
 }
 #line 1 "duk_api_object.c"
 /*
@@ -32174,7 +32174,7 @@ DUK_INTERNAL duk_ret_t duk_bi_duktape_object_gc(duk_hthread *thr) {
 	duk_small_uint_t flags;
 
 	flags = (duk_small_uint_t) duk_get_uint(thr, 0);
-	duk_heap_mark_and_sweep(thr->heap, flags);
+	duk_heap_mJAK_and_sweep(thr->heap, flags);
 
 	/* XXX: Not sure what the best return value would be in the API.
 	 * Return true for now.
@@ -47676,12 +47676,12 @@ DUK_INTERNAL void duk_heap_free(duk_heap *heap) {
 	DUK_D(DUK_DPRINT("execute finalizers before freeing heap"));
 	DUK_ASSERT(heap->pf_skip_finalizers == 0);
 	DUK_D(DUK_DPRINT("forced gc #1 in heap destruction"));
-	duk_heap_mark_and_sweep(heap, 0);
+	duk_heap_mJAK_and_sweep(heap, 0);
 	DUK_D(DUK_DPRINT("forced gc #2 in heap destruction"));
-	duk_heap_mark_and_sweep(heap, 0);
+	duk_heap_mJAK_and_sweep(heap, 0);
 	DUK_D(DUK_DPRINT("forced gc #3 in heap destruction (don't run finalizers)"));
 	heap->pf_skip_finalizers = 1;
-	duk_heap_mark_and_sweep(heap, 0);  /* Skip finalizers; queue finalizable objects to heap_allocated. */
+	duk_heap_mJAK_and_sweep(heap, 0);  /* Skip finalizers; queue finalizable objects to heap_allocated. */
 
 	/* There are never objects in refzero_list at this point, or at any
 	 * point beyond a DECREF (even a DECREF_NORZ).  Since Duktape 2.1
@@ -49102,30 +49102,30 @@ DUK_INTERNAL duk_uint32_t duk_heap_hashstring(duk_heap *heap, const duk_uint8_t 
 
 /* #include duk_internal.h -> already included */
 
-DUK_LOCAL_DECL void duk__mark_heaphdr(duk_heap *heap, duk_heaphdr *h);
-DUK_LOCAL_DECL void duk__mark_heaphdr_nonnull(duk_heap *heap, duk_heaphdr *h);
-DUK_LOCAL_DECL void duk__mark_tval(duk_heap *heap, duk_tval *tv);
-DUK_LOCAL_DECL void duk__mark_tvals(duk_heap *heap, duk_tval *tv, duk_idx_t count);
+DUK_LOCAL_DECL void duk__mJAK_heaphdr(duk_heap *heap, duk_heaphdr *h);
+DUK_LOCAL_DECL void duk__mJAK_heaphdr_nonnull(duk_heap *heap, duk_heaphdr *h);
+DUK_LOCAL_DECL void duk__mJAK_tval(duk_heap *heap, duk_tval *tv);
+DUK_LOCAL_DECL void duk__mJAK_tvals(duk_heap *heap, duk_tval *tv, duk_idx_t count);
 
 /*
  *  Marking functions for heap types: mark children recursively.
  */
 
-DUK_LOCAL void duk__mark_hstring(duk_heap *heap, duk_hstring *h) {
+DUK_LOCAL void duk__mJAK_hstring(duk_heap *heap, duk_hstring *h) {
 	DUK_UNREF(heap);
 	DUK_UNREF(h);
 
-	DUK_DDD(DUK_DDDPRINT("duk__mark_hstring: %p", (void *) h));
+	DUK_DDD(DUK_DDDPRINT("duk__mJAK_hstring: %p", (void *) h));
 	DUK_ASSERT(h);
 	DUK_HSTRING_ASSERT_VALID(h);
 
 	/* nothing to process */
 }
 
-DUK_LOCAL void duk__mark_hobject(duk_heap *heap, duk_hobject *h) {
+DUK_LOCAL void duk__mJAK_hobject(duk_heap *heap, duk_hobject *h) {
 	duk_uint_fast32_t i;
 
-	DUK_DDD(DUK_DDDPRINT("duk__mark_hobject: %p", (void *) h));
+	DUK_DDD(DUK_DDDPRINT("duk__mJAK_hobject: %p", (void *) h));
 
 	DUK_ASSERT(h);
 	DUK_HOBJECT_ASSERT_VALID(h);
@@ -49137,22 +49137,22 @@ DUK_LOCAL void duk__mark_hobject(duk_heap *heap, duk_hobject *h) {
 		if (key == NULL) {
 			continue;
 		}
-		duk__mark_heaphdr_nonnull(heap, (duk_heaphdr *) key);
+		duk__mJAK_heaphdr_nonnull(heap, (duk_heaphdr *) key);
 		if (DUK_HOBJECT_E_SLOT_IS_ACCESSOR(heap, h, i)) {
-			duk__mark_heaphdr(heap, (duk_heaphdr *) DUK_HOBJECT_E_GET_VALUE_PTR(heap, h, i)->a.get);
-			duk__mark_heaphdr(heap, (duk_heaphdr *) DUK_HOBJECT_E_GET_VALUE_PTR(heap, h, i)->a.set);
+			duk__mJAK_heaphdr(heap, (duk_heaphdr *) DUK_HOBJECT_E_GET_VALUE_PTR(heap, h, i)->a.get);
+			duk__mJAK_heaphdr(heap, (duk_heaphdr *) DUK_HOBJECT_E_GET_VALUE_PTR(heap, h, i)->a.set);
 		} else {
-			duk__mark_tval(heap, &DUK_HOBJECT_E_GET_VALUE_PTR(heap, h, i)->v);
+			duk__mJAK_tval(heap, &DUK_HOBJECT_E_GET_VALUE_PTR(heap, h, i)->v);
 		}
 	}
 
 	for (i = 0; i < (duk_uint_fast32_t) DUK_HOBJECT_GET_ASIZE(h); i++) {
-		duk__mark_tval(heap, DUK_HOBJECT_A_GET_VALUE_PTR(heap, h, i));
+		duk__mJAK_tval(heap, DUK_HOBJECT_A_GET_VALUE_PTR(heap, h, i));
 	}
 
 	/* Hash part is a 'weak reference' and does not contribute. */
 
-	duk__mark_heaphdr(heap, (duk_heaphdr *) DUK_HOBJECT_GET_PROTOTYPE(heap, h));
+	duk__mJAK_heaphdr(heap, (duk_heaphdr *) DUK_HOBJECT_GET_PROTOTYPE(heap, h));
 
 	/* Fast path for objects which don't have a subclass struct, or have a
 	 * subclass struct but nothing that needs marking in the subclass struct.
@@ -49175,22 +49175,22 @@ DUK_LOCAL void duk__mark_hobject(duk_heap *heap, duk_hobject *h) {
 		 * contains a reference.
 		 */
 
-		duk__mark_heaphdr(heap, (duk_heaphdr *) DUK_HCOMPFUNC_GET_DATA(heap, f));
-		duk__mark_heaphdr(heap, (duk_heaphdr *) DUK_HCOMPFUNC_GET_LEXENV(heap, f));
-		duk__mark_heaphdr(heap, (duk_heaphdr *) DUK_HCOMPFUNC_GET_VARENV(heap, f));
+		duk__mJAK_heaphdr(heap, (duk_heaphdr *) DUK_HCOMPFUNC_GET_DATA(heap, f));
+		duk__mJAK_heaphdr(heap, (duk_heaphdr *) DUK_HCOMPFUNC_GET_LEXENV(heap, f));
+		duk__mJAK_heaphdr(heap, (duk_heaphdr *) DUK_HCOMPFUNC_GET_VARENV(heap, f));
 
 		if (DUK_HCOMPFUNC_GET_DATA(heap, f) != NULL) {
 			tv = DUK_HCOMPFUNC_GET_CONSTS_BASE(heap, f);
 			tv_end = DUK_HCOMPFUNC_GET_CONSTS_END(heap, f);
 			while (tv < tv_end) {
-				duk__mark_tval(heap, tv);
+				duk__mJAK_tval(heap, tv);
 				tv++;
 			}
 
 			fn = DUK_HCOMPFUNC_GET_FUNCS_BASE(heap, f);
 			fn_end = DUK_HCOMPFUNC_GET_FUNCS_END(heap, f);
 			while (fn < fn_end) {
-				duk__mark_heaphdr_nonnull(heap, (duk_heaphdr *) *fn);
+				duk__mJAK_heaphdr_nonnull(heap, (duk_heaphdr *) *fn);
 				fn++;
 			}
 		} else {
@@ -49200,31 +49200,31 @@ DUK_LOCAL void duk__mark_hobject(duk_heap *heap, duk_hobject *h) {
 	} else if (DUK_HOBJECT_IS_DECENV(h)) {
 		duk_hdecenv *e = (duk_hdecenv *) h;
 		DUK_HDECENV_ASSERT_VALID(e);
-		duk__mark_heaphdr(heap, (duk_heaphdr *) e->thread);
-		duk__mark_heaphdr(heap, (duk_heaphdr *) e->varmap);
+		duk__mJAK_heaphdr(heap, (duk_heaphdr *) e->thread);
+		duk__mJAK_heaphdr(heap, (duk_heaphdr *) e->varmap);
 	} else if (DUK_HOBJECT_IS_OBJENV(h)) {
 		duk_hobjenv *e = (duk_hobjenv *) h;
 		DUK_HOBJENV_ASSERT_VALID(e);
-		duk__mark_heaphdr_nonnull(heap, (duk_heaphdr *) e->target);
+		duk__mJAK_heaphdr_nonnull(heap, (duk_heaphdr *) e->target);
 #if defined(DUK_USE_BUFFEROBJECT_SUPPORT)
 	} else if (DUK_HOBJECT_IS_BUFOBJ(h)) {
 		duk_hbufobj *b = (duk_hbufobj *) h;
 		DUK_HBUFOBJ_ASSERT_VALID(b);
-		duk__mark_heaphdr(heap, (duk_heaphdr *) b->buf);
-		duk__mark_heaphdr(heap, (duk_heaphdr *) b->buf_prop);
+		duk__mJAK_heaphdr(heap, (duk_heaphdr *) b->buf);
+		duk__mJAK_heaphdr(heap, (duk_heaphdr *) b->buf_prop);
 #endif  /* DUK_USE_BUFFEROBJECT_SUPPORT */
 	} else if (DUK_HOBJECT_IS_BOUNDFUNC(h)) {
 		duk_hboundfunc *f = (duk_hboundfunc *) (void *) h;
 		DUK_HBOUNDFUNC_ASSERT_VALID(f);
-		duk__mark_tval(heap, &f->target);
-		duk__mark_tval(heap, &f->this_binding);
-		duk__mark_tvals(heap, f->args, f->nargs);
+		duk__mJAK_tval(heap, &f->target);
+		duk__mJAK_tval(heap, &f->this_binding);
+		duk__mJAK_tvals(heap, f->args, f->nargs);
 #if defined(DUK_USE_ES6_PROXY)
 	} else if (DUK_HOBJECT_IS_PROXY(h)) {
 		duk_hproxy *p = (duk_hproxy *) h;
 		DUK_HPROXY_ASSERT_VALID(p);
-		duk__mark_heaphdr_nonnull(heap, (duk_heaphdr *) p->target);
-		duk__mark_heaphdr_nonnull(heap, (duk_heaphdr *) p->handler);
+		duk__mJAK_heaphdr_nonnull(heap, (duk_heaphdr *) p->target);
+		duk__mJAK_heaphdr_nonnull(heap, (duk_heaphdr *) p->handler);
 #endif  /* DUK_USE_ES6_PROXY */
 	} else if (DUK_HOBJECT_IS_THREAD(h)) {
 		duk_hthread *t = (duk_hthread *) h;
@@ -49235,16 +49235,16 @@ DUK_LOCAL void duk__mark_hobject(duk_heap *heap, duk_hobject *h) {
 
 		tv = t->valstack;
 		while (tv < t->valstack_top) {
-			duk__mark_tval(heap, tv);
+			duk__mJAK_tval(heap, tv);
 			tv++;
 		}
 
 		for (act = t->callstack_curr; act != NULL; act = act->parent) {
-			duk__mark_heaphdr(heap, (duk_heaphdr *) DUK_ACT_GET_FUNC(act));
-			duk__mark_heaphdr(heap, (duk_heaphdr *) act->var_env);
-			duk__mark_heaphdr(heap, (duk_heaphdr *) act->lex_env);
+			duk__mJAK_heaphdr(heap, (duk_heaphdr *) DUK_ACT_GET_FUNC(act));
+			duk__mJAK_heaphdr(heap, (duk_heaphdr *) act->var_env);
+			duk__mJAK_heaphdr(heap, (duk_heaphdr *) act->lex_env);
 #if defined(DUK_USE_NONSTD_FUNC_CALLER_PROPERTY)
-			duk__mark_heaphdr(heap, (duk_heaphdr *) act->prev_caller);
+			duk__mJAK_heaphdr(heap, (duk_heaphdr *) act->prev_caller);
 #endif
 #if 0  /* nothing now */
 			for (cat = act->cat; cat != NULL; cat = cat->parent) {
@@ -49252,10 +49252,10 @@ DUK_LOCAL void duk__mark_hobject(duk_heap *heap, duk_hobject *h) {
 #endif
 		}
 
-		duk__mark_heaphdr(heap, (duk_heaphdr *) t->resumer);
+		duk__mJAK_heaphdr(heap, (duk_heaphdr *) t->resumer);
 
 		for (i = 0; i < DUK_NUM_BUILTINS; i++) {
-			duk__mark_heaphdr(heap, (duk_heaphdr *) t->builtins[i]);
+			duk__mJAK_heaphdr(heap, (duk_heaphdr *) t->builtins[i]);
 		}
 	} else {
 		/* We may come here if the object should have a FASTREFS flag
@@ -49268,8 +49268,8 @@ DUK_LOCAL void duk__mark_hobject(duk_heap *heap, duk_hobject *h) {
 }
 
 /* Mark any duk_heaphdr type.  Recursion tracking happens only here. */
-DUK_LOCAL void duk__mark_heaphdr(duk_heap *heap, duk_heaphdr *h) {
-	DUK_DDD(DUK_DDDPRINT("duk__mark_heaphdr %p, type %ld",
+DUK_LOCAL void duk__mJAK_heaphdr(duk_heap *heap, duk_heaphdr *h) {
+	DUK_DDD(DUK_DDDPRINT("duk__mJAK_heaphdr %p, type %ld",
 	                     (void *) h,
 	                     (h != NULL ? (long) DUK_HEAPHDR_GET_TYPE(h) : (long) -1)));
 
@@ -49299,7 +49299,7 @@ DUK_LOCAL void duk__mark_heaphdr(duk_heap *heap, duk_heaphdr *h) {
 
 	DUK_HEAPHDR_SET_REACHABLE(h);
 
-	if (heap->ms_recursion_depth >= DUK_USE_MARK_AND_SWEEP_RECLIMIT) {
+	if (heap->ms_recursion_depth >= DUK_USE_MJAK_AND_SWEEP_RECLIMIT) {
 		DUK_D(DUK_DPRINT("mark-and-sweep recursion limit reached, marking as temproot: %p", (void *) h));
 		DUK_HEAP_SET_MARKANDSWEEP_RECLIMIT_REACHED(heap);
 		DUK_HEAPHDR_SET_TEMPROOT(h);
@@ -49311,10 +49311,10 @@ DUK_LOCAL void duk__mark_heaphdr(duk_heap *heap, duk_heaphdr *h) {
 
 	switch (DUK_HEAPHDR_GET_TYPE(h)) {
 	case DUK_HTYPE_STRING:
-		duk__mark_hstring(heap, (duk_hstring *) h);
+		duk__mJAK_hstring(heap, (duk_hstring *) h);
 		break;
 	case DUK_HTYPE_OBJECT:
-		duk__mark_hobject(heap, (duk_hobject *) h);
+		duk__mJAK_hobject(heap, (duk_hobject *) h);
 		break;
 	case DUK_HTYPE_BUFFER:
 		/* nothing to mark */
@@ -49328,8 +49328,8 @@ DUK_LOCAL void duk__mark_heaphdr(duk_heap *heap, duk_heaphdr *h) {
 	heap->ms_recursion_depth--;
 }
 
-DUK_LOCAL void duk__mark_tval(duk_heap *heap, duk_tval *tv) {
-	DUK_DDD(DUK_DDDPRINT("duk__mark_tval %p", (void *) tv));
+DUK_LOCAL void duk__mJAK_tval(duk_heap *heap, duk_tval *tv) {
+	DUK_DDD(DUK_DDDPRINT("duk__mJAK_tval %p", (void *) tv));
 	if (tv == NULL) {
 		return;
 	}
@@ -49338,11 +49338,11 @@ DUK_LOCAL void duk__mark_tval(duk_heap *heap, duk_tval *tv) {
 		duk_heaphdr *h;
 		h = DUK_TVAL_GET_HEAPHDR(tv);
 		DUK_ASSERT(h != NULL);
-		duk__mark_heaphdr_nonnull(heap, h);
+		duk__mJAK_heaphdr_nonnull(heap, h);
 	}
 }
 
-DUK_LOCAL void duk__mark_tvals(duk_heap *heap, duk_tval *tv, duk_idx_t count) {
+DUK_LOCAL void duk__mJAK_tvals(duk_heap *heap, duk_tval *tv, duk_idx_t count) {
 	DUK_ASSERT(count == 0 || tv != NULL);
 
 	while (count-- > 0) {
@@ -49351,43 +49351,43 @@ DUK_LOCAL void duk__mark_tvals(duk_heap *heap, duk_tval *tv, duk_idx_t count) {
 			duk_heaphdr *h;
 			h = DUK_TVAL_GET_HEAPHDR(tv);
 			DUK_ASSERT(h != NULL);
-			duk__mark_heaphdr_nonnull(heap, h);
+			duk__mJAK_heaphdr_nonnull(heap, h);
 		}
 		tv++;
 	}
 }
 
 /* Mark any duk_heaphdr type, caller guarantees a non-NULL pointer. */
-DUK_LOCAL void duk__mark_heaphdr_nonnull(duk_heap *heap, duk_heaphdr *h) {
+DUK_LOCAL void duk__mJAK_heaphdr_nonnull(duk_heap *heap, duk_heaphdr *h) {
 	/* For now, just call the generic handler.  Change when call sites
 	 * are changed too.
 	 */
-	duk__mark_heaphdr(heap, h);
+	duk__mJAK_heaphdr(heap, h);
 }
 
 /*
  *  Mark the heap.
  */
 
-DUK_LOCAL void duk__mark_roots_heap(duk_heap *heap) {
+DUK_LOCAL void duk__mJAK_roots_heap(duk_heap *heap) {
 	duk_small_uint_t i;
 
-	DUK_DD(DUK_DDPRINT("duk__mark_roots_heap: %p", (void *) heap));
+	DUK_DD(DUK_DDPRINT("duk__mJAK_roots_heap: %p", (void *) heap));
 
-	duk__mark_heaphdr(heap, (duk_heaphdr *) heap->heap_thread);
-	duk__mark_heaphdr(heap, (duk_heaphdr *) heap->heap_object);
+	duk__mJAK_heaphdr(heap, (duk_heaphdr *) heap->heap_thread);
+	duk__mJAK_heaphdr(heap, (duk_heaphdr *) heap->heap_object);
 
 	for (i = 0; i < DUK_HEAP_NUM_STRINGS; i++) {
 		duk_hstring *h = DUK_HEAP_GET_STRING(heap, i);
-		duk__mark_heaphdr(heap, (duk_heaphdr *) h);
+		duk__mJAK_heaphdr(heap, (duk_heaphdr *) h);
 	}
 
-	duk__mark_tval(heap, &heap->lj.value1);
-	duk__mark_tval(heap, &heap->lj.value2);
+	duk__mJAK_tval(heap, &heap->lj.value1);
+	duk__mJAK_tval(heap, &heap->lj.value2);
 
 #if defined(DUK_USE_DEBUGGER_SUPPORT)
 	for (i = 0; i < heap->dbg_breakpoint_count; i++) {
-		duk__mark_heaphdr(heap, (duk_heaphdr *) heap->dbg_breakpoints[i].filename);
+		duk__mJAK_heaphdr(heap, (duk_heaphdr *) heap->dbg_breakpoints[i].filename);
 	}
 #endif
 }
@@ -49405,11 +49405,11 @@ DUK_LOCAL void duk__mark_roots_heap(duk_heap *heap) {
  */
 
 #if defined(DUK_USE_FINALIZER_SUPPORT)
-DUK_LOCAL void duk__mark_finalizable(duk_heap *heap) {
+DUK_LOCAL void duk__mJAK_finalizable(duk_heap *heap) {
 	duk_heaphdr *hdr;
 	duk_size_t count_finalizable = 0;
 
-	DUK_DD(DUK_DDPRINT("duk__mark_finalizable: %p", (void *) heap));
+	DUK_DD(DUK_DDPRINT("duk__mJAK_finalizable: %p", (void *) heap));
 
 	DUK_ASSERT(heap->heap_thread != NULL);
 
@@ -49455,7 +49455,7 @@ DUK_LOCAL void duk__mark_finalizable(duk_heap *heap) {
 	hdr = heap->heap_allocated;
 	while (hdr != NULL) {
 		if (DUK_HEAPHDR_HAS_FINALIZABLE(hdr)) {
-			duk__mark_heaphdr_nonnull(heap, hdr);
+			duk__mJAK_heaphdr_nonnull(heap, hdr);
 		}
 
 		hdr = DUK_HEAPHDR_GET_NEXT(heap, hdr);
@@ -49470,17 +49470,17 @@ DUK_LOCAL void duk__mark_finalizable(duk_heap *heap) {
  */
 
 #if defined(DUK_USE_FINALIZER_SUPPORT)
-DUK_LOCAL void duk__mark_finalize_list(duk_heap *heap) {
+DUK_LOCAL void duk__mJAK_finalize_list(duk_heap *heap) {
 	duk_heaphdr *hdr;
 #if defined(DUK_USE_DEBUG)
 	duk_size_t count_finalize_list = 0;
 #endif
 
-	DUK_DD(DUK_DDPRINT("duk__mark_finalize_list: %p", (void *) heap));
+	DUK_DD(DUK_DDPRINT("duk__mJAK_finalize_list: %p", (void *) heap));
 
 	hdr = heap->finalize_list;
 	while (hdr != NULL) {
-		duk__mark_heaphdr_nonnull(heap, hdr);
+		duk__mJAK_heaphdr_nonnull(heap, hdr);
 		hdr = DUK_HEAPHDR_GET_NEXT(heap, hdr);
 #if defined(DUK_USE_DEBUG)
 		count_finalize_list++;
@@ -49527,24 +49527,24 @@ DUK_LOCAL void duk__handle_temproot(duk_heap *heap, duk_heaphdr *hdr) {
 
 	DUK_DDD(DUK_DDDPRINT("found a temp root: %p", (void *) hdr));
 	DUK_HEAPHDR_CLEAR_TEMPROOT(hdr);
-	DUK_HEAPHDR_CLEAR_REACHABLE(hdr);  /* Done so that duk__mark_heaphdr() works correctly. */
+	DUK_HEAPHDR_CLEAR_REACHABLE(hdr);  /* Done so that duk__mJAK_heaphdr() works correctly. */
 #if defined(DUK_USE_ASSERTIONS) && defined(DUK_USE_REFERENCE_COUNTING)
 	hdr->h_assert_refcount--;  /* Same node visited twice. */
 #endif
-	duk__mark_heaphdr_nonnull(heap, hdr);
+	duk__mJAK_heaphdr_nonnull(heap, hdr);
 
 #if defined(DUK_USE_DEBUG)
 	(*count)++;
 #endif
 }
 
-DUK_LOCAL void duk__mark_temproots_by_heap_scan(duk_heap *heap) {
+DUK_LOCAL void duk__mJAK_temproots_by_heap_scan(duk_heap *heap) {
 	duk_heaphdr *hdr;
 #if defined(DUK_USE_DEBUG)
 	duk_size_t count;
 #endif
 
-	DUK_DD(DUK_DDPRINT("duk__mark_temproots_by_heap_scan: %p", (void *) heap));
+	DUK_DD(DUK_DDPRINT("duk__mJAK_temproots_by_heap_scan: %p", (void *) heap));
 
 	while (DUK_HEAP_HAS_MARKANDSWEEP_RECLIMIT_REACHED(heap)) {
 		DUK_DD(DUK_DDPRINT("recursion limit reached, doing heap scan to continue from temproots"));
@@ -50292,7 +50292,7 @@ DUK_LOCAL void duk__dump_stats(duk_heap *heap) {
  *  mask typically prevents certain mark-and-sweep operation to avoid trouble.
  */
 
-DUK_INTERNAL void duk_heap_mark_and_sweep(duk_heap *heap, duk_small_uint_t flags) {
+DUK_INTERNAL void duk_heap_mJAK_and_sweep(duk_heap *heap, duk_small_uint_t flags) {
 	duk_size_t count_keep_obj;
 	duk_size_t count_keep_str;
 #if defined(DUK_USE_VOLUNTARY_GC)
@@ -50400,17 +50400,17 @@ DUK_INTERNAL void duk_heap_mark_and_sweep(duk_heap *heap, duk_small_uint_t flags
 #if defined(DUK_USE_LITCACHE_SIZE)
 	duk__wipe_litcache(heap);
 #endif
-	duk__mark_roots_heap(heap);               /* Mark main reachability roots. */
+	duk__mJAK_roots_heap(heap);               /* Mark main reachability roots. */
 #if defined(DUK_USE_REFERENCE_COUNTING)
 	DUK_ASSERT(heap->refzero_list == NULL);   /* Always handled to completion inline in DECREF. */
 #endif
-	duk__mark_temproots_by_heap_scan(heap);   /* Temproots. */
+	duk__mJAK_temproots_by_heap_scan(heap);   /* Temproots. */
 
 #if defined(DUK_USE_FINALIZER_SUPPORT)
-	duk__mark_finalizable(heap);              /* Mark finalizable as reachability roots. */
-	duk__mark_finalize_list(heap);            /* Mark finalizer work list as reachability roots. */
+	duk__mJAK_finalizable(heap);              /* Mark finalizable as reachability roots. */
+	duk__mJAK_finalize_list(heap);            /* Mark finalizer work list as reachability roots. */
 #endif
-	duk__mark_temproots_by_heap_scan(heap);   /* Temproots. */
+	duk__mJAK_temproots_by_heap_scan(heap);   /* Temproots. */
 
 	/*
 	 *  Sweep garbage and remove marking flags, and move objects with
@@ -50527,8 +50527,8 @@ DUK_INTERNAL void duk_heap_mark_and_sweep(duk_heap *heap, duk_small_uint_t flags
 #if defined(DUK_USE_VOLUNTARY_GC)
 	tmp = (count_keep_obj + count_keep_str) / 256;
 	heap->ms_trigger_counter = (duk_int_t) (
-	    (tmp * DUK_HEAP_MARK_AND_SWEEP_TRIGGER_MULT) +
-	    DUK_HEAP_MARK_AND_SWEEP_TRIGGER_ADD);
+	    (tmp * DUK_HEAP_MJAK_AND_SWEEP_TRIGGER_MULT) +
+	    DUK_HEAP_MJAK_AND_SWEEP_TRIGGER_ADD);
 	DUK_D(DUK_DPRINT("garbage collect (mark-and-sweep) finished: %ld objects kept, %ld strings kept, trigger reset to %ld",
 	                 (long) count_keep_obj, (long) count_keep_str, (long) heap->ms_trigger_counter));
 #else
@@ -50604,7 +50604,7 @@ DUK_LOCAL DUK_INLINE void duk__check_voluntary_gc(duk_heap *heap) {
 		 * voluntary GC is not allowed.  The voluntary GC trigger
 		 * counter is only rewritten if mark-and-sweep actually runs.
 		 */
-		duk_heap_mark_and_sweep(heap, DUK_MS_FLAG_VOLUNTARY /*flags*/);
+		duk_heap_mJAK_and_sweep(heap, DUK_MS_FLAG_VOLUNTARY /*flags*/);
 	}
 }
 #define DUK__VOLUNTARY_PERIODIC_GC(heap)  do { duk__check_voluntary_gc((heap)); } while (0)
@@ -50662,7 +50662,7 @@ DUK_INTERNAL void *duk_heap_mem_alloc(duk_heap *heap, duk_size_t size) {
 	 *  or compact objects.
 	 *
 	 *  NOTE: explicit handling isn't actually be needed: if the GC is
-	 *  not allowed, duk_heap_mark_and_sweep() will reject it for every
+	 *  not allowed, duk_heap_mJAK_and_sweep() will reject it for every
 	 *  attempt in the loop below, resulting in a NULL same as here.
 	 */
 
@@ -50686,7 +50686,7 @@ DUK_INTERNAL void *duk_heap_mem_alloc(duk_heap *heap, duk_size_t size) {
 			flags |= DUK_MS_FLAG_EMERGENCY;
 		}
 
-		duk_heap_mark_and_sweep(heap, flags);
+		duk_heap_mJAK_and_sweep(heap, flags);
 
 		res = heap->alloc_func(heap->heap_udata, size);
 		if (res) {
@@ -50806,7 +50806,7 @@ DUK_INTERNAL void *duk_heap_mem_realloc(duk_heap *heap, void *ptr, duk_size_t ne
 			flags |= DUK_MS_FLAG_EMERGENCY;
 		}
 
-		duk_heap_mark_and_sweep(heap, flags);
+		duk_heap_mJAK_and_sweep(heap, flags);
 
 		res = heap->realloc_func(heap->heap_udata, ptr, newsize);
 		if (res || newsize == 0) {
@@ -50898,7 +50898,7 @@ DUK_INTERNAL void *duk_heap_mem_realloc_indirect(duk_heap *heap, duk_mem_getptr 
 			flags |= DUK_MS_FLAG_EMERGENCY;
 		}
 
-		duk_heap_mark_and_sweep(heap, flags);
+		duk_heap_mJAK_and_sweep(heap, flags);
 #if defined(DUK_USE_DEBUG)
 		ptr_post = cb(heap, ud);
 		if (ptr_pre != ptr_post) {

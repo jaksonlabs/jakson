@@ -10,19 +10,19 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#include <ark-js/carbon/archive/archive-iter.h>
-#include <ark-js/carbon/carbon.h>
+#include <jak_archive_it.h>
+#include <jak_carbon.h>
 
 static void
 iterate_properties(struct prop_iter *prop_iter);
 
 static void
-iterate_object_vals(struct archive_value_vector *value_iter)
+iterate_object_vals(struct jak_archive_value_vector *value_iter)
 {
     bool status;
     bool is_object;
     u32 vector_length;
-    struct archive_object object;
+    struct jak_archive_object object;
     struct prop_iter  prop_iter;
     struct err err;
 
@@ -40,7 +40,7 @@ iterate_object_vals(struct archive_value_vector *value_iter)
         printf("\t\t{type: object, id: %" PRIu64 "}\n", object.object_id);
 
 
-        status = archive_prop_iter_from_object(&prop_iter, ARK_ARCHIVE_ITER_MASK_ANY, &err, &object);
+        status = archive_prop_iter_from_object(&prop_iter, JAK_ARCHIVE_ITER_MASK_ANY, &err, &object);
         ASSERT_TRUE(status);
 
         iterate_properties(&prop_iter);
@@ -48,14 +48,14 @@ iterate_object_vals(struct archive_value_vector *value_iter)
 }
 
 static void
-iterate_object(struct archive_value_vector *value_iter)
+iterate_object(struct jak_archive_value_vector *value_iter)
 {
     ASSERT_TRUE (!value_iter->is_array);
     iterate_object_vals(value_iter);
 }
 
 static void
-print_basic_fixed_types_basic(struct archive_value_vector *value_iter, u32 idx)
+print_basic_fixed_types_basic(struct jak_archive_value_vector *value_iter, u32 idx)
 {
     u32 num_values;
     switch (value_iter->prop_type) {
@@ -131,7 +131,7 @@ print_basic_fixed_types_basic(struct archive_value_vector *value_iter, u32 idx)
 }
 
 static void
-print_basic_fixed_types_array(struct archive_value_vector *value_iter, u32 idx)
+print_basic_fixed_types_array(struct jak_archive_value_vector *value_iter, u32 idx)
 {
     u32 array_length;
     switch (value_iter->prop_type) {
@@ -274,7 +274,7 @@ print_basic_fixed_types_array(struct archive_value_vector *value_iter, u32 idx)
 }
 
 static void
-print_basic_fixed_types(struct archive_value_vector *value_iter, u32 idx)
+print_basic_fixed_types(struct jak_archive_value_vector *value_iter, u32 idx)
 {
     if (value_iter->is_array) {
         print_basic_fixed_types_array(value_iter, idx);
@@ -290,7 +290,7 @@ static void
 iterate_properties(struct prop_iter *prop_iter)
 {
     global_id_t                oid;
-    struct archive_value_vector     value_iter;
+    struct jak_archive_value_vector     value_iter;
     enum field_type               type;
     bool                              is_array;
     const field_sid_t         *keys;
@@ -475,7 +475,7 @@ iterate_properties(struct prop_iter *prop_iter)
                         } break;
                         case FIELD_OBJECT: {
                             struct column_object_iter iter;
-                            const struct archive_object *archive_object;
+                            const struct jak_archive_object *archive_object;
                             archive_column_entry_get_objects(&iter, &entry_iter);
                             printf("\t\t{ << objects >>: [");
                             while ((archive_object = archive_column_entry_object_iter_next_object(&iter)) != NULL) {
@@ -484,7 +484,7 @@ iterate_properties(struct prop_iter *prop_iter)
                                 printf("{ oid: %" PRIu64 " } \n", id);
 
                                 struct prop_iter nested_obj_prop_iter;
-                                archive_prop_iter_from_object(&nested_obj_prop_iter, ARK_ARCHIVE_ITER_MASK_ANY,
+                                archive_prop_iter_from_object(&nested_obj_prop_iter, JAK_ARCHIVE_ITER_MASK_ANY,
                                                                      &err, archive_object);
                                 iterate_properties(&nested_obj_prop_iter);
                             }
@@ -504,7 +504,7 @@ iterate_properties(struct prop_iter *prop_iter)
 
 TEST(ArchiveIterTest, CreateIterator)
 {
-    struct archive            archive;
+    struct jak_archive            archive;
     struct err                err;
     struct prop_iter  prop_iter;
     bool                        status;
@@ -514,7 +514,7 @@ TEST(ArchiveIterTest, CreateIterator)
     status = archive_open(&archive, "./assets/test-archive.carbon");
     ASSERT_TRUE(status);
 
-    status = archive_prop_iter_from_archive(&prop_iter, &err, ARK_ARCHIVE_ITER_MASK_ANY, &archive);
+    status = archive_prop_iter_from_archive(&prop_iter, &err, JAK_ARCHIVE_ITER_MASK_ANY, &archive);
     ASSERT_TRUE(status);
 
     iterate_properties(&prop_iter);

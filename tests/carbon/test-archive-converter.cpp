@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
 
-#include <ark-js/carbon/carbon.h>
+#include <jak_carbon.h>
 
 TEST(ConverterTest, PerformConversion)
 {
     bool status;
-    struct archive archive;
-    struct encoded_doc_list collection;
+    struct jak_archive archive;
+    struct jak_encoded_doc_list collection;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */

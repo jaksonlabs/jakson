@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <printf.h>
 
-#include <ark-js/carbon/carbon.h>
+#include <jak_carbon.h>
 
 TEST(GlobalIdTest, CreateId) {
     global_id_t id;

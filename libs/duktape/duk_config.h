@@ -724,7 +724,7 @@
 #endif  /* DUK_F_BCC */
 #include <sys/param.h>
 #include <sys/time.h>
-#include <time.h>
+#include <jak_time.h>
 
 #define DUK_USE_DATE_NOW_GETTIMEOFDAY
 #define DUK_USE_DATE_TZO_GMTIME_R
@@ -852,7 +852,7 @@
 /* Shared includes: C89 */
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <jak_string.h>
 #include <stdarg.h>  /* varargs */
 #include <setjmp.h>
 #include <stddef.h>  /* e.g. ptrdiff_t */
@@ -2983,7 +2983,7 @@ typedef struct duk_hthread duk_context;
 #define DUK_USE_LEXER_SLIDING_WINDOW
 #undef DUK_USE_LIGHTFUNC_BUILTINS
 #define DUK_USE_LITCACHE_SIZE 256
-#define DUK_USE_MARK_AND_SWEEP_RECLIMIT 256
+#define DUK_USE_MJAK_AND_SWEEP_RECLIMIT 256
 #define DUK_USE_MATH_BUILTIN
 #define DUK_USE_NATIVE_CALL_RECLIMIT 1000
 #undef DUK_USE_NATIVE_STACK_CHECK
@@ -3314,8 +3314,8 @@ typedef struct duk_hthread duk_context;
 #if defined(DUK_OPT_NO_JX)
 #error unsupported legacy feature option DUK_OPT_NO_JX used
 #endif
-#if defined(DUK_OPT_NO_MARK_AND_SWEEP)
-#error unsupported legacy feature option DUK_OPT_NO_MARK_AND_SWEEP used
+#if defined(DUK_OPT_NO_MJAK_AND_SWEEP)
+#error unsupported legacy feature option DUK_OPT_NO_MJAK_AND_SWEEP used
 #endif
 #if defined(DUK_OPT_NO_MS_STRINGTABLE_RESIZE)
 #error unsupported legacy feature option DUK_OPT_NO_MS_STRINGTABLE_RESIZE used
@@ -3598,8 +3598,8 @@ typedef struct duk_hthread duk_context;
 #if defined(DUK_USE_MARKANDSWEEP_FINALIZER_TORTURE)
 #error unsupported config option used (option has been removed): DUK_USE_MARKANDSWEEP_FINALIZER_TORTURE
 #endif
-#if defined(DUK_USE_MARK_AND_SWEEP)
-#error unsupported config option used (option has been removed): DUK_USE_MARK_AND_SWEEP
+#if defined(DUK_USE_MJAK_AND_SWEEP)
+#error unsupported config option used (option has been removed): DUK_USE_MJAK_AND_SWEEP
 #endif
 #if defined(DUK_USE_MATH_FMAX)
 #error unsupported config option used (option has been removed): DUK_USE_MATH_FMAX

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <printf.h>
 
-#include <ark-js/shared/stdx/uintvar_stream.h>
+#include <jak_uintvar_stream.h>
 
 #define DEFINE_uintvar_stream_POINT_TEST(test_name, value, expected_bytes)     \
 TEST(VarUintTest, ReadWrite##test_name) {                               \

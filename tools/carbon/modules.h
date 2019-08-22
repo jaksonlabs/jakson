@@ -17,10 +17,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ARK_TOOLS_ARK_MODULES
-#define ARK_TOOLS_ARK_MODULES
+#ifndef JAK_TOOLS_JAK_MODULES
+#define JAK_TOOLS_JAK_MODULES
 
-#include <ark-js/shared/shell/opt.h>
+#include <jak_opt.h>
 
 bool moduleCheckJsInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager);
 bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *manager);

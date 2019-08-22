@@ -9,7 +9,7 @@ set(TOOL_SOURCES
         ${CMDOPT_SOURCES}
         ${TOOL_SOURCES}
         modules.h
-        modules.c ../../src/ark-js/shared/utils/numbers.c)
+        modules.c ../../src/jak_utils_numbers.c)
 
 add_executable(ark-carbon main.c ${TOOL_SOURCES})
 target_link_libraries(ark-carbon PUBLIC ${LIBS} PRIVATE ark-sources)

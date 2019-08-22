@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <ark-js/carbon/carbon-media.h>
+#include <jak_carbon_media.h>
 
 TEST(MimeTypeTest, TestMimeMapping) {
 

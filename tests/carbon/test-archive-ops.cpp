@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
 #include <inttypes.h>
-#include <ark-js/carbon/archive/archive-query.h>
-#include <ark-js/carbon/carbon.h>
+#include <jak_archive_query.h>
+#include <jak_carbon.h>
 
 TEST(CarbonArchiveOpsTest, CreateStreamFromJsonString)
 {
@@ -21,7 +21,7 @@ TEST(CarbonArchiveOpsTest, CreateStreamFromJsonString)
 
 TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonString)
 {
-    struct archive   archive;
+    struct jak_archive   archive;
     struct err       err;
 
     const char        *json_string = "{ \"test\": 123 }";
@@ -41,7 +41,7 @@ TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonString)
 
 TEST(CarbonArchiveOpsTest, CreateArchiveFromJsonStringWithBakedStringIdIndex)
 {
-    struct archive   archive;
+    struct jak_archive   archive;
     struct err       err;
 
     const char        *json_string = "{ \"test\": 123 }";
@@ -63,14 +63,14 @@ TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
 {
     std::set<field_sid_t> haystack;
 
-    struct archive     archive;
+    struct jak_archive     archive;
     struct strid_iter  strid_iter;
     struct strid_info *info;
     size_t               vector_len;
     bool                 status;
     bool                 success;
     struct err         err;
-    struct archive_query       query;
+    struct jak_archive_query       query;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
@@ -110,14 +110,14 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
 {
     std::set<field_sid_t> all_str_ids;
 
-    struct archive     archive;
+    struct jak_archive     archive;
     struct strid_iter  strid_iter;
     struct strid_info *info;
     size_t               vector_len;
     bool                 status;
     bool                 success;
     struct err         err;
-    struct archive_query       query;
+    struct jak_archive_query       query;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
@@ -156,14 +156,14 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
 
 TEST(CarbonArchiveOpsTest, DecodeStringByFastUnsafeAccess)
 {
-    struct archive                 archive;
+    struct jak_archive                 archive;
     struct strid_iter              strid_iter;
     struct strid_info             *info;
     size_t                           vector_len;
     bool                             status;
     bool                             success;
     struct err                     err;
-    struct archive_query                   query;
+    struct jak_archive_query                   query;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
@@ -199,8 +199,8 @@ TEST(CarbonArchiveOpsTest, DecodeStringByFastUnsafeAccess)
 
 TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateContains)
 {
-    struct archive      archive;
-    struct archive_query        query;
+    struct jak_archive      archive;
+    struct jak_archive_query        query;
     bool                  status;
     size_t                num_match;
     struct string_pred_t  pred;
@@ -217,7 +217,7 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateContains)
     const char *needle = "arg";
 
     string_pred_contains_init(&pred);
-    result = query_find_ids(&num_match, &query, &pred, (void *) needle, ARK_QUERY_LIMIT_NONE);
+    result = query_find_ids(&num_match, &query, &pred, (void *) needle, JAK_QUERY_LIMIT_NONE);
     ASSERT_TRUE(result != NULL);
     ASSERT_TRUE(num_match == 4);
 
@@ -236,8 +236,8 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateContains)
 
 TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateEquals)
 {
-    struct archive      archive;
-    struct archive_query        query;
+    struct jak_archive      archive;
+    struct jak_archive_query        query;
     bool                  status;
     size_t                num_match;
     struct string_pred_t  pred;
@@ -254,7 +254,7 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateEquals)
     const char *needle = "phoneNumbers";
 
     string_pred_equals_init(&pred);
-    result = query_find_ids(&num_match, &query, &pred, (void *) needle, ARK_QUERY_LIMIT_NONE);
+    result = query_find_ids(&num_match, &query, &pred, (void *) needle, JAK_QUERY_LIMIT_NONE);
     ASSERT_TRUE(result != NULL);
 
     ASSERT_TRUE(num_match == 1);

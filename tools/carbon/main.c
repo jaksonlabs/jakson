@@ -1,5 +1,5 @@
-#include <ark-js/shared/error.h>
-#include <ark-js/shared/shell/opt.h>
+#include <jak_error.h>
+#include <jak_opt.h>
 
 #include "modules.h"
 
@@ -56,7 +56,7 @@
 static int module##module_name##Entry(int argc, char **argv, FILE *file)                                         \
 {                                                                                                               \
     struct cmdopt_mgr manager;                                                                        \
-    opt_mgr_create(&manager, moduleCommand, desc, ARK_MOD_ARG_REQUIRED, invokeFunc);            \
+    opt_mgr_create(&manager, moduleCommand, desc, JAK_MOD_ARG_REQUIRED, invokeFunc);            \
     int status = opt_mgr_process(&manager, argc, argv, file);                                       \
     opt_mgr_drop(&manager);                                                                         \
     return status;                                                                                              \
@@ -76,13 +76,13 @@ static bool showHelp(int argc, char **argv, FILE *file, struct cmdopt_mgr *manag
 
 int main (int argc, char **argv)
 {
-    ARK_CONSOLE_OUTPUT_ON();
+    JAK_CONSOLE_OUTPUT_ON();
 
     struct cmdopt_mgr manager;
     struct cmdopt_group *group;
 
     opt_mgr_create(&manager, "ark-carbon", "A tool to work with CARBON files.\n"
-                                 "Copyright (c) 2018-2019 Marcus Pinnecke (pinnecke@ovgu.de)", ARK_MOD_ARG_MAYBE_REQUIRED,
+                                 "Copyright (c) 2018-2019 Marcus Pinnecke (pinnecke@ovgu.de)", JAK_MOD_ARG_MAYBE_REQUIRED,
                              showHelp);
 
     opt_mgr_create_group(&group, "work with JSON files", &manager);

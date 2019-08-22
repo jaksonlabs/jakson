@@ -3,7 +3,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include <ark-js/shared/json/json.h>
+#include <jak_json.h>
 
 TEST(JsonTest, JsonListTypeForColumnEqualTypes) {
         auto result = json_fitting_type(JSON_LIST_TYPE_EMPTY, JSON_LIST_TYPE_EMPTY);
@@ -771,17 +771,17 @@ TEST(JsonTest, JsonListTypeForColumnEnlargeType)
 
 TEST(JsonTest, ParseNullArray)
 {
-        struct json_parser parser;
-        struct json json;
-        struct json_err error_desc;
+        struct jak_json_parser parser;
+        struct jak_json json;
+        struct jak_json_err error_desc;
         json_parser_create(&parser);
         bool status = json_parse(&json, &error_desc, &parser, "[null, null, null]");
         ASSERT_TRUE(status);
         ASSERT_EQ(json.element->value.value_type, JSON_VALUE_ARRAY);
         ASSERT_EQ(json.element->value.value.array->elements.elements.num_elems, 3);
-        struct json_element *e1 = vec_get(&json.element->value.value.array->elements.elements, 0, struct json_element);
-        struct json_element *e2 = vec_get(&json.element->value.value.array->elements.elements, 1, struct json_element);
-        struct json_element *e3 = vec_get(&json.element->value.value.array->elements.elements, 2, struct json_element);
+        struct jak_json_element *e1 = vec_get(&json.element->value.value.array->elements.elements, 0, struct jak_json_element);
+        struct jak_json_element *e2 = vec_get(&json.element->value.value.array->elements.elements, 1, struct jak_json_element);
+        struct jak_json_element *e3 = vec_get(&json.element->value.value.array->elements.elements, 2, struct jak_json_element);
         ASSERT_EQ(e1->value.value_type, JSON_VALUE_NULL);
         ASSERT_EQ(e2->value.value_type, JSON_VALUE_NULL);
         ASSERT_EQ(e3->value.value_type, JSON_VALUE_NULL);
@@ -791,16 +791,16 @@ TEST(JsonTest, ParseNullArray)
 
 TEST(JsonTest, ParseBooleanArray)
 {
-        struct json_parser parser;
-        struct json json;
-        struct json_err error_desc;
+        struct jak_json_parser parser;
+        struct jak_json json;
+        struct jak_json_err error_desc;
         json_parser_create(&parser);
         bool status = json_parse(&json, &error_desc, &parser, "[true, false]");
         ASSERT_TRUE(status);
         ASSERT_EQ(json.element->value.value_type, JSON_VALUE_ARRAY);
         ASSERT_EQ(json.element->value.value.array->elements.elements.num_elems, 2);
-        struct json_element *e1 = vec_get(&json.element->value.value.array->elements.elements, 0, struct json_element);
-        struct json_element *e2 = vec_get(&json.element->value.value.array->elements.elements, 1, struct json_element);
+        struct jak_json_element *e1 = vec_get(&json.element->value.value.array->elements.elements, 0, struct jak_json_element);
+        struct jak_json_element *e2 = vec_get(&json.element->value.value.array->elements.elements, 1, struct jak_json_element);
         ASSERT_EQ(e1->value.value_type, JSON_VALUE_TRUE);
         ASSERT_EQ(e2->value.value_type, JSON_VALUE_FALSE);
 
@@ -809,67 +809,67 @@ TEST(JsonTest, ParseBooleanArray)
 
 TEST(JsonTest, ParseJsonFromString)
 {
-        struct json_parser parser;
-        struct json json;
-        struct json_err error_desc;
+        struct jak_json_parser parser;
+        struct jak_json json;
+        struct jak_json_err error_desc;
         json_parser_create(&parser);
         bool status = json_parse(&json, &error_desc, &parser, "{\"Hello World\": \"Value\"}");
         ASSERT_TRUE(status);
         ASSERT_EQ(json.element->value.value_type, JSON_VALUE_OBJECT);
         ASSERT_EQ(json.element->value.value.object->value->members.num_elems, 1);
         ASSERT_TRUE(strcmp((vec_get(&json.element->value.value.object->value->members, 0,
-                struct json_prop))->key.value, "Hello World") == 0);
+                struct jak_json_prop))->key.value, "Hello World") == 0);
         ASSERT_TRUE(strcmp((vec_get(&json.element->value.value.object->value->members, 0,
-                            struct json_prop))->value.value.value.string->value, "Value") == 0);
+                            struct jak_json_prop))->value.value.value.string->value, "Value") == 0);
 
         json_drop(&json);
 }
 
 TEST(JsonTest, ParseJsonFromStringLaxQuotes)
 {
-        struct json_parser parser;
-        struct json json;
-        struct json_err error_desc;
+        struct jak_json_parser parser;
+        struct jak_json json;
+        struct jak_json_err error_desc;
         json_parser_create(&parser);
         bool status = json_parse(&json, &error_desc, &parser, "{Hello_World: \"Value\"}");
         ASSERT_TRUE(status);
         ASSERT_EQ(json.element->value.value_type, JSON_VALUE_OBJECT);
         ASSERT_EQ(json.element->value.value.object->value->members.num_elems, 1);
         ASSERT_TRUE(strcmp((vec_get(&json.element->value.value.object->value->members, 0,
-                            struct json_prop))->key.value, "Hello_World") == 0);
+                            struct jak_json_prop))->key.value, "Hello_World") == 0);
         ASSERT_TRUE(strcmp((vec_get(&json.element->value.value.object->value->members, 0,
-                            struct json_prop))->value.value.value.string->value, "Value") == 0);
+                            struct jak_json_prop))->value.value.value.string->value, "Value") == 0);
 
         json_drop(&json);
 }
 
 TEST(JsonTest, ParseJsonFromStringLaxQuotesList)
 {
-        struct json_parser parser;
-        struct json json;
-        struct json_err error_desc;
+        struct jak_json_parser parser;
+        struct jak_json json;
+        struct jak_json_err error_desc;
         json_parser_create(&parser);
         bool status = json_parse(&json, &error_desc, &parser, "{Hello: Value1,\nWorld: \"Value2\"}");
         ASSERT_TRUE(status);
         ASSERT_EQ(json.element->value.value_type, JSON_VALUE_OBJECT);
         ASSERT_EQ(json.element->value.value.object->value->members.num_elems, 2);
         ASSERT_TRUE(strcmp((vec_get(&json.element->value.value.object->value->members, 0,
-                            struct json_prop))->key.value, "Hello") == 0);
+                            struct jak_json_prop))->key.value, "Hello") == 0);
         ASSERT_TRUE(strcmp((vec_get(&json.element->value.value.object->value->members, 0,
-                            struct json_prop))->value.value.value.string->value, "Value1") == 0);
+                            struct jak_json_prop))->value.value.value.string->value, "Value1") == 0);
         ASSERT_TRUE(strcmp((vec_get(&json.element->value.value.object->value->members, 1,
-                            struct json_prop))->key.value, "World") == 0);
+                            struct jak_json_prop))->key.value, "World") == 0);
         ASSERT_TRUE(strcmp((vec_get(&json.element->value.value.object->value->members, 1,
-                            struct json_prop))->value.value.value.string->value, "Value2") == 0);
+                            struct jak_json_prop))->value.value.value.string->value, "Value2") == 0);
 
         json_drop(&json);
 }
 
 TEST(JsonTest, ParseJsonFromStringLaxQuotesTestNull)
 {
-        struct json_parser parser;
-        struct json json;
-        struct json_err error_desc;
+        struct jak_json_parser parser;
+        struct jak_json json;
+        struct jak_json_err error_desc;
         json_parser_create(&parser);
         bool status = json_parse(&json, &error_desc, &parser, "null");
         ASSERT_TRUE(status);
@@ -886,9 +886,9 @@ TEST(JsonTest, ParseRandomJson)
         int json_in_len = lseek(fd, 0, SEEK_END);
         const char *json_in = (const char *) mmap(0, json_in_len, PROT_READ, MAP_PRIVATE, fd, 0);
 
-        struct json_parser parser;
-        struct json json;
-        struct json_err error_desc;
+        struct jak_json_parser parser;
+        struct jak_json json;
+        struct jak_json_err error_desc;
         json_parser_create(&parser);
         bool status = json_parse(&json, &error_desc, &parser, json_in);
         ASSERT_TRUE(status);
