@@ -78,7 +78,9 @@ const char *carbon_field_type_str(struct err *err, enum carbon_field_type type)
                 case CARBON_FIELD_TYPE_BINARY_CUSTOM:
                 case CARBON_FIELD_TYPE_BINARY:
                         return CARBON_FIELD_TYPE_BINARY_STR;
-                default: error(err, ARK_ERR_NOTFOUND);
+                default: if (err) {
+                                error(err, ARK_ERR_NOTFOUND);
+                        }
                         return NULL;
         }
 }

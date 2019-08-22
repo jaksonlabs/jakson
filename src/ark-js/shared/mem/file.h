@@ -98,6 +98,8 @@ i64 memfile_read_i64(struct memfile *file);
 
 bool memfile_skip(struct memfile *file, signed_offset_t nbytes);
 
+#define memfile_skip_byte(file) memfile_skip(file, sizeof(u8))
+
 const char *memfile_peek(struct memfile *file, offset_t nbytes);
 
 bool memfile_write_byte(struct memfile *file, u8 data);

@@ -60,6 +60,8 @@ bool string_add_i64(struct string *builder, i64 value);
 
 bool string_add_u64_as_hex(struct string *builder, u64 value);
 
+bool string_add_u64_as_hex_0x_prefix_compact(struct string *builder, u64 value);
+
 bool string_add_float(struct string *builder, float value);
 
 bool string_clear(struct string *builder);

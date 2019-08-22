@@ -29,9 +29,14 @@ static void write_payload(struct memfile *file, const char *string, size_t str_l
 
 bool carbon_string_nomarker_write(struct memfile *file, const char *string)
 {
+        return carbon_string_nomarker_nchar_write(file, string, strlen(string));
+}
+
+bool carbon_string_nomarker_nchar_write(struct memfile *file, const char *string, u64 str_len)
+{
         error_if_null(file)
         error_if_null(string)
-        write_payload(file, string, strlen(string));
+        write_payload(file, string, str_len);
 
         return true;
 }
@@ -61,12 +66,17 @@ bool carbon_string_remove(struct memfile *file)
 
 bool carbon_string_write(struct memfile *file, const char *string)
 {
+        return carbon_string_nchar_write(file, string, strlen(string));
+}
+
+bool carbon_string_nchar_write(struct memfile *file, const char *string, u64 str_len)
+{
         error_if_null(file)
         error_if_null(string)
 
         memfile_ensure_space(file, sizeof(media_type_t));
         carbon_media_write(file, CARBON_FIELD_TYPE_STRING);
-        carbon_string_nomarker_write(file, string);
+        carbon_string_nomarker_nchar_write(file, string, str_len);
 
         return true;
 }

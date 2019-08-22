@@ -8705,18 +8705,37 @@ TEST(CarbonTest, PathIndex) {
         struct carbon doc;
         struct err err;
 
-        //const char *json = "[{\"key\": \"value\", \"x\": {\"y\": [{\"z\": 23}, {\"z\": null}]}, \"a\": [1,2,3], \"b\": [\"a\", 4,5] }, true, false, null, [1,null,2], [true, null, false], {\"col\": [true, null, false]}]";
+        const char *json = "[\n"
+                           "   {\n"
+                           "      \"a\":null,\n"
+                           "      \"b\":[ 1, 2, 3 ],\n"
+                           "      \"c\":{\n"
+                           "         \"msg\":\"Hello, World!\"\n"
+                           "      }\n"
+                           "   },\n"
+                           "   {\n"
+                           "      \"a\":42,\n"
+                           "      \"b\":[ ],\n"
+                           "      \"c\":null\n"
+                           "   }\n"
+                           "]";
 
-        int fd = open("./assets/ms-academic-graph.json", O_RDONLY);
-        ASSERT_NE(fd, -1);
-        int json_in_len = lseek(fd, 0, SEEK_END);
-        const char *json = (const char *) mmap(0, json_in_len, PROT_READ, MAP_PRIVATE, fd, 0);
+//        int fd = open("./assets/ms-academic-graph.json", O_RDONLY);
+//        ASSERT_NE(fd, -1);
+//        int json_in_len = lseek(fd, 0, SEEK_END);
+//        const char *json = (const char *) mmap(0, json_in_len, PROT_READ, MAP_PRIVATE, fd, 0);
 
         carbon_from_json(&doc, json, CARBON_KEY_NOKEY, NULL, &err);
         carbon_path_index_create(&index, &doc);
         carbon_path_index_print(stdout, &index);
         carbon_hexdump_print(stdout, &doc);
         carbon_path_index_hexdump(stdout, &index);
+
+        struct carbon path_carbon;
+        carbon_path_index_to_carbon(&path_carbon, &index);
+        carbon_print(stdout, JSON_COMPACT, &path_carbon);
+        carbon_drop(&path_carbon);
+
         ASSERT_TRUE(carbon_path_index_indexes_doc(&index, &doc));
         carbon_drop(&doc);
 }

@@ -26,7 +26,11 @@ ARK_BEGIN_DECL
 
 bool carbon_string_write(struct memfile *file, const char *string);
 
+bool carbon_string_nchar_write(struct memfile *file, const char *string, u64 str_len);
+
 bool carbon_string_nomarker_write(struct memfile *file, const char *string);
+
+bool carbon_string_nomarker_nchar_write(struct memfile *file, const char *string, u64 str_len);
 
 bool carbon_string_nomarker_remove(struct memfile *file);
 

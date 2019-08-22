@@ -138,6 +138,13 @@ bool string_add_u64_as_hex(struct string *builder, u64 value)
         return string_add(builder, buffer);
 }
 
+bool string_add_u64_as_hex_0x_prefix_compact(struct string *builder, u64 value)
+{
+        char buffer[17];
+        sprintf(buffer, "0x%"PRIx64, value);
+        return string_add(builder, buffer);
+}
+
 bool string_add_float(struct string *builder, float value)
 {
         char buffer[2046];

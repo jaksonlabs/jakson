@@ -68,6 +68,8 @@ bool carbon_insert_float(struct carbon_insert *inserter, float value);
 
 bool carbon_insert_string(struct carbon_insert *inserter, const char *value);
 
+bool carbon_insert_nchar(struct carbon_insert *inserter, const char *value, u64 value_len);
+
 /**
  * Inserts a user-defined binary string <code>value</code> of <code>nbytes</code> bytes along with a (mime) type annotation.
  * The type annotation is automatically found if <code>file_ext</code> is non-null and known to the system. If it is
@@ -124,6 +126,8 @@ bool carbon_insert_prop_signed(struct carbon_insert *inserter, const char *key, 
 bool carbon_insert_prop_float(struct carbon_insert *inserter, const char *key, float value);
 
 bool carbon_insert_prop_string(struct carbon_insert *inserter, const char *key, const char *value);
+
+bool carbon_insert_prop_nchar(struct carbon_insert *inserter, const char *key, const char *value, u64 value_len);
 
 bool carbon_insert_prop_binary(struct carbon_insert *inserter, const char *key, const void *value,
                                size_t nbytes, const char *file_ext, const char *user_type);

@@ -245,7 +245,7 @@ char *carbon_to_json_extended_dup(struct carbon *doc);
 char *carbon_to_json_compact_dup(struct carbon *doc);
 bool carbon_iterator_open(struct carbon_array_it *it, struct carbon *doc);
 bool carbon_iterator_close(struct carbon_array_it *it);
-bool carbon_print(FILE *file, struct carbon *doc);
+bool carbon_print(FILE *file, enum carbon_printer_impl printer, struct carbon *doc);
 bool carbon_hexdump_print(FILE *file, struct carbon *doc);
 
 ARK_END_DECL

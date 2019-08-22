@@ -392,11 +392,16 @@ bool carbon_insert_float(struct carbon_insert *inserter, float value)
 
 bool carbon_insert_string(struct carbon_insert *inserter, const char *value)
 {
+        return carbon_insert_nchar(inserter, value, strlen(value));
+}
+
+bool carbon_insert_nchar(struct carbon_insert *inserter, const char *value, u64 value_len)
+{
         unused(inserter);
         unused(value);
         error_if(inserter->context_type != CARBON_ARRAY, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
 
-        return carbon_string_write(&inserter->memfile, value);
+        return carbon_string_nchar_write(&inserter->memfile, value, value_len);
 }
 
 static void insert_binary(struct carbon_insert *inserter, const void *value, size_t nbytes,
@@ -785,10 +790,15 @@ bool carbon_insert_prop_float(struct carbon_insert *inserter, const char *key, f
 
 bool carbon_insert_prop_string(struct carbon_insert *inserter, const char *key, const char *value)
 {
+        return carbon_insert_prop_nchar(inserter, key, value, strlen(value));
+}
+
+bool carbon_insert_prop_nchar(struct carbon_insert *inserter, const char *key, const char *value, u64 value_len)
+{
         error_if(inserter->context_type != CARBON_OBJECT, &inserter->err, ARK_ERR_UNSUPPCONTAINER);
         offset_t prop_start = memfile_tell(&inserter->memfile);
         carbon_string_nomarker_write(&inserter->memfile, key);
-        carbon_string_write(&inserter->memfile, value);
+        carbon_string_nchar_write(&inserter->memfile, value, value_len);
         offset_t prop_end = memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;

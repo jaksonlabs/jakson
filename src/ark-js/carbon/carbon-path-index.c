@@ -24,6 +24,8 @@
 #include <ark-js/carbon/carbon-key.h>
 #include "carbon-int.h"
 #include "carbon-string.h"
+#include "carbon-insert.h"
+#include "carbon-commit.h"
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  config
@@ -62,11 +64,14 @@ struct path_index_node
 //  helper prototypes
 // ---------------------------------------------------------------------------------------------------------------------
 
-static void array_to_str(struct string *str, struct carbon_path_index *index, bool is_root);
+static void array_to_str(struct string *str, struct carbon_path_index *index, bool is_root, unsigned intent_level);
+static void array_into_carbon(struct carbon_insert *ins, struct carbon_path_index *index, bool is_root);
 
-static void prop_to_str(struct string *str, struct carbon_path_index *index);
+static void prop_to_str(struct string *str, struct carbon_path_index *index, unsigned intent_level);
+static void prop_into_carbon(struct carbon_insert *ins, struct carbon_path_index *index);
 
-static void column_to_str(struct string *str, struct carbon_path_index *index);
+static void column_to_str(struct string *str, struct carbon_path_index *index, unsigned intent_level);
+static void column_into_carbon(struct carbon_insert *ins, struct carbon_path_index *index);
 
 static void object_build_index(struct path_index_node *parent, struct carbon_object_it *elem_it);
 
@@ -77,6 +82,14 @@ static void node_flat(struct memfile *file, struct path_index_node *node);
 // ---------------------------------------------------------------------------------------------------------------------
 //  helper
 // ---------------------------------------------------------------------------------------------------------------------
+
+static void intent(struct string *str, unsigned intent)
+{
+        string_add_char(str, '\n');
+        for (unsigned i = 0; i < intent; i++) {
+                string_add(str, "    ");
+        }
+}
 
 static void path_index_node_init(struct path_index_node *node)
 {
@@ -396,8 +409,6 @@ static void field_ref_write(struct memfile *file, struct path_index_node *node)
 
 static void container_contents_flat(struct memfile *file, struct path_index_node *node)
 {
-        assert(node->sub_entries.num_elems > 0);
-
         memfile_write_varuint(NULL, file, node->sub_entries.num_elems);
 
         /* write position offsets */
@@ -480,29 +491,81 @@ static void array_flat(struct memfile *file, struct path_index_node *node)
         }
 }
 
-static void node_to_str(struct string *str, struct carbon_path_index *index)
+ark_func_unused
+static void node_into_carbon(struct carbon_insert *ins, struct carbon_path_index *index)
 {
         u8 next = memfile_peek_byte(&index->memfile);
         switch (next) {
                 case PATH_MARKER_PROP_NODE:
-                        prop_to_str(str, index);
+                        prop_into_carbon(ins, index);
                         break;
                 case PATH_MARKER_ARRAY_NODE:
-                        array_to_str(str, index, false);
+                        array_into_carbon(ins, index, false);
                         break;
                 case PATH_MARKER_COLUMN_NODE:
-                        column_to_str(str, index);
+                        column_into_carbon(ins, index);
                         break;
                 default:
                 error(&index->err, ARK_ERR_CORRUPTED)
         }
 }
 
+static void node_to_str(struct string *str, struct carbon_path_index *index, unsigned intent_level)
+{
+        u8 next = memfile_peek_byte(&index->memfile);
+        intent_level++;
+
+        switch (next) {
+                case PATH_MARKER_PROP_NODE:
+                        prop_to_str(str, index, intent_level);
+                        break;
+                case PATH_MARKER_ARRAY_NODE:
+                        array_to_str(str, index, false, intent_level);
+                        break;
+                case PATH_MARKER_COLUMN_NODE:
+                        column_to_str(str, index, intent_level);
+                        break;
+                default:
+                error(&index->err, ARK_ERR_CORRUPTED)
+        }
+}
+
+static u8 field_ref_into_carbon(struct carbon_insert *ins, struct carbon_path_index *index, bool is_root)
+{
+        u8 field_type = memfile_read_byte(&index->memfile);
+
+        if (is_root) {
+                carbon_insert_prop_null(ins, "container");
+        } else {
+                carbon_insert_prop_string(ins, "container", carbon_field_type_str(NULL, field_type));
+        }
+
+
+        if (field_type != CARBON_FIELD_TYPE_NULL && field_type != CARBON_FIELD_TYPE_TRUE &&
+            field_type != CARBON_FIELD_TYPE_FALSE) {
+                /* only in case of field type that is not null, true, or false, there is more information behind
+                 * the field offset */
+                u64 field_offset = memfile_read_varuint(NULL, &index->memfile);
+                if (is_root) {
+                        carbon_insert_prop_null(ins, "offset");
+                } else {
+                        struct string str;
+                        string_create(&str);
+                        string_add_u64_as_hex_0x_prefix_compact(&str, field_offset);
+                        carbon_insert_prop_string(ins, "offset", string_cstr(&str));
+                        string_drop(&str);
+                }
+        } else {
+                carbon_insert_prop_null(ins, "offset");
+        }
+        return field_type;
+}
+
 static u8 field_ref_to_str(struct string *str, struct carbon_path_index *index)
 {
         u8 field_type = memfile_read_byte(&index->memfile);
 
-        string_add(str, "[field-type: ");
+        string_add_char(str, '[');
         string_add_char(str, field_type);
         string_add_char(str, ']');
 
@@ -511,41 +574,94 @@ static u8 field_ref_to_str(struct string *str, struct carbon_path_index *index)
                 /* only in case of field type that is not null, true, or false, there is more information behind
                  * the field offset */
                 u64 field_offset = memfile_read_varuint(NULL, &index->memfile);
-                string_add(str, "(field-offset: ");
-                string_add_u64(str, field_offset);
+                string_add_char(str, '(');
+                string_add_u64_as_hex_0x_prefix_compact(str, field_offset);
                 string_add_char(str, ')');
         }
 
         return field_type;
 }
 
-static void column_to_str(struct string *str, struct carbon_path_index *index)
+static void column_to_str(struct string *str, struct carbon_path_index *index, unsigned intent_level)
 {
+        intent(str, intent_level);
         u8 marker = memfile_read_byte(&index->memfile);
-        string_add(str, "[marker: ");
+        string_add_char(str, '[');
         string_add_char(str, marker);
         string_add_char(str, ']');
 
         field_ref_to_str(str, index);
 }
 
-static void container_contents_to_str(struct string *str, struct carbon_path_index *index)
+static u8 _insert_field_ref(struct carbon_insert *ins, struct carbon_path_index *index, bool is_root)
+{
+        struct carbon_insert_object_state object;
+        struct carbon_insert *oins = carbon_insert_prop_object_begin(&object, ins, "record-reference", 1024);
+        u8 ret = field_ref_into_carbon(oins, index, is_root);
+        carbon_insert_prop_object_end(&object);
+        return ret;
+}
+
+ark_func_unused
+static void column_into_carbon(struct carbon_insert *ins, struct carbon_path_index *index)
+{
+        memfile_skip_byte(&index->memfile);
+        carbon_insert_prop_string(ins, "type", "column");
+        _insert_field_ref(ins, index, false);
+}
+
+static void container_contents_into_carbon(struct carbon_insert *ins, struct carbon_path_index *index)
 {
         u64 num_elems = memfile_read_varuint(NULL, &index->memfile);
+        carbon_insert_prop_unsigned(ins, "element-count", num_elems);
+
+        struct carbon_insert_array_state array;
+        struct carbon_insert *ains = carbon_insert_prop_array_begin(&array, ins, "element-offsets", 1024);
+
+        struct string str;
+        string_create(&str);
+        for (u32 i = 0; i < num_elems; i++) {
+                u64 pos_offs = memfile_read_varuint(NULL, &index->memfile);
+                string_clear(&str);
+                string_add_u64_as_hex_0x_prefix_compact(&str, pos_offs);
+                carbon_insert_string(ains, string_cstr(&str));
+        }
+        string_drop(&str);
+
+        carbon_insert_prop_array_end(&array);
+
+        ains = carbon_insert_prop_array_begin(&array, ins, "elements", 1024);
+        unused(ains)
+        for (u32 i = 0; i < num_elems; i++) {
+                struct carbon_insert_object_state node_obj;
+                struct carbon_insert *node_obj_ins = carbon_insert_object_begin(&node_obj, ains, 1024);
+                node_into_carbon(node_obj_ins, index);
+                carbon_insert_object_end(&node_obj);
+        }
+        carbon_insert_prop_array_end(&array);
+
+}
+
+static void container_contents_to_str(struct string *str, struct carbon_path_index *index, unsigned intent_level)
+{
+        u64 num_elems = memfile_read_varuint(NULL, &index->memfile);
+        string_add_char(str, '(');
+        string_add_u64(str, num_elems);
+        string_add_char(str, ')');
 
         for (u32 i = 0; i < num_elems; i++) {
                 u64 pos_offs = memfile_read_varuint(NULL, &index->memfile);
-                string_add(str, "(elem-off: ");
-                string_add_u64(str, pos_offs);
+                string_add_char(str, '(');
+                string_add_u64_as_hex_0x_prefix_compact(str, pos_offs);
                 string_add_char(str, ')');
         }
 
         for (u32 i = 0; i < num_elems; i++) {
-                node_to_str(str, index);
+                node_to_str(str, index, intent_level);
         }
 }
 
-static void container_to_str(struct string *str, struct carbon_path_index *index, u8 field_type)
+static void container_to_str(struct string *str, struct carbon_path_index *index, u8 field_type, unsigned intent_level)
 {
         switch (field_type) {
                 case CARBON_FIELD_TYPE_NULL:
@@ -578,17 +694,59 @@ static void container_to_str(struct string *str, struct carbon_path_index *index
                 case CARBON_FIELD_TYPE_COLUMN_FLOAT:
                 case CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
                         /* subsequent path elements to be printed */
-                        container_contents_to_str(str, index);
+                        container_contents_to_str(str, index, ++intent_level);
                 } break;
                 default:
                 error(&index->err, ARK_ERR_INTERNALERR);
         }
 }
 
-static void prop_to_str(struct string *str, struct carbon_path_index *index)
+static void container_into_carbon(struct carbon_insert *ins, struct carbon_path_index *index, u8 field_type)
 {
+        switch (field_type) {
+                case CARBON_FIELD_TYPE_NULL:
+                case CARBON_FIELD_TYPE_TRUE:
+                case CARBON_FIELD_TYPE_FALSE:
+                case CARBON_FIELD_TYPE_STRING:
+                case CARBON_FIELD_TYPE_NUMBER_U8:
+                case CARBON_FIELD_TYPE_NUMBER_U16:
+                case CARBON_FIELD_TYPE_NUMBER_U32:
+                case CARBON_FIELD_TYPE_NUMBER_U64:
+                case CARBON_FIELD_TYPE_NUMBER_I8:
+                case CARBON_FIELD_TYPE_NUMBER_I16:
+                case CARBON_FIELD_TYPE_NUMBER_I32:
+                case CARBON_FIELD_TYPE_NUMBER_I64:
+                case CARBON_FIELD_TYPE_NUMBER_FLOAT:
+                case CARBON_FIELD_TYPE_BINARY:
+                case CARBON_FIELD_TYPE_BINARY_CUSTOM:
+                        /* nothing to do */
+                        break;
+                case CARBON_FIELD_TYPE_OBJECT:
+                case CARBON_FIELD_TYPE_ARRAY:
+                case CARBON_FIELD_TYPE_COLUMN_U8:
+                case CARBON_FIELD_TYPE_COLUMN_U16:
+                case CARBON_FIELD_TYPE_COLUMN_U32:
+                case CARBON_FIELD_TYPE_COLUMN_U64:
+                case CARBON_FIELD_TYPE_COLUMN_I8:
+                case CARBON_FIELD_TYPE_COLUMN_I16:
+                case CARBON_FIELD_TYPE_COLUMN_I32:
+                case CARBON_FIELD_TYPE_COLUMN_I64:
+                case CARBON_FIELD_TYPE_COLUMN_FLOAT:
+                case CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
+                        /* subsequent path elements to be printed */
+                        container_contents_into_carbon(ins, index);
+                } break;
+                default:
+                error(&index->err, ARK_ERR_INTERNALERR);
+        }
+}
+
+static void prop_to_str(struct string *str, struct carbon_path_index *index, unsigned intent_level)
+{
+        intent(str, intent_level++);
+
         u8 marker = memfile_read_byte(&index->memfile);
-        string_add(str, "[marker: ");
+        string_add_char(str, '[');
         string_add_char(str, marker);
         string_add_char(str, ']');
 
@@ -596,26 +754,64 @@ static void prop_to_str(struct string *str, struct carbon_path_index *index)
 
         u64 key_offset = memfile_read_varuint(NULL, &index->memfile);
 
-        string_add(str, "(key-offset: ");
-        string_add_u64(str, key_offset);
+        string_add_char(str, '(');
+        string_add_u64_as_hex_0x_prefix_compact(str, key_offset);
         string_add_char(str, ')');
 
-        container_to_str(str, index, field_type);
+        container_to_str(str, index, field_type, intent_level);
 }
 
-static void array_to_str(struct string *str, struct carbon_path_index *index, bool is_root)
+ark_func_unused
+static void prop_into_carbon(struct carbon_insert *ins, struct carbon_path_index *index)
 {
+        memfile_skip_byte(&index->memfile);
+        carbon_insert_prop_string(ins, "type", "key");
+        u8 field_type = _insert_field_ref(ins, index, false);
+
+        struct string str;
+        string_create(&str);
+
+        u64 key_offset = memfile_read_varuint(NULL, &index->memfile);
+        string_add_u64_as_hex_0x_prefix_compact(&str, key_offset);
+        carbon_insert_prop_string(ins, "key", string_cstr(&str));
+        string_drop(&str);
+
+        container_into_carbon(ins, index, field_type);
+}
+
+static void array_into_carbon(struct carbon_insert *ins, struct carbon_path_index *index, bool is_root)
+{
+        memfile_skip_byte(&index->memfile);
+        u8 field_type;
+
+        carbon_insert_prop_string(ins, "parent", is_root ? "record" : "array");
+        field_type = _insert_field_ref(ins, index, is_root);
+
+        struct carbon_insert_object_state object;
+        struct carbon_insert *oins = carbon_insert_prop_object_begin(&object, ins, "nodes", 1024);
+        if (unlikely(is_root)) {
+                container_contents_into_carbon(oins, index);
+        } else {
+                container_into_carbon(oins, index, field_type);
+        }
+        carbon_insert_prop_object_end(&object);
+}
+
+static void array_to_str(struct string *str, struct carbon_path_index *index, bool is_root, unsigned intent_level)
+{
+        intent(str, intent_level++);
+
         u8 marker = memfile_read_byte(&index->memfile);
-        string_add(str, "[marker: ");
+        string_add_char(str, '[');
         string_add_char(str, marker);
         string_add_char(str, ']');
 
         u8 field_type = field_ref_to_str(str, index);
 
         if (unlikely(is_root)) {
-                container_contents_to_str(str, index);
+                container_contents_to_str(str, index, intent_level);
         } else {
-                container_to_str(str, index, field_type);
+                container_to_str(str, index, field_type, intent_level);
         }
 }
 
@@ -682,7 +878,7 @@ static void index_build(struct memfile *file, struct carbon *doc)
 static void record_ref_to_str(struct string *str, struct carbon_path_index *index)
 {
         u8 key_type = memfile_read_byte(&index->memfile);
-        string_add(str, "[key-type: ");
+        string_add_char(str, '[');
         string_add_char(str, key_type);
         string_add_char(str, ']');
 
@@ -693,20 +889,20 @@ static void record_ref_to_str(struct string *str, struct carbon_path_index *inde
                 case CARBON_KEY_AUTOKEY:
                 case CARBON_KEY_UKEY: {
                         u64 key = memfile_read_u64(&index->memfile);
-                        string_add(str, "[key: ");
+                        string_add_char(str, '[');
                         string_add_u64(str, key);
                         string_add_char(str, ']');
                 } break;
                 case CARBON_KEY_IKEY: {
                         i64 key = memfile_read_i64(&index->memfile);
-                        string_add(str, "[key: ");
+                        string_add_char(str, '[');;
                         string_add_i64(str, key);
                         string_add_char(str, ']');
                 } break;
                 case CARBON_KEY_SKEY: {
                         u64 key_len;
                         const char *key = carbon_string_read(&key_len, &index->memfile);
-                        string_add(str, "(key: ");
+                        string_add_char(str, '(');
                         string_add_nchar(str, key, key_len);
                         string_add_char(str, ')');
                 } break;
@@ -714,9 +910,43 @@ static void record_ref_to_str(struct string *str, struct carbon_path_index *inde
                 error(&index->err, ARK_ERR_INTERNALERR);
         }
         u64 commit_hash = memfile_read_u64(&index->memfile);
-        string_add(str, "[commit-hash: ");
+        string_add_char(str, '[');
         string_add_u64(str, commit_hash);
         string_add_char(str, ']');
+}
+
+static void record_ref_to_carbon(struct carbon_insert *roins, struct carbon_path_index *index)
+{
+        char key_type = memfile_read_byte(&index->memfile);
+        carbon_insert_prop_string(roins, "key-type", carbon_key_type_str(key_type));
+
+        switch (key_type) {
+                case CARBON_KEY_NOKEY:
+                        /* nothing to do */
+                        break;
+                case CARBON_KEY_AUTOKEY:
+                case CARBON_KEY_UKEY: {
+                        u64 key = memfile_read_u64(&index->memfile);
+                        carbon_insert_prop_unsigned(roins, "key-value", key);
+                } break;
+                case CARBON_KEY_IKEY: {
+                        i64 key = memfile_read_i64(&index->memfile);
+                        carbon_insert_prop_signed(roins, "key-value", key);
+                } break;
+                case CARBON_KEY_SKEY: {
+                        u64 key_len;
+                        const char *key = carbon_string_read(&key_len, &index->memfile);
+                        carbon_insert_prop_nchar(roins, "key-value", key, key_len);
+                } break;
+                default:
+                error(&index->err, ARK_ERR_INTERNALERR);
+        }
+        u64 commit_hash = memfile_read_u64(&index->memfile);
+        struct string str;
+        string_create(&str);
+        carbon_commit_hash_to_str(&str, commit_hash);
+        carbon_insert_prop_string(roins, "commit-hash", string_cstr(&str));
+        string_drop(&str);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1038,15 +1268,37 @@ bool carbon_path_index_hexdump(FILE *file, struct carbon_path_index *index)
 
 bool carbon_path_index_to_carbon(struct carbon *doc, struct carbon_path_index *index)
 {
-        unused(doc)
-        unused(index)
-        return false;
+        struct carbon_new context;
+        struct carbon_insert_object_state object;
+
+        memfile_seek_to_start(&index->memfile);
+
+        struct carbon_insert *ins = carbon_create_begin(&context, doc, CARBON_KEY_NOKEY, CARBON_OPTIMIZE);
+        struct carbon_insert *oins = carbon_insert_object_begin(&object, ins, 1024);
+
+        {
+                struct carbon_insert_object_state ref_object;
+                struct carbon_insert *roins = carbon_insert_prop_object_begin(&ref_object, oins, "record-association", 1024);
+                record_ref_to_carbon(roins, index);
+                carbon_insert_prop_object_end(&ref_object);
+        }
+        {
+                struct carbon_insert_object_state root_object;
+                struct carbon_insert *roins = carbon_insert_prop_object_begin(&root_object, oins, "index", 1024);
+                array_into_carbon(roins, index, true);
+                carbon_insert_prop_object_end(&root_object);
+        }
+
+        carbon_insert_object_end(&object);
+        carbon_create_end(&context);
+        return true;
 }
 
 const char *carbon_path_index_to_str(struct string *str, struct carbon_path_index *index)
 {
+        memfile_seek_to_start(&index->memfile);
         record_ref_to_str(str, index);
-        array_to_str(str, index, true);
+        array_to_str(str, index, true, 0);
         return string_cstr(str);
 }
 

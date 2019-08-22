@@ -213,3 +213,17 @@ const void *carbon_key_read(u64 *len, enum carbon_key_type *out, struct memfile 
                         return NULL;
         }
 }
+
+const char *carbon_key_type_str(enum carbon_key_type type)
+{
+        switch (type) {
+                case CARBON_KEY_NOKEY: return "nokey";
+                case CARBON_KEY_AUTOKEY: return "autokey";
+                case CARBON_KEY_UKEY: return "ukey";
+                case CARBON_KEY_IKEY: return "ikey";
+                case CARBON_KEY_SKEY: return "skey";
+                default:
+                        error_print(ARK_ERR_INTERNALERR);
+                        return NULL;
+        }
+}

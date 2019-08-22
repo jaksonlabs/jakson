@@ -388,14 +388,14 @@ bool carbon_iterator_close(struct carbon_array_it *it)
         return carbon_array_it_drop(it);
 }
 
-bool carbon_print(FILE *file, struct carbon *doc)
+bool carbon_print(FILE *file, enum carbon_printer_impl printer, struct carbon *doc)
 {
         error_if_null(file);
         error_if_null(doc);
 
         struct string builder;
         string_create(&builder);
-        carbon_to_str(&builder, JSON_EXTENDED, doc);
+        carbon_to_str(&builder, printer, doc);
         printf("%s\n", string_cstr(&builder));
         string_drop(&builder);
 
