@@ -25,24 +25,24 @@
 #include <jak_archive_visitor.h>
 #include <jak_archive_query.h>
 
-static void iterate_props(jak_archive *archive, struct jak_prop_iter *prop_iter,
-                          struct jak_vector ofType(struct jak_path_entry) *path_stack,
-                          struct jak_archive_visitor *visitor,
+static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
+                          struct jak_vector ofType(jak_path_entry) *path_stack,
+                          jak_archive_visitor *visitor,
                           int mask, void *capture,
                           bool is_root_object, jak_archive_field_sid_t parent_key, jak_u32 parent_key_array_idx);
 
 static void iterate_objects(jak_archive *archive, const jak_archive_field_sid_t *keys, jak_u32 num_pairs,
-                            struct jak_archive_value_vector *value_iter,
-                            struct jak_vector ofType(struct jak_path_entry) *path_stack,
-                            struct jak_archive_visitor *visitor, int mask, void *capture, bool is_root_object)
+                            jak_archive_value_vector *value_iter,
+                            struct jak_vector ofType(jak_path_entry) *path_stack,
+                            jak_archive_visitor *visitor, int mask, void *capture, bool is_root_object)
 {
         JAK_UNUSED(num_pairs);
 
         jak_u32 vector_length;
-        struct jak_archive_object object;
+        jak_archive_object object;
         jak_global_id_t parent_object_id;
         jak_global_id_t object_id;
-        struct jak_prop_iter prop_iter;
+        jak_prop_iter prop_iter;
         struct jak_error err;
 
         jak_archive_value_vector_get_object_id(&parent_object_id, value_iter);
@@ -53,7 +53,7 @@ static void iterate_objects(jak_archive *archive, const jak_archive_field_sid_t 
                 jak_archive_field_sid_t parent_key = keys[i];
                 jak_u32 parent_key_array_idx = i;
 
-//        struct jak_path_entry  e = { .key = parent_key, .idx = 0 };
+//        jak_path_entry  e = { .key = parent_key, .idx = 0 };
 //        vec_push(path_stack, &e, 1);
 
                 //  fprintf(stderr, "XXXX object: ");
@@ -65,7 +65,7 @@ static void iterate_objects(jak_archive *archive, const jak_archive_field_sid_t 
                 jak_archive_prop_iter_from_object(&prop_iter, mask, &err, &object);
 
                 if (!is_root_object) {
-                        enum jak_visit_policy visit = JAK_VISIT_INCLUDE;
+                        jak_visit_policy_e visit = JAK_VISIT_INCLUDE;
                         if (visitor->before_object_visit) {
                                 visit = visitor->before_object_visit(archive,
                                                                      path_stack,
@@ -115,7 +115,7 @@ static void iterate_objects(jak_archive *archive, const jak_archive_field_sid_t 
 #define SET_TYPE_SWITCH_CASE(name, built_in_type)                                                                      \
 {                                                                                                                      \
     if (is_array) {                                                                                                    \
-        enum jak_visit_policy visit = JAK_VISIT_INCLUDE;                                                 \
+        jak_visit_policy_e visit = JAK_VISIT_INCLUDE;                                                 \
         if (visitor->visit_enter_##name##_array_pairs) {                                                               \
             visit = visitor->visit_enter_##name##_array_pairs(archive, path_stack, this_object_oid, keys, num_pairs, capture);     \
         }                                                                                                              \
@@ -152,26 +152,26 @@ static void iterate_objects(jak_archive *archive, const jak_archive_field_sid_t 
                   current_column_name, values, entry_length, capture);                                                 \
 }
 
-static void iterate_props(jak_archive *archive, struct jak_prop_iter *prop_iter,
-                          struct jak_vector ofType(struct jak_path_entry) *path_stack,
-                          struct jak_archive_visitor *visitor,
+static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
+                          struct jak_vector ofType(jak_path_entry) *path_stack,
+                          jak_archive_visitor *visitor,
                           int mask, void *capture,
                           bool is_root_object, jak_archive_field_sid_t parent_key, jak_u32 parent_key_array_idx)
 {
         jak_global_id_t this_object_oid;
-        struct jak_archive_value_vector value_iter;
+        jak_archive_value_vector value_iter;
         enum jak_archive_field_type type;
         bool is_array;
         const jak_archive_field_sid_t *keys;
         jak_u32 num_pairs;
-        enum jak_prop_iter_mode iter_type;
-        struct jak_independent_iter_state collection_iter;
+        jak_prop_iter_mode_e iter_type;
+        jak_independent_iter_state collection_iter;
         bool first_type_group = true;
 
         JAK_UNUSED(parent_key);
         JAK_UNUSED(parent_key_array_idx);
 
-        struct jak_path_entry e = {.key = parent_key, .idx = parent_key_array_idx};
+        jak_path_entry e = {.key = parent_key, .idx = parent_key_array_idx};
         vec_push(path_stack, &e, 1);
 
         jak_archive_value_vector_get_object_id(&this_object_oid, &value_iter);
@@ -196,7 +196,7 @@ static void iterate_props(jak_archive *archive, struct jak_prop_iter *prop_iter,
                                                   is_array,
                                                   capture);
 
-                                struct jak_path_entry e = {.key = keys[i], .idx = 666};
+                                jak_path_entry e = {.key = keys[i], .idx = 666};
                                 vec_push(path_stack, &e, 1);
                                 //jak_archive_visitor_print_path(stderr, archive, path_stack);
                                 JAK_optional_call(visitor,
@@ -252,7 +252,7 @@ static void iterate_props(jak_archive *archive, struct jak_prop_iter *prop_iter,
                                         break;
                                 case JAK_FIELD_NULL:
                                         if (is_array) {
-                                                enum jak_visit_policy visit = JAK_VISIT_INCLUDE;
+                                                jak_visit_policy_e visit = JAK_VISIT_INCLUDE;
                                                 if (visitor->visit_enter_null_array_pairs) {
                                                         visit = visitor->visit_enter_null_array_pairs(archive,
                                                                                                       path_stack,
@@ -340,7 +340,7 @@ static void iterate_props(jak_archive *archive, struct jak_prop_iter *prop_iter,
 
                         first_type_group = false;
                 } else {
-                        struct jak_independent_iter_state group_iter;
+                        jak_independent_iter_state group_iter;
                         jak_u32 num_column_groups;
                         keys = jak_archive_collection_iter_get_keys(&num_column_groups, &collection_iter);
 
@@ -350,11 +350,11 @@ static void iterate_props(jak_archive *archive, struct jak_prop_iter *prop_iter,
                         if (visitor->before_visit_object_array) {
                                 for (jak_u32 i = 0; i < num_column_groups; i++) {
 
-                                        //     struct jak_path_entry  e = { .key = parent_key, .idx = i };
+                                        //     jak_path_entry  e = { .key = parent_key, .idx = i };
                                         //vec_push(path_stack, &e, 1);
 
 
-                                        enum jak_visit_policy policy = visitor->before_visit_object_array(archive,
+                                        jak_visit_policy_e policy = visitor->before_visit_object_array(archive,
                                                                                                           path_stack,
                                                                                                           this_object_oid,
                                                                                                           keys[i],
@@ -372,7 +372,7 @@ static void iterate_props(jak_archive *archive, struct jak_prop_iter *prop_iter,
                                 if (!skip_groups_by_key[current_group_idx]) {
 
                                         jak_u32 num_column_group_objs;
-                                        struct jak_independent_iter_state column_iter;
+                                        jak_independent_iter_state column_iter;
                                         jak_archive_field_sid_t group_key = keys[current_group_idx];
                                         const jak_global_id_t *column_group_object_ids =
                                                 jak_archive_column_group_get_object_ids(&num_column_group_objs,
@@ -403,7 +403,7 @@ static void iterate_props(jak_archive *archive, struct jak_prop_iter *prop_iter,
                                                                                     &current_column_entry_type,
                                                                                     &column_iter);
 
-                                                        struct jak_path_entry e = {.key = current_column_name, .idx = 0};
+                                                        jak_path_entry e = {.key = current_column_name, .idx = 0};
                                                         vec_push(path_stack, &e, 1);
 
                                                         /**
@@ -429,7 +429,7 @@ static void iterate_props(jak_archive *archive, struct jak_prop_iter *prop_iter,
 
                                                         bool skip_column = false;
                                                         if (visitor->before_visit_object_array_object_property) {
-                                                                enum jak_visit_policy policy =
+                                                                jak_visit_policy_e policy =
                                                                         visitor->before_visit_object_array_object_property(
                                                                                 archive,
                                                                                 path_stack,
@@ -447,7 +447,7 @@ static void iterate_props(jak_archive *archive, struct jak_prop_iter *prop_iter,
                                                                         jak_archive_column_get_entry_positions(
                                                                                 &num_positions,
                                                                                 &column_iter);
-                                                                struct jak_independent_iter_state entry_iter;
+                                                                jak_independent_iter_state entry_iter;
 
                                                                 jak_global_id_t *entry_object_containments =
                                                                         JAK_MALLOC(num_positions *
@@ -552,8 +552,8 @@ static void iterate_props(jak_archive *archive, struct jak_prop_iter *prop_iter,
                                                                                 }
                                                                                         break;
                                                                                 case JAK_FIELD_OBJECT: {
-                                                                                        struct jak_column_object_iter iter;
-                                                                                        const struct jak_archive_object
+                                                                                        jak_column_object_iter iter;
+                                                                                        const jak_archive_object
                                                                                                 *archive_object;
                                                                                         jak_archive_column_entry_get_objects(
                                                                                                 &iter,
@@ -571,7 +571,7 @@ static void iterate_props(jak_archive *archive, struct jak_prop_iter *prop_iter,
                                                                                                 bool skip_object = false;
                                                                                                 if (visitor
                                                                                                         ->before_object_array_object_property_object) {
-                                                                                                        enum jak_visit_policy
+                                                                                                        jak_visit_policy_e
                                                                                                                 policy =
                                                                                                                 visitor->before_object_array_object_property_object(
                                                                                                                         archive,
@@ -593,13 +593,13 @@ static void iterate_props(jak_archive *archive, struct jak_prop_iter *prop_iter,
 
                                                                                                         //keys[i]
 
-                                                                                                        //struct jak_path_entry  e = { .key = current_column_name, .idx = 0 };
+                                                                                                        //jak_path_entry  e = { .key = current_column_name, .idx = 0 };
                                                                                                         //vec_push(path_stack, &e, 1);
 
                                                                                                         vec_pop(path_stack);
 
                                                                                                         struct jak_error err;
-                                                                                                        struct jak_prop_iter
+                                                                                                        jak_prop_iter
                                                                                                                 nested_obj_prop_iter;
                                                                                                         jak_archive_prop_iter_from_object(
                                                                                                                 &nested_obj_prop_iter,
@@ -617,7 +617,7 @@ static void iterate_props(jak_archive *archive, struct jak_prop_iter *prop_iter,
                                                                                                                 current_column_name,
                                                                                                                 current_group_idx);
 
-                                                                                                        struct jak_path_entry e =
+                                                                                                        jak_path_entry e =
                                                                                                                 {.key = current_column_name, .idx = 0};
                                                                                                         vec_push(
                                                                                                                 path_stack,
@@ -654,19 +654,19 @@ static void iterate_props(jak_archive *archive, struct jak_prop_iter *prop_iter,
         vec_pop(path_stack);
 }
 
-bool jak_archive_visit_archive(jak_archive *archive, const struct jak_archive_visitor_desc *desc,
-                               struct jak_archive_visitor *visitor, void *capture)
+bool jak_archive_visit_archive(jak_archive *archive, const jak_archive_visitor_desc *desc,
+                               jak_archive_visitor *visitor, void *capture)
 {
         JAK_ERROR_IF_NULL(archive)
         JAK_ERROR_IF_NULL(visitor)
 
-        struct jak_prop_iter prop_iter;
+        jak_prop_iter prop_iter;
         struct jak_vector ofType(path_entry) path_stack;
 
         int mask = desc ? desc->visit_mask : JAK_ARCHIVE_ITER_MASK_ANY;
 
         if (jak_archive_prop_iter_from_archive(&prop_iter, &archive->err, mask, archive)) {
-                vec_create(&path_stack, NULL, sizeof(struct jak_path_entry), 100);
+                vec_create(&path_stack, NULL, sizeof(jak_path_entry), 100);
                 JAK_optional_call(visitor, before_visit_starts, archive, capture);
                 iterate_props(archive, &prop_iter, &path_stack, visitor, mask, capture, true, 0, 0);
                 JAK_optional_call(visitor, after_visit_ends, archive, capture);
@@ -680,13 +680,13 @@ bool jak_archive_visit_archive(jak_archive *archive, const struct jak_archive_vi
 #include <inttypes.h>
 
 void jak_archive_visitor_path_to_string(char path_buffer[2048], jak_archive *archive,
-                                        const struct jak_vector ofType(struct jak_path_entry) *path_stack)
+                                        const struct jak_vector ofType(jak_path_entry) *path_stack)
 {
 
-        struct jak_archive_query *query = jak_archive_query_default(archive);
+        jak_archive_query *query = jak_archive_query_default(archive);
 
         for (jak_u32 i = 0; i < path_stack->num_elems; i++) {
-                const struct jak_path_entry *entry = vec_get(path_stack, i, struct jak_path_entry);
+                const jak_path_entry *entry = vec_get(path_stack, i, jak_path_entry);
                 if (entry->key != 0) {
                         char *key = jak_query_fetch_string_by_id(query, entry->key);
                         size_t path_len = strlen(path_buffer);
@@ -699,16 +699,16 @@ void jak_archive_visitor_path_to_string(char path_buffer[2048], jak_archive *arc
 }
 
 bool jak_archive_visitor_print_path(FILE *file, jak_archive *archive,
-                                    const struct jak_vector ofType(struct jak_path_entry) *path_stack)
+                                    const struct jak_vector ofType(jak_path_entry) *path_stack)
 {
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(path_stack)
         JAK_ERROR_IF_NULL(archive)
 
-        struct jak_archive_query *query = jak_archive_query_default(archive);
+        jak_archive_query *query = jak_archive_query_default(archive);
 
         for (jak_u32 i = 0; i < path_stack->num_elems; i++) {
-                const struct jak_path_entry *entry = vec_get(path_stack, i, struct jak_path_entry);
+                const jak_path_entry *entry = vec_get(path_stack, i, jak_path_entry);
                 if (entry->key != 0) {
                         char *key = jak_query_fetch_string_by_id(query, entry->key);
                         fprintf(file, "%s/", key);
@@ -727,7 +727,7 @@ bool jak_archive_visitor_print_path(FILE *file, jak_archive *archive,
         return true;
 }
 
-bool jak_archive_visitor_path_compare(const struct jak_vector ofType(struct jak_path_entry) *path,
+bool jak_archive_visitor_path_compare(const struct jak_vector ofType(jak_path_entry) *path,
                                       jak_archive_field_sid_t *group_name, const char *path_str,
                                       jak_archive *archive)
 {
@@ -735,10 +735,10 @@ bool jak_archive_visitor_path_compare(const struct jak_vector ofType(struct jak_
         memset(path_buffer, 0, sizeof(path_buffer));
         sprintf(path_buffer, "/");
 
-        struct jak_archive_query *query = jak_archive_query_default(archive);
+        jak_archive_query *query = jak_archive_query_default(archive);
 
         for (jak_u32 i = 1; i < path->num_elems; i++) {
-                const struct jak_path_entry *entry = vec_get(path, i, struct jak_path_entry);
+                const jak_path_entry *entry = vec_get(path, i, jak_path_entry);
                 if (entry->key != 0) {
                         char *key = jak_query_fetch_string_by_id(query, entry->key);
                         size_t path_len = strlen(path_buffer);

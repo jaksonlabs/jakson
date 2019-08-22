@@ -39,7 +39,7 @@ struct lru_list {
 struct jak_string_cache {
         struct jak_vector ofType(struct lru_list) list_entries;
         jak_sid_cache_stats statistics;
-        struct jak_archive_query query;
+        jak_archive_query query;
         struct jak_error err;
         size_t capacity;
 };
@@ -58,7 +58,7 @@ static void init_list(struct lru_list *list)
 
 bool jak_string_id_cache_create_lru(struct jak_string_cache **cache, jak_archive *archive)
 {
-        struct jak_archive_info archive_info;
+        jak_archive_info archive_info;
         jak_archive_get_info(&archive_info, archive);
         jak_u32 capacity = archive_info.num_embeddded_strings * 0.25f;
         return jak_string_id_cache_create_lru_ex(cache, archive, capacity);

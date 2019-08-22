@@ -32,17 +32,15 @@
 
 JAK_BEGIN_DECL
 
-struct jak_archive_query; /* forwarded from 'types-query.h' */
-
 typedef struct jak_archive {
-        struct jak_archive_info info;
+        jak_archive_info info;
         char *disk_file_path;
-        struct jak_string_table string_table;
-        struct jak_record_table record_table;
+        jak_string_table string_table;
+        jak_record_table record_table;
         struct jak_error err;
         struct jak_sid_to_offset *query_index_string_id_to_offset;
         struct jak_string_cache *string_id_cache;
-        struct jak_archive_query *default_query;
+        jak_archive_query *default_query;
 } jak_archive;
 
 typedef struct jak_archive_callback {
@@ -84,27 +82,27 @@ bool jak_archive_write(FILE *file, const struct jak_memblock *stream);
 bool jak_archive_load(struct jak_memblock **stream, FILE *file);
 bool jak_archive_print(FILE *file, struct jak_error *err, struct jak_memblock *stream);
 bool jak_archive_open(jak_archive *out, const char *file_path);
-bool jak_archive_get_info(struct jak_archive_info *info, const jak_archive *archive);
+bool jak_archive_get_info(jak_archive_info *info, const jak_archive *archive);
 bool jak_archive_close(jak_archive *archive);
 bool jak_archive_drop_indexes(jak_archive *archive);
-bool jak_archive_query(struct jak_archive_query *query, jak_archive *archive);
+bool jak_archive_query_run(jak_archive_query *query, jak_archive *archive);
 bool jak_archive_has_query_index_string_id_to_offset(bool *state, jak_archive *archive);
 bool jak_archive_hash_query_string_id_cache(bool *has_cache, jak_archive *archive);
 bool jak_archive_drop_query_string_id_cache(jak_archive *archive);
 struct jak_string_cache *jak_archive_get_query_string_id_cache(jak_archive *archive);
-struct jak_archive_query *jak_archive_query_default(jak_archive *archive);
+jak_archive_query *jak_archive_query_default(jak_archive *archive);
 
 /**
- * Creates a new <code>struct jak_io_context</code> to access the archives underlying file for unsafe operations.
+ * Creates a new <code>jak_archive_io_context</code> to access the archives underlying file for unsafe operations.
  *
  * An unsafe operation directly seeks randomly in the underlying file. To avoid creation of multiple file
  * descriptors while at the same time allow to access unsafe operations in a multi-threading environment, an
- * <code>struct jak_io_context</code> is used. Roughly, such a context is a regular FILE that is protected by a lock.
+ * <code>jak_archive_io_context</code> is used. Roughly, such a context is a regular FILE that is protected by a lock.
  *
  * @param archive The archive
- * @return a heap-allocated instance of <code>struct jak_io_context</code>, or NULL if not successful
+ * @return a heap-allocated instance of <code>jak_archive_io_context</code>, or NULL if not successful
  */
-struct jak_io_context *jak_archive_io_context_create(jak_archive *archive);
+jak_archive_io_context *jak_archive_io_context_create(jak_archive *archive);
 
 JAK_END_DECL
 

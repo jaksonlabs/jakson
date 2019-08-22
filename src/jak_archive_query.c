@@ -45,7 +45,7 @@ struct jak_sid_to_offset {
     if (obj->flags.bits.bit_flag_name) {                                                                               \
         JAK_ASSERT(obj->props.offset_name != 0);                                                                           \
         memfile_seek(&obj->file, obj->props.offset_name);                                                       \
-        struct jak_fixed_prop prop;                                                                                      \
+        jak_fixed_prop prop;                                                                                      \
         jak_int_embedded_fixed_props_read(&prop, &obj->file);                                                       \
         jak_archive_int_reset_carbon_object_mem_file(obj);                                                                   \
         JAK_optional_set(num_pairs, prop.header->num_entries);                                                      \
@@ -56,7 +56,7 @@ struct jak_sid_to_offset {
     }                                                                                                                  \
 }
 
-bool jak_query_create(struct jak_archive_query *query, jak_archive *archive)
+bool jak_query_create(jak_archive_query *query, jak_archive *archive)
 {
         JAK_ERROR_IF_NULL(query)
         JAK_ERROR_IF_NULL(archive)
@@ -66,13 +66,13 @@ bool jak_query_create(struct jak_archive_query *query, jak_archive *archive)
         return query->context != NULL;
 }
 
-bool jak_query_drop(struct jak_archive_query *query)
+bool jak_query_drop(jak_archive_query *query)
 {
         JAK_ERROR_IF_NULL(query)
         return jak_io_context_drop(query->context);
 }
 
-bool jak_query_scan_strids(struct jak_strid_iter *it, struct jak_archive_query *query)
+bool jak_query_scan_strids(jak_strid_iter *it, jak_archive_query *query)
 {
         JAK_ERROR_IF_NULL(it)
         JAK_ERROR_IF_NULL(query)
@@ -94,18 +94,18 @@ index_string_id_to_offset_open_file(struct jak_sid_to_offset *index, struct jak_
         }
 }
 
-bool jak_query_create_index_string_id_to_offset(struct jak_sid_to_offset **index, struct jak_archive_query *query)
+bool jak_query_create_index_string_id_to_offset(struct jak_sid_to_offset **index, jak_archive_query *query)
 {
         JAK_ERROR_IF_NULL(index)
         JAK_ERROR_IF_NULL(query)
 
-        struct jak_strid_iter strid_iter;
-        struct jak_strid_info *info;
+        jak_strid_iter strid_iter;
+        jak_strid_info *info;
         size_t vector_len;
         bool status;
         bool success;
         jak_u32 capacity;
-        struct jak_archive_info archive_info;
+        jak_archive_info archive_info;
         jak_archive_get_info(&archive_info, query->archive);
         capacity = archive_info.num_embeddded_strings;
 
@@ -216,12 +216,12 @@ static char *fetch_string_from_file(bool *decode_success, FILE *disk_file, size_
         return result;
 }
 
-static char *fetch_string_by_id_via_scan(struct jak_archive_query *query, jak_archive_field_sid_t id)
+static char *fetch_string_by_id_via_scan(jak_archive_query *query, jak_archive_field_sid_t id)
 {
         JAK_ASSERT(query);
 
-        struct jak_strid_iter strid_iter;
-        struct jak_strid_info *info;
+        jak_strid_iter strid_iter;
+        jak_strid_info *info;
         size_t vector_len;
         bool status;
         bool success;
@@ -265,7 +265,7 @@ static char *fetch_string_by_id_via_scan(struct jak_archive_query *query, jak_ar
         }
 }
 
-static char *fetch_string_by_id_via_index(struct jak_archive_query *query, struct jak_sid_to_offset *index,
+static char *fetch_string_by_id_via_index(jak_archive_query *query, struct jak_sid_to_offset *index,
                                           jak_archive_field_sid_t id)
 {
         const struct jak_sid_to_offset_arg *args = hashtable_get_value(&index->mapping, &id);
@@ -295,7 +295,7 @@ static char *fetch_string_by_id_via_index(struct jak_archive_query *query, struc
         }
 }
 
-char *jak_query_fetch_string_by_id(struct jak_archive_query *query, jak_archive_field_sid_t id)
+char *jak_query_fetch_string_by_id(jak_archive_query *query, jak_archive_field_sid_t id)
 {
         JAK_ASSERT(query);
 
@@ -308,7 +308,7 @@ char *jak_query_fetch_string_by_id(struct jak_archive_query *query, jak_archive_
         }
 }
 
-char *jak_query_fetch_string_by_id_nocache(struct jak_archive_query *query, jak_archive_field_sid_t id)
+char *jak_query_fetch_string_by_id_nocache(jak_archive_query *query, jak_archive_field_sid_t id)
 {
         bool has_index;
         jak_archive_has_query_index_string_id_to_offset(&has_index, query->archive);
@@ -319,7 +319,7 @@ char *jak_query_fetch_string_by_id_nocache(struct jak_archive_query *query, jak_
         }
 }
 
-char **jak_query_fetch_strings_by_offset(struct jak_archive_query *query, jak_offset_t *offs, jak_u32 *strlens,
+char **jak_query_fetch_strings_by_offset(jak_archive_query *query, jak_offset_t *offs, jak_u32 *strlens,
                                          size_t num_offs)
 {
         JAK_ASSERT(query);
@@ -380,8 +380,8 @@ char **jak_query_fetch_strings_by_offset(struct jak_archive_query *query, jak_of
         return NULL;
 }
 
-jak_archive_field_sid_t *jak_query_find_ids(size_t *num_found, struct jak_archive_query *query,
-                                            const struct jak_string_pred_t *pred, void *capture, jak_i64 limit)
+jak_archive_field_sid_t *jak_query_find_ids(size_t *num_found, jak_archive_query *query,
+                                            const jak_string_pred *pred, void *capture, jak_i64 limit)
 {
         if (JAK_UNLIKELY(jak_string_pred_validate(&query->err, pred) == false)) {
                 return NULL;
@@ -390,8 +390,8 @@ jak_archive_field_sid_t *jak_query_find_ids(size_t *num_found, struct jak_archiv
         jak_string_pred_get_limit(&pred_limit, pred);
         pred_limit = pred_limit < 0 ? limit : JAK_min(pred_limit, limit);
 
-        struct jak_strid_iter it;
-        struct jak_strid_info *info = NULL;
+        jak_strid_iter it;
+        jak_strid_info *info = NULL;
         size_t info_len = 0;
         size_t step_len = 0;
         jak_offset_t *str_offs = NULL;

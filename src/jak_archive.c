@@ -136,7 +136,7 @@ static bool __serialize(jak_offset_t *offset, struct jak_error *err, struct jak_
                         struct jak_column_doc_obj *columndoc,
                         jak_offset_t root_object_header_offset);
 
-static union jak_object_flags *get_flags(union jak_object_flags *flags, struct jak_column_doc_obj *columndoc);
+static jak_object_flags_u *get_flags(jak_object_flags_u *flags, struct jak_column_doc_obj *columndoc);
 
 static void update_file_header(struct jak_memfile *memfile, jak_offset_t root_object_header_offset);
 
@@ -341,7 +341,7 @@ static bool run_string_id_baking(struct jak_error *err, struct jak_memblock **st
         }
 
         struct jak_sid_to_offset *index;
-        struct jak_archive_query query;
+        jak_archive_query query;
         jak_query_create(&query, &archive);
         jak_query_create_index_string_id_to_offset(&index, &query);
         jak_query_drop(&query);
@@ -427,10 +427,10 @@ bool jak_archive_from_model(struct jak_memblock **stream, struct jak_error *err,
         return true;
 }
 
-struct jak_io_context *jak_archive_io_context_create(jak_archive *archive)
+jak_archive_io_context *jak_archive_io_context_create(jak_archive *archive)
 {
         JAK_ERROR_IF_NULL(archive);
-        struct jak_io_context *context;
+        jak_archive_io_context *context;
         if (jak_io_context_create(&context, &archive->err, archive->disk_file_path)) {
                 return context;
         } else {
@@ -460,7 +460,7 @@ bool jak_archive_print(FILE *file, struct jak_error *err, struct jak_memblock *s
         struct jak_memfile memfile;
         memfile_open(&memfile, stream, READ_ONLY);
         if (memfile_size(&memfile)
-            < sizeof(jak_archive_header) + sizeof(struct jak_string_table_header) +
+            < sizeof(jak_archive_header) + sizeof(jak_string_table_header) +
               sizeof(jak_object_header)) {
                 error(err, JAK_ERR_NOCARBONSTREAM);
                 return false;
@@ -471,7 +471,7 @@ bool jak_archive_print(FILE *file, struct jak_error *err, struct jak_memblock *s
 
 bool print_object(FILE *file, struct jak_error *err, struct jak_memfile *memfile, unsigned nesting_level);
 
-static jak_u32 flags_to_int32(union jak_object_flags *flags)
+static jak_u32 flags_to_int32(jak_object_flags_u *flags)
 {
         return *((jak_i32 *) flags);
 }
@@ -665,7 +665,7 @@ static bool write_array_prop(jak_offset_t *offset, struct jak_error *err, struct
 
         if (keys->num_elems > 0) {
                 jak_prop_header header =
-                        {.marker = marker_symbols[value_array_marker_mapping[type].marker].symbol, .num_entries = keys
+                        {.marker = jak_global_marker_symbols[jak_global_value_array_marker_mapping[type].marker].symbol, .num_entries = keys
                                 ->num_elems};
                 jak_offset_t prop_ofOffset = memfile_tell(memfile);
                 memfile_write(memfile, &header, sizeof(jak_prop_header));
@@ -685,7 +685,7 @@ static bool write_array_prop(jak_offset_t *offset, struct jak_error *err, struct
 }
 
 static bool write_array_props(struct jak_memfile *memfile, struct jak_error *err, struct jak_column_doc_obj *columndoc,
-                              struct jak_archive_prop_offs *offsets, jak_offset_t root_object_header_offset)
+                              jak_archive_prop_offs *offsets, jak_offset_t root_object_header_offset)
 {
         if (!write_array_prop(&offsets->null_arrays,
                               err,
@@ -809,7 +809,7 @@ static bool write_fixed_props(jak_offset_t *offset, struct jak_error *err, struc
 
         if (keys->num_elems > 0) {
                 jak_prop_header header =
-                        {.marker = marker_symbols[valueMarkerMapping[type].marker].symbol, .num_entries = keys
+                        {.marker = jak_global_marker_symbols[valueMarkerMapping[type].marker].symbol, .num_entries = keys
                                 ->num_elems};
 
                 jak_offset_t prop_ofOffset = memfile_tell(memfile);
@@ -864,7 +864,7 @@ static bool write_var_props(jak_offset_t *offset, struct jak_error *err, struct 
 
 static bool
 write_primitive_props(struct jak_memfile *memfile, struct jak_error *err, struct jak_column_doc_obj *columndoc,
-                      struct jak_archive_prop_offs *offsets, jak_offset_t root_object_header_offset)
+                      jak_archive_prop_offs *offsets, jak_offset_t root_object_header_offset)
 {
         if (!write_fixed_props(&offsets->nulls, err, memfile, &columndoc->null_prop_keys, JAK_FIELD_NULL, NULL)) {
                 return false;
@@ -1031,11 +1031,11 @@ static bool write_column(struct jak_memfile *memfile, struct jak_error *err, str
 {
         JAK_ASSERT(column->array_positions.num_elems == column->values.num_elems);
 
-        struct jak_column_header header = {.marker = marker_symbols[JAK_MARKER_TYPE_COLUMN].symbol, .column_name = column
-                ->key_name, .value_type = marker_symbols[value_array_marker_mapping[column->type].marker]
+        jak_column_header header = {.marker = jak_global_marker_symbols[JAK_MARKER_TYPE_COLUMN].symbol, .column_name = column
+                ->key_name, .value_type = jak_global_marker_symbols[jak_global_value_array_marker_mapping[column->type].marker]
                 .symbol, .num_entries = column->values.num_elems};
 
-        memfile_write(memfile, &header, sizeof(struct jak_column_header));
+        memfile_write(memfile, &header, sizeof(jak_column_header));
 
         /** skip offset column to value entry points */
         jak_offset_t value_entry_offsets = memfile_tell(memfile);
@@ -1059,15 +1059,15 @@ static bool write_column(struct jak_memfile *memfile, struct jak_error *err, str
 
 static bool write_object_array_props(struct jak_memfile *memfile, struct jak_error *err,
                                      struct jak_vector ofType(struct jak_column_doc_group) *object_key_columns,
-                                     struct jak_archive_prop_offs *offsets,
+                                     jak_archive_prop_offs *offsets,
                                      jak_offset_t root_object_header_offset)
 {
         if (object_key_columns->num_elems > 0) {
-                struct jak_object_array_header header = {.marker = marker_symbols[JAK_MARKER_TYPE_PROP_OBJECT_ARRAY]
+                jak_object_array_header header = {.marker = jak_global_marker_symbols[JAK_MARKER_TYPE_PROP_OBJECT_ARRAY]
                         .symbol, .num_entries = object_key_columns->num_elems};
 
                 offsets->object_arrays = memfile_tell(memfile) - root_object_header_offset;
-                memfile_write(memfile, &header, sizeof(struct jak_object_array_header));
+                memfile_write(memfile, &header, sizeof(jak_object_array_header));
 
                 for (size_t i = 0; i < object_key_columns->num_elems; i++) {
                         struct jak_column_doc_group *column_group = vec_get(object_key_columns, i,
@@ -1094,10 +1094,10 @@ static bool write_object_array_props(struct jak_memfile *memfile, struct jak_err
                                         max_pos = JAK_max(max_pos, array_pos[m]);
                                 }
                         }
-                        struct jak_column_group_header jak_column_group_header =
-                                {.marker = marker_symbols[JAK_MARKER_TYPE_COLUMN_GROUP].symbol, .num_columns = column_group
+                        jak_column_group_header jak_column_group_header =
+                                {.marker = jak_global_marker_symbols[JAK_MARKER_TYPE_COLUMN_GROUP].symbol, .num_columns = column_group
                                         ->columns.num_elems, .num_objects = max_pos + 1};
-                        memfile_write(memfile, &jak_column_group_header, sizeof(struct jak_column_group_header));
+                        memfile_write(memfile, &jak_column_group_header, sizeof(jak_column_group_header));
 
                         for (size_t i = 0; i < jak_column_group_header.num_objects; i++) {
                                 jak_global_id_t oid;
@@ -1148,7 +1148,7 @@ static void
 update_record_header(struct jak_memfile *memfile, jak_offset_t root_object_header_offset, struct jak_column_doc *model,
                      jak_u64 record_size)
 {
-        struct jak_record_flags flags = {.bits.is_sorted = model->read_optimized};
+        jak_record_flags flags = {.bits.is_sorted = model->read_optimized};
         jak_record_header
                 header = {.marker = JAK_MARKER_SYMBOL_RECORD_HEADER, .flags = flags.value, .record_size = record_size};
         jak_offset_t offset;
@@ -1158,8 +1158,8 @@ update_record_header(struct jak_memfile *memfile, jak_offset_t root_object_heade
         memfile_seek(memfile, offset);
 }
 
-static void propOffsetsWrite(struct jak_memfile *memfile, const union jak_object_flags *flags,
-                             struct jak_archive_prop_offs *prop_offsets)
+static void propOffsetsWrite(struct jak_memfile *memfile, const jak_object_flags_u *flags,
+                             jak_archive_prop_offs *prop_offsets)
 {
         if (flags->bits.has_null_props) {
                 memfile_write(memfile, &prop_offsets->nulls, sizeof(jak_offset_t));
@@ -1241,7 +1241,7 @@ static void propOffsetsWrite(struct jak_memfile *memfile, const union jak_object
         }
 }
 
-static void prop_offsets_skip_write(struct jak_memfile *memfile, const union jak_object_flags *flags)
+static void prop_offsets_skip_write(struct jak_memfile *memfile, const jak_object_flags_u *flags)
 {
         unsigned num_skip_offset_bytes = 0;
         if (flags->bits.has_null_props) {
@@ -1330,8 +1330,8 @@ static bool __serialize(jak_offset_t *offset, struct jak_error *err, struct jak_
                         struct jak_column_doc_obj *columndoc,
                         jak_offset_t root_object_header_offset)
 {
-        union jak_object_flags flags;
-        struct jak_archive_prop_offs prop_offsets;
+        jak_object_flags_u flags;
+        jak_archive_prop_offs prop_offsets;
         get_flags(&flags, columndoc);
 
         jak_offset_t header_offset = memfile_tell(memfile);
@@ -1356,7 +1356,7 @@ static bool __serialize(jak_offset_t *offset, struct jak_error *err, struct jak_
                 return false;
         }
 
-        memfile_write(memfile, &marker_symbols[JAK_MARKER_TYPE_OBJECT_END].symbol, 1);
+        memfile_write(memfile, &jak_global_marker_symbols[JAK_MARKER_TYPE_OBJECT_END].symbol, 1);
 
         jak_offset_t object_end_offset = memfile_tell(memfile);
         memfile_seek(memfile, header_offset);
@@ -1368,7 +1368,7 @@ static bool __serialize(jak_offset_t *offset, struct jak_error *err, struct jak_
         }
 
         jak_object_header header =
-                {.marker = marker_symbols[JAK_MARKER_TYPE_OBJECT_BEGIN].symbol, .oid = oid, .flags = flags_to_int32(
+                {.marker = jak_global_marker_symbols[JAK_MARKER_TYPE_OBJECT_BEGIN].symbol, .oid = oid, .flags = flags_to_int32(
                         &flags),
 
                 };
@@ -1382,7 +1382,7 @@ static bool __serialize(jak_offset_t *offset, struct jak_error *err, struct jak_
         return true;
 }
 
-static char *embedded_dic_flags_to_string(const union jak_string_tab_flags *flags)
+static char *embedded_dic_flags_to_string(const jak_string_tab_flags_u *flags)
 {
         size_t max = 2048;
         char *string = JAK_MALLOC(max + 1);
@@ -1407,7 +1407,7 @@ static char *embedded_dic_flags_to_string(const union jak_string_tab_flags *flag
         return string;
 }
 
-static char *record_header_flags_to_string(const struct jak_record_flags *flags)
+static char *record_header_flags_to_string(const jak_record_flags *flags)
 {
         size_t max = 2048;
         char *string = JAK_MALLOC(max + 1);
@@ -1431,9 +1431,9 @@ static char *record_header_flags_to_string(const struct jak_record_flags *flags)
 static bool serialize_string_dic(struct jak_memfile *memfile, struct jak_error *err, const struct jak_doc_bulk *context,
                                  enum jak_packer_type compressor)
 {
-        union jak_string_tab_flags flags;
+        jak_string_tab_flags_u flags;
         struct jak_packer strategy;
-        struct jak_string_table_header header;
+        jak_string_table_header header;
 
         struct jak_vector ofType (const char *) *strings;
         struct jak_vector ofType(jak_archive_field_sid_t) *string_ids;
@@ -1450,13 +1450,13 @@ static bool serialize_string_dic(struct jak_memfile *memfile, struct jak_error *
         JAK_set_bits(flags.value, flag_bit);
 
         jak_offset_t header_pos = memfile_tell(memfile);
-        memfile_skip(memfile, sizeof(struct jak_string_table_header));
+        memfile_skip(memfile, sizeof(jak_string_table_header));
 
         jak_offset_t extra_begin_off = memfile_tell(memfile);
         pack_write_extra(err, &strategy, memfile, strings);
         jak_offset_t extra_end_off = memfile_tell(memfile);
 
-        header = (struct jak_string_table_header) {.marker = marker_symbols[JAK_MARKER_TYPE_EMBEDDED_STR_DIC]
+        header = (jak_string_table_header) {.marker = jak_global_marker_symbols[JAK_MARKER_TYPE_EMBEDDED_STR_DIC]
                 .symbol, .flags = flags.value, .num_entries = strings
                 ->num_elems, .first_entry = memfile_tell(memfile), .compressor_extra_size = (extra_end_off
                                                                                              - extra_begin_off)};
@@ -1465,11 +1465,11 @@ static bool serialize_string_dic(struct jak_memfile *memfile, struct jak_error *
                 jak_archive_field_sid_t id = *vec_get(string_ids, i, jak_archive_field_sid_t);
                 const char *string = *vec_get(strings, i, char *);
 
-                struct jak_string_entry_header header = {.marker = marker_symbols[JAK_MARKER_TYPE_EMBEDDED_UNCOMP_STR]
+                jak_string_entry_header header = {.marker = jak_global_marker_symbols[JAK_MARKER_TYPE_EMBEDDED_UNCOMP_STR]
                         .symbol, .next_entry_off = 0, .string_id = id, .string_len = strlen(string)};
 
                 jak_offset_t header_pos_off = memfile_tell(memfile);
-                memfile_skip(memfile, sizeof(struct jak_string_entry_header));
+                memfile_skip(memfile, sizeof(jak_string_entry_header));
 
                 if (!pack_encode(err, &strategy, memfile, string)) {
                         error_print(err.code);
@@ -1478,13 +1478,13 @@ static bool serialize_string_dic(struct jak_memfile *memfile, struct jak_error *
                 jak_offset_t continue_off = memfile_tell(memfile);
                 memfile_seek(memfile, header_pos_off);
                 header.next_entry_off = i + 1 < strings->num_elems ? continue_off : 0;
-                memfile_write(memfile, &header, sizeof(struct jak_string_entry_header));
+                memfile_write(memfile, &header, sizeof(jak_string_entry_header));
                 memfile_seek(memfile, continue_off);
         }
 
         jak_offset_t continue_pos = memfile_tell(memfile);
         memfile_seek(memfile, header_pos);
-        memfile_write(memfile, &header, sizeof(struct jak_string_table_header));
+        memfile_write(memfile, &header, sizeof(jak_string_table_header));
         memfile_seek(memfile, continue_pos);
 
         vec_drop(strings);
@@ -1517,7 +1517,7 @@ print_column_form_memfile(FILE *file, struct jak_error *err, struct jak_memfile 
 {
         jak_offset_t offset;
         memfile_get_offset(&offset, memfile);
-        struct jak_column_header *header = JAK_MEMFILE_READ_TYPE(memfile, struct jak_column_header);
+        jak_column_header *header = JAK_MEMFILE_READ_TYPE(memfile, jak_column_header);
         if (header->marker != JAK_MARKER_SYMBOL_COLUMN) {
                 char buffer[256];
                 sprintf(buffer, "expected marker [%c] but found [%c]", JAK_MARKER_SYMBOL_COLUMN, header->marker);
@@ -1633,7 +1633,7 @@ static bool print_object_array_from_memfile(FILE *file, struct jak_error *err, s
                                             unsigned nesting_level)
 {
         unsigned offset = (unsigned) memfile_tell(memfile);
-        struct jak_object_array_header *header = JAK_MEMFILE_READ_TYPE(memfile, struct jak_object_array_header);
+        jak_object_array_header *header = JAK_MEMFILE_READ_TYPE(memfile, jak_object_array_header);
         if (header->marker != JAK_MARKER_SYMBOL_PROP_OBJECT_ARRAY) {
                 char buffer[256];
                 sprintf(buffer, "expected marker [%c] but found [%c]", JAK_MARKER_SYMBOL_PROP_OBJECT_ARRAY,
@@ -1664,14 +1664,14 @@ static bool print_object_array_from_memfile(FILE *file, struct jak_error *err, s
 
         for (size_t i = 0; i < header->num_entries; i++) {
                 offset = memfile_tell(memfile);
-                struct jak_column_group_header
-                        *jak_column_group_header = JAK_MEMFILE_READ_TYPE(memfile, struct jak_column_group_header);
-                if (jak_column_group_header->marker != JAK_MARKER_SYMBOL_COLUMN_GROUP) {
+                jak_column_group_header
+                        *column_group_header = JAK_MEMFILE_READ_TYPE(memfile, jak_column_group_header);
+                if (column_group_header->marker != JAK_MARKER_SYMBOL_COLUMN_GROUP) {
                         char buffer[256];
                         sprintf(buffer,
                                 "expected marker [%c] but found [%c]",
                                 JAK_MARKER_SYMBOL_COLUMN_GROUP,
-                                jak_column_group_header->marker);
+                                column_group_header->marker);
                         error_with_details(err, JAK_ERR_CORRUPTED, buffer);
                         return false;
                 }
@@ -1679,27 +1679,27 @@ static bool print_object_array_from_memfile(FILE *file, struct jak_error *err, s
                 INTENT_LINE(nesting_level);
                 fprintf(file,
                         "[marker: %c (Column Group)] [num_columns: %d] [num_objects: %d] [object_ids: ",
-                        jak_column_group_header->marker,
-                        jak_column_group_header->num_columns,
-                        jak_column_group_header->num_objects);
+                        column_group_header->marker,
+                        column_group_header->num_columns,
+                        column_group_header->num_objects);
                 const jak_global_id_t
                         *oids = JAK_MEMFILE_READ_TYPE_LIST(memfile, jak_global_id_t,
-                                                           jak_column_group_header->num_objects);
-                for (size_t k = 0; k < jak_column_group_header->num_objects; k++) {
-                        fprintf(file, "%"PRIu64"%s", oids[k], k + 1 < jak_column_group_header->num_objects ? ", " : "");
+                                                           column_group_header->num_objects);
+                for (size_t k = 0; k < column_group_header->num_objects; k++) {
+                        fprintf(file, "%"PRIu64"%s", oids[k], k + 1 < column_group_header->num_objects ? ", " : "");
                 }
                 fprintf(file, "] [offsets: ");
-                for (size_t k = 0; k < jak_column_group_header->num_columns; k++) {
+                for (size_t k = 0; k < column_group_header->num_columns; k++) {
                         jak_offset_t column_off = *JAK_MEMFILE_READ_TYPE(memfile, jak_offset_t);
                         fprintf(file,
                                 "0x%04x%s",
                                 (unsigned) column_off,
-                                k + 1 < jak_column_group_header->num_columns ? ", " : "");
+                                k + 1 < column_group_header->num_columns ? ", " : "");
                 }
 
                 fprintf(file, "]\n");
 
-                for (size_t k = 0; k < jak_column_group_header->num_columns; k++) {
+                for (size_t k = 0; k < column_group_header->num_columns; k++) {
                         if (!print_column_form_memfile(file, err, memfile, nesting_level + 1)) {
                                 return false;
                         }
@@ -1712,8 +1712,8 @@ static bool print_object_array_from_memfile(FILE *file, struct jak_error *err, s
         return true;
 }
 
-static void print_prop_offsets(FILE *file, const union jak_object_flags *flags,
-                               const struct jak_archive_prop_offs *prop_offsets)
+static void print_prop_offsets(FILE *file, const jak_object_flags_u *flags,
+                               const jak_archive_prop_offs *prop_offsets)
 {
         if (flags->bits.has_null_props) {
                 fprintf(file, " nulls: 0x%04x", (unsigned) prop_offsets->nulls);
@@ -1800,8 +1800,8 @@ bool print_object(FILE *file, struct jak_error *err, struct jak_memfile *memfile
         unsigned offset = (unsigned) memfile_tell(memfile);
         jak_object_header *header = JAK_MEMFILE_READ_TYPE(memfile, jak_object_header);
 
-        struct jak_archive_prop_offs prop_offsets;
-        union jak_object_flags flags = {.value = header->flags};
+        jak_archive_prop_offs prop_offsets;
+        jak_object_flags_u flags = {.value = header->flags};
 
         jak_int_read_prop_offsets(&prop_offsets, memfile, &flags);
         jak_offset_t nextObjectOrNil = *JAK_MEMFILE_READ_TYPE(memfile, jak_offset_t);
@@ -1961,7 +1961,7 @@ bool print_object(FILE *file, struct jak_error *err, struct jak_memfile *memfile
                                                                                      "");
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_OBJECT: {
-                                struct jak_var_prop prop;
+                                jak_var_prop prop;
                                 jak_int_embedded_var_props_read(&prop, memfile);
                                 fprintf(file, "0x%04x ", offset);
                                 INTENT_LINE(nesting_level)
@@ -2222,8 +2222,8 @@ static void print_record_header_from_memfile(FILE *file, struct jak_memfile *mem
 {
         unsigned offset = memfile_tell(memfile);
         jak_record_header *header = JAK_MEMFILE_READ_TYPE(memfile, jak_record_header);
-        struct jak_record_flags flags;
-        memset(&flags, 0, sizeof(struct jak_record_flags));
+        jak_record_flags flags;
+        memset(&flags, 0, sizeof(jak_record_flags));
         flags.value = header->flags;
         char *flags_string = record_header_flags_to_string(&flags);
         fprintf(file, "0x%04x ", offset);
@@ -2257,15 +2257,15 @@ static bool print_header_from_memfile(FILE *file, struct jak_error *err, struct 
 static bool print_embedded_dic_from_memfile(FILE *file, struct jak_error *err, struct jak_memfile *memfile)
 {
         struct jak_packer strategy;
-        union jak_string_tab_flags flags;
+        jak_string_tab_flags_u flags;
 
         unsigned offset = memfile_tell(memfile);
-        struct jak_string_table_header *header = JAK_MEMFILE_READ_TYPE(memfile, struct jak_string_table_header);
-        if (header->marker != marker_symbols[JAK_MARKER_TYPE_EMBEDDED_STR_DIC].symbol) {
+        jak_string_table_header *header = JAK_MEMFILE_READ_TYPE(memfile, jak_string_table_header);
+        if (header->marker != jak_global_marker_symbols[JAK_MARKER_TYPE_EMBEDDED_STR_DIC].symbol) {
                 char buffer[256];
                 sprintf(buffer,
                         "expected [%c] marker, but found [%c]",
-                        marker_symbols[JAK_MARKER_TYPE_EMBEDDED_STR_DIC].symbol,
+                        jak_global_marker_symbols[JAK_MARKER_TYPE_EMBEDDED_STR_DIC].symbol,
                         header->marker);
                 error_with_details(err, JAK_ERR_CORRUPTED, buffer);
                 return false;
@@ -2290,9 +2290,9 @@ static bool print_embedded_dic_from_memfile(FILE *file, struct jak_error *err, s
 
         pack_print_extra(err, &strategy, file, memfile);
 
-        while ((*JAK_MEMFILE_PEEK(memfile, char)) == marker_symbols[JAK_MARKER_TYPE_EMBEDDED_UNCOMP_STR].symbol) {
+        while ((*JAK_MEMFILE_PEEK(memfile, char)) == jak_global_marker_symbols[JAK_MARKER_TYPE_EMBEDDED_UNCOMP_STR].symbol) {
                 unsigned offset = memfile_tell(memfile);
-                struct jak_string_entry_header header = *JAK_MEMFILE_READ_TYPE(memfile, struct jak_string_entry_header);
+                jak_string_entry_header header = *JAK_MEMFILE_READ_TYPE(memfile, jak_string_entry_header);
                 fprintf(file,
                         "0x%04x    [marker: %c] [next-entry-off: 0x%04zx] [string-id: %"PRIu64"] [string-length: %"PRIu32"]",
                         offset,
@@ -2322,9 +2322,9 @@ static bool print_archive_from_memfile(FILE *file, struct jak_error *err, struct
         return true;
 }
 
-static union jak_object_flags *get_flags(union jak_object_flags *flags, struct jak_column_doc_obj *columndoc)
+static jak_object_flags_u *get_flags(jak_object_flags_u *flags, struct jak_column_doc_obj *columndoc)
 {
-        JAK_zero_memory(flags, sizeof(union jak_object_flags));
+        JAK_zero_memory(flags, sizeof(jak_object_flags_u));
         flags->bits.has_null_props = (columndoc->null_prop_keys.num_elems > 0);
         flags->bits.has_bool_props = (columndoc->bool_prop_keys.num_elems > 0);
         flags->bits.has_int8_props = (columndoc->int8_prop_keys.num_elems > 0);
@@ -2357,7 +2357,7 @@ static union jak_object_flags *get_flags(union jak_object_flags *flags, struct j
 
 static bool init_decompressor(struct jak_packer *strategy, jak_u8 flags);
 
-static bool read_stringtable(struct jak_string_table *table, struct jak_error *err, FILE *disk_file);
+static bool read_stringtable(jak_string_table *table, struct jak_error *err, FILE *disk_file);
 
 static bool read_record(jak_record_header *header_read, jak_archive *archive, FILE *disk_file,
                         jak_offset_t record_header_offset);
@@ -2441,7 +2441,7 @@ bool jak_archive_open(jak_archive *out, const char *file_path)
                                 out->info.record_table_size = record_table_size;
                                 out->info.num_embeddded_strings = out->string_table.num_embeddded_strings;
                                 out->info.string_id_index_size = string_id_index;
-                                out->default_query = JAK_MALLOC(sizeof(struct jak_archive_query));
+                                out->default_query = JAK_MALLOC(sizeof(jak_archive_query));
                                 jak_query_create(out->default_query, out);
 
                         }
@@ -2451,7 +2451,7 @@ bool jak_archive_open(jak_archive *out, const char *file_path)
         return true;
 }
 
-bool jak_archive_get_info(struct jak_archive_info *info, const jak_archive *archive)
+bool jak_archive_get_info(jak_archive_info *info, const jak_archive *archive)
 {
         JAK_ERROR_IF_NULL(info);
         JAK_ERROR_IF_NULL(archive);
@@ -2480,7 +2480,7 @@ bool jak_archive_drop_indexes(jak_archive *archive)
         return true;
 }
 
-bool jak_archive_query(struct jak_archive_query *query, jak_archive *archive)
+bool jak_archive_query_run(jak_archive_query *query, jak_archive *archive)
 {
         if (jak_query_create(query, archive)) {
                 bool has_index = false;
@@ -2530,7 +2530,7 @@ struct jak_string_cache *jak_archive_get_query_string_id_cache(jak_archive *arch
         return archive->string_id_cache;
 }
 
-struct jak_archive_query *jak_archive_query_default(jak_archive *archive)
+jak_archive_query *jak_archive_query_default(jak_archive *archive)
 {
         return archive ? archive->default_query : NULL;
 }
@@ -2543,19 +2543,19 @@ static bool init_decompressor(struct jak_packer *strategy, jak_u8 flags)
         return true;
 }
 
-static bool read_stringtable(struct jak_string_table *table, struct jak_error *err, FILE *disk_file)
+static bool read_stringtable(jak_string_table *table, struct jak_error *err, FILE *disk_file)
 {
         JAK_ASSERT(disk_file);
 
-        struct jak_string_table_header header;
-        union jak_string_tab_flags flags;
+        jak_string_table_header header;
+        jak_string_tab_flags_u flags;
 
-        size_t num_read = fread(&header, sizeof(struct jak_string_table_header), 1, disk_file);
+        size_t num_read = fread(&header, sizeof(jak_string_table_header), 1, disk_file);
         if (num_read != 1) {
                 error(err, JAK_ERR_IO);
                 return false;
         }
-        if (header.marker != marker_symbols[JAK_MARKER_TYPE_EMBEDDED_STR_DIC].symbol) {
+        if (header.marker != jak_global_marker_symbols[JAK_MARKER_TYPE_EMBEDDED_STR_DIC].symbol) {
                 error(err, JAK_ERR_CORRUPTED);
                 return false;
         }

@@ -26,23 +26,21 @@
 
 JAK_BEGIN_DECL
 
-typedef bool
-(*jak_string_pred_func_t)(size_t *idxs_matching, size_t *num_matching, char **strings, size_t num_strings,
-                          void *capture);
+typedef bool (*jak_string_pred_func_t)(size_t *idxs_matching, size_t *num_matching, char **strings, size_t num_strings, void *capture);
 
-struct jak_string_pred_t {
+typedef struct jak_string_pred {
         jak_string_pred_func_t func;
         jak_i64 limit;
-};
+} jak_string_pred;
 
-JAK_BUILT_IN(static bool) jak_string_pred_validate(struct jak_error *err, const struct jak_string_pred_t *pred)
+JAK_BUILT_IN(static bool) jak_string_pred_validate(struct jak_error *err, const jak_string_pred *pred)
 {
         JAK_ERROR_IF_NULL(pred);
         JAK_ERROR_IF_NOT_IMPLEMENTED(err, pred, func)
         return true;
 }
 
-JAK_BUILT_IN(static bool) jak_string_pred_eval(const struct jak_string_pred_t *pred, size_t *idxs_matching,
+JAK_BUILT_IN(static bool) jak_string_pred_eval(const jak_string_pred *pred, size_t *idxs_matching,
                                                size_t *num_matching, char **strings, size_t num_strings, void *capture)
 {
         JAK_ASSERT(pred);
@@ -53,7 +51,7 @@ JAK_BUILT_IN(static bool) jak_string_pred_eval(const struct jak_string_pred_t *p
         return pred->func(idxs_matching, num_matching, strings, num_strings, capture);
 }
 
-JAK_BUILT_IN(static bool) jak_string_pred_get_limit(jak_i64 *limit, const struct jak_string_pred_t *pred)
+JAK_BUILT_IN(static bool) jak_string_pred_get_limit(jak_i64 *limit, const jak_string_pred *pred)
 {
         JAK_ERROR_IF_NULL(limit);
         JAK_ERROR_IF_NULL(pred);

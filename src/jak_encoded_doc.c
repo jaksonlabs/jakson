@@ -507,8 +507,8 @@ bool encoded_doc_array_push_object_decoded(struct jak_encoded_doc *doc, const ch
 
 static bool doc_print_pretty(FILE *file, struct jak_encoded_doc *doc, unsigned level)
 {
-        struct jak_archive_query query;
-        jak_archive_query(&query, doc->context->archive);
+        jak_archive_query query;
+        jak_archive_query_run(&query, doc->context->archive);
 
         fprintf(file, "{\n");
 

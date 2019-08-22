@@ -54,7 +54,7 @@ typedef struct __attribute__((packed)) jak_prop_header {
         jak_u32 num_entries;
 } jak_prop_header;
 
-union __attribute__((packed)) jak_string_tab_flags {
+typedef union __attribute__((packed)) jak_string_tab_flags {
         struct {
                 jak_u8 compressor_none
                         : 1;
@@ -62,35 +62,35 @@ union __attribute__((packed)) jak_string_tab_flags {
                         : 1;
         } bits;
         jak_u8 value;
-};
+} jak_string_tab_flags_u;
 
-struct __attribute__((packed)) jak_string_table_header {
+typedef struct __attribute__((packed)) jak_string_table_header {
         char marker;
         jak_u32 num_entries;
         jak_u8 flags;
         jak_offset_t first_entry;
         jak_offset_t compressor_extra_size;
-};
+} jak_string_table_header;
 
-struct __attribute__((packed)) jak_object_array_header {
+typedef struct __attribute__((packed)) jak_object_array_header {
         char marker;
         jak_u8 num_entries;
-};
+} jak_object_array_header;
 
-struct __attribute__((packed)) jak_column_group_header {
+typedef struct __attribute__((packed)) jak_column_group_header {
         char marker;
         jak_u32 num_columns;
         jak_u32 num_objects;
-};
+} jak_column_group_header;
 
-struct __attribute__((packed)) jak_column_header {
+typedef struct __attribute__((packed)) jak_column_header {
         char marker;
         jak_archive_field_sid_t column_name;
         char value_type;
         jak_u32 num_entries;
-};
+} jak_column_header;
 
-union jak_object_flags {
+typedef union jak_object_flags {
         struct {
                 jak_u32 has_null_props
                         : 1;
@@ -158,9 +158,9 @@ union jak_object_flags {
                         : 1;
         } bits;
         jak_u32 value;
-};
+} jak_object_flags_u;
 
-struct jak_archive_prop_offs {
+typedef struct jak_archive_prop_offs {
         jak_offset_t nulls;
         jak_offset_t bools;
         jak_offset_t int8s;
@@ -187,40 +187,40 @@ struct jak_archive_prop_offs {
         jak_offset_t float_arrays;
         jak_offset_t string_arrays;
         jak_offset_t object_arrays;
-};
+} jak_archive_prop_offs;
 
-struct jak_fixed_prop {
+typedef struct jak_fixed_prop {
         jak_prop_header *header;
         const jak_archive_field_sid_t *keys;
         const void *values;
-};
+} jak_fixed_prop;
 
-struct jak_table_prop {
+typedef struct jak_table_prop {
         jak_prop_header *header;
         const jak_archive_field_sid_t *keys;
         const jak_offset_t *group_offs;
-};
+} jak_table_prop;
 
-struct jak_var_prop {
+typedef struct jak_var_prop {
         jak_prop_header *header;
         const jak_archive_field_sid_t *keys;
         const jak_offset_t *offsets;
         const void *values;
-};
+} jak_var_prop;
 
-struct jak_array_prop {
+typedef struct jak_array_prop {
         jak_prop_header *header;
         const jak_archive_field_sid_t *keys;
         const jak_u32 *lengths;
         jak_offset_t values_begin;
-};
+} jak_array_prop;
 
-struct jak_null_prop {
+typedef struct jak_null_prop {
         jak_prop_header *header;
         const jak_archive_field_sid_t *keys;
-};
+} jak_null_prop;
 
-enum jak_archive_marker {
+typedef enum jak_archive_marker {
         JAK_MARKER_TYPE_OBJECT_BEGIN = 0,
         JAK_MARKER_TYPE_OBJECT_END = 1,
         JAK_MARKER_TYPE_PROP_NULL = 2,
@@ -255,7 +255,7 @@ enum jak_archive_marker {
         JAK_MARKER_TYPE_COLUMN = 31,
         JAK_MARKER_TYPE_HUFFMAN_DIC_ENTRY = 32,
         JAK_MARKER_TYPE_RECORD_HEADER = 33,
-};
+} jak_archive_marker_e;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -263,9 +263,9 @@ enum jak_archive_marker {
 static jak_archive_header this_file_header = {.version = JAK_CARBON_ARCHIVE_VERSION, .root_object_header_offset = 0};
 
 static struct {
-        enum jak_archive_marker type;
+        jak_archive_marker_e type;
         char symbol;
-} marker_symbols[] =
+} jak_global_marker_symbols[] =
         {{JAK_MARKER_TYPE_OBJECT_BEGIN,        JAK_MARKER_SYMBOL_OBJECT_BEGIN},
          {JAK_MARKER_TYPE_OBJECT_END,          JAK_MARKER_SYMBOL_OBJECT_END},
          {JAK_MARKER_TYPE_PROP_NULL,           JAK_MARKER_SYMBOL_PROP_NULL},
@@ -303,8 +303,8 @@ static struct {
 
 static struct {
         jak_archive_field_e value_type;
-        enum jak_archive_marker marker;
-} value_array_marker_mapping[] =
+        jak_archive_marker_e marker;
+} jak_global_value_array_marker_mapping[] =
         {{JAK_FIELD_NULL,    JAK_MARKER_TYPE_PROP_NULL_ARRAY},
          {JAK_FIELD_BOOLEAN, JAK_MARKER_TYPE_PROP_BOOLEAN_ARRAY},
          {JAK_FIELD_INT8,    JAK_MARKER_TYPE_PROP_INT8_ARRAY},
@@ -334,7 +334,7 @@ static struct {
 
 #pragma GCC diagnostic pop
 
-struct jak_record_flags {
+typedef struct jak_record_flags {
         struct {
                 jak_u8 is_sorted
                         : 1;
@@ -354,48 +354,40 @@ struct jak_record_flags {
                         : 1;
         } bits;
         jak_u8 value;
-};
+} jak_record_flags;
 
-struct jak_string_table {
+typedef struct jak_string_table {
         struct jak_packer compressor;
         jak_offset_t first_entry_off;
         jak_u32 num_embeddded_strings;
-};
+} jak_string_table;
 
-struct jak_record_table {
-        struct jak_record_flags flags;
+typedef struct jak_record_table {
+        jak_record_flags flags;
         struct jak_memblock *record_db;
-};
+} jak_record_table;
 
-struct jak_archive_info {
+typedef struct jak_archive_info {
         size_t string_table_size;
         size_t record_table_size;
         size_t string_id_index_size;
         jak_u32 num_embeddded_strings;
-};
+} jak_archive_info;
 
-struct __attribute__((packed)) jak_string_entry_header {
+typedef struct __attribute__((packed)) jak_string_entry_header {
         char marker;
         jak_offset_t next_entry_off;
         jak_archive_field_sid_t string_id;
         jak_u32 string_len;
-};
+} jak_string_entry_header;
 
-void jak_int_read_prop_offsets(struct jak_archive_prop_offs *prop_offsets, struct jak_memfile *memfile,
-                               const union jak_object_flags *flags);
-
-void jak_int_embedded_fixed_props_read(struct jak_fixed_prop *prop, struct jak_memfile *memfile);
-
-void jak_int_embedded_var_props_read(struct jak_var_prop *prop, struct jak_memfile *memfile);
-
-void jak_int_embedded_null_props_read(struct jak_null_prop *prop, struct jak_memfile *memfile);
-
-void jak_int_embedded_array_props_read(struct jak_array_prop *prop, struct jak_memfile *memfile);
-
-void jak_int_embedded_table_props_read(struct jak_table_prop *prop, struct jak_memfile *memfile);
-
+void jak_int_read_prop_offsets(jak_archive_prop_offs *prop_offsets, struct jak_memfile *memfile, const jak_object_flags_u *flags);
+void jak_int_embedded_fixed_props_read(jak_fixed_prop *prop, struct jak_memfile *memfile);
+void jak_int_embedded_var_props_read(jak_var_prop *prop, struct jak_memfile *memfile);
+void jak_int_embedded_null_props_read(jak_null_prop *prop, struct jak_memfile *memfile);
+void jak_int_embedded_array_props_read(jak_array_prop *prop, struct jak_memfile *memfile);
+void jak_int_embedded_table_props_read(jak_table_prop *prop, struct jak_memfile *memfile);
 jak_archive_field_e jak_int_get_value_type_of_char(char c);
-
 jak_archive_field_e jak_int_marker_to_field_type(char symbol);
 
 JAK_END_DECL

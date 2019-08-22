@@ -49,7 +49,7 @@ visit_##name##_pairs (jak_archive *jak_archive, path_stack_t path_stack, jak_glo
 }
 
 #define DECLARE_VISIT_ARRAY_TYPE(name, built_in_type)                                                                  \
-static enum jak_visit_policy                                                                                         \
+static jak_visit_policy_e                                                                                         \
 visit_enter_##name##_array_pairs(jak_archive *jak_archive, path_stack_t path, jak_global_id_t id,                  \
                                  const jak_archive_field_sid_t *keys, jak_u32 num_pairs, void *capture)                    \
 {                                                                                                                      \
@@ -139,7 +139,7 @@ static void visit_null_pairs(jak_archive *archive, path_stack_t path, jak_global
         }
 }
 
-static enum jak_visit_policy
+static jak_visit_policy_e
 before_object_visit(jak_archive *archive, path_stack_t path_stack, jak_global_id_t parent_id,
                     jak_global_id_t value_id, jak_u32 object_idx, jak_u32 num_objects, jak_archive_field_sid_t key,
                     void *capture)
@@ -181,7 +181,7 @@ DECLARE_VISIT_ARRAY_TYPE(boolean, jak_archive_field_boolean_t)
 
 DECLARE_VISIT_ARRAY_TYPE(string, jak_archive_field_sid_t)
 
-static enum jak_visit_policy
+static jak_visit_policy_e
 visit_enter_null_array_pairs(jak_archive *archive, path_stack_t path, jak_global_id_t id,
                              const jak_archive_field_sid_t *keys, jak_u32 num_pairs, void *capture)
 {
@@ -300,8 +300,8 @@ bool jak_archive_converter(struct jak_encoded_doc_list *collection, jak_archive 
 
         encoded_doc_collection_create(collection, &archive->err, archive);
 
-        struct jak_archive_visitor visitor = {0};
-        struct jak_archive_visitor_desc desc = {.visit_mask = JAK_ARCHIVE_ITER_MASK_ANY};
+        jak_archive_visitor visitor = {0};
+        jak_archive_visitor_desc desc = {.visit_mask = JAK_ARCHIVE_ITER_MASK_ANY};
         struct converter_capture capture = {.collection = collection};
 
         visitor.visit_root_object = visit_root_object;

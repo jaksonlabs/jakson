@@ -46,7 +46,7 @@ JAK_BUILT_IN(static bool) __string_pred_contains_func(size_t *idxs_matching, siz
 
 JAK_BUILT_IN(static bool)
 
-string_pred_contains_init(struct jak_string_pred_t *pred)
+string_pred_contains_init(jak_string_pred *pred)
 {
         JAK_ERROR_IF_NULL(pred);
         pred->limit = JAK_QUERY_LIMIT_NONE;

@@ -21,7 +21,7 @@
 
 #include <jak_archive_strid_it.h>
 
-bool jak_strid_iter_open(struct jak_strid_iter *it, struct jak_error *err, jak_archive *archive)
+bool jak_strid_iter_open(jak_strid_iter *it, struct jak_error *err, jak_archive *archive)
 {
         JAK_ERROR_IF_NULL(it)
         JAK_ERROR_IF_NULL(archive)
@@ -39,19 +39,19 @@ bool jak_strid_iter_open(struct jak_strid_iter *it, struct jak_error *err, jak_a
         return true;
 }
 
-bool jak_strid_iter_next(bool *success, struct jak_strid_info **info, struct jak_error *err, size_t *info_length,
-                         struct jak_strid_iter *it)
+bool jak_strid_iter_next(bool *success, jak_strid_info **info, struct jak_error *err, size_t *info_length,
+                         jak_strid_iter *it)
 {
         JAK_ERROR_IF_NULL(info)
         JAK_ERROR_IF_NULL(info_length)
         JAK_ERROR_IF_NULL(it)
 
         if (it->disk_offset != 0 && it->is_open) {
-                struct jak_string_entry_header header;
+                jak_string_entry_header header;
                 size_t vec_pos = 0;
                 do {
                         fseek(it->disk_file, it->disk_offset, SEEK_SET);
-                        int num_read = fread(&header, sizeof(struct jak_string_entry_header), 1, it->disk_file);
+                        int num_read = fread(&header, sizeof(jak_string_entry_header), 1, it->disk_file);
                         if (header.marker != '-') {
                                 error_print(JAK_ERR_INTERNALERR);
                                 return false;
@@ -78,7 +78,7 @@ bool jak_strid_iter_next(bool *success, struct jak_strid_info **info, struct jak
         }
 }
 
-bool jak_strid_iter_close(struct jak_strid_iter *it)
+bool jak_strid_iter_close(jak_strid_iter *it)
 {
         JAK_ERROR_IF_NULL(it)
         if (it->is_open) {

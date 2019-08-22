@@ -64,20 +64,20 @@ TEST(CarbonArchiveOpsTest, CreateArchiveStringHandling)
     std::set<jak_archive_field_sid_t> haystack;
 
     jak_archive     archive;
-    struct jak_strid_iter  strid_iter;
-    struct jak_strid_info *info;
+    jak_strid_iter  strid_iter;
+    jak_strid_info *info;
     size_t               vector_len;
     bool                 status;
     bool                 success;
     struct jak_error         err;
-    struct jak_archive_query       query;
+    jak_archive_query       query;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
     status = jak_archive_open(&archive, "./assets/test-archive.carbon");
     ASSERT_TRUE(status);
 
-    status = jak_archive_query(&query, &archive);
+    status = jak_archive_query_run(&query, &archive);
     ASSERT_TRUE(status);
 
     status = jak_query_scan_strids(&strid_iter, &query);
@@ -111,20 +111,20 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
     std::set<jak_archive_field_sid_t> all_str_ids;
 
     jak_archive     archive;
-    struct jak_strid_iter  strid_iter;
-    struct jak_strid_info *info;
+    jak_strid_iter  strid_iter;
+    jak_strid_info *info;
     size_t               vector_len;
     bool                 status;
     bool                 success;
     struct jak_error         err;
-    struct jak_archive_query       query;
+    jak_archive_query       query;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
     status = jak_archive_open(&archive, "./assets/test-archive.carbon");
     ASSERT_TRUE(status);
 
-    status = jak_archive_query(&query, &archive);
+    status = jak_archive_query_run(&query, &archive);
     ASSERT_TRUE(status);
 
     status = jak_query_scan_strids(&strid_iter, &query);
@@ -157,20 +157,20 @@ TEST(CarbonArchiveOpsTest, DecodeStringByIdFullScan)
 TEST(CarbonArchiveOpsTest, DecodeStringByFastUnsafeAccess)
 {
     jak_archive                 archive;
-    struct jak_strid_iter              strid_iter;
-    struct jak_strid_info             *info;
+    jak_strid_iter              strid_iter;
+    jak_strid_info             *info;
     size_t                           vector_len;
     bool                             status;
     bool                             success;
     struct jak_error                     err;
-    struct jak_archive_query                   query;
+    jak_archive_query                   query;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
      * below the projects root directory (e.g., 'build/') */
     status = jak_archive_open(&archive, "./assets/test-archive.carbon");
     ASSERT_TRUE(status);
 
-    status = jak_archive_query(&query, &archive);
+    status = jak_archive_query_run(&query, &archive);
     ASSERT_TRUE(status);
 
     status = jak_query_scan_strids(&strid_iter, &query);
@@ -200,10 +200,10 @@ TEST(CarbonArchiveOpsTest, DecodeStringByFastUnsafeAccess)
 TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateContains)
 {
     jak_archive      archive;
-    struct jak_archive_query        query;
+    jak_archive_query        query;
     bool                  status;
     size_t                num_match;
-    struct jak_string_pred_t  pred;
+    jak_string_pred  pred;
     jak_archive_field_sid_t   *result;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
@@ -211,7 +211,7 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateContains)
     status = jak_archive_open(&archive, "./assets/test-archive.carbon");
     ASSERT_TRUE(status);
 
-    status = jak_archive_query(&query, &archive);
+    status = jak_archive_query_run(&query, &archive);
     ASSERT_TRUE(status);
 
     const char *needle = "arg";
@@ -237,10 +237,10 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateContains)
 TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateEquals)
 {
     jak_archive      archive;
-    struct jak_archive_query        query;
+    jak_archive_query        query;
     bool                  status;
     size_t                num_match;
-    struct jak_string_pred_t  pred;
+    jak_string_pred  pred;
     jak_archive_field_sid_t   *result;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
@@ -248,7 +248,7 @@ TEST(CarbonArchiveOpsTest, FindStringIdMatchingPredicateEquals)
     status = jak_archive_open(&archive, "./assets/test-archive.carbon");
     ASSERT_TRUE(status);
 
-    status = jak_archive_query(&query, &archive);
+    status = jak_archive_query_run(&query, &archive);
     ASSERT_TRUE(status);
 
     const char *needle = "phoneNumbers";

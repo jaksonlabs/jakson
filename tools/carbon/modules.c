@@ -562,7 +562,7 @@ bool moduleInspectInvoke(int argc, char **argv, FILE *file, struct cmdopt_mgr *m
         JAK_CONSOLE_OUTPUT_ON()
 
         jak_archive archive;
-        struct jak_archive_info info;
+        jak_archive_info info;
         if ((jak_archive_open(&archive, pathCarbonFileIn)) != true) {
             JAK_CONSOLE_WRITE(file, "Cannot open requested CARBON file: %s", pathCarbonFileIn);
             return false;

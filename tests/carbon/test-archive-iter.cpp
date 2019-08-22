@@ -14,16 +14,16 @@
 #include <jak_carbon.h>
 
 static void
-iterate_properties(struct jak_prop_iter *prop_iter);
+iterate_properties(jak_prop_iter *prop_iter);
 
 static void
-iterate_object_vals(struct jak_archive_value_vector *value_iter)
+iterate_object_vals(jak_archive_value_vector *value_iter)
 {
     bool status;
     bool is_object;
     jak_u32 vector_length;
-    struct jak_archive_object object;
-    struct jak_prop_iter  prop_iter;
+    jak_archive_object object;
+    jak_prop_iter  prop_iter;
     struct jak_error err;
 
     status = jak_archive_value_vector_is_of_objects(&is_object, value_iter);
@@ -48,14 +48,14 @@ iterate_object_vals(struct jak_archive_value_vector *value_iter)
 }
 
 static void
-iterate_object(struct jak_archive_value_vector *value_iter)
+iterate_object(jak_archive_value_vector *value_iter)
 {
     ASSERT_TRUE (!value_iter->is_array);
     iterate_object_vals(value_iter);
 }
 
 static void
-print_basic_fixed_types_basic(struct jak_archive_value_vector *value_iter, jak_u32 idx)
+print_basic_fixed_types_basic(jak_archive_value_vector *value_iter, jak_u32 idx)
 {
     jak_u32 num_values;
     switch (value_iter->prop_type) {
@@ -131,7 +131,7 @@ print_basic_fixed_types_basic(struct jak_archive_value_vector *value_iter, jak_u
 }
 
 static void
-print_basic_fixed_types_array(struct jak_archive_value_vector *value_iter, jak_u32 idx)
+print_basic_fixed_types_array(jak_archive_value_vector *value_iter, jak_u32 idx)
 {
     jak_u32 array_length;
     switch (value_iter->prop_type) {
@@ -274,7 +274,7 @@ print_basic_fixed_types_array(struct jak_archive_value_vector *value_iter, jak_u
 }
 
 static void
-print_basic_fixed_types(struct jak_archive_value_vector *value_iter, jak_u32 idx)
+print_basic_fixed_types(jak_archive_value_vector *value_iter, jak_u32 idx)
 {
     if (value_iter->is_array) {
         print_basic_fixed_types_array(value_iter, idx);
@@ -287,20 +287,20 @@ print_basic_fixed_types(struct jak_archive_value_vector *value_iter, jak_u32 idx
 
 
 static void
-iterate_properties(struct jak_prop_iter *prop_iter)
+iterate_properties(jak_prop_iter *prop_iter)
 {
     jak_global_id_t                oid;
-    struct jak_archive_value_vector     value_iter;
+    jak_archive_value_vector     value_iter;
     enum jak_archive_field_type               type;
     bool                              is_array;
     const jak_archive_field_sid_t         *keys;
     jak_u32                          num_pairs;
-    enum jak_prop_iter_mode   iter_type;
-    struct jak_independent_iter_state  collection_iter;
+    jak_prop_iter_mode_e   iter_type;
+    jak_independent_iter_state  collection_iter;
     jak_u32                          num_column_groups;
-    struct jak_independent_iter_state group_iter;
-    struct jak_independent_iter_state       column_iter;
-    struct jak_independent_iter_state entry_iter;
+    jak_independent_iter_state group_iter;
+    jak_independent_iter_state       column_iter;
+    jak_independent_iter_state entry_iter;
     struct jak_error                       err;
 
     while (jak_archive_prop_iter_next(&iter_type, &value_iter, &collection_iter, prop_iter))
@@ -474,8 +474,8 @@ iterate_properties(struct jak_prop_iter *prop_iter)
                             printf("]\n");
                         } break;
                         case JAK_FIELD_OBJECT: {
-                            struct jak_column_object_iter iter;
-                            const struct jak_archive_object *archive_object;
+                            jak_column_object_iter iter;
+                            const jak_archive_object *archive_object;
                             jak_archive_column_entry_get_objects(&iter, &entry_iter);
                             printf("\t\t{ << objects >>: [");
                             while ((archive_object = jak_archive_column_entry_object_iter_next_object(&iter)) != NULL) {
@@ -483,7 +483,7 @@ iterate_properties(struct jak_prop_iter *prop_iter)
                                 jak_archive_object_get_object_id(&id, archive_object);
                                 printf("{ oid: %" PRIu64 " } \n", id);
 
-                                struct jak_prop_iter nested_obj_prop_iter;
+                                jak_prop_iter nested_obj_prop_iter;
                                 jak_archive_prop_iter_from_object(&nested_obj_prop_iter, JAK_ARCHIVE_ITER_MASK_ANY,
                                                                      &err, archive_object);
                                 iterate_properties(&nested_obj_prop_iter);
@@ -506,7 +506,7 @@ TEST(ArchiveIterTest, CreateIterator)
 {
     jak_archive            archive;
     struct jak_error                err;
-    struct jak_prop_iter  prop_iter;
+    jak_prop_iter  prop_iter;
     bool                        status;
 
     /* in order to access this file, the working directory of this test executable must be set to a sub directory
