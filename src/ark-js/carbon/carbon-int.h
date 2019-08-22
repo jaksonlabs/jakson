@@ -21,7 +21,7 @@
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/mem/file.h>
-#include <ark-js/shared/stdx/varuint.h>
+#include <ark-js/shared/stdx/uintvar_stream.h>
 #include <ark-js/shared/json/json.h>
 #include <ark-js/carbon/carbon-int.h>
 #include <ark-js/carbon/carbon-field.h>

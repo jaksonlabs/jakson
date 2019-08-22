@@ -403,18 +403,18 @@ static void field_ref_write(struct memfile *file, struct path_index_node *node)
                 node->field_type != CARBON_FIELD_TYPE_FALSE) {
                 /* only in case of field type that is not null, true, or false, there is more information behind
                  * the field offset */
-                memfile_write_varuint(NULL, file, node->field_offset);
+                memfile_write_uintvar_stream(NULL, file, node->field_offset);
         }
 }
 
 static void container_contents_flat(struct memfile *file, struct path_index_node *node)
 {
-        memfile_write_varuint(NULL, file, node->sub_entries.num_elems);
+        memfile_write_uintvar_stream(NULL, file, node->sub_entries.num_elems);
 
         /* write position offsets */
         offset_t position_off_latest = memfile_tell(file);
         for (u32 i = 0; i < node->sub_entries.num_elems; i++) {
-                memfile_write_varuint(NULL, file, 0);
+                memfile_write_uintvar_stream(NULL, file, 0);
         }
 
         for (u32 i = 0; i < node->sub_entries.num_elems; i++) {
@@ -423,7 +423,7 @@ static void container_contents_flat(struct memfile *file, struct path_index_node
                 node_flat(file, sub);
                 memfile_save_position(file);
                 memfile_seek(file, position_off_latest);
-                signed_offset_t shift = memfile_update_varuint(file, node_off);
+                signed_offset_t shift = memfile_update_uintvar_stream(file, node_off);
                 position_off_latest = memfile_tell(file);
                 memfile_restore_position(file);
                 memfile_seek_from_here(file, shift);
@@ -476,7 +476,7 @@ static void prop_flat(struct memfile *file, struct path_index_node *node)
 {
         memfile_write_byte(file, PATH_MARKER_PROP_NODE);
         field_ref_write(file, node);
-        memfile_write_varuint(NULL, file, node->entry.key.offset);
+        memfile_write_uintvar_stream(NULL, file, node->entry.key.offset);
         container_field_flat(file, node);
 }
 
@@ -545,7 +545,7 @@ static u8 field_ref_into_carbon(struct carbon_insert *ins, struct carbon_path_in
             field_type != CARBON_FIELD_TYPE_FALSE) {
                 /* only in case of field type that is not null, true, or false, there is more information behind
                  * the field offset */
-                u64 field_offset = memfile_read_varuint(NULL, &index->memfile);
+                u64 field_offset = memfile_read_uintvar_stream(NULL, &index->memfile);
                 if (is_root) {
                         carbon_insert_prop_null(ins, "offset");
                 } else {
@@ -573,7 +573,7 @@ static u8 field_ref_to_str(struct string *str, struct carbon_path_index *index)
                 field_type != CARBON_FIELD_TYPE_FALSE) {
                 /* only in case of field type that is not null, true, or false, there is more information behind
                  * the field offset */
-                u64 field_offset = memfile_read_varuint(NULL, &index->memfile);
+                u64 field_offset = memfile_read_uintvar_stream(NULL, &index->memfile);
                 string_add_char(str, '(');
                 string_add_u64_as_hex_0x_prefix_compact(str, field_offset);
                 string_add_char(str, ')');
@@ -612,7 +612,7 @@ static void column_into_carbon(struct carbon_insert *ins, struct carbon_path_ind
 
 static void container_contents_into_carbon(struct carbon_insert *ins, struct carbon_path_index *index)
 {
-        u64 num_elems = memfile_read_varuint(NULL, &index->memfile);
+        u64 num_elems = memfile_read_uintvar_stream(NULL, &index->memfile);
         carbon_insert_prop_unsigned(ins, "element-count", num_elems);
 
         struct carbon_insert_array_state array;
@@ -621,7 +621,7 @@ static void container_contents_into_carbon(struct carbon_insert *ins, struct car
         struct string str;
         string_create(&str);
         for (u32 i = 0; i < num_elems; i++) {
-                u64 pos_offs = memfile_read_varuint(NULL, &index->memfile);
+                u64 pos_offs = memfile_read_uintvar_stream(NULL, &index->memfile);
                 string_clear(&str);
                 string_add_u64_as_hex_0x_prefix_compact(&str, pos_offs);
                 carbon_insert_string(ains, string_cstr(&str));
@@ -644,13 +644,13 @@ static void container_contents_into_carbon(struct carbon_insert *ins, struct car
 
 static void container_contents_to_str(struct string *str, struct carbon_path_index *index, unsigned intent_level)
 {
-        u64 num_elems = memfile_read_varuint(NULL, &index->memfile);
+        u64 num_elems = memfile_read_uintvar_stream(NULL, &index->memfile);
         string_add_char(str, '(');
         string_add_u64(str, num_elems);
         string_add_char(str, ')');
 
         for (u32 i = 0; i < num_elems; i++) {
-                u64 pos_offs = memfile_read_varuint(NULL, &index->memfile);
+                u64 pos_offs = memfile_read_uintvar_stream(NULL, &index->memfile);
                 string_add_char(str, '(');
                 string_add_u64_as_hex_0x_prefix_compact(str, pos_offs);
                 string_add_char(str, ')');
@@ -752,7 +752,7 @@ static void prop_to_str(struct string *str, struct carbon_path_index *index, uns
 
         u8 field_type = field_ref_to_str(str, index);
 
-        u64 key_offset = memfile_read_varuint(NULL, &index->memfile);
+        u64 key_offset = memfile_read_uintvar_stream(NULL, &index->memfile);
 
         string_add_char(str, '(');
         string_add_u64_as_hex_0x_prefix_compact(str, key_offset);
@@ -771,7 +771,7 @@ static void prop_into_carbon(struct carbon_insert *ins, struct carbon_path_index
         struct string str;
         string_create(&str);
 
-        u64 key_offset = memfile_read_varuint(NULL, &index->memfile);
+        u64 key_offset = memfile_read_uintvar_stream(NULL, &index->memfile);
         string_add_u64_as_hex_0x_prefix_compact(&str, key_offset);
         carbon_insert_prop_string(ins, "key", string_cstr(&str));
         string_drop(&str);

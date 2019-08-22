@@ -66,7 +66,7 @@
 #include <ark-js/carbon/string-pred/pred-contains.h>
 #include <ark-js/carbon/string-pred/pred-equals.h>
 #include <ark-js/carbon/carbon-printers.h>
-#include <ark-js/shared/stdx/varuint.h>
+#include <ark-js/shared/stdx/uintvar_stream.h>
 
 ARK_BEGIN_DECL
 

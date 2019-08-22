@@ -16,7 +16,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <ark-js/shared/stdx/varuint.h>
+#include <ark-js/shared/stdx/uintvar_stream.h>
 
 #define MASK_LAST_BYTE                  (0 | ((char) ~0u))
 #define MASK_FORWARD_BIT                ((char) (1u << 7))
@@ -24,7 +24,7 @@
 
 #define extract_data(x, byte_shift)     (MASK_BLOCK_DATA & (MASK_LAST_BYTE & (x >> byte_shift)))
 
-u8 varuint_write(varuint_t dst, u64 value)
+u8 uintvar_stream_write(uintvar_stream_t dst, u64 value)
 {
         if (likely(dst != NULL)) {
                 u8 num_bytes = 0;
@@ -43,7 +43,7 @@ u8 varuint_write(varuint_t dst, u64 value)
         }
 }
 
-u64 varuint_read(u8 *nbytes, varuint_t src)
+u64 uintvar_stream_read(u8 *nbytes, uintvar_stream_t src)
 {
         u64 value = 0;
         bool has_next = true;

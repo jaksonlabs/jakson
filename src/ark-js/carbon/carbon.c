@@ -18,7 +18,7 @@
 
 #include <inttypes.h>
 
-#include <ark-js/shared/stdx/varuint.h>
+#include <ark-js/shared/stdx/uintvar_stream.h>
 #include <ark-js/carbon/carbon.h>
 #include <ark-js/carbon/carbon-array-it.h>
 #include <ark-js/carbon/carbon-column-it.h>

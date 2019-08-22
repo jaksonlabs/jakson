@@ -120,15 +120,15 @@ bool memfile_restore_position(struct memfile *file);
 
 signed_offset_t memfile_ensure_space(struct memfile *memfile, u64 nbytes);
 
-u64 memfile_read_varuint(u8 *nbytes, struct memfile *memfile);
+u64 memfile_read_uintvar_stream(u8 *nbytes, struct memfile *memfile);
 
-bool memfile_skip_varuint(struct memfile *memfile);
+bool memfile_skip_uintvar_stream(struct memfile *memfile);
 
-u64 memfile_peek_varuint(u8 *nbytes, struct memfile *memfile);
+u64 memfile_peek_uintvar_stream(u8 *nbytes, struct memfile *memfile);
 
-u64 memfile_write_varuint(u64 *nbytes_moved, struct memfile *memfile, u64 value);
+u64 memfile_write_uintvar_stream(u64 *nbytes_moved, struct memfile *memfile, u64 value);
 
-signed_offset_t memfile_update_varuint(struct memfile *memfile, u64 value);
+signed_offset_t memfile_update_uintvar_stream(struct memfile *memfile, u64 value);
 
 bool memfile_seek_to_start(struct memfile *file);
 

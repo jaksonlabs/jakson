@@ -15,7 +15,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <ark-js/shared/stdx/varuint.h>
+#include <ark-js/shared/stdx/uintvar_stream.h>
 #include <ark-js/carbon/carbon-array-it.h>
 #include <ark-js/carbon/carbon-column-it.h>
 #include <ark-js/carbon/carbon-insert.h>
@@ -414,7 +414,7 @@ static void insert_binary(struct carbon_insert *inserter, const void *value, siz
                 /* write length of 'user_type' string with variable-length integer type */
                 u64 user_type_strlen = strlen(user_type);
 
-                memfile_write_varuint(NULL, &inserter->memfile, user_type_strlen);
+                memfile_write_uintvar_stream(NULL, &inserter->memfile, user_type_strlen);
 
                 /* write 'user_type' string */
                 memfile_ensure_space(&inserter->memfile, user_type_strlen);
@@ -431,7 +431,7 @@ static void insert_binary(struct carbon_insert *inserter, const void *value, siz
                 u64 mime_type_id = carbon_media_mime_type_by_ext(file_ext);
 
                 /* write mime type id */
-                memfile_write_varuint(NULL, &inserter->memfile, mime_type_id);
+                memfile_write_uintvar_stream(NULL, &inserter->memfile, mime_type_id);
 
                 /* write binary blob */
                 write_binary_blob(inserter, value, nbytes);
@@ -896,12 +896,12 @@ static bool push_in_column(struct carbon_insert *inserter, const void *base, enu
 
         // Increase element counter
         memfile_seek(&inserter->memfile, inserter->context.column->num_and_capacity_start_offset);
-        u32 num_elems = memfile_peek_varuint(NULL, &inserter->memfile);
+        u32 num_elems = memfile_peek_uintvar_stream(NULL, &inserter->memfile);
         num_elems++;
-        memfile_update_varuint(&inserter->memfile, num_elems);
+        memfile_update_uintvar_stream(&inserter->memfile, num_elems);
         inserter->context.column->column_num_elements = num_elems;
 
-        u32 capacity = memfile_read_varuint(NULL, &inserter->memfile);
+        u32 capacity = memfile_read_uintvar_stream(NULL, &inserter->memfile);
 
         if (unlikely(num_elems > capacity)) {
                 memfile_save_position(&inserter->memfile);
@@ -910,8 +910,8 @@ static bool push_in_column(struct carbon_insert *inserter, const void *base, enu
 
                 // Update capacity counter
                 memfile_seek(&inserter->memfile, inserter->context.column->num_and_capacity_start_offset);
-                memfile_skip_varuint(&inserter->memfile); // skip num element counter
-                memfile_update_varuint(&inserter->memfile, new_capacity);
+                memfile_skip_uintvar_stream(&inserter->memfile); // skip num element counter
+                memfile_update_uintvar_stream(&inserter->memfile, new_capacity);
                 inserter->context.column->column_capacity = new_capacity;
 
                 size_t payload_start = carbon_int_column_get_payload_off(inserter->context.column);
@@ -946,7 +946,7 @@ static void internal_create(struct carbon_insert *inserter, struct memfile *src,
 static void write_binary_blob(struct carbon_insert *inserter, const void *value, size_t nbytes)
 {
         /* write blob length */
-        memfile_write_varuint(NULL, &inserter->memfile, nbytes);
+        memfile_write_uintvar_stream(NULL, &inserter->memfile, nbytes);
 
         /* write blob */
         memfile_ensure_space(&inserter->memfile, nbytes);

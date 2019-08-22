@@ -16,7 +16,7 @@
  */
 
 #include <ark-js/shared/mem/file.h>
-#include <ark-js/shared/stdx/varuint.h>
+#include <ark-js/shared/stdx/uintvar_stream.h>
 
 bool memfile_open(struct memfile *file, struct memblock *block, enum access_mode mode)
 {
@@ -390,49 +390,49 @@ signed_offset_t memfile_ensure_space(struct memfile *memfile, u64 nbytes)
         return shift;
 }
 
-u64 memfile_read_varuint(u8 *nbytes, struct memfile *memfile)
+u64 memfile_read_uintvar_stream(u8 *nbytes, struct memfile *memfile)
 {
         u8 nbytes_read;
-        u64 result = varuint_read(&nbytes_read, (varuint_t) memfile_peek(memfile, sizeof(char)));
+        u64 result = uintvar_stream_read(&nbytes_read, (uintvar_stream_t) memfile_peek(memfile, sizeof(char)));
         memfile_skip(memfile, nbytes_read);
         ark_optional_set(nbytes, nbytes_read);
         return result;
 }
 
-bool memfile_skip_varuint(struct memfile *memfile)
+bool memfile_skip_uintvar_stream(struct memfile *memfile)
 {
         error_if_null(memfile)
-        memfile_read_varuint(NULL, memfile);
+        memfile_read_uintvar_stream(NULL, memfile);
         return true;
 }
 
-u64 memfile_peek_varuint(u8 *nbytes, struct memfile *memfile)
+u64 memfile_peek_uintvar_stream(u8 *nbytes, struct memfile *memfile)
 {
         memfile_save_position(memfile);
-        u64 result = memfile_read_varuint(nbytes, memfile);
+        u64 result = memfile_read_uintvar_stream(nbytes, memfile);
         memfile_restore_position(memfile);
         return result;
 }
 
-u64 memfile_write_varuint(u64 *nbytes_moved, struct memfile *memfile, u64 value)
+u64 memfile_write_uintvar_stream(u64 *nbytes_moved, struct memfile *memfile, u64 value)
 {
-        u8 required_blocks = varuint_required_blocks(value);
+        u8 required_blocks = uintvar_stream_required_blocks(value);
         signed_offset_t shift = memfile_ensure_space(memfile, required_blocks);
-        varuint_t dst = (varuint_t) memfile_peek(memfile, sizeof(char));
-        varuint_write(dst, value);
+        uintvar_stream_t dst = (uintvar_stream_t) memfile_peek(memfile, sizeof(char));
+        uintvar_stream_write(dst, value);
         memfile_skip(memfile, required_blocks);
         ark_optional_set(nbytes_moved, shift);
         return required_blocks;
 }
 
-signed_offset_t memfile_update_varuint(struct memfile *memfile, u64 value)
+signed_offset_t memfile_update_uintvar_stream(struct memfile *memfile, u64 value)
 {
         error_if_null(memfile);
 
         u8 bytes_used_now, bytes_used_then;
 
-        memfile_peek_varuint(&bytes_used_now, memfile);
-        bytes_used_then = varuint_required_blocks(value);
+        memfile_peek_uintvar_stream(&bytes_used_now, memfile);
+        bytes_used_then = uintvar_stream_required_blocks(value);
 
         if (bytes_used_now < bytes_used_then) {
                 u8 inc = bytes_used_then - bytes_used_now;
@@ -442,8 +442,8 @@ signed_offset_t memfile_update_varuint(struct memfile *memfile, u64 value)
                 memfile_inplace_remove(memfile, dec);
         }
 
-        varuint_t dst = (varuint_t) memfile_peek(memfile, sizeof(char));
-        u8 required_blocks = varuint_write(dst, value);
+        uintvar_stream_t dst = (uintvar_stream_t) memfile_peek(memfile, sizeof(char));
+        u8 required_blocks = uintvar_stream_write(dst, value);
         memfile_skip(memfile, required_blocks);
 
         return bytes_used_then - bytes_used_now;

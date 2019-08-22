@@ -528,8 +528,8 @@ static bool internal_pack_column(struct carbon_column_it *it)
                 memfile_inplace_remove(&it->memfile, free_space);
 
                 memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
-                memfile_skip_varuint(&it->memfile); // skip num of elements counter
-                memfile_update_varuint(&it->memfile, it->column_num_elements); // update capacity counter to num elems
+                memfile_skip_uintvar_stream(&it->memfile); // skip num of elements counter
+                memfile_update_uintvar_stream(&it->memfile, it->column_num_elements); // update capacity counter to num elems
 
                 memfile_skip(&it->memfile, payload_size);
 

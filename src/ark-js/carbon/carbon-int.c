@@ -16,7 +16,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <ark-js/shared/stdx/varuint.h>
+#include <ark-js/shared/stdx/uintvar_stream.h>
 #include <ark-js/carbon/carbon.h>
 #include <ark-js/carbon/carbon-insert.h>
 #include <ark-js/carbon/carbon-media.h>
@@ -124,8 +124,8 @@ bool carbon_int_insert_column(struct memfile *memfile_in, struct err *err_in, en
         u32 num_elements = 0;
         u32 cap_elements = capactity;
 
-        memfile_write_varuint(NULL, memfile_in, num_elements);
-        memfile_write_varuint(NULL, memfile_in, cap_elements);
+        memfile_write_uintvar_stream(NULL, memfile_in, num_elements);
+        memfile_write_uintvar_stream(NULL, memfile_in, cap_elements);
 
         offset_t payload_begin = memfile_tell(memfile_in);
 
@@ -248,7 +248,7 @@ bool carbon_int_object_it_prop_key_access(struct carbon_object_it *it)
         //memfile_skip(&it->memfile, sizeof(media_type_t));
 
         it->field.key.offset = memfile_tell(&it->memfile);
-        it->field.key.name_len = memfile_read_varuint(NULL, &it->memfile);
+        it->field.key.name_len = memfile_read_uintvar_stream(NULL, &it->memfile);
         it->field.key.name = memfile_peek(&it->memfile, it->field.key.name_len);
         memfile_skip(&it->memfile, it->field.key.name_len);
         it->field.value.offset = memfile_tell(&it->memfile);
@@ -268,7 +268,7 @@ bool carbon_int_object_it_prop_skip(struct carbon_object_it *it)
 {
         error_if_null(it)
 
-        it->field.key.name_len = memfile_read_varuint(NULL, &it->memfile);
+        it->field.key.name_len = memfile_read_uintvar_stream(NULL, &it->memfile);
         memfile_skip(&it->memfile, it->field.key.name_len);
 
         return carbon_field_skip(&it->memfile);
@@ -334,32 +334,32 @@ bool carbon_int_field_data_access(struct memfile *file, struct err *err, struct 
                         break;
                 case CARBON_FIELD_TYPE_STRING: {
                         u8 nbytes;
-                        varuint_t len = (varuint_t) memfile_peek(file, 1);
-                        field_access->it_field_len = varuint_read(&nbytes, len);
+                        uintvar_stream_t len = (uintvar_stream_t) memfile_peek(file, 1);
+                        field_access->it_field_len = uintvar_stream_read(&nbytes, len);
 
                         memfile_skip(file, nbytes);
                 }
                         break;
                 case CARBON_FIELD_TYPE_BINARY: {
                         /* read mime type with variable-length integer type */
-                        u64 mime_type_id = memfile_read_varuint(NULL, file);
+                        u64 mime_type_id = memfile_read_uintvar_stream(NULL, file);
 
                         field_access->it_mime_type = carbon_media_mime_type_by_id(mime_type_id);
                         field_access->it_mime_type_strlen = strlen(field_access->it_mime_type);
 
                         /* read blob length */
-                        field_access->it_field_len = memfile_read_varuint(NULL, file);
+                        field_access->it_field_len = memfile_read_uintvar_stream(NULL, file);
 
                         /* the memfile points now to the actual blob data, which is used by the iterator to set the field */
                 }
                         break;
                 case CARBON_FIELD_TYPE_BINARY_CUSTOM: {
                         /* read mime type string */
-                        field_access->it_mime_type_strlen = memfile_read_varuint(NULL, file);
+                        field_access->it_mime_type_strlen = memfile_read_uintvar_stream(NULL, file);
                         field_access->it_mime_type = memfile_read(file, field_access->it_mime_type_strlen);
 
                         /* read blob length */
-                        field_access->it_field_len = memfile_read_varuint(NULL, file);
+                        field_access->it_field_len = memfile_read_uintvar_stream(NULL, file);
 
                         /* the memfile points now to the actual blob data, which is used by the iterator to set the field */
                 }
@@ -405,8 +405,8 @@ offset_t carbon_int_column_get_payload_off(struct carbon_column_it *it)
 {
         memfile_save_position(&it->memfile);
         memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
-        memfile_skip_varuint(&it->memfile); // skip num of elements
-        memfile_skip_varuint(&it->memfile); // skip capacity of elements
+        memfile_skip_uintvar_stream(&it->memfile); // skip num of elements
+        memfile_skip_uintvar_stream(&it->memfile); // skip capacity of elements
         offset_t result = memfile_tell(&it->memfile);
         memfile_restore_position(&it->memfile);
         return result;
@@ -855,7 +855,7 @@ bool carbon_int_field_remove(struct memfile *memfile, struct err *err, enum carb
                         u8 len_nbytes;  /* number of bytes used to store string length */
                         u64 str_len; /* the number of characters of the string field */
 
-                        str_len = memfile_read_varuint(&len_nbytes, memfile);
+                        str_len = memfile_read_uintvar_stream(&len_nbytes, memfile);
 
                         rm_nbytes += len_nbytes + str_len;
                 }
@@ -866,10 +866,10 @@ bool carbon_int_field_remove(struct memfile *memfile, struct err *err, enum carb
                         u64 blob_nbytes; /* number of bytes to store actual blob data */
 
                         /* get bytes used for mime type id */
-                        memfile_read_varuint(&mime_type_nbytes, memfile);
+                        memfile_read_uintvar_stream(&mime_type_nbytes, memfile);
 
                         /* get bytes used for blob length info */
-                        blob_nbytes = memfile_read_varuint(&blob_length_nbytes, memfile);
+                        blob_nbytes = memfile_read_uintvar_stream(&blob_length_nbytes, memfile);
 
                         rm_nbytes += mime_type_nbytes + blob_length_nbytes + blob_nbytes;
                 }
@@ -881,11 +881,11 @@ bool carbon_int_field_remove(struct memfile *memfile, struct err *err, enum carb
                         u64 blob_nbytes; /* number of bytes to store actual blob data */
 
                         /* get bytes for custom type string len, and the actual length */
-                        custom_type_strlen = memfile_read_varuint(&custom_type_strlen_nbytes, memfile);
+                        custom_type_strlen = memfile_read_uintvar_stream(&custom_type_strlen_nbytes, memfile);
                         memfile_skip(memfile, custom_type_strlen);
 
                         /* get bytes used for blob length info */
-                        blob_nbytes = memfile_read_varuint(&blob_length_nbytes, memfile);
+                        blob_nbytes = memfile_read_uintvar_stream(&blob_length_nbytes, memfile);
 
                         rm_nbytes += custom_type_strlen_nbytes + custom_type_strlen + blob_length_nbytes + blob_nbytes;
                 }

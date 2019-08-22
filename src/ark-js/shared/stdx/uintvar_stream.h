@@ -1,5 +1,5 @@
 /**
- * A variable-length unsigned integer type (varuint)
+ * A variable-length unsigned integer type that encodes the number of used bytes by a flag bit in the byte stream
  * Copyright 2019 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -16,8 +16,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef ARK_VARUINT_H
-#define ARK_VARUINT_H
+#ifndef ARK_UINTVAR_STREAM_H
+#define ARK_UINTVAR_STREAM_H
 
 #include <ark-js/shared/common.h>
 #include <ark-js/shared/types.h>
@@ -57,20 +57,20 @@ ARK_BEGIN_DECL
  *              10 | 9223372036854775808 | 18446744073709551615
  */
 
-typedef void *varuint_t;
+typedef void *uintvar_stream_t;
 
-#define varuint_max_blocks()    (4)
+#define uintvar_stream_max_blocks()    (4)
 
-u8 varuint_write(varuint_t dst, u64 value);
+u8 uintvar_stream_write(uintvar_stream_t dst, u64 value);
 
-#define varuint_sizeof(value)                                                                                   \
-({                                                                                                              \
-        size_t num_blocks_strlen = varuint_required_blocks(value);                                              \
-        num_blocks_strlen = num_blocks_strlen < sizeof(varuint_t) ? sizeof(varuint_t) : num_blocks_strlen;      \
-        num_blocks_strlen;                                                                                      \
+#define uintvar_stream_sizeof(value)                                                                                   \
+({                                                                                                                     \
+        size_t num_blocks_strlen = uintvar_stream_required_blocks(value);                                              \
+        num_blocks_strlen = num_blocks_strlen < sizeof(uintvar_stream_t) ? sizeof(uintvar_stream_t):num_blocks_strlen; \
+        num_blocks_strlen;                                                                                             \
 })
 
-#define varuint_required_blocks(value)                  \
+#define uintvar_stream_required_blocks(value)           \
 ({                                                      \
         u8 num_blocks_required;                         \
         if (value < 128u) {                             \
@@ -97,7 +97,7 @@ u8 varuint_write(varuint_t dst, u64 value);
         num_blocks_required;                            \
 })
 
-u64 varuint_read(u8 *nbytes, varuint_t src);
+u64 uintvar_stream_read(u8 *nbytes, uintvar_stream_t src);
 
 ARK_END_DECL
 

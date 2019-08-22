@@ -15,14 +15,14 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <ark-js/shared/stdx/varuint.h>
+#include <ark-js/shared/stdx/uintvar_stream.h>
 #include <ark-js/carbon/carbon-media.h>
 #include <ark-js/carbon/carbon-field.h>
 #include <ark-js/carbon/carbon-string.h>
 
 static void write_payload(struct memfile *file, const char *string, size_t str_len)
 {
-        memfile_write_varuint(NULL, file, str_len);
+        memfile_write_uintvar_stream(NULL, file, str_len);
         memfile_ensure_space(file, str_len);
         memfile_write(file, string, str_len);
 }
@@ -45,7 +45,7 @@ bool carbon_string_nomarker_remove(struct memfile *file)
 {
         error_if_null(file);
         u8 len_nbytes;
-        u64 str_len = memfile_read_varuint(&len_nbytes, file);
+        u64 str_len = memfile_read_uintvar_stream(&len_nbytes, file);
         memfile_skip(file, -len_nbytes);
         memfile_inplace_remove(file, len_nbytes + str_len);
         return true;
@@ -91,7 +91,7 @@ bool carbon_string_update_wnchar(struct memfile *file, const char *string, size_
         u8 marker = *ARK_MEMFILE_READ_TYPE(file, u8);
         if (likely(marker == CARBON_FIELD_TYPE_STRING)) {
                 offset_t payload_start = memfile_tell(file);
-                u32 old_len = memfile_read_varuint(NULL, file);
+                u32 old_len = memfile_read_uintvar_stream(NULL, file);
                 memfile_skip(file, old_len);
                 offset_t diff = memfile_tell(file) - payload_start;
                 memfile_seek(file, payload_start);
@@ -129,7 +129,7 @@ const char *carbon_string_read(u64 *len, struct memfile *file)
 
 const char *carbon_string_nomarker_read(u64 *len, struct memfile *file)
 {
-        u64 str_len = memfile_read_varuint(NULL, file);
+        u64 str_len = memfile_read_uintvar_stream(NULL, file);
         const char *result = memfile_read(file, str_len);
         ark_optional_set(len, str_len);
         return result;

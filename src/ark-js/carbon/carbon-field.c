@@ -278,11 +278,11 @@ bool carbon_field_skip_binary(struct memfile *file)
 
         error_if(type_marker != CARBON_FIELD_TYPE_BINARY, &file->err, ARK_ERR_TYPEMISMATCH);
         /* read and skip mime type with variable-length integer type */
-        u64 mime_type = memfile_read_varuint(NULL, file);
+        u64 mime_type = memfile_read_uintvar_stream(NULL, file);
         unused(mime_type);
 
         /* read blob length */
-        u64 blob_len = memfile_read_varuint(NULL, file);
+        u64 blob_len = memfile_read_uintvar_stream(NULL, file);
 
         /* skip blob */
         memfile_skip(file, blob_len);
@@ -295,11 +295,11 @@ bool carbon_field_skip_custom_binary(struct memfile *file)
 
         error_if(type_marker != CARBON_FIELD_TYPE_BINARY_CUSTOM, &file->err, ARK_ERR_TYPEMISMATCH);
         /* read custom type string length, and skip the type string */
-        u64 custom_type_str_len = memfile_read_varuint(NULL, file);
+        u64 custom_type_str_len = memfile_read_uintvar_stream(NULL, file);
         memfile_skip(file, custom_type_str_len);
 
         /* read blob length, and skip blob data */
-        u64 blob_len = memfile_read_varuint(NULL, file);
+        u64 blob_len = memfile_read_uintvar_stream(NULL, file);
         memfile_skip(file, blob_len);
         return true;
 }
@@ -309,7 +309,7 @@ bool carbon_field_skip_string(struct memfile *file)
         u8 type_marker = *ARK_MEMFILE_READ_TYPE(file, u8);
 
         error_if(type_marker != CARBON_FIELD_TYPE_STRING, &file->err, ARK_ERR_TYPEMISMATCH);
-        u64 strlen = memfile_read_varuint(NULL, file);
+        u64 strlen = memfile_read_uintvar_stream(NULL, file);
         memfile_skip(file, strlen);
         return true;
 }

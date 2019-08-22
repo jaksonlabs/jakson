@@ -64,8 +64,8 @@ bool carbon_column_it_create(struct carbon_column_it *it, struct memfile *memfil
         it->type = type;
 
         it->num_and_capacity_start_offset = memfile_tell(&it->memfile);
-        it->column_num_elements = (u32) memfile_read_varuint(NULL, &it->memfile);
-        it->column_capacity = (u32) memfile_read_varuint(NULL, &it->memfile);
+        it->column_num_elements = (u32) memfile_read_uintvar_stream(NULL, &it->memfile);
+        it->column_capacity = (u32) memfile_read_uintvar_stream(NULL, &it->memfile);
 
         carbon_column_it_rewind(it);
 
@@ -115,8 +115,8 @@ offset_t carbon_column_it_tell(struct carbon_column_it *it, u32 elem_idx)
         if (it) {
                 memfile_save_position(&it->memfile);
                 memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
-                u32 num_elements = (u32) memfile_read_varuint(NULL, &it->memfile);
-                memfile_read_varuint(NULL, &it->memfile);
+                u32 num_elements = (u32) memfile_read_uintvar_stream(NULL, &it->memfile);
+                memfile_read_uintvar_stream(NULL, &it->memfile);
                 offset_t payload_start = memfile_tell(&it->memfile);
                 error_if(elem_idx >= num_elements, &it->err, ARK_ERR_OUTOFBOUNDS);
                 offset_t ret = payload_start + elem_idx * carbon_int_get_type_value_size(it->type);
@@ -134,7 +134,7 @@ bool carbon_column_it_values_info(enum carbon_field_type *type, u32 *nvalues, st
 
         if (nvalues) {
                 memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
-                u32 num_elements = (u32) memfile_read_varuint(NULL, &it->memfile);
+                u32 num_elements = (u32) memfile_read_uintvar_stream(NULL, &it->memfile);
                 *nvalues = num_elements;
         }
 
@@ -181,8 +181,8 @@ const void *carbon_column_it_values(enum carbon_field_type *type, u32 *nvalues, 
 {
         error_if_null(it);
         memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
-        u32 num_elements = (u32) memfile_read_varuint(NULL, &it->memfile);
-        u32 cap_elements = (u32) memfile_read_varuint(NULL, &it->memfile);
+        u32 num_elements = (u32) memfile_read_uintvar_stream(NULL, &it->memfile);
+        u32 cap_elements = (u32) memfile_read_uintvar_stream(NULL, &it->memfile);
         offset_t payload_start = memfile_tell(&it->memfile);
 
         const void *result = memfile_peek(&it->memfile, sizeof(void));
@@ -266,10 +266,10 @@ bool carbon_column_it_remove(struct carbon_column_it *it, u32 pos)
 
         /* update element counter */
         memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
-        u32 num_elems = memfile_peek_varuint(NULL, &it->memfile);
+        u32 num_elems = memfile_peek_uintvar_stream(NULL, &it->memfile);
         assert(num_elems > 0);
         num_elems--;
-        signed_offset_t shift = memfile_update_varuint(&it->memfile, num_elems);
+        signed_offset_t shift = memfile_update_uintvar_stream(&it->memfile, num_elems);
         it->column_num_elements = num_elems;
 
         memfile_restore_position(&it->memfile);
