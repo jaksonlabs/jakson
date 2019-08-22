@@ -27,7 +27,7 @@
 
 static bool internal_pack_array(jak_carbon_array_it *it);
 
-static bool internal_pack_object(struct jak_carbon_object_it *it);
+static bool internal_pack_object(jak_carbon_object_it *it);
 
 static bool internal_pack_column(jak_carbon_column_it *it);
 
@@ -74,7 +74,7 @@ static void key_unsigned_set(jak_carbon *doc, jak_u64 key)
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
 
-        carbon_key_write_unsigned(&doc->memfile, key);
+        jak_carbon_key_write_unsigned(&doc->memfile, key);
 
         memfile_restore_position(&doc->memfile);
 }
@@ -85,7 +85,7 @@ static void key_signed_set(jak_carbon *doc, jak_i64 key)
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
 
-        carbon_key_write_signed(&doc->memfile, key);
+        jak_carbon_key_write_signed(&doc->memfile, key);
 
         memfile_restore_position(&doc->memfile);
 }
@@ -96,7 +96,7 @@ static void key_string_set(jak_carbon *doc, const char *key)
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
 
-        carbon_key_update_string(&doc->memfile, key);
+        jak_carbon_key_update_string(&doc->memfile, key);
 
         memfile_restore_position(&doc->memfile);
 }
@@ -208,11 +208,11 @@ bool carbon_revise_remove(const char *dot_path, struct jak_carbon_revise *contex
         JAK_ERROR_IF_NULL(context)
 
         jak_carbon_dot_path dot;
-        struct jak_carbon_path_evaluator eval;
+        jak_carbon_path_evaluator eval;
         bool result;
 
         if (jak_carbon_dot_path_from_string(&dot, dot_path)) {
-                carbon_path_evaluator_begin_mutable(&eval, &dot, context);
+                jak_carbon_path_evaluator_begin_mutable(&eval, &dot, context);
 
                 if (eval.status != JAK_CARBON_PATH_RESOLVED) {
                         result = false;
@@ -233,7 +233,7 @@ bool carbon_revise_remove(const char *dot_path, struct jak_carbon_revise *contex
                                         result = false;
                         }
                 }
-                carbon_path_evaluator_end(&eval);
+                jak_carbon_path_evaluator_end(&eval);
                 return result;
         } else {
                 error(&context->original->err, JAK_ERR_DOT_PATH_PARSERR);
@@ -383,8 +383,8 @@ static bool internal_pack_array(jak_carbon_array_it *it)
                                                      memfile_tell(&it->field_access.nested_column_it->memfile));
                                         break;
                                 case JAK_CARBON_FIELD_TYPE_OBJECT: {
-                                        struct jak_carbon_object_it nested_object_it;
-                                        carbon_object_it_create(&nested_object_it, &it->memfile, &it->err,
+                                        jak_carbon_object_it nested_object_it;
+                                        jak_carbon_object_it_create(&nested_object_it, &it->memfile, &it->err,
                                                                 it->field_access.nested_object_it->object_contents_off -
                                                                 sizeof(jak_u8));
                                         internal_pack_object(&nested_object_it);
@@ -392,7 +392,7 @@ static bool internal_pack_array(jak_carbon_array_it *it)
                                                    JAK_CARBON_MARKER_OBJECT_END);
                                         memfile_skip(&nested_object_it.memfile, sizeof(char));
                                         memfile_seek(&it->memfile, memfile_tell(&nested_object_it.memfile));
-                                        carbon_object_it_drop(&nested_object_it);
+                                        jak_carbon_object_it_drop(&nested_object_it);
                                 }
                                         break;
                                 default: error(&it->err, JAK_ERR_INTERNALERR);
@@ -406,16 +406,16 @@ static bool internal_pack_array(jak_carbon_array_it *it)
         return true;
 }
 
-static bool internal_pack_object(struct jak_carbon_object_it *it)
+static bool internal_pack_object(jak_carbon_object_it *it)
 {
         JAK_ASSERT(it);
 
         /* shrink this object */
         {
-                struct jak_carbon_object_it this_object_it;
+                jak_carbon_object_it this_object_it;
                 bool is_empty_slot, is_object_end;
 
-                carbon_object_it_copy(&this_object_it, it);
+                jak_carbon_object_it_copy(&this_object_it, it);
                 jak_carbon_int_object_skip_contents(&is_empty_slot, &is_object_end, &this_object_it);
 
                 if (!is_object_end) {
@@ -436,14 +436,14 @@ static bool internal_pack_object(struct jak_carbon_object_it *it)
                         JAK_ASSERT(final == JAK_CARBON_MARKER_OBJECT_END);
                 }
 
-                carbon_object_it_drop(&this_object_it);
+                jak_carbon_object_it_drop(&this_object_it);
         }
 
         /* shrink contained containers */
         {
-                while (carbon_object_it_next(it)) {
+                while (jak_carbon_object_it_next(it)) {
                         jak_carbon_field_type_e type;
-                        carbon_object_it_prop_type(&type, it);
+                        jak_carbon_object_it_prop_type(&type, it);
                         switch (type) {
                                 case JAK_CARBON_FIELD_TYPE_NULL:
                                 case JAK_CARBON_FIELD_TYPE_TRUE:
@@ -491,8 +491,8 @@ static bool internal_pack_object(struct jak_carbon_object_it *it)
                                                      memfile_tell(&it->field.value.data.nested_column_it->memfile));
                                         break;
                                 case JAK_CARBON_FIELD_TYPE_OBJECT: {
-                                        struct jak_carbon_object_it nested_object_it;
-                                        carbon_object_it_create(&nested_object_it, &it->memfile, &it->err,
+                                        jak_carbon_object_it nested_object_it;
+                                        jak_carbon_object_it_create(&nested_object_it, &it->memfile, &it->err,
                                                                 it->field.value.data.nested_object_it->object_contents_off -
                                                                 sizeof(jak_u8));
                                         internal_pack_object(&nested_object_it);
@@ -500,7 +500,7 @@ static bool internal_pack_object(struct jak_carbon_object_it *it)
                                                    JAK_CARBON_MARKER_OBJECT_END);
                                         memfile_skip(&nested_object_it.memfile, sizeof(char));
                                         memfile_seek(&it->memfile, memfile_tell(&nested_object_it.memfile));
-                                        carbon_object_it_drop(&nested_object_it);
+                                        jak_carbon_object_it_drop(&nested_object_it);
                                 }
                                         break;
                                 default: error(&it->err, JAK_ERR_INTERNALERR);
@@ -553,7 +553,7 @@ static bool carbon_header_rev_inc(jak_carbon *doc)
         jak_carbon_key_e key_type;
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
-        carbon_key_read(NULL, &key_type, &doc->memfile);
+        jak_carbon_key_read(NULL, &key_type, &doc->memfile);
         if (jak_carbon_has_key(key_type)) {
                 jak_u64 raw_data_len = 0;
                 const void *raw_data = jak_carbon_raw_data(&raw_data_len, doc);

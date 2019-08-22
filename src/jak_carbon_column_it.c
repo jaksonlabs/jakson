@@ -49,7 +49,7 @@ bool jak_carbon_column_it_create(jak_carbon_column_it *it, struct jak_memfile *m
         memfile_open(&it->memfile, memfile->memblock, memfile->mode);
         memfile_seek(&it->memfile, column_start_offset);
 
-        error_if(memfile_remain_size(&it->memfile) < sizeof(jak_u8) + sizeof(media_type_t), err, JAK_ERR_CORRUPTED);
+        error_if(memfile_remain_size(&it->memfile) < sizeof(jak_u8) + sizeof(jak_media_type), err, JAK_ERR_CORRUPTED);
 
         jak_u8 marker = *memfile_read(&it->memfile, sizeof(jak_u8));
         error_if_with_details(marker != JAK_CARBON_MARKER_COLUMN_U8 &&

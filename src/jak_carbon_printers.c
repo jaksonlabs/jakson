@@ -351,7 +351,7 @@ bool carbon_printer_object_prop_name(struct printer *printer, struct jak_string 
         return true;
 }
 
-bool carbon_printer_print_object(struct jak_carbon_object_it *it, struct printer *printer, struct jak_string *builder)
+bool carbon_printer_print_object(jak_carbon_object_it *it, struct printer *printer, struct jak_string *builder)
 {
         JAK_ASSERT(it);
         JAK_ASSERT(printer);
@@ -360,15 +360,15 @@ bool carbon_printer_print_object(struct jak_carbon_object_it *it, struct printer
         bool first_entry = true;
         carbon_printer_object_begin(printer, builder);
 
-        while (carbon_object_it_next(it)) {
+        while (jak_carbon_object_it_next(it)) {
                 if (JAK_LIKELY(!first_entry)) {
                         carbon_printer_comma(printer, builder);
                 }
                 jak_carbon_field_type_e type;
                 jak_u64 key_len;
-                const char *key_name = carbon_object_it_prop_name(&key_len, it);
+                const char *key_name = jak_carbon_object_it_prop_name(&key_len, it);
 
-                carbon_object_it_prop_type(&type, it);
+                jak_carbon_object_it_prop_type(&type, it);
                 switch (type) {
                         case JAK_CARBON_FIELD_TYPE_NULL:
                                 carbon_printer_prop_null(printer, builder, key_name, key_len);
@@ -388,7 +388,7 @@ bool carbon_printer_print_object(struct jak_carbon_object_it *it, struct printer
                         case JAK_CARBON_FIELD_TYPE_NUMBER_U32:
                         case JAK_CARBON_FIELD_TYPE_NUMBER_U64: {
                                 jak_u64 value;
-                                carbon_object_it_unsigned_value(&is_null_value, &value, it);
+                                jak_carbon_object_it_unsigned_value(&is_null_value, &value, it);
                                 carbon_printer_prop_unsigned(printer, builder, key_name, key_len,
                                                              is_null_value ? NULL : &value);
                         }
@@ -398,33 +398,33 @@ bool carbon_printer_print_object(struct jak_carbon_object_it *it, struct printer
                         case JAK_CARBON_FIELD_TYPE_NUMBER_I32:
                         case JAK_CARBON_FIELD_TYPE_NUMBER_I64: {
                                 jak_i64 value;
-                                carbon_object_it_signed_value(&is_null_value, &value, it);
+                                jak_carbon_object_it_signed_value(&is_null_value, &value, it);
                                 carbon_printer_prop_signed(printer, builder, key_name, key_len,
                                                            is_null_value ? NULL : &value);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT: {
                                 float value;
-                                carbon_object_it_float_value(&is_null_value, &value, it);
+                                jak_carbon_object_it_float_value(&is_null_value, &value, it);
                                 carbon_printer_prop_float(printer, builder, key_name, key_len,
                                                           is_null_value ? NULL : &value);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_STRING: {
                                 jak_u64 strlen;
-                                const char *value = carbon_object_it_string_value(&strlen, it);
+                                const char *value = jak_carbon_object_it_string_value(&strlen, it);
                                 carbon_printer_prop_string(printer, builder, key_name, key_len, value, strlen);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_BINARY:
                         case JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM: {
                                 struct jak_carbon_binary binary;
-                                carbon_object_it_binary_value(&binary, it);
+                                jak_carbon_object_it_binary_value(&binary, it);
                                 carbon_printer_prop_binary(printer, builder, key_name, key_len, &binary);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_ARRAY: {
-                                jak_carbon_array_it *array = carbon_object_it_array_value(it);
+                                jak_carbon_array_it *array = jak_carbon_object_it_array_value(it);
                                 carbon_printer_array_prop_name(printer, builder, key_name, key_len);
                                 carbon_printer_print_array(array, printer, builder, false);
                                 jak_carbon_array_it_drop(array);
@@ -440,16 +440,16 @@ bool carbon_printer_print_object(struct jak_carbon_object_it *it, struct printer
                         case JAK_CARBON_FIELD_TYPE_COLUMN_I64:
                         case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT:
                         case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
-                                jak_carbon_column_it *column = carbon_object_it_column_value(it);
+                                jak_carbon_column_it *column = jak_carbon_object_it_column_value(it);
                                 carbon_printer_column_prop_name(printer, builder, key_name, key_len);
                                 carbon_printer_print_column(column, printer, builder);
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_OBJECT: {
-                                struct jak_carbon_object_it *object = carbon_object_it_object_value(it);
+                                jak_carbon_object_it *object = jak_carbon_object_it_object_value(it);
                                 carbon_printer_object_prop_name(printer, builder, key_name, key_len);
                                 carbon_printer_print_object(object, printer, builder);
-                                carbon_object_it_drop(object);
+                                jak_carbon_object_it_drop(object);
                         }
                                 break;
                         default:
@@ -562,9 +562,9 @@ bool carbon_printer_print_array(jak_carbon_array_it *it, struct printer *printer
                         }
                                 break;
                         case JAK_CARBON_FIELD_TYPE_OBJECT: {
-                                struct jak_carbon_object_it *object = jak_carbon_array_it_object_value(it);
+                                jak_carbon_object_it *object = jak_carbon_array_it_object_value(it);
                                 carbon_printer_print_object(object, printer, builder);
-                                carbon_object_it_drop(object);
+                                jak_carbon_object_it_drop(object);
                         }
                                 break;
                         default:

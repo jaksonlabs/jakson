@@ -233,11 +233,11 @@ bool jak_carbon_field_skip_object(struct jak_memfile *file)
         jak_u8 type_marker = *JAK_MEMFILE_READ_TYPE(file, jak_u8);
 
         error_if(type_marker != JAK_CARBON_FIELD_TYPE_OBJECT, &file->err, JAK_ERR_TYPEMISMATCH);
-        struct jak_carbon_object_it skip_it;
-        carbon_object_it_create(&skip_it, file, &file->err, memfile_tell(file) - sizeof(jak_u8));
-        carbon_object_it_fast_forward(&skip_it);
+        jak_carbon_object_it skip_it;
+        jak_carbon_object_it_create(&skip_it, file, &file->err, memfile_tell(file) - sizeof(jak_u8));
+        jak_carbon_object_it_fast_forward(&skip_it);
         memfile_seek(file, memfile_tell(&skip_it.memfile));
-        carbon_object_it_drop(&skip_it);
+        jak_carbon_object_it_drop(&skip_it);
         return true;
 }
 

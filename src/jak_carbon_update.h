@@ -36,7 +36,7 @@ JAK_BEGIN_DECL
 
 struct jak_carbon_update {
         struct jak_carbon_revise *context;
-        struct jak_carbon_path_evaluator path_evaluater;
+        jak_carbon_path_evaluator path_evaluater;
         const jak_carbon_dot_path *path;
         struct jak_error err;
         bool is_found;

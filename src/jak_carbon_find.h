@@ -37,14 +37,14 @@ typedef struct jak_carbon_find {
         jak_carbon *doc;
         jak_carbon_field_type_e type;
         struct jak_error err;
-        struct jak_carbon_path_evaluator path_evaluater;
+        jak_carbon_path_evaluator path_evaluater;
 
         bool value_is_nulled;
 
         union {
                 jak_carbon_array_it *array_it;
                 jak_carbon_column_it *column_it;
-                struct jak_carbon_object_it *object_it;
+                jak_carbon_object_it *object_it;
                 bool boolean;
                 jak_u64 unsigned_number;
                 jak_i64 signed_number;
@@ -74,7 +74,7 @@ char *jak_carbon_find_result_to_json_compact_dup(jak_carbon_find *find);
 bool jak_carbon_find_result_type(jak_carbon_field_type_e *type, jak_carbon_find *find);
 
 jak_carbon_array_it *jak_carbon_find_result_array(jak_carbon_find *find);
-struct jak_carbon_object_it *jak_carbon_find_result_object(jak_carbon_find *find);
+jak_carbon_object_it *jak_carbon_find_result_object(jak_carbon_find *find);
 jak_carbon_column_it *jak_carbon_find_result_column(jak_carbon_find *find);
 bool jak_carbon_find_result_boolean(bool *out, jak_carbon_find *find);
 bool jak_carbon_find_result_unsigned(jak_u64 *out, jak_carbon_find *find);

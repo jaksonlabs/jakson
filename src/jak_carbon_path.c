@@ -20,22 +20,22 @@
 #include <jak_carbon_revise.h>
 #include "jak_carbon_path.h"
 
-static inline carbon_path_status_e traverse_column(struct jak_carbon_path_evaluator *state,
+static inline jak_carbon_path_status_e traverse_column(jak_carbon_path_evaluator *state,
                                                       const jak_carbon_dot_path *path, jak_u32 current_path_pos,
                                                       jak_carbon_column_it *it);
 
-static inline carbon_path_status_e traverse_array(struct jak_carbon_path_evaluator *state,
+static inline jak_carbon_path_status_e traverse_array(jak_carbon_path_evaluator *state,
                                                      const jak_carbon_dot_path *path, jak_u32 current_path_pos,
                                                      jak_carbon_array_it *it, bool is_record);
 
-bool carbon_path_evaluator_begin(struct jak_carbon_path_evaluator *eval, jak_carbon_dot_path *path,
+bool jak_carbon_path_evaluator_begin(jak_carbon_path_evaluator *eval, jak_carbon_dot_path *path,
                                  jak_carbon *doc)
 {
         JAK_ERROR_IF_NULL(eval)
         JAK_ERROR_IF_NULL(path)
         JAK_ERROR_IF_NULL(doc)
 
-        JAK_zero_memory(eval, sizeof(struct jak_carbon_path_evaluator));
+        JAK_zero_memory(eval, sizeof(jak_carbon_path_evaluator));
         eval->doc = doc;
         JAK_check_success(error_init(&eval->err));
         JAK_check_success(jak_carbon_iterator_open(&eval->root_it, eval->doc));
@@ -44,7 +44,7 @@ bool carbon_path_evaluator_begin(struct jak_carbon_path_evaluator *eval, jak_car
         return true;
 }
 
-bool carbon_path_evaluator_begin_mutable(struct jak_carbon_path_evaluator *eval, const jak_carbon_dot_path *path,
+bool jak_carbon_path_evaluator_begin_mutable(jak_carbon_path_evaluator *eval, const jak_carbon_dot_path *path,
                                          struct jak_carbon_revise *context)
 {
         JAK_ERROR_IF_NULL(eval)
@@ -59,7 +59,7 @@ bool carbon_path_evaluator_begin_mutable(struct jak_carbon_path_evaluator *eval,
         return true;
 }
 
-bool carbon_path_evaluator_status(carbon_path_status_e *status, struct jak_carbon_path_evaluator *state)
+bool jak_carbon_path_evaluator_status(jak_carbon_path_status_e *status, jak_carbon_path_evaluator *state)
 {
         JAK_ERROR_IF_NULL(status)
         JAK_ERROR_IF_NULL(state)
@@ -67,18 +67,18 @@ bool carbon_path_evaluator_status(carbon_path_status_e *status, struct jak_carbo
         return true;
 }
 
-bool carbon_path_evaluator_has_result(struct jak_carbon_path_evaluator *state)
+bool jak_carbon_path_evaluator_has_result(jak_carbon_path_evaluator *state)
 {
         JAK_ERROR_IF_NULL(state)
         return state->status == JAK_CARBON_PATH_RESOLVED;
 }
 
-bool carbon_path_evaluator_end(struct jak_carbon_path_evaluator *state)
+bool jak_carbon_path_evaluator_end(jak_carbon_path_evaluator *state)
 {
         JAK_ERROR_IF_NULL(state)
         switch (state->result.container_type) {
                 case JAK_CARBON_OBJECT:
-                        carbon_object_it_drop(&state->result.containers.object.it);
+                        jak_carbon_object_it_drop(&state->result.containers.object.it);
                         break;
                 case JAK_CARBON_ARRAY:
                         jak_carbon_array_it_drop(&state->result.containers.array.it);
@@ -90,7 +90,7 @@ bool carbon_path_evaluator_end(struct jak_carbon_path_evaluator *state)
         return true;
 }
 
-bool carbon_path_exists(jak_carbon *doc, const char *path)
+bool jak_carbon_path_exists(jak_carbon *doc, const char *path)
 {
         jak_carbon_find find;
         bool result = jak_carbon_find_open(&find, path, doc);
@@ -98,7 +98,7 @@ bool carbon_path_exists(jak_carbon *doc, const char *path)
         return result;
 }
 
-bool carbon_path_is_array(jak_carbon *doc, const char *path)
+bool jak_carbon_path_is_array(jak_carbon *doc, const char *path)
 {
         jak_carbon_find find;
         jak_carbon_field_type_e field_type;
@@ -113,7 +113,7 @@ bool carbon_path_is_array(jak_carbon *doc, const char *path)
         return result;
 }
 
-bool carbon_path_is_column(jak_carbon *doc, const char *path)
+bool jak_carbon_path_is_column(jak_carbon *doc, const char *path)
 {
         jak_carbon_find find;
         jak_carbon_field_type_e field_type;
@@ -128,7 +128,7 @@ bool carbon_path_is_column(jak_carbon *doc, const char *path)
         return result;
 }
 
-bool carbon_path_is_object(jak_carbon *doc, const char *path)
+bool jak_carbon_path_is_object(jak_carbon *doc, const char *path)
 {
         jak_carbon_find find;
         jak_carbon_field_type_e field_type;
@@ -143,13 +143,13 @@ bool carbon_path_is_object(jak_carbon *doc, const char *path)
         return result;
 }
 
-bool carbon_path_is_container(jak_carbon *doc, const char *path)
+bool jak_carbon_path_is_container(jak_carbon *doc, const char *path)
 {
-        return (carbon_path_is_array(doc, path) || carbon_path_is_column(doc, path) ||
-                carbon_path_is_object(doc, path));
+        return (jak_carbon_path_is_array(doc, path) || jak_carbon_path_is_column(doc, path) ||
+                jak_carbon_path_is_object(doc, path));
 }
 
-bool carbon_path_is_null(jak_carbon *doc, const char *path)
+bool jak_carbon_path_is_null(jak_carbon *doc, const char *path)
 {
         jak_carbon_find find;
         jak_carbon_field_type_e field_type;
@@ -164,7 +164,7 @@ bool carbon_path_is_null(jak_carbon *doc, const char *path)
         return result;
 }
 
-bool carbon_path_is_number(jak_carbon *doc, const char *path)
+bool jak_carbon_path_is_number(jak_carbon *doc, const char *path)
 {
         jak_carbon_find find;
         jak_carbon_field_type_e field_type;
@@ -179,7 +179,7 @@ bool carbon_path_is_number(jak_carbon *doc, const char *path)
         return result;
 }
 
-bool carbon_path_is_boolean(jak_carbon *doc, const char *path)
+bool jak_carbon_path_is_boolean(jak_carbon *doc, const char *path)
 {
         jak_carbon_find find;
         jak_carbon_field_type_e field_type;
@@ -194,7 +194,7 @@ bool carbon_path_is_boolean(jak_carbon *doc, const char *path)
         return result;
 }
 
-bool carbon_path_is_string(jak_carbon *doc, const char *path)
+bool jak_carbon_path_is_string(jak_carbon *doc, const char *path)
 {
         jak_carbon_find find;
         jak_carbon_field_type_e field_type;
@@ -209,9 +209,9 @@ bool carbon_path_is_string(jak_carbon *doc, const char *path)
         return result;
 }
 
-static inline carbon_path_status_e traverse_object(struct jak_carbon_path_evaluator *state,
+static inline jak_carbon_path_status_e traverse_object(jak_carbon_path_evaluator *state,
                                                       const jak_carbon_dot_path *path, jak_u32 current_path_pos,
-                                                      struct jak_carbon_object_it *it)
+                                                      jak_carbon_object_it *it)
 {
         carbon_dot_node_e node_type;
         jak_u32 path_length;
@@ -220,7 +220,7 @@ static inline carbon_path_status_e traverse_object(struct jak_carbon_path_evalua
         jak_carbon_dot_path_type_at(&node_type, current_path_pos, path);
         JAK_ASSERT(node_type == JAK_DOT_NODE_KEY_NAME);
 
-        status = carbon_object_it_next(it);
+        status = jak_carbon_object_it_next(it);
         jak_carbon_dot_path_len(&path_length, path);
         const char *needle = jak_carbon_dot_path_key_at(current_path_pos, path);
         jak_u64 needle_len = strlen(needle);
@@ -232,18 +232,18 @@ static inline carbon_path_status_e traverse_object(struct jak_carbon_path_evalua
         } else {
                 jak_u64 key_len;
                 do {
-                        const char *key_name = carbon_object_it_prop_name(&key_len, it);
+                        const char *key_name = jak_carbon_object_it_prop_name(&key_len, it);
                         if (key_len == needle_len && strncmp(key_name, needle, needle_len) == 0) {
                                 if (next_path_pos == path_length) {
                                         state->result.container_type = JAK_CARBON_OBJECT;
-                                        carbon_object_it_clone(&state->result.containers.object.it, it);
+                                        jak_carbon_object_it_clone(&state->result.containers.object.it, it);
                                         return JAK_CARBON_PATH_RESOLVED;
                                 } else {
                                         /* path end not reached, traverse further if possible */
                                         JAK_ASSERT(next_path_pos < path_length);
 
                                         jak_carbon_field_type_e prop_type;
-                                        carbon_object_it_prop_type(&prop_type, it);
+                                        jak_carbon_object_it_prop_type(&prop_type, it);
 
                                         if (!jak_carbon_field_type_is_traversable(prop_type)) {
                                                 return JAK_CARBON_PATH_NOTTRAVERSABLE;
@@ -262,19 +262,19 @@ static inline carbon_path_status_e traverse_object(struct jak_carbon_path_evalua
                                                            prop_type == JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
                                                 switch (prop_type) {
                                                         case JAK_CARBON_FIELD_TYPE_OBJECT: {
-                                                                struct jak_carbon_object_it *sub_it = carbon_object_it_object_value(
+                                                                jak_carbon_object_it *sub_it = jak_carbon_object_it_object_value(
                                                                         it);
-                                                                carbon_path_status_e ret = traverse_object(state,
+                                                                jak_carbon_path_status_e ret = traverse_object(state,
                                                                                                               path,
                                                                                                               next_path_pos,
                                                                                                               sub_it);
-                                                                carbon_object_it_drop(sub_it);
+                                                                jak_carbon_object_it_drop(sub_it);
                                                                 return ret;
                                                         }
                                                         case JAK_CARBON_FIELD_TYPE_ARRAY: {
-                                                                jak_carbon_array_it *sub_it = carbon_object_it_array_value(
+                                                                jak_carbon_array_it *sub_it = jak_carbon_object_it_array_value(
                                                                         it);
-                                                                carbon_path_status_e ret = traverse_array(state,
+                                                                jak_carbon_path_status_e ret = traverse_array(state,
                                                                                                              path,
                                                                                                              next_path_pos,
                                                                                                              sub_it,
@@ -292,7 +292,7 @@ static inline carbon_path_status_e traverse_object(struct jak_carbon_path_evalua
                                                         case JAK_CARBON_FIELD_TYPE_COLUMN_I64:
                                                         case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT:
                                                         case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
-                                                                jak_carbon_column_it *sub_it = carbon_object_it_column_value(
+                                                                jak_carbon_column_it *sub_it = jak_carbon_object_it_column_value(
                                                                         it);
                                                                 return traverse_column(state,
                                                                                        path,
@@ -305,13 +305,13 @@ static inline carbon_path_status_e traverse_object(struct jak_carbon_path_evalua
                                         }
                                 }
                         }
-                } while (carbon_object_it_next(it));
+                } while (jak_carbon_object_it_next(it));
         }
 
         return JAK_CARBON_PATH_NOSUCHKEY;
 }
 
-static inline carbon_path_status_e traverse_array(struct jak_carbon_path_evaluator *state,
+static inline jak_carbon_path_status_e traverse_array(jak_carbon_path_evaluator *state,
                                                      const jak_carbon_dot_path *path, jak_u32 current_path_pos,
                                                      jak_carbon_array_it *it, bool is_record)
 {
@@ -323,7 +323,7 @@ static inline carbon_path_status_e traverse_array(struct jak_carbon_path_evaluat
         jak_carbon_field_type_e elem_type;
         carbon_dot_node_e node_type;
         jak_u32 path_length;
-        carbon_path_status_e status;
+        jak_carbon_path_status_e status;
         jak_u32 requested_array_idx;
         jak_u32 current_array_idx = 0;
         bool is_unit_array = jak_carbon_array_it_is_unit(it);
@@ -444,13 +444,13 @@ static inline carbon_path_status_e traverse_array(struct jak_carbon_path_evaluat
                                                                                     JAK_CARBON_FIELD_TYPE_OBJECT) {
                                                                                         return JAK_CARBON_PATH_NOTANOBJECT;
                                                                                 } else {
-                                                                                        struct jak_carbon_object_it *sub_it = jak_carbon_array_it_object_value(
+                                                                                        jak_carbon_object_it *sub_it = jak_carbon_array_it_object_value(
                                                                                                 it);
                                                                                         status = traverse_object(state,
                                                                                                                  path,
                                                                                                                  next_path_pos,
                                                                                                                  sub_it);
-                                                                                        carbon_object_it_drop(sub_it);
+                                                                                        jak_carbon_object_it_drop(sub_it);
                                                                                         return status;
                                                                                 }
                                                                         default: error_print(JAK_ERR_INTERNALERR);
@@ -479,13 +479,13 @@ static inline carbon_path_status_e traverse_array(struct jak_carbon_path_evaluat
                                                 return JAK_CARBON_PATH_NOTANOBJECT;
                                         } else {
                                                 if (is_unit_array && is_record) {
-                                                        struct jak_carbon_object_it *sub_it = jak_carbon_array_it_object_value(
+                                                        jak_carbon_object_it *sub_it = jak_carbon_array_it_object_value(
                                                                 it);
                                                         status = traverse_object(state,
                                                                                  path,
                                                                                  current_path_pos,
                                                                                  sub_it);
-                                                        carbon_object_it_drop(sub_it);
+                                                        jak_carbon_object_it_drop(sub_it);
                                                         return status;
                                                 } else {
                                                         return JAK_CARBON_PATH_NOSUCHKEY;
@@ -499,7 +499,7 @@ static inline carbon_path_status_e traverse_array(struct jak_carbon_path_evaluat
         }
 }
 
-static inline carbon_path_status_e traverse_column(struct jak_carbon_path_evaluator *state,
+static inline jak_carbon_path_status_e traverse_column(jak_carbon_path_evaluator *state,
                                                       const jak_carbon_dot_path *path, jak_u32 current_path_pos,
                                                       jak_carbon_column_it *it)
 {

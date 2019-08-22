@@ -431,7 +431,7 @@ jak_carbon_array_it *jak_carbon_array_it_array_value(jak_carbon_array_it *it_in)
         return jak_carbon_int_field_access_array_value(&it_in->field_access, &it_in->err);
 }
 
-struct jak_carbon_object_it *jak_carbon_array_it_object_value(jak_carbon_array_it *it_in)
+jak_carbon_object_it *jak_carbon_array_it_object_value(jak_carbon_array_it *it_in)
 {
         return jak_carbon_int_field_access_object_value(&it_in->field_access, &it_in->err);
 }

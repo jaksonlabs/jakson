@@ -192,7 +192,7 @@ bool jak_carbon_key_type(jak_carbon_key_e *out, jak_carbon *doc)
         JAK_ERROR_IF_NULL(out)
         JAK_ERROR_IF_NULL(doc)
         memfile_save_position(&doc->memfile);
-        carbon_key_skip(out, &doc->memfile);
+        jak_carbon_key_skip(out, &doc->memfile);
         memfile_restore_position(&doc->memfile);
         return true;
 }
@@ -201,7 +201,7 @@ const void *jak_carbon_key_raw_value(jak_u64 *len, jak_carbon_key_e *type, jak_c
 {
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
-        const void *result = carbon_key_read(len, type, &doc->memfile);
+        const void *result = jak_carbon_key_read(len, type, &doc->memfile);
         memfile_restore_position(&doc->memfile);
         return result;
 }
@@ -211,7 +211,7 @@ bool jak_carbon_key_signed_value(jak_i64 *key, jak_carbon *doc)
         jak_carbon_key_e type;
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
-        const void *result = carbon_key_read(NULL, &type, &doc->memfile);
+        const void *result = jak_carbon_key_read(NULL, &type, &doc->memfile);
         memfile_restore_position(&doc->memfile);
         if (JAK_LIKELY(jak_carbon_key_is_signed(type))) {
                 *key = *((const jak_i64 *) result);
@@ -227,7 +227,7 @@ bool jak_carbon_key_unsigned_value(jak_u64 *key, jak_carbon *doc)
         jak_carbon_key_e type;
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
-        const void *result = carbon_key_read(NULL, &type, &doc->memfile);
+        const void *result = jak_carbon_key_read(NULL, &type, &doc->memfile);
         memfile_restore_position(&doc->memfile);
         if (JAK_LIKELY(jak_carbon_key_is_unsigned(type))) {
                 *key = *((const jak_u64 *) result);
@@ -243,7 +243,7 @@ const char *jak_carbon_key_string_value(jak_u64 *len, jak_carbon *doc)
         jak_carbon_key_e type;
         memfile_save_position(&doc->memfile);
         memfile_seek(&doc->memfile, 0);
-        const void *result = carbon_key_read(len, &type, &doc->memfile);
+        const void *result = jak_carbon_key_read(len, &type, &doc->memfile);
         memfile_restore_position(&doc->memfile);
         if (JAK_LIKELY(jak_carbon_key_is_string(type))) {
                 return result;
@@ -431,7 +431,7 @@ static void carbon_header_init(jak_carbon *doc, jak_carbon_key_e key_type)
         JAK_ASSERT(doc);
 
         memfile_seek(&doc->memfile, 0);
-        carbon_key_create(&doc->memfile, key_type, &doc->err);
+        jak_carbon_key_create(&doc->memfile, key_type, &doc->err);
 
         if (key_type != JAK_CARBON_KEY_NOKEY) {
                 jak_carbon_commit_hash_create(&doc->memfile);

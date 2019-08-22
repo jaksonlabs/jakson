@@ -35,7 +35,7 @@ JAK_BEGIN_DECL
 
 bool jak_carbon_int_insert_create_for_array(jak_carbon_insert *inserter, jak_carbon_array_it *context);
 bool jak_carbon_int_insert_create_for_column(jak_carbon_insert *inserter, jak_carbon_column_it *context);
-bool jak_carbon_int_insert_create_for_object(jak_carbon_insert *inserter, struct jak_carbon_object_it *context);
+bool jak_carbon_int_insert_create_for_object(jak_carbon_insert *inserter, jak_carbon_object_it *context);
 
 bool jak_carbon_insert_null(jak_carbon_insert *inserter);
 bool jak_carbon_insert_true(jak_carbon_insert *inserter);

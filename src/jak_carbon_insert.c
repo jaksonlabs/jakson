@@ -79,11 +79,11 @@ bool jak_carbon_int_insert_create_for_column(jak_carbon_insert *inserter, jak_ca
         return true;
 }
 
-bool jak_carbon_int_insert_create_for_object(jak_carbon_insert *inserter, struct jak_carbon_object_it *context)
+bool jak_carbon_int_insert_create_for_object(jak_carbon_insert *inserter, jak_carbon_object_it *context)
 {
         JAK_ERROR_IF_NULL(inserter)
         JAK_ERROR_IF_NULL(context)
-        carbon_object_it_lock(context);
+        jak_carbon_object_it_lock(context);
         inserter->context_type = JAK_CARBON_OBJECT;
         inserter->context.object = context;
 
@@ -427,7 +427,7 @@ static void insert_binary(jak_carbon_insert *inserter, const void *value, size_t
                 push_media_type_for_array(inserter, JAK_CARBON_FIELD_TYPE_BINARY);
 
                 /* write mime type with variable-length integer type */
-                jak_u64 mime_type_id = carbon_media_mime_type_by_ext(file_ext);
+                jak_u64 mime_type_id = jak_carbon_media_mime_type_by_ext(file_ext);
 
                 /* write mime type id */
                 memfile_write_uintvar_stream(NULL, &inserter->memfile, mime_type_id);
@@ -463,7 +463,7 @@ jak_carbon_insert *jak_carbon_insert_object_begin(jak_carbon_insert_object_state
 
         *out = (jak_carbon_insert_object_state) {
                 .parent_inserter = inserter,
-                .it = JAK_MALLOC(sizeof(struct jak_carbon_object_it)),
+                .it = JAK_MALLOC(sizeof(jak_carbon_object_it)),
                 .object_begin = memfile_tell(&inserter->memfile),
                 .object_end = 0
         };
@@ -472,8 +472,8 @@ jak_carbon_insert *jak_carbon_insert_object_begin(jak_carbon_insert_object_state
         jak_carbon_int_insert_object(&inserter->memfile, object_capacity);
         jak_u64 payload_start = memfile_tell(&inserter->memfile) - 1;
 
-        carbon_object_it_create(out->it, &inserter->memfile, &inserter->err, payload_start);
-        carbon_object_it_insert_begin(&out->inserter, out->it);
+        jak_carbon_object_it_create(out->it, &inserter->memfile, &inserter->err, payload_start);
+        jak_carbon_object_it_insert_begin(&out->inserter, out->it);
 
         return &out->inserter;
 }
@@ -482,10 +482,10 @@ bool jak_carbon_insert_object_end(jak_carbon_insert_object_state *state)
 {
         JAK_ERROR_IF_NULL(state);
 
-        struct jak_carbon_object_it scan;
-        carbon_object_it_create(&scan, &state->parent_inserter->memfile, &state->parent_inserter->err,
+        jak_carbon_object_it scan;
+        jak_carbon_object_it_create(&scan, &state->parent_inserter->memfile, &state->parent_inserter->err,
                                 memfile_tell(&state->parent_inserter->memfile) - 1);
-        while (carbon_object_it_next(&scan)) {}
+        while (jak_carbon_object_it_next(&scan)) {}
 
         JAK_ASSERT(*memfile_peek(&scan.memfile, sizeof(char)) == JAK_CARBON_MARKER_OBJECT_END);
         memfile_read(&scan.memfile, sizeof(char));
@@ -495,9 +495,9 @@ bool jak_carbon_insert_object_end(jak_carbon_insert_object_state *state)
         memfile_skip(&scan.memfile, 1);
 
         memfile_seek(&state->parent_inserter->memfile, memfile_tell(&scan.memfile) - 1);
-        carbon_object_it_drop(&scan);
+        jak_carbon_object_it_drop(&scan);
         jak_carbon_insert_drop(&state->inserter);
-        carbon_object_it_drop(state->it);
+        jak_carbon_object_it_drop(state->it);
         free(state->it);
         return true;
 }
@@ -867,7 +867,7 @@ bool jak_carbon_insert_drop(jak_carbon_insert *inserter)
         } else if (inserter->context_type == JAK_CARBON_COLUMN) {
                 jak_carbon_column_it_unlock(inserter->context.column);
         } else if (inserter->context_type == JAK_CARBON_OBJECT) {
-                carbon_object_it_unlock(inserter->context.object);
+                jak_carbon_object_it_unlock(inserter->context.object);
         } else {
                 error(&inserter->err, JAK_ERR_INTERNALERR);
         }
@@ -930,8 +930,8 @@ static bool push_in_column(jak_carbon_insert *inserter, const void *base, jak_ca
 
 static bool push_media_type_for_array(jak_carbon_insert *inserter, jak_carbon_field_type_e type)
 {
-        memfile_ensure_space(&inserter->memfile, sizeof(media_type_t));
-        return carbon_media_write(&inserter->memfile, type);
+        memfile_ensure_space(&inserter->memfile, sizeof(jak_media_type));
+        return jak_carbon_media_write(&inserter->memfile, type);
 }
 
 static void internal_create(jak_carbon_insert *inserter, struct jak_memfile *src, jak_offset_t pos)

@@ -5814,17 +5814,17 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringIt)
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
         ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
-        struct jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
-        has_next = carbon_object_it_next(obj_it);
+        jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
+        has_next = jak_carbon_object_it_next(obj_it);
         ASSERT_TRUE(has_next);
-        const char *prop_name = carbon_object_it_prop_name(&key_len, obj_it);
+        const char *prop_name = jak_carbon_object_it_prop_name(&key_len, obj_it);
         ASSERT_TRUE(strncmp(prop_name, "1", strlen("1")) == 0);
 
-        carbon_object_it_insert_begin(&nested_ins, obj_it);
+        jak_carbon_object_it_insert_begin(&nested_ins, obj_it);
         jak_carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
-        carbon_object_it_insert_end(&nested_ins);
+        jak_carbon_object_it_insert_end(&nested_ins);
 
-        carbon_object_it_drop(obj_it);
+        jak_carbon_object_it_drop(obj_it);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -5892,15 +5892,15 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex1)
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
         ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
-        struct jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
-        ASSERT_TRUE(carbon_object_it_next(obj_it));
-        ASSERT_TRUE(carbon_object_it_next(obj_it));
+        jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
+        ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
+        ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
 
-        carbon_object_it_insert_begin(&nested_ins, obj_it);
+        jak_carbon_object_it_insert_begin(&nested_ins, obj_it);
         jak_carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
-        carbon_object_it_insert_end(&nested_ins);
+        jak_carbon_object_it_insert_end(&nested_ins);
 
-        carbon_object_it_drop(obj_it);
+        jak_carbon_object_it_drop(obj_it);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -5967,15 +5967,15 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex2)
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
         ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
-        struct jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
-        ASSERT_TRUE(carbon_object_it_next(obj_it));
-        ASSERT_TRUE(carbon_object_it_next(obj_it));
-        ASSERT_TRUE(carbon_object_it_next(obj_it));
+        jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
+        ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
+        ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
+        ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
 
-        carbon_object_it_insert_begin(&nested_ins, obj_it);
+        jak_carbon_object_it_insert_begin(&nested_ins, obj_it);
         jak_carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
-        carbon_object_it_insert_end(&nested_ins);
-        carbon_object_it_drop(obj_it);
+        jak_carbon_object_it_insert_end(&nested_ins);
+        jak_carbon_object_it_drop(obj_it);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6042,16 +6042,16 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex3)
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
         ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
-        struct jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
-        ASSERT_TRUE(carbon_object_it_next(obj_it));
-        ASSERT_TRUE(carbon_object_it_next(obj_it));
-        ASSERT_TRUE(carbon_object_it_next(obj_it));
-        ASSERT_TRUE(carbon_object_it_next(obj_it));
+        jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
+        ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
+        ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
+        ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
+        ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
 
-        carbon_object_it_insert_begin(&nested_ins, obj_it);
+        jak_carbon_object_it_insert_begin(&nested_ins, obj_it);
         jak_carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
-        carbon_object_it_insert_end(&nested_ins);
-        carbon_object_it_drop(obj_it);
+        jak_carbon_object_it_insert_end(&nested_ins);
+        jak_carbon_object_it_drop(obj_it);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6118,17 +6118,17 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex4)
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
         ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
-        struct jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
-        ASSERT_TRUE(carbon_object_it_next(obj_it));
-        ASSERT_TRUE(carbon_object_it_next(obj_it));
-        ASSERT_TRUE(carbon_object_it_next(obj_it));
-        ASSERT_TRUE(carbon_object_it_next(obj_it));
-        ASSERT_TRUE(carbon_object_it_next(obj_it));
+        jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
+        ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
+        ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
+        ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
+        ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
+        ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
 
-        carbon_object_it_insert_begin(&nested_ins, obj_it);
+        jak_carbon_object_it_insert_begin(&nested_ins, obj_it);
         jak_carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
-        carbon_object_it_insert_end(&nested_ins);
-        carbon_object_it_drop(obj_it);
+        jak_carbon_object_it_insert_end(&nested_ins);
+        jak_carbon_object_it_drop(obj_it);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6195,18 +6195,18 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex5)
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
         ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
-        struct jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
-        ASSERT_TRUE(carbon_object_it_next(obj_it));
-        ASSERT_TRUE(carbon_object_it_next(obj_it));
-        ASSERT_TRUE(carbon_object_it_next(obj_it));
-        ASSERT_TRUE(carbon_object_it_next(obj_it));
-        ASSERT_TRUE(carbon_object_it_next(obj_it));
-        ASSERT_FALSE(carbon_object_it_next(obj_it));
+        jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
+        ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
+        ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
+        ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
+        ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
+        ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
+        ASSERT_FALSE(jak_carbon_object_it_next(obj_it));
 
-        carbon_object_it_insert_begin(&nested_ins, obj_it);
+        jak_carbon_object_it_insert_begin(&nested_ins, obj_it);
         jak_carbon_insert_prop_string(&nested_ins, "Hello Long Key", "Hello Long Value");
-        carbon_object_it_insert_end(&nested_ins);
-        carbon_object_it_drop(obj_it);
+        jak_carbon_object_it_insert_end(&nested_ins);
+        jak_carbon_object_it_drop(obj_it);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6273,14 +6273,14 @@ TEST(CarbonTest, CarbonObjectRemovePropByKey)
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
         ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
-        struct jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
-        has_next = carbon_object_it_next(obj_it);
+        jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
+        has_next = jak_carbon_object_it_next(obj_it);
         ASSERT_TRUE(has_next);
-        const char *prop_name = carbon_object_it_prop_name(&key_len, obj_it);
+        const char *prop_name = jak_carbon_object_it_prop_name(&key_len, obj_it);
         ASSERT_TRUE(strncmp(prop_name, "1", strlen("1")) == 0);
 
-        carbon_object_it_remove(obj_it);
-        carbon_object_it_drop(obj_it);
+        jak_carbon_object_it_remove(obj_it);
+        jak_carbon_object_it_drop(obj_it);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6354,14 +6354,14 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectNonEmpty)
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
         ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
-        struct jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
-        has_next = carbon_object_it_next(obj_it);
+        jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
+        has_next = jak_carbon_object_it_next(obj_it);
         ASSERT_TRUE(has_next);
-        const char *prop_name = carbon_object_it_prop_name(&key_len, obj_it);
+        const char *prop_name = jak_carbon_object_it_prop_name(&key_len, obj_it);
         ASSERT_TRUE(strncmp(prop_name, "1", strlen("1")) == 0);
 
-        carbon_object_it_remove(obj_it);
-        carbon_object_it_drop(obj_it);
+        jak_carbon_object_it_remove(obj_it);
+        jak_carbon_object_it_drop(obj_it);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6432,14 +6432,14 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayEmpty)
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
         ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
-        struct jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
-        has_next = carbon_object_it_next(obj_it);
+        jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
+        has_next = jak_carbon_object_it_next(obj_it);
         ASSERT_TRUE(has_next);
-        const char *prop_name = carbon_object_it_prop_name(&key_len, obj_it);
+        const char *prop_name = jak_carbon_object_it_prop_name(&key_len, obj_it);
         ASSERT_TRUE(strncmp(prop_name, "1", strlen("1")) == 0);
 
-        carbon_object_it_remove(obj_it);
-        carbon_object_it_drop(obj_it);
+        jak_carbon_object_it_remove(obj_it);
+        jak_carbon_object_it_drop(obj_it);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6515,14 +6515,14 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayNonEmpty)
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
         ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
-        struct jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
-        has_next = carbon_object_it_next(obj_it);
+        jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
+        has_next = jak_carbon_object_it_next(obj_it);
         ASSERT_TRUE(has_next);
-        const char *prop_name = carbon_object_it_prop_name(&key_len, obj_it);
+        const char *prop_name = jak_carbon_object_it_prop_name(&key_len, obj_it);
         ASSERT_TRUE(strncmp(prop_name, "1", strlen("1")) == 0);
 
-        carbon_object_it_remove(obj_it);
-        carbon_object_it_drop(obj_it);
+        jak_carbon_object_it_remove(obj_it);
+        jak_carbon_object_it_drop(obj_it);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6593,14 +6593,14 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeColumnEmpty)
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
         ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
-        struct jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
-        has_next = carbon_object_it_next(obj_it);
+        jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
+        has_next = jak_carbon_object_it_next(obj_it);
         ASSERT_TRUE(has_next);
-        const char *prop_name = carbon_object_it_prop_name(&key_len, obj_it);
+        const char *prop_name = jak_carbon_object_it_prop_name(&key_len, obj_it);
         ASSERT_TRUE(strncmp(prop_name, "1", strlen("1")) == 0);
 
-        carbon_object_it_remove(obj_it);
-        carbon_object_it_drop(obj_it);
+        jak_carbon_object_it_remove(obj_it);
+        jak_carbon_object_it_drop(obj_it);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -6670,14 +6670,14 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectEmpty)
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
         ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
-        struct jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
-        has_next = carbon_object_it_next(obj_it);
+        jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
+        has_next = jak_carbon_object_it_next(obj_it);
         ASSERT_TRUE(has_next);
-        const char *prop_name = carbon_object_it_prop_name(&key_len, obj_it);
+        const char *prop_name = jak_carbon_object_it_prop_name(&key_len, obj_it);
         ASSERT_TRUE(strncmp(prop_name, "1", strlen("1")) == 0);
 
-        carbon_object_it_remove(obj_it);
-        carbon_object_it_drop(obj_it);
+        jak_carbon_object_it_remove(obj_it);
+        jak_carbon_object_it_drop(obj_it);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -7707,12 +7707,12 @@ TEST(CarbonTest, CarbonFromJsonColumnNumber)
         ASSERT_TRUE(jak_carbon_array_it_next(&it));
         jak_carbon_array_it_field_type(&field_type, &it);
         ASSERT_TRUE(field_type == JAK_CARBON_FIELD_TYPE_OBJECT);
-        struct jak_carbon_object_it *oit = jak_carbon_array_it_object_value(&it);
-        ASSERT_TRUE(carbon_object_it_next(oit));
-        carbon_object_it_prop_type(&field_type, oit);
+        jak_carbon_object_it *oit = jak_carbon_array_it_object_value(&it);
+        ASSERT_TRUE(jak_carbon_object_it_next(oit));
+        jak_carbon_object_it_prop_type(&field_type, oit);
         ASSERT_TRUE(jak_carbon_field_type_is_column(field_type));
         ASSERT_TRUE(field_type == JAK_CARBON_FIELD_TYPE_COLUMN_U8);
-        carbon_object_it_drop(oit);
+        jak_carbon_object_it_drop(oit);
         jak_carbon_iterator_close(&it);
 
         json_out_extended = jak_carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{\"x\": [1, 2, 3]}}'
@@ -7748,12 +7748,12 @@ TEST(CarbonTest, CarbonFromJsonColumnNullableNumber)
         ASSERT_TRUE(jak_carbon_array_it_next(&it));
         jak_carbon_array_it_field_type(&field_type, &it);
         ASSERT_TRUE(field_type == JAK_CARBON_FIELD_TYPE_OBJECT);
-        struct jak_carbon_object_it *oit = jak_carbon_array_it_object_value(&it);
-        ASSERT_TRUE(carbon_object_it_next(oit));
-        carbon_object_it_prop_type(&field_type, oit);
+        jak_carbon_object_it *oit = jak_carbon_array_it_object_value(&it);
+        ASSERT_TRUE(jak_carbon_object_it_next(oit));
+        jak_carbon_object_it_prop_type(&field_type, oit);
         ASSERT_TRUE(jak_carbon_field_type_is_column(field_type));
         ASSERT_TRUE(field_type == JAK_CARBON_FIELD_TYPE_COLUMN_U8);
-        carbon_object_it_drop(oit);
+        jak_carbon_object_it_drop(oit);
         jak_carbon_iterator_close(&it);
 
         json_out_extended = jak_carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{"x": [1, null, 3]}]}'
@@ -8701,7 +8701,7 @@ TEST(CarbonTest, ParseBooleanArray) {
 }
 
 TEST(CarbonTest, PathIndex) {
-        struct jak_carbon_path_index index;
+        jak_carbon_path_index index;
         jak_carbon doc;
         struct jak_error err;
 
@@ -8726,17 +8726,17 @@ TEST(CarbonTest, PathIndex) {
 //        const char *json = (const char *) mmap(0, json_in_len, PROT_READ, MAP_PRIVATE, fd, 0);
 
         jak_carbon_from_json(&doc, json, JAK_CARBON_KEY_NOKEY, NULL, &err);
-        carbon_path_index_create(&index, &doc);
-        carbon_path_index_print(stdout, &index);
+        jak_carbon_path_index_create(&index, &doc);
+        jak_carbon_path_index_print(stdout, &index);
         jak_carbon_hexdump_print(stdout, &doc);
-        carbon_path_index_hexdump(stdout, &index);
+        jak_carbon_path_index_hexdump(stdout, &index);
 
         jak_carbon path_carbon;
-        carbon_path_index_to_carbon(&path_carbon, &index);
+        jak_carbon_path_index_to_carbon(&path_carbon, &index);
         jak_carbon_print(stdout, JAK_JSON_COMPACT, &path_carbon);
         jak_carbon_drop(&path_carbon);
 
-        ASSERT_TRUE(carbon_path_index_indexes_doc(&index, &doc));
+        ASSERT_TRUE(jak_carbon_path_index_indexes_doc(&index, &doc));
         jak_carbon_drop(&doc);
 }
 

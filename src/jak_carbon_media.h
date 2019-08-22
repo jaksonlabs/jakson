@@ -30,13 +30,13 @@
 
 JAK_BEGIN_DECL
 
-typedef jak_u8 media_type_t; /* byte to determine type at hand (e.g., JSON array, string, null, ...) */
+typedef jak_u8 jak_media_type; /* byte to determine type at hand (e.g., JSON array, string, null, ...) */
 
 static struct mime_type {
         const char *type;
         const char *ext;
 
-} mime_type_register[] = { /* the entries in this list must be sorted by extension! */
+} jak_global_mime_type_register[] = { /* the entries in this list must be sorted by extension! */
         {"application/vnd.lotus-1-2-3",                                               "123"},
         {"text/vnd.in3d.3dml",                                                        "3dml"},
         {"video/3gpp2",                                                               "3g2"},
@@ -722,27 +722,27 @@ static struct mime_type {
         {"application/vnd.handheld-entertainment+xml",                                "zmm"},
 };
 
-static const jak_u32 _nmime_type_register = (jak_u32) JAK_ARRAY_LENGTH(mime_type_register);
+static const jak_u32 _jak_global_mime_type_register = (jak_u32) JAK_ARRAY_LENGTH(jak_global_mime_type_register);
 
-bool carbon_media_write(struct jak_memfile *dst, jak_carbon_field_type_e type);
+bool jak_carbon_media_write(struct jak_memfile *dst, jak_carbon_field_type_e type);
 
 /**
  * Returns the mime type identifier for a file extension <code>ext</code>. If <code>ext</code> is not known,
  * the mime type application/octet-stream (.bin) is returned.
  */
-jak_u32 carbon_media_mime_type_by_ext(const char *ext);
+jak_u32 jak_carbon_media_mime_type_by_ext(const char *ext);
 
 /**
  * Returns a human readable string representing the mime type for the mime type identifier <code>id</code>.
  * In case <code>id</code> is invalid, the mime type application/octet-stream is returned.
  */
-const char *carbon_media_mime_type_by_id(jak_u32 id);
+const char *jak_carbon_media_mime_type_by_id(jak_u32 id);
 
 /**
  * Returns the file extension for the mime type identifier <code>id</code>.
  * In case <code>id</code> is invalid, the file extension "bin" is returned.
  */
-const char *carbon_media_mime_ext_by_id(jak_u32 id);
+const char *jak_carbon_media_mime_ext_by_id(jak_u32 id);
 
 JAK_END_DECL
 

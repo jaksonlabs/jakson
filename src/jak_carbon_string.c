@@ -74,8 +74,8 @@ bool carbon_string_nchar_write(struct jak_memfile *file, const char *string, jak
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(string)
 
-        memfile_ensure_space(file, sizeof(media_type_t));
-        carbon_media_write(file, JAK_CARBON_FIELD_TYPE_STRING);
+        memfile_ensure_space(file, sizeof(jak_media_type));
+        jak_carbon_media_write(file, JAK_CARBON_FIELD_TYPE_STRING);
         carbon_string_nomarker_nchar_write(file, string, str_len);
 
         return true;

@@ -99,7 +99,7 @@ DEFINE_ARRAY_UPDATE_FUNCTION(float, JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT, jak_carb
                         error(&context->original->err, JAK_ERR_INTERNALERR)                                            \
                         }                                                                                              \
                 }                                                                                                      \
-                carbon_path_evaluator_end(&updater.path_evaluater);                                                    \
+                jak_carbon_path_evaluator_end(&updater.path_evaluater);                                                    \
                 }                                                                                                              \
         status;                                                                                                        \
 })
@@ -133,12 +133,12 @@ static bool compile_path(jak_carbon_dot_path *out, const char *in)
 
 static bool resolve_path(struct jak_carbon_update *updater)
 {
-        return carbon_path_evaluator_begin_mutable(&updater->path_evaluater, updater->path, updater->context);
+        return jak_carbon_path_evaluator_begin_mutable(&updater->path_evaluater, updater->path, updater->context);
 }
 
 static bool path_resolved(struct jak_carbon_update *updater)
 {
-        return carbon_path_evaluator_has_result(&updater->path_evaluater);
+        return jak_carbon_path_evaluator_has_result(&updater->path_evaluater);
 }
 
 static bool column_update_u8(jak_carbon_column_it *it, jak_u32 pos, jak_u8 value)

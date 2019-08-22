@@ -27,12 +27,11 @@
 
 JAK_BEGIN_DECL
 
-struct jak_carbon_path_evaluator {
+typedef struct jak_carbon_path_evaluator {
         jak_carbon *doc;
         jak_carbon_array_it root_it;
-        carbon_path_status_e status;
+        jak_carbon_path_status_e status;
         struct jak_error err;
-
         struct {
                 jak_carbon_container_e container_type;
                 union {
@@ -41,7 +40,7 @@ struct jak_carbon_path_evaluator {
                         } array;
 
                         struct {
-                                struct jak_carbon_object_it it;
+                                jak_carbon_object_it it;
                         } object;
 
                         struct {
@@ -51,37 +50,24 @@ struct jak_carbon_path_evaluator {
 
                 } containers;
         } result;
-};
+} jak_carbon_path_evaluator;
 
-bool carbon_path_evaluator_begin(struct jak_carbon_path_evaluator *eval, jak_carbon_dot_path *path,
-                                 jak_carbon *doc);
+bool jak_carbon_path_evaluator_begin(jak_carbon_path_evaluator *eval, jak_carbon_dot_path *path, jak_carbon *doc);
+bool jak_carbon_path_evaluator_begin_mutable(jak_carbon_path_evaluator *eval, const jak_carbon_dot_path *path, struct jak_carbon_revise *context);
+bool jak_carbon_path_evaluator_end(jak_carbon_path_evaluator *state);
 
-bool carbon_path_evaluator_begin_mutable(struct jak_carbon_path_evaluator *eval, const jak_carbon_dot_path *path,
-                                         struct jak_carbon_revise *context);
+bool jak_carbon_path_evaluator_status(jak_carbon_path_status_e *status, jak_carbon_path_evaluator *state);
+bool jak_carbon_path_evaluator_has_result(jak_carbon_path_evaluator *state);
+bool jak_carbon_path_exists(jak_carbon *doc, const char *path);
 
-bool carbon_path_evaluator_status(carbon_path_status_e *status, struct jak_carbon_path_evaluator *state);
-
-bool carbon_path_evaluator_has_result(struct jak_carbon_path_evaluator *state);
-
-bool carbon_path_evaluator_end(struct jak_carbon_path_evaluator *state);
-
-bool carbon_path_exists(jak_carbon *doc, const char *path);
-
-bool carbon_path_is_array(jak_carbon *doc, const char *path);
-
-bool carbon_path_is_column(jak_carbon *doc, const char *path);
-
-bool carbon_path_is_object(jak_carbon *doc, const char *path);
-
-bool carbon_path_is_container(jak_carbon *doc, const char *path);
-
-bool carbon_path_is_null(jak_carbon *doc, const char *path);
-
-bool carbon_path_is_number(jak_carbon *doc, const char *path);
-
-bool carbon_path_is_boolean(jak_carbon *doc, const char *path);
-
-bool carbon_path_is_string(jak_carbon *doc, const char *path);
+bool jak_carbon_path_is_array(jak_carbon *doc, const char *path);
+bool jak_carbon_path_is_column(jak_carbon *doc, const char *path);
+bool jak_carbon_path_is_object(jak_carbon *doc, const char *path);
+bool jak_carbon_path_is_container(jak_carbon *doc, const char *path);
+bool jak_carbon_path_is_null(jak_carbon *doc, const char *path);
+bool jak_carbon_path_is_number(jak_carbon *doc, const char *path);
+bool jak_carbon_path_is_boolean(jak_carbon *doc, const char *path);
+bool jak_carbon_path_is_string(jak_carbon *doc, const char *path);
 
 JAK_END_DECL
 

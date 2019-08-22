@@ -52,7 +52,7 @@ typedef struct jak_carbon_dot_path {
         struct jak_error err;
 } jak_carbon_dot_path;
 
-typedef enum carbon_path_status {
+typedef enum jak_carbon_path_status {
         JAK_CARBON_PATH_RESOLVED,
         JAK_CARBON_PATH_EMPTY_DOC,
         JAK_CARBON_PATH_NOSUCHINDEX,
@@ -62,7 +62,7 @@ typedef enum carbon_path_status {
         JAK_CARBON_PATH_NOTANOBJECT,
         JAK_CARBON_PATH_NONESTING,
         JAK_CARBON_PATH_INTERNAL
-} carbon_path_status_e;
+} jak_carbon_path_status_e;
 
 JAK_DEFINE_ERROR_GETTER(jak_carbon_dot_path)
 
