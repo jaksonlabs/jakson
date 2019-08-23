@@ -58,7 +58,7 @@ static void init_list(struct lru_list *list)
 
 bool jak_string_id_cache_create_lru(struct jak_string_cache **cache, jak_archive *archive)
 {
-        jak_archive_info archive_info;
+        JAK_DECLARE_AND_INIT(jak_archive_info, archive_info)
         jak_archive_get_info(&archive_info, archive);
         jak_u32 capacity = archive_info.num_embeddded_strings * 0.25f;
         return jak_string_id_cache_create_lru_ex(cache, archive, capacity);

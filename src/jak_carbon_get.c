@@ -33,7 +33,7 @@
         }                                                                                                              \
                                                                                                                        \
         jak_carbon_find_close(&find);                                                                                       \
-        result;                                                                                                        \
+        default_val;                                                                                                        \
 })
 
 
@@ -72,11 +72,13 @@ jak_carbon_get_or_default_string(jak_u64 *len_out, jak_carbon *doc, const char *
                 jak_carbon_find_result_type(&field_type, &find);
                 if (jak_carbon_field_type_is_string(field_type)) {
                         result = jak_carbon_find_result_string(len_out, &find);
+                        jak_carbon_find_close(&find);
+                        return result;
                 }
         }
 
         jak_carbon_find_close(&find);
-        return result;
+        return default_val;
 }
 
 jak_carbon_binary *
@@ -84,17 +86,19 @@ jak_carbon_get_or_default_binary(jak_carbon *doc, const char *path, jak_carbon_b
 {
         jak_carbon_find find;
         jak_carbon_field_type_e field_type;
-        jak_carbon_binary *result = default_val;
+        jak_carbon_binary *result = NULL;
 
         if (jak_carbon_find_open(&find, path, doc)) {
                 jak_carbon_find_result_type(&field_type, &find);
                 if (jak_carbon_field_type_is_binary(field_type)) {
                         result = jak_carbon_find_result_binary(&find);
+                        jak_carbon_find_close(&find);
+                        return result;
                 }
         }
 
         jak_carbon_find_close(&find);
-        return result;
+        return default_val;
 }
 
 jak_carbon_array_it *carbon_get_array_or_null(jak_carbon *doc, const char *path)

@@ -29,8 +29,10 @@ target_link_libraries(test-archive-converter PUBLIC gtest ${TEST_LIBS} PRIVATE j
 add_executable(test-varuint test-varuint.cpp)
 target_link_libraries(test-varuint PUBLIC gtest ${TEST_LIBS} PRIVATE jakson-sources)
 
+# add_executable(test-carbon test-carbon.cpp)
+# target_link_libraries(test-carbon PUBLIC gtest ${TEST_LIBS} PRIVATE jakson-sources)
+
 add_executable(test-carbon test-carbon.cpp ${CATTED_SOURCES})
-#target_link_libraries(test-carbon PUBLIC gtest ${TEST_LIBS} PRIVATE jakson-sources)
 target_link_libraries(test-carbon PUBLIC gtest ${TEST_LIBS})
 
 add_executable(test-mime test-mime.cpp)

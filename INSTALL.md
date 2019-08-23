@@ -2,7 +2,8 @@ libcarbon uses [CMake](https://cmake.org) as build system. CMake 3.9.6 or higher
 For testing, [Google Test Framework](https://github.com/google/googletest) is required. You will find
 installation instructions in [misc/INSTALL_GTEST.md](misc/INSTALL_GTEST.md). Libcarbon is built for the [Clang C Compiler](https://clang.llvm.org). 
 To install this compiler on Linux, use `$ sudo apt install clang` if not yet present and set
-`clang` as standard compiler by typing `$ sudo update-alternatives --config c++`.  
+`clang` as standard compiler by typing `$ sudo update-alternatives --config cc` and 
+`$ sudo update-alternatives --config c++`.  
 
 The basic usage is 
 ```

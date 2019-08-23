@@ -356,7 +356,7 @@ bool jak_carbon_printer_print_object(jak_carbon_object_it *it, jak_carbon_printe
         JAK_ASSERT(it);
         JAK_ASSERT(printer);
         JAK_ASSERT(builder);
-        bool is_null_value;
+        bool is_null_value = false;
         bool first_entry = true;
         jak_carbon_printer_object_begin(printer, builder);
 
@@ -364,8 +364,8 @@ bool jak_carbon_printer_print_object(jak_carbon_object_it *it, jak_carbon_printe
                 if (JAK_LIKELY(!first_entry)) {
                         jak_carbon_printer_comma(printer, builder);
                 }
-                jak_carbon_field_type_e type;
-                jak_u64 key_len;
+                JAK_DECLARE_AND_INIT(jak_carbon_field_type_e, type)
+                JAK_DECLARE_AND_INIT(jak_u64, key_len)
                 const char *key_name = jak_carbon_object_it_prop_name(&key_len, it);
 
                 jak_carbon_object_it_prop_type(&type, it);

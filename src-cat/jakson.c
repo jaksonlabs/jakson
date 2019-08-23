@@ -3138,7 +3138,7 @@ static void init_list(struct lru_list *list)
 
 bool jak_string_id_cache_create_lru(struct jak_string_cache **cache, jak_archive *archive)
 {
-        jak_archive_info archive_info;
+        JAK_DECLARE_AND_INIT(jak_archive_info, archive_info)
         jak_archive_get_info(&archive_info, archive);
         jak_u32 capacity = archive_info.num_embeddded_strings * 0.25f;
         return jak_string_id_cache_create_lru_ex(cache, archive, capacity);
@@ -5796,12 +5796,12 @@ static void iterate_objects(jak_archive *archive, const jak_archive_field_sid_t 
 {
         JAK_UNUSED(num_pairs);
 
-        jak_u32 jak_vector_length;
-        jak_archive_object object;
-        jak_uid_t parent_object_id;
-        jak_uid_t object_id;
-        jak_prop_iter prop_iter;
-        jak_error err;
+        JAK_DECLARE_AND_INIT(jak_u32, jak_vector_length)
+        JAK_DECLARE_AND_INIT(jak_archive_object, object)
+        JAK_DECLARE_AND_INIT(jak_uid_t, parent_object_id)
+        JAK_DECLARE_AND_INIT(jak_uid_t, object_id)
+        JAK_DECLARE_AND_INIT(jak_prop_iter, prop_iter)
+        JAK_DECLARE_AND_INIT(jak_error, err)
 
         jak_archive_value_jak_vector_get_object_id(&parent_object_id, value_iter);
         jak_archive_value_jak_vector_get_length(&jak_vector_length, value_iter);
@@ -5916,14 +5916,14 @@ static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
                           int mask, void *capture,
                           bool is_root_object, jak_archive_field_sid_t parent_key, jak_u32 parent_key_array_idx)
 {
-        jak_uid_t this_object_oid;
-        jak_archive_value_vector value_iter;
-        enum jak_archive_field_type type;
-        bool is_array;
-        const jak_archive_field_sid_t *keys;
-        jak_u32 num_pairs;
-        jak_prop_iter_mode_e iter_type;
-        jak_independent_iter_state collection_iter;
+        JAK_DECLARE_AND_INIT(jak_uid_t, this_object_oid)
+        JAK_DECLARE_AND_INIT(jak_archive_value_vector, value_iter)
+        JAK_DECLARE_AND_INIT(enum jak_archive_field_type, type);
+        JAK_DECLARE_AND_INIT(bool, is_array)
+        JAK_DECLARE_AND_INIT(const jak_archive_field_sid_t *, keys);
+        JAK_DECLARE_AND_INIT(jak_u32, num_pairs);
+        JAK_DECLARE_AND_INIT(jak_prop_iter_mode_e, iter_type)
+        JAK_DECLARE_AND_INIT(jak_independent_iter_state, collection_iter)
         bool first_type_group = true;
 
         JAK_UNUSED(parent_key);
@@ -6234,7 +6234,7 @@ static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
 
                                                                         jak_uid_t current_nested_object_id =
                                                                                 entry_object_containments[current_entry_idx];
-                                                                        jak_u32 entry_length;
+                                                                        JAK_DECLARE_AND_INIT(jak_u32, entry_length)
 
                                                                         switch (current_column_entry_type) {
                                                                                 case JAK_FIELD_INT8: {
@@ -10619,7 +10619,7 @@ result_from_column(jak_carbon_find *find, jak_u32 requested_idx, jak_carbon_colu
         }                                                                                                              \
                                                                                                                        \
         jak_carbon_find_close(&find);                                                                                       \
-        result;                                                                                                        \
+        default_val;                                                                                                        \
 })
 
 
@@ -10658,11 +10658,13 @@ jak_carbon_get_or_default_string(jak_u64 *len_out, jak_carbon *doc, const char *
                 jak_carbon_find_result_type(&field_type, &find);
                 if (jak_carbon_field_type_is_string(field_type)) {
                         result = jak_carbon_find_result_string(len_out, &find);
+                        jak_carbon_find_close(&find);
+                        return result;
                 }
         }
 
         jak_carbon_find_close(&find);
-        return result;
+        return default_val;
 }
 
 jak_carbon_binary *
@@ -10670,17 +10672,19 @@ jak_carbon_get_or_default_binary(jak_carbon *doc, const char *path, jak_carbon_b
 {
         jak_carbon_find find;
         jak_carbon_field_type_e field_type;
-        jak_carbon_binary *result = default_val;
+        jak_carbon_binary *result = NULL;
 
         if (jak_carbon_find_open(&find, path, doc)) {
                 jak_carbon_find_result_type(&field_type, &find);
                 if (jak_carbon_field_type_is_binary(field_type)) {
                         result = jak_carbon_find_result_binary(&find);
+                        jak_carbon_find_close(&find);
+                        return result;
                 }
         }
 
         jak_carbon_find_close(&find);
-        return result;
+        return default_val;
 }
 
 jak_carbon_array_it *carbon_get_array_or_null(jak_carbon *doc, const char *path)
@@ -10715,7 +10719,8 @@ jak_carbon_column_it *carbon_get_column_or_null(jak_carbon *doc, const char *pat
 
         jak_carbon_find_close(&find);
         return result;
-}/**
+}
+/**
  * Columnar Binary JSON -- Copyright 2019 Marcus Pinnecke
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -14060,9 +14065,9 @@ static inline jak_carbon_path_status_e traverse_object(jak_carbon_path_evaluator
                                                       const jak_carbon_dot_path *path, jak_u32 current_path_pos,
                                                       jak_carbon_object_it *it)
 {
-        carbon_dot_node_e node_type;
-        jak_u32 path_length;
-        bool status;
+        JAK_DECLARE_AND_INIT(carbon_dot_node_e, node_type)
+        JAK_DECLARE_AND_INIT(jak_u32, path_length)
+        JAK_DECLARE_AND_INIT(bool, status)
 
         jak_carbon_dot_path_type_at(&node_type, current_path_pos, path);
         JAK_ASSERT(node_type == JAK_DOT_NODE_KEY_NAME);
@@ -14077,7 +14082,7 @@ static inline jak_carbon_path_status_e traverse_object(jak_carbon_path_evaluator
                 /* empty document */
                 return JAK_CARBON_PATH_EMPTY_DOC;
         } else {
-                jak_u64 key_len;
+                JAK_DECLARE_AND_INIT(jak_u64, key_len)
                 do {
                         const char *key_name = jak_carbon_object_it_prop_name(&key_len, it);
                         if (key_len == needle_len && strncmp(key_name, needle, needle_len) == 0) {
@@ -14167,12 +14172,12 @@ static inline jak_carbon_path_status_e traverse_array(jak_carbon_path_evaluator 
         JAK_ASSERT(it);
         JAK_ASSERT(current_path_pos < path->path_len);
 
-        jak_carbon_field_type_e elem_type;
-        carbon_dot_node_e node_type;
-        jak_u32 path_length;
-        jak_carbon_path_status_e status;
-        jak_u32 requested_array_idx;
-        jak_u32 current_array_idx = 0;
+        JAK_DECLARE_AND_INIT(jak_carbon_field_type_e, elem_type)
+        JAK_DECLARE_AND_INIT(carbon_dot_node_e, node_type)
+        JAK_DECLARE_AND_INIT(jak_u32, path_length)
+        JAK_DECLARE_AND_INIT(jak_carbon_path_status_e, status)
+        JAK_DECLARE_AND_INIT(jak_u32, requested_array_idx)
+        JAK_DECLARE_AND_INIT(jak_u32, current_array_idx)
         bool is_unit_array = jak_carbon_array_it_is_unit(it);
 
         jak_carbon_dot_path_type_at(&node_type, current_path_pos, path);
@@ -14350,11 +14355,11 @@ static inline jak_carbon_path_status_e traverse_column(jak_carbon_path_evaluator
                                                       const jak_carbon_dot_path *path, jak_u32 current_path_pos,
                                                       jak_carbon_column_it *it)
 {
-        jak_u32 total_path_len;
-        jak_u32 requested_idx;
-        jak_u32 nun_values_contained;
-        carbon_dot_node_e node_type;
-        jak_carbon_field_type_e column_type;
+        JAK_DECLARE_AND_INIT(jak_u32, total_path_len)
+        JAK_DECLARE_AND_INIT(jak_u32, requested_idx)
+        JAK_DECLARE_AND_INIT(jak_u32, nun_values_contained)
+        JAK_DECLARE_AND_INIT(carbon_dot_node_e, node_type)
+        JAK_DECLARE_AND_INIT(jak_carbon_field_type_e, column_type)
         jak_carbon_dot_path_len(&total_path_len, path);
         if (current_path_pos + 1 != total_path_len) {
                 /* a column cannot contain further containers; since the current path node is not
@@ -14610,7 +14615,7 @@ static void record_ref_create(jak_memfile *memfile, jak_carbon *doc)
                 }
                         break;
                 case JAK_CARBON_KEY_IKEY: {
-                        jak_i64 key;
+                        JAK_DECLARE_AND_INIT(jak_i64, key)
                         jak_carbon_key_signed_value(&key, doc);
                         jak_memfile_seek(memfile, 0);
                         jak_carbon_key_write_signed(memfile, key);
@@ -14644,8 +14649,9 @@ static void array_traverse(struct path_index_node *parent, jak_carbon_array_it *
 
 static void column_traverse(struct path_index_node *parent, jak_carbon_column_it *it)
 {
-        jak_carbon_field_type_e column_type, entry_type;
-        jak_u32 nvalues;
+        JAK_DECLARE_AND_INIT(jak_carbon_field_type_e, column_type)
+        JAK_DECLARE_AND_INIT(jak_carbon_field_type_e, entry_type)
+        jak_u32 nvalues = 0;
 
         jak_carbon_column_it_values_info(&column_type, &nvalues, it);
 
@@ -14667,7 +14673,7 @@ static void object_traverse(struct path_index_node *parent, jak_carbon_object_it
 {
         while (jak_carbon_object_it_next(it)) {
                 jak_u64 prop_name_len = 0;
-                jak_offset_t key_off, value_off;
+                jak_offset_t key_off = 0, value_off = 0;
                 jak_carbon_object_it_tell(&key_off, &value_off, it);
                 const char *prop_name = jak_carbon_object_it_prop_name(&prop_name_len, it);
                 struct path_index_node *elem_node = path_index_node_add_key_elem(parent, key_off,
@@ -14678,7 +14684,7 @@ static void object_traverse(struct path_index_node *parent, jak_carbon_object_it
 
 static void object_build_index(struct path_index_node *parent, jak_carbon_object_it *elem_it)
 {
-        jak_carbon_field_type_e field_type;
+        jak_carbon_field_type_e field_type = 0;;
         jak_carbon_object_it_prop_type(&field_type, elem_it);
         path_index_node_set_field_type(parent, field_type);
 
@@ -16066,7 +16072,7 @@ bool jak_carbon_printer_print_object(jak_carbon_object_it *it, jak_carbon_printe
         JAK_ASSERT(it);
         JAK_ASSERT(printer);
         JAK_ASSERT(builder);
-        bool is_null_value;
+        bool is_null_value = false;
         bool first_entry = true;
         jak_carbon_printer_object_begin(printer, builder);
 
@@ -16074,8 +16080,8 @@ bool jak_carbon_printer_print_object(jak_carbon_object_it *it, jak_carbon_printe
                 if (JAK_LIKELY(!first_entry)) {
                         jak_carbon_printer_comma(printer, builder);
                 }
-                jak_carbon_field_type_e type;
-                jak_u64 key_len;
+                JAK_DECLARE_AND_INIT(jak_carbon_field_type_e, type)
+                JAK_DECLARE_AND_INIT(jak_u64, key_len)
                 const char *key_name = jak_carbon_object_it_prop_name(&key_len, it);
 
                 jak_carbon_object_it_prop_type(&type, it);
@@ -24530,8 +24536,8 @@ bool jak_pack_jak_coding_huffman_drop(jak_packer *self)
 
 bool huffman_dump_dictionary(FILE *file, jak_memfile *memfile)
 {
-        jak_pack_huffman_info entry_info;
-        jak_offset_t offset;
+        JAK_DECLARE_AND_INIT(jak_pack_huffman_info, entry_info)
+        JAK_DECLARE_AND_INIT(jak_offset_t, offset);
 
         while ((*JAK_MEMFILE_PEEK(memfile, char)) == JAK_MARKER_SYMBOL_HUFFMAN_DIC_ENTRY) {
                 jak_memfile_get_offset(&offset, memfile);
@@ -27195,7 +27201,7 @@ bool jak_memfile_skip(jak_memfile *file, signed_offset_t nbytes)
 
 const char *jak_memfile_peek(jak_memfile *file, jak_offset_t nbytes)
 {
-        jak_offset_t file_size;
+        jak_offset_t file_size = 0;
         jak_memblock_size(&file_size, file->memblock);
         if (JAK_UNLIKELY(file->pos + nbytes > file_size)) {
                 JAK_ERROR(&file->err, JAK_ERR_READOUTOFBOUNDS);
@@ -27217,7 +27223,7 @@ bool jak_memfile_write(jak_memfile *file, const void *data, jak_offset_t nbytes)
         JAK_ERROR_IF_NULL(data)
         if (file->mode == JAK_READ_WRITE) {
                 if (JAK_LIKELY(nbytes != 0)) {
-                        jak_offset_t file_size;
+                        jak_offset_t file_size = 0;
                         jak_memblock_size(&file_size, file->memblock);
                         jak_offset_t required_size = file->pos + nbytes;
                         if (JAK_UNLIKELY(required_size >= file_size)) {
@@ -27365,7 +27371,8 @@ signed_offset_t jak_memfile_ensure_space(jak_memfile *memfile, jak_u64 nbytes)
 {
         JAK_ERROR_IF_NULL(memfile)
 
-        jak_offset_t block_size;
+        JAK_DECLARE_AND_INIT(jak_offset_t, block_size);
+
         jak_memblock_size(&block_size, memfile->memblock);
         JAK_ASSERT(memfile->pos < block_size);
         size_t diff = block_size - memfile->pos;
@@ -27490,7 +27497,7 @@ bool jak_memfile_end_bit_mode(size_t *num_bytes_written, jak_memfile *file)
 void *jak_memfile_current_pos(jak_memfile *file, jak_offset_t nbytes)
 {
         if (file && nbytes > 0) {
-                jak_offset_t file_size;
+                jak_offset_t file_size = 0;
                 jak_memblock_size(&file_size, file->memblock);
                 jak_offset_t required_size = file->pos + nbytes;
                 if (JAK_UNLIKELY(file->pos + nbytes >= file_size)) {
@@ -27512,7 +27519,7 @@ bool jak_memfile_hexdump(jak_string *sb, jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(sb);
         JAK_ERROR_IF_NULL(file);
-        jak_offset_t block_size;
+        JAK_DECLARE_AND_INIT(jak_offset_t, block_size)
         jak_memblock_size(&block_size, file->memblock);
         jak_hexdump(sb, jak_memblock_raw_data(file->memblock), block_size);
         return true;
@@ -27522,7 +27529,7 @@ bool jak_memfile_hexdump_printf(FILE *file, jak_memfile *memfile)
 {
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(memfile)
-        jak_offset_t block_size;
+        JAK_DECLARE_AND_INIT(jak_offset_t, block_size)
         jak_memblock_size(&block_size, memfile->memblock);
         jak_hexdump_print(file, jak_memblock_raw_data(memfile->memblock), block_size);
         return true;

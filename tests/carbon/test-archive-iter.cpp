@@ -372,8 +372,8 @@ iterate_properties(jak_prop_iter *prop_iter)
 
                     while(jak_archive_column_next_entry(&entry_iter, &column_iter)) {
 
-                        enum jak_archive_field_type entry_type;
-                        jak_u32 entry_length;
+                        JAK_DECLARE_AND_INIT(enum jak_archive_field_type, entry_type)
+                        JAK_DECLARE_AND_INIT(jak_u32, entry_length)
                         jak_archive_column_entry_get_type(&entry_type, &entry_iter);
 
                         switch (entry_type) {
