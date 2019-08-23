@@ -60,9 +60,9 @@ static void appenderNew(jak_slice_list_t *list);
 
 static void appenderSeal(jak_slice *slice);
 
-static void lock(jak_slice_list_t *list);
+static void _jak_slicelist_lock(jak_slice_list_t *list);
 
-static void unlock(jak_slice_list_t *list);
+static void _jak_slicelist_unlock(jak_slice_list_t *list);
 
 bool jak_slice_list_create(jak_slice_list_t *list, const jak_allocator *alloc, size_t slice_capacity)
 {
@@ -110,7 +110,7 @@ bool jak_slice_list_is_empty(const jak_slice_list_t *list)
 
 bool jak_slice_list_insert(jak_slice_list_t *list, char **strings, jak_archive_field_sid_t *ids, size_t num_pairs)
 {
-        lock(list);
+        _jak_slicelist_lock(list);
 
         while (num_pairs--) {
                 const char *key = *strings++;
@@ -157,7 +157,7 @@ bool jak_slice_list_insert(jak_slice_list_t *list, char **strings, jak_archive_f
                 }
         }
 
-        unlock(list);
+        _jak_slicelist_unlock(list);
         return true;
 }
 
@@ -316,12 +316,12 @@ static void appenderSeal(jak_slice *slice)
         // Not yet implemented: sealed slices are also search in a linear fashion
 }
 
-static void lock(jak_slice_list_t *list)
+static void _jak_slicelist_lock(jak_slice_list_t *list)
 {
         jak_spinlock_acquire(&list->lock);
 }
 
-static void unlock(jak_slice_list_t *list)
+static void _jak_slicelist_unlock(jak_slice_list_t *list)
 {
         jak_spinlock_release(&list->lock);
 }

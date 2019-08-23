@@ -81,7 +81,7 @@ bool jak_memfile_grow(jak_memfile *file_in, size_t grow_by_bytes)
 {
         JAK_ERROR_IF_NULL(file_in)
         if (JAK_LIKELY(grow_by_bytes > 0)) {
-                jak_offset_t block_size;
+                jak_offset_t block_size = 0;
                 jak_memblock_size(&block_size, file_in->memblock);
                 jak_memblock_resize(file_in->memblock, (block_size + grow_by_bytes));
         }
@@ -110,7 +110,7 @@ size_t jak_memfile_size(jak_memfile *file)
 bool jak_memfile_cut(jak_memfile *file, size_t how_many_bytes)
 {
         JAK_ERROR_IF_NULL(file);
-        jak_offset_t block_size;
+        jak_offset_t block_size = 0;
         jak_memblock_size(&block_size, file->memblock);
 
         if (how_many_bytes > 0 && block_size > how_many_bytes) {
@@ -176,7 +176,7 @@ bool jak_memfile_skip(jak_memfile *file, signed_offset_t nbytes)
 {
         jak_offset_t required_size = file->pos + nbytes;
         file->pos += nbytes;
-        jak_offset_t file_size;
+        jak_offset_t file_size = 0;
         jak_memblock_size(&file_size, file->memblock);
 
         if (JAK_UNLIKELY(required_size >= file_size)) {

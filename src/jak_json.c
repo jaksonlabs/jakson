@@ -27,19 +27,19 @@
 static struct {
         jak_json_token_e token;
         const char *string;
-} TOKEN_STRING[] = {{.token = JAK_OBJECT_OPEN, .string = "JAK_OBJECT_OPEN"},
-                    {.token = JAK_OBJECT_CLOSE, .string = "JAK_OBJECT_CLOSE"},
-                    {.token = JAK_LITERAL_STRING, .string = "JSON_TOKEN_STRING"},
-                    {.token = JAK_LITERAL_INT, .string = "JAK_LITERAL_INT"},
-                    {.token = JAK_LITERAL_FLOAT, .string = "JAK_LITERAL_FLOAT"},
-                    {.token = JAK_LITERAL_TRUE, .string = "JAK_LITERAL_TRUE"},
-                    {.token = JAK_LITERAL_FALSE, .string = "JAK_LITERAL_FALSE"},
-                    {.token = JAK_LITERAL_NULL, .string = "JAK_LITERAL_NULL"},
-                    {.token = JAK_COMMA, .string = "JAK_COMMA"},
-                    {.token = JAK_ASSIGN, .string = "JSON_TOKEN_ASSIGMENT"},
-                    {.token = JAK_ARRAY_OPEN, .string = "JAK_ARRAY_OPEN"},
-                    {.token = JAK_ARRAY_CLOSE, .string = "JAK_ARRAY_CLOSE"},
-                    {.token = JAK_JSON_UNKNOWN, .string = "JAK_JSON_UNKNOWN"}};
+} JAK_JSON_TOKEN_STRINGS[] = {{.token = JAK_OBJECT_OPEN, .string = "JAK_OBJECT_OPEN"},
+                              {.token = JAK_OBJECT_CLOSE, .string = "JAK_OBJECT_CLOSE"},
+                              {.token = JAK_LITERAL_STRING, .string = "JSON_TOKEN_STRING"},
+                              {.token = JAK_LITERAL_INT, .string = "JAK_LITERAL_INT"},
+                              {.token = JAK_LITERAL_FLOAT, .string = "JAK_LITERAL_FLOAT"},
+                              {.token = JAK_LITERAL_TRUE, .string = "JAK_LITERAL_TRUE"},
+                              {.token = JAK_LITERAL_FALSE, .string = "JAK_LITERAL_FALSE"},
+                              {.token = JAK_LITERAL_NULL, .string = "JAK_LITERAL_NULL"},
+                              {.token = JAK_COMMA, .string = "JAK_COMMA"},
+                              {.token = JAK_ASSIGN, .string = "JSON_TOKEN_ASSIGMENT"},
+                              {.token = JAK_ARRAY_OPEN, .string = "JAK_ARRAY_OPEN"},
+                              {.token = JAK_ARRAY_CLOSE, .string = "JAK_ARRAY_CLOSE"},
+                              {.token = JAK_JSON_UNKNOWN, .string = "JAK_JSON_UNKNOWN"}};
 
 struct token_memory {
         jak_json_token_e type;
@@ -202,7 +202,7 @@ void jak_json_token_print(FILE *file, const jak_json_token *token)
         string[token->length] = '\0';
         fprintf(file,
                 "{\"type\": \"%s\", \"line\": %d, \"column\": %d, \"length\": %d, \"text\": \"%s\"}",
-                TOKEN_STRING[token->type].string,
+                JAK_JSON_TOKEN_STRINGS[token->type].string,
                 token->line,
                 token->column,
                 token->length,
@@ -845,7 +845,7 @@ static int set_error(jak_json_err *error_desc, const jak_json_token *token, cons
 {
         if (error_desc) {
                 error_desc->token = token;
-                error_desc->token_type_str = token ? TOKEN_STRING[token->type].string : "(no token)";
+                error_desc->token_type_str = token ? JAK_JSON_TOKEN_STRINGS[token->type].string : "(no token)";
                 error_desc->msg = msg;
         }
         return false;

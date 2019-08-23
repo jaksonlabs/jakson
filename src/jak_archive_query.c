@@ -310,7 +310,7 @@ char *jak_query_fetch_jak_string_by_id(jak_archive_query *query, jak_archive_fie
 
 char *jak_query_fetch_jak_string_by_id_nocache(jak_archive_query *query, jak_archive_field_sid_t id)
 {
-        bool has_index;
+        bool has_index = false;
         jak_archive_has_query_index_jak_string_id_to_offset(&has_index, query->archive);
         if (has_index) {
                 return fetch_jak_string_by_id_via_index(query, query->archive->query_index_jak_string_id_to_offset, id);

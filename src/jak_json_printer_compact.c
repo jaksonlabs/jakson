@@ -47,26 +47,26 @@ struct jak_json_compact_extra {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-static void nop(jak_carbon_printer *self, jak_string *builder)
+static void _jak_json_printer_compact_nop(jak_carbon_printer *self, jak_string *builder)
 {
         JAK_UNUSED(self)
         JAK_UNUSED(builder)
 }
 
-static void drop(jak_carbon_printer *self)
+static void _jak_json_printer_compact_drop(jak_carbon_printer *self)
 {
         struct jak_json_compact_extra *extra = (struct jak_json_compact_extra *) self->extra;
         free(extra->buffer);
         free(self->extra);
 }
 
-static void obj_begin(jak_carbon_printer *self, jak_string *builder)
+static void _jak_json_printer_compact_obj_begin(jak_carbon_printer *self, jak_string *builder)
 {
         JAK_UNUSED(self);
         jak_string_add(builder, "{");
 }
 
-static void obj_end(jak_carbon_printer *self, jak_string *builder)
+static void _jak_json_printer_compact_obj_end(jak_carbon_printer *self, jak_string *builder)
 {
         JAK_UNUSED(self);
         jak_string_add(builder, "}");
@@ -83,44 +83,44 @@ static void meta_data_nop(jak_carbon_printer *self, jak_string *builder, int key
         JAK_UNUSED(rev)
 }
 
-static void empty_record(jak_carbon_printer *self, jak_string *builder)
+static void _jak_json_printer_compact_empty_record(jak_carbon_printer *self, jak_string *builder)
 {
         JAK_UNUSED(self);
         jak_string_add(builder, "{}");
 }
 
-static void array_begin(jak_carbon_printer *self, jak_string *builder)
+static void _jak_json_printer_compact_array_begin(jak_carbon_printer *self, jak_string *builder)
 {
         JAK_UNUSED(self);
 
         jak_string_add(builder, "[");
 }
 
-static void array_end(jak_carbon_printer *self, jak_string *builder)
+static void _jak_json_printer_compact_array_end(jak_carbon_printer *self, jak_string *builder)
 {
         JAK_UNUSED(self);
         jak_string_add(builder, "]");
 }
 
-static void const_null(jak_carbon_printer *self, jak_string *builder)
+static void _jak_json_printer_compact_const_null(jak_carbon_printer *self, jak_string *builder)
 {
         JAK_UNUSED(self);
         jak_string_add(builder, "null");
 }
 
-static void const_true(jak_carbon_printer *self, bool is_null, jak_string *builder)
+static void _jak_json_printer_compact_const_true(jak_carbon_printer *self, bool is_null, jak_string *builder)
 {
         JAK_UNUSED(self);
         jak_string_add(builder, is_null ? "null" : "true");
 }
 
-static void const_false(jak_carbon_printer *self, bool is_null, jak_string *builder)
+static void _jak_json_printer_compact_const_false(jak_carbon_printer *self, bool is_null, jak_string *builder)
 {
         JAK_UNUSED(self);
         jak_string_add(builder, is_null ? "null" : "false");
 }
 
-static void val_signed(jak_carbon_printer *self, jak_string *builder, const jak_i64 *value)
+static void _jak_json_printer_compact_val_signed(jak_carbon_printer *self, jak_string *builder, const jak_i64 *value)
 {
         JAK_UNUSED(self);
         if (JAK_LIKELY(value != NULL)) {
@@ -131,7 +131,7 @@ static void val_signed(jak_carbon_printer *self, jak_string *builder, const jak_
 
 }
 
-static void val_unsigned(jak_carbon_printer *self, jak_string *builder, const jak_u64 *value)
+static void _jak_json_printer_compact_val_unsigned(jak_carbon_printer *self, jak_string *builder, const jak_u64 *value)
 {
         JAK_UNUSED(self);
         if (JAK_LIKELY(value != NULL)) {
@@ -141,7 +141,7 @@ static void val_unsigned(jak_carbon_printer *self, jak_string *builder, const ja
         }
 }
 
-static void val_float(jak_carbon_printer *self, jak_string *builder, const float *value)
+static void _jak_json_printer_compact_val_float(jak_carbon_printer *self, jak_string *builder, const float *value)
 {
         JAK_UNUSED(self);
         if (JAK_LIKELY(value != NULL)) {
@@ -151,7 +151,7 @@ static void val_float(jak_carbon_printer *self, jak_string *builder, const float
         }
 }
 
-static void val_string(jak_carbon_printer *self, jak_string *builder, const char *value, jak_u64 strlen)
+static void _jak_json_printer_compact_val_string(jak_carbon_printer *self, jak_string *builder, const char *value, jak_u64 strlen)
 {
         JAK_UNUSED(self);
         jak_string_add_char(builder, '"');
@@ -162,7 +162,7 @@ static void val_string(jak_carbon_printer *self, jak_string *builder, const char
 #define code_of(x, data_len)      (x + data_len + 2)
 #define data_of(x)      (x)
 
-static void print_binary(jak_carbon_printer *self, jak_string *builder, const jak_carbon_binary *binary)
+static void _jak_json_printer_compact_print_binary(jak_carbon_printer *self, jak_string *builder, const jak_carbon_binary *binary)
 {
         /* base64 code will be written into the extra's buffer after a null-terminated copy of the binary data */
         struct jak_json_compact_extra *extra = (struct jak_json_compact_extra *) self->extra;
@@ -203,12 +203,12 @@ static void print_binary(jak_carbon_printer *self, jak_string *builder, const ja
         jak_string_add(builder, "\" }");
 }
 
-static void val_binary(jak_carbon_printer *self, jak_string *builder, const jak_carbon_binary *binary)
+static void _jak_json_printer_compact_val_binary(jak_carbon_printer *self, jak_string *builder, const jak_carbon_binary *binary)
 {
-        print_binary(self, builder, binary);
+        _jak_json_printer_compact_print_binary(self, builder, binary);
 }
 
-static void comma(jak_carbon_printer *self, jak_string *builder)
+static void _jak_json_printer_compact_comma(jak_carbon_printer *self, jak_string *builder)
 {
         JAK_UNUSED(self);
         jak_string_add(builder, ", ");
@@ -221,7 +221,7 @@ static void print_key(jak_string *builder, const char *key_name, jak_u64 key_len
         jak_string_add(builder, "\": ");
 }
 
-static void prop_null(jak_carbon_printer *self, jak_string *builder,
+static void _jak_json_printer_compact_prop_null(jak_carbon_printer *self, jak_string *builder,
                       const char *key_name, jak_u64 key_len)
 {
         JAK_UNUSED(self);
@@ -229,7 +229,7 @@ static void prop_null(jak_carbon_printer *self, jak_string *builder,
         jak_string_add(builder, "null");
 }
 
-static void prop_true(jak_carbon_printer *self, jak_string *builder,
+static void _jak_json_printer_compact_prop_true(jak_carbon_printer *self, jak_string *builder,
                       const char *key_name, jak_u64 key_len)
 {
         JAK_UNUSED(self);
@@ -237,7 +237,7 @@ static void prop_true(jak_carbon_printer *self, jak_string *builder,
         jak_string_add(builder, "true");
 }
 
-static void prop_false(jak_carbon_printer *self, jak_string *builder,
+static void _jak_json_printer_compact_prop_false(jak_carbon_printer *self, jak_string *builder,
                        const char *key_name, jak_u64 key_len)
 {
         JAK_UNUSED(self);
@@ -245,7 +245,7 @@ static void prop_false(jak_carbon_printer *self, jak_string *builder,
         jak_string_add(builder, "false");
 }
 
-static void prop_signed(jak_carbon_printer *self, jak_string *builder,
+static void _jak_json_printer_compact_prop_signed(jak_carbon_printer *self, jak_string *builder,
                         const char *key_name, jak_u64 key_len, const jak_i64 *value)
 {
         JAK_UNUSED(self);
@@ -253,7 +253,7 @@ static void prop_signed(jak_carbon_printer *self, jak_string *builder,
         jak_string_add_i64(builder, *value);
 }
 
-static void prop_unsigned(jak_carbon_printer *self, jak_string *builder,
+static void _jak_json_printer_compact_prop_unsigned(jak_carbon_printer *self, jak_string *builder,
                           const char *key_name, jak_u64 key_len, const jak_u64 *value)
 {
         JAK_UNUSED(self);
@@ -261,7 +261,7 @@ static void prop_unsigned(jak_carbon_printer *self, jak_string *builder,
         jak_string_add_u64(builder, *value);
 }
 
-static void prop_float(jak_carbon_printer *self, jak_string *builder,
+static void _jak_json_printer_compact_prop_float(jak_carbon_printer *self, jak_string *builder,
                        const char *key_name, jak_u64 key_len, const float *value)
 {
         JAK_UNUSED(self);
@@ -269,7 +269,7 @@ static void prop_float(jak_carbon_printer *self, jak_string *builder,
         jak_string_add_float(builder, *value);
 }
 
-static void prop_string(jak_carbon_printer *self, jak_string *builder,
+static void _jak_json_printer_compact_prop_string(jak_carbon_printer *self, jak_string *builder,
                         const char *key_name, jak_u64 key_len, const char *value, jak_u64 strlen)
 {
         JAK_UNUSED(self);
@@ -279,21 +279,21 @@ static void prop_string(jak_carbon_printer *self, jak_string *builder,
         jak_string_add_char(builder, '"');
 }
 
-static void prop_binary(jak_carbon_printer *self, jak_string *builder,
+static void _jak_json_printer_compact_prop_binary(jak_carbon_printer *self, jak_string *builder,
                         const char *key_name, jak_u64 key_len, const jak_carbon_binary *binary)
 {
         print_key(builder, key_name, key_len);
-        print_binary(self, builder, binary);
+        _jak_json_printer_compact_print_binary(self, builder, binary);
 }
 
-static void array_prop_name(jak_carbon_printer *self, jak_string *builder,
+static void _jak_json_printer_compact_array_prop_name(jak_carbon_printer *self, jak_string *builder,
                             const char *key_name, jak_u64 key_len)
 {
         JAK_UNUSED(self)
         print_key(builder, key_name, key_len);
 }
 
-static void obj_prop_name(jak_carbon_printer *self, jak_string *builder,
+static void _jak_json_printer_compact_obj_prop_name(jak_carbon_printer *self, jak_string *builder,
                           const char *key_name, jak_u64 key_len)
 {
         JAK_UNUSED(self)
@@ -305,51 +305,51 @@ static void obj_prop_name(jak_carbon_printer *self, jak_string *builder,
 bool jak_json_compact_printer_create(jak_carbon_printer *printer)
 {
         JAK_ERROR_IF_NULL(printer);
-        printer->drop = drop;
+        printer->drop = _jak_json_printer_compact_drop;
 
-        printer->record_begin = nop;
-        printer->record_end = nop;
+        printer->record_begin = _jak_json_printer_compact_nop;
+        printer->record_end = _jak_json_printer_compact_nop;
 
-        printer->meta_begin = nop;
+        printer->meta_begin = _jak_json_printer_compact_nop;
         printer->meta_data = meta_data_nop;
-        printer->meta_end = nop;
+        printer->meta_end = _jak_json_printer_compact_nop;
 
-        printer->doc_begin = nop;
-        printer->doc_end = nop;
+        printer->doc_begin = _jak_json_printer_compact_nop;
+        printer->doc_end = _jak_json_printer_compact_nop;
 
-        printer->empty_record = empty_record;
+        printer->empty_record = _jak_json_printer_compact_empty_record;
 
-        printer->unit_array_begin = nop;
-        printer->unit_array_end = nop;
+        printer->unit_array_begin = _jak_json_printer_compact_nop;
+        printer->unit_array_end = _jak_json_printer_compact_nop;
 
-        printer->array_begin = array_begin;
-        printer->array_end = array_end;
+        printer->array_begin = _jak_json_printer_compact_array_begin;
+        printer->array_end = _jak_json_printer_compact_array_end;
 
-        printer->const_null = const_null;
-        printer->const_true = const_true;
-        printer->const_false = const_false;
+        printer->const_null = _jak_json_printer_compact_const_null;
+        printer->const_true = _jak_json_printer_compact_const_true;
+        printer->const_false = _jak_json_printer_compact_const_false;
 
-        printer->val_signed = val_signed;
-        printer->val_unsigned = val_unsigned;
-        printer->val_float = val_float;
-        printer->val_string = val_string;
-        printer->val_binary = val_binary;
+        printer->val_signed = _jak_json_printer_compact_val_signed;
+        printer->val_unsigned = _jak_json_printer_compact_val_unsigned;
+        printer->val_float = _jak_json_printer_compact_val_float;
+        printer->val_string = _jak_json_printer_compact_val_string;
+        printer->val_binary = _jak_json_printer_compact_val_binary;
 
-        printer->comma = comma;
+        printer->comma = _jak_json_printer_compact_comma;
 
-        printer->prop_null = prop_null;
-        printer->prop_true = prop_true;
-        printer->prop_false = prop_false;
-        printer->prop_signed = prop_signed;
-        printer->prop_unsigned = prop_unsigned;
-        printer->prop_float = prop_float;
-        printer->prop_string = prop_string;
-        printer->prop_binary = prop_binary;
-        printer->array_prop_name = array_prop_name;
-        printer->column_prop_name = array_prop_name;
-        printer->obj_prop_name = obj_prop_name;
-        printer->obj_begin = obj_begin;
-        printer->obj_end = obj_end;
+        printer->prop_null = _jak_json_printer_compact_prop_null;
+        printer->prop_true = _jak_json_printer_compact_prop_true;
+        printer->prop_false = _jak_json_printer_compact_prop_false;
+        printer->prop_signed = _jak_json_printer_compact_prop_signed;
+        printer->prop_unsigned = _jak_json_printer_compact_prop_unsigned;
+        printer->prop_float = _jak_json_printer_compact_prop_float;
+        printer->prop_string = _jak_json_printer_compact_prop_string;
+        printer->prop_binary = _jak_json_printer_compact_prop_binary;
+        printer->array_prop_name = _jak_json_printer_compact_array_prop_name;
+        printer->column_prop_name = _jak_json_printer_compact_array_prop_name;
+        printer->obj_prop_name = _jak_json_printer_compact_obj_prop_name;
+        printer->obj_begin = _jak_json_printer_compact_obj_begin;
+        printer->obj_end = _jak_json_printer_compact_obj_end;
 
         printer->extra = JAK_MALLOC(sizeof(struct jak_json_compact_extra));
         struct jak_json_compact_extra *extra = (struct jak_json_compact_extra *) printer->extra;

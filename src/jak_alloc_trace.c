@@ -174,13 +174,13 @@ static inline void *alloc_register(size_t size)
 struct trace_stats global_trace_stats =
         {.num_malloc_calls   = 0, .num_realloc_calls  = 0, .num_free_calls     = 0, .total_size         = 0, .malloc_sizes       = NULL, .spinlock           = NULL};
 
-static void *invoke_malloc(jak_allocator *self, size_t size);
+static void *_jak_alloc_trace_invoke_malloc(jak_allocator *self, size_t size);
 
-static void *invoke_realloc(jak_allocator *self, void *ptr, size_t size);
+static void *_jak_alloc_trace_invoke_realloc(jak_allocator *self, void *ptr, size_t size);
 
-static void invoke_free(jak_allocator *self, void *ptr);
+static void _jak_alloc_trace_invoke_free(jak_allocator *self, void *ptr);
 
-static void invoke_clone(jak_allocator *dst, const jak_allocator *self);
+static void _jak_alloc_trace_invoke_clone(jak_allocator *dst, const jak_allocator *self);
 
 #define LAZY_INIT()                                                                                                    \
 if (!global_trace_stats.malloc_sizes) {                                                                                \
@@ -214,15 +214,15 @@ int jak_trace_alloc_create(jak_allocator *alloc)
         alloc->extra = NULL;
         LAZY_INIT();
 
-        alloc->malloc = invoke_malloc;
-        alloc->realloc = invoke_realloc;
-        alloc->free = invoke_free;
-        alloc->clone = invoke_clone;
+        alloc->malloc = _jak_alloc_trace_invoke_malloc;
+        alloc->realloc = _jak_alloc_trace_invoke_realloc;
+        alloc->free = _jak_alloc_trace_invoke_free;
+        alloc->clone = _jak_alloc_trace_invoke_clone;
 
         return true;
 }
 
-static void *invoke_malloc(jak_allocator *self, size_t size)
+static void *_jak_alloc_trace_invoke_malloc(jak_allocator *self, size_t size)
 {
         JAK_UNUSED(self);
 
@@ -265,7 +265,7 @@ static void *invoke_malloc(jak_allocator *self, size_t size)
         return result;
 }
 
-static void *invoke_realloc(jak_allocator *self, void *ptr, size_t size)
+static void *_jak_alloc_trace_invoke_realloc(jak_allocator *self, void *ptr, size_t size)
 {
         JAK_UNUSED(self);
 
@@ -304,7 +304,7 @@ static void *invoke_realloc(jak_allocator *self, void *ptr, size_t size)
         }
 }
 
-static void invoke_free(jak_allocator *self, void *ptr)
+static void _jak_alloc_trace_invoke_free(jak_allocator *self, void *ptr)
 {
         JAK_UNUSED(self);
 
@@ -332,7 +332,7 @@ static void invoke_free(jak_allocator *self, void *ptr)
         jak_spinlock_release(global_trace_stats.spinlock);
 }
 
-static void invoke_clone(jak_allocator *dst, const jak_allocator *self)
+static void _jak_alloc_trace_invoke_clone(jak_allocator *dst, const jak_allocator *self)
 {
         *dst = *self;
 }

@@ -24,7 +24,7 @@
 #include <jak_slicelist.h>
 #include <jak_hash.h>
 
-#define HASHCODE_OF(key)      JAK_HASH_BERNSTEIN(strlen(key), key)
+#define JAK_STR_HASH_MEM_HASHCODE_OF(key)      JAK_HASH_BERNSTEIN(strlen(key), key)
 
 #define SMART_MAP_TAG "strhash-mem"
 
@@ -36,7 +36,7 @@ struct mem_extra {
         jak_vector ofType(bucket) buckets;
 };
 
-static int this_drop(jak_str_hash *self);
+static int _jak_str_hash_mem_drop(jak_str_hash *self);
 
 static int this_put_safe_bulk(jak_str_hash *self, char *const *keys, const jak_archive_field_sid_t *values,
                               size_t num_pairs);
@@ -60,9 +60,9 @@ static int this_get_fast(jak_str_hash *self, jak_archive_field_sid_t **out, char
 static int this_update_key_fast(jak_str_hash *self, const jak_archive_field_sid_t *values, char *const *keys,
                                 size_t num_keys);
 
-static int this_remove(jak_str_hash *self, char *const *keys, size_t num_keys);
+static int _jak_str_hash_mem_remove(jak_str_hash *self, char *const *keys, size_t num_keys);
 
-static int this_free(jak_str_hash *self, void *ptr);
+static int _jak_str_hash_mem_free(jak_str_hash *self, void *ptr);
 
 static int this_insert_bulk(jak_vector ofType(bucket) *buckets, char *const *restrict keys,
                             const jak_archive_field_sid_t *restrict values, size_t *restrict bucket_idxs,
@@ -84,7 +84,7 @@ static int
 this_fetch_single(jak_vector ofType(bucket) *buckets, jak_archive_field_sid_t *value_out, bool *key_found,
                   const size_t bucket_idx, const char *key, jak_str_hash_counters *counter);
 
-static int this_create_extra(jak_str_hash *self, size_t num_buckets, size_t cap_buckets);
+static int _jak_str_hash_mem_create_extra(jak_str_hash *self, size_t num_buckets, size_t cap_buckets);
 
 static struct mem_extra *this_get_exta(jak_str_hash *self);
 
@@ -106,7 +106,7 @@ jak_str_hash_create_inmemory(jak_str_hash *str_hash, const jak_allocator *alloc,
         cap_buckets = cap_buckets < 1 ? 1 : cap_buckets;
 
         str_hash->tag = JAK_MEMORY_RESIDENT;
-        str_hash->drop = this_drop;
+        str_hash->drop = _jak_str_hash_mem_drop;
         str_hash->put_bulk_safe = this_put_safe_bulk;
         str_hash->put_bulk_fast = this_put_fast_bulk;
         str_hash->put_exact_safe = this_put_safe_exact;
@@ -114,17 +114,17 @@ jak_str_hash_create_inmemory(jak_str_hash *str_hash, const jak_allocator *alloc,
         str_hash->get_bulk_safe = this_get_safe;
         str_hash->get_fast = this_get_fast;
         str_hash->update_key_fast = this_update_key_fast;
-        str_hash->remove = this_remove;
-        str_hash->free = this_free;
+        str_hash->remove = _jak_str_hash_mem_remove;
+        str_hash->free = _jak_str_hash_mem_free;
         str_hash->get_exact_safe = this_get_safe_exact;
         jak_error_init(&str_hash->err);
 
         jak_str_hash_reset_counters(str_hash);
-        JAK_CHECK_SUCCESS(this_create_extra(str_hash, num_buckets, cap_buckets));
+        JAK_CHECK_SUCCESS(_jak_str_hash_mem_create_extra(str_hash, num_buckets, cap_buckets));
         return true;
 }
 
-static int this_drop(jak_str_hash *self)
+static int _jak_str_hash_mem_drop(jak_str_hash *self)
 {
         JAK_ASSERT(self->tag == JAK_MEMORY_RESIDENT);
         struct mem_extra *extra = this_get_exta(self);
@@ -146,7 +146,7 @@ static int this_put_safe_bulk(jak_str_hash *self, char *const *keys, const jak_a
 
         for (size_t i = 0; i < num_pairs; i++) {
                 const char *key = keys[i];
-                hash32_t hash = HASHCODE_OF(key);
+                hash32_t hash = JAK_STR_HASH_MEM_HASHCODE_OF(key);
                 bucket_idxs[i] = hash % extra->buckets.cap_elems;
         }
 
@@ -170,7 +170,7 @@ static int this_put_safe_exact(jak_str_hash *self, const char *key, jak_archive_
         JAK_ASSERT(self->tag == JAK_MEMORY_RESIDENT);
         struct mem_extra *extra = this_get_exta(self);
 
-        hash32_t hash = strcmp("", key) != 0 ? HASHCODE_OF(key) : 0;
+        hash32_t hash = strcmp("", key) != 0 ? JAK_STR_HASH_MEM_HASHCODE_OF(key) : 0;
         size_t bucket_idx = hash % extra->buckets.cap_elems;
 
         JAK_PREFETCH_READ(key);
@@ -280,7 +280,7 @@ this_get_safe(jak_str_hash *self, jak_archive_field_sid_t **out, bool **found_ma
 
         for (register size_t i = 0; i < num_keys; i++) {
                 const char *key = keys[i];
-                hash32_t hash = key && strcmp("", key) != 0 ? HASHCODE_OF(key) : 0;
+                hash32_t hash = key && strcmp("", key) != 0 ? JAK_STR_HASH_MEM_HASHCODE_OF(key) : 0;
                 bucket_idxs[i] = hash % extra->buckets.cap_elems;
                 JAK_PREFETCH_READ((struct bucket *) jak_vector_data(&extra->buckets) + bucket_idxs[i]);
         }
@@ -326,7 +326,7 @@ this_get_safe_exact(jak_str_hash *self, jak_archive_field_sid_t *out, bool *foun
 
         struct mem_extra *extra = this_get_exta(self);
 
-        hash32_t hash = strcmp("", key) != 0 ? HASHCODE_OF(key) : 0;
+        hash32_t hash = strcmp("", key) != 0 ? JAK_STR_HASH_MEM_HASHCODE_OF(key) : 0;
         size_t bucket_idx = hash % extra->buckets.cap_elems;
         JAK_PREFETCH_READ((struct bucket *) jak_vector_data(&extra->buckets) + bucket_idx);
 
@@ -340,7 +340,7 @@ static int this_get_fast(jak_str_hash *self, jak_archive_field_sid_t **out, char
         bool *found_mask;
         size_t num_not_found;
         int status = this_get_safe(self, out, &found_mask, &num_not_found, keys, num_keys);
-        this_free(self, found_mask);
+        _jak_str_hash_mem_free(self, found_mask);
         return status;
 }
 
@@ -378,7 +378,7 @@ static int simple_map_remove(struct mem_extra *extra, size_t *bucket_idxs, char 
         return true;
 }
 
-static int this_remove(jak_str_hash *self, char *const *keys, size_t num_keys)
+static int _jak_str_hash_mem_remove(jak_str_hash *self, char *const *keys, size_t num_keys)
 {
         JAK_ASSERT(self->tag == JAK_MEMORY_RESIDENT);
 
@@ -386,7 +386,7 @@ static int this_remove(jak_str_hash *self, char *const *keys, size_t num_keys)
         size_t *bucket_idxs = jak_alloc_malloc(&self->allocator, num_keys * sizeof(size_t));
         for (register size_t i = 0; i < num_keys; i++) {
                 const char *key = keys[i];
-                hash32_t hash = HASHCODE_OF(key);
+                hash32_t hash = JAK_STR_HASH_MEM_HASHCODE_OF(key);
                 bucket_idxs[i] = hash % extra->buckets.cap_elems;
         }
 
@@ -395,7 +395,7 @@ static int this_remove(jak_str_hash *self, char *const *keys, size_t num_keys)
         return true;
 }
 
-static int this_free(jak_str_hash *self, void *ptr)
+static int _jak_str_hash_mem_free(jak_str_hash *self, void *ptr)
 {
         JAK_ASSERT(self->tag == JAK_MEMORY_RESIDENT);
         JAK_CHECK_SUCCESS(jak_alloc_free(&self->allocator, ptr));
@@ -403,7 +403,7 @@ static int this_free(jak_str_hash *self, void *ptr)
 }
 
 JAK_FUNC_UNUSED
-static int this_create_extra(jak_str_hash *self, size_t num_buckets, size_t cap_buckets)
+static int _jak_str_hash_mem_create_extra(jak_str_hash *self, size_t num_buckets, size_t cap_buckets)
 {
         if ((self->extra = jak_alloc_malloc(&self->allocator, sizeof(struct mem_extra))) != NULL) {
                 struct mem_extra *extra = this_get_exta(self);

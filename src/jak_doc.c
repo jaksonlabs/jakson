@@ -33,7 +33,7 @@ static void entries_drop(jak_doc_entries *entry);
 
 static bool print_value(FILE *file, jak_archive_field_e type, const jak_vector ofType(<T>) *values);
 
-static void print_object(FILE *file, const jak_doc_obj *model);
+static void _jak_doc_print_object(FILE *file, const jak_doc_obj *model);
 
 static bool
 import_json_object(jak_doc_obj *target, jak_error *err, const jak_json_object *json_obj);
@@ -173,7 +173,7 @@ bool jak_doc_print(FILE *file, const jak_doc *doc)
 
         for (size_t num_entries = 0; num_entries < doc->obj_model.num_elems; num_entries++) {
                 jak_doc_obj *object = JAK_VECTOR_GET(&doc->obj_model, num_entries, jak_doc_obj);
-                print_object(file, object);
+                _jak_doc_print_object(file, object);
                 fprintf(file, "%s", num_entries + 1 < doc->obj_model.num_elems ? ", " : "");
         }
 
@@ -1570,7 +1570,7 @@ static bool print_value(FILE *file, jak_archive_field_e type, const jak_vector o
                         for (size_t i = 0; i < num_values; i++) {
                                 jak_doc_obj *obj = JAK_VECTOR_GET(values, i, jak_doc_obj);
                                 if (!JAK_NULL_OBJECT_MODEL(obj)) {
-                                        print_object(file, obj);
+                                        _jak_doc_print_object(file, obj);
                                 } else {
                                         fprintf(file, "null");
                                 }
@@ -1586,7 +1586,7 @@ static bool print_value(FILE *file, jak_archive_field_e type, const jak_vector o
         return true;
 }
 
-static void print_object(FILE *file, const jak_doc_obj *model)
+static void _jak_doc_print_object(FILE *file, const jak_doc_obj *model)
 {
         fprintf(file, "{");
         for (size_t i = 0; i < model->entries.num_elems; i++) {
