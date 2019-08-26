@@ -3,7 +3,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include <jak_json.h>
+#include <jakson/jakson.h>
 
 TEST(JsonTest, JsonListTypeForColumnEqualTypes) {
         auto result = jak_json_fitting_type(JAK_JSON_LIST_EMPTY, JAK_JSON_LIST_EMPTY);

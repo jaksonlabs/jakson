@@ -469,7 +469,7 @@ bool jak_archive_print(FILE *file, jak_error *err, jak_memblock *stream)
         }
 }
 
-bool print_object(FILE *file, jak_error *err, jak_memfile *memfile, unsigned nesting_level);
+bool _jak_archive_print_object(FILE *file, jak_error *err, jak_memfile *memfile, unsigned nesting_level);
 
 static jak_u32 flags_to_int32(jak_object_flags_u *flags)
 {
@@ -1614,7 +1614,7 @@ print_column_form_memfile(FILE *file, jak_error *err, jak_memfile *memfile, unsi
                                 INTENT_LINE(nesting_level);
                                 fprintf(file, "   [num_elements: %d] [values: [\n", num_elements);
                                 for (size_t i = 0; i < num_elements; i++) {
-                                        if (!print_object(file, err, memfile, nesting_level + 2)) {
+                                        if (!_jak_archive_print_object(file, err, memfile, nesting_level + 2)) {
                                                 return false;
                                         }
                                 }
@@ -1629,7 +1629,7 @@ print_column_form_memfile(FILE *file, jak_error *err, jak_memfile *memfile, unsi
         return true;
 }
 
-static bool print_object_array_from_memfile(FILE *file, jak_error *err, jak_memfile *memfile,
+static bool _jak_archive_print_object_array_from_memfile(FILE *file, jak_error *err, jak_memfile *memfile,
                                             unsigned nesting_level)
 {
         unsigned offset = (unsigned) jak_memfile_tell(memfile);
@@ -1795,7 +1795,7 @@ static void print_prop_offsets(FILE *file, const jak_object_flags_u *flags,
         }
 }
 
-bool print_object(FILE *file, jak_error *err, jak_memfile *memfile, unsigned nesting_level)
+bool _jak_archive_print_object(FILE *file, jak_error *err, jak_memfile *memfile, unsigned nesting_level)
 {
         unsigned offset = (unsigned) jak_memfile_tell(memfile);
         jak_object_header *header = JAK_MEMFILE_READ_TYPE(memfile, jak_object_header);
@@ -1984,7 +1984,7 @@ bool print_object(FILE *file, jak_error *err, jak_memfile *memfile, unsigned nes
 
                                 char nextEntryMarker;
                                 do {
-                                        if (!print_object(file, err, memfile, nesting_level + 1)) {
+                                        if (!_jak_archive_print_object(file, err, memfile, nesting_level + 1)) {
                                                 return false;
                                         }
                                         nextEntryMarker = *JAK_MEMFILE_PEEK(memfile, char);
@@ -2169,7 +2169,7 @@ bool print_object(FILE *file, jak_error *err, jak_memfile *memfile, unsigned nes
                                                                                           "");
                                 break;
                         case JAK_MARKER_SYMBOL_PROP_OBJECT_ARRAY:
-                                if (!print_object_array_from_memfile(file, err, memfile, nesting_level)) {
+                                if (!_jak_archive_print_object_array_from_memfile(file, err, memfile, nesting_level)) {
                                         return false;
                                 }
                                 break;
@@ -2316,7 +2316,7 @@ static bool print_archive_from_memfile(FILE *file, jak_error *err, jak_memfile *
                 return false;
         }
         print_record_header_from_memfile(file, memfile);
-        if (!print_object(file, err, memfile, 0)) {
+        if (!_jak_archive_print_object(file, err, memfile, 0)) {
                 return false;
         }
         return true;

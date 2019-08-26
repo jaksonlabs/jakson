@@ -38,12 +38,12 @@ static void iterate_objects(jak_archive *archive, const jak_archive_field_sid_t 
 {
         JAK_UNUSED(num_pairs);
 
-        jak_u32 jak_vector_length;
-        jak_archive_object object;
-        jak_uid_t parent_object_id;
-        jak_uid_t object_id;
-        jak_prop_iter prop_iter;
-        jak_error err;
+        JAK_DECLARE_AND_INIT(jak_u32, jak_vector_length)
+        JAK_DECLARE_AND_INIT(jak_archive_object, object)
+        JAK_DECLARE_AND_INIT(jak_uid_t, parent_object_id)
+        JAK_DECLARE_AND_INIT(jak_uid_t, object_id)
+        JAK_DECLARE_AND_INIT(jak_prop_iter, prop_iter)
+        JAK_DECLARE_AND_INIT(jak_error, err)
 
         jak_archive_value_jak_vector_get_object_id(&parent_object_id, value_iter);
         jak_archive_value_jak_vector_get_length(&jak_vector_length, value_iter);
@@ -158,14 +158,14 @@ static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
                           int mask, void *capture,
                           bool is_root_object, jak_archive_field_sid_t parent_key, jak_u32 parent_key_array_idx)
 {
-        jak_uid_t this_object_oid;
-        jak_archive_value_vector value_iter;
-        enum jak_archive_field_type type;
-        bool is_array;
-        const jak_archive_field_sid_t *keys;
-        jak_u32 num_pairs;
-        jak_prop_iter_mode_e iter_type;
-        jak_independent_iter_state collection_iter;
+        JAK_DECLARE_AND_INIT(jak_uid_t, this_object_oid)
+        JAK_DECLARE_AND_INIT(jak_archive_value_vector, value_iter)
+        JAK_DECLARE_AND_INIT(enum jak_archive_field_type, type);
+        JAK_DECLARE_AND_INIT(bool, is_array)
+        JAK_DECLARE_AND_INIT(const jak_archive_field_sid_t *, keys);
+        JAK_DECLARE_AND_INIT(jak_u32, num_pairs);
+        JAK_DECLARE_AND_INIT(jak_prop_iter_mode_e, iter_type)
+        JAK_DECLARE_AND_INIT(jak_independent_iter_state, collection_iter)
         bool first_type_group = true;
 
         JAK_UNUSED(parent_key);
@@ -476,7 +476,7 @@ static void iterate_props(jak_archive *archive, jak_prop_iter *prop_iter,
 
                                                                         jak_uid_t current_nested_object_id =
                                                                                 entry_object_containments[current_entry_idx];
-                                                                        jak_u32 entry_length;
+                                                                        JAK_DECLARE_AND_INIT(jak_u32, entry_length)
 
                                                                         switch (current_column_entry_type) {
                                                                                 case JAK_FIELD_INT8: {

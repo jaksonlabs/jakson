@@ -5,19 +5,12 @@ project(jakson VERSION 1.0.0.0 DESCRIPTION "A library to operate with CARBON fil
 
 set (CMAKE_C_STANDARD 11)
 
-#if (${BUILD_TYPE} MATCHES Debug)
-#        message("-- Debug build is enabled")
-#        set(CMAKE_BUILD_TYPE Debug)
-#else()
-        message("-- Release build is enabled")
-        set(CMAKE_BUILD_TYPE Release)
-#endif()
-
-file(MAKE_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
+set(MAKE_DIRECTORY "${CMAKE_HOME_DIRECTORY}/bin")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${MAKE_DIRECTORY})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${MAKE_DIRECTORY})
 
 include_directories("${CMAKE_SOURCE_DIR}/src")
+include_directories("${CMAKE_SOURCE_DIR}/include")
 include_directories("${CMAKE_SOURCE_DIR}")
 
 include_directories("/usr/include")
@@ -25,11 +18,108 @@ include_directories("/usr/local/include")
 
 set(LIBS ${LIBS} pthread m)
 
-file(GLOB_RECURSE LIB_HEADER_FILES src/*.h )
-file(GLOB_RECURSE LIB_SOURCE_FILES src/*.c )
 file(GLOB_RECURSE LIB_LIBS_HEADER_FILES libs/*.h )
 file(GLOB_RECURSE LIB_LIBS_SOURCE_FILES libs/*.c )
-set(LIB_SOURCES ${LIB_HEADER_FILES} ${LIB_SOURCE_FILES} ${LIB_LIBS_HEADER_FILES} ${LIB_LIBS_SOURCE_FILES})
+
+#
+# Source Amalgamation
+#
+# In order to allow the C compiler to optimize across translation unit boundaries, the optimized release version of
+# Jakson combines all source files (in 'src/') by a pre-building process into one translation unit, `jakson.h` and
+# `jakson.c` located in `include`. This technique, called amalgamation, is inspired by SQLite and others Duktape, which
+# do similar. Amalgamation in its simplest form is realy just that: source concatenation. In order to let this
+# concatenation runs smoothly, implemenations files must make use of static functions and must avoid naming conflicts
+# (typically by the use of `__jak_` prefix in implementation files).
+#
+# The implementation of amalgamation for Jakson is done as follows. Independent of the build type, amalgamation can
+# turned off or on. If it is turned off, a header file 'jakson.h' is generated in `include/jakson` that includes all
+# header files in 'src/', and each source file in 'src/' is compiled as a single translation unit when compiled.
+# If amalgamation is turned on, all header files in 'src/' are concatenated as a single file 'jakson.h' in
+# `include/jakson`, and all implementation files in 'src/' are concatenated as a single file 'jakson.c'. The original
+# `src/` directory is ignored when compilation is done, leading to one large compilation unit stored in
+# `include/jakson`.
+#
+# By including `include/jakson` instead of indivudal header files, the transition between builds with and without
+# amalgamation is smoothly.
+#
+
+set(JAK_SRC_IN "${CMAKE_SOURCE_DIR}/src")
+set(JAK_SRC_TEMP "${CMAKE_SOURCE_DIR}/src-tmp")
+set(JAK_SRC_AMALGAMATION "${CMAKE_SOURCE_DIR}/include/jakson")
+
+file(GLOB_RECURSE LIB_HEADER_FILES ${JAK_SRC_IN}/*.h )
+file(GLOB_RECURSE LIB_SOURCE_FILES ${JAK_SRC_IN}/*.c )
+
+set(LIB_SOURCES ${LIB_LIBS_HEADER_FILES} ${LIB_LIBS_SOURCE_FILES})
+
+function(cat IN_FILE OUT_FILE)
+    file(READ ${IN_FILE} CONTENTS)
+    file(APPEND ${OUT_FILE} "${CONTENTS}")
+endfunction()
+
+if (CMAKE_BUILD_TYPE MATCHES Debug OR BUILD_TYPE MATCHES Debug)
+    message("Debug build is enabled")
+    set(CMAKE_BUILD_TYPE Debug)
+elseif(CMAKE_BUILD_TYPE MATCHES Release OR BUILD_TYPE MATCHES Release)
+    message("Release build is enabled")
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
+OPTION(USE_AMALGAMATION "Turns source amalgamation (source code concatenation) on or off" ON)
+
+if (USE_AMALGAMATION)
+    message("-- *** source amalgamation is turned on ***")
+    message("     - concat '${JAK_SRC_IN}/*.h' to '${JAK_SRC_AMALGAMATION}/jakson.h'")
+    message("     - concat '${JAK_SRC_IN}/*.c' to '${JAK_SRC_AMALGAMATION}/jakson.c'")
+
+    message("-- Building header file 'jakson.h'")
+    file(WRITE ${JAK_SRC_AMALGAMATION}/jakson.h "")
+    foreach(LIB_HEADER_FILE ${LIB_HEADER_FILES})
+        cat(${LIB_HEADER_FILE} ${JAK_SRC_AMALGAMATION}/jakson.h)
+        message("     - append ${LIB_HEADER_FILE}")
+    endforeach()
+
+    message("-- Building implementation file 'jakson.c'")
+    file(WRITE ${JAK_SRC_AMALGAMATION}/jakson.c "")
+    foreach(LIB_SOURCE_FILE ${LIB_SOURCE_FILES})
+        cat(${LIB_SOURCE_FILE} ${JAK_SRC_AMALGAMATION}/jakson.c)
+        message("     - append ${LIB_SOURCE_FILE}")
+    endforeach()
+
+    message("-- Inclusion header 'jakson.h' has been successfully built")
+    message("-- Implementation file 'jakson.c' has been successfully built")
+
+    set(LIB_SOURCES ${JAK_SRC_AMALGAMATION}/jakson.h ${JAK_SRC_AMALGAMATION}/jakson.c ${LIB_SOURCES})
+    message("-- Source files are: ")
+    foreach(LIB_SOURCE_FILE ${LIB_SOURCES})
+        message("     - '${LIB_SOURCE_FILE}'")
+    endforeach()
+else()
+    message("-- *** source amalgamation is turned off ***")
+
+    message("-- Generating inclusion header 'jakson.h' in ${JAK_SRC_AMALGAMATION}/")
+
+    file(WRITE ${JAK_SRC_AMALGAMATION}/jakson.h "/* This is the generated inclusion file of Jakson. Do not modify the contents. */\n#ifndef JAK_JAKSON\n#define JAK_JAKSON\n")
+
+    foreach(LIB_HEADER_FILE ${LIB_HEADER_FILES})
+        file(APPEND ${JAK_SRC_AMALGAMATION}/jakson.h "#include \"${LIB_HEADER_FILE}\"\n")
+        message("     - include ${LIB_HEADER_FILE}")
+    endforeach()
+
+    file(APPEND ${JAK_SRC_AMALGAMATION}/jakson.h "#endif")
+
+    message("-- Inclusion header 'jakson.h' has been successfully built")
+
+    set(LIB_SOURCES ${JAK_SRC_AMALGAMATION}/jakson.h ${LIB_HEADER_FILES} ${LIB_SOURCE_FILES} ${LIB_SOURCES})
+
+    message("-- Source files are: ")
+    foreach(LIB_SOURCE_FILE ${LIB_SOURCES})
+        message("     - '${LIB_SOURCE_FILE}'")
+    endforeach()
+
+endif()
+
+# End of Source Amalgamation
 
 if (${LOG_INFO} MATCHES "on")
     if (${BUILD_TYPE} MATCHES Debug)

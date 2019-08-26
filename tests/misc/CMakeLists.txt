@@ -11,9 +11,9 @@ set(
         ${LIBS}
 )
 
-add_executable(test-thread-pool test-thread-pool.cpp)
-target_link_libraries(test-thread-pool PUBLIC gtest ${TEST_LIBS} PRIVATE jakson-sources)
+add_executable(jakson-test-thread-pool test-thread-pool.cpp)
+target_link_libraries(jakson-test-thread-pool PUBLIC gtest ${TEST_LIBS} PRIVATE jakson-sources)
 
-ADD_DEPENDENCIES(tests test-thread-pool)
+ADD_DEPENDENCIES(tests jakson-test-thread-pool)
 
-add_test(TestThreadPool ${CMAKE_HOME_DIRECTORY}/build/test-thread-pool)
+add_test(TestThreadPool ${MAKE_DIRECTORY}/jakson-test-thread-pool)

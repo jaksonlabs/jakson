@@ -31,7 +31,7 @@ static bool import_object(jak_column_doc_obj *dst, jak_error *err, const jak_doc
                           jak_string_dict *dic);
 
 static bool
-print_object(FILE *file, jak_error *err, const jak_column_doc_obj *object, jak_string_dict *dic);
+_jak_column_doc_print_object(FILE *file, jak_error *err, const jak_column_doc_obj *object, jak_string_dict *dic);
 
 static const char *get_type_name(jak_error *err, jak_archive_field_e type);
 
@@ -349,7 +349,7 @@ static bool print_primitive_objects(FILE *file, jak_error *err, const char *type
                 fprintf(file, "\"Values\": [ ");
                 for (size_t i = 0; i < (value_vector)->num_elems; i++) {
                         const jak_column_doc_obj *object = JAK_VECTOR_GET(value_vector, i, jak_column_doc_obj);
-                        if (!print_object(file, err, object, dic)) {
+                        if (!_jak_column_doc_print_object(file, err, object, dic)) {
                                 return false;
                         }
                         fprintf(file, "%s", i + 1 < (value_vector)->num_elems ? ", " : "");
@@ -675,7 +675,7 @@ static bool print_array_objects(FILE *file, jak_error *err, const char *type_nam
                                                 break;
                                         case JAK_FIELD_OBJECT: {
                                                 // jak_column_doc_obj *doc = JAK_VECTOR_GET(&column->values, valueIdx, jak_column_doc_obj);
-                                                //  print_object(file, doc, encode);
+                                                //  _jak_column_doc_print_object(file, doc, encode);
                                                 const jak_vector
                                                         *column = JAK_VECTOR_GET(&columnTable->values, array_idx,
                                                                           jak_vector);
@@ -683,7 +683,7 @@ static bool print_array_objects(FILE *file, jak_error *err, const char *type_nam
                                                 for (size_t i = 0; i < column->num_elems; i++) {
                                                         const jak_column_doc_obj
                                                                 *object = JAK_VECTOR_GET(column, i, jak_column_doc_obj);
-                                                        if (!print_object(file, err, object, dic)) {
+                                                        if (!_jak_column_doc_print_object(file, err, object, dic)) {
                                                                 return false;
                                                         }
                                                         fprintf(file, "%s", i + 1 < column->num_elems ? ", " : "");
@@ -718,7 +718,7 @@ static bool print_array_objects(FILE *file, jak_error *err, const char *type_nam
 }
 
 static bool
-print_object(FILE *file, jak_error *err, const jak_column_doc_obj *object, jak_string_dict *dic)
+_jak_column_doc_print_object(FILE *file, jak_error *err, const jak_column_doc_obj *object, jak_string_dict *dic)
 {
         char **parentKey = jak_string_dict_extract(dic, &object->parent_key, 1);
         fprintf(file, "{ ");
@@ -883,7 +883,7 @@ bool jak_columndoc_print(FILE *file, jak_column_doc *doc)
 {
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(doc)
-        return print_object(file, &doc->err, &doc->columndoc, doc->dic);
+        return _jak_column_doc_print_object(file, &doc->err, &doc->columndoc, doc->dic);
 }
 
 bool jak_columndoc_drop(jak_column_doc *doc)
