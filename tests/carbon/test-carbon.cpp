@@ -1,20 +1,8 @@
 #include <gtest/gtest.h>
 
-#include <jak_carbon.h>
-#include <jak_carbon_dot.h>
-#include <jak_carbon_array_it.h>
-#include <jak_carbon_insert.h>
-#include <jak_carbon_find.h>
-#include <jak_carbon_update.h>
-#include <jak_carbon_path.h>
-#include <jak_carbon_get.h>
-#include <jak_carbon_revise.h>
-#include <jak_carbon_object_it.h>
-
-#include <sys/stat.h>
 #include <fcntl.h>
-#include <jak_carbon_commit.h>
-#include <jak_carbon_path_index.h>
+
+#include <jakson/jakson.h>
 
 TEST(CarbonTest, CreateCarbon) {
         jak_carbon doc;
@@ -2223,13 +2211,36 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesSimple)
 
         // -------------------------------------------------------------------------------------------------------------
 
-        jak_u64 e1 = jak_carbon_get_or_default_unsigned(&rev_doc2, "0", 0);
-        jak_i64 e2 = jak_carbon_get_or_default_signed(&rev_doc2, "1", 0);
-        float e3 = jak_carbon_get_or_default_float(&rev_doc2, "2", NAN);
+        jak_carbon_find find;
+        jak_carbon_field_type_e result_type;
+        jak_u64 result;
+        jak_i64 resulti64;
+        jak_float resultfloat;
 
-        ASSERT_EQ(e1, 1);
-        ASSERT_EQ(e2, 1024);
-        ASSERT_TRUE(e3 > 22.9f && e3 < 24.0f);
+        jak_carbon_find_open(&find, "0", &rev_doc2);
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        jak_carbon_find_result_type(&result_type, &find);
+        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
+        jak_carbon_find_result_unsigned(&result, &find);
+        jak_carbon_find_close(&find);
+        ASSERT_EQ(result, 1);
+
+        jak_carbon_find_open(&find, "1", &rev_doc2);
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        jak_carbon_find_result_type(&result_type, &find);
+        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_NUMBER_I64);
+        jak_carbon_find_result_signed(&resulti64, &find);
+        jak_carbon_find_close(&find);
+        ASSERT_EQ(resulti64, 1024);
+
+        jak_carbon_find_open(&find, "2", &rev_doc2);
+        ASSERT_TRUE(jak_carbon_find_has_result(&find));
+        jak_carbon_find_result_type(&result_type, &find);
+        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT);
+        jak_carbon_find_result_float(&resultfloat, &find);
+        jak_carbon_find_close(&find);
+        ASSERT_GE(resultfloat, 22.9f);
+        ASSERT_LE(resultfloat, 24.0f);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -7936,7 +7947,7 @@ TEST(CarbonTest, CarbonFromJsonFromExcerpt)
         jak_carbon doc;
         jak_error err;
 
-        /* the working directory must be 'tests/jakson-tool' to find this file */
+        /* the working directory must be 'tests/carbon' */
         int fd = open("./assets/ms-academic-graph.json", O_RDONLY);
         ASSERT_NE(fd, -1);
         int json_in_len = lseek(fd, 0, SEEK_END);
@@ -8720,7 +8731,8 @@ TEST(CarbonTest, PathIndex) {
                            "   }\n"
                            "]";
 
-//        int fd = open("./assets/ms-academic-graph.json", O_RDONLY);
+//        /* the working directory must be the repository root */
+//        int fd = open("tests/carbon/assets/ms-academic-graph.json", O_RDONLY);
 //        ASSERT_NE(fd, -1);
 //        int json_in_len = lseek(fd, 0, SEEK_END);
 //        const char *jak_json = (const char *) mmap(0, json_in_len, PROT_READ, MAP_PRIVATE, fd, 0);

@@ -1,6 +1,4 @@
-#include <jak_error.h>
-#include <jak_opt.h>
-
+#include <jakson/jakson.h>
 #include "modules.h"
 
 #define DESC_CHECK_JS "Test if JSON files are suitable for CARBON."

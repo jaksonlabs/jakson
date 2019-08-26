@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
-#include <jak_carbon_media.h>
+
+#include <jakson/jakson.h>
 
 TEST(MimeTypeTest, TestMimeMapping) {
 

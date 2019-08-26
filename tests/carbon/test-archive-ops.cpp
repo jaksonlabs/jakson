@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
 #include <inttypes.h>
-#include <jak_archive_query.h>
-#include <jak_carbon.h>
+
+#include <jakson/jakson.h>
 
 TEST(CarbonArchiveOpsTest, CreateStreamFromJsonString)
 {

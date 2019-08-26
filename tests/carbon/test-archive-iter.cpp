@@ -10,8 +10,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#include <jak_archive_it.h>
-#include <jak_carbon.h>
+#include <jakson/jakson.h>
 
 static void
 iterate_properties(jak_prop_iter *prop_iter);
