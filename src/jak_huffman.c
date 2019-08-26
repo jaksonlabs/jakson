@@ -62,8 +62,8 @@ bool jak_pack_jak_coding_huffman_drop(jak_packer *self)
 
 bool huffman_dump_dictionary(FILE *file, jak_memfile *memfile)
 {
-        jak_pack_huffman_info entry_info;
-        jak_offset_t offset;
+        JAK_DECLARE_AND_INIT(jak_pack_huffman_info, entry_info)
+        JAK_DECLARE_AND_INIT(jak_offset_t, offset);
 
         while ((*JAK_MEMFILE_PEEK(memfile, char)) == JAK_MARKER_SYMBOL_HUFFMAN_DIC_ENTRY) {
                 jak_memfile_get_offset(&offset, memfile);

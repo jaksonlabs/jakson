@@ -233,7 +233,7 @@ static void record_ref_create(jak_memfile *memfile, jak_carbon *doc)
                 }
                         break;
                 case JAK_CARBON_KEY_IKEY: {
-                        jak_i64 key;
+                        JAK_DECLARE_AND_INIT(jak_i64, key)
                         jak_carbon_key_signed_value(&key, doc);
                         jak_memfile_seek(memfile, 0);
                         jak_carbon_key_write_signed(memfile, key);
@@ -267,8 +267,9 @@ static void array_traverse(struct path_index_node *parent, jak_carbon_array_it *
 
 static void column_traverse(struct path_index_node *parent, jak_carbon_column_it *it)
 {
-        jak_carbon_field_type_e column_type, entry_type;
-        jak_u32 nvalues;
+        JAK_DECLARE_AND_INIT(jak_carbon_field_type_e, column_type)
+        JAK_DECLARE_AND_INIT(jak_carbon_field_type_e, entry_type)
+        jak_u32 nvalues = 0;
 
         jak_carbon_column_it_values_info(&column_type, &nvalues, it);
 
@@ -290,7 +291,7 @@ static void object_traverse(struct path_index_node *parent, jak_carbon_object_it
 {
         while (jak_carbon_object_it_next(it)) {
                 jak_u64 prop_name_len = 0;
-                jak_offset_t key_off, value_off;
+                jak_offset_t key_off = 0, value_off = 0;
                 jak_carbon_object_it_tell(&key_off, &value_off, it);
                 const char *prop_name = jak_carbon_object_it_prop_name(&prop_name_len, it);
                 struct path_index_node *elem_node = path_index_node_add_key_elem(parent, key_off,
@@ -301,7 +302,7 @@ static void object_traverse(struct path_index_node *parent, jak_carbon_object_it
 
 static void object_build_index(struct path_index_node *parent, jak_carbon_object_it *elem_it)
 {
-        jak_carbon_field_type_e field_type;
+        jak_carbon_field_type_e field_type = 0;;
         jak_carbon_object_it_prop_type(&field_type, elem_it);
         path_index_node_set_field_type(parent, field_type);
 

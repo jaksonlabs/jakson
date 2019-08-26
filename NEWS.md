@@ -1,4 +1,7 @@
 ## 0.5.00.03 [2019-XX-XX]
+- Add source amalgamation as optional build option to increase runtime performance by generating a single translation 
+  unit for Jaksons sources. Set `-DUSE_AMALGAMATION=ON` to use amalgamation, and see [INSTALL.md](INSTALL.md) for more
+  information. Implementation details are given in [CMakeLists.txt](CMakeLists.txt).
 
 ## 0.5.00.02 [2019-08-23]
 - JSON parser for carbon files (see `carbon_from_json` in `carbon.h`)

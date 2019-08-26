@@ -213,9 +213,9 @@ static inline jak_carbon_path_status_e traverse_object(jak_carbon_path_evaluator
                                                       const jak_carbon_dot_path *path, jak_u32 current_path_pos,
                                                       jak_carbon_object_it *it)
 {
-        carbon_dot_node_e node_type;
-        jak_u32 path_length;
-        bool status;
+        JAK_DECLARE_AND_INIT(carbon_dot_node_e, node_type)
+        JAK_DECLARE_AND_INIT(jak_u32, path_length)
+        JAK_DECLARE_AND_INIT(bool, status)
 
         jak_carbon_dot_path_type_at(&node_type, current_path_pos, path);
         JAK_ASSERT(node_type == JAK_DOT_NODE_KEY_NAME);
@@ -230,7 +230,7 @@ static inline jak_carbon_path_status_e traverse_object(jak_carbon_path_evaluator
                 /* empty document */
                 return JAK_CARBON_PATH_EMPTY_DOC;
         } else {
-                jak_u64 key_len;
+                JAK_DECLARE_AND_INIT(jak_u64, key_len)
                 do {
                         const char *key_name = jak_carbon_object_it_prop_name(&key_len, it);
                         if (key_len == needle_len && strncmp(key_name, needle, needle_len) == 0) {
@@ -320,12 +320,12 @@ static inline jak_carbon_path_status_e traverse_array(jak_carbon_path_evaluator 
         JAK_ASSERT(it);
         JAK_ASSERT(current_path_pos < path->path_len);
 
-        jak_carbon_field_type_e elem_type;
-        carbon_dot_node_e node_type;
-        jak_u32 path_length;
-        jak_carbon_path_status_e status;
-        jak_u32 requested_array_idx;
-        jak_u32 current_array_idx = 0;
+        JAK_DECLARE_AND_INIT(jak_carbon_field_type_e, elem_type)
+        JAK_DECLARE_AND_INIT(carbon_dot_node_e, node_type)
+        JAK_DECLARE_AND_INIT(jak_u32, path_length)
+        JAK_DECLARE_AND_INIT(jak_carbon_path_status_e, status)
+        JAK_DECLARE_AND_INIT(jak_u32, requested_array_idx)
+        JAK_DECLARE_AND_INIT(jak_u32, current_array_idx)
         bool is_unit_array = jak_carbon_array_it_is_unit(it);
 
         jak_carbon_dot_path_type_at(&node_type, current_path_pos, path);
@@ -503,11 +503,11 @@ static inline jak_carbon_path_status_e traverse_column(jak_carbon_path_evaluator
                                                       const jak_carbon_dot_path *path, jak_u32 current_path_pos,
                                                       jak_carbon_column_it *it)
 {
-        jak_u32 total_path_len;
-        jak_u32 requested_idx;
-        jak_u32 nun_values_contained;
-        carbon_dot_node_e node_type;
-        jak_carbon_field_type_e column_type;
+        JAK_DECLARE_AND_INIT(jak_u32, total_path_len)
+        JAK_DECLARE_AND_INIT(jak_u32, requested_idx)
+        JAK_DECLARE_AND_INIT(jak_u32, nun_values_contained)
+        JAK_DECLARE_AND_INIT(carbon_dot_node_e, node_type)
+        JAK_DECLARE_AND_INIT(jak_carbon_field_type_e, column_type)
         jak_carbon_dot_path_len(&total_path_len, path);
         if (current_path_pos + 1 != total_path_len) {
                 /* a column cannot contain further containers; since the current path node is not

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <printf.h>
 
-#include <jak_carbon.h>
+#include <jakson/jakson.h>
 
 TEST(GlobalIdTest, CreateId) {
     jak_uid_t id;

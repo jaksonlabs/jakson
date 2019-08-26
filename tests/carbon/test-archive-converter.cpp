@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <jak_carbon.h>
+#include <jakson/jakson.h>
 
 TEST(ConverterTest, PerformConversion)
 {
@@ -8,8 +8,7 @@ TEST(ConverterTest, PerformConversion)
     jak_archive archive;
     jak_encoded_doc_list collection;
 
-    /* in order to access this file, the working directory of this test executable must be set to a sub directory
-     * below the projects root directory (e.g., 'build/') */
+    /* in order to access this file, the working directory must 'test/carbon' */
     status = jak_archive_open(&archive, "./assets/test-archive.carbon");
     //status = jak_archive_open(&archive, "../mag_papers_excerpt.jakson-tool");
     ASSERT_TRUE(status);

@@ -23,22 +23,22 @@
 
 #include <jak_alloc.h>
 
-static void *invoke_malloc(jak_allocator *self, size_t size);
+static void *_jak_alloc_invoke_malloc(jak_allocator *self, size_t size);
 
-static void *invoke_realloc(jak_allocator *self, void *ptr, size_t size);
+static void *_jak_alloc_invoke_realloc(jak_allocator *self, void *ptr, size_t size);
 
-static void invoke_free(jak_allocator *self, void *ptr);
+static void _jak_alloc_invoke_free(jak_allocator *self, void *ptr);
 
-static void invoke_clone(jak_allocator *dst, const jak_allocator *self);
+static void _jak_alloc_invoke_clone(jak_allocator *dst, const jak_allocator *self);
 
 bool jak_alloc_create_std(jak_allocator *alloc)
 {
         if (alloc) {
                 alloc->extra = NULL;
-                alloc->malloc = invoke_malloc;
-                alloc->realloc = invoke_realloc;
-                alloc->free = invoke_free;
-                alloc->clone = invoke_clone;
+                alloc->malloc = _jak_alloc_invoke_malloc;
+                alloc->realloc = _jak_alloc_invoke_realloc;
+                alloc->free = _jak_alloc_invoke_free;
+                alloc->clone = _jak_alloc_invoke_clone;
                 jak_error_init(&alloc->err);
                 return true;
         } else {
@@ -81,7 +81,7 @@ bool jak_alloc_clone(jak_allocator *dst, const jak_allocator *src)
         return true;
 }
 
-static void *invoke_malloc(jak_allocator *self, size_t size)
+static void *_jak_alloc_invoke_malloc(jak_allocator *self, size_t size)
 {
         JAK_UNUSED(self);
         void *result;
@@ -94,7 +94,7 @@ static void *invoke_malloc(jak_allocator *self, size_t size)
         }
 }
 
-static void *invoke_realloc(jak_allocator *self, void *ptr, size_t size)
+static void *_jak_alloc_invoke_realloc(jak_allocator *self, void *ptr, size_t size)
 {
         JAK_UNUSED(self);
         void *result;
@@ -107,13 +107,13 @@ static void *invoke_realloc(jak_allocator *self, void *ptr, size_t size)
         }
 }
 
-static void invoke_free(jak_allocator *self, void *ptr)
+static void _jak_alloc_invoke_free(jak_allocator *self, void *ptr)
 {
         JAK_UNUSED(self);
         return free(ptr);
 }
 
-static void invoke_clone(jak_allocator *dst, const jak_allocator *self)
+static void _jak_alloc_invoke_clone(jak_allocator *dst, const jak_allocator *self)
 {
         *dst = *self;
 }

@@ -81,7 +81,7 @@ bool jak_memfile_grow(jak_memfile *file_in, size_t grow_by_bytes)
 {
         JAK_ERROR_IF_NULL(file_in)
         if (JAK_LIKELY(grow_by_bytes > 0)) {
-                jak_offset_t block_size;
+                jak_offset_t block_size = 0;
                 jak_memblock_size(&block_size, file_in->memblock);
                 jak_memblock_resize(file_in->memblock, (block_size + grow_by_bytes));
         }
@@ -110,7 +110,7 @@ size_t jak_memfile_size(jak_memfile *file)
 bool jak_memfile_cut(jak_memfile *file, size_t how_many_bytes)
 {
         JAK_ERROR_IF_NULL(file);
-        jak_offset_t block_size;
+        jak_offset_t block_size = 0;
         jak_memblock_size(&block_size, file->memblock);
 
         if (how_many_bytes > 0 && block_size > how_many_bytes) {
@@ -176,7 +176,7 @@ bool jak_memfile_skip(jak_memfile *file, signed_offset_t nbytes)
 {
         jak_offset_t required_size = file->pos + nbytes;
         file->pos += nbytes;
-        jak_offset_t file_size;
+        jak_offset_t file_size = 0;
         jak_memblock_size(&file_size, file->memblock);
 
         if (JAK_UNLIKELY(required_size >= file_size)) {
@@ -194,7 +194,7 @@ bool jak_memfile_skip(jak_memfile *file, signed_offset_t nbytes)
 
 const char *jak_memfile_peek(jak_memfile *file, jak_offset_t nbytes)
 {
-        jak_offset_t file_size;
+        jak_offset_t file_size = 0;
         jak_memblock_size(&file_size, file->memblock);
         if (JAK_UNLIKELY(file->pos + nbytes > file_size)) {
                 JAK_ERROR(&file->err, JAK_ERR_READOUTOFBOUNDS);
@@ -216,7 +216,7 @@ bool jak_memfile_write(jak_memfile *file, const void *data, jak_offset_t nbytes)
         JAK_ERROR_IF_NULL(data)
         if (file->mode == JAK_READ_WRITE) {
                 if (JAK_LIKELY(nbytes != 0)) {
-                        jak_offset_t file_size;
+                        jak_offset_t file_size = 0;
                         jak_memblock_size(&file_size, file->memblock);
                         jak_offset_t required_size = file->pos + nbytes;
                         if (JAK_UNLIKELY(required_size >= file_size)) {
@@ -364,7 +364,8 @@ signed_offset_t jak_memfile_ensure_space(jak_memfile *memfile, jak_u64 nbytes)
 {
         JAK_ERROR_IF_NULL(memfile)
 
-        jak_offset_t block_size;
+        JAK_DECLARE_AND_INIT(jak_offset_t, block_size);
+
         jak_memblock_size(&block_size, memfile->memblock);
         JAK_ASSERT(memfile->pos < block_size);
         size_t diff = block_size - memfile->pos;
@@ -489,7 +490,7 @@ bool jak_memfile_end_bit_mode(size_t *num_bytes_written, jak_memfile *file)
 void *jak_memfile_current_pos(jak_memfile *file, jak_offset_t nbytes)
 {
         if (file && nbytes > 0) {
-                jak_offset_t file_size;
+                jak_offset_t file_size = 0;
                 jak_memblock_size(&file_size, file->memblock);
                 jak_offset_t required_size = file->pos + nbytes;
                 if (JAK_UNLIKELY(file->pos + nbytes >= file_size)) {
@@ -511,7 +512,7 @@ bool jak_memfile_hexdump(jak_string *sb, jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(sb);
         JAK_ERROR_IF_NULL(file);
-        jak_offset_t block_size;
+        JAK_DECLARE_AND_INIT(jak_offset_t, block_size)
         jak_memblock_size(&block_size, file->memblock);
         jak_hexdump(sb, jak_memblock_raw_data(file->memblock), block_size);
         return true;
@@ -521,7 +522,7 @@ bool jak_memfile_hexdump_printf(FILE *file, jak_memfile *memfile)
 {
         JAK_ERROR_IF_NULL(file)
         JAK_ERROR_IF_NULL(memfile)
-        jak_offset_t block_size;
+        JAK_DECLARE_AND_INIT(jak_offset_t, block_size)
         jak_memblock_size(&block_size, memfile->memblock);
         jak_hexdump_print(file, jak_memblock_raw_data(memfile->memblock), block_size);
         return true;

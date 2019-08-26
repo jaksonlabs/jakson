@@ -75,7 +75,7 @@ struct parallel_extract_arg {
         bool did_work;
 };
 
-#define HASHCODE_OF(string)                                                                                            \
+#define _JAK_ENCODE_ASYNC_HASHCODE_OF(string)                                                                                            \
     HASH_FUNCTION(strlen(string), string)
 
 #define MAKE_GLOBAL(thread_id, localjak_string_id_t)                                                                \
@@ -87,39 +87,39 @@ struct parallel_extract_arg {
 #define GET_jak_string_id_t(globalId)                                                                               \
     ((~((jak_archive_field_sid_t) 0)) >> 10 & global_jak_string_id);
 
-static bool this_drop(jak_string_dict *self);
+static bool _jak_encode_async_drop(jak_string_dict *self);
 
 static bool
-this_insert(jak_string_dict *self, jak_archive_field_sid_t **out, char *const *strings, size_t num_strings,
+_jak_encode_async_insert(jak_string_dict *self, jak_archive_field_sid_t **out, char *const *strings, size_t num_strings,
             size_t __num_threads);
 
-static bool this_remove(jak_string_dict *self, jak_archive_field_sid_t *strings, size_t num_strings);
+static bool _jak_encode_async_remove(jak_string_dict *self, jak_archive_field_sid_t *strings, size_t num_strings);
 
 static bool
-this_locate_safe(jak_string_dict *self, jak_archive_field_sid_t **out, bool **found_mask, size_t *num_not_found,
+_jak_encode_async_locate_safe(jak_string_dict *self, jak_archive_field_sid_t **out, bool **found_mask, size_t *num_not_found,
                  char *const *keys, size_t num_keys);
 
 static bool
-this_locate_fast(jak_string_dict *self, jak_archive_field_sid_t **out, char *const *keys, size_t num_keys);
+_jak_encode_async_locate_fast(jak_string_dict *self, jak_archive_field_sid_t **out, char *const *keys, size_t num_keys);
 
-static char **this_extract(jak_string_dict *self, const jak_archive_field_sid_t *ids, size_t num_ids);
+static char **_jak_encode_async_locate_extract(jak_string_dict *self, const jak_archive_field_sid_t *ids, size_t num_ids);
 
-static bool this_free(jak_string_dict *self, void *ptr);
+static bool _jak_encode_async_free(jak_string_dict *self, void *ptr);
 
-static bool this_num_distinct(jak_string_dict *self, size_t *num);
+static bool _jak_encode_async_num_distinct(jak_string_dict *self, size_t *num);
 
-static bool this_get_contents(jak_string_dict *self, jak_vector ofType (char *) *strings,
+static bool _jak_encode_async_get_contents(jak_string_dict *self, jak_vector ofType (char *) *strings,
                               jak_vector ofType(jak_archive_field_sid_t) *jak_string_ids);
 
-static bool this_reset_counters(jak_string_dict *self);
+static bool _jak_encode_async_reset_counters(jak_string_dict *self);
 
-static bool this_counters(jak_string_dict *self, jak_str_hash_counters *counters);
+static bool _jak_encode_async_counters(jak_string_dict *self, jak_str_hash_counters *counters);
 
 static bool this_lock(jak_string_dict *self);
 
 static bool this_unlock(jak_string_dict *self);
 
-static bool this_create_extra(jak_string_dict *self, size_t capacity, size_t num_index_buckets,
+static bool _jak_encode_async_create_extra(jak_string_dict *self, size_t capacity, size_t num_index_buckets,
                               size_t approx_num_unique_str, size_t num_threads);
 
 static bool this_setup_carriers(jak_string_dict *self, size_t capacity, size_t num_index_buckets,
@@ -137,23 +137,23 @@ int jak_encode_async_create(jak_string_dict *dic, size_t capacity, size_t num_in
         JAK_CHECK_SUCCESS(jak_alloc_this_or_std(&dic->alloc, alloc));
 
         dic->tag = JAK_ASYNC;
-        dic->drop = this_drop;
-        dic->insert = this_insert;
-        dic->remove = this_remove;
-        dic->locate_safe = this_locate_safe;
-        dic->locate_fast = this_locate_fast;
-        dic->extract = this_extract;
-        dic->free = this_free;
-        dic->resetCounters = this_reset_counters;
-        dic->counters = this_counters;
-        dic->num_distinct = this_num_distinct;
-        dic->get_contents = this_get_contents;
+        dic->drop = _jak_encode_async_drop;
+        dic->insert = _jak_encode_async_insert;
+        dic->remove = _jak_encode_async_remove;
+        dic->locate_safe = _jak_encode_async_locate_safe;
+        dic->locate_fast = _jak_encode_async_locate_fast;
+        dic->extract = _jak_encode_async_locate_extract;
+        dic->free = _jak_encode_async_free;
+        dic->resetCounters = _jak_encode_async_reset_counters;
+        dic->counters = _jak_encode_async_counters;
+        dic->num_distinct = _jak_encode_async_num_distinct;
+        dic->get_contents = _jak_encode_async_get_contents;
 
-        JAK_CHECK_SUCCESS(this_create_extra(dic, capacity, num_index_buckets, approx_num_unique_strs, num_threads));
+        JAK_CHECK_SUCCESS(_jak_encode_async_create_extra(dic, capacity, num_index_buckets, approx_num_unique_strs, num_threads));
         return true;
 }
 
-static bool this_create_extra(jak_string_dict *self, size_t capacity, size_t num_index_buckets,
+static bool _jak_encode_async_create_extra(jak_string_dict *self, size_t capacity, size_t num_index_buckets,
                               size_t approx_num_unique_str, size_t num_threads)
 {
         JAK_ASSERT(self);
@@ -168,7 +168,7 @@ static bool this_create_extra(jak_string_dict *self, size_t capacity, size_t num
         return true;
 }
 
-static bool this_drop(jak_string_dict *self)
+static bool _jak_encode_async_drop(jak_string_dict *self)
 {
         JAK_CHECK_TAG(self->tag, JAK_ASYNC);
         struct async_extra *extra = THIS_EXTRAS(self);
@@ -359,7 +359,7 @@ static void parallel_compute_thread_assignment_function(const void *restrict sta
                 const char *key = *strings;
                 /** re-using this hashcode for the thread-local dictionary is more costly than to compute it fresh
                  * (due to more I/O with the RAM) */
-                size_t thread_id = HASHCODE_OF(key) % func_args->num_threads;
+                size_t thread_id = _JAK_ENCODE_ASYNC_HASHCODE_OF(key) % func_args->num_threads;
                 atomic_fetch_add(&func_args->str_carrier_mapping[i], thread_id);
                 atomic_fetch_add(&func_args->carrier_num_strings[thread_id], 1);
                 strings++;
@@ -382,7 +382,7 @@ static void compute_thread_assignment(atomic_uint_fast16_t *str_carrier_mapping,
 }
 
 static bool
-this_insert(jak_string_dict *self, jak_archive_field_sid_t **out, char *const *strings, size_t num_strings,
+_jak_encode_async_insert(jak_string_dict *self, jak_archive_field_sid_t **out, char *const *strings, size_t num_strings,
             size_t __num_threads)
 {
         jak_timestamp begin = jak_wallclock();
@@ -517,7 +517,7 @@ this_insert(jak_string_dict *self, jak_archive_field_sid_t **out, char *const *s
         return true;
 }
 
-static bool this_remove(jak_string_dict *self, jak_archive_field_sid_t *strings, size_t num_strings)
+static bool _jak_encode_async_remove(jak_string_dict *self, jak_archive_field_sid_t *strings, size_t num_strings)
 {
         jak_timestamp begin = jak_wallclock();
         JAK_INFO(STRING_DIC_ASYNC_TAG, "remove operation started: %zu strings to remove", num_strings);
@@ -585,7 +585,7 @@ static bool this_remove(jak_string_dict *self, jak_archive_field_sid_t *strings,
 }
 
 static bool
-this_locate_safe(jak_string_dict *self, jak_archive_field_sid_t **out, bool **found_mask, size_t *num_not_found,
+_jak_encode_async_locate_safe(jak_string_dict *self, jak_archive_field_sid_t **out, bool **found_mask, size_t *num_not_found,
                  char *const *keys, size_t num_keys)
 {
         jak_timestamp begin = jak_wallclock();
@@ -713,7 +713,7 @@ this_locate_safe(jak_string_dict *self, jak_archive_field_sid_t **out, bool **fo
 }
 
 static bool
-this_locate_fast(jak_string_dict *self, jak_archive_field_sid_t **out, char *const *keys, size_t num_keys)
+_jak_encode_async_locate_fast(jak_string_dict *self, jak_archive_field_sid_t **out, char *const *keys, size_t num_keys)
 {
         JAK_CHECK_TAG(self->tag, JAK_ASYNC);
 
@@ -724,17 +724,17 @@ this_locate_fast(jak_string_dict *self, jak_archive_field_sid_t **out, char *con
         int result;
 
         /** use safer but in principle more slower implementation */
-        result = this_locate_safe(self, out, &found_mask, &num_not_found, keys, num_keys);
+        result = _jak_encode_async_locate_safe(self, out, &found_mask, &num_not_found, keys, num_keys);
 
         /** cleanup */
-        this_free(self, found_mask);
+        _jak_encode_async_free(self, found_mask);
 
         this_unlock(self);
 
         return result;
 }
 
-static char **this_extract(jak_string_dict *self, const jak_archive_field_sid_t *ids, size_t num_ids)
+static char **_jak_encode_async_locate_extract(jak_string_dict *self, const jak_archive_field_sid_t *ids, size_t num_ids)
 {
         jak_timestamp begin = jak_wallclock();
         JAK_INFO(STRING_DIC_ASYNC_TAG, "extract (safe) operation started: %zu strings to extract", num_ids)
@@ -815,14 +815,14 @@ static char **this_extract(jak_string_dict *self, const jak_archive_field_sid_t 
         return globalResult;
 }
 
-static bool this_free(jak_string_dict *self, void *ptr)
+static bool _jak_encode_async_free(jak_string_dict *self, void *ptr)
 {
         JAK_CHECK_TAG(self->tag, JAK_ASYNC);
         jak_alloc_free(&self->alloc, ptr);
         return true;
 }
 
-static bool this_num_distinct(jak_string_dict *self, size_t *num)
+static bool _jak_encode_async_num_distinct(jak_string_dict *self, size_t *num)
 {
         JAK_CHECK_TAG(self->tag, JAK_ASYNC);
         this_lock(self);
@@ -842,7 +842,7 @@ static bool this_num_distinct(jak_string_dict *self, size_t *num)
         return true;
 }
 
-static bool this_get_contents(jak_string_dict *self, jak_vector ofType (char *) *strings,
+static bool _jak_encode_async_get_contents(jak_string_dict *self, jak_vector ofType (char *) *strings,
                               jak_vector ofType(jak_archive_field_sid_t) *jak_string_ids)
 {
         JAK_CHECK_TAG(self->tag, JAK_ASYNC);
@@ -852,7 +852,7 @@ static bool this_get_contents(jak_string_dict *self, jak_vector ofType (char *) 
         jak_vector ofType (char *) local_jak_string_results;
         jak_vector ofType (jak_archive_field_sid_t) local_jak_string_id_results;
         size_t approx_num_distinct_local_values;
-        this_num_distinct(self, &approx_num_distinct_local_values);
+        _jak_encode_async_num_distinct(self, &approx_num_distinct_local_values);
         approx_num_distinct_local_values = JAK_MAX(1, approx_num_distinct_local_values / extra->carriers.num_elems);
         approx_num_distinct_local_values *= 1.2f;
 
@@ -884,7 +884,7 @@ static bool this_get_contents(jak_string_dict *self, jak_vector ofType (char *) 
         return true;
 }
 
-static bool this_reset_counters(jak_string_dict *self)
+static bool _jak_encode_async_reset_counters(jak_string_dict *self)
 {
         JAK_CHECK_TAG(self->tag, JAK_ASYNC);
 
@@ -903,7 +903,7 @@ static bool this_reset_counters(jak_string_dict *self)
         return true;
 }
 
-static bool this_counters(jak_string_dict *self, jak_str_hash_counters *counters)
+static bool _jak_encode_async_counters(jak_string_dict *self, jak_str_hash_counters *counters)
 {
         JAK_CHECK_TAG(self->tag, JAK_ASYNC);
 
