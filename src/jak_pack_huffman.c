@@ -119,7 +119,7 @@ bool jak_coding_huffman_serialize(jak_memfile *file, const jak_huffman *dic, cha
                 /** this will be the number of bytes used to encode the significant part of the prefix code */
                 jak_memfile_skip(file, sizeof(jak_u8));
 
-                jak_memfile_begin_bit_mode(file);
+                jak_memfile_bit_mode_begin(file);
                 bool first_bit_found = false;
                 for (int i = 31; entry->blocks && i >= 0; i--) {
                         jak_u32 mask = 1 << i;
@@ -132,7 +132,7 @@ bool jak_coding_huffman_serialize(jak_memfile *file, const jak_huffman *dic, cha
                         }
                 }
                 size_t num_bytes_written;
-                jak_memfile_end_bit_mode(&num_bytes_written, file);
+                jak_memfile_bit_mode_end(&num_bytes_written, file);
                 jak_memfile_get_offset(&offset_continue, file);
                 jak_memfile_seek(file, offset_meta);
                 jak_u8 num_bytes_written_uint8 = (jak_u8) num_bytes_written;
@@ -158,7 +158,7 @@ static jak_pack_huffman_entry *find_dic_entry(jak_huffman *dic, unsigned char c)
 
 static size_t encodeString(jak_memfile *file, jak_huffman *dic, const char *string)
 {
-        jak_memfile_begin_bit_mode(file);
+        jak_memfile_bit_mode_begin(file);
 
         for (const char *c = string; *c != '\0'; c++) {
                 jak_pack_huffman_entry *entry = find_dic_entry(dic, (unsigned char) *c);
@@ -188,7 +188,7 @@ static size_t encodeString(jak_memfile *file, jak_huffman *dic, const char *stri
         }
 
         size_t num_written_bytes;
-        jak_memfile_end_bit_mode(&num_written_bytes, file);
+        jak_memfile_bit_mode_end(&num_written_bytes, file);
         return num_written_bytes;
 }
 

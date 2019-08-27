@@ -27,7 +27,8 @@ Marker  | Carbon Type      | Descriptions
 `[s]`   | `string`         | a character string field
 `[b]`   | `binary`         | a binary string field with known MIME type
 `[x]`   | `custom binary`  | a binary string field with user-defined type
-`[n]`   | `null`           | absence of data
+`[n]`   | `null`           | absence of data (user-defined)
+`[N]`   | `nil`            | absence of data (structure-defined)
 
 <span class="caption">Figure MF-1: Data Type Markers</span>
 

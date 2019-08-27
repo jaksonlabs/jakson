@@ -246,7 +246,7 @@ bool jak_memfile_write_zero(jak_memfile *file, size_t how_many)
         return true;
 }
 
-bool jak_memfile_begin_bit_mode(jak_memfile *file)
+bool jak_memfile_bit_mode_begin(jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(file);
         if (file->mode == JAK_READ_WRITE) {
@@ -450,6 +450,31 @@ signed_offset_t jak_memfile_update_uintvar_stream(jak_memfile *memfile, jak_u64 
         return bytes_used_then - bytes_used_now;
 }
 
+jak_u64 jak_memfile_read_uintvar_marker(jak_u8 *nbytes, jak_memfile *memfile)
+{
+
+}
+
+bool jak_memfile_skip_uintvar_marker(jak_memfile *memfile)
+{
+
+}
+
+jak_u64 jak_memfile_peek_uintvar_marker(jak_u8 *nbytes, jak_memfile *memfile)
+{
+
+}
+
+jak_u64 jak_memfile_write_uintvar_marker(jak_u64 *nbytes_moved, jak_memfile *memfile, jak_u64 value)
+{
+
+}
+
+signed_offset_t jak_memfile_update_uintvar_marker(jak_memfile *memfile, jak_u64 value)
+{
+
+}
+
 bool jak_memfile_seek_to_start(jak_memfile *file)
 {
         return jak_memfile_seek(file, 0);
@@ -474,7 +499,7 @@ bool jak_memfile_inplace_remove(jak_memfile *file, size_t nbytes_from_here)
         return jak_memblock_move_left(file->memblock, file->pos, nbytes_from_here);
 }
 
-bool jak_memfile_end_bit_mode(size_t *num_bytes_written, jak_memfile *file)
+bool jak_memfile_bit_mode_end(size_t *num_bytes_written, jak_memfile *file)
 {
         JAK_ERROR_IF_NULL(file);
         file->bit_mode = false;

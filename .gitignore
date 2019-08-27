@@ -31,3 +31,5 @@ CMakeCache.txt
 libark-sources\.a
 
 include/
+
+*.a

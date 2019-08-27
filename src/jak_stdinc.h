@@ -36,7 +36,7 @@
 #include <limits.h>
 #include <math.h>
 
-#include "jak_forwdecl.h"
+#include <jak_forwdecl.h>
 
 #ifndef __cplusplus
 
@@ -159,10 +159,10 @@ JAK_FUNC_UNUSED static const char *jak_basic_type_to_system_type_str(enum jak_ar
 
 #define JAK_NOT_IMPLEMENTED                                                                                            \
 {                                                                                                                      \
-    jak_error err;                                                                                                    \
-    jak_error_init(&err);                                                                                                  \
-    JAK_ERROR(&err, JAK_ERR_NOTIMPLEMENTED)                                                                                \
-    jak_error_print_and_abort(&err);                                                                                       \
+    jak_error err;                                                                                                     \
+    jak_error_init(&err);                                                                                              \
+    JAK_ERROR(&err, JAK_ERR_NOTIMPLEMENTED)                                                                            \
+    jak_error_print_and_abort(&err);                                                                                   \
     return false;                                                                                                      \
 };
 
@@ -294,40 +294,40 @@ JAK_FUNC_UNUSED static const char *jak_basic_type_to_system_type_str(enum jak_ar
 #define JAK_MIN(a, b)                                                                                                  \
     ((a) < (b) ? (a) : (b))
 
-#define JAK_ERROR_IF_NULL(x)                                                                                               \
+#define JAK_ERROR_IF_NULL(x)                                                                                           \
 {                                                                                                                      \
     if (!(x)) {                                                                                                        \
-        jak_error err;                                                                                                \
-        jak_error_init(&err);                                                                                              \
-        JAK_ERROR(&err, JAK_ERR_NULLPTR);                                                                                  \
-        jak_error_print_to_stderr(&err);                                                                                   \
+        jak_error err;                                                                                                 \
+        jak_error_init(&err);                                                                                          \
+        JAK_ERROR(&err, JAK_ERR_NULLPTR);                                                                              \
+        jak_error_print_to_stderr(&err);                                                                               \
         return false;                                                                                                  \
     }                                                                                                                  \
 }
 
 #define JAK_CHECK_SUCCESS(x)                                                                                           \
 {                                                                                                                      \
-    if (JAK_UNLIKELY(!x)) {                                                                                                \
+    if (JAK_UNLIKELY(!x)) {                                                                                            \
         return x;                                                                                                      \
     }                                                                                                                  \
 }
 
 #define JAK_SUCCESS_OR_JUMP(expr, label)                                                                               \
 {                                                                                                                      \
-    if (JAK_UNLIKELY(!expr)) {                                                                                             \
+    if (JAK_UNLIKELY(!expr)) {                                                                                         \
         goto label;                                                                                                    \
     }                                                                                                                  \
 }
 
-#define JAK_LIKELY(x)                                                                                                      \
+#define JAK_LIKELY(x)                                                                                                  \
     __builtin_expect((x), 1)
-#define JAK_UNLIKELY(x)                                                                                                    \
+#define JAK_UNLIKELY(x)                                                                                                \
     __builtin_expect((x), 0)
 
-#define JAK_PREFETCH_READ(adr)                                                                                             \
+#define JAK_PREFETCH_READ(adr)                                                                                         \
     __builtin_prefetch(adr, 0, 3)
 
-#define JAK_PREFETCH_WRITE(adr)                                                                                            \
+#define JAK_PREFETCH_WRITE(adr)                                                                                        \
     __builtin_prefetch(adr, 1, 3)
 
 #define JAK_FORWARD_STRUCT_DECL(x) struct x;
@@ -338,7 +338,7 @@ JAK_FUNC_UNUSED static const char *jak_basic_type_to_system_type_str(enum jak_ar
 #define JAK_UNSET_BITS(x, mask)       ( x &= ~(mask) )
 #define JAK_ARE_BITS_SET(mask, bit)   (((bit) & mask ) == (bit))
 
-#define JAK_ERROR_IF_NOT_IMPLEMENTED(err, x, func)                                                                         \
+#define JAK_ERROR_IF_NOT_IMPLEMENTED(err, x, func)                                                                     \
     JAK_OPTIONAL(x->func == NULL, JAK_ERROR(err, JAK_ERR_NOTIMPLEMENTED))
 
 #define JAK_OPTIONAL(expr, stmt)                                                                                       \
@@ -362,7 +362,7 @@ bool jak_global_console_enable_output;
 
 #define JAK_CONSOLE_WRITE(file, msg, ...)                                                                              \
 {                                                                                                                      \
-    if (jak_global_console_enable_output) {                                                                                   \
+    if (jak_global_console_enable_output) {                                                                            \
         pid_t pid = getpid();                                                                                          \
         char timeBuffer[2048];                                                                                         \
         char formatBuffer[2048];                                                                                       \
@@ -377,21 +377,21 @@ bool jak_global_console_enable_output;
 
 #define JAK_CONSOLE_WRITE_ENDL(file)                                                                                   \
 {                                                                                                                      \
-    if (jak_global_console_enable_output) {                                                                                   \
+    if (jak_global_console_enable_output) {                                                                            \
         fprintf(file, "\n");                                                                                           \
     }                                                                                                                  \
 }
 
 #define JAK_CONSOLE_WRITE_CONT(file, msg, ...)                                                                         \
 {                                                                                                                      \
-    if (jak_global_console_enable_output) {                                                                                   \
+    if (jak_global_console_enable_output) {                                                                            \
         fprintf(file, msg, __VA_ARGS__);                                                                               \
     }                                                                                                                  \
 }
 
 #define JAK_CONSOLE_WRITELN(file, msg, ...)                                                                            \
 {                                                                                                                      \
-    if (jak_global_console_enable_output) {                                                                                   \
+    if (jak_global_console_enable_output) {                                                                            \
         JAK_CONSOLE_WRITE(file, msg, __VA_ARGS__)                                                                      \
         JAK_CONSOLE_WRITE_ENDL(file)                                                                                   \
         fflush(file);                                                                                                  \

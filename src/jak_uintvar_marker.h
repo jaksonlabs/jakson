@@ -24,9 +24,7 @@
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include "jak_stdinc.h"
-#include "stdbool.h"
-#include "jak_types.h"
+#include <jak_types.h>
 
 /**
  * This type is for variable-length unsigned integer types.
@@ -62,26 +60,55 @@
 
 JAK_BEGIN_DECL
 
+// ---------------------------------------------------------------------------------------------------------------------
+//  markers
+// ---------------------------------------------------------------------------------------------------------------------
+
 #define UINT_VAR_MARKER_8 'c'
 #define UINT_VAR_MARKER_16 'd'
 #define UINT_VAR_MARKER_32 'i'
 #define UINT_VAR_MARKER_64 'l'
 
+// ---------------------------------------------------------------------------------------------------------------------
+//  types
+// ---------------------------------------------------------------------------------------------------------------------
+
 typedef void *jak_uintvar_marker_t;
 
 typedef enum jak_uintvar_marker {
-        JAK_UINTVAR_8,
-        JAK_UINTVAR_16,
-        JAK_UINTVAR_32,
-        JAK_UINTVAR_64
+        JAK_UINTVAR_8 = 0,
+        JAK_UINTVAR_16 = 1,
+        JAK_UINTVAR_32 = 2,
+        JAK_UINTVAR_64 = 3
 } jak_uintvar_marker_e;
+
+static const struct {
+        jak_marker_t marker;
+        jak_u8 size;
+} jak_global_uintvar_marker_reg[] = {
+        { UINT_VAR_MARKER_8, sizeof(jak_u8) },
+        { UINT_VAR_MARKER_16, sizeof(jak_u16) },
+        { UINT_VAR_MARKER_32, sizeof(jak_u32) },
+        { UINT_VAR_MARKER_64, sizeof(jak_u64) }
+};
+
+static const int jak_global_uintvar_marker_nreg = JAK_ARRAY_LENGTH(jak_global_uintvar_marker_reg);
+
+// ---------------------------------------------------------------------------------------------------------------------
+//  read/write
+// ---------------------------------------------------------------------------------------------------------------------
 
 bool jak_uintvar_marker_write(jak_uintvar_marker_t dst, jak_u64 value);
 jak_u64 jak_uintvar_marker_read(jak_u8 *nbytes_read, jak_uintvar_marker_t src);
+
+// ---------------------------------------------------------------------------------------------------------------------
+//  information
+// ---------------------------------------------------------------------------------------------------------------------
+
 jak_uintvar_marker_e jak_uintvar_marker_type_for(jak_u64 value);
-bool jak_uintvar_marker_type(const void *data);
-size_t jak_uintvar_marker_sizeof(jak_uintvar_marker_t value);
-size_t jak_uintvar_marker_required_size(jak_u64 value);
+jak_uintvar_marker_e jak_uintvar_marker_type(const void *data);
+jak_u8 jak_uintvar_marker_sizeof(jak_uintvar_marker_t varuint);
+jak_u8 jak_uintvar_marker_required_size(jak_u64 value);
 
 JAK_END_DECL
 

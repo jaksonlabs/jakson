@@ -38,7 +38,10 @@
 		- [Atomic Operations](update-spec/atomic-ops.md)
 		- [Insert Operations](update-spec/insert-ops.md)		
 		- [In-Place Updates](update-spec/update-ops.md)
-		- [Delete Operations](update-spec/delete-ops.md)		
+		- [Delete Operations](update-spec/delete-ops.md)	
+
+	- [Indexing](indexing.md)
+	    - [Path Indexes](indexing/path-indexes.md)
 
 	- [Querying for Values](traversals-queries.md)	
 		- [Dot Path Expressions](traversals-queries/dot-path-expressions.md)

@@ -92,6 +92,9 @@ typedef jak_u64 jak_archive_field_u64_t;
 typedef float jak_archive_field_number_t;
 typedef const char *field_jak_string_t;
 
+
+typedef jak_u8 jak_marker_t;
+
 #define JAK_NULL_ENCODED_STRING            0
 #define JAK_NULL_BOOLEAN                   INT8_MAX
 #define JAK_NULL_INT8                      INT8_MAX

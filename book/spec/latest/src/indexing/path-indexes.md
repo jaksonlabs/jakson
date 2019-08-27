@@ -1,5 +1,13 @@
 # Path Indexes
 
+- Carbon file structure is optimized for memory footprint (e.g., variable-length integers) and for embedding of variable-length data (e.g., binary or character strings)
+- For path evaluation, the Carbon file structure is not optimal since it is not designed fast traversals (e.g., variable-length integers must be interpreted, variable-length fields must be skipped)
+- To improve path evaluation, an optional index, the path index, may be created to improve traversal operations
+- Like Carbon files, the index is a tree structure that is embedded ("flattened") into a continous memory block to increase CPU data cache efficiency.
+- In contrast to Carbon files, the path index is constructed for fix-length-only data types that are more optimal for reading (e.g., no interpreation is needed). Further, for list (array and column) containers, seeking to a particular index is a constant operation. 
+
+Key difference of path index
+
 ## Structure Overview
 
 ```

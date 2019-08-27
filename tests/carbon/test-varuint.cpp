@@ -3,14 +3,14 @@
 
 #include <jakson/jakson.h>
 
-#define DEFINE_UINTVAR_STREAM_POINT_TEST(test_name, value, expected_bytes)     \
-TEST(VarUintTest, ReadWrite##test_name) {                               \
-        char dst[10];                                                   \
-        jak_u8 nbytes = jak_uintvar_stream_write(&dst, value);                         \
-        ASSERT_TRUE(nbytes == expected_bytes);                          \
-        jak_u64 read_value = jak_uintvar_stream_read(&nbytes, &dst);                   \
-        ASSERT_TRUE(nbytes == expected_bytes);                          \
-        ASSERT_TRUE(read_value == value);                               \
+#define DEFINE_UINTVAR_STREAM_POINT_TEST(test_name, value, expected_bytes)              \
+TEST(VarUintTest, ReadWrite##test_name) {                                               \
+        char dst[10];                                                                   \
+        jak_u8 nbytes = jak_uintvar_stream_write(&dst, value);                          \
+        ASSERT_TRUE(nbytes == expected_bytes);                                          \
+        jak_u64 read_value = jak_uintvar_stream_read(&nbytes, &dst);                    \
+        ASSERT_TRUE(nbytes == expected_bytes);                                          \
+        ASSERT_TRUE(read_value == value);                                               \
 }
 
 DEFINE_UINTVAR_STREAM_POINT_TEST(1ByteMin, 0u, 1)
@@ -43,13 +43,24 @@ DEFINE_UINTVAR_STREAM_POINT_TEST(9ByteMax, 9223372036854775807u, 9)
 DEFINE_UINTVAR_STREAM_POINT_TEST(10ByteMin, 9223372036854775808u, 10)
 DEFINE_UINTVAR_STREAM_POINT_TEST(10ByteMax, 18446744073709551615u, 10)
 
-TEST(VarUintTest, ReadWriteRandValuesEncoding) {
+TEST(VarUintTest, ReadWriteRandValuesEncodingVarlenBased) {
         char dst[10];
         for (unsigned i = 0; i < 10000; i++) {
                 jak_u64 in_value = rand();
                 in_value = (in_value << 32) | rand();
                 jak_uintvar_stream_write(&dst, in_value);
                 jak_u64 out_value = jak_uintvar_stream_read(NULL, &dst);
+                ASSERT_EQ(in_value, out_value);
+        }
+}
+
+TEST(VarUintTest, ReadWriteRandValuesEncodingMarkerBased) {
+        char dst[10];
+        for (unsigned i = 0; i < 10000; i++) {
+                jak_u64 in_value = rand();
+                in_value = (in_value << 32) | rand();
+                jak_uintvar_marker_write(&dst, in_value);
+                jak_u64 out_value = jak_uintvar_marker_read(NULL, &dst);
                 ASSERT_EQ(in_value, out_value);
         }
 }
