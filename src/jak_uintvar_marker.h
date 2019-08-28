@@ -106,9 +106,10 @@ jak_u64 jak_uintvar_marker_read(jak_u8 *nbytes_read, jak_uintvar_marker_t src);
 // ---------------------------------------------------------------------------------------------------------------------
 
 jak_uintvar_marker_e jak_uintvar_marker_type_for(jak_u64 value);
-jak_uintvar_marker_e jak_uintvar_marker_type(const void *data);
+jak_uintvar_marker_e jak_uintvar_marker_type(jak_uintvar_marker_t data);
 jak_u8 jak_uintvar_marker_sizeof(jak_uintvar_marker_t varuint);
 jak_u8 jak_uintvar_marker_required_size(jak_u64 value);
+char jak_uintvar_marker_type_str(jak_uintvar_marker_e marker);
 
 JAK_END_DECL
 

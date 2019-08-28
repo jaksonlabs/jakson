@@ -272,7 +272,7 @@ bool jak_carbon_column_it_remove(jak_carbon_column_it *it, jak_u32 pos)
         jak_u32 num_elems = jak_memfile_peek_uintvar_stream(NULL, &it->memfile);
         JAK_ASSERT(num_elems > 0);
         num_elems--;
-        signed_offset_t shift = jak_memfile_update_uintvar_stream(&it->memfile, num_elems);
+        jak_signed_offset_t shift = jak_memfile_update_uintvar_stream(&it->memfile, num_elems);
         it->column_num_elements = num_elems;
 
         jak_memfile_restore_position(&it->memfile);

@@ -23,6 +23,7 @@
 #include <jak_uintvar_marker.h>
 #include <jak_error.h>
 #include <jakson/jakson.h>
+#include "jak_uintvar_marker.h"
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  read/write
@@ -44,7 +45,7 @@ jak_u64 jak_uintvar_marker_read(jak_u8 *nbytes_read, jak_uintvar_marker_t src)
 {
         JAK_ERROR_IF_NULL(src);
         jak_uintvar_marker_e marker = jak_uintvar_marker_type(src);
-        JAK_OPTIONAL_SET(nbytes_read, jak_global_uintvar_marker_reg[marker].size);
+        JAK_OPTIONAL_SET(nbytes_read, jak_global_uintvar_marker_reg[marker].size + sizeof(jak_marker_t));
         src += sizeof(jak_marker_t);
         switch (marker) {
                 case JAK_UINTVAR_8:  return *(jak_u8 *) src;
@@ -74,7 +75,7 @@ jak_uintvar_marker_e jak_uintvar_marker_type_for(jak_u64 value)
         }
 }
 
-jak_uintvar_marker_e jak_uintvar_marker_type(const void *data)
+jak_uintvar_marker_e jak_uintvar_marker_type(jak_uintvar_marker_t data)
 {
         jak_u8 marker = *(jak_u8 *)data;
         bool is_u8 = marker == UINT_VAR_MARKER_8;
@@ -109,4 +110,10 @@ jak_u8 jak_uintvar_marker_required_size(jak_u64 value)
         jak_uintvar_marker_e marker = jak_uintvar_marker_type_for(value);
         JAK_ERROR_PRINT_IF(marker >= jak_global_uintvar_marker_nreg, JAK_ERR_MARKERMAPPING)
         return jak_global_uintvar_marker_reg[marker].size + sizeof(jak_marker_t);
+}
+
+char jak_uintvar_marker_type_str(jak_uintvar_marker_e marker)
+{
+        JAK_ERROR_PRINT_IF(marker >= jak_global_uintvar_marker_nreg, JAK_ERR_MARKERMAPPING)
+        return (char) jak_global_uintvar_marker_reg[marker].marker;
 }

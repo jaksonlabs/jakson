@@ -26,6 +26,8 @@
 #include <jak_string.h>
 #include <jak_utils_hexdump.h>
 #include <jak_memblock.h>
+#include <jak_uintvar_stream.h>
+#include <jak_uintvar_marker.h>
 
 JAK_BEGIN_DECL
 
@@ -96,7 +98,7 @@ bool jak_memfile_write(jak_memfile *file, const void *data, jak_offset_t nbytes)
 const char *jak_memfile_read(jak_memfile *file, jak_offset_t nbytes);
 const char *jak_memfile_peek(jak_memfile *file, jak_offset_t nbytes);
 
-bool jak_memfile_skip(jak_memfile *file, signed_offset_t nbytes);
+bool jak_memfile_skip(jak_memfile *file, jak_signed_offset_t nbytes);
 #define JAK_MEMFILE_SKIP_BYTE(file) jak_memfile_skip(file, sizeof(jak_u8))
 
 bool jak_memfile_write_zero(jak_memfile *file, size_t how_many);
@@ -119,7 +121,7 @@ jak_u64 jak_memfile_read_uintvar_stream(jak_u8 *nbytes, jak_memfile *memfile);
 bool jak_memfile_skip_uintvar_stream(jak_memfile *memfile);
 jak_u64 jak_memfile_peek_uintvar_stream(jak_u8 *nbytes, jak_memfile *memfile);
 jak_u64 jak_memfile_write_uintvar_stream(jak_u64 *nbytes_moved, jak_memfile *memfile, jak_u64 value);
-signed_offset_t jak_memfile_update_uintvar_stream(jak_memfile *memfile, jak_u64 value);
+jak_signed_offset_t jak_memfile_update_uintvar_stream(jak_memfile *memfile, jak_u64 value);
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  variable-length unsigned integers (marker based)
@@ -128,8 +130,9 @@ signed_offset_t jak_memfile_update_uintvar_stream(jak_memfile *memfile, jak_u64 
 jak_u64 jak_memfile_read_uintvar_marker(jak_u8 *nbytes, jak_memfile *memfile);
 bool jak_memfile_skip_uintvar_marker(jak_memfile *memfile);
 jak_u64 jak_memfile_peek_uintvar_marker(jak_u8 *nbytes, jak_memfile *memfile);
+jak_uintvar_marker_e jak_memfile_peek_uintvar_marker_type(jak_memfile *memfile);
 jak_u64 jak_memfile_write_uintvar_marker(jak_u64 *nbytes_moved, jak_memfile *memfile, jak_u64 value);
-signed_offset_t jak_memfile_update_uintvar_marker(jak_memfile *memfile, jak_u64 value);
+jak_signed_offset_t jak_memfile_update_uintvar_marker(jak_memfile *memfile, jak_u64 value);
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  positioning
@@ -138,7 +141,7 @@ signed_offset_t jak_memfile_update_uintvar_marker(jak_memfile *memfile, jak_u64 
 bool jak_memfile_seek(jak_memfile *file, jak_offset_t pos);
 bool jak_memfile_seek_to_start(jak_memfile *file);
 bool jak_memfile_seek_to_end(jak_memfile *file);
-bool jak_memfile_seek_from_here(jak_memfile *file, signed_offset_t where);
+bool jak_memfile_seek_from_here(jak_memfile *file, jak_signed_offset_t where);
 bool jak_memfile_rewind(jak_memfile *file);
 jak_offset_t jak_memfile_save_position(jak_memfile *file);
 bool jak_memfile_restore_position(jak_memfile *file);
@@ -150,7 +153,7 @@ bool jak_memfile_restore_position(jak_memfile *file);
 bool jak_memfile_grow(jak_memfile *file_in, size_t grow_by_bytes);
 bool jak_memfile_cut(jak_memfile *file, size_t how_many_bytes);
 bool jak_memfile_shrink(jak_memfile *file);
-signed_offset_t jak_memfile_ensure_space(jak_memfile *memfile, jak_u64 nbytes);
+jak_signed_offset_t jak_memfile_ensure_space(jak_memfile *memfile, jak_u64 nbytes);
 
 /**
  * Moves the contents of the underlying memory block <code>nbytes</code> towards the end of the file.

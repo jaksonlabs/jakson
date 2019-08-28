@@ -16,8 +16,6 @@
  */
 
 #include <jak_memfile.h>
-#include <jak_uintvar_stream.h>
-#include <jak_uintvar_marker.h>
 
 bool jak_memfile_open(jak_memfile *file, jak_memblock *block, jak_access_mode_e mode)
 {
@@ -64,7 +62,7 @@ bool jak_memfile_seek(jak_memfile *file, jak_offset_t pos)
         return true;
 }
 
-bool jak_memfile_seek_from_here(jak_memfile *file, signed_offset_t where)
+bool jak_memfile_seek_from_here(jak_memfile *file, jak_signed_offset_t where)
 {
         jak_offset_t now = jak_memfile_tell(file);
         jak_offset_t then = now + where;
@@ -173,7 +171,7 @@ jak_i64 jak_memfile_read_i64(jak_memfile *file)
         return *JAK_MEMFILE_READ_TYPE(file, jak_i64);
 }
 
-bool jak_memfile_skip(jak_memfile *file, signed_offset_t nbytes)
+bool jak_memfile_skip(jak_memfile *file, jak_signed_offset_t nbytes)
 {
         jak_offset_t required_size = file->pos + nbytes;
         file->pos += nbytes;
@@ -361,7 +359,7 @@ bool jak_memfile_restore_position(jak_memfile *file)
         }
 }
 
-signed_offset_t jak_memfile_ensure_space(jak_memfile *memfile, jak_u64 nbytes)
+jak_signed_offset_t jak_memfile_ensure_space(jak_memfile *memfile, jak_u64 nbytes)
 {
         JAK_ERROR_IF_NULL(memfile)
 
@@ -376,7 +374,7 @@ signed_offset_t jak_memfile_ensure_space(jak_memfile *memfile, jak_u64 nbytes)
 
         jak_memfile_save_position(memfile);
         jak_offset_t current_off = jak_memfile_tell(memfile);
-        signed_offset_t shift = 0;
+        jak_signed_offset_t shift = 0;
         for (jak_u32 i = 0; i < nbytes; i++) {
                 char c = *jak_memfile_read(memfile, 1);
                 if (JAK_UNLIKELY(c != 0)) {
@@ -430,7 +428,7 @@ jak_u64 jak_memfile_peek_uintvar_stream(jak_u8 *nbytes, jak_memfile *memfile)
 jak_u64 jak_memfile_write_uintvar_stream(jak_u64 *nbytes_moved, jak_memfile *memfile, jak_u64 value)
 {
         jak_u8 required_blocks = JAK_UINTVAR_STREAM_REQUIRED_BLOCKS(value);
-        signed_offset_t shift = jak_memfile_ensure_space(memfile, required_blocks);
+        jak_signed_offset_t shift = jak_memfile_ensure_space(memfile, required_blocks);
         jak_uintvar_stream_t dst = (jak_uintvar_stream_t) jak_memfile_peek(memfile, sizeof(char));
         jak_uintvar_stream_write(dst, value);
         jak_memfile_skip(memfile, required_blocks);
@@ -438,7 +436,7 @@ jak_u64 jak_memfile_write_uintvar_stream(jak_u64 *nbytes_moved, jak_memfile *mem
         return required_blocks;
 }
 
-signed_offset_t jak_memfile_update_uintvar_stream(jak_memfile *memfile, jak_u64 value)
+jak_signed_offset_t jak_memfile_update_uintvar_stream(jak_memfile *memfile, jak_u64 value)
 {
         JAK_ERROR_IF_NULL(memfile);
 
@@ -480,10 +478,16 @@ jak_u64 jak_memfile_peek_uintvar_marker(jak_u8 *nbytes, jak_memfile *memfile)
         return result;
 }
 
+jak_uintvar_marker_e jak_memfile_peek_uintvar_marker_type(jak_memfile *memfile)
+{
+        jak_uintvar_marker_t src = (jak_uintvar_marker_t) jak_memfile_peek(memfile, sizeof(char));
+        return jak_uintvar_marker_type(src);
+}
+
 jak_u64 jak_memfile_write_uintvar_marker(jak_u64 *nbytes_moved, jak_memfile *memfile, jak_u64 value)
 {
         jak_u8 num_bytes_needed = jak_uintvar_marker_required_size(value);
-        signed_offset_t shift = jak_memfile_ensure_space(memfile, num_bytes_needed);
+        jak_signed_offset_t shift = jak_memfile_ensure_space(memfile, num_bytes_needed);
         jak_uintvar_marker_t dst = (jak_uintvar_marker_t) jak_memfile_peek(memfile, sizeof(char));
         jak_uintvar_marker_write(dst, value);
         jak_memfile_skip(memfile, num_bytes_needed);
@@ -491,7 +495,7 @@ jak_u64 jak_memfile_write_uintvar_marker(jak_u64 *nbytes_moved, jak_memfile *mem
         return num_bytes_needed;
 }
 
-signed_offset_t jak_memfile_update_uintvar_marker(jak_memfile *memfile, jak_u64 value)
+jak_signed_offset_t jak_memfile_update_uintvar_marker(jak_memfile *memfile, jak_u64 value)
 {
         JAK_ERROR_IF_NULL(memfile);
 
@@ -504,7 +508,7 @@ signed_offset_t jak_memfile_update_uintvar_marker(jak_memfile *memfile, jak_u64 
 
         jak_uintvar_marker_t dst = (jak_uintvar_marker_t) jak_memfile_peek(memfile, sizeof(char));
         jak_u8 required_bytes = jak_uintvar_marker_write(dst, value);
-        jak_memfile_skip(memfile, required_bytes);
+        jak_memfile_skip(memfile, required_bytes + sizeof(jak_marker_t));
 
         return bytes_used_then - bytes_used_now;
 }
