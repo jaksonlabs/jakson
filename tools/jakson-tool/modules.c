@@ -626,6 +626,73 @@ bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *
     }
 }
 
+bool moduleValSchema(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager)
+{
+    JAK_UNUSED(manager);
+
+    if (argc < 2) {
+        JAK_CONSOLE_WRITE(file, "Require one schema file and at least one BISON file to test for <args>.%s", "");
+        JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
+        JAK_CONSOLE_WRITELN(file, "Run '%s' to see an example on the usage.", "$ types schema");
+        return false;
+    } else {
+        int schemaIdx = 0;
+        int i;
+
+        for (i = 0; i < argc; i++) {
+            char *opt = argv[i];
+            if (strncmp(opt, "--", 2) == 0) {
+                // TODO: fancy flag options
+                JAK_CONSOLE_WRITELN(file, "** ERROR ** unrecognized option '%s'", opt);
+                return false;
+            }
+            // schemafile should be right after flag options
+            schemaIdx = i;
+            if (schemaIdx + 1 >= argc) {
+                JAK_CONSOLE_WRITELN(file, "** ERROR ** require schema and CARBON parameter: %d remain", argc);
+            return false;
+            }
+            break;
+        }
+
+        const char *pathSchemaFileIn = argv[schemaIdx];
+
+        if (testFileExists(file, pathSchemaFileIn, 1, 1, true) != true) {
+            JAK_CONSOLE_WRITELN(file, "Schema file cannot be found. %s", "STOP.");
+            return false;
+        }
+        JAK_CONSOLE_WRITELN(file, "  - Read schema contents into memory%s", "");
+
+        FILE *f = fopen(pathSchemaFileIn, "rb");
+        fseek(f, 0, SEEK_END);
+        long fsize = ftell(f);
+        fseek(f, 0, SEEK_SET);
+        char *schemaContent = JAK_MALLOC(fsize + 1);
+        size_t nread = fread(schemaContent, fsize, 1, f);
+        JAK_UNUSED(nread);
+        fclose(f);
+        schemaContent[fsize] = 0;
+
+        int skippedFiles = 0;
+        int failedFiles = 0;
+        for (i = schemaIdx + 1; i < argc; i++) {
+            char *pathCarbonFileIn = argv[i];
+            if (testFileExists(file, pathCarbonFileIn, 1, 1, true) != true) {
+                JAK_CONSOLE_WRITELN(file, "Warning: File %s does not exist. Skipping.", pathCarbonFileIn);
+                skippedFiles++;
+            } else {
+                //TODO: implement validation    
+            }
+        }
+
+        free(schemaContent);
+        JAK_CONSOLE_WRITELN(file, "  - Schema validation completed with %d skipped and %d failed CARBON files.", skippedFiles, failedFiles);
+
+        return true;
+    }
+}
+
+
 bool moduleListInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager)
 {
     JAK_UNUSED(manager);

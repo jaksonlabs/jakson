@@ -41,6 +41,8 @@
 #define DESC_CAB_VIEW "Print CARBON file in human readable form to stdout"
 #define DESC_CAB_INFO "Display information about a CARBON file to stdout"
 
+#define DESC_SCHEMA_USAGE "TODO"
+
 #define DESC_CLI "Runs the (experimental) command line interface"
 #define DESC_CLI_INFO "Executes interactively commands on CARBON file <args>.\n" \
                       "\nEXAMPLE\n" \
@@ -66,6 +68,7 @@ DEFINE_MODULE(Js2Cab, "convert", DESC_JS2CAB_USAGE, moduleJs2CabInvoke);
 DEFINE_MODULE(ViewCab, "view", DESC_CAB_VIEW, moduleViewCabInvoke);
 DEFINE_MODULE(Inspect, "inspect", DESC_CAB_INFO, moduleInspectInvoke);
 DEFINE_MODULE(Cab2Js, "to_json", DESC_CAB2JS_USAGE, moduleCab2JsInvoke);
+DEFINE_MODULE(ValSchema, "validate_schema", DESC_SCHEMA_USAGE, moduleValSchema);
 
 DEFINE_MODULE(List, "list", DESC_LIST_USAGE, moduleListInvoke);
 
@@ -106,6 +109,10 @@ int main (int argc, char **argv)
                                 "to_json", DESC_CAB2JS_INFO,
                                 "manpages/types/to_json",
                                 moduleCab2JsEntry);
+    opt_group_add_cmd(group,
+                                "validate_schema", DESC_SCHEMA_USAGE,
+                                "manpages/types/validate_schema",
+                                moduleValSchemaEntry);
 
     jak_opt_manager_create_group(&group, "misc and orientation", &manager);
     opt_group_add_cmd(group,
