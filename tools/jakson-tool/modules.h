@@ -28,6 +28,7 @@ bool moduleViewCabInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr 
 bool moduleInspectInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager);
 bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager);
 bool moduleListInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager);
+bool moduleBenchInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager);
 
 
 #endif

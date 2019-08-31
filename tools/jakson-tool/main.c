@@ -50,6 +50,13 @@
 #define DESC_LIST_USAGE "The parameter <args> is one of the following constants:\n\n"                                  \
                         "   compressors               Shows available compressors used by `convert` module"
 
+#define DESC_BENCH          "Convert single JSON file into CARBON|BSON|UBJSON and run a benchmark test on it\n"
+#define DESC_BENCH_USAGE    "The parameter <args> split into two parts <format> and <input>.\n" \
+                            "This command converts a single JSON file <input> into format type <format>,\n" \
+                            "runs a pre-defined benchmark on it and prints the results to stdout" \
+                            "\nEXAMPLE\n" \
+                            "   $ jakson-tool bench CARBON myfile.json\n" \
+
 #define DEFINE_MODULE(module_name, moduleCommand, desc, invokeFunc)                                              \
 static int module##module_name##Entry(int argc, char **argv, FILE *file)                                         \
 {                                                                                                               \
@@ -68,7 +75,7 @@ DEFINE_MODULE(Inspect, "inspect", DESC_CAB_INFO, moduleInspectInvoke);
 DEFINE_MODULE(Cab2Js, "to_json", DESC_CAB2JS_USAGE, moduleCab2JsInvoke);
 
 DEFINE_MODULE(List, "list", DESC_LIST_USAGE, moduleListInvoke);
-
+DEFINE_MODULE(Bench, "bench", DESC_BENCH_USAGE, moduleBenchInvoke)
 
 static bool showHelp(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager);
 
@@ -112,6 +119,10 @@ int main (int argc, char **argv)
                                 "list", DESC_LIST,
                                 "manpages/types/list",
                                 moduleListEntry);
+    opt_group_add_cmd(group,
+                                "bench", DESC_BENCH,
+                                "manpages/types/bench",
+                                moduleBenchEntry);
 
     int status = jak_opt_manager_process(&manager, argc - 1, argv + 1, stdout);
     jak_opt_manager_drop(&manager);

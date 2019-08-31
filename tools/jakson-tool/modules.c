@@ -650,3 +650,37 @@ bool moduleListInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *ma
         return true;
     }
 }
+
+bool moduleBenchInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager)
+{
+    JAK_UNUSED(manager);
+
+    // TODO: Allow input of multiple files
+    if (argc != 2) {
+        JAK_CONSOLE_WRITE(file, "Require <format type> and <input> parameters for <args>.%s", "");
+        JAK_CONSOLE_WRITE_CONT(file, "[%s]\n", "ERROR");
+        JAK_CONSOLE_WRITELN(file, "Run '%s' to see an example on the usage.", "$ types bench");
+        return false;
+    } else {
+        const char *format = argv[0];
+        const char *filePath = argv[1];
+
+        if(testFileExists(file, filePath, 1, 1, true) != true) {
+            JAK_CONSOLE_WRITELN(file, "Input file '%s' cannot be found. STOP", filePath);
+            return false;
+        }
+
+        if(strcmp(format, "CARBON") == 0) {
+            // TODO: Include Carbon file benchmarking
+        } else if(strcmp(format, "BSON") == 0) {
+            // TODO: Include BSON file benchmarking
+        } else if(strcmp(format, "UBJSON") == 0) {
+            // TODO: Include UBJSON file benchmarking
+        } else {
+            JAK_CONSOLE_WRITELN(file, "Format type '%s' is not supported. STOP", format);
+        }
+
+    }
+
+    return true;
+}
