@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
-#if !defined(BSON_INSIDE) && !defined(BSON_COMPILATION)
-//#error "Only <bson/bson.h> can be included directly."
+#if !defined(MONGOC_INSIDE) && !defined(MONGOC_COMPILATION) && \
+   !defined(BSON_COMPILATION) && !defined(BSON_INSIDE)
+//#error "Only <mongoc/mongoc.h> or <bson/bson.h> can be included directly."
 #endif

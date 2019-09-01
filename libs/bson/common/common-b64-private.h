@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-present MongoDB, Inc.
+ * Copyright 2018-present MongoDB Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,20 @@
  * limitations under the License.
  */
 
-#if !defined(BSON_INSIDE) && !defined(BSON_COMPILATION)
-//#error "Only <bson/bson.h> can be included directly."
-#endif
+#include "common-prelude.h"
+
+#ifndef COMMON_B64_PRIVATE_H
+#define COMMON_B64_PRIVATE_H
+
+#include "../bson.h"
+
+int
+bson_b64_ntop (uint8_t const *src,
+               size_t srclength,
+               char *target,
+               size_t targsize);
+
+int
+bson_b64_pton (char const *src, uint8_t *target, size_t targsize);
+
+#endif /* COMMON_B64_PRIVATE_H */

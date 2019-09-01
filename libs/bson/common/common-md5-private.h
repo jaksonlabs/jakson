@@ -14,6 +14,22 @@
  * limitations under the License.
  */
 
-#if !defined(BSON_INSIDE) && !defined(BSON_COMPILATION)
-//#error "Only <bson/bson.h> can be included directly."
-#endif
+#include "common-prelude.h"
+
+#ifndef COMMON_MD5_PRIVATE_H
+#define COMMON_MD5_PRIVATE_H
+
+#include "../bson.h"
+
+BSON_BEGIN_DECLS
+
+void
+_bson_md5_init (bson_md5_t *pms);
+void
+_bson_md5_append (bson_md5_t *pms, const uint8_t *data, uint32_t nbytes);
+void
+_bson_md5_finish (bson_md5_t *pms, uint8_t digest[16]);
+
+BSON_END_DECLS
+
+#endif /* COMMON_MD5_PRIVATE_H */
