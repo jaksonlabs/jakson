@@ -5,6 +5,8 @@
 #include <jak_archive_int.h>
 #include <jak_carbon.h>
 
+#include <libs/bson/bson.h>
+
 #include "modules.h"
 
 struct js_to_context
@@ -671,9 +673,31 @@ bool moduleBenchInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *m
         }
 
         if(strcmp(format, "CARBON") == 0) {
-            // TODO: Include Carbon file benchmarking
+            // TODO: Include CARBON file benchmarking
         } else if(strcmp(format, "BSON") == 0) {
             // TODO: Include BSON file benchmarking
+            bson_reader_t *bReader;
+            const bson_t *b;
+            bson_error_t bError;
+            char *str;
+
+            if(!(bReader = bson_reader_new_from_file(filePath, &bError))) {
+                JAK_CONSOLE_WRITE(file, "BSON reader Failed to open '%s': ", filePath);
+                JAK_CONSOLE_WRITE(file, "%s", bError.message);
+                JAK_CONSOLE_WRITE_ENDL(file);
+                return false;
+            }
+
+            while((b = bson_reader_read(bReader, NULL))) {
+                str = bson_as_canonical_extended_json(b, NULL);
+                // Output test -> Remove later
+                JAK_CONSOLE_WRITE(file, "%s", str);
+                JAK_CONSOLE_WRITE_ENDL(file);
+
+                bson_free(str);
+            }
+            bson_reader_destroy(bReader);
+
         } else if(strcmp(format, "UBJSON") == 0) {
             // TODO: Include UBJSON file benchmarking
         } else {
