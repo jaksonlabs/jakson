@@ -1,0 +1,44 @@
+{
+    "required": ["foo", "bar"],
+    "maxProperties": 20,
+
+    "properties": {
+        "foo": { 
+            "type": [ "int", "float" ],
+            "maximum": 10,
+            "minimum": 5
+        },
+
+        "bar": {
+            "type": "column",
+            "maxItems": 5,
+            "uniqueItems": true,
+            "items": [
+                { "type": "string" },
+                { "minLength": 5 },
+                { "maxLength": 5 }
+            ]
+        },
+
+        "oof": {
+            "type": "array",
+            "items": [
+                { "type": "string" },
+                { "format": "date" },
+                { "formatMaximum": "2019-03-12" },
+                { "type": "string" },
+                { "pattern": "[oof]+" }
+            ],
+            "additionalItems": { "type": "string" }
+        },
+
+        "rab": {
+            "type": "array",
+            "contains": { "type": "string" }
+        },
+        "baz": {
+            "type": "object",
+            properties:
+        }
+    }
+}

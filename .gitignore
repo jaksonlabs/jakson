@@ -1,5 +1,3 @@
-*.carbon
-*.json
 *.dylib
 *.cbp
 install_manifest.txt
@@ -10,7 +8,6 @@ CTestTestfile.cmake
 Testing/Temporary
 carbon-temp-statistics--cache-monitor.csv
 *.csv
-examples/json
 book/libcarbon/latest/book
 book/spec/latest/book
 CMakeFiles

@@ -667,7 +667,7 @@ bool moduleValSchema(int argc, char **argv, FILE *file, jak_command_opt_mgr *man
         fseek(f, 0, SEEK_END);
         long fsize = ftell(f);
         fseek(f, 0, SEEK_SET);
-        char *schemaContent = JAK_MALLOC(fsize + 1);
+        static const char *schemaContent = JAK_MALLOC(fsize + 1);
         size_t nread = fread(schemaContent, fsize, 1, f);
         JAK_UNUSED(nread);
         fclose(f);
@@ -681,10 +681,25 @@ bool moduleValSchema(int argc, char **argv, FILE *file, jak_command_opt_mgr *man
                 JAK_CONSOLE_WRITELN(file, "Warning: File %s does not exist. Skipping.", pathCarbonFileIn);
                 skippedFiles++;
             } else {
-                //TODO: implement validation    
+                FILE *f = fopen(pathCarbonFileIn, "rb");
+                fseek(f, 0, SEEK_END);
+                long fsize = ftell(f);
+                char *carbonContent = JAK_MALLOC(fsize +1);
+                size_t nread = fread(carbonContent, fsize, 1, f);
+                JAK_UNUSED(nread);
+                fclose(f);
+                carbonContent[fsize]=0;
+                // validate schema
+                if(jak_validate_schema(schemaContent, carbonContent) != true) {
+                    // TODO: details on failure
+                    JAK_CONSOLE_WRITELN(file, "Warning: File %s failed the schema validation!", pathCarbonFileIn);
+                    failedFiles++;
+                } else {
+                    JAK_CONSOLE_WRITELN(file, "File %s: passed", pathCarbonFileIn);
+                }
+                free(carbonContent);
             }
         }
-
         free(schemaContent);
         JAK_CONSOLE_WRITELN(file, "  - Schema validation completed with %d skipped and %d failed CARBON files.", skippedFiles, failedFiles);
 
