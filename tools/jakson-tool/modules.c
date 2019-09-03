@@ -6,6 +6,7 @@
 #include <jak_carbon.h>
 
 #include <libs/bson/bson.h>
+#include <libs/ubj/ubj.h>
 
 #include "modules.h"
 
@@ -653,6 +654,8 @@ bool moduleListInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *ma
     }
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpointer-sign"
 bool moduleBenchInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager)
 {
     JAK_UNUSED(manager);
@@ -700,6 +703,48 @@ bool moduleBenchInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *m
 
         } else if(strcmp(format, "UBJSON") == 0) {
             // TODO: Include UBJSON file benchmarking
+            char *testStr = "Test";
+            size_t len_testStr = strlen(testStr);
+            const char expected_mixed_dynamic_array[]= "[i\x05Si\x05helloi\x0a]";
+            uint8_t *memory = malloc(2 * len_testStr);
+            ubjw_context_t *ctx = ubjw_open_memory(memory, memory + 2 * len_testStr);
+
+            JAK_UNUSED(expected_mixed_dynamic_array);
+
+            ubjw_begin_array(ctx, UBJ_MIXED, 0);
+            ubjw_write_int8(ctx, 5);
+            ubjw_write_string(ctx, "hello");
+            ubjw_write_int8(ctx, 10);
+            ubjw_end(ctx);
+
+            size_t n = ubjw_close_context(ctx);
+            int c = memcmp(memory, testStr, len_testStr);
+            if (c == 0 && n == len_testStr) {
+                printf("PASSED\n");
+            } else {
+                printf("FAILED (");
+            }
+
+            ubjr_context_t* rctx = ubjr_open_memory(testStr,testStr + len_testStr);
+            ubjw_context_t* wctx = ubjw_open_memory(memory,memory+2*len_testStr);
+            ubjr_dynamic_t filestruct=ubjr_read_dynamic(rctx);
+            ubjrw_write_dynamic(ctx,filestruct,0);
+
+            n = ubjw_close_context(ctx);
+            c = memcmp(memory, testStr, len_testStr);
+            if (c == 0 && n == len_testStr) {
+                printf("PASSED\n");
+            } else {
+                printf("FAILED (");
+            }
+
+            ubjr_cleanup_dynamic(&filestruct);
+
+            ubjr_close_context(rctx);
+            ubjw_close_context(wctx);
+
+            free(memory);
+
         } else {
             JAK_CONSOLE_WRITELN(file, "Format type '%s' is not supported. STOP", format);
         }
@@ -708,3 +753,4 @@ bool moduleBenchInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *m
 
     return true;
 }
+#pragma clang diagnostic pop
