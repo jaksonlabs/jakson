@@ -45,7 +45,12 @@ selector_read_file(char const * filename) {
     fseek(file, 0, SEEK_SET);
 
     char *content = malloc(file_size + 1);
-    fread(content, 1, file_size, file);
+    if(fread(content, 1, file_size, file) != file_size) {
+        free(content);
+        fclose(file);
+        return "";
+    }
+
     fclose(file);
     content[file_size] = 0;
 
