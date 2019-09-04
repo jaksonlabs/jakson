@@ -326,8 +326,20 @@ carbon_compressor_auto_prepare_entries(carbon_compressor_t *self,
         }
 
         for(carbon_hashmap_iterator_t inner_it = carbon_hashmap_begin(extra->compressors);inner_it.valid;carbon_hashmap_next(&inner_it)) {
-            if(carbon_compressor_config_similarity(&tmp, (carbon_compressor_selector_result_t*)inner_it.value)) {
+            carbon_compressor_selector_result_t* inner_config = (carbon_compressor_selector_result_t*)inner_it.value;
+            if(carbon_compressor_config_similarity(&tmp, inner_config)) {
                 CARBON_CONSOLE_WRITELN(stdout, "            Joining %s to %s", it.key, inner_it.key);
+
+                // Ensure we are using dictionary coding when joining incremental and prefix or incremental & incremental
+                if(
+                        (
+                            tmp.config.prefix == carbon_compressor_configurable_prefix_type_prefix_dict_coding ||
+                            tmp.config.prefix == carbon_compressor_configurable_prefix_type_incremental
+                        ) &&
+                        inner_config->config.prefix == carbon_compressor_configurable_prefix_type_incremental
+                ) {
+                    inner_config->config.prefix = carbon_compressor_configurable_prefix_type_prefix_dict_coding;
+                }
 
                 carbon_string_id_t old_key_id = this_safe_find_key(extra->context->dic, inner_it.key);
                 carbon_strdic_join_grouping_keys(extra->context->dic, new_key_id, old_key_id);

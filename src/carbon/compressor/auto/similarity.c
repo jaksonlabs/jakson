@@ -6,15 +6,21 @@ bool carbon_compressor_config_similarity(
     )
 {
     if(
-            a->joinable_group == SIZE_MAX ||
-            b->joinable_group == SIZE_MAX ||
+            a->joinable_group == 0 ||
+            b->joinable_group == 0 ||
             a->joinable_group != b->joinable_group
     ) {
         return false;
     }
 
     if(
-            a->config.prefix != b->config.prefix ||
+            (
+                a->config.prefix != b->config.prefix &&
+                !(
+                    a->config.prefix == carbon_compressor_configurable_prefix_type_prefix_dict_coding &&
+                    b->config.prefix != carbon_compressor_configurable_prefix_type_none
+                )
+            ) ||
             a->config.suffix != b->config.suffix ||
             a->config.reverse_strings != b->config.reverse_strings ||
             a->config.reverse_sort    != b->config.reverse_sort ||

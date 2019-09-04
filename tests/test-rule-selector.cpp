@@ -8,19 +8,19 @@
 
 TEST(RuleSelector, Parser) {
     char const * content = "url.pattern=[a-z]+://[^\\s]+\n"
-                           "url.joinable=true\n"
+                           "url.join_group=1\n"
                            "url.option.reverse_strings=true\n"
                            "url.option.reverse_sort=false\n"
                            "url.option.prefix=table\n"
-                           "url.option.suffix=incremental\n"
+                           "url.option.suffix=configurable\n"
                            "url.option.huffman=true\n"
                            "\n"
                            "email.pattern=[^\\s]+@[^\\s]+\n"
-                           "email.joinable=true\n"
+                           "email.join_group=0\n"
                            "email.option.reverse_strings=true\n"
                            "email.option.reverse_sort=false\n"
                            "email.option.prefix=table\n"
-                           "email.option.suffix=incremental\n"
+                           "email.option.suffix=configurable\n"
                            "email.option.huffman=true\n";
 
     carbon_vec_t *rules = carbon_compressor_selector_rule_based_parse(content);
