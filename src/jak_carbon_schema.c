@@ -18,10 +18,10 @@
 // ---------------------------------------------------------------------------------------------------------------------
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
+# include "jak_carbon_schema.h"
 
-#include "jak_json.h"
-
-bool jak_validate_schema(static const char *schemaContent, char *carbonContent) {
-    
-
+bool jak_carbon_validate_schema(jak_json *schema, jak_memblock *carbon) {
+    JAK_UNUSED(schema);
+    JAK_UNUSED(carbon);
+    return true;   
 }

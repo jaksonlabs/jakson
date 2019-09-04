@@ -71,6 +71,7 @@
 #include <jak_pred_equals.h>
 #include <jak_carbon_printers.h>
 #include <jak_uintvar_stream.h>
+#include <jak_carbon_schema.h>
 
 JAK_BEGIN_DECL
 
