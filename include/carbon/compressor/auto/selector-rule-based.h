@@ -12,7 +12,7 @@ typedef struct carbon_selector_rule {
     char *name;
     char *pattern;
 
-    bool joinable;
+    size_t join_group;
 
     carbon_hashmap_t options;
 } carbon_selector_rule_t;
@@ -20,6 +20,8 @@ typedef struct carbon_selector_rule {
 typedef struct carbon_compressor_selector_rule_based_config {
     char * ruleset_filename;
     carbon_vec_t ofType(carbon_selector_rule_t *) * rules;
+
+    double min_support;
 } carbon_compressor_selector_rule_based_config_t;
 
 CARBON_EXPORT(carbon_vec_t ofType(carbon_selector_rule_t) *)

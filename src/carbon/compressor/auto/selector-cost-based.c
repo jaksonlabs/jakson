@@ -2,16 +2,16 @@
 #include <carbon/compressor/auto/common-prefix-suffix-iterator.h>
 
 #include <carbon/compressor/compressor-utils.h>
-#include <carbon/compressor/carbon-compressor-incremental.h>
+#include <carbon/compressor/carbon-compressor-configurable.h>
 #include <carbon/compressor/huffman/priority-queue.h>
 #include <carbon/compressor/prefix/prefix_encoder.h>
 
 #include <math.h>
 
 // Avoid writing out these every time...
-static carbon_compressor_incremental_prefix_type_e const none = carbon_compressor_incremental_prefix_type_none;
-static carbon_compressor_incremental_prefix_type_e const inc = carbon_compressor_incremental_prefix_type_incremental;
-static carbon_compressor_incremental_prefix_type_e const table = carbon_compressor_incremental_prefix_type_table;
+static carbon_compressor_configurable_prefix_type_e const none = carbon_compressor_configurable_prefix_type_none;
+static carbon_compressor_configurable_prefix_type_e const inc = carbon_compressor_configurable_prefix_type_incremental;
+static carbon_compressor_configurable_prefix_type_e const table = carbon_compressor_configurable_prefix_type_prefix_dict_coding;
 
 
 typedef struct cost_model_input {
@@ -154,17 +154,17 @@ carbon_compressor_selector_result_t carbon_compressor_find_by_strings_cost_based
         }
     }
 
-    result.joinable_group = 0;
+    result.joinable_group = 1;
     result.compressor     = malloc(sizeof(carbon_compressor_t));
 
-    carbon_compressor_by_type(&err, result.compressor, context, CARBON_COMPRESSOR_INCREMENTAL);
+    carbon_compressor_by_type(&err, result.compressor, context, CARBON_COMPRESSOR_CONFIGURABLE);
     carbon_compressor_selector_apply_highlevel_config(result.compressor, &result.config);
 
     CARBON_CONSOLE_WRITELN(
                 stdout,
                 "            Detected settings: prefix = %s, suffix = %s, huffman = %s, rev_str = %s, rev_sort = %s",
-                (result.config.prefix == inc ? "incremental" : ( result.config.prefix == table ? "table" : "none" )),
-                (result.config.suffix == inc ? "incremental" : ( result.config.suffix == table ? "table" : "none" )),
+                (result.config.prefix == inc ? "incremental" : ( result.config.prefix == table ? "prefix-dict" : "none" )),
+                (result.config.suffix == inc ? "incremental" : ( result.config.suffix == table ? "prefix-dict" : "none" )),
                 result.config.huffman ?         "true" : "false",
                 result.config.reverse_strings ? "true" : "false",
                 result.config.reverse_sort ?    "true" : "false"
@@ -262,21 +262,21 @@ static ssize_t selector_evluate_model(
     ssize_t savings = 0;
 
     switch(config->prefix) {
-    case carbon_compressor_incremental_prefix_type_incremental:
+    case carbon_compressor_configurable_prefix_type_incremental:
     {
         if(config->reverse_strings)
-            savings += ((config->reverse_sort ? input->avg_suffix_suffix_len : input->avg_prefix_suffix_len) - 1.0) * (ssize_t)input->total_entry_count;
+            savings += ((config->reverse_sort ? input->avg_suffix_suffix_len : input->avg_prefix_suffix_len) - 2.5) * (ssize_t)input->total_entry_count;
         else
-            savings += ((config->reverse_sort ? input->avg_suffix_prefix_len : input->avg_prefix_prefix_len) - 1.0) * (ssize_t)input->total_entry_count;
+            savings += ((config->reverse_sort ? input->avg_suffix_prefix_len : input->avg_prefix_prefix_len) - 2.5) * (ssize_t)input->total_entry_count;
 
         break;
     }
-    case carbon_compressor_incremental_prefix_type_table:
+    case carbon_compressor_configurable_prefix_type_prefix_dict_coding:
     {
         if(config->reverse_strings)
-            savings += (input->avg_suffix_suffix_len - 2.0) * (ssize_t)input->total_entry_count;
+            savings += (input->avg_suffix_suffix_len - 3.5) * (ssize_t)input->total_entry_count;
         else
-            savings += (input->avg_prefix_prefix_len - 2.0) * (ssize_t)input->total_entry_count;
+            savings += (input->avg_prefix_prefix_len - 3.5) * (ssize_t)input->total_entry_count;
 
         break;
     }
@@ -287,12 +287,12 @@ static ssize_t selector_evluate_model(
 
 
     switch(config->suffix) {
-    case carbon_compressor_incremental_prefix_type_incremental:
+    case carbon_compressor_configurable_prefix_type_incremental:
     {
         if(config->reverse_strings)
-            savings += ((config->reverse_sort ? input->avg_prefix_prefix_len : input->avg_suffix_prefix_len) - 1.0) * (ssize_t)input->total_entry_count;
+            savings += ((config->reverse_sort ? input->avg_prefix_prefix_len : input->avg_suffix_prefix_len) - 2.5) * (ssize_t)input->total_entry_count;
         else
-            savings += ((config->reverse_sort ? input->avg_prefix_suffix_len : input->avg_suffix_suffix_len) - 1.0) * (ssize_t)input->total_entry_count;
+            savings += ((config->reverse_sort ? input->avg_prefix_suffix_len : input->avg_suffix_suffix_len) - 2.5) * (ssize_t)input->total_entry_count;
 
         break;
     }

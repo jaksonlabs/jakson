@@ -22,7 +22,7 @@
 #include <carbon/compressor/carbon-compressor-null.h>
 #include <carbon/compressor/carbon-compressor-huffman.h>
 #include <carbon/compressor/carbon-compressor-prefix.h>
-#include <carbon/compressor/carbon-compressor-incremental.h>
+#include <carbon/compressor/carbon-compressor-configurable.h>
 #include <carbon/compressor/carbon-compressor-auto.h>
 
 #include <carbon/carbon-hashmap.h>
@@ -45,7 +45,7 @@ typedef enum carbon_compressor_type
     CARBON_COMPRESSOR_NULL,
     CARBON_COMPRESSOR_HUFFMAN,
     CARBON_COMPRESSOR_PREFIX,
-    CARBON_COMPRESSOR_INCREMENTAL,
+    CARBON_COMPRESSOR_CONFIGURABLE,
     CARBON_COMPRESSOR_AUTO
 } carbon_compressor_type_e;
 
@@ -268,19 +268,19 @@ static void carbon_compressor_prefix_create(carbon_compressor_t *strategy)
     strategy->print_encoded   = carbon_compressor_prefix_print_encoded_string;
 }
 
-static void carbon_compressor_incremental_create(carbon_compressor_t *strategy)
+static void carbon_compressor_configurable_create(carbon_compressor_t *strategy)
 {
-    strategy->tag             = CARBON_COMPRESSOR_INCREMENTAL;
-    strategy->create          = carbon_compressor_incremental_init;
-    strategy->cpy             = carbon_compressor_incremental_cpy;
-    strategy->drop            = carbon_compressor_incremental_drop;
-    strategy->write_extra     = carbon_compressor_incremental_write_extra;
-    strategy->read_extra      = carbon_compressor_incremental_read_extra;
-    strategy->prepare_entries = carbon_compressor_incremental_prepare_entries;
-    strategy->encode_string   = carbon_compressor_incremental_encode_string;
-    strategy->decode_string   = carbon_compressor_incremental_decode_string;
-    strategy->print_extra     = carbon_compressor_incremental_print_extra;
-    strategy->print_encoded   = carbon_compressor_incremental_print_encoded_string;
+    strategy->tag             = CARBON_COMPRESSOR_CONFIGURABLE;
+    strategy->create          = carbon_compressor_configurable_init;
+    strategy->cpy             = carbon_compressor_configurable_cpy;
+    strategy->drop            = carbon_compressor_configurable_drop;
+    strategy->write_extra     = carbon_compressor_configurable_write_extra;
+    strategy->read_extra      = carbon_compressor_configurable_read_extra;
+    strategy->prepare_entries = carbon_compressor_configurable_prepare_entries;
+    strategy->encode_string   = carbon_compressor_configurable_encode_string;
+    strategy->decode_string   = carbon_compressor_configurable_decode_string;
+    strategy->print_extra     = carbon_compressor_configurable_print_extra;
+    strategy->print_encoded   = carbon_compressor_configurable_print_encoded_string;
 }
 
 static void carbon_compressor_auto_create(carbon_compressor_t *strategy)
@@ -317,8 +317,8 @@ static struct
       .create = carbon_compressor_huffman_create,             .flag_bit = 1 << 2  },
     { .type = CARBON_COMPRESSOR_PREFIX, .name = "prefix",
       .create = carbon_compressor_prefix_create,              .flag_bit = 1 << 3  },
-    { .type = CARBON_COMPRESSOR_INCREMENTAL, .name = "incremental",
-      .create = carbon_compressor_incremental_create,         .flag_bit = 1 << 4  },
+    { .type = CARBON_COMPRESSOR_CONFIGURABLE, .name = "configurable",
+      .create = carbon_compressor_configurable_create,         .flag_bit = 1 << 4  },
     { .type = CARBON_COMPRESSOR_AUTO, .name = "auto",
       .create = carbon_compressor_auto_create,                .flag_bit = 1 << 5  }
 };

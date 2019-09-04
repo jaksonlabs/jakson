@@ -1,16 +1,16 @@
 #include <carbon/compressor/auto/selector-brute-force.h>
 
 #include <carbon/compressor/compressor-utils.h>
-#include <carbon/compressor/carbon-compressor-incremental.h>
+#include <carbon/compressor/carbon-compressor-configurable.h>
 
 #include <carbon/carbon-memfile.h>
 #include <carbon/carbon-memblock.h>
 
 
 // Avoid writing out these every time...
-static carbon_compressor_incremental_prefix_type_e const none = carbon_compressor_incremental_prefix_type_none;
-static carbon_compressor_incremental_prefix_type_e const inc = carbon_compressor_incremental_prefix_type_incremental;
-static carbon_compressor_incremental_prefix_type_e const table = carbon_compressor_incremental_prefix_type_table;
+static carbon_compressor_configurable_prefix_type_e const none = carbon_compressor_configurable_prefix_type_none;
+static carbon_compressor_configurable_prefix_type_e const inc = carbon_compressor_configurable_prefix_type_incremental;
+static carbon_compressor_configurable_prefix_type_e const table = carbon_compressor_configurable_prefix_type_prefix_dict_coding;
 
 
 // Forward decl of helpers
@@ -104,8 +104,8 @@ carbon_compressor_selector_result_t carbon_compressor_find_by_strings_brute_forc
             result.config         = configurations[i];
 
             if(result.config.huffman) {
-                carbon_compressor_incremental_extra_t *extra =
-                        (carbon_compressor_incremental_extra_t *)compressor->extra;
+                carbon_compressor_configurable_extra_t *extra =
+                        (carbon_compressor_configurable_extra_t *)compressor->extra;
 
                 carbon_huffman_encoder_drop(&result.huffman);
                 carbon_huffman_encoder_create(&result.huffman);
@@ -119,8 +119,8 @@ carbon_compressor_selector_result_t carbon_compressor_find_by_strings_brute_forc
     CARBON_CONSOLE_WRITELN(
                 stdout,
                 "            Detected settings: prefix = %s, suffix = %s, huffman = %s, rev_str = %s, rev_sort = %s",
-                (result.config.prefix == inc ? "incremental" : ( result.config.prefix == table ? "table" : "none" )),
-                (result.config.suffix == inc ? "incremental" : ( result.config.suffix == table ? "table" : "none" )),
+                (result.config.prefix == inc ? "incremental" : ( result.config.prefix == table ? "prefix-dict" : "none" )),
+                (result.config.suffix == inc ? "incremental" : ( result.config.suffix == table ? "prefix-dict" : "none" )),
                 result.config.huffman ?         "true" : "false",
                 result.config.reverse_strings ? "true" : "false",
                 result.config.reverse_sort ?    "true" : "false"
@@ -129,7 +129,7 @@ carbon_compressor_selector_result_t carbon_compressor_find_by_strings_brute_forc
     carbon_vec_drop(samples);
     free(samples);
 
-    result.joinable_group = 0;
+    result.joinable_group = 1;
     result.compressor     = compressor_for(result.config, context);
     return result;
 }
@@ -143,7 +143,7 @@ static carbon_compressor_t *compressor_for(
 
 
     carbon_err_t err;
-    carbon_compressor_by_type(&err, compressor, context, CARBON_COMPRESSOR_INCREMENTAL);
+    carbon_compressor_by_type(&err, compressor, context, CARBON_COMPRESSOR_CONFIGURABLE);
     carbon_compressor_selector_apply_highlevel_config(compressor, &config);
     return compressor;
 }
@@ -155,13 +155,13 @@ static size_t compute_size(
     carbon_err_t       err;
     carbon_memfile_t   memfile;
     carbon_memblock_t *memblock;
-    carbon_compressor_incremental_extra_t * extra =
-            (carbon_compressor_incremental_extra_t *)compressor->extra;
+    carbon_compressor_configurable_extra_t * extra =
+            (carbon_compressor_configurable_extra_t *)compressor->extra;
 
     carbon_memblock_create(&memblock, 1024 * 1024);
     carbon_memfile_open(&memfile, memblock, CARBON_MEMFILE_MODE_READWRITE);
 
-    carbon_compressor_incremental_prepare_and_analyze(
+    carbon_compressor_configurable_prepare_and_analyze(
         strings, &extra->config,
         &extra->prefix_tbl_table, &extra->prefix_tbl_encoder,
         &extra->huffman_encoder,

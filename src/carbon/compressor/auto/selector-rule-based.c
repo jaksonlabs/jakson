@@ -4,8 +4,8 @@
 #define CARBON_COMPRESSOR_REGEX_NUM_GROUPS 4
 
 // Avoid writing out these every time...
-static carbon_compressor_incremental_prefix_type_e const inc = carbon_compressor_incremental_prefix_type_incremental;
-static carbon_compressor_incremental_prefix_type_e const table = carbon_compressor_incremental_prefix_type_table;
+static carbon_compressor_configurable_prefix_type_e const inc = carbon_compressor_configurable_prefix_type_incremental;
+static carbon_compressor_configurable_prefix_type_e const table = carbon_compressor_configurable_prefix_type_prefix_dict_coding;
 
 typedef enum rule_params {
     rule_param_pattern,
@@ -198,7 +198,7 @@ carbon_compressor_selector_result_t carbon_compressor_find_by_strings_rule_based
     carbon_huffman_create_all_eq_encoder(&result.huffman);
 
     result.compressor = malloc(sizeof(carbon_compressor_t));
-    carbon_compressor_by_type(&err, result.compressor, context, CARBON_COMPRESSOR_INCREMENTAL);
+    carbon_compressor_by_type(&err, result.compressor, context, CARBON_COMPRESSOR_CONFIGURABLE);
     for(carbon_hashmap_iterator_t it = carbon_hashmap_begin(rule->options);it.valid;carbon_hashmap_next(&it)) {
         if(!carbon_compressor_set_option(&err, result.compressor, it.key, (char *)it.value)) {
             CARBON_PRINT_ERROR_AND_DIE(err.code);
@@ -219,8 +219,8 @@ carbon_compressor_selector_result_t carbon_compressor_find_by_strings_rule_based
         stdout,
         "            Detected settings: rule: %s, prefix = %s, suffix = %s, huffman = %s, rev_str = %s, rev_sort = %s",
         rule->name,
-        (result.config.prefix == inc ? "incremental" : ( result.config.prefix == table ? "table" : "none" )),
-        (result.config.suffix == inc ? "incremental" : ( result.config.suffix == table ? "table" : "none" )),
+        (result.config.prefix == inc ? "incremental" : ( result.config.prefix == table ? "prefix-dict" : "none" )),
+        (result.config.suffix == inc ? "incremental" : ( result.config.suffix == table ? "prefix-dict" : "none" )),
         result.config.huffman ?         "true" : "false",
         result.config.reverse_strings ? "true" : "false",
         result.config.reverse_sort ?    "true" : "false"

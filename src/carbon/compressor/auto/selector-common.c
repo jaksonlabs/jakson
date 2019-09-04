@@ -66,12 +66,12 @@ void carbon_compressor_selector_apply_highlevel_config(
 
     carbon_compressor_set_option(
         &err, compressor, "prefix",
-        config->prefix == carbon_compressor_incremental_prefix_type_incremental ? "incremental" :
-                        (config->prefix == carbon_compressor_incremental_prefix_type_table ? "table" : "none")
+        config->prefix == carbon_compressor_configurable_prefix_type_incremental ? "incremental" :
+                        (config->prefix == carbon_compressor_configurable_prefix_type_prefix_dict_coding ? "prefix-dict" : "none")
     );
     carbon_compressor_set_option(
         &err, compressor, "suffix",
-        config->suffix == carbon_compressor_incremental_prefix_type_incremental ? "incremental" : "none"
+        config->suffix == carbon_compressor_configurable_prefix_type_incremental ? "incremental" : "none"
     );
     carbon_compressor_set_option(
         &err, compressor, "huffman", config->huffman ? "true" : "false"

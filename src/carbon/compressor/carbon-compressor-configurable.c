@@ -23,7 +23,7 @@
 #include <carbon/carbon-compressor.h>
 
 #include <carbon/compressor/compressor-utils.h>
-#include <carbon/compressor/carbon-compressor-incremental.h>
+#include <carbon/compressor/carbon-compressor-configurable.h>
 
 #include <carbon/compressor/prefix/prefix_encoder.h>
 
@@ -52,15 +52,15 @@ bool option_set_bool(carbon_err_t *err, bool *target, char *value) {
     }
 }
 
-bool option_set_type(carbon_err_t *err, carbon_compressor_incremental_prefix_type_e *target, char *value) {
+bool option_set_type(carbon_err_t *err, carbon_compressor_configurable_prefix_type_e *target, char *value) {
     if(strcmp(value, "none") == 0) {
-        *target = carbon_compressor_incremental_prefix_type_none;
+        *target = carbon_compressor_configurable_prefix_type_none;
         return true;
     } else if(strcmp(value, "incremental") == 0) {
-        *target = carbon_compressor_incremental_prefix_type_incremental;
+        *target = carbon_compressor_configurable_prefix_type_incremental;
         return true;
-    } else if(strcmp(value, "table") == 0) {
-        *target = carbon_compressor_incremental_prefix_type_table;
+    } else if(strcmp(value, "prefix-dict") == 0) {
+        *target = carbon_compressor_configurable_prefix_type_prefix_dict_coding;
         return true;
     } else {
         CARBON_ERROR(err, CARBON_ERR_COMPRESSOR_OPT_VAL_INVALID);
@@ -79,31 +79,31 @@ bool option_set_sizet(carbon_err_t *err, size_t *target, char *value) {
 
 
 bool set_prefix(carbon_err_t *err, carbon_compressor_t *self, char *value) {
-    return option_set_type(err, &((carbon_compressor_incremental_extra_t *)self->extra)->config.prefix, value);
+    return option_set_type(err, &((carbon_compressor_configurable_extra_t *)self->extra)->config.prefix, value);
 }
 
 bool set_suffix(carbon_err_t *err, carbon_compressor_t *self, char *value) {
-    return option_set_type(err, &((carbon_compressor_incremental_extra_t *)self->extra)->config.suffix, value);
+    return option_set_type(err, &((carbon_compressor_configurable_extra_t *)self->extra)->config.suffix, value);
 }
 
 bool set_huffman(carbon_err_t *err, carbon_compressor_t *self, char *value) {
-    return option_set_bool(err, &((carbon_compressor_incremental_extra_t *)self->extra)->config.huffman, value);
+    return option_set_bool(err, &((carbon_compressor_configurable_extra_t *)self->extra)->config.huffman, value);
 }
 
 bool set_reverse_strings(carbon_err_t *err, carbon_compressor_t *self, char *value) {
-    return option_set_bool(err, &((carbon_compressor_incremental_extra_t *)self->extra)->config.reverse_strings, value);
+    return option_set_bool(err, &((carbon_compressor_configurable_extra_t *)self->extra)->config.reverse_strings, value);
 }
 
 bool set_reverse_sort(carbon_err_t *err, carbon_compressor_t *self, char *value) {
-    return option_set_bool(err, &((carbon_compressor_incremental_extra_t *)self->extra)->config.reverse_sort, value);
+    return option_set_bool(err, &((carbon_compressor_configurable_extra_t *)self->extra)->config.reverse_sort, value);
 }
 
 bool set_sort_chunk_length(carbon_err_t *err, carbon_compressor_t *self, char *value) {
-    return option_set_sizet(err, &((carbon_compressor_incremental_extra_t *)self->extra)->config.sort_chunk_length, value);
+    return option_set_sizet(err, &((carbon_compressor_configurable_extra_t *)self->extra)->config.sort_chunk_length, value);
 }
 
 bool set_delta_chunk_length(carbon_err_t *err, carbon_compressor_t *self, char *value) {
-    return option_set_sizet(err, &((carbon_compressor_incremental_extra_t *)self->extra)->config.delta_chunk_length, value);
+    return option_set_sizet(err, &((carbon_compressor_configurable_extra_t *)self->extra)->config.delta_chunk_length, value);
 }
 
 static int compare_entries_by_str_fwd(void const *a, void const *b) {
@@ -142,7 +142,7 @@ size_t min(size_t a, size_t b) {
 
 char const * this_resolve_string_with_prefix_table(
         char *in,
-        carbon_compressor_incremental_extra_t *extra
+        carbon_compressor_configurable_extra_t *extra
     ) {
 
     char * resolve_buffer = malloc(10);
@@ -168,8 +168,8 @@ bool this_read_string_from_io_device(carbon_compressor_t *self, carbon_io_device
         uint16_t prefix_table_id;
     } local_entry_t;
 
-    carbon_compressor_incremental_extra_t * extra =
-            (carbon_compressor_incremental_extra_t *)self->extra;
+    carbon_compressor_configurable_extra_t * extra =
+            (carbon_compressor_configurable_extra_t *)self->extra;
 
     carbon_vec_t ofType(local_entry_t) dependencies;
     carbon_vec_create(&dependencies, NULL, sizeof(local_entry_t), 10);
@@ -192,18 +192,21 @@ bool this_read_string_from_io_device(carbon_compressor_t *self, carbon_io_device
         size_t current_position = carbon_io_device_tell(src);
 
         bool ok;
-        previous_offset_diff = carbon_vlq_decode_from_io(src, &ok);
-        if(!ok)
-            return false;
+
+        if(extra->config.prefix == carbon_compressor_configurable_prefix_type_incremental || extra->config.suffix == carbon_compressor_configurable_prefix_type_incremental) {
+            previous_offset_diff = carbon_vlq_decode_from_io(src, &ok);
+            if(!ok)
+                return false;
+        }
 
 
-        if(extra->config.prefix == carbon_compressor_incremental_prefix_type_incremental) {
+        if(extra->config.prefix == carbon_compressor_configurable_prefix_type_incremental) {
             if(carbon_io_device_read(src, &common_prefix_len_ui8, 1, 1) != 1)
                 return false;
         }
 
         size_t table_prefix_length = 0;
-        if(extra->config.prefix == carbon_compressor_incremental_prefix_type_table) {
+        if(extra->config.prefix == carbon_compressor_configurable_prefix_type_prefix_dict_coding) {
             entry.prefix_table_id = carbon_vlq_decode_from_io(src, &ok);
 
             // Resolve prefix length
@@ -213,7 +216,7 @@ bool this_read_string_from_io_device(carbon_compressor_t *self, carbon_io_device
             table_prefix_length = strlen(entry.prefix_table_prefix);
         }
 
-        if(extra->config.suffix == carbon_compressor_incremental_prefix_type_incremental) {
+        if(extra->config.suffix == carbon_compressor_configurable_prefix_type_incremental) {
             if(carbon_io_device_read(src, &common_suffix_len_ui8, 1, 1) != 1)
                 return false;
         }
@@ -245,20 +248,20 @@ bool this_read_string_from_io_device(carbon_compressor_t *self, carbon_io_device
     } while(common_prefix_len_ui8 != 0 || common_suffix_len_ui8 != 0);
 
 
-    if(extra->config.prefix == carbon_compressor_incremental_prefix_type_table) {
+    if(extra->config.prefix == carbon_compressor_configurable_prefix_type_prefix_dict_coding) {
         for(size_t i = 0; i < dependencies.num_elems; ++i) {
             local_entry_t const *current  = (local_entry_t const *)carbon_vec_at(&dependencies, i);
             strncpy(current->str, current->prefix_table_prefix, strlen(current->prefix_table_prefix));
         }
     }
 
-    if(extra->config.prefix == carbon_compressor_incremental_prefix_type_incremental || extra->config.suffix == carbon_compressor_incremental_prefix_type_incremental) {
+    if(extra->config.prefix == carbon_compressor_configurable_prefix_type_incremental || extra->config.suffix == carbon_compressor_configurable_prefix_type_incremental) {
         // Dependencies now contains all entries in reverse order -> reconstruct them
         for(ssize_t i = (ssize_t)dependencies.num_elems - 2;i >= 0;--i) {
             local_entry_t const *current  = (local_entry_t const *)carbon_vec_at(&dependencies, (size_t)i);
             local_entry_t const *previous = (local_entry_t const *)carbon_vec_at(&dependencies, (size_t)i + 1);
 
-            if(extra->config.prefix == carbon_compressor_incremental_prefix_type_incremental) {
+            if(extra->config.prefix == carbon_compressor_configurable_prefix_type_incremental) {
                 strncpy(current->str, previous->str, current->common_prefix_length);
             }
 
@@ -283,15 +286,15 @@ bool this_read_string_from_io_device(carbon_compressor_t *self, carbon_io_device
 }
 
 void this_read_config_from_io_device(carbon_compressor_t *self, carbon_io_device_t *src,
-                                     carbon_compressor_incremental_config_t *config) {
+                                     carbon_compressor_configurable_config_t *config) {
 
     CARBON_UNUSED(self);
 
     uint8_t flags = 0;
     carbon_io_device_read(src, &flags, 1, 1);
 
-    config->prefix = flags & 1 ? (flags & 2 ? carbon_compressor_incremental_prefix_type_table : carbon_compressor_incremental_prefix_type_incremental) : carbon_compressor_incremental_prefix_type_none;
-    config->suffix = flags & 4 ? (flags & 8 ? carbon_compressor_incremental_prefix_type_table : carbon_compressor_incremental_prefix_type_incremental) : carbon_compressor_incremental_prefix_type_none;
+    config->prefix = flags & 1 ? (flags & 2 ? carbon_compressor_configurable_prefix_type_prefix_dict_coding : carbon_compressor_configurable_prefix_type_incremental) : carbon_compressor_configurable_prefix_type_none;
+    config->suffix = flags & 4 ? (flags & 8 ? carbon_compressor_configurable_prefix_type_prefix_dict_coding : carbon_compressor_configurable_prefix_type_incremental) : carbon_compressor_configurable_prefix_type_none;
     config->huffman = flags & 16;
     config->reverse_strings = flags & 32;
 }
@@ -308,7 +311,7 @@ size_t this_read_next_bit_from_io(carbon_bitstream_ro_t *stream) {
 
 void this_read_huffman_table_from_io_device(
         carbon_io_device_t *src,
-        carbon_compressor_incremental_extra_t *extra
+        carbon_compressor_configurable_extra_t *extra
     ) {
 
     bool ok;
@@ -351,7 +354,7 @@ void this_read_huffman_table_from_io_device(
 
 void this_read_prefix_table_from_io_device(
         carbon_io_device_t *src,
-        carbon_compressor_incremental_extra_t *extra
+        carbon_compressor_configurable_extra_t *extra
     ) {
     bool ok;
     size_t length = carbon_vlq_decode_from_io(src, &ok);
@@ -376,16 +379,16 @@ void this_read_prefix_table_from_io_device(
     extra->prefix_tbl_encoder = carbon_prefix_table_to_encoder_tree(extra->prefix_tbl_table);
 }
 
-carbon_compressor_incremental_stringset_properties_t carbon_compressor_incremental_prepare_and_analyze(
+carbon_compressor_configurable_stringset_properties_t carbon_compressor_configurable_prepare_and_analyze(
         carbon_vec_t ofType(char *) *entries,
-        carbon_compressor_incremental_config_t *config,
+        carbon_compressor_configurable_config_t *config,
         carbon_prefix_table **prefix_tbl_table,
         carbon_prefix_ro_tree **prefix_tbl_encoder,
         carbon_huffman_encoder_t *huffman_encoder,
-        carbon_compressor_incremental_sort_function sort,
-        carbon_compressor_incremental_vecent2str vecent2str
+        carbon_compressor_configurable_sort_function sort,
+        carbon_compressor_configurable_vecent2str vecent2str
 ) {
-    carbon_compressor_incremental_stringset_properties_t properties = {
+    carbon_compressor_configurable_stringset_properties_t properties = {
         .total_size = 0, .total_remaining_text_length = 0
     };
 
@@ -410,7 +413,7 @@ carbon_compressor_incremental_stringset_properties_t carbon_compressor_increment
         carbon_vec_push(&strings, &str, 1);
     }
 
-    if(config->prefix == carbon_compressor_incremental_prefix_type_table) {
+    if(config->prefix == carbon_compressor_configurable_prefix_type_prefix_dict_coding) {
         carbon_prefix_encoder_config * cfg = carbon_prefix_encoder_auto_config(entries->num_elems, 2.0);
         carbon_prefix_tree_node * root = carbon_prefix_tree_node_create(0);
 
@@ -452,11 +455,11 @@ carbon_compressor_incremental_stringset_properties_t carbon_compressor_increment
             size_t total_length = 0;
             char const *string_start = carbon_remove_common_prefix_and_suffix(
                         string, string_length, previous_string, previous_length, &total_length,
-                        config->prefix == carbon_compressor_incremental_prefix_type_incremental,
-                        config->suffix == carbon_compressor_incremental_prefix_type_incremental
+                        config->prefix == carbon_compressor_configurable_prefix_type_incremental,
+                        config->suffix == carbon_compressor_configurable_prefix_type_incremental
             );
 
-            if(config->prefix == carbon_compressor_incremental_prefix_type_table) {
+            if(config->prefix == carbon_compressor_configurable_prefix_type_prefix_dict_coding) {
                 size_t prefix_len = 0;
                 carbon_prefix_ro_tree_max_prefix(*prefix_tbl_encoder, string, &prefix_len);
                 prefix_len = min(prefix_len, total_length);
@@ -488,17 +491,17 @@ carbon_compressor_incremental_stringset_properties_t carbon_compressor_increment
   Compressor implementation
   */
 CARBON_EXPORT(bool)
-carbon_compressor_incremental_init(carbon_compressor_t *self, carbon_doc_bulk_t const *context)
+carbon_compressor_configurable_init(carbon_compressor_t *self, carbon_doc_bulk_t const *context)
 {
     CARBON_UNUSED(self);
     CARBON_UNUSED(context);
     /* nothing to do for uncompressed dictionaries */
 
 
-    self->extra = malloc(sizeof(carbon_compressor_incremental_extra_t));
+    self->extra = malloc(sizeof(carbon_compressor_configurable_extra_t));
 
-    carbon_compressor_incremental_extra_t *extra =
-            (carbon_compressor_incremental_extra_t *)self->extra;
+    carbon_compressor_configurable_extra_t *extra =
+            (carbon_compressor_configurable_extra_t *)self->extra;
 
     carbon_huffman_encoder_create(&extra->huffman_encoder);
     extra->huffman_decoder.tree = NULL;
@@ -513,8 +516,8 @@ carbon_compressor_incremental_init(carbon_compressor_t *self, carbon_doc_bulk_t 
     extra->previous_string = "";
 
 
-    extra->config.prefix = carbon_compressor_incremental_prefix_type_incremental;
-    extra->config.suffix = carbon_compressor_incremental_prefix_type_none;
+    extra->config.prefix = carbon_compressor_configurable_prefix_type_incremental;
+    extra->config.suffix = carbon_compressor_configurable_prefix_type_none;
     extra->config.huffman = false;
     extra->config.reverse_sort = false;
     extra->config.reverse_strings = false;
@@ -533,9 +536,9 @@ carbon_compressor_incremental_init(carbon_compressor_t *self, carbon_doc_bulk_t 
 }
 
 CARBON_EXPORT(bool)
-carbon_compressor_incremental_cpy(const carbon_compressor_t *self, carbon_compressor_t *dst)
+carbon_compressor_configurable_cpy(const carbon_compressor_t *self, carbon_compressor_t *dst)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_INCREMENTAL);
+    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_CONFIGURABLE);
 
     /* nothing to hard copy but the function pointers */
     *dst = *self;
@@ -543,12 +546,12 @@ carbon_compressor_incremental_cpy(const carbon_compressor_t *self, carbon_compre
 }
 
 CARBON_EXPORT(bool)
-carbon_compressor_incremental_drop(carbon_compressor_t *self)
+carbon_compressor_configurable_drop(carbon_compressor_t *self)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_INCREMENTAL);
+    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_CONFIGURABLE);
 
-    carbon_compressor_incremental_extra_t *extra =
-            (carbon_compressor_incremental_extra_t *)self->extra;
+    carbon_compressor_configurable_extra_t *extra =
+            (carbon_compressor_configurable_extra_t *)self->extra;
 
     carbon_huffman_encoder_drop(&extra->huffman_encoder);
 
@@ -567,10 +570,10 @@ carbon_compressor_incremental_drop(carbon_compressor_t *self)
 }
 
 CARBON_EXPORT(bool)
-carbon_compressor_incremental_write_extra(carbon_compressor_t *self, carbon_memfile_t *dst,
+carbon_compressor_configurable_write_extra(carbon_compressor_t *self, carbon_memfile_t *dst,
                                         const carbon_vec_t ofType (const char *) *strings)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_INCREMENTAL);
+    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_CONFIGURABLE);
 
     CARBON_UNUSED(strings);
 
@@ -579,21 +582,21 @@ carbon_compressor_incremental_write_extra(carbon_compressor_t *self, carbon_memf
         char symbol;
     } local_huffman_table_entry_t;
 
-    carbon_compressor_incremental_extra_t * extra =
-            (carbon_compressor_incremental_extra_t *)self->extra;
+    carbon_compressor_configurable_extra_t * extra =
+            (carbon_compressor_configurable_extra_t *)self->extra;
 
     uint8_t flags = 0;
-    flags |= (extra->config.prefix != carbon_compressor_incremental_prefix_type_none ? 1 : 0 ) << 0;
-    flags |= (extra->config.prefix != carbon_compressor_incremental_prefix_type_incremental ? 1 : 0 ) << 1;
-    flags |= (extra->config.suffix != carbon_compressor_incremental_prefix_type_none ? 1 : 0 ) << 2;
-    flags |= (extra->config.suffix != carbon_compressor_incremental_prefix_type_incremental ? 1 : 0 ) << 3;
+    flags |= (extra->config.prefix != carbon_compressor_configurable_prefix_type_none ? 1 : 0 ) << 0;
+    flags |= (extra->config.prefix != carbon_compressor_configurable_prefix_type_incremental ? 1 : 0 ) << 1;
+    flags |= (extra->config.suffix != carbon_compressor_configurable_prefix_type_none ? 1 : 0 ) << 2;
+    flags |= (extra->config.suffix != carbon_compressor_configurable_prefix_type_incremental ? 1 : 0 ) << 3;
     flags |= (extra->config.huffman ? 1 : 0) << 4;
     flags |= (extra->config.reverse_strings ? 1 : 0) << 5;
 
     carbon_memfile_write(dst, &flags, 1);
 
 
-    if(extra->config.prefix == carbon_compressor_incremental_prefix_type_table) {
+    if(extra->config.prefix == carbon_compressor_configurable_prefix_type_prefix_dict_coding) {
         carbon_io_device_t io;
         carbon_io_device_from_memfile(&io, dst);
 
@@ -678,16 +681,16 @@ carbon_compressor_incremental_write_extra(carbon_compressor_t *self, carbon_memf
     return true;
 }
 
-bool carbon_compressor_incremental_print_extra(carbon_compressor_t *self, FILE *file, carbon_memfile_t *src, size_t nbytes)
+bool carbon_compressor_configurable_print_extra(carbon_compressor_t *self, FILE *file, carbon_memfile_t *src, size_t nbytes)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_INCREMENTAL);
+    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_CONFIGURABLE);
 
     CARBON_UNUSED(self);
     CARBON_UNUSED(file);
     CARBON_UNUSED(nbytes);
 
-    carbon_compressor_incremental_extra_t *extra =
-            (carbon_compressor_incremental_extra_t *)self->extra;
+    carbon_compressor_configurable_extra_t *extra =
+            (carbon_compressor_configurable_extra_t *)self->extra;
 
     carbon_io_device_t io;
     carbon_io_device_from_memfile(&io, src);
@@ -695,13 +698,13 @@ bool carbon_compressor_incremental_print_extra(carbon_compressor_t *self, FILE *
 
     fprintf(file, "0x%04x [config: prefix=%s, suffix=%s, remaining=%s]\n",
             (unsigned int)carbon_io_device_tell(&io),
-            extra->config.prefix == carbon_compressor_incremental_prefix_type_incremental ? "incremental" : (extra->config.prefix == carbon_compressor_incremental_prefix_type_table ? "table" : "none"),
-            extra->config.suffix == carbon_compressor_incremental_prefix_type_incremental ? "incremental" : (extra->config.suffix == carbon_compressor_incremental_prefix_type_table ? "table" : "none"),
+            extra->config.prefix == carbon_compressor_configurable_prefix_type_incremental ? "incremental" : (extra->config.prefix == carbon_compressor_configurable_prefix_type_prefix_dict_coding ? "prefix-dict" : "none"),
+            extra->config.suffix == carbon_compressor_configurable_prefix_type_incremental ? "incremental" : (extra->config.suffix == carbon_compressor_configurable_prefix_type_prefix_dict_coding ? "prefix-dict" : "none"),
             extra->config.huffman ? "huffman" : "uncompressed"
     );
 
 
-    if(extra->config.prefix == carbon_compressor_incremental_prefix_type_table) {
+    if(extra->config.prefix == carbon_compressor_configurable_prefix_type_prefix_dict_coding) {
         carbon_off_t file_position = carbon_io_device_tell(&io);
 
         fprintf(file, "0x%04x [prefix-table]\n", (unsigned int)file_position);
@@ -751,12 +754,12 @@ bool carbon_compressor_incremental_print_extra(carbon_compressor_t *self, FILE *
 }
 
 CARBON_EXPORT(bool)
-carbon_compressor_incremental_print_encoded_string(carbon_compressor_t *self,
+carbon_compressor_configurable_print_encoded_string(carbon_compressor_t *self,
                                                  FILE *file,
                                                  carbon_memfile_t *src,
                                                  uint32_t decompressed_strlen)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_INCREMENTAL);
+    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_CONFIGURABLE);
 
     CARBON_UNUSED(self);
 
@@ -775,11 +778,11 @@ carbon_compressor_incremental_print_encoded_string(carbon_compressor_t *self,
 }
 
 CARBON_EXPORT(bool)
-carbon_compressor_incremental_prepare_entries(carbon_compressor_t *self,
+carbon_compressor_configurable_prepare_entries(carbon_compressor_t *self,
                                               carbon_vec_t ofType(carbon_strdic_entry_t) *entries)
 {
-    carbon_compressor_incremental_extra_t *extra = (carbon_compressor_incremental_extra_t*)self->extra;
-    carbon_compressor_incremental_prepare_and_analyze(
+    carbon_compressor_configurable_extra_t *extra = (carbon_compressor_configurable_extra_t*)self->extra;
+    carbon_compressor_configurable_prepare_and_analyze(
         entries, &extra->config, &extra->prefix_tbl_table,
         &extra->prefix_tbl_encoder, &extra->huffman_encoder,
         sort_strdic_entries, strdic_entry_to_str
@@ -789,10 +792,10 @@ carbon_compressor_incremental_prepare_entries(carbon_compressor_t *self,
 }
 
 CARBON_EXPORT(bool)
-carbon_compressor_incremental_encode_string(carbon_compressor_t *self, carbon_memfile_t *fp, carbon_err_t *err,
+carbon_compressor_configurable_encode_string(carbon_compressor_t *self, carbon_memfile_t *fp, carbon_err_t *err,
                                             const char *original_string, carbon_string_id_t grouping_key)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_INCREMENTAL);
+    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_CONFIGURABLE);
 
     CARBON_UNUSED(err);
     CARBON_UNUSED(grouping_key);
@@ -802,8 +805,8 @@ carbon_compressor_incremental_encode_string(carbon_compressor_t *self, carbon_me
 
     size_t string_length = strlen(original_string);
 
-    carbon_compressor_incremental_extra_t * extra =
-            (carbon_compressor_incremental_extra_t *)self->extra;
+    carbon_compressor_configurable_extra_t * extra =
+            (carbon_compressor_configurable_extra_t *)self->extra;
 
     carbon_off_t current_off = carbon_io_device_tell(&io);
 
@@ -811,7 +814,8 @@ carbon_compressor_incremental_encode_string(carbon_compressor_t *self, carbon_me
     if(extra->previous_offset == 0)
         previous_off_diff = 0;
 
-    carbon_vlq_encode_to_io(previous_off_diff, &io);
+    if(extra->config.prefix == carbon_compressor_configurable_prefix_type_incremental || extra->config.suffix == carbon_compressor_configurable_prefix_type_incremental)
+        carbon_vlq_encode_to_io(previous_off_diff, &io);
 
     size_t common_prefix_len = 0;
     size_t common_suffix_len = 0;
@@ -821,7 +825,7 @@ carbon_compressor_incremental_encode_string(carbon_compressor_t *self, carbon_me
     if(extra->config.reverse_strings)
         carbon_str_reverse(string);
 
-    if(extra->config.prefix == carbon_compressor_incremental_prefix_type_incremental) {
+    if(extra->config.prefix == carbon_compressor_configurable_prefix_type_incremental) {
         for(
             common_prefix_len = 0;
             common_prefix_len < max_common_len && string[common_prefix_len] == extra->previous_string[common_prefix_len];
@@ -831,12 +835,12 @@ carbon_compressor_incremental_encode_string(carbon_compressor_t *self, carbon_me
         carbon_io_device_write(&io, &common_prefix_len_ui8, 1, 1);
     }
 
-    if(extra->config.prefix == carbon_compressor_incremental_prefix_type_table) {
+    if(extra->config.prefix == carbon_compressor_configurable_prefix_type_prefix_dict_coding) {
         uint16_t prefix = carbon_prefix_ro_tree_max_prefix(extra->prefix_tbl_encoder, string, &common_prefix_len);
         carbon_vlq_encode_to_io(prefix, &io);
     }
 
-    if(extra->config.suffix == carbon_compressor_incremental_prefix_type_incremental) {
+    if(extra->config.suffix == carbon_compressor_configurable_prefix_type_incremental) {
         for(
             common_suffix_len = 0;
             common_suffix_len + common_prefix_len < max_common_len && string[string_length - 1 - common_suffix_len] == extra->previous_string[extra->previous_length - 1 - common_suffix_len];
@@ -884,9 +888,9 @@ carbon_compressor_incremental_encode_string(carbon_compressor_t *self, carbon_me
 }
 
 CARBON_EXPORT(bool)
-carbon_compressor_incremental_decode_string(carbon_compressor_t *self, char *dst, size_t strlen, FILE *src)
+carbon_compressor_configurable_decode_string(carbon_compressor_t *self, char *dst, size_t strlen, FILE *src)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_INCREMENTAL);
+    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_CONFIGURABLE);
 
     CARBON_UNUSED(self);
 
@@ -897,20 +901,20 @@ carbon_compressor_incremental_decode_string(carbon_compressor_t *self, char *dst
 }
 
 CARBON_EXPORT(bool)
-carbon_compressor_incremental_read_extra(carbon_compressor_t *self, FILE *src, size_t nbytes)
+carbon_compressor_configurable_read_extra(carbon_compressor_t *self, FILE *src, size_t nbytes)
 {
-    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_INCREMENTAL);
+    CARBON_CHECK_TAG(self->tag, CARBON_COMPRESSOR_CONFIGURABLE);
     CARBON_UNUSED(nbytes);
 
     carbon_io_device_t io;
     carbon_io_device_from_file(&io, src);
 
-    carbon_compressor_incremental_extra_t * extra =
-            (carbon_compressor_incremental_extra_t *)self->extra;
+    carbon_compressor_configurable_extra_t * extra =
+            (carbon_compressor_configurable_extra_t *)self->extra;
 
     this_read_config_from_io_device(self, &io, &extra->config);
 
-    if(extra->config.prefix == carbon_compressor_incremental_prefix_type_table) {
+    if(extra->config.prefix == carbon_compressor_configurable_prefix_type_prefix_dict_coding) {
         this_read_prefix_table_from_io_device(&io, extra);
     }
 

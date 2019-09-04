@@ -2,11 +2,11 @@
 #define CARBON_COMPRESSOR_AUTO_SELECTOR_COMMON_H
 
 #include <carbon/carbon-compressor.h>
-#include <carbon/compressor/carbon-compressor-incremental.h>
+#include <carbon/compressor/carbon-compressor-configurable.h>
 
 typedef struct carbon_compressor_highlevel_config {
-    carbon_compressor_incremental_prefix_type_e prefix;
-    carbon_compressor_incremental_prefix_type_e suffix;
+    carbon_compressor_configurable_prefix_type_e prefix;
+    carbon_compressor_configurable_prefix_type_e suffix;
     bool reverse_strings;
     bool reverse_sort;
     bool huffman;
