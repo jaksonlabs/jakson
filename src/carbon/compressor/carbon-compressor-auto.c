@@ -146,6 +146,8 @@ static char const * selector_name(selector_e selector) {
     case selector_cost_model: return "cost-model";
     case selector_rule_based: return "rule-based";
     }
+
+    return "brute-force";
 }
 
 
@@ -490,9 +492,9 @@ carbon_compressor_auto_write_extra(carbon_compressor_t *self, carbon_memfile_t *
     carbon_vlq_encode_to_io(extra->ranges.num_elems, &io);
     extra->range_begin_table_offset = carbon_io_device_tell(&io);
 
+    carbon_off_t zero_offset = 0;
     for(size_t i = 0; i < extra->ranges.num_elems;++i) {
-        carbon_string_id_t id = 0;
-        carbon_io_device_write(&io, &id, sizeof(carbon_string_id_t), 1);
+        carbon_io_device_write(&io, &zero_offset, sizeof(carbon_off_t), 1);
     }
 
     for(size_t i = 0; i < extra->ranges.num_elems;++i) {

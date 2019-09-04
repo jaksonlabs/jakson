@@ -9,7 +9,7 @@ static carbon_compressor_configurable_prefix_type_e const table = carbon_compres
 
 typedef enum rule_params {
     rule_param_pattern,
-    rule_param_joinable,
+    rule_param_join_group,
     rule_param_option,
     rule_param_unknown
 } rule_params_e;
@@ -21,7 +21,7 @@ typedef struct {
 
 static rule_param_description_t rule_params[] = {
     { .param = rule_param_pattern, .name = "pattern" },
-    { .param = rule_param_joinable, .name = "joinable" }
+    { .param = rule_param_join_group, .name = "join_group" }
 };
 
 static rule_params_e rule_by_string(char const *name) {
@@ -212,14 +212,14 @@ carbon_compressor_selector_result_t carbon_compressor_find_by_strings_rule_based
         }
     }
 
-    carbon_compressor_incremental_extra_t * extra =
-            (carbon_compressor_incremental_extra_t *)result.compressor->extra;
+    carbon_compressor_configurable_extra_t * extra =
+            (carbon_compressor_configurable_extra_t *)result.compressor->extra;
     result.config.prefix          = extra->config.prefix;
     result.config.suffix          = extra->config.suffix;
     result.config.huffman         = extra->config.huffman;
     result.config.reverse_sort    = extra->config.reverse_sort;
     result.config.reverse_strings = extra->config.reverse_strings;
-    result.joinable_group         = rule->joinable ? rule_idx : SIZE_MAX;
+    result.joinable_group         = rule->join_group;
     result.estimated_size         = 0;
 
     CARBON_CONSOLE_WRITELN(
