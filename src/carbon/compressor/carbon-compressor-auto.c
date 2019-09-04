@@ -207,6 +207,17 @@ static bool set_cfg_rb_filename(carbon_err_t *err, carbon_compressor_t *self, ch
     return true;
 }
 
+static bool set_cfg_rb_min_support(carbon_err_t *err, carbon_compressor_t *self, char *value) {
+    double parsed_value = atof(value);
+
+    if(parsed_value < 0.0 || parsed_value > 1.0) {
+        CARBON_ERROR(err, CARBON_ERR_COMPRESSOR_OPT_VAL_INVALID);
+        return false;
+    }
+
+    ((carbon_compressor_auto_extra_t *)self->extra)->rb_config.min_support = parsed_value;
+    return true;
+}
 
 
 CARBON_EXPORT(bool)
@@ -258,6 +269,7 @@ carbon_compressor_auto_init(carbon_compressor_t *self, carbon_doc_bulk_t const *
 
     {
         carbon_hashmap_put(self->options, "rule-based.filename", (carbon_hashmap_any_t)&set_cfg_rb_filename);
+        carbon_hashmap_put(self->options, "rule-based.min-support", (carbon_hashmap_any_t)&set_cfg_rb_min_support);
     }
 
     return true;

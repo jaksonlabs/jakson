@@ -53,7 +53,7 @@ selector_read_file(char const * filename) {
 }
 
 static double
-selector_rule_match_percentage(carbon_vec_t ofType(char *) *strings, carbon_selector_rule_t *rule);
+selector_rule_match_percentage(carbon_vec_t ofType(char *) *strings, carbon_selector_rule_t *rule, double min_support_relative);
 
 carbon_vec_t ofType(carbon_selector_rule_t) *carbon_compressor_selector_rule_based_parse(
         char const *content
@@ -89,6 +89,7 @@ carbon_vec_t ofType(carbon_selector_rule_t) *carbon_compressor_selector_rule_bas
             rule->pattern = malloc( 1 );
             rule->pattern[ 0 ] = 0;
             rule->options = carbon_hashmap_new();
+            rule->join_group = 0;
 
             carbon_vec_push(rules, &rule, 1);
             carbon_hashmap_put(rule_map, tokens[ 1 ], rule);
@@ -96,7 +97,7 @@ carbon_vec_t ofType(carbon_selector_rule_t) *carbon_compressor_selector_rule_bas
 
         switch(rule_by_string(tokens[ 2 ])) {
             case rule_param_pattern: { free(rule->pattern); rule->pattern = strdup(tokens[ 3 ]); break; }
-            case rule_param_joinable: { rule->joinable = strcmp(tokens[ 3 ], "true") == 0; break; }
+            case rule_param_join_group: { rule->join_group = strtoul(tokens[ 3 ], NULL, 10); break; }
             case rule_param_option: { carbon_hashmap_put(rule->options, tokens[ 2 ] + strlen("option."), strdup(tokens[ 3 ])); break; }
             case rule_param_unknown:
             {
@@ -140,7 +141,7 @@ void carbon_compressor_selector_rule_print(
         FILE *file, carbon_selector_rule_t *rule
     ) {
     fprintf(file, "%s.pattern=%s\n", rule->name, rule->pattern);
-    fprintf(file, "%s.joinable=%s\n", rule->name, rule->joinable ? "true" : "false");
+    fprintf(file, "%s.join_group=%zu\n", rule->name, rule->join_group);
 
     for(carbon_hashmap_iterator_t it = carbon_hashmap_begin(rule->options);it.valid;carbon_hashmap_next(&it)) {
         fprintf(file, "%s.option.%s=%s\n", rule->name, it.key, (char const *)it.value);
@@ -151,6 +152,7 @@ void carbon_compressor_selector_rule_based_config_init(
         carbon_compressor_selector_rule_based_config_t *config
     ) {
     config->rules = NULL;
+    config->min_support = 0.0;
 }
 
 carbon_compressor_selector_result_t carbon_compressor_find_by_strings_rule_based(
@@ -180,7 +182,7 @@ carbon_compressor_selector_result_t carbon_compressor_find_by_strings_rule_based
             default_rule = tmp;
             default_idx  = i;
         } else {
-            double matches = selector_rule_match_percentage(samples, tmp);
+            double matches = selector_rule_match_percentage(samples, tmp, config->min_support);
             if(matches > max_matches) {
                 max_matches = matches;
                 rule_idx    = i;
@@ -231,9 +233,11 @@ carbon_compressor_selector_result_t carbon_compressor_find_by_strings_rule_based
 
 static double selector_rule_match_percentage(
         carbon_vec_t ofType(char *) *strings,
-        carbon_selector_rule_t *rule
+        carbon_selector_rule_t *rule,
+        double min_support_relative
     ) {
     size_t  count = 0;
+    size_t  min_support_abs = (size_t)(min_support_relative * strings->num_elems);
 
     regex_t match;
     regmatch_t matches[1];
@@ -244,6 +248,15 @@ static double selector_rule_match_percentage(
         if(regexec(&match, string, 1, matches, REG_EXTENDED) == 0) {
             if((size_t)(matches[0].rm_eo - matches[0].rm_so) == strlen(string))
                 ++count;
+        } else {
+            if(min_support_abs > count && strings->num_elems - i + 1 < min_support_abs - count) {
+                // There are not even enough entries left to achieve at least min_support_abs matches -> early out
+                regfree(&match);
+
+                printf("             - Early out on trying rule %s after %zu values: only %zu matched so far\n", rule->name, i + 1, count);
+
+                return 0.0;
+            }
         }
     }
 
