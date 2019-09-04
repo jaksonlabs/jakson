@@ -258,7 +258,11 @@ static double selector_rule_match_percentage(
                 // There are not even enough entries left to achieve at least min_support_abs matches -> early out
                 regfree(&match);
 
-                printf("             - Early out on trying rule %s after %zu values: only %zu matched so far\n", rule->name, i + 1, count);
+                CARBON_CONSOLE_WRITELN(
+                            stdout,
+                            "             - Early out on trying rule %s after %zu/%d values: only %zu matched so far",
+                            rule->name, i + 1, strings->num_elems, count
+                );
 
                 return 0.0;
             }
