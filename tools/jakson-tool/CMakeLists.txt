@@ -5,7 +5,17 @@ set(TOOL_SOURCES
         modules.h
         modules.c)
 
-add_executable(jakson-tool main.c ${TOOL_SOURCES})
+set(BENCH_SOURCES
+        bench/bench_format_handler.h
+        bench/bench_format_handler.c
+        bench/bench_bson.h
+        bench/bench_bson.c
+        bench/bench_carbon.h
+        bench/bench_carbon.c
+        bench/bench_ubjson.h
+        bench/bench_ubjson.c)
+
+add_executable(jakson-tool main.c ${TOOL_SOURCES} ${BENCH_SOURCES})
 target_link_libraries(jakson-tool PUBLIC ${LIBS} PRIVATE jakson-sources)
 
 install(TARGETS jakson-tool
