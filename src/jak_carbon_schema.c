@@ -20,8 +20,13 @@
 // ---------------------------------------------------------------------------------------------------------------------
 # include "jak_carbon_schema.h"
 
-bool jak_carbon_validate_schema(jak_json *schema, jak_memblock *carbon) {
+
+
+bool jak_carbon_validate_schema(jak_carbon *schema, jak_memblock *carbon) {
+
     JAK_UNUSED(schema);
     JAK_UNUSED(carbon);
+
+
     return true;   
 }
