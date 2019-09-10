@@ -711,8 +711,8 @@ bool moduleValSchema(int argc, char **argv, FILE *file, jak_command_opt_mgr *man
         }
 
         FILE *f = fopen(pathCarbonFileIn, "rb");
-        jak_memblock *carbon;
-        if(!(jak_archive_load(&carbon, f))) {
+        jak_carbon carbon;
+        if(!(jak_archive_load(&carbon.memblock, f))) {
             JAK_CONSOLE_WRITELN(file, "Error loading CARBON file!%s","");
             jak_carbon_drop(&schema);
             return false;
@@ -720,7 +720,7 @@ bool moduleValSchema(int argc, char **argv, FILE *file, jak_command_opt_mgr *man
         fclose(f);
 
         // validate carbon files according to schema
-        if(!(jak_carbon_validate_schema(&schema, carbon))) {
+        if(!(jak_carbon_validate_schema(&schema, &carbon))) {
             // TODO: details on failure
             if (strict != true) {
                 JAK_CONSOLE_WRITELN(file, "Warning: File %s failed the schema validation!", pathCarbonFileIn);
@@ -728,14 +728,14 @@ bool moduleValSchema(int argc, char **argv, FILE *file, jak_command_opt_mgr *man
             } else {
                 JAK_CONSOLE_WRITELN(file, "Error: File %s failed the schema validation! Aborting.", pathCarbonFileIn);
                 jak_carbon_drop(&schema);
-                jak_memblock_drop(carbon);
+                jak_carbon_drop(&carbon);
                 return false;
             }
         } else {
             JAK_CONSOLE_WRITELN(file, "File %s: passed the schema validation!", pathCarbonFileIn);
         }
         jak_carbon_drop(&schema);
-        jak_memblock_drop(carbon);
+        jak_carbon_drop(&carbon);
     }
 
     if (skippedFiles == 0 && failedFiles == 0){

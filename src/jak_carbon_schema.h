@@ -21,11 +21,15 @@
 // ---------------------------------------------------------------------------------------------------------------------
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
-#include "jak_json.h"
+#include <jak_json.h>
+#include <jakson/jakson.h>
+#include <fcntl.h>
+#include <jak_carbon.h>
+#include <jak_carbon_find.h>
 
 JAK_BEGIN_DECL
 
-bool jak_carbon_validate_schema(jak_carbon *schema, jak_memblock *carbon);
+bool jak_carbon_validate_schema(jak_carbon *schema, jak_carbon *carbon);
 
 JAK_END_DECL
 

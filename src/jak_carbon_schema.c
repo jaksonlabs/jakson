@@ -20,13 +20,20 @@
 // ---------------------------------------------------------------------------------------------------------------------
 # include "jak_carbon_schema.h"
 
-
-
-bool jak_carbon_validate_schema(jak_carbon *schema, jak_memblock *carbon) {
+bool jak_carbon_validate_schema(jak_carbon *schema, jak_carbon *carbon) {
 
     JAK_UNUSED(schema);
     JAK_UNUSED(carbon);
 
+    jak_carbon_find finder;
+    //jak_carbon_column_it *iter;
+    //jak_error *err;
+	//jak_memfile *carbon_memf = NULL;
+    //
+    JAK_UNUSED(finder);
+    //JAK_UNUSED(iter);
+
+    //jak_carbon_column_it_create(iter, schema->memfile, err, 0, 0);
 
     return true;   
 }
