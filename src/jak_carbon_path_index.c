@@ -425,7 +425,24 @@ static void __jak_path_index_field_ref_write(jak_memfile *file, struct path_inde
 
 static void __jak_path_index_container_contents_flat(jak_memfile *file, struct path_index_node *node)
 {
+        /*
+         * Write num of elements in array; this uses a marker-based encoding, which results in
+         *      [int-type][int-value]
+         * such as [c][2] for example
+         */
         jak_memfile_write_uintvar_marker(NULL, file, node->sub_entries.num_elems);
+
+        /*
+         * The following elements are a list of per-element offsets in this index. Like for the element count, a
+         * marker-based variable-length encoding is used. However, to avoid writing redundant markers
+         * (e.g., [c][...][c][...] for two element offsets) and in order to allow seeking to a particular element
+         * without the need to interprete the int-type for preceeding elements in this list, the encoding
+         * is slight different. The element offset position list is encoded as a fixed-type array, which means
+         * first a marker [int-type] is written, and all n element offsets that follow have the same type (i.e.,
+         * [int-type]), such that the per-element marker is omitted. This results in a list like [c][...][...].
+         * For this, the smallest [int-type] that allows to store the largest element in the list, must be computed
+         * beforehand.
+         */
 
         /* write position offsets */
         jak_offset_t position_off_latest = jak_memfile_tell(file);
@@ -442,7 +459,7 @@ static void __jak_path_index_container_contents_flat(jak_memfile *file, struct p
                 jak_signed_offset_t shift = jak_memfile_update_uintvar_marker(file, node_off);
                 position_off_latest = jak_memfile_tell(file);
                 jak_memfile_restore_position(file);
-                jak_memfile_seek_from_here(file, shift);
+                jak_memfile_seek_relative(file, shift);
         }
 }
 
@@ -585,7 +602,7 @@ static jak_u8 __jak_path_index_field_ref_to_str(jak_string *str, jak_carbon_path
             field_type != JAK_CARBON_FIELD_TYPE_FALSE) {
                 /* only in case of field type that is not null, true, or false, there is more information behind
                  * the field offset */
-                jak_uintvar_marker_e marker = jak_memfile_peek_uintvar_marker_type(&index->memfile);
+                jak_uintvar_marker_marker_type_e marker = jak_memfile_peek_uintvar_marker_type(&index->memfile);
                 char marker_char = jak_uintvar_marker_type_str(marker);
                 jak_string_add_char(str, '[');
                 jak_string_add_char(str, marker_char);
@@ -663,7 +680,7 @@ static void __jak_path_index_container_contents_into_carbon(jak_carbon_insert *i
 static void
 __jak_path_index_container_contents_to_str(jak_string *str, jak_carbon_path_index *index, unsigned intent_level)
 {
-        jak_uintvar_marker_e marker = jak_memfile_peek_uintvar_marker_type(&index->memfile);
+        jak_uintvar_marker_marker_type_e marker = jak_memfile_peek_uintvar_marker_type(&index->memfile);
         jak_u64 num_elems = jak_memfile_read_uintvar_marker(NULL, &index->memfile);
         char marker_c = jak_uintvar_marker_type_str(marker);
 

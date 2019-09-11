@@ -398,4 +398,10 @@ bool jak_global_console_enable_output;
     }                                                                                                                  \
 }
 
+#ifndef NDEBUG
+#define JAK_DEBUG_ONLY_BLOCK(block) { block }
+#else
+#define JAK_DEBUG_ONLY_BLOCK(block) { }
+#endif
+
 #endif

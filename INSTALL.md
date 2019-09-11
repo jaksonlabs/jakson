@@ -17,7 +17,9 @@ and others. The downside of source amalgamation is more cumbersome debugging bec
 for such large source files.
 
 To build targets in *release mode*, define the option `-DBUILD_TYPE=Release` for `cmake`. To turn source amalgamation
-on, define the option `-DUSE_AMALGAMATION=ON` for `cmake`. Hence, for development, use
+on, define the option `-DUSE_AMALGAMATION=ON` for `cmake`. 
+
+For development, use
 ```
 $ cmake -DBUILD_TYPE=Debug -DUSE_AMALGAMATION=OFF . && make -j4 && make test && sudo make install
 ```

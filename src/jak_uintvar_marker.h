@@ -75,12 +75,16 @@ JAK_BEGIN_DECL
 
 typedef void *jak_uintvar_marker_t;
 
-typedef enum jak_uintvar_marker {
+typedef enum jak_uintvar_marker_marker_type {
         JAK_UINTVAR_8 = 0,
         JAK_UINTVAR_16 = 1,
         JAK_UINTVAR_32 = 2,
         JAK_UINTVAR_64 = 3
-} jak_uintvar_marker_e;
+} jak_uintvar_marker_marker_type_e;
+
+static const jak_marker_t jak_uintvar_marker_strs[] = {
+        UINT_VAR_MARKER_8, UINT_VAR_MARKER_16, UINT_VAR_MARKER_32, UINT_VAR_MARKER_64
+};
 
 static const struct {
         jak_marker_t marker;
@@ -101,15 +105,25 @@ static const int jak_global_uintvar_marker_nreg = JAK_ARRAY_LENGTH(jak_global_ui
 bool jak_uintvar_marker_write(jak_uintvar_marker_t dst, jak_u64 value);
 jak_u64 jak_uintvar_marker_read(jak_u8 *nbytes_read, jak_uintvar_marker_t src);
 
+jak_u8 jak_uintvar_marker_write_marker_for(jak_uintvar_marker_marker_type_e *marker_out, void *dst, jak_u64 value);
+void jak_uintvar_marker_write_marker(void *dst, jak_uintvar_marker_marker_type_e type);
+
+jak_u8 jak_uintvar_marker_write_value_only(void *dst, jak_uintvar_marker_marker_type_e type, jak_u64 value);
+
 // ---------------------------------------------------------------------------------------------------------------------
 //  information
 // ---------------------------------------------------------------------------------------------------------------------
 
-jak_uintvar_marker_e jak_uintvar_marker_type_for(jak_u64 value);
-jak_uintvar_marker_e jak_uintvar_marker_type(jak_uintvar_marker_t data);
+#define JAK_UINTVAR_MARKER_BYTES_NEEDED_FOR_MARKER()      sizeof(jak_marker_t)
+
+jak_uintvar_marker_marker_type_e jak_uintvar_marker_type_for(jak_u64 value);
+jak_uintvar_marker_marker_type_e jak_uintvar_marker_peek_marker(jak_uintvar_marker_t data);
 jak_u8 jak_uintvar_marker_sizeof(jak_uintvar_marker_t varuint);
-jak_u8 jak_uintvar_marker_required_size(jak_u64 value);
-char jak_uintvar_marker_type_str(jak_uintvar_marker_e marker);
+jak_u8 jak_uintvar_marker_bytes_needed_value(jak_u64 value);
+jak_u8 jak_uintvar_marker_bytes_needed_for_value_by_type(jak_uintvar_marker_marker_type_e type);
+jak_u8 jak_uintvar_marker_bytes_needed_complete(jak_u64 value);
+char jak_uintvar_marker_type_str(jak_uintvar_marker_marker_type_e marker);
+int jak_uintvar_marker_compare(jak_uintvar_marker_marker_type_e lhs, jak_uintvar_marker_marker_type_e rhs);
 
 JAK_END_DECL
 

@@ -37,6 +37,7 @@ bool jak_memblock_get_error(jak_error *out, jak_memblock *block);
 bool jak_memblock_zero_out(jak_memblock *block);
 bool jak_memblock_size(jak_offset_t *size, const jak_memblock *block);
 jak_offset_t jak_memblock_last_used_byte(const jak_memblock *block);
+bool jak_memblock_force_set_last_used_byte(jak_memblock *block, jak_offset_t last_byte);
 bool jak_memblock_write_to_file(FILE *file, const jak_memblock *block);
 const char *jak_memblock_raw_data(const jak_memblock *block);
 bool jak_memblock_resize(jak_memblock *block, size_t size);

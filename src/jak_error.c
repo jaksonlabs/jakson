@@ -17,6 +17,9 @@
 
 #include <jak_error.h>
 
+bool jak_global_error_is_abort_in_debug = true;
+bool jak_global_error_print_in_debug = true;
+
 bool jak_error_init(jak_error *err)
 {
         if (err) {
@@ -51,34 +54,40 @@ bool jak_error_set(jak_error *err, int code, const char *file, jak_u32 line)
         return jak_error_set_wdetails(err, code, file, line, NULL);
 }
 
-bool jak_error_set_wdetails(jak_error *err, int code, const char *file, jak_u32 line, const char *details)
+bool jak_error_update(jak_error *err, int code, const char *file, jak_u32 line)
+{
+        return jak_error_update_wdetails(err, code, file, line, NULL);
+}
+
+
+bool jak_error_update_wdetails(jak_error *err, int code, const char *file, jak_u32 line, const char *details)
 {
         if (err) {
                 err->code = code;
                 err->file = file;
                 err->line = line;
                 err->details = details ? strdup(details) : NULL;
-#ifndef NDEBUG
-                jak_error_print_and_abort(err);
-#endif
         }
         return (err != NULL);
 }
 
-bool jak_error_set_no_abort(jak_error *err, int code, const char *file, jak_u32 line)
-{
-        return jak_error_set_wdetails_no_abort(err, code, file, line, NULL);
-}
-
-bool jak_error_set_wdetails_no_abort(jak_error *err, int code, const char *file, jak_u32 line, const char *details)
+bool jak_error_set_wdetails(jak_error *err, int code, const char *file, jak_u32 line, const char *details)
 {
         if (err) {
-                err->code = code;
-                err->file = file;
-                err->line = line;
-                err->details = details ? strdup(details) : NULL;
+                jak_error_update_wdetails(err, code, file, line, details);
 #ifndef NDEBUG
-                JAK_ERROR_PRINT(code);
+                if (jak_global_error_is_abort_in_debug) {
+                        if (jak_global_error_print_in_debug) {
+                                jak_error_print_and_abort(err);
+                        } else {
+                                abort();
+                        }
+
+                } else {
+                        if (jak_global_error_print_in_debug) {
+                                JAK_ERROR_PRINT(code);
+                        }
+                }
 #endif
         }
         return (err != NULL);

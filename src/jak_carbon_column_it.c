@@ -49,7 +49,7 @@ bool jak_carbon_column_it_create(jak_carbon_column_it *it, jak_memfile *memfile,
         jak_memfile_open(&it->memfile, memfile->memblock, memfile->mode);
         jak_memfile_seek(&it->memfile, column_start_offset);
 
-        JAK_ERROR_IF(jak_memfile_remain_size(&it->memfile) < sizeof(jak_u8) + sizeof(jak_media_type), err, JAK_ERR_CORRUPTED);
+        JAK_ERROR_IF(jak_memfile_remaining_size(&it->memfile) < sizeof(jak_u8) + sizeof(jak_media_type), err, JAK_ERR_CORRUPTED);
 
         jak_u8 marker = *jak_memfile_read(&it->memfile, sizeof(jak_u8));
         JAK_ERROR_IF_WDETAILS(marker != JAK_CARBON_MARKER_COLUMN_U8 &&
@@ -276,7 +276,7 @@ bool jak_carbon_column_it_remove(jak_carbon_column_it *it, jak_u32 pos)
         it->column_num_elements = num_elems;
 
         jak_memfile_restore_position(&it->memfile);
-        jak_memfile_seek_from_here(&it->memfile, shift);
+        jak_memfile_seek_relative(&it->memfile, shift);
 
         return true;
 }

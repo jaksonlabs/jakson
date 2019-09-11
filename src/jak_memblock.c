@@ -80,6 +80,13 @@ jak_offset_t jak_memblock_last_used_byte(const jak_memblock *block)
         return block ? block->last_byte : 0;
 }
 
+bool jak_memblock_force_set_last_used_byte(jak_memblock *block, jak_offset_t last_byte)
+{
+        JAK_ERROR_IF(last_byte >= block->blockLength, &block->err, JAK_ERR_OUTOFBOUNDS);
+        block->last_byte = last_byte;
+        return true;
+}
+
 bool jak_memblock_write_to_file(FILE *file, const jak_memblock *block)
 {
         size_t nwritten = fwrite(block->base, block->blockLength, 1, file);

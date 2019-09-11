@@ -256,7 +256,7 @@ bool jak_carbon_revise_shrink(jak_carbon_revise *context)
         jak_carbon_array_it it;
         jak_carbon_revise_iterator_open(&it, context);
         jak_carbon_array_it_fast_forward(&it);
-        if (jak_memfile_remain_size(&it.memfile) > 0) {
+        if (jak_memfile_remaining_size(&it.memfile) > 0) {
                 jak_offset_t first_empty_slot = jak_memfile_tell(&it.memfile);
                 JAK_ASSERT(jak_memfile_size(&it.memfile) > first_empty_slot);
                 jak_offset_t shrink_size = jak_memfile_size(&it.memfile) - first_empty_slot;

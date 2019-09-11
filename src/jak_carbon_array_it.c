@@ -151,7 +151,7 @@ bool jak_carbon_array_it_create(jak_carbon_array_it *it, jak_memfile *memfile, j
         jak_memfile_open(&it->memfile, memfile->memblock, memfile->mode);
         jak_memfile_seek(&it->memfile, payload_start);
 
-        JAK_ERROR_IF(jak_memfile_remain_size(&it->memfile) < sizeof(jak_u8), err, JAK_ERR_CORRUPTED);
+        JAK_ERROR_IF(jak_memfile_remaining_size(&it->memfile) < sizeof(jak_u8), err, JAK_ERR_CORRUPTED);
 
         jak_u8 marker = *jak_memfile_read(&it->memfile, sizeof(jak_u8));
         JAK_ERROR_IF_WDETAILS(marker != JAK_CARBON_MARKER_ARRAY_BEGIN, err, JAK_ERR_ILLEGALOP,

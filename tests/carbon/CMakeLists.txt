@@ -41,6 +41,9 @@ target_link_libraries(jakson-test-mime PUBLIC gtest ${TEST_LIBS} PRIVATE jakson-
 add_executable(jakson-test-json test-json.cpp)
 target_link_libraries(jakson-test-json PUBLIC gtest ${TEST_LIBS} PRIVATE jakson-sources)
 
+add_executable(jakson-test-uintvar-column test-uintvar-column.cpp)
+target_link_libraries(jakson-test-uintvar-column PUBLIC gtest ${TEST_LIBS} PRIVATE jakson-sources)
+
 ADD_DEPENDENCIES(tests jakson-test-object-ids)
 ADD_DEPENDENCIES(tests jakson-test-archive-ops)
 ADD_DEPENDENCIES(tests jakson-test-fix-map)
@@ -51,6 +54,7 @@ ADD_DEPENDENCIES(tests jakson-test-carbon)
 ADD_DEPENDENCIES(tests jakson-test-carbon-path-index)
 ADD_DEPENDENCIES(tests jakson-test-mime)
 ADD_DEPENDENCIES(tests jakson-test-json)
+ADD_DEPENDENCIES(tests jakson-test-uintvar-column)
 
 add_test(TestObjectIds  ${MAKE_DIRECTORY}/jakson-test-object-ids)
 add_test(TestArchiveOps ${MAKE_DIRECTORY}/jakson-test-archive-ops)
@@ -62,3 +66,4 @@ add_test(TestCarbonFiles ${MAKE_DIRECTORY}/jakson-test-carbon)
 add_test(TestCarbonPathIndex ${MAKE_DIRECTORY}/jakson-test-carbon-path-index)
 add_test(TestMimeTypeEncoding ${MAKE_DIRECTORY}/jakson-test-mime)
 add_test(TestJson ${MAKE_DIRECTORY}/jakson-test-json)
+add_test(TestUintvarColumn ${MAKE_DIRECTORY}/jakson-test-uintvar-column)

@@ -132,6 +132,7 @@ JAK_BEGIN_DECL
 #define JAK_ERR_BUFFERTOOTINY 94            /** buffer capacity exceeded */
 #define JAK_ERR_TAILINGJUNK 95              /** tailing junk was detected in a stream */
 #define JAK_ERR_NOTINDEXED 96               /** not indexed */
+#define JAK_ERR_OVERLAP 97                  /** memory areas are not allowed to overlap here */
 
 static const char *const jak_global_err_str[] =
         {"No JAK_ERROR", "Null pointer detected", "Function not implemented", "Index is out of bounds",
@@ -179,11 +180,27 @@ static const char *const jak_global_err_str[] =
          "parsing JAK_ERROR key name or array index expected", "parsing JAK_ERROR: unknown token",
          "dot-notated path could not be parsed", "Illegal state", "Unsupported data type", "Operation failed",
          "Cleanup operation failed; potentially a memory leak occurred", "dot-notated path could not be compiled",
-         "not a number", "buffer capacity exceeded", "tailing junk was detected in a stream", "not indexed"};
+         "not a number", "buffer capacity exceeded", "tailing junk was detected in a stream", "not indexed",
+         "memory areas are not allowed to overlap here"};
 
 #define JAK_ERRSTR_ILLEGAL_CODE "illegal JAK_ERROR code"
 
 static const int jak_global_nerr_str = JAK_ARRAY_LENGTH(jak_global_err_str);
+
+extern bool jak_global_error_is_abort_in_debug;
+extern bool jak_global_error_print_in_debug;
+
+#define JAK_EXPLICT_NO_ABORT_BY_ERROR_IN_DEBUG_BEGIN       jak_global_error_is_abort_in_debug = false;
+#define JAK_EXPLICT_NO_ABORT_BY_ERROR_IN_DEBUG_END         jak_global_error_is_abort_in_debug = true;
+
+#define JAK_EXPLICT_NO_ERROR_PRINT_IN_DEBUG_BEGIN          jak_global_error_print_in_debug = false;
+#define JAK_EXPLICT_NO_ERROR_PRINT_IN_DEBUG_END            jak_global_error_print_in_debug = true;
+
+#define JAK_EXPLICT_SIMULATE_ERROR_HANDLING_IN_RELEASE_BEGIN                                                           \
+        JAK_EXPLICT_NO_ABORT_BY_ERROR_IN_DEBUG_BEGIN; JAK_EXPLICT_NO_ERROR_PRINT_IN_DEBUG_BEGIN
+
+#define JAK_EXPLICT_SIMULATE_ERROR_HANDLING_IN_RELEASE_END                                                             \
+        JAK_EXPLICT_NO_ABORT_BY_ERROR_IN_DEBUG_END; JAK_EXPLICT_NO_ERROR_PRINT_IN_DEBUG_END
 
 typedef struct jak_error {
         int code;
@@ -200,11 +217,11 @@ bool jak_error_drop(jak_error *err);
 
 bool jak_error_set(jak_error *err, int code, const char *file, jak_u32 line);
 
+bool jak_error_update(jak_error *err, int code, const char *file, jak_u32 line);
+
 bool jak_error_set_wdetails(jak_error *err, int code, const char *file, jak_u32 line, const char *details);
 
-bool jak_error_set_no_abort(jak_error *err, int code, const char *file, jak_u32 line);
-
-bool jak_error_set_wdetails_no_abort(jak_error *err, int code, const char *file, jak_u32 line, const char *details);
+bool jak_error_update_wdetails(jak_error *err, int code, const char *file, jak_u32 line, const char *details);
 
 bool jak_error_str(const char **errstr, const char **file, jak_u32 *line, bool *details, const char **detailsstr,
                const jak_error *err);
@@ -226,6 +243,7 @@ bool jak_error_print_and_abort(const jak_error *err);
 #define JAK_SUCCESS_ELSE_FAIL(expr, err)           JAK_SUCCESS_ELSE_RETURN(expr, err, JAK_ERR_FAILED, false)
 
 
+#define JAK_ERROR_UPDATE(err, code)              jak_error_update(err, code, __FILE__, __LINE__);
 #define JAK_ERROR(err, code)                     JAK_ERROR_IF (true, err, code)
 #define JAK_ERROR_NO_ABORT(err, code)            JAK_ERROR_IF (true, err, code)
 #define JAK_ERROR_IF(expr, err, code)            { if (expr) { jak_error_set(err, code, __FILE__, __LINE__); } }
@@ -244,7 +262,7 @@ bool jak_error_print_and_abort(const jak_error *err);
     if (expr) {                                                                                                        \
         jak_error err;                                                                                                \
         jak_error_init(&err);                                                                                              \
-        JAK_ERROR(&err, code);                                                                                             \
+        JAK_ERROR_UPDATE(&err, code);                                                                                             \
         jak_error_print_to_stderr(&err);                                                                                   \
     }                                                                                                                  \
 }

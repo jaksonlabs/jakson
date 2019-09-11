@@ -260,7 +260,8 @@ typedef enum jak_archive_marker {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
-static jak_archive_header this_file_header = {.version = JAK_CARBON_ARCHIVE_VERSION, .root_object_header_offset = 0};
+static jak_archive_header this_file_header = {.version = JAK_CARBON_ARCHIVE_VERSION, .root_object_header_offset = 0,
+                                              .jak_string_id_to_offset_index_offset = 0, .magic = {0}};
 
 static struct {
         jak_archive_marker_e type;

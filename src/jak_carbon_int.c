@@ -303,7 +303,7 @@ bool jak_carbon_int_array_it_refresh(bool *is_empty_slot, bool *is_array_end, ja
 bool jak_carbon_int_array_it_field_type_read(jak_carbon_array_it *it)
 {
         JAK_ERROR_IF_NULL(it)
-        JAK_ERROR_IF(jak_memfile_remain_size(&it->memfile) < 1, &it->err, JAK_ERR_ILLEGALOP);
+        JAK_ERROR_IF(jak_memfile_remaining_size(&it->memfile) < 1, &it->err, JAK_ERR_ILLEGALOP);
         jak_memfile_save_position(&it->memfile);
         it->field_offset = jak_memfile_tell(&it->memfile);
         jak_u8 media_type = *jak_memfile_read(&it->memfile, 1);
