@@ -216,6 +216,7 @@
 </code></pre>
 <p>Carbon <code>record</code> for JSON snippet</p>
 <pre><code>[nokey, 1B]
+[array-begin, 1B]
 [object-begin, 1B]
    (str-len, 1B)[title, 5B] [string-field, 1B](str-len, 1B)[Back to the Future, 18B]
    (str-len, 1B)[sub-title, 9B] [null-field, 1B]
@@ -238,14 +239,15 @@
          [2012, 1B]
          [2015, 1B]
          [2016, 1B]
+[array-end, 1B]         
 [object-end, 1B]  
 </code></pre>
-<p>132 byte</p>
+<p>134 byte</p>
 <table><thead><tr><th>Format</th><th>Document Size</th></tr></thead><tbody>
 <tr><td>Plain-Text JSON</td><td>187 byte</td></tr>
 <tr><td>Binary JSON (BSON)</td><td>219 byte</td></tr>
 <tr><td>Universal Binary JSON (UBJSON)</td><td>145 byte</td></tr>
-<tr><td>Columnar Binary JSON (Carbon)</td><td>132 byte</td></tr>
+<tr><td>Columnar Binary JSON (Carbon)</td><td>134 byte</td></tr>
 </tbody></table>
 <h1><a class="header" href="#binary-json" id="binary-json">Binary JSON</a></h1>
 <h2><a class="header" href="#bson-running-example" id="bson-running-example">BSON Running Example</a></h2>
