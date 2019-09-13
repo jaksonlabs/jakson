@@ -41,11 +41,11 @@ window.search = window.search || {};
                 breadcrumbs: {boost: 0}
             }
         },
-        mJAK_exclude = [],
+        mark_exclude = [],
         marker = new Mark(content),
         current_searchterm = "",
         URL_SEARCH_PARAM = 'search',
-        URL_MJAK_PARAM = 'highlight',
+        URL_MARK_PARAM = 'highlight',
         teaser_count = 0,
 
         SEARCH_HOTKEY_KEYCODE = 83,
@@ -139,13 +139,13 @@ window.search = window.search || {};
         var teaser = makeTeaser(escapeHTML(result.doc.body), searchterms);
         teaser_count++;
 
-        // The ?URL_MJAK_PARAM= parameter belongs inbetween the page and the #heading-anchor
+        // The ?URL_MARK_PARAM= parameter belongs inbetween the page and the #heading-anchor
         var url = doc_urls[result.ref].split("#");
         if (url.length == 1) { // no anchor found
             url.push("");
         }
 
-        return '<a href="' + path_to_root + url[0] + '?' + URL_MJAK_PARAM + '=' + searchterms + '#' + url[1]
+        return '<a href="' + path_to_root + url[0] + '?' + URL_MARK_PARAM + '=' + searchterms + '#' + url[1]
             + '" aria-details="teaser_' + teaser_count + '">' + result.doc.breadcrumbs + '</a>'
             + '<span class="teaser" id="teaser_' + teaser_count + '" aria-label="Search Result Teaser">' 
             + teaser + '</span>';
@@ -290,10 +290,10 @@ window.search = window.search || {};
             showSearch(false);
         }
 
-        if (url.params.hasOwnProperty(URL_MJAK_PARAM)) {
-            var words = url.params[URL_MJAK_PARAM].split(' ');
+        if (url.params.hasOwnProperty(URL_MARK_PARAM)) {
+            var words = url.params[URL_MARK_PARAM].split(' ');
             marker.mark(words, {
-                exclude: mJAK_exclude
+                exclude: mark_exclude
             });
 
             var markers = document.querySelectorAll("mark");
@@ -410,7 +410,7 @@ window.search = window.search || {};
         marker.unmark();
     }
     
-    // Update current url with ?URL_SEARCH_PARAM= parameter, remove ?URL_MJAK_PARAM and #heading-anchor .
+    // Update current url with ?URL_SEARCH_PARAM= parameter, remove ?URL_MARK_PARAM and #heading-anchor .
     // `action` can be one of "push", "replace", "push_if_new_search_else_replace"
     // and replaces or pushes a new browser history item.
     // "push_if_new_search_else_replace" pushes if there is no `?URL_SEARCH_PARAM=abc` yet.
@@ -419,7 +419,7 @@ window.search = window.search || {};
         var first_search = ! url.params.hasOwnProperty(URL_SEARCH_PARAM);
         if (searchterm != "" || action == "push_if_new_search_else_replace") {
             url.params[URL_SEARCH_PARAM] = searchterm;
-            delete url.params[URL_MJAK_PARAM];
+            delete url.params[URL_MARK_PARAM];
             url.hash = "";
         } else {
             delete url.params[URL_SEARCH_PARAM];
