@@ -1,4 +1,4 @@
-// file: bench_carbon.h
+// file: bench_fwd.h
 
 /**
  *  Copyright (C) 2018 Marcus Pinnecke
@@ -17,19 +17,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef JAKSON_BENCH_CARBON_H
-#define JAKSON_BENCH_CARBON_H
+#ifndef JAKSON_BENCH_FWD_H
+#define JAKSON_BENCH_FWD_H
 
-#include <jak_stdinc.h>
-#include <jak_carbon.h>
-#include <jak_carbon_find.h>
+//#include "bench_bson.h"
 
-typedef struct bench_carbon_mgr {
-    jak_carbon doc;
-    jak_error err;
-    jak_carbon_find find;
-    jak_string result;
-} bench_carbon_mgr;
-
+typedef struct bench_error bench_error;
+//typedef struct bench_error bench_error;
 
 #endif

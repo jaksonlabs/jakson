@@ -25,14 +25,17 @@
 
 #include <libs/bson/bson.h>
 
-#include "bench_format_handler.h"
+#include "bench_fwd.h"
 
 //typedef struct bench_format_handler bench_format_handler;
+//extern struct bench_error bench_error;
+//typedef struct bench_bson_error bench_bson_error;
 
 typedef struct bench_bson_error {
-    bench_error err;
-    bson_error_t bError;
+    bench_error *err;
+    bson_error_t *bError;
 } bench_bson_error;
+
 
 typedef struct bench_bson_mgr {
     //bench_format_handler handler;
@@ -41,6 +44,7 @@ typedef struct bench_bson_mgr {
     bench_bson_error *error;
 } bench_bson_mgr;
 
+bool bench_bson_error_create(bench_bson_error *error);
 bool bench_bson_mgr_create_from_file(bench_bson_mgr *manager, const char* filePath);
 bool bench_bson_mgr_create_empty(bench_bson_mgr *manager, bench_bson_error *error);
 bool bench_bson_mgr_destroy(bench_bson_mgr *manager);

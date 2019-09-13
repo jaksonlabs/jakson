@@ -1,5 +1,6 @@
 
 #include "bench_bson.h"
+#include "bench_format_handler.h"
 
 bool bench_bson_mgr_create_from_file(bench_bson_mgr *manager, const char* filePath)
 {

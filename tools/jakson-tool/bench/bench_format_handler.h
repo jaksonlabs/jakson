@@ -26,6 +26,9 @@
 #include "bench_carbon.h"
 #include "bench_bson.h"
 #include "bench_ubjson.h"
+#include <libs/bson/bson.h>
+
+typedef struct bench_bson_error bench_bson_error;
 
 typedef struct bench_error {
     uint32_t code;

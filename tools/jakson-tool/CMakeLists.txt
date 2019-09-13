@@ -13,7 +13,8 @@ set(BENCH_SOURCES
         bench/bench_carbon.h
         bench/bench_carbon.c
         bench/bench_ubjson.h
-        bench/bench_ubjson.c)
+        bench/bench_ubjson.c
+        bench/bench_fwd.h)
 
 add_executable(jakson-tool main.c ${TOOL_SOURCES} ${BENCH_SOURCES})
 target_link_libraries(jakson-tool PUBLIC ${LIBS} PRIVATE jakson-sources)

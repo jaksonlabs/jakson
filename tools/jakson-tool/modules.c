@@ -682,7 +682,7 @@ bool moduleBenchInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *m
             bson_reader_t *bReader;
             const bson_t *b;
             bson_error_t bError;
-            char *str;
+            //char *str;
 
             if(!(bReader = bson_reader_new_from_file(filePath, &bError))) {
                 JAK_CONSOLE_WRITE(file, "BSON reader Failed to open '%s': ", filePath);
@@ -690,20 +690,26 @@ bool moduleBenchInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *m
                 JAK_CONSOLE_WRITE_ENDL(file);
                 return false;
             }
-
+            b = bson_reader_read(bReader, NULL);
+            char *j = bson_as_canonical_extended_json (b, NULL);
+            JAK_CONSOLE_WRITE(file, "%s", j);
+            /*
             while((b = bson_reader_read(bReader, NULL))) {
                 str = bson_as_canonical_extended_json(b, NULL);
                 // Output test -> Remove later
-                JAK_CONSOLE_WRITE(file, "%s", str);
+                JAK_CONSOLE_WRITELN(file, "test%s", "");
+                JAK_CONSOLE_WRITELN(file, "%s", str);
                 JAK_CONSOLE_WRITE_ENDL(file);
 
                 bson_free(str);
             }
+             */
             bson_reader_destroy(bReader);
 
         } else if(strcmp(format, "UBJSON") == 0) {
             // TODO: Include UBJSON file benchmarking
-            char *testStr = "Test";
+
+            const char *testStr = "[i\x05Si\x05helloi\x0a]";
             size_t len_testStr = strlen(testStr);
             const char expected_mixed_dynamic_array[]= "[i\x05Si\x05helloi\x0a]";
             uint8_t *memory = malloc(2 * len_testStr);

@@ -24,10 +24,8 @@ bool bench_format_handler_create_bson(bench_format_handler *handler, bench_error
     handler->format_name = "bson";
     handler->error = error;
 
-    bench_bson_error *bsonError = malloc(sizeof(bench_bson_error));
-    bench_bson_mgr *manager = malloc(sizeof(bench_bson_mgr));
-    if(manager == NULL)
-        return false;
+    bench_bson_error *bsonError;
+    bench_bson_mgr *manager;
     bench_bson_mgr_create_from_file(manager, filePath);
 
     manager->error = bsonError;
@@ -73,10 +71,12 @@ bool bench_format_handler_insert_int32(bench_format_handler *handler, const char
 {
     if(strcmp(handler->format_name, "carbon") == 0) {
         // TODO: Implement
+        return false;
     } else if(strcmp(handler->format_name, "bson") == 0) {
         return bench_bson_mgr_insert_int32((bench_bson_mgr*) handler->manager, key, val);
     } else if(strcmp(handler->format_name, "ubjson") == 0) {
         // TODO: Implement
+        return false;
     } else {
         return false;
     }
