@@ -27,6 +27,7 @@ Carbon `record` for JSON snippet
 
 ```
 [nokey, 1B]
+[array-begin, 1B]
 [object-begin, 1B]
    (str-len, 1B)[title, 5B] [string-field, 1B](str-len, 1B)[Back to the Future, 18B]
    (str-len, 1B)[sub-title, 9B] [null-field, 1B]
@@ -49,14 +50,15 @@ Carbon `record` for JSON snippet
          [2012, 1B]
          [2015, 1B]
          [2016, 1B]
+[array-end, 1B]         
 [object-end, 1B]  
 ```
 
-132 byte
+134 byte
 
 Format                         | Document Size
 -------------------------------|--------------
 Plain-Text JSON                | 187 byte
 Binary JSON (BSON)             | 219 byte
 Universal Binary JSON (UBJSON) | 145 byte
-Columnar Binary JSON (Carbon)  | 132 byte
+Columnar Binary JSON (Carbon)  | 134 byte
