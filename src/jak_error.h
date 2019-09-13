@@ -213,7 +213,7 @@ bool jak_error_print_to_stderr(const jak_error *err);
 
 bool jak_error_print_and_abort(const jak_error *err);
 
-#define JAK_ERROR_OCCURED(x)                   ((x)->err.code != JAK_ERR_NOERR)
+#define JAK_ERROR_OCCURRED(x)                   ((x)->err.code != JAK_ERR_NOERR)
 
 #define JAK_SUCCESS_ELSE_RETURN(expr, err, code, retval)                                                                   \
 {                                                                                                                      \
