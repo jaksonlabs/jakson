@@ -19,14 +19,27 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 #include "jak_carbon_schema.h"
+#include <jak_carbon.h>
+#include <jak_carbon_array_it.h>
 
 bool jak_carbon_iterate_schema(jak_schema *schema) {
     JAK_UNUSED(schema);
-//    jak_carbon_array_it it;
-//    jak_carbon_field_type_e field_type;
-//    jak_carbon_iterator_open(&it, &schema->carbon);
-//    
-//    jak_carbon_iterator_close(&it);
+
+    jak_carbon_array_it it;
+    jak_carbon_field_type_e field_type;
+    jak_carbon_iterator_open(&it, schema->carbon);
+    jak_carbon_array_it_next(&it)
+    jak_carbon_array_it_field_type(&field_type, &it);
+
+    // top level of schema has to be an object
+    if (!(jak_carbon_field_type_is_object(field_type))){
+        JAK_ERROR_WDETAILS(&schema->err, JAK_ERR_BADTYPE, "expected object in schemafile.");
+        jak_carbon_iterator_close(&it);
+        return false;
+    }
+    jak_carbon_object_it *oit = jak_carbon_array_it_object_value(&it);
+    
+    jak_carbon_iterator_close(&it);
     
 
 
@@ -34,8 +47,8 @@ bool jak_carbon_iterate_schema(jak_schema *schema) {
 }
 
 bool jak_carbon_create_schema(jak_schema *schema, jak_carbon *schemaCarbon) {
-//    JAK_ERROR_IF_NULL(schemaCarbon);
-//    schema->carbon=schemaCarbon;
+    JAK_ERROR_IF_NULL(schemaCarbon);
+    schema->carbon=schemaCarbon;
 
     JAK_UNUSED(schema);
     JAK_UNUSED(schemaCarbon);
@@ -46,11 +59,11 @@ bool jak_carbon_create_schema(jak_schema *schema, jak_carbon *schemaCarbon) {
 }
 
 bool jak_carbon_validate_schema(jak_carbon *schemaCarbon, jak_carbon *carbon) {
-//    JAK_ERROR_IF_NULL(schemaCarbon);
-//    JAK_ERROR_IF_NULL(carbon);
-//    
-//    jak_schema schema;
-//    jak_carbon_create_schema(&schema, schemaCarbon);
+    JAK_ERROR_IF_NULL(schemaCarbon);
+    JAK_ERROR_IF_NULL(carbon);
+    
+    jak_schema schema;
+    jak_carbon_create_schema(&schema, schemaCarbon);
 
     JAK_UNUSED(schemaCarbon);
     JAK_UNUSED(carbon);

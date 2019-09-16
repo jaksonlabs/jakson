@@ -21,20 +21,14 @@
 // ---------------------------------------------------------------------------------------------------------------------
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
-#include <jak_json.h>
-#include <jak_carbon.h>
-#include <jak_carbon_find.h>
-//#include <jak_carbon_array_it.h>
-//#include <jak_carbon_object_it.h>
-//#include <jak_carbon_column_it.h>
-//#include <jak_carbon_dot.h>
-//#include <jakson/jakson.h>
-//#include <fcntl.h>
+#include <jak_stdinc.h>
+#include <jak_error.h>
 
 JAK_BEGIN_DECL
 
 typedef struct jak_schema {
     jak_carbon *carbon;
+    jak_error err;
 } jak_schema;
 
 bool jak_carbon_iterate_schema(jak_schema *schema);
