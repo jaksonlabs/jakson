@@ -37,8 +37,7 @@
             "contains": { "type": "string" }
         },
         "baz": {
-            "type": "object",
-            properties:
+            "type": "object"
         }
     }
 }

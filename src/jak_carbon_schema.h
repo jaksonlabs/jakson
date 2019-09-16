@@ -22,14 +22,24 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 #include <jak_json.h>
-#include <jakson/jakson.h>
-#include <fcntl.h>
 #include <jak_carbon.h>
-#include <jak_carbon_find.h>
+//#include <jak_carbon_find.h>
+#include <jak_carbon_array_it.h>
+//#include <jak_carbon_object_it.h>
+//#include <jak_carbon_column_it.h>
+//#include <jak_carbon_dot.h>
+//#include <jakson/jakson.h>
+//#include <fcntl.h>
 
 JAK_BEGIN_DECL
 
-bool jak_carbon_validate_schema(jak_carbon *schema, jak_carbon *carbon);
+typedef struct jak_schema {
+    jak_carbon *carbon;
+} jak_schema;
+
+bool jak_carbon_iterate_schema(jak_schema *schema);
+bool jak_carbon_create_schema(jak_schema *schema, jak_carbon *schemaCarbon);
+bool jak_carbon_validate_schema(jak_carbon *schemaCarbon, jak_carbon *carbon);
 
 JAK_END_DECL
 

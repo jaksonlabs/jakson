@@ -18,22 +18,38 @@
 // ---------------------------------------------------------------------------------------------------------------------
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
-# include "jak_carbon_schema.h"
+#include "jak_carbon_schema.h"
 
-bool jak_carbon_validate_schema(jak_carbon *schema, jak_carbon *carbon) {
+bool jak_carbon_iterate_schema(jak_schema *schema) {
+//    jak_carbon_array_it it;
+//    jak_carbon_field_type_e field_type;
+//    jak_carbon_iterator_open(&it, &schema->carbon);
+//    
+//    jak_carbon_iterator_close(&it);
+    
 
-    JAK_UNUSED(schema);
-    JAK_UNUSED(carbon);
 
-    jak_carbon_find finder;
-    //jak_carbon_column_it *iter;
-    //jak_error *err;
-	//jak_memfile *carbon_memf = NULL;
-    //
-    JAK_UNUSED(finder);
-    //JAK_UNUSED(iter);
+    return true;
+}
 
-    //jak_carbon_column_it_create(iter, schema->memfile, err, 0, 0);
+bool jak_carbon_create_schema(jak_schema *schema, jak_carbon *schemaCarbon) {
+//    JAK_ERROR_IF_NULL(schemaCarbon);
+//    schema->carbon=schemaCarbon;
+
+    
+
+
+    return true;
+}
+
+bool jak_carbon_validate_schema(jak_carbon *schemaCarbon, jak_carbon *carbon) {
+//    JAK_ERROR_IF_NULL(schemaCarbon);
+//    JAK_ERROR_IF_NULL(carbon);
+//    
+//    jak_schema schema;
+//    jak_carbon_create_schema(&schema, schemaCarbon);
+
 
     return true;   
+
 }
