@@ -209,7 +209,10 @@ jak_carbon_insert *jak_carbon_create_begin(jak_carbon_new *context, jak_carbon *
 bool jak_carbon_create_end(jak_carbon_new *context);
 bool jak_carbon_create_empty(jak_carbon *doc, jak_carbon_key_e type);
 bool jak_carbon_create_empty_ex(jak_carbon *doc, jak_carbon_key_e type, jak_u64 doc_cap, jak_u64 array_cap);
+
 bool jak_carbon_from_json(jak_carbon *doc, const char *json, jak_carbon_key_e type, const void *key, jak_error *err);
+bool jak_carbon_from_raw_data(jak_carbon *doc, jak_error *err, const void *data, jak_u64 len);
+
 bool jak_carbon_drop(jak_carbon *doc);
 
 const void *jak_carbon_raw_data(jak_u64 *len, jak_carbon *doc);

@@ -778,7 +778,7 @@ TEST(JsonTest, ParseNullArray)
         bool status = jak_json_parse(&jak_json, &error_desc, &parser, "[null, null, null]");
         ASSERT_TRUE(status);
         ASSERT_EQ(jak_json.element->value.value_type, JAK_JSON_VALUE_ARRAY);
-        ASSERT_EQ(jak_json.element->value.value.array->elements.elements.num_elems, 3);
+        ASSERT_EQ(jak_json.element->value.value.array->elements.elements.num_elems, 3L);
         jak_json_element *e1 = JAK_VECTOR_GET(&jak_json.element->value.value.array->elements.elements, 0, jak_json_element);
         jak_json_element *e2 = JAK_VECTOR_GET(&jak_json.element->value.value.array->elements.elements, 1, jak_json_element);
         jak_json_element *e3 = JAK_VECTOR_GET(&jak_json.element->value.value.array->elements.elements, 2, jak_json_element);
@@ -798,7 +798,7 @@ TEST(JsonTest, ParseBooleanArray)
         bool status = jak_json_parse(&jak_json, &error_desc, &parser, "[true, false]");
         ASSERT_TRUE(status);
         ASSERT_EQ(jak_json.element->value.value_type, JAK_JSON_VALUE_ARRAY);
-        ASSERT_EQ(jak_json.element->value.value.array->elements.elements.num_elems, 2);
+        ASSERT_EQ(jak_json.element->value.value.array->elements.elements.num_elems, 2L);
         jak_json_element *e1 = JAK_VECTOR_GET(&jak_json.element->value.value.array->elements.elements, 0, jak_json_element);
         jak_json_element *e2 = JAK_VECTOR_GET(&jak_json.element->value.value.array->elements.elements, 1, jak_json_element);
         ASSERT_EQ(e1->value.value_type, JAK_JSON_VALUE_TRUE);
@@ -816,7 +816,7 @@ TEST(JsonTest, ParseJsonFromString)
         bool status = jak_json_parse(&jak_json, &error_desc, &parser, "{\"Hello World\": \"Value\"}");
         ASSERT_TRUE(status);
         ASSERT_EQ(jak_json.element->value.value_type, JAK_JSON_VALUE_OBJECT);
-        ASSERT_EQ(jak_json.element->value.value.object->value->members.num_elems, 1);
+        ASSERT_EQ(jak_json.element->value.value.object->value->members.num_elems, 1u);
         ASSERT_TRUE(strcmp((JAK_VECTOR_GET(&jak_json.element->value.value.object->value->members, 0,
                 jak_json_prop))->key.value, "Hello World") == 0);
         ASSERT_TRUE(strcmp((JAK_VECTOR_GET(&jak_json.element->value.value.object->value->members, 0,
@@ -834,7 +834,7 @@ TEST(JsonTest, ParseJsonFromStringLaxQuotes)
         bool status = jak_json_parse(&jak_json, &error_desc, &parser, "{Hello_World: \"Value\"}");
         ASSERT_TRUE(status);
         ASSERT_EQ(jak_json.element->value.value_type, JAK_JSON_VALUE_OBJECT);
-        ASSERT_EQ(jak_json.element->value.value.object->value->members.num_elems, 1);
+        ASSERT_EQ(jak_json.element->value.value.object->value->members.num_elems, 1u);
         ASSERT_TRUE(strcmp((JAK_VECTOR_GET(&jak_json.element->value.value.object->value->members, 0,
                             jak_json_prop))->key.value, "Hello_World") == 0);
         ASSERT_TRUE(strcmp((JAK_VECTOR_GET(&jak_json.element->value.value.object->value->members, 0,
@@ -852,7 +852,7 @@ TEST(JsonTest, ParseJsonFromStringLaxQuotesList)
         bool status = jak_json_parse(&jak_json, &error_desc, &parser, "{Hello: Value1,\nWorld: \"Value2\"}");
         ASSERT_TRUE(status);
         ASSERT_EQ(jak_json.element->value.value_type, JAK_JSON_VALUE_OBJECT);
-        ASSERT_EQ(jak_json.element->value.value.object->value->members.num_elems, 2);
+        ASSERT_EQ(jak_json.element->value.value.object->value->members.num_elems, 2u);
         ASSERT_TRUE(strcmp((JAK_VECTOR_GET(&jak_json.element->value.value.object->value->members, 0,
                             jak_json_prop))->key.value, "Hello") == 0);
         ASSERT_TRUE(strcmp((JAK_VECTOR_GET(&jak_json.element->value.value.object->value->members, 0,

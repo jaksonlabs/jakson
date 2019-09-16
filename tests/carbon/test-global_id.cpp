@@ -7,7 +7,7 @@ TEST(GlobalIdTest, CreateId) {
     jak_uid_t id;
     bool result = jak_unique_id_create(&id);
     EXPECT_TRUE(result);
-    EXPECT_NE(id, 0);
+    EXPECT_NE(id, 0U);
 }
 
 TEST(GlobalIdTest, CreateUniqueIds) {

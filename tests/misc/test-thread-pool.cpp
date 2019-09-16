@@ -90,7 +90,7 @@ TEST(ThreadPool, RESIZE)
         bool status = jak_thread_pool_resize(pool, 6);
 
         EXPECT_EQ(status, true);
-        EXPECT_EQ(pool->size, 6);
+        EXPECT_EQ(pool->size, 6U);
 
         jak_thread_pool_free(pool);
 }
@@ -164,22 +164,22 @@ TEST(ThreadPool, LIVE_RESIZE)
                 if (i == 0) { tasks[i].priority = 1; }
                 jak_thread_pool_enqueue_task(&tasks[i], pool, &hndl);
                 if (i == numThreads * 1 / 3) {
-                        ASSERT_EQ(pool->size, 3);
+                        ASSERT_EQ(pool->size, 3U);
                         jak_thread_pool_resize(pool, 4);
-                        ASSERT_EQ(pool->size, 4);
+                        ASSERT_EQ(pool->size, 4U);
                 }
                 if (i == numThreads * 2 / 3) {
-                        ASSERT_EQ(pool->size, 4);
+                        ASSERT_EQ(pool->size, 4U);
                         jak_thread_pool_resize(pool, 3);
-                        ASSERT_EQ(pool->size, 3);
+                        ASSERT_EQ(pool->size, 3U);
                 }
                 if (i == numThreads * 3 / 4) {
-                        ASSERT_EQ(pool->size, 2);
+                        ASSERT_EQ(pool->size, 2U);
                         jak_thread_pool_resize(pool, 4);
-                        ASSERT_EQ(pool->size, 4);
+                        ASSERT_EQ(pool->size, 4U);
                 }
         }
-        ASSERT_EQ(pool->size, 4);
+        ASSERT_EQ(pool->size, 4U);
 
         jak_thread_pool_wait_for_all(pool);
         jak_thread_pool_free(pool);

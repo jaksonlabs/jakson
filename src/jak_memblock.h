@@ -31,6 +31,7 @@ bool jak_memblock_create(jak_memblock **block, size_t size);
 bool jak_memblock_drop(jak_memblock *block);
 
 bool jak_memblock_from_file(jak_memblock **block, FILE *file, size_t nbytes);
+bool jak_memblock_from_raw_data(jak_memblock **block, const void *data, size_t nbytes);
 
 bool jak_memblock_get_error(jak_error *out, jak_memblock *block);
 

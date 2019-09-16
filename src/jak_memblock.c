@@ -53,6 +53,24 @@ bool jak_memblock_from_file(jak_memblock **block, FILE *file, size_t nbytes)
         return numRead == nbytes ? true : false;
 }
 
+bool jak_memblock_from_raw_data(jak_memblock **block, const void *data, size_t nbytes)
+{
+        JAK_ERROR_IF_NULL(block)
+        JAK_ERROR_IF_NULL(data)
+        JAK_ERROR_IF_NULL(nbytes)
+
+        jak_memblock *result = JAK_MALLOC(sizeof(jak_memblock));
+        JAK_ERROR_IF_NULL(result)
+        result->blockLength = nbytes;
+        result->last_byte = nbytes;
+        result->base = JAK_MALLOC(nbytes);
+        JAK_ERROR_IF_NULL(result->base)
+        memcpy(result->base, data, nbytes);
+        jak_error_init(&result->err);
+        *block = result;
+        return true;
+}
+
 bool jak_memblock_drop(jak_memblock *block)
 {
         JAK_ERROR_IF_NULL(block)

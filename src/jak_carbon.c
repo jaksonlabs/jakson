@@ -166,6 +166,25 @@ bool jak_carbon_from_json(jak_carbon *doc, const char *json, jak_carbon_key_e ty
         }
 }
 
+bool jak_carbon_from_raw_data(jak_carbon *doc, jak_error *err, const void *data, jak_u64 len)
+{
+        JAK_ERROR_IF_NULL(doc);
+        JAK_ERROR_IF_NULL(err);
+        JAK_ERROR_IF_NULL(data);
+        JAK_ERROR_IF_NULL(len);
+
+        jak_error_init(&doc->err);
+        jak_memblock_from_raw_data(&doc->memblock, data, len);
+        jak_memfile_open(&doc->memfile, doc->memblock, JAK_READ_WRITE);
+
+        jak_spinlock_init(&doc->versioning.write_lock);
+
+        doc->versioning.commit_lock = false;
+        doc->versioning.is_latest = true;
+
+        return true;
+}
+
 bool jak_carbon_drop(jak_carbon *doc)
 {
         JAK_ERROR_IF_NULL(doc);
