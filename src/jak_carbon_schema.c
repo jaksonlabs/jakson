@@ -21,6 +21,7 @@
 #include "jak_carbon_schema.h"
 
 bool jak_carbon_iterate_schema(jak_schema *schema) {
+    JAK_UNUSED(schema);
 //    jak_carbon_array_it it;
 //    jak_carbon_field_type_e field_type;
 //    jak_carbon_iterator_open(&it, &schema->carbon);
@@ -36,6 +37,8 @@ bool jak_carbon_create_schema(jak_schema *schema, jak_carbon *schemaCarbon) {
 //    JAK_ERROR_IF_NULL(schemaCarbon);
 //    schema->carbon=schemaCarbon;
 
+    JAK_UNUSED(schema);
+    JAK_UNUSED(schemaCarbon);
     
 
 
@@ -49,6 +52,8 @@ bool jak_carbon_validate_schema(jak_carbon *schemaCarbon, jak_carbon *carbon) {
 //    jak_schema schema;
 //    jak_carbon_create_schema(&schema, schemaCarbon);
 
+    JAK_UNUSED(schemaCarbon);
+    JAK_UNUSED(carbon);
 
     return true;   
 

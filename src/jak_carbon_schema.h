@@ -23,8 +23,8 @@
 // ---------------------------------------------------------------------------------------------------------------------
 #include <jak_json.h>
 #include <jak_carbon.h>
-//#include <jak_carbon_find.h>
-#include <jak_carbon_array_it.h>
+#include <jak_carbon_find.h>
+//#include <jak_carbon_array_it.h>
 //#include <jak_carbon_object_it.h>
 //#include <jak_carbon_column_it.h>
 //#include <jak_carbon_dot.h>
