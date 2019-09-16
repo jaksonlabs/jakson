@@ -174,6 +174,7 @@ add_library(jakson-sources STATIC ${LIB_SOURCES}) # used to share object files a
 link_libraries(jakson-sources ${LIBS})
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/tools")
+add_subdirectory("${CMAKE_SOURCE_DIR}/examples")
 
 enable_testing()
 add_subdirectory("${CMAKE_SOURCE_DIR}/tests")
