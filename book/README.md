@@ -1,6 +1,6 @@
 # Columnar Binary JSON Books
 
-This directory (`book`) contains the Carbon Specification document, and a manual on the [libcarbon](https://github.com/protolabs/libcarbon) library.
+This directory (`book`) contains the Carbon Specification document, and a developer manual for [Jakson](https://github.com/protolabs/libcarbon) (including the Carbon API).
 
 ## Specification 
 
@@ -13,6 +13,8 @@ $ cd spec/latest
 $ mdbook build
 ```
 
+> You find the latest stable snapshot on [carbonspec.org](http://www.carbonspec.org)
+
 ## Jakson Developer Documentation 
 
 The sources of current Jakson Developer Documentation are located in the `jakson-devdoc/latest` directory. 
@@ -23,3 +25,5 @@ To build the specification book, type in your bash
 $ cd jakson-devdoc/latest
 $ mdbook build
 ```
+
+> You find the latest stable snapshot on [jakson-devdocs.org](http://www.jakson-devdocs.org)
