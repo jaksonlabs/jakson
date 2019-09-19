@@ -21,53 +21,66 @@
 #include "jak_carbon_schema.h"
 #include <jak_carbon.h>
 #include <jak_carbon_array_it.h>
+#include <jak_carbon_object_it.h>
 
-bool jak_carbon_iterate_schema(jak_schema *schema) {
-    JAK_UNUSED(schema);
-
+bool jak_carbon_schema_validate(jak_carbon *schemaCarbon, jak_carbon **filesToVal) {
+    JAK_ERROR_IF_NULL(schemaCarbon);
+    JAK_ERROR_IF_NULL(jak_carbon);
+    
     jak_carbon_array_it it;
     jak_carbon_field_type_e field_type;
-    jak_carbon_iterator_open(&it, schema->carbon);
-    jak_carbon_array_it_next(&it)
-    jak_carbon_array_it_field_type(&field_type, &it);
 
-    // top level of schema has to be an object
+    jak_carbon_iterator_open(&it, schemaCarbon);
+    jak_carbon_array_it_next(&it);
+    jak_carbon_array_it_field_type(&field_type, &it);
+    // a schema always has to be an object.
     if (!(jak_carbon_field_type_is_object(field_type))){
-        JAK_ERROR_WDETAILS(&schema->err, JAK_ERR_BADTYPE, "expected object in schemafile.");
+        JAK_ERROR_WDETAILS(&it.err, JAK_ERR_BADTYPE, "Schema has to be an object.");
         jak_carbon_iterator_close(&it);
+        //TODO: cleanup?
         return false;
     }
-    jak_carbon_object_it *oit = jak_carbon_array_it_object_value(&it);
-    
+
+    //the schema is split into subschemas and validated recursively. 
+    if(!(jak_carbon_schema_createSchema(jak_carbon_array_it_object_value(&it)))) {
+        //TODO: error handling and cleanup
+        return false;
+    }
     jak_carbon_iterator_close(&it);
-    
-
-
-    return true;
-}
-
-bool jak_carbon_create_schema(jak_schema *schema, jak_carbon *schemaCarbon) {
-    JAK_ERROR_IF_NULL(schemaCarbon);
-    schema->carbon=schemaCarbon;
-
-    JAK_UNUSED(schema);
-    JAK_UNUSED(schemaCarbon);
-    
-
-
-    return true;
-}
-
-bool jak_carbon_validate_schema(jak_carbon *schemaCarbon, jak_carbon *carbon) {
-    JAK_ERROR_IF_NULL(schemaCarbon);
-    JAK_ERROR_IF_NULL(carbon);
-    
-    jak_schema schema;
-    jak_carbon_create_schema(&schema, schemaCarbon);
-
-    JAK_UNUSED(schemaCarbon);
-    JAK_UNUSED(carbon);
-
     return true;   
 
+}
+
+bool jak_carbon_schema_init(jak_carbon *schemaCarbon) {
+}
+
+
+bool jak_carbon_schema_createSchema(jak_carbon_object_it *oit) {
+
+    jak_carbon_schema schema;
+    // get schema size to avoid unnecessary reallocs
+    unsigned int schemaSize = jak_carbon_schema_getSchemaSize(oit);
+    jak_carbon_schema_content *content = malloc(schemaSize * sizeof(jak_carbon_schema_content*));
+    schema.content = content;
+    
+    unsigned int pos = 0;
+    while(jak_carbon_object_it_next(oit)) {
+        content[pos].key = oit->field.key.name;
+        content[pos].value = &(oit->field.value.data);
+    }
+
+    jak_carbon_schema_handleKeys
+
+    free(content);
+    return true;
+}
+
+
+unsigned int jak_carbon_schema_getSchemaSize(jak_carbon_object_it *oit) {
+    unsigned int size = 0;
+    while (jak_carbon_object_it_next(oit)) {
+        size++;
+    }
+    jak_carbon_object_it_rewind(oit);
+    return size;
 }

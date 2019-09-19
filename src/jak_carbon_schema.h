@@ -26,14 +26,21 @@
 
 JAK_BEGIN_DECL
 
-typedef struct jak_schema {
-    jak_carbon *carbon;
-    jak_error err;
-} jak_schema;
+typedef struct jak_carbon_schema_content {
+    const char *key;
+    void *value;
+} jak_carbon_schema_content;
 
-bool jak_carbon_iterate_schema(jak_schema *schema);
-bool jak_carbon_create_schema(jak_schema *schema, jak_carbon *schemaCarbon);
-bool jak_carbon_validate_schema(jak_carbon *schemaCarbon, jak_carbon *carbon);
+typedef struct jak_carbon_schema {
+    jak_carbon_schema_content *content;
+    jak_error err;
+} jak_carbon_schema;
+
+bool jak_carbon_schema_validate(jak_carbon *schemaCarbon, jak_carbon **filesToVal);
+bool jak_carbon_schema_init(jak_carbon *schemaCarbon);
+bool jak_carbon_schema_createSchema(jak_carbon_object_it *oit);
+bool jak_carbon_schema_handleKeys(jak_carbon_schema *schema);
+unsigned int jak_carbon_schema_getSchemaSize(jak_carbon_object_it *oit);
 
 JAK_END_DECL
 
