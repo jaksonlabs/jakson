@@ -76,7 +76,7 @@ To have a full compatibility to [JSON RFC 8259](https://tools.ietf.org/html/rfc8
 
 Consequentially, the example from above will result in the JSON file `["Hello, Carbon!", 42, null]` that is printed to standard out.
 
-> **Empty records are empty JSON objects**. In the first example, an empty record was created and the resulting JSON string was `{}` rather than `[]`. Although the latter is correct in terms of internal encoding, the first is the correct resulting string for empty records. This is due to a design decision that reflect the common sense of an empty JSON as an empty document rather than an empty array. In cases where this behavior does not match the applications requirements, a modified [JSON printer](conversion-to-json.md) is a good solution.
+> **Empty records are empty JSON objects**. In the first example, an empty record was created and the resulting JSON string was `{}` rather than `[]`. Although the latter is correct in terms of internal encoding, the first is the correct resulting string for empty records. This is due to a design decision that reflect the common sense of an empty JSON as an empty document rather than an empty array. In cases where this behavior does not match the applications requirements, a modified [JSON printer](../conversion-to-json.md) is a good solution.
 
 ## Insertion Contextes
 
@@ -84,7 +84,7 @@ An insertion context `jak_carbon_insert`, defined in `jak_carbon_insert.h`, is t
 
 ### Revision Contextes
 
-Each container (i.e., arrays, columns, and objects) allows getting a new insertion context for modifications *if* the caller has *write* access to the Carbon record at hand. For existing records, a *write* access must be aquired first. Such record modifications require a revision context (`jak_carbon_revise`, defined in `jak_carbon_revise.h`), and are described in the [Section about Carbon record modification](modify-contents.md). For construction operations, *write* access is always the case, since any construction context `jak_carbon_new` has its own revision context `jak_carbon_revise` built-in. 
+Each container (i.e., arrays, columns, and objects) allows getting a new insertion context for modifications *if* the caller has *write* access to the Carbon record at hand. For existing records, a *write* access must be aquired first. Such record modifications require a revision context (`jak_carbon_revise`, defined in `jak_carbon_revise.h`), and are described in the [Section about Carbon record modification](../modify-contents.md). For construction operations, *write* access is always the case, since any construction context `jak_carbon_new` has its own revision context `jak_carbon_revise` built-in. 
 
 If only *read* access is availble to a record, any call to the insertion context will fail.
 

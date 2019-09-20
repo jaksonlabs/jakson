@@ -1,8 +1,8 @@
 # Objects
 
-Carbon Type    | Description                          | Size                | *null*-Value | Marker
----------------|--------------------------------------|---------------------|--------------|------------
-`object`       | list of key-value pairs (properties) | **TODO** bytes | `null` | `{`, `}`
+Carbon Type    | Description                          | Size                | *null*-Value | Marker | Abstract Type
+---------------|--------------------------------------|---------------------|--------------|------|------
+`object`       | key-value pair list | **TODO** bytes | `null` | `{`, `}` | `unsorted_multimap`
 
 ## Encoding
 
@@ -51,6 +51,10 @@ column-boolean, object
 ```
 ...
 ```
+
+#### Abstract Type
+
+An `object` is the [abstract base type](../abstract-types.md) for [`unsorted_multimap`](../abstract-base-types.md). 
 
 ### Example
 

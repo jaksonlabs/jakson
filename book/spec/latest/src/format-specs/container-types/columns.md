@@ -1,8 +1,8 @@
 # Columns
 
-Carbon Type    | Description                      | Size                | *null*-Value | Begin Marker 
----------------|----------------------------------|---------------------|--------------|--------------
-`column`       | list of fixed-typed elements     | 3<sup>+</sup> bytes | `null` value | *see below*  
+Carbon Type    | Description                      | Size                | *null*-Value | Begin Marker | Abstract Type
+---------------|----------------------------------|---------------------|--------------|--------------|---------
+`column`       | list of fixed-typed elements     | 3<sup>+</sup> bytes | `null` value | *see below* | `unsorted_list` 
 
 ## Encoding
 
@@ -38,6 +38,10 @@ Marker | Container | Description             | Size     | *null*-Value
 ```
 ...
 ```
+
+#### Abstract Type
+
+A `column` is one [abstract base type](../abstract-types.md) for [`unsorted_list`](../abstract-base-types.md). The other base type is `array`, see [array containers](arrays.md).
 
 ### Example
 

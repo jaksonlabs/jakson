@@ -3,6 +3,7 @@
   unit for Jaksons sources. Set `-DUSE_AMALGAMATION=ON` to use amalgamation, and see [INSTALL.md](INSTALL.md) for more
   information. Implementation details are given in [CMakeLists.txt](CMakeLists.txt).
 - Jakson Developer Documentation, see [book/](book/README.md) and examples in [examples/](examples).
+- Add *abstract types* (abstract base types, and derived abstract types) to the specification and documentation
 
 ## 0.5.00.02 [2019-08-23]
 - JSON parser for carbon files (see `carbon_from_json` in `carbon.h`)

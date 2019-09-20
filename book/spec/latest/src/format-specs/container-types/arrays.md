@@ -1,8 +1,8 @@
 # Arrays
 
-Carbon Type    | Description                      | Size                | *null*-Value | Marker
----------------|----------------------------------|---------------------|--------------|------------
-`array`        | list of variable-typed elements  | 2<sup>+</sup> bytes | `null` value | `[`, `]`
+Type    | Description                      | Size                | *null*-Value | Marker | Abstract Type
+---------------|----------------------------------|---------------------|--------------|----------|--
+`array`        | variable-typed list  | 2<sup>+</sup> bytes | `null` | `[`, `]` | `unsorted_list`
 
 ## Encoding
 
@@ -30,6 +30,11 @@ column-boolean, object
 ```
 ...
 ```
+
+
+#### Abstract Type
+
+An `array` is one [abstract type](../abstract-types.md) for the [`unsorted_list`](../abstract-base-types.md) abstract base type. The other base type is `column`, see [column containers](columns.md).
 
 ### Example
 

@@ -2,13 +2,16 @@
 
 Fields in array containers are added with an insertion context `jak_carbon_insert`, defined in `jak_carbon_insert.h`. An insertion context results either from a library function call, or is manually constructed.
 
-**Library Functions**. Insertion contextes for array containers result from record creation by 
+**Library Functions**. Insertion contextes for array containers result  
 
-- calling `jak_carbon_create_begin`, defined in `jak_carbon.h`
-- when an insertion context is requested to add a new (nested) array container as a field inside another array by calling `jak_carbon_insert_array_begin`, defined in `jak_carbon_insert.h` 
+- from record creation by calling `jak_carbon_create_begin`, defined in `jak_carbon.h`, or
+- when an another insertion context from another array is requested to add a new (nested) array as a field by calling `jak_carbon_insert_array_begin`, defined in `jak_carbon_insert.h`, or 
+- when an another insertion from an object context is requested to add a new array container as value for a property by calling `jak_carbon_insert_prop_array_begin`, defined in `jak_carbon_insert.h` 
 - when any field is updated (and potentially re-written) as an array container by calling `jak_carbon_update_set_array_begin`, defined in `jak_carbon_update.h`.
 
-**Manual Construction**. Another possibility is to construct insertion contextes manually, by calling `jak_carbon_int_insert_create_for_...`, but these function are for internal usage and are not typically called from client code.
+**Manual Construction**. Another possibility is to construct insertion contextes manually, by calling `jak_carbon_int_insert_create_for_array`, but this function is for internal usage and ist not typically called from client code.
+
+
 
 ## Example
 
@@ -51,11 +54,7 @@ int main (void)
 }
 ```
 
-In the above example, at first and at last, two strings (`Hello` and `array!`) are added, between them a nested array is added inside an (atomic) array insertion block beginning with `jak_carbon_insert_array_begin` and ending with `jak_carbon_insert_array_end` to insert a nested array containing of two strings `you` and `nested`. The begin of this block requires a state object (`state`) that is used to adjust the parent memory file position when calling `jak_carbon_insert_array_end`, the parent insertion context (here `ins`) itself, and a non-zero integer (here `1024`) that defines the capacity in number of bytes of the new-to-add array. 
-
-In case not enough capacity is given for the final nested array contents, the remaining memory area after the new-to-add array is moved-in-place towards the end of the underlying memory file. This movement may result in a reallocation of the entire underlying memory block, if the tailing buffer of the Carbon record is exhausted. Otherwise, in case of that more capacity is given than actually used for the new-to-add array, reserved (zero-valued) memory remains as tail between the end of the new-to-add array and the next element in the parent array (i.e., the string field `array!`). 
-
-Both reserved memory areas, the potentially reserved memory between the new-to-add array and the string field `array!`, and the tailing buffer of the Carbon record can be removed by specifying other [optimization flags](carbon-api/record-optimization.md) than `JAK_CARBON_KEEP`, or by manually calling `jak_carbon_revise_shrink` resp. `jak_carbon_revise_pack`  (both defined in `jak_carbon_revise.h`).
+In the above example, at first and at last, two strings (`Hello` and `array!`) are added, between them a nested array is added inside an (atomic) array insertion block beginning with `jak_carbon_insert_array_begin` and ending with `jak_carbon_insert_array_end` to insert a nested array containing of two strings `you` and `nested`. The begin of this block requires a state object (`state`) that is used to adjust the parent memory file position when calling `jak_carbon_insert_array_end`, the parent insertion context (here `ins`) itself, and a non-zero integer (here `1024`) that defines the capacity in number of bytes of the new-to-add array. Assuming this capacity would be `1`, the array container would look like `[[]0[]]`, when the insertion block would be immediatly ended, and could be optimized to `[[][]]` when calling a proper [record optimization](../../record-optimization.md).
 
 
 Afterwards the resulting record is printed to standard out, resulting in the following JSON string:
@@ -75,7 +74,9 @@ Finally, some cleanup operations are performed.
 
 ## Function Overview for Array-Container Insertion Contextes
 
-Array containers are the most flexible container, capable of containing all field types including any other container. The following functions of an insertion context `jak_carbon_insert` are allowed to called (all defined in `jak_carbon_insert.h`:
+Array and object containers are the most flexible container, capable of containing all field types including any other container. Since a Carbon record is in its core a versioned array container, elements can be added directly to a record as part of the record array container.
+
+ The following functions of an insertion context `jak_carbon_insert` are allowed to called (all defined in `jak_carbon_insert.h`:
 
 | Function                               | What is inserted
 |----------------------------------------|-------------
@@ -98,6 +99,6 @@ Array containers are the most flexible container, capable of containing all fiel
 | `jak_carbon_insert_array_{begin,end}`  | an array container
 | `jak_carbon_insert_column_{begin,end}` | a column container
 
-For convenience, the library provides two functions `jak_carbon_insert_unsigned` and `jak_carbon_insert_signed`, which internally call the best fitting `jak_carbon_insert_u...` resp. `jak_carbon_insert_i...` function for an input integer `x`. A function is best fitting in this context, if the functions encoding type requires the minimum amount of bytes to store `x`. For instance, `jak_carbon_insert_unsigned` called for `42` will internally call `jak_carbon_insert_u8`, but `jak_carbon_insert_u16` if the input is `4242`.
+For convenience, the library provides two functions `jak_carbon_insert_unsigned` and `jak_carbon_insert_signed`, which internally call the best fitting `jak_carbon_insert_u...` resp. `jak_carbon_insert_i...` function for an input integer `x`. A function is best fitting in this context, if the functions encoding type requires the minimum amount of bytes to store `x`. For instance, `jak_carbon_insert_unsigned` called for `42` will internally call `jak_carbon_insert_u8`, but `jak_carbon_insert_u16` if the input is `4242`. However, both `jak_carbon_insert_unsigned` and `jak_carbon_insert_signed` require some effort to figure out which particular function to call. Therefore, whenever possible, use the function from the table above rather than these two convenience functions.
 
 For more information on the internal encoding of arrays and their elements, see the [Columnar Binary JSON (Carbon) specification](http://www.carbonspec.org).

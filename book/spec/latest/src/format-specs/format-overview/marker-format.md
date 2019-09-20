@@ -48,9 +48,80 @@ Marker  | Carbon Type      | Descriptions
 `[R]`   | `column-float`          | a single-precision floating number column
 `[B]`   | `column-boolean`        | a three-valued logic column
 
-
-
 <span class="caption">Figure MF-2: Container Type Markers</span>
+
+
+Begin Marker | Abstract Type        | Base | Container         | Element | Distinct | Sorted
+-------------|----------------------|------|-------------------|---------|----------|--------
+`[{]`        | `unsorted_multimap`  | yes  | `object`          | pair    | no       | no
+`[~]`        | `sorted_multimap`     | no   | `object`          | pair    | no       | yes
+`[:]`        | `unsorted_map`       | no   | `object`          | pair    | yes      | no
+`[#]`        | `sorted_map`         | no   | `object`          | pair    | yes      | yes
+
+
+
+<span class="caption">Figure MF-2: Abstract Types on `object` containers</span>
+
+Begin Marker | Abstract Type        | Base | Container         | Element | Distinct | Sorted
+-------------|----------------------|------|-------------------|---------|----------|--------
+`[[]`        | `unsorted_list`      | yes  | `array`           | value   | no       | no
+`[<]`        | `sorted_list`        | no   | `array`           | value   | no       | yes 
+`[/]`        | `unsorted_set`       | no   | `array`           | value   | yes      | no 
+`[=]`        | `sorted_set`         | no   | `array`           | value   | yes      | yes 
+
+
+<span class="caption">Figure MF-2: Abstract Types on `array` containers</span>
+
+Begin Marker | Abstract Type        | Base | Container         | Element | Distinct | Sorted
+-------------|----------------------|------|-------------------|---------|----------|--------
+`[1]`        | `unsorted_list`      | yes  | `column-u8`       | value   | no       | no
+`[SOH]`        | `sorted_list`        | no   | `column-u8`       | value   | no       | yes 
+`[STX]`        | `unsorted_set`       | no   | `column-u8`       | value   | yes      | no 
+`[ETX]`        | `sorted_set`         | no   | `column-u8`       | value   | yes      | yes 
+`[2]`        | `unsorted_list`      | yes  | `column-u16`       | value   | no       | no
+`[ENQ]`        | `sorted_list`        | no   | `column-u16`       | value   | no       | yes 
+`[ACK]`        | `unsorted_set`       | no   | `column-u16`       | value   | yes      | no 
+`[BEL]`        | `sorted_set`         | no   | `column-u16`       | value   | yes      | yes 
+`[3]`        | `unsorted_list`      | yes  | `column-u32`       | value   | no       | no
+`[TAB]`        | `sorted_list`        | no   | `column-u32`       | value   | no       | yes 
+`[LF]`        | `unsorted_set`       | no   | `column-u32`       | value   | yes      | no 
+`[VT]`        | `sorted_set`         | no   | `column-u32`       | value   | yes      | yes 
+`[4]`        | `unsorted_list`      | yes  | `column-u64`       | value   | no       | no
+`[CR]`        | `sorted_list`        | no   | `column-u64`       | value   | no       | yes 
+`[S0]`        | `unsorted_set`       | no   | `column-u64`       | value   | yes      | no 
+`[S1]`        | `sorted_set`         | no   | `column-u64`       | value   | yes      | yes 
+`[5]`        | `unsorted_list`      | yes  | `column-i8`       | value   | no       | no
+`[DC1]`        | `sorted_list`        | no   | `column-i8`       | value   | no       | yes 
+`[DC2]`        | `unsorted_set`       | no   | `column-i8`       | value   | yes      | no 
+`[DC3]`        | `sorted_set`         | no   | `column-i8`       | value   | yes      | yes 
+`[6]`        | `unsorted_list`      | yes  | `column-i16`       | value   | no       | no
+`[NAK]`        | `sorted_list`        | no   | `column-i16`       | value   | no       | yes 
+`[SYN]`        | `unsorted_set`       | no   | `column-i16`       | value   | yes      | no 
+`[ETB]`        | `sorted_set`         | no   | `column-i16`       | value   | yes      | yes 
+`[7]`        | `unsorted_list`      | yes  | `column-i32`       | value   | no       | no
+`[EM]`        | `sorted_list`        | no   | `column-i32`       | value   | no       | yes 
+`[SUB]`        | `unsorted_set`       | no   | `column-i32`       | value   | yes      | no 
+`[ESC]`        | `sorted_set`         | no   | `column-i32`       | value   | yes      | yes 
+`[8]`        | `unsorted_list`      | yes  | `column-i64`       | value   | no       | no
+`[GS]`        | `sorted_list`        | no   | `column-i64`       | value   | no       | yes 
+`[RS]`        | `unsorted_set`       | no   | `column-i64`       | value   | yes      | no 
+`[US]`        | `sorted_set`         | no   | `column-i64`       | value   | yes      | yes 
+`[R]`        | `unsorted_list`      | yes  | `column-float`       | value   | no       | no
+`["]`        | `sorted_list`        | no   | `column-float`       | value   | no       | yes 
+`[$]`        | `unsorted_set`       | no   | `column-float`       | value   | yes      | no 
+`[.]`        | `sorted_set`         | no   | `column-float`       | value   | yes      | yes 
+`[B]`        | `unsorted_list`      | yes  | `column-boolean`       | value   | no       | no
+`[_]`        | `sorted_list`        | no   | `column-boolean`       | value   | no       | yes 
+`[']`        | `unsorted_set`       | no   | `column-boolean`       | value   | yes      | no 
+`[DEL]`        | `sorted_set`         | no   | `column-boolean`       | value   | yes      | yes 
+
+
+
+
+
+
+<span class="caption">Figure MF-2: Abstract Types on `column` containers</span>
+
 
 Marker  | Carbon Type      | Descriptions
 --------|------------------|--------------------------------------------------
@@ -67,3 +138,10 @@ Marker  | Carbon Type      | Descriptions
 `[0]`   | `reserved`       | marks a single reserved byte
 
 <span class="caption">Figure MF-4: Special Purpose Markers</span>
+
+
+```
+[NUL], [EOT], [BS], [FF], [DLE], [DC4], [CAN], [FS], [^], [\], [@] 
+```
+
+<span class="caption">Figure MF-4: Unused but reserved Markers</span>

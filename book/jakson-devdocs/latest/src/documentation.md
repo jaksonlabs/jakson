@@ -4,9 +4,13 @@
 
 > **This document is work-in-progress**. 
 
-> You see the latest version in the `master` branch, as of 16th September 2019.
+> You see the latest version as of 19th September 2019.
 
 Welcome to the *Jakson Developer Documentation*, which will help you to get started with the Jakson project at source level!. This document aims to provide a good starting point for new developers, and a reference for developers already active in the project. 
+
+<p style="text-align: center;">
+  <img src="jakson-logo-200x200.png" width="200px" />
+</p>
 
 This documentations covers the majority of Jaksons core data structures and function, the projects organization, design decisions made for particular scenarios, and some hints in the general usage. In particular, this documentation is structured as folows:
 
