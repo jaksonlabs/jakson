@@ -28,6 +28,9 @@
 #include "bench_ubjson.h"
 #include <libs/bson/bson.h>
 
+#include <jak_carbon_find.h>
+#include <jak_carbon_array_it.h>
+
 typedef struct bench_bson_error bench_bson_error;
 
 typedef struct bench_error {
@@ -37,12 +40,7 @@ typedef struct bench_error {
 
 typedef struct bench_format_ops bench_format_ops;
 
-/**
-typedef struct bench_format_mgr {
-    void *data;
-    bench_format_ops *ops;
-} bench_format_mgr;
-
+/*
 struct bench_format_ops {
     bool (*create_doc)(bench_format_mgr *, char* file);
     bool (*insert_uint32)(bench_format_mgr *, uint32_t value, unsigned int pos);
@@ -50,11 +48,10 @@ struct bench_format_ops {
     bool (*delete_uint32)(bench_format_mgr *, unsigned int pos);
     // TODO: Add more operations
 };
-**/
+*/
 
 typedef struct bench_format_handler {
     bench_error *error;
-    //bench_format_mgr manager;
     void *manager;
     char *format_name;
 } bench_format_handler;
@@ -62,7 +59,13 @@ typedef struct bench_format_handler {
 //bool bench_format_handler_create_carbon_handler(bench_format_handler *handler,bench_carbon_mgr *manager, bench_error *error, const char* filePath);
 bool bench_format_handler_create_bson_handler(bench_format_handler *handler, bench_error *error, const char* filePath);
 //bool bench_format_handler_create_ubjson_handler(bench_format_handler *handler, bench_error *error, const char* filePath);
+bool bench_format_handler_init_error(bench_error *error);
 bool bench_format_handler_destroy(bench_format_handler *handler);
+bool bench_format_handler_get_doc(char *str, bench_format_handler *handler);
+bool bench_format_handler_write_error(bench_format_handler *handler);
 bool bench_format_handler_insert_int32(bench_format_handler *handler, const char *key, uint32_t val);
+bool bench_format_handler_find_int32(bench_format_handler *handler, const char* key, uint32_t val);
+bool bench_format_handler_delete_int32(bench_format_handler *handler, const char* key);
+
 
 #endif

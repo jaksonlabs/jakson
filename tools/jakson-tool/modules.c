@@ -5,7 +5,7 @@
 #include <jak_archive_int.h>
 #include <jak_carbon.h>
 
-#include <libs/bson/bson.h>
+#include "bench/bench_format_handler.h"
 #include <libs/ubj/ubj.h>
 
 #include "modules.h"
@@ -679,10 +679,10 @@ bool moduleBenchInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *m
             // TODO: Include CARBON file benchmarking
         } else if(strcmp(format, "BSON") == 0) {
             // TODO: Include BSON file benchmarking
+            /*
             bson_reader_t *bReader;
             const bson_t *b;
             bson_error_t bError;
-            //char *str;
 
             if(!(bReader = bson_reader_new_from_file(filePath, &bError))) {
                 JAK_CONSOLE_WRITE(file, "BSON reader Failed to open '%s': ", filePath);
@@ -693,18 +693,26 @@ bool moduleBenchInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *m
             b = bson_reader_read(bReader, NULL);
             char *j = bson_as_canonical_extended_json (b, NULL);
             JAK_CONSOLE_WRITE(file, "%s", j);
-            /*
-            while((b = bson_reader_read(bReader, NULL))) {
-                str = bson_as_canonical_extended_json(b, NULL);
-                // Output test -> Remove later
-                JAK_CONSOLE_WRITELN(file, "test%s", "");
-                JAK_CONSOLE_WRITELN(file, "%s", str);
-                JAK_CONSOLE_WRITE_ENDL(file);
 
-                bson_free(str);
-            }
-             */
             bson_reader_destroy(bReader);
+            */
+            bench_format_handler handler;
+            bench_error err;
+            if(!bench_format_handler_create_bson_handler(&handler, &err, filePath)) {
+
+                //JAK_CONSOLE_WRITELN(file, err.msg, "");
+                return false;
+            }
+            //bench_bson_mgr mgr;
+            //bench_bson_error error;
+            //bench_bson_mgr_create_empty(&mgr, &error);
+            //bench_bson_mgr_insert_int32(&mgr, "test", 42);
+            bench_format_handler_insert_int32(&handler, "test", 42);
+            char buffer[512];
+            //strcpy(buffer, "test");
+            bench_format_handler_get_doc(buffer, &handler);
+            JAK_CONSOLE_WRITE(file, "The following keys were found:\n%s", buffer);
+            bench_format_handler_destroy(&handler);
 
         } else if(strcmp(format, "UBJSON") == 0) {
             // TODO: Include UBJSON file benchmarking

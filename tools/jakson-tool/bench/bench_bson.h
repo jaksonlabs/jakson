@@ -33,21 +33,25 @@
 
 typedef struct bench_bson_error {
     bench_error *err;
-    bson_error_t *bError;
+    //bson_error_t *bError;
 } bench_bson_error;
-
 
 typedef struct bench_bson_mgr {
     //bench_format_handler handler;
-    bson_reader_t *bReader;
     bson_t *b;
     bench_bson_error *error;
+    bson_iter_t *it;
 } bench_bson_mgr;
 
-bool bench_bson_error_create(bench_bson_error *error);
-bool bench_bson_mgr_create_from_file(bench_bson_mgr *manager, const char* filePath);
+bool bench_bson_error_create(bench_bson_error *bsonError, bench_error *benchError);
+bool bench_bson_error_write(bench_bson_error *error, char *msg, size_t errOffset);
+bool bench_bson_mgr_create_from_file(bench_bson_mgr *manager, const char *filePath);
 bool bench_bson_mgr_create_empty(bench_bson_mgr *manager, bench_bson_error *error);
 bool bench_bson_mgr_destroy(bench_bson_mgr *manager);
-bool bench_bson_mgr_insert_int32(bench_bson_mgr *manager, const char *key, uint32_t val);
+bool bench_bson_get_doc(char *str, bench_bson_mgr *manager);
+bool bench_bson_insert_int32(bench_bson_mgr *manager, const char *key, int32_t val);
+bool bench_bson_find_int32(bench_bson_mgr *manager, const char *key, uint32_t val);
+bool bench_bson_delete_int32(bench_bson_mgr *manager, const char *key);
+
 
 #endif

@@ -14,21 +14,26 @@ bool bench_format_handler_create_carbon(bench_format_handler *handler, bench_car
     return false;
 }
 
-bool bench_format_handler_create_bson(bench_format_handler *handler, bench_error *error, const char* filePath)
+bool bench_format_handler_create_bson_handler(bench_format_handler *handler, bench_error *error, const char* filePath)
 {
     //JAK_ERROR_IF_NULL(handler);
 
     JAK_UNUSED(error);
     JAK_UNUSED(filePath);
-
     handler->format_name = "bson";
+    error = malloc(sizeof(*error));
+    error->msg = NULL;
+    error->code = 0;
     handler->error = error;
 
-    bench_bson_error *bsonError;
-    bench_bson_mgr *manager;
-    bench_bson_mgr_create_from_file(manager, filePath);
-
-    manager->error = bsonError;
+    bench_bson_error *bsonError = malloc(sizeof(*bsonError));
+    bench_bson_mgr *manager = malloc(sizeof(*manager));
+    //if(filePath == NULL) {
+        bench_bson_error_create(bsonError, error);
+        bench_bson_mgr_create_empty(manager, bsonError);
+    //} else {
+    //    bench_bson_mgr_create_from_file(&manager, filePath);
+    //}
     handler->manager = manager;
 
     return true;
@@ -53,11 +58,10 @@ bool bench_format_handler_destroy(bench_format_handler *handler)
     if(strcmp(handler->format_name, "carbon") == 0) {
         // TODO: Implement
     } else if(strcmp(handler->format_name, "bson") == 0) {
-        free(handler->format_name);
-        free(handler->error);
         if(!bench_bson_mgr_destroy((bench_bson_mgr*) handler->manager))
             return false;
         free(handler->manager);
+        free(handler->error);
     } else if(strcmp(handler->format_name, "ubjson") == 0) {
         // TODO: Implement
     } else {
@@ -67,13 +71,13 @@ bool bench_format_handler_destroy(bench_format_handler *handler)
     return true;
 }
 
-bool bench_format_handler_insert_int32(bench_format_handler *handler, const char *key, uint32_t val)
-{
+bool bench_format_handler_get_doc(char *str, bench_format_handler *handler) {
+    JAK_ERROR_IF_NULL(handler);
     if(strcmp(handler->format_name, "carbon") == 0) {
         // TODO: Implement
         return false;
     } else if(strcmp(handler->format_name, "bson") == 0) {
-        return bench_bson_mgr_insert_int32((bench_bson_mgr*) handler->manager, key, val);
+        return bench_bson_get_doc(str, (bench_bson_mgr*) handler->manager);
     } else if(strcmp(handler->format_name, "ubjson") == 0) {
         // TODO: Implement
         return false;
@@ -82,3 +86,17 @@ bool bench_format_handler_insert_int32(bench_format_handler *handler, const char
     }
 }
 
+bool bench_format_handler_insert_int32(bench_format_handler *handler, const char *key, uint32_t val)
+{
+    if(strcmp(handler->format_name, "carbon") == 0) {
+        // TODO: Implement
+        return false;
+    } else if(strcmp(handler->format_name, "bson") == 0) {
+        return bench_bson_insert_int32((bench_bson_mgr*) handler->manager, key, val);
+    } else if(strcmp(handler->format_name, "ubjson") == 0) {
+        // TODO: Implement
+        return false;
+    } else {
+        return false;
+    }
+}

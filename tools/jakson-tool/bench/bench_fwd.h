@@ -20,9 +20,9 @@
 #ifndef JAKSON_BENCH_FWD_H
 #define JAKSON_BENCH_FWD_H
 
-//#include "bench_bson.h"
+#include <jak_carbon_find.h>
+#include <jak_carbon_array_it.h>
 
 typedef struct bench_error bench_error;
-//typedef struct bench_error bench_error;
 
 #endif
