@@ -22,6 +22,7 @@
 #include <jak_carbon.h>
 #include <jak_carbon_array_it.h>
 #include <jak_carbon_object_it.h>
+#include <jak_carbon_schema_keywords.h>
 
 bool jak_carbon_schema_validate(jak_carbon *schemaCarbon, jak_carbon **filesToVal) {
     JAK_ERROR_IF_NULL(schemaCarbon);
@@ -44,12 +45,10 @@ bool jak_carbon_schema_validate(jak_carbon *schemaCarbon, jak_carbon **filesToVa
     jak_carbon_schema schema;
     if(!(jak_carbon_schema_createSchema(&schema, jak_carbon_array_it_object_value(&it), filesToVal))) {
         //TODO: error handling
-        free(&schema);
         return false;
     }
     jak_carbon_iterator_close(&it);
 
-    free(&schema);
     return true;   
 }
 
@@ -68,8 +67,10 @@ bool jak_carbon_schema_createSchema(jak_carbon_schema *schema, jak_carbon_object
     }
     if(!(jak_carbon_schema_handleKeys(schema, filesToVal))) {
         //TODO: error handling
+        free(content);
         return false;
     }
+    free(content);
     return true;
 }
 
@@ -78,10 +79,10 @@ bool jak_carbon_schema_handleKeys(jak_carbon_schema *schema, jak_carbon **filesT
     bool status = true;
     for (unsigned int i = 0; i < schema->content_size; i++) {
         if (strcmp(schema->content[i].key, "type")==0) {
-            status = jak_carbon_schema_keywordType(schema, filesToVal);
+            status = jak_carbon_schema_keywords_type(schema, filesToVal);
         }
         else if (strcmp(schema->content[i].key, "properties")==0) {
-                status = jak_carbon_schema_keywordProperties(schema, filesToVal);
+                status = jak_carbon_schema_keywords_properties(schema, filesToVal);
         }
         else {
             //TODO: error handling

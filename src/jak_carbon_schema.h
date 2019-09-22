@@ -37,21 +37,6 @@ typedef struct jak_carbon_schema {
     jak_error err;
 } jak_carbon_schema;
 
-
-bool jak_carbon_schema_keywordType(jak_carbon_schema *schema, jak_carbon **filesToVal) {
-    JAK_UNUSED(schema);
-    JAK_UNUSED(filesToVal);
-    return true;
-}
-
-
-bool jak_carbon_schema_keywordProperties(jak_carbon_schema *schema, jak_carbon **filesToVal) {
-    JAK_UNUSED(schema);
-    JAK_UNUSED(filesToVal);
-    return true;
-}
-
-
 bool jak_carbon_schema_validate(jak_carbon *schemaCarbon, jak_carbon **filesToVal);
 bool jak_carbon_schema_createSchema(jak_carbon_schema *schema, jak_carbon_object_it *oit, jak_carbon **filesToVal);
 bool jak_carbon_schema_handleKeys(jak_carbon_schema *schema, jak_carbon **filesToVal);

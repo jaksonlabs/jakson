@@ -39,7 +39,7 @@ add_executable(jakson-test-json test-json.cpp)
 target_link_libraries(jakson-test-json PUBLIC gtest ${TEST_LIBS} PRIVATE jakson-sources)
 
 add_executable(jakson-test-schema test-schema.cpp)
-target_link_libraries(jakson-test-schema PUBLIC gtest ${TEST_LIBS} PRIVATE jaskson-sources)
+target_link_libraries(jakson-test-schema PUBLIC gtest ${TEST_LIBS} PRIVATE jakson-sources)
 
 ADD_DEPENDENCIES(tests jakson-test-object-ids)
 ADD_DEPENDENCIES(tests jakson-test-archive-ops)

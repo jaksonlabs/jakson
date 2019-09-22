@@ -19,4 +19,4 @@ cmake_install.cmake
 CMakeCache.txt
 libark-sources\.a
 include/
-libjakson-sources.a
+libjakson-sources\.a

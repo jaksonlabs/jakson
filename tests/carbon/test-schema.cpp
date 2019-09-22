@@ -9,15 +9,15 @@ TEST(SchemaTest, ValidateSchema) {
     jak_error err;
     const char *json_in;
 
-    //json_in = "{\"type\": \"string\"}";
-    //jak_carbon_from_json(&schemaCarbon, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
+    json_in = "{\"type\": \"string\"}";
+    jak_carbon_from_json(&schemaCarbon, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-    //json_in = "{\"foo\": \"bar\"}";
-    //jak_carbon_from_json(&fileToVal, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
+    json_in = "{\"foo\": \"bar\"}";
+    jak_carbon_from_json(&fileToVal, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
 
-    //jak_carbon *fileToValPtr = &fileToVal;
-    //status=jak_carbon_schema_validate(&schemaCarbon, &fileToValPtr);
-    //ASSERT_TRUE(status);
+    jak_carbon *fileToValPtr = &fileToVal;
+    status=jak_carbon_schema_validate(&schemaCarbon, &fileToValPtr);
+    ASSERT_TRUE(status);
 }
     
 
