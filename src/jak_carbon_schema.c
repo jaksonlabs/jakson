@@ -25,7 +25,7 @@
 
 bool jak_carbon_schema_validate(jak_carbon *schemaCarbon, jak_carbon **filesToVal) {
     JAK_ERROR_IF_NULL(schemaCarbon);
-    JAK_ERROR_IF_NULL(jak_carbon);
+    JAK_ERROR_IF_NULL(filesToVal);
     
     jak_carbon_array_it it;
     jak_carbon_field_type_e field_type;
@@ -35,43 +35,63 @@ bool jak_carbon_schema_validate(jak_carbon *schemaCarbon, jak_carbon **filesToVa
     jak_carbon_array_it_field_type(&field_type, &it);
     // a schema always has to be an object.
     if (!(jak_carbon_field_type_is_object(field_type))){
-        JAK_ERROR_WDETAILS(&it.err, JAK_ERR_BADTYPE, "Schema has to be an object.");
+        JAK_ERROR_WDETAILS(&it.err, JAK_ERR_BADTYPE, "schema has to be an object.");
         jak_carbon_iterator_close(&it);
         //TODO: cleanup?
         return false;
     }
 
-    //the schema is split into subschemas and validated recursively. 
-    if(!(jak_carbon_schema_createSchema(jak_carbon_array_it_object_value(&it)))) {
-        //TODO: error handling and cleanup
+    jak_carbon_schema schema;
+    if(!(jak_carbon_schema_createSchema(&schema, jak_carbon_array_it_object_value(&it), filesToVal))) {
+        //TODO: error handling
+        free(&schema);
         return false;
     }
     jak_carbon_iterator_close(&it);
+
+    free(&schema);
     return true;   
-
 }
 
-bool jak_carbon_schema_init(jak_carbon *schemaCarbon) {
-}
+bool jak_carbon_schema_createSchema(jak_carbon_schema *schema, jak_carbon_object_it *oit, jak_carbon **filesToVal) {
 
-
-bool jak_carbon_schema_createSchema(jak_carbon_object_it *oit) {
-
-    jak_carbon_schema schema;
     // get schema size to avoid unnecessary reallocs
     unsigned int schemaSize = jak_carbon_schema_getSchemaSize(oit);
     jak_carbon_schema_content *content = malloc(schemaSize * sizeof(jak_carbon_schema_content*));
-    schema.content = content;
+    schema->content = content;
+    schema->content_size = schemaSize;
     
     unsigned int pos = 0;
     while(jak_carbon_object_it_next(oit)) {
         content[pos].key = oit->field.key.name;
         content[pos].value = &(oit->field.value.data);
     }
+    if(!(jak_carbon_schema_handleKeys(schema, filesToVal))) {
+        //TODO: error handling
+        return false;
+    }
+    return true;
+}
 
-    jak_carbon_schema_handleKeys
 
-    free(content);
+bool jak_carbon_schema_handleKeys(jak_carbon_schema *schema, jak_carbon **filesToVal) {
+    bool status = true;
+    for (unsigned int i = 0; i < schema->content_size; i++) {
+        if (strcmp(schema->content[i].key, "type")==0) {
+            status = jak_carbon_schema_keywordType(schema, filesToVal);
+        }
+        else if (strcmp(schema->content[i].key, "properties")==0) {
+                status = jak_carbon_schema_keywordProperties(schema, filesToVal);
+        }
+        else {
+            //TODO: error handling
+            return false;
+        }
+        if (status != true) {
+            //TODO: error handling
+            return false;
+        }
+    }
     return true;
 }
 
