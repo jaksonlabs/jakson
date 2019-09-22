@@ -7,6 +7,7 @@ bool bench_bson_error_create(bench_bson_error *bsonError, bench_error *benchErro
     return 0;
 }
 
+// TODO : Use error write function implicitly by handling error messages in-function as additional parameter
 bool bench_bson_error_write(bench_bson_error *error, char *msg, size_t errOffset) {
     if(errOffset) {
         error->err->msg = strcat(msg, (const char *) errOffset);
@@ -91,28 +92,90 @@ bool bench_bson_get_doc(char* str, bench_bson_mgr *manager) {
     return str;
 }
 
-bool bench_bson_insert_int32(bench_bson_mgr *manager, const char *key, int32_t val)
+bool bench_bson_insert_int32(bench_bson_mgr *manager, bson_iter_t *it, const char *key, int32_t val)
 {
-    bson_append_int32(manager->b, key, strlen(key), val);
+    JAK_ERROR_IF_NULL(manager);
+    if(it) {
+        return bson_append_int32(manager->b, key, strlen(key), val);
+    } else {
+        // TODO? : Insert at current iterator position
+        return false;
+    }
+}
+
+bool bench_bson_find_int32(bench_bson_mgr *manager, bson_iter_t *it, const char *key, int32_t val) {
+    JAK_ERROR_IF_NULL(manager);
+    JAK_UNUSED(val);
+
+    return bson_iter_find(it, key);
+}
+
+bool bench_bson_change_val_int32(bench_bson_mgr *manager, bson_iter_t *it, const char *key, int32_t newVal) {
+    JAK_ERROR_IF_NULL(manager);
+    JAK_UNUSED(key);
+
+    bson_iter_overwrite_int32(it, newVal);
+
     return true;
 }
 
-bool bench_bson_find_int32(bench_bson_mgr *manager, const char *key, int32_t val) {
+bool bench_bson_convert_entry_int32(bench_bson_mgr *manager, bson_iter_t *it, const char *key) {
+    JAK_ERROR_IF_NULL(manager);
+    JAK_ERROR_IF_NULL(key);
+    JAK_UNUSED(it);
+
+    // TODO : Proper implementation instead of just blind iterating and copy pasta.
+
     return 0;
 }
 
-bool bench_bson_change_val_int32(bench_bson_mgr *manager, const char *key, int32_t newVal) {
+bool bench_bson_convert_entry_int64(bench_bson_mgr *manager, bson_iter_t *it, const char *key) {
+    JAK_ERROR_IF_NULL(manager);
+    JAK_ERROR_IF_NULL(key);
+    JAK_UNUSED(it);
+
+    // TODO : Proper implementation instead of just blind iterating and copy pasta.
+
     return 0;
 }
 
-bool bench_bson_convert_entry_int32(bench_bson_mgr *manager, const char *key) {
-    return 0;
+bool bench_bson_delete_int32(bench_bson_mgr *manager, bson_iter_t *it, const char *key) {
+    JAK_ERROR_IF_NULL(manager);
+    JAK_UNUSED(it);
+
+    bson_t *bNew= bson_new();
+    bson_copy_to_excluding_noinit(manager->b, bNew, key, NULL);
+
+    return true;
 }
 
-bool bench_bson_convert_entry_int64(bench_bson_mgr *manager, const char *key) {
-    return 0;
-}
+bool bench_bson_execute_benchmark(bench_bson_mgr *manager, const char *benchType) {
+    JAK_ERROR_IF_NULL(manager);
+    JAK_UNUSED(benchType);
+    bson_iter_t it;
+    bson_iter_init(&it, manager->b);
 
-bool bench_bson_delete_int32(bench_bson_mgr *manager, const char *key) {
-    return 0;
+    assert(bench_bson_insert_int32(manager, 0, "Test1", 41));
+    assert(bench_bson_insert_int32(manager, 0, "Test2", 42));
+    assert(bench_bson_insert_int32(manager, 0, "Test3", 43));
+    assert(bench_bson_insert_int32(manager, 0, "Test4", 44));
+    assert(bench_bson_insert_int32(manager, 0, "Test5", 45));
+    assert(bench_bson_insert_int32(manager, 0, "Test6", 46));
+
+    if(!bench_bson_find_int32(manager, &it, "Test3", 0))
+        return bench_bson_error_write(manager->error, "Failed to find int32 value.", 0);
+
+    if(!bench_bson_change_val_int32(manager, &it, 0, 21))
+        return bench_bson_error_write(manager->error, "Failed to change int32 value.", 0);
+
+    if(!bench_bson_convert_entry_int64(manager, &it, 0))
+        return bench_bson_error_write(manager->error, "Failed to convert to int64 entry.", 0);
+
+    if(!bench_bson_convert_entry_int32(manager, &it, 0))
+        return bench_bson_error_write(manager->error, "Failed to convert to int32 entry.", 0);
+
+    if(!bench_bson_delete_int32(manager, &it, 0))
+        return bench_bson_error_write(manager->error, "Failed to delete int32 entry.", 0);
+
+    return true;
 }

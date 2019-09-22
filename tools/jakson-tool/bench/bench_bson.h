@@ -52,34 +52,35 @@ bool bench_bson_get_doc(char *str, bench_bson_mgr *manager);
 
 bool bench_bson_insert_int8(bench_bson_mgr *manager, const char *key, int8_t val);
 bool bench_bson_insert_int16(bench_bson_mgr *manager, const char *key, int16_t val);
-bool bench_bson_insert_int32(bench_bson_mgr *manager, const char *key, int32_t val);
+bool bench_bson_insert_int32(bench_bson_mgr *manager, bson_iter_t *it, const char *key, int32_t val);
 bool bench_bson_insert_int64(bench_bson_mgr *manager, const char *key, int64_t val);
 bool bench_bson_insert_string(bench_bson_mgr *manager, const char *key, const char *val);
 
 bool bench_bson_find_int8(bench_bson_mgr *manager, const char *key, int8_t val);
 bool bench_bson_find_int16(bench_bson_mgr *manager, const char *key, int16_t val);
-bool bench_bson_find_int32(bench_bson_mgr *manager, const char *key, int32_t val);
+bool bench_bson_find_int32(bench_bson_mgr *manager, bson_iter_t *it, const char *key, int32_t val);
 bool bench_bson_find_int64(bench_bson_mgr *manager, const char *key, int64_t val);
 bool bench_bson_find_string(bench_bson_mgr *manager, const char *key, const char *val);
 
 bool bench_bson_change_val_int8(bench_bson_mgr *manager, const char *key, int8_t newVal);
 bool bench_bson_change_val_int16(bench_bson_mgr *manager, const char *key, int16_t newVal);
-bool bench_bson_change_val_int32(bench_bson_mgr *manager, const char *key, int32_t newVal);
+bool bench_bson_change_val_int32(bench_bson_mgr *manager, bson_iter_t *it, const char *key, int32_t newVal);
 bool bench_bson_change_val_int64(bench_bson_mgr *manager, const char *key, int64_t newVal);
 bool bench_bson_change_val_string(bench_bson_mgr *manager, const char *key, const char *newVal);
 
 bool bench_bson_convert_entry_int8(bench_bson_mgr *manager, const char *key);
 bool bench_bson_convert_entry_int16(bench_bson_mgr *manager, const char *key);
-bool bench_bson_convert_entry_int32(bench_bson_mgr *manager, const char *key);
-bool bench_bson_convert_entry_int64(bench_bson_mgr *manager, const char *key);
+bool bench_bson_convert_entry_int32(bench_bson_mgr *manager, bson_iter_t *it, const char *key);
+bool bench_bson_convert_entry_int64(bench_bson_mgr *manager, bson_iter_t *it, const char *key);
 bool bench_bson_convert_entry_string(bench_bson_mgr *manager, const char *key, size_t size);
 bool bench_bson_convert_entry_object(bench_bson_mgr *manager, const char *key);
 
 bool bench_bson_delete_int8(bench_bson_mgr *manager, const char *key);
 bool bench_bson_delete_int16(bench_bson_mgr *manager, const char *key);
-bool bench_bson_delete_int32(bench_bson_mgr *manager, const char *key);
+bool bench_bson_delete_int32(bench_bson_mgr *manager, bson_iter_t *it, const char *key);
 bool bench_bson_delete_int64(bench_bson_mgr *manager, const char *key);
 bool bench_bson_delete_string(bench_bson_mgr *manager, const char *key);
 
+bool bench_bson_execute_benchmark(bench_bson_mgr *manager, const char *benchType);
 
 #endif
