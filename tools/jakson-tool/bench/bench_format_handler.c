@@ -86,7 +86,82 @@ bool bench_format_handler_get_doc(char *str, bench_format_handler *handler) {
     }
 }
 
-bool bench_format_handler_insert_int32(bench_format_handler *handler, const char *key, uint32_t val)
+bool bench_format_handler_insert_int32(bench_format_handler *handler, const char *key, int32_t val)
+{
+    if(strcmp(handler->format_name, "carbon") == 0) {
+        // TODO: Implement
+        return false;
+    } else if(strcmp(handler->format_name, "bson") == 0) {
+        return bench_bson_insert_int32((bench_bson_mgr*) handler->manager, key, val);
+    } else if(strcmp(handler->format_name, "ubjson") == 0) {
+        // TODO: Implement
+        return false;
+    } else {
+        return false;
+    }
+}
+
+bool bench_format_handler_find_int32(bench_format_handler *handler, const char *key, int32_t val)
+{
+    if(strcmp(handler->format_name, "carbon") == 0) {
+        // TODO: Implement
+        return false;
+    } else if(strcmp(handler->format_name, "bson") == 0) {
+        return bench_bson_insert_int32((bench_bson_mgr*) handler->manager, key, val);
+    } else if(strcmp(handler->format_name, "ubjson") == 0) {
+        // TODO: Implement
+        return false;
+    } else {
+        return false;
+    }
+}
+
+bool bench_format_handler_change_val_int32(bench_format_handler *handler, const char *key, int32_t newVal)
+{
+    if(strcmp(handler->format_name, "carbon") == 0) {
+        // TODO: Implement
+        return false;
+    } else if(strcmp(handler->format_name, "bson") == 0) {
+        return bench_bson_insert_int32((bench_bson_mgr*) handler->manager, key, val);
+    } else if(strcmp(handler->format_name, "ubjson") == 0) {
+        // TODO: Implement
+        return false;
+    } else {
+        return false;
+    }
+}
+
+bool bench_format_handler_convert_entry_int32(bench_format_handler *handler, const char *key)
+{
+    if(strcmp(handler->format_name, "carbon") == 0) {
+        // TODO: Implement
+        return false;
+    } else if(strcmp(handler->format_name, "bson") == 0) {
+        return bench_bson_insert_int32((bench_bson_mgr*) handler->manager, key, val);
+    } else if(strcmp(handler->format_name, "ubjson") == 0) {
+        // TODO: Implement
+        return false;
+    } else {
+        return false;
+    }
+}
+
+bool bench_format_handler_convert_entry_int64(bench_format_handler *handler, const char *key)
+{
+    if(strcmp(handler->format_name, "carbon") == 0) {
+        // TODO: Implement
+        return false;
+    } else if(strcmp(handler->format_name, "bson") == 0) {
+        return bench_bson_insert_int32((bench_bson_mgr*) handler->manager, key, val);
+    } else if(strcmp(handler->format_name, "ubjson") == 0) {
+        // TODO: Implement
+        return false;
+    } else {
+        return false;
+    }
+}
+
+bool bench_format_handler_delete_int32(bench_format_handler *handler, const char *key)
 {
     if(strcmp(handler->format_name, "carbon") == 0) {
         // TODO: Implement

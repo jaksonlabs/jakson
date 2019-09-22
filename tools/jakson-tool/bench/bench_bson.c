@@ -7,8 +7,6 @@ bool bench_bson_error_create(bench_bson_error *bsonError, bench_error *benchErro
     return 0;
 }
 
-
-
 bool bench_bson_error_write(bench_bson_error *error, char *msg, size_t errOffset) {
     if(errOffset) {
         error->err->msg = strcat(msg, (const char *) errOffset);
@@ -97,4 +95,24 @@ bool bench_bson_insert_int32(bench_bson_mgr *manager, const char *key, int32_t v
 {
     bson_append_int32(manager->b, key, strlen(key), val);
     return true;
+}
+
+bool bench_bson_find_int32(bench_bson_mgr *manager, const char *key, int32_t val) {
+    return 0;
+}
+
+bool bench_bson_change_val_int32(bench_bson_mgr *manager, const char *key, int32_t newVal) {
+    return 0;
+}
+
+bool bench_bson_convert_entry_int32(bench_bson_mgr *manager, const char *key) {
+    return 0;
+}
+
+bool bench_bson_convert_entry_int64(bench_bson_mgr *manager, const char *key) {
+    return 0;
+}
+
+bool bench_bson_delete_int32(bench_bson_mgr *manager, const char *key) {
+    return 0;
 }
