@@ -19,8 +19,6 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <errno.h>
-
 #include <jak_alloc.h>
 
 static void *_jak_alloc_invoke_malloc(jak_allocator *self, size_t size);

@@ -65,14 +65,14 @@ insert_embedded_container(jak_memfile *memfile, jak_u8 begin_marker, jak_u8 end_
 bool jak_carbon_int_insert_object(jak_memfile *memfile, size_t nbytes)
 {
         JAK_ERROR_IF_NULL(memfile);
-        insert_embedded_container(memfile, JAK_CARBON_MARKER_OBJECT_BEGIN, JAK_CARBON_MARKER_OBJECT_END, nbytes);
+        insert_embedded_container(memfile, CARBON_MOBJECT_BEGIN, CARBON_MOBJECT_END, nbytes);
         return true;
 }
 
 bool jak_carbon_int_insert_array(jak_memfile *memfile, size_t nbytes)
 {
         JAK_ERROR_IF_NULL(memfile);
-        insert_embedded_container(memfile, JAK_CARBON_MARKER_ARRAY_BEGIN, JAK_CARBON_MARKER_ARRAY_END, nbytes);
+        insert_embedded_container(memfile, CARBON_MARRAY_BEGIN, CARBON_MARRAY_END, nbytes);
         return true;
 }
 
@@ -308,7 +308,7 @@ bool jak_carbon_int_array_it_field_type_read(jak_carbon_array_it *it)
         it->field_offset = jak_memfile_tell(&it->memfile);
         jak_u8 media_type = *jak_memfile_read(&it->memfile, 1);
         JAK_ERROR_IF(media_type == 0, &it->err, JAK_ERR_NOTFOUND)
-        JAK_ERROR_IF(media_type == JAK_CARBON_MARKER_ARRAY_END, &it->err, JAK_ERR_OUTOFBOUNDS)
+        JAK_ERROR_IF(media_type == CARBON_MARRAY_END, &it->err, JAK_ERR_OUTOFBOUNDS)
         it->field_access.it_field_type = media_type;
         jak_memfile_restore_position(&it->memfile);
         return true;
@@ -1508,13 +1508,13 @@ static void marker_insert(jak_memfile *memfile, jak_u8 marker)
 static bool array_it_is_slot_occupied(bool *is_empty_slot, bool *is_array_end, jak_carbon_array_it *it)
 {
         jak_carbon_int_field_auto_close(&it->field_access);
-        return is_slot_occupied(is_empty_slot, is_array_end, &it->memfile, JAK_CARBON_MARKER_ARRAY_END);
+        return is_slot_occupied(is_empty_slot, is_array_end, &it->memfile, CARBON_MARRAY_END);
 }
 
 static bool object_it_is_slot_occupied(bool *is_empty_slot, bool *is_object_end, jak_carbon_object_it *it)
 {
         jak_carbon_int_field_auto_close(&it->field.value.data);
-        return is_slot_occupied(is_empty_slot, is_object_end, &it->memfile, JAK_CARBON_MARKER_OBJECT_END);
+        return is_slot_occupied(is_empty_slot, is_object_end, &it->memfile, CARBON_MOBJECT_END);
 }
 
 static bool is_slot_occupied(bool *is_empty_slot, bool *is_end_reached, jak_memfile *file, jak_u8 end_marker)

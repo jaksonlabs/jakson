@@ -20,13 +20,13 @@
 
 static void write_nokey(jak_memfile *file)
 {
-        jak_u8 marker = JAK_CARBON_MARKER_KEY_NOKEY;
+        jak_u8 marker = CARBON_MNOKEY;
         jak_memfile_write(file, &marker, sizeof(jak_u8));
 }
 
 static void write_autokey(jak_memfile *file)
 {
-        jak_u8 marker = JAK_CARBON_MARKER_KEY_AUTOKEY;
+        jak_u8 marker = CARBON_MAUTOKEY;
         jak_uid_t key = 0;
         jak_memfile_write(file, &marker, sizeof(jak_u8));
         jak_memfile_write(file, &key, sizeof(jak_uid_t));
@@ -34,7 +34,7 @@ static void write_autokey(jak_memfile *file)
 
 static void write_ukey(jak_memfile *file)
 {
-        jak_u8 marker = JAK_CARBON_MARKER_KEY_UKEY;
+        jak_u8 marker = CARBON_MUKEY;
         jak_u64 key = 0;
         jak_memfile_write(file, &marker, sizeof(jak_u8));
         jak_memfile_write(file, &key, sizeof(jak_u64));
@@ -42,7 +42,7 @@ static void write_ukey(jak_memfile *file)
 
 static void write_ikey(jak_memfile *file)
 {
-        jak_u8 marker = JAK_CARBON_MARKER_KEY_IKEY;
+        jak_u8 marker = CARBON_MIKEY;
         jak_i64 key = 0;
         jak_memfile_write(file, &marker, sizeof(jak_u8));
         jak_memfile_write(file, &key, sizeof(jak_u64));
@@ -50,7 +50,7 @@ static void write_ikey(jak_memfile *file)
 
 static void write_skey(jak_memfile *file)
 {
-        jak_u8 marker = JAK_CARBON_MARKER_KEY_SKEY;
+        jak_u8 marker = CARBON_MSKEY;
         const char *key = "";
         jak_memfile_write(file, &marker, sizeof(jak_u8));
         jak_carbon_jak_string_write(file, key);
@@ -161,24 +161,24 @@ bool jak_carbon_key_read_type(jak_carbon_key_e *out, jak_memfile *file)
 {
         jak_u8 marker = *JAK_MEMFILE_READ_TYPE(file, jak_u8);
 
-        JAK_ASSERT(marker == JAK_CARBON_MARKER_KEY_NOKEY || marker == JAK_CARBON_MARKER_KEY_AUTOKEY || marker ==
-                                                                                                       JAK_CARBON_MARKER_KEY_UKEY ||
-                   marker == JAK_CARBON_MARKER_KEY_IKEY || marker == JAK_CARBON_MARKER_KEY_SKEY);
+        JAK_ASSERT(marker == CARBON_MNOKEY || marker == CARBON_MAUTOKEY || marker ==
+                                                                                                       CARBON_MUKEY ||
+                   marker == CARBON_MIKEY || marker == CARBON_MSKEY);
 
         switch (marker) {
-                case JAK_CARBON_MARKER_KEY_NOKEY:
+                case CARBON_MNOKEY:
                         JAK_OPTIONAL_SET(out, JAK_CARBON_KEY_NOKEY)
                         break;
-                case JAK_CARBON_MARKER_KEY_AUTOKEY:
+                case CARBON_MAUTOKEY:
                         JAK_OPTIONAL_SET(out, JAK_CARBON_KEY_AUTOKEY)
                         break;
-                case JAK_CARBON_MARKER_KEY_UKEY:
+                case CARBON_MUKEY:
                         JAK_OPTIONAL_SET(out, JAK_CARBON_KEY_UKEY)
                         break;
-                case JAK_CARBON_MARKER_KEY_IKEY:
+                case CARBON_MIKEY:
                         JAK_OPTIONAL_SET(out, JAK_CARBON_KEY_IKEY)
                         break;
-                case JAK_CARBON_MARKER_KEY_SKEY:
+                case CARBON_MSKEY:
                         JAK_OPTIONAL_SET(out, JAK_CARBON_KEY_SKEY)
                         break;
                 default: JAK_ERROR(&file->err, JAK_ERR_INTERNALERR)

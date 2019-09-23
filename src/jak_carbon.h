@@ -119,55 +119,231 @@ typedef enum jak_carbon_printer_impl {
         JAK_JSON_EXTENDED, JAK_JSON_COMPACT
 } jak_carbon_printer_impl_e;
 
-#define JAK_CARBON_MARKER_KEY_NOKEY '?'
-#define JAK_CARBON_MARKER_KEY_AUTOKEY '*'
-#define JAK_CARBON_MARKER_KEY_UKEY '+'
-#define JAK_CARBON_MARKER_KEY_IKEY '-'
-#define JAK_CARBON_MARKER_KEY_SKEY '!'
+#define JAK_CARBON_NIL_STR "_nil"
+
+// ---------------------------------------------------------------------------------------------------------------------
+//  format markers, see carbonspec.org/format-specs/format-overview/marker-format.html
+// ---------------------------------------------------------------------------------------------------------------------
+
+/* data type marker */
+#define CARBON_MNULL                        'n'
+#define CARBON_MTRUE                        't'
+#define CARBON_MFALSE                       'f'
+#define CARBON_MSTRING                      's'
+#define CARBON_MU8                          'c'
+#define CARBON_MU16                         'd'
+#define CARBON_MU32                         'i'
+#define CARBON_MU64                         'l'
+#define CARBON_MI8                          'C'
+#define CARBON_MI16                         'D'
+#define CARBON_MI32                         'I'
+#define CARBON_MI64                         'L'
+#define CARBON_MFLOAT                       'r'
+#define CARBON_MBINARY                      'b'
+#define CARBON_MCUSTOM_BINARY               'x'
+
+/* container marker */
+#define CARBON_MOBJECT_BEGIN                '{'
+#define CARBON_MOBJECT_END                  '}'
+#define CARBON_MARRAY_BEGIN                 '['
+#define CARBON_MARRAY_END                   ']'
+#define CARBON_MCOLUMN_U8                   '1'
+#define CARBON_MCOLUMN_U16                  '2'
+#define CARBON_MCOLUMN_U32                  '3'
+#define CARBON_MCOLUMN_U64                  '4'
+#define CARBON_MCOLUMN_I8                   '5'
+#define CARBON_MCOLUMN_I16                  '6'
+#define CARBON_MCOLUMN_I32                  '7'
+#define CARBON_MCOLUMN_I64                  '8'
+#define CARBON_MCOLUMN_FLOAT                'R'
+#define CARBON_MCOLUMN_BOOLEAN              'B'
+
+/* record identifier marker */
+#define CARBON_MNOKEY                       '?'
+#define CARBON_MAUTOKEY                     '*'
+#define CARBON_MUKEY                        '+'
+#define CARBON_MIKEY                        '-'
+#define CARBON_MSKEY                        '!'
+
+/* abstract types for object containers */
+#define CARBON_MUNSORTED_MULTIMAP           CARBON_MOBJECT_BEGIN
+#define CARBON_MSORTED_MULTIMAP             '~'
+#define CARBON_MUNSORTED_MAP                ':'
+#define CARBON_MSORTED_MAP                  '#'
+
+/* abstract types for array containers */
+#define CARBON_MUNSORTED_MULTISET_ARR       CARBON_MARRAY_BEGIN
+#define CARBON_MSORTED_MULTISET_ARR         '<'
+#define CARBON_MUNSORTED_SET_ARR            '/'
+#define CARBON_MSORTED_SET_ARR              '='
+
+/* abstract types for column-u8 containers */
+#define CARBON_MUNSORTED_MULTISET_U8        CARBON_MCOLUMN_U8
+#define CARBON_MSORTED_MULTISET_U8          0x01 /* SOH */
+#define CARBON_MUNSORTED_SET_U8             0x02 /* STX */
+#define CARBON_MSORTED_SET_U8               0x03 /* ETX */
+
+/* abstract types for column-u16 containers */
+#define CARBON_MUNSORTED_MULTISET_U16       CARBON_MCOLUMN_U16
+#define CARBON_MSORTED_MULTISET_U16         0x05 /* ENQ */
+#define CARBON_MUNSORTED_SET_U16            0x06 /* ACK */
+#define CARBON_MSORTED_SET_U16              0x07 /* BEL */
+
+/* abstract types for column-u32 containers */
+#define CARBON_MUNSORTED_MULTISET_U32       CARBON_MCOLUMN_U32
+#define CARBON_MSORTED_MULTISET_U32         0x09 /* TAB */
+#define CARBON_MUNSORTED_SET_U32            0x0A /* LF */
+#define CARBON_MSORTED_SET_U32              0x0B /* VT */
+
+/* abstract types for column-u64 containers */
+#define CARBON_MUNSORTED_MULTISET_U64       CARBON_MCOLUMN_U64
+#define CARBON_MSORTED_MULTISET_U64         0x0D /* CR */
+#define CARBON_MUNSORTED_SET_U64            0x0E /* SO */
+#define CARBON_MSORTED_SET_U64              0x0F /* SI */
+
+/* abstract types for column-i8 containers */
+#define CARBON_MUNSORTED_MULTISET_I8        CARBON_MCOLUMN_I8
+#define CARBON_MSORTED_MULTISET_I8          0x11 /* DC1 */
+#define CARBON_MUNSORTED_SET_I8             0x12 /* DC2 */
+#define CARBON_MSORTED_SET_I8               0x13 /* DC3 */
+
+/* abstract types for column-i16 containers */
+#define CARBON_MUNSORTED_MULTISET_I16       CARBON_MCOLUMN_I16
+#define CARBON_MSORTED_MULTISET_I16         0x15 /* NAK */
+#define CARBON_MUNSORTED_SET_I16            0x16 /* SYN */
+#define CARBON_MSORTED_SET_I16              0x17 /* ETB */
+
+/* abstract types for column-i32 containers */
+#define CARBON_MUNSORTED_MULTISET_I32       CARBON_MCOLUMN_I32
+#define CARBON_MSORTED_MULTISET_I32         0x19 /* EM */
+#define CARBON_MUNSORTED_SET_I32            0x1A /* SUB */
+#define CARBON_MSORTED_SET_I32              0x1B /* ESC */
+
+/* abstract types for column-i64 containers */
+#define CARBON_MUNSORTED_MULTISET_I64       CARBON_MCOLUMN_I64
+#define CARBON_MSORTED_MULTISET_I64         0x1D /* GS */
+#define CARBON_MUNSORTED_SET_I64            0x1E /* RS */
+#define CARBON_MSORTED_SET_I64              0x1F /* US */
+
+/* abstract types for column-float containers */
+#define CARBON_MUNSORTED_MULTISET_FLOAT    CARBON_MCOLUMN_FLOAT
+#define CARBON_MSORTED_MULTISET_FLOAT      '"'
+#define CARBON_MUNSORTED_SET_FLOAT         '$'
+#define CARBON_MSORTED_SET_FLOAT           '.'
+
+/* abstract types for column-boolean containers */
+#define CARBON_MUNSORTED_MULTISET_BOOLEAN  CARBON_MCOLUMN_BOOLEAN
+#define CARBON_MSORTED_MULTISET_BOOLEAN    '_'
+#define CARBON_MUNSORTED_SET_BOOLEAN       '\''
+#define CARBON_MSORTED_SET_BOOLEAN         0x7F /* DEL */
 
 typedef enum jak_carbon_key_type {
         /* no key, no revision number */
-        JAK_CARBON_KEY_NOKEY = JAK_CARBON_MARKER_KEY_NOKEY,
+        JAK_CARBON_KEY_NOKEY = CARBON_MNOKEY,
         /* auto-generated 64bit unsigned integer key */
-        JAK_CARBON_KEY_AUTOKEY = JAK_CARBON_MARKER_KEY_AUTOKEY,
+        JAK_CARBON_KEY_AUTOKEY = CARBON_MAUTOKEY,
         /* user-defined 64bit unsigned integer key */
-        JAK_CARBON_KEY_UKEY = JAK_CARBON_MARKER_KEY_UKEY,
+        JAK_CARBON_KEY_UKEY = CARBON_MUKEY,
         /* user-defined 64bit signed integer key */
-        JAK_CARBON_KEY_IKEY = JAK_CARBON_MARKER_KEY_IKEY,
+        JAK_CARBON_KEY_IKEY = CARBON_MIKEY,
         /* user-defined n-char string key */
-        JAK_CARBON_KEY_SKEY = JAK_CARBON_MARKER_KEY_SKEY
+        JAK_CARBON_KEY_SKEY = CARBON_MSKEY
 } jak_carbon_key_e;
 
-#define JAK_CARBON_NIL_STR "_nil"
-#define JAK_CARBON_MARKER_NULL 'n'
-#define JAK_CARBON_MARKER_TRUE 't'
-#define JAK_CARBON_MARKER_FALSE 'f'
-#define JAK_CARBON_MARKER_STRING 's'
-#define JAK_CARBON_MARKER_U8 'c'
-#define JAK_CARBON_MARKER_U16 'd'
-#define JAK_CARBON_MARKER_U32 'i'
-#define JAK_CARBON_MARKER_U64 'l'
-#define JAK_CARBON_MARKER_I8 'C'
-#define JAK_CARBON_MARKER_I16 'D'
-#define JAK_CARBON_MARKER_I32 'I'
-#define JAK_CARBON_MARKER_I64 'L'
-#define JAK_CARBON_MARKER_FLOAT 'r'
-#define JAK_CARBON_MARKER_BINARY 'b'
-#define JAK_CARBON_MARKER_CUSTOM_BINARY 'x'
-#define JAK_CARBON_MARKER_OBJECT_BEGIN '{'
-#define JAK_CARBON_MARKER_OBJECT_END '}'
-#define JAK_CARBON_MARKER_ARRAY_BEGIN '['
-#define JAK_CARBON_MARKER_ARRAY_END ']'
-#define JAK_CARBON_MARKER_COLUMN_U8 '1'
-#define JAK_CARBON_MARKER_COLUMN_U16 '2'
-#define JAK_CARBON_MARKER_COLUMN_U32 '3'
-#define JAK_CARBON_MARKER_COLUMN_U64 '4'
-#define JAK_CARBON_MARKER_COLUMN_I8 '5'
-#define JAK_CARBON_MARKER_COLUMN_I16 '6'
-#define JAK_CARBON_MARKER_COLUMN_I32 '7'
-#define JAK_CARBON_MARKER_COLUMN_I64 '8'
-#define JAK_CARBON_MARKER_COLUMN_FLOAT 'R'
-#define JAK_CARBON_MARKER_COLUMN_BOOLEAN 'B'
+typedef enum carbon_abstract {
+        /* Does not need further treatment to guarantee properties (unsorted, and not duplicate-free) */
+        CARBON_ABSTRACT_BASE,
+        /* particular abstract type with further properties (such as uniqueness of contained elements), enabling the
+         * application to check certain promises and guarantees */
+        CARBON_ABSTRACT_DERIVED,
+} carbon_abstract_e;
+
+typedef enum carbon_abstract_type {
+        /* abstract base types */
+        CARBON_TYPE_UNSORTED_MULTISET,     /* element type: values, distinct elements: no, sorted: no */
+        CARBON_TYPE_UNSORTED_MULTIMAP,     /* element type: pairs, distinct elements: no, sorted: no */
+
+        /* derived abstract types */
+        CARBON_TYPE_SORTED_MULTISET,       /* element type: values, distinct elements: no, sorted: yes */
+        CARBON_TYPE_UNSORTED_SET,          /* element type: values, distinct elements: yes, sorted: no */
+        CARBON_TYPE_SORTED_MAP,            /* element type: pairs, distinct elements: yes, sorted: yes */
+        CARBON_TYPE_SORTED_MULTIMAP,       /* element type: pairs, distinct elements: no, sorted: yes */
+        CARBON_TYPE_UNSORTED_MAP          /* element type: pairs, distinct elements: yes, sorted: no */
+} carbon_abstract_type_e;
+
+typedef enum carbon_derived {
+        /* abstract types for object containers */
+        CARBON_UNSORTED_MULTIMAP = CARBON_MUNSORTED_MULTIMAP,
+        CARBON_SORTED_MULTIMAP = CARBON_MSORTED_MULTIMAP,
+        CARBON_UNSORTED_MAP = CARBON_MUNSORTED_MAP,
+        CARBON_SORTED_MAP = CARBON_MSORTED_MAP,
+
+        /* abstract types for array containers */
+        CARBON_UNSORTED_MULTISET_ARRAY = CARBON_MUNSORTED_MULTISET_ARR,
+        CARBON_SORTED_MULTISET_ARRAY = CARBON_MSORTED_MULTISET_ARR,
+        CARBON_UNSORTED_SET_ARRAY = CARBON_MUNSORTED_SET_ARR,
+        CARBON_SORTED_SET_ARRAY = CARBON_MSORTED_SET_ARR,
+
+        /* abstract types for column-u8 containers */
+        CARBON_UNSORTED_MULTISET_COL_U8 = CARBON_MUNSORTED_MULTISET_U8,
+        CARBON_SORTED_MULTISET_COL_U8 = CARBON_MSORTED_MULTISET_U8,
+        CARBON_UNSORTED_SET_COL_U8 = CARBON_MUNSORTED_SET_U8,
+        CARBON_SORTED_SET_COL_U8 = CARBON_MSORTED_SET_U8,
+
+        /* abstract types for column-u16 containers */
+        CARBON_UNSORTED_MULTISET_COL_U16 = CARBON_MUNSORTED_MULTISET_U16,
+        CARBON_SORTED_MULTISET_COL_U16 = CARBON_MSORTED_MULTISET_U16,
+        CARBON_UNSORTED_SET_COL_U16 = CARBON_MUNSORTED_SET_U16,
+        CARBON_SORTED_SET_COL_U16 = CARBON_MSORTED_SET_U16,
+
+        /* abstract types for column-u32 containers */
+        CARBON_UNSORTED_MULTISET_COL_U32 = CARBON_MUNSORTED_MULTISET_U32,
+        CARBON_SORTED_MULTISET_COL_U32 = CARBON_MSORTED_MULTISET_U32,
+        CARBON_UNSORTED_SET_COL_U32 = CARBON_MUNSORTED_SET_U32,
+        CARBON_SORTED_SET_COL_U32 = CARBON_MSORTED_SET_U32,
+
+        /* abstract types for column-u64 containers */
+        CARBON_UNSORTED_MULTISET_COL_U64 = CARBON_MUNSORTED_MULTISET_U64,
+        CARBON_SORTED_MULTISET_COL_U64 = CARBON_MSORTED_MULTISET_U64,
+        CARBON_UNSORTED_SET_COL_U64 = CARBON_MUNSORTED_SET_U64,
+        CARBON_SORTED_SET_COL_U64 = CARBON_MSORTED_SET_U64,
+
+        /* abstract types for column-i8 containers */
+        CARBON_UNSORTED_MULTISET_COL_I8 = CARBON_MUNSORTED_MULTISET_I8,
+        CARBON_SORTED_MULTISET_COL_I8 = CARBON_MSORTED_MULTISET_I8,
+        CARBON_UNSORTED_SET_COL_I8 = CARBON_MUNSORTED_SET_I8,
+        CARBON_SORTED_SET_COL_I8 = CARBON_MSORTED_SET_I8,
+
+        /* abstract types for column-i16 containers */
+        CARBON_UNSORTED_MULTISET_COL_I16 = CARBON_MUNSORTED_MULTISET_I16,
+        CARBON_SORTED_MULTISET_COL_I16 = CARBON_MSORTED_MULTISET_I16,
+        CARBON_UNSORTED_SET_COL_I16 = CARBON_MUNSORTED_SET_I16,
+        CARBON_SORTED_SET_COL_I16 = CARBON_MSORTED_SET_I16,
+
+        /* abstract types for column-i32 containers */
+        CARBON_UNSORTED_MULTISET_COL_I32 = CARBON_MUNSORTED_MULTISET_I32,
+        CARBON_SORTED_MULTISET_COL_I32 = CARBON_MSORTED_MULTISET_I32,
+        CARBON_UNSORTED_SET_COL_I32 = CARBON_MUNSORTED_SET_I32,
+        CARBON_SORTED_SET_COL_I32 = CARBON_MSORTED_SET_I32,
+
+        /* abstract types for column-i64 containers */
+        CARBON_UNSORTED_MULTISET_COL_I64 = CARBON_MUNSORTED_MULTISET_I64,
+        CARBON_SORTED_MULTISET_COL_I64 = CARBON_MSORTED_MULTISET_I64,
+        CARBON_UNSORTED_SET_COL_I64 = CARBON_MUNSORTED_SET_I64,
+        CARBON_SORTED_SET_COL_I64 = CARBON_MSORTED_SET_I64,
+
+        /* abstract types for column-float containers */
+        CARBON_UNSORTED_MULTISET_COL_FLOAT = CARBON_MUNSORTED_MULTISET_FLOAT,
+        CARBON_SORTED_MULTISET_COL_FLOAT = CARBON_MSORTED_MULTISET_FLOAT,
+        CARBON_UNSORTED_SET_COL_FLOAT = CARBON_MUNSORTED_SET_FLOAT,
+        CARBON_SORTED_SET_COL_FLOAT = CARBON_MSORTED_SET_FLOAT,
+
+        /* abstract types for column-boolean containers */
+        CARBON_UNSORTED_MULTISET_COL_BOOLEAN = CARBON_MUNSORTED_MULTISET_BOOLEAN,
+        CARBON_SORTED_MULTISET_COL_BOOLEAN = CARBON_MSORTED_MULTISET_BOOLEAN,
+        CARBON_UNSORTED_SET_COL_BOOLEAN = CARBON_MUNSORTED_SET_BOOLEAN,
+        CARBON_SORTED_SET_COL_BOOLEAN = CARBON_MSORTED_SET_BOOLEAN
+} carbon_derived_e;
 
 JAK_DEFINE_ERROR_GETTER(jak_carbon);
 JAK_DEFINE_ERROR_GETTER(jak_carbon_new);

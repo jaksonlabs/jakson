@@ -154,7 +154,7 @@ bool jak_carbon_array_it_create(jak_carbon_array_it *it, jak_memfile *memfile, j
         JAK_ERROR_IF(jak_memfile_remain_size(&it->memfile) < sizeof(jak_u8), err, JAK_ERR_CORRUPTED);
 
         jak_u8 marker = *jak_memfile_read(&it->memfile, sizeof(jak_u8));
-        JAK_ERROR_IF_WDETAILS(marker != JAK_CARBON_MARKER_ARRAY_BEGIN, err, JAK_ERR_ILLEGALOP,
+        JAK_ERROR_IF_WDETAILS(marker != CARBON_MARRAY_BEGIN, err, JAK_ERR_ILLEGALOP,
                               "array begin marker ('[') not found");
 
         it->payload_start += sizeof(jak_u8);
@@ -302,7 +302,7 @@ bool jak_carbon_array_it_next(jak_carbon_array_it *it)
                                 jak_memfile_skip(&it->memfile, 1);
                         }
                 }
-                JAK_ASSERT(*jak_memfile_peek(&it->memfile, sizeof(char)) == JAK_CARBON_MARKER_ARRAY_END);
+                JAK_ASSERT(*jak_memfile_peek(&it->memfile, sizeof(char)) == CARBON_MARRAY_END);
                 jak_carbon_int_field_auto_close(&it->field_access);
                 return false;
         }
@@ -351,7 +351,7 @@ bool jak_carbon_array_it_fast_forward(jak_carbon_array_it *it)
         JAK_ERROR_IF_NULL(it);
         while (jak_carbon_array_it_next(it)) {}
 
-        JAK_ASSERT(*jak_memfile_peek(&it->memfile, sizeof(char)) == JAK_CARBON_MARKER_ARRAY_END);
+        JAK_ASSERT(*jak_memfile_peek(&it->memfile, sizeof(char)) == CARBON_MARRAY_END);
         jak_memfile_skip(&it->memfile, sizeof(char));
         return true;
 }

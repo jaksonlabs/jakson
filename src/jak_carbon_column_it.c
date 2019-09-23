@@ -52,16 +52,16 @@ bool jak_carbon_column_it_create(jak_carbon_column_it *it, jak_memfile *memfile,
         JAK_ERROR_IF(jak_memfile_remain_size(&it->memfile) < sizeof(jak_u8) + sizeof(jak_media_type), err, JAK_ERR_CORRUPTED);
 
         jak_u8 marker = *jak_memfile_read(&it->memfile, sizeof(jak_u8));
-        JAK_ERROR_IF_WDETAILS(marker != JAK_CARBON_MARKER_COLUMN_U8 &&
-                              marker != JAK_CARBON_MARKER_COLUMN_U16 &&
-                              marker != JAK_CARBON_MARKER_COLUMN_U32 &&
-                              marker != JAK_CARBON_MARKER_COLUMN_U64 &&
-                              marker != JAK_CARBON_MARKER_COLUMN_I8 &&
-                              marker != JAK_CARBON_MARKER_COLUMN_I16 &&
-                              marker != JAK_CARBON_MARKER_COLUMN_I32 &&
-                              marker != JAK_CARBON_MARKER_COLUMN_I64 &&
-                              marker != JAK_CARBON_MARKER_COLUMN_FLOAT &&
-                              marker != JAK_CARBON_MARKER_COLUMN_BOOLEAN, err, JAK_ERR_ILLEGALOP,
+        JAK_ERROR_IF_WDETAILS(marker != CARBON_MCOLUMN_U8 &&
+                              marker != CARBON_MCOLUMN_U16 &&
+                              marker != CARBON_MCOLUMN_U32 &&
+                              marker != CARBON_MCOLUMN_U64 &&
+                              marker != CARBON_MCOLUMN_I8 &&
+                              marker != CARBON_MCOLUMN_I16 &&
+                              marker != CARBON_MCOLUMN_I32 &&
+                              marker != CARBON_MCOLUMN_I64 &&
+                              marker != CARBON_MCOLUMN_FLOAT &&
+                              marker != CARBON_MCOLUMN_BOOLEAN, err, JAK_ERR_ILLEGALOP,
                               "column begin marker ('(') not found");
 
         jak_carbon_field_type_e type = (jak_carbon_field_type_e) marker;

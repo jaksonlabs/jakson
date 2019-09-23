@@ -25,8 +25,6 @@
 #include <jak_stdinc.h>
 #include <jak_alloc.h>
 
-#include "stdlib.h"
-
 JAK_BEGIN_DECL
 
 typedef bool (*jak_less_eq_func_t)(const void *lhs, const void *rhs);

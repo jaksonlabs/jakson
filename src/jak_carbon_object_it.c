@@ -45,7 +45,7 @@ bool jak_carbon_object_it_create(jak_carbon_object_it *it, jak_memfile *memfile,
         JAK_ERROR_IF(jak_memfile_remain_size(&it->memfile) < sizeof(jak_u8), err, JAK_ERR_CORRUPTED);
 
         jak_u8 marker = *jak_memfile_read(&it->memfile, sizeof(jak_u8));
-        JAK_ERROR_IF_WDETAILS(marker != JAK_CARBON_MARKER_OBJECT_BEGIN, err, JAK_ERR_ILLEGALOP,
+        JAK_ERROR_IF_WDETAILS(marker != CARBON_MOBJECT_BEGIN, err, JAK_ERR_ILLEGALOP,
                               "object begin marker ('{') not found");
 
         it->object_contents_off += sizeof(jak_u8);
@@ -119,7 +119,7 @@ bool jak_carbon_object_it_next(jak_carbon_object_it *it)
                         }
                 }
 
-                JAK_ASSERT(*jak_memfile_peek(&it->memfile, sizeof(char)) == JAK_CARBON_MARKER_OBJECT_END);
+                JAK_ASSERT(*jak_memfile_peek(&it->memfile, sizeof(char)) == CARBON_MOBJECT_END);
                 return false;
         }
 }
@@ -309,7 +309,7 @@ bool jak_carbon_object_it_fast_forward(jak_carbon_object_it *it)
         JAK_ERROR_IF_NULL(it);
         while (jak_carbon_object_it_next(it)) {}
 
-        JAK_ASSERT(*jak_memfile_peek(&it->memfile, sizeof(jak_u8)) == JAK_CARBON_MARKER_OBJECT_END);
+        JAK_ASSERT(*jak_memfile_peek(&it->memfile, sizeof(jak_u8)) == CARBON_MOBJECT_END);
         jak_memfile_skip(&it->memfile, sizeof(jak_u8));
         return true;
 }

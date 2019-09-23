@@ -4,7 +4,7 @@ This is [libcarbon](https://github.com/protolabs/libcarbon), a C library for cre
 
 Columnar Binary JSON (CARBON) files. 
 
-The latest Carbon specification document is available at [carbonspec.org](http://carbonspec.org), and the sources are located in [book/spec/latest](book/spec/latest), see [book instructions](book/README.md).
+The latest Carbon specification document is available at [carbonspec.org](http://www.carbonspec.org). In addition, the Jakson Developer Document is available at [jakson-devdocs.org](http://www.jakson-devdocs.org). Sources to both are located in [book/](book/). See [book instructions](book/README.md) for more on building these documents.
 
 The documentation is available at [CodeDocs](https://codedocs.xyz/protolabs/libcarbon/). If you have any issues, please 
 use our [issue tracker](https://github.com/protolabs/libcarbon/issues).
