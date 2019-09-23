@@ -29,6 +29,10 @@
 
 JAK_BEGIN_DECL
 
+typedef jak_u16 jak_error_code;
+
+extern _Thread_local jak_error jak_global_error;
+
 #define JAK_ERR_NOERR 0                    /** No JAK_ERROR */
 #define JAK_ERR_NULLPTR 1                  /** Null pointer detected */
 #define JAK_ERR_NOTIMPL 2                  /** Function not implemented */
@@ -132,6 +136,10 @@ JAK_BEGIN_DECL
 #define JAK_ERR_BUFFERTOOTINY 94            /** buffer capacity exceeded */
 #define JAK_ERR_TAILINGJUNK 95              /** tailing junk was detected in a stream */
 #define JAK_ERR_NOTINDEXED 96               /** not indexed */
+#define JAK_ERR_NOERR_RESULT_BOOLEAN 97     /** No JAK_ERROR, and result is boolean */
+#define JAK_ERR_NOERR_RESULT_INT 98         /** No JAK_ERROR, and result is 63bit int */
+#define JAK_ERR_NOERR_RESULT_UINT 99        /** No JAK_ERROR, and result is 63bit unsigned int */
+#define JAK_ERR_NOERR_RESULT_PTR 100        /** No JAK_ERROR, and result is 63bit pointer */
 
 static const char *const jak_global_err_str[] =
         {"No JAK_ERROR", "Null pointer detected", "Function not implemented", "Index is out of bounds",
@@ -179,7 +187,10 @@ static const char *const jak_global_err_str[] =
          "parsing JAK_ERROR key name or array index expected", "parsing JAK_ERROR: unknown token",
          "dot-notated path could not be parsed", "Illegal state", "Unsupported data type", "Operation failed",
          "Cleanup operation failed; potentially a memory leak occurred", "dot-notated path could not be compiled",
-         "not a number", "buffer capacity exceeded", "tailing junk was detected in a stream", "not indexed"};
+         "not a number", "buffer capacity exceeded", "tailing junk was detected in a stream", "not indexed",
+         "result is boolean", "result is 63bit int", "result is 63bit unsigned int", "result is 63bit pointer"
+
+        };
 
 #define JAK_ERRSTR_ILLEGAL_CODE "illegal JAK_ERROR code"
 

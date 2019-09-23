@@ -4,12 +4,12 @@ This directory (`book`) contains the Carbon Specification document, and a develo
 
 ## Specification 
 
-The sources of current Carbon Specification draft are located in the `spec/latest` directory. 
+The sources of current Carbon Specification draft are located in the `carbonspec/latest` directory. 
 The specification is formatted with  markdown, and built with [MdBook](https://github.com/rust-lang-nursery/mdBook).
 
 To build the specification book, type in your bash
 ```
-$ cd spec/latest
+$ cd carbonspec/latest
 $ mdbook build
 ```
 

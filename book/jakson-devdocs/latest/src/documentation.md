@@ -4,7 +4,7 @@
 
 > **This document is work-in-progress**. 
 
-> You see the latest version as of 19th September 2019.
+> You see the latest version as of 20th September 2019.
 
 Welcome to the *Jakson Developer Documentation*, which will help you to get started with the Jakson project at source level!. This document aims to provide a good starting point for new developers, and a reference for developers already active in the project. 
 

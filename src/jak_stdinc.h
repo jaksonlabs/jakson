@@ -166,6 +166,9 @@ JAK_FUNC_UNUSED static const char *jak_basic_type_to_system_type_str(enum jak_ar
     return false;                                                                                                      \
 };
 
+#define __JAK_CPP_VA_ARGS_11(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, ...) a11
+#define JAK_VA_ARGS_LENGTH(...) __JAK_CPP_VA_ARGS_11(_, ## __VA_ARGS__, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+
 #ifndef NDEBUG
 #define JAK_CHECK_TAG(is, expected)                                                                                 \
 {                                                                                                                      \

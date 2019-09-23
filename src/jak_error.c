@@ -17,6 +17,8 @@
 
 #include <jak_error.h>
 
+_Thread_local jak_error jak_global_error;
+
 bool jak_error_init(jak_error *err)
 {
         if (err) {
@@ -78,7 +80,7 @@ bool jak_error_set_wdetails_no_abort(jak_error *err, int code, const char *file,
                 err->line = line;
                 err->details = details ? strdup(details) : NULL;
 #ifndef NDEBUG
-                JAK_ERROR_PRINT(code);
+                jak_error_print_to_stderr(err);
 #endif
         }
         return (err != NULL);

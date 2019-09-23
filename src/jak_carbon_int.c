@@ -27,7 +27,7 @@
 #include <jak_carbon_key.h>
 #include <jak_carbon_commit.h>
 #include <jak_json.h>
-#include "jak_carbon_object_it.h"
+#include <jak_carbon_object_it.h>
 
 static void marker_insert(jak_memfile *memfile, jak_u8 marker);
 

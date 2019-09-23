@@ -74,6 +74,7 @@ typedef struct jak_encoded_doc jak_encoded_doc;
 typedef struct jak_encoded_doc_list jak_encoded_doc_list;
 
 typedef struct jak_error jak_error;
+typedef struct fn_result fn_result;
 
 typedef struct jak_async_func_proxy jak_async_func_proxy;
 typedef struct jak_filter_arg jak_filter_arg;
