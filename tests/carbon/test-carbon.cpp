@@ -8772,6 +8772,13 @@ TEST(CarbonTest, CommitHashStr) {
         jak_string_drop(&s);
 }
 
+TEST(CarbonTest, Segfault) {
+    jak_carbon carbon;
+    jak_error err;
+    const char *json_in = "{\"foo\"}";
+    jak_carbon_from_json(&carbon, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
+    JAK_UNUSED(carbon);
+}
 
 
 int main(int argc, char **argv) {
