@@ -64,7 +64,7 @@ fn_result ofType(bool) carbon_abstract_is_derived(jak_memfile *memfile);
 //  abstract type (multiset, set, sorted or unsorted)
 // ---------------------------------------------------------------------------------------------------------------------
 
-/* class of an abstract type independent of a particular abstract derived container  */
+/* class of an abstract type independent of a particular abstract derived container */
 typedef enum carbon_abstract_type_class {
         /* abstract base types */
         CARBON_TYPE_UNSORTED_MULTISET,     /* element type: values, distinct elements: no, sorted: no */
