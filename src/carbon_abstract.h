@@ -32,6 +32,7 @@ JAK_BEGIN_DECL
 //  abstract type class (base or derived)
 // ---------------------------------------------------------------------------------------------------------------------
 
+/* derivation type of any abstract type */
 typedef enum carbon_abstract {
         /* Does not need further treatment to guarantee properties (unsorted, and not duplicate-free) */
         CARBON_ABSTRACT_BASE,
@@ -40,14 +41,30 @@ typedef enum carbon_abstract {
         CARBON_ABSTRACT_DERIVED,
 } carbon_abstract_e;
 
+/* Reads the abstract type from the memory file without moving the memory file cursors. This function translates
+ * from a particular derived container (e.g., CARBON_UNSORTED_MULTISET_COL_U8, or CARBON_SORTED_MULTIMAP)
+ * to its abstract type (e.g., CARBON_ABSTRACT_BASE resp. CARBON_ABSTRACT_DERIVED) */
 fn_result carbon_abstract_type(carbon_abstract_e *type, jak_memfile *memfile);
+
+/* Calls carbon_abstract_type and returns true in case of an abstract base type for a particular
+ * derived container marker that is read from the current position of the memfile without moving
+ * the memory files cursor.
+ *
+ * In case of success, a boolean value is returned, indicating whether the particular container marker is an
+ * abstract base type, or not.
+ *
+ * In case of any failure (such as the read maker does not belong to any known derived container), the function
+ * returns an error. */
 fn_result ofType(bool) carbon_abstract_is_base(jak_memfile *memfile);
+
+/* Calls carbon_abstract_is_base and negates its result */
 fn_result ofType(bool) carbon_abstract_is_derived(jak_memfile *memfile);
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  abstract type (multiset, set, sorted or unsorted)
 // ---------------------------------------------------------------------------------------------------------------------
 
+/* class of an abstract type independent of a particular abstract derived container  */
 typedef enum carbon_abstract_type_class {
         /* abstract base types */
         CARBON_TYPE_UNSORTED_MULTISET,     /* element type: values, distinct elements: no, sorted: no */
@@ -62,18 +79,39 @@ typedef enum carbon_abstract_type_class {
         CARBON_TYPE_UNSORTED_MAP           /* element type: pairs, distinct elements: yes, sorted: no */
 } carbon_abstract_type_class_e;
 
+/* Returns the abstract type class for a particular abstract derived container marker that is read from
+ * the current position in the memory file without moving the memory files cursor. */
 fn_result carbon_abstract_get_class(carbon_abstract_type_class_e *type, jak_memfile *memfile);
+
+/* Returns true if the abstract type class is of multiset (i.e., if the class is CARBON_TYPE_UNSORTED_MULTISET, or
+ * CARBON_TYPE_SORTED_MULTISET. */
 fn_result ofType(bool) carbon_abstract_is_multiset(carbon_abstract_type_class_e type);
+
+/* Returns true if the abstract type class is of set (i.e., if the class is CARBON_TYPE_UNSORTED_SET, or
+ * CARBON_TYPE_SORTED_SET. */
 fn_result ofType(bool) carbon_abstract_is_set(carbon_abstract_type_class_e type);
+
+/* Returns true if the abstract type class is of multimap (i.e., if the class is CARBON_TYPE_UNSORTED_MULTIMAP, or
+ * CARBON_TYPE_SORTED_MULTIMAP. */
 fn_result ofType(bool) carbon_abstract_is_multimap(carbon_abstract_type_class_e type);
+
+/* Returns true if the abstract type class is of map (i.e., if the class is CARBON_TYPE_SORTED_MAP, or
+ * CARBON_TYPE_UNSORTED_MAP. */
 fn_result ofType(bool) carbon_abstract_is_map(carbon_abstract_type_class_e type);
+
+/* Returns true if the abstract type class is sorted (i.e., if the class is CARBON_TYPE_SORTED_MULTISET,
+ * CARBON_TYPE_SORTED_SET, CARBON_TYPE_SORTED_MAP, or CARBON_TYPE_SORTED_MULTIMAP */
 fn_result ofType(bool) carbon_abstract_is_sorted(carbon_abstract_type_class_e type);
+
+/* Returns true if the abstract type class does not contain duplicate entries (i.e., if the class is
+ * CARBON_TYPE_UNSORTED_SET, CARBON_TYPE_SORTED_SET, CARBON_TYPE_SORTED_MAP, or CARBON_TYPE_UNSORTED_MAP) */
 fn_result ofType(bool) carbon_abstract_is_distinct(carbon_abstract_type_class_e type);
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  derived type (actual abstract type and which container is used)
 // ---------------------------------------------------------------------------------------------------------------------
 
+/* particular abstract derived type container (with marker) */
 typedef enum carbon_derived {
         /* abstract types for object containers */
         CARBON_UNSORTED_MULTIMAP = CARBON_MUNSORTED_MULTIMAP,
@@ -200,6 +238,9 @@ fn_result carbon_abstract_derive_list_to(carbon_derived_e *concrete, jak_carbon_
  * (e.g., CARBON_SORTED_MULTIMAP) */
 fn_result carbon_abstract_derive_map_to(carbon_derived_e *concrete, carbon_map_derivable_e should);
 
+/* Reads a marker from the memory file, and returns the particular abstract derived container (including
+ * the marker) without moving the memory files cursor. In case of an failure (e.g., the read marker is not known),
+ * the function returns an error. */
 fn_result carbon_abstract_get_derived_type(carbon_derived_e *type, jak_memfile *memfile);
 
 JAK_END_DECL

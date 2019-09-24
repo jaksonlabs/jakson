@@ -585,7 +585,7 @@ fn_result carbon_abstract_get_derived_type(carbon_derived_e *type, jak_memfile *
 {
         FN_FAIL_IF_NULL(type, memfile)
         jak_u8 c = jak_memfile_peek_byte(memfile);
-        assert(c == CARBON_MUNSORTED_MULTIMAP || c == CARBON_MSORTED_MULTIMAP || c == CARBON_MUNSORTED_MAP ||
+        if (!(c == CARBON_MUNSORTED_MULTIMAP || c == CARBON_MSORTED_MULTIMAP || c == CARBON_MUNSORTED_MAP ||
                        c == CARBON_MSORTED_MAP || c == CARBON_MUNSORTED_MULTISET_ARR ||
                        c == CARBON_MSORTED_MULTISET_ARR || c == CARBON_MUNSORTED_SET_ARR ||
                        c == CARBON_MSORTED_SET_ARR || c == CARBON_MUNSORTED_MULTISET_U8 ||
@@ -608,7 +608,9 @@ fn_result carbon_abstract_get_derived_type(carbon_derived_e *type, jak_memfile *
                        c == CARBON_MSORTED_MULTISET_FLOAT || c == CARBON_MUNSORTED_SET_FLOAT ||
                        c == CARBON_MSORTED_SET_FLOAT || c == CARBON_MUNSORTED_MULTISET_BOOLEAN ||
                        c == CARBON_MSORTED_MULTISET_BOOLEAN || c == CARBON_MUNSORTED_SET_BOOLEAN ||
-                       c == CARBON_MSORTED_SET_BOOLEAN);
+                       c == CARBON_MSORTED_SET_BOOLEAN)) {
+                return FN_FAIL(JAK_ERR_MARKERMAPPING, "unknown marker for abstract derived type");
+        }
         *type = c;
         return FN_OK();
 }
