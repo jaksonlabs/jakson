@@ -41,18 +41,20 @@ typedef struct fn_result {
 } fn_result;
 
 
-#define JAK_IS_OK(result)          JAK_RESULT_IS_OK(result)
+#define FN_IS_OK(result)          JAK_RESULT_IS_OK(result)
 
-#define JAK_OK()                   JAK_RESULT_OK()
-#define JAK_OK_INT(value)          JAK_RESULT_OK_INT(value)
-#define JAK_OK_UINT(value)         JAK_RESULT_OK_UINT(value)
-#define JAK_OK_BOOL(value)         JAK_RESULT_OK_BOOL(value)
-#define JAK_OK_PTR(value)          JAK_RESULT_OK_PTR(value)
+#define FN_OK()                   JAK_RESULT_OK()
+#define FN_OK_INT(value)          JAK_RESULT_OK_INT(value)
+#define FN_OK_UINT(value)         JAK_RESULT_OK_UINT(value)
+#define FN_OK_BOOL(value)         JAK_RESULT_OK_BOOL(value)
+#define FN_OK_PTR(value)          JAK_RESULT_OK_PTR(value)
 
-#define JAK_INT(result)            __JAK_RESULT_EXTRACT_VALUE(result, jak_iu32, JAK_RESULT_INT_VALUE)
-#define JAK_UINT(result)           __JAK_RESULT_EXTRACT_VALUE(result, jak_u32, JAK_RESULT_UINT_VALUE)
-#define JAK_BOOL(result)           __JAK_RESULT_EXTRACT_VALUE(result, bool, JAK_RESULT_BOOL_VALUE)
-#define JAK_PTR(result)            __JAK_RESULT_EXTRACT_VALUE(result, void *, JAK_RESULT_PTR_VALUE)
+#define FN_FAIL(code, msg)        JAK_RESULT_FAIL(code, msg)
+
+#define FN_INT(result)            __JAK_RESULT_EXTRACT_VALUE(result, jak_iu32, JAK_RESULT_INT_VALUE)
+#define FN_UINT(result)           __JAK_RESULT_EXTRACT_VALUE(result, jak_u32, JAK_RESULT_UINT_VALUE)
+#define FN_BOOL(result)           __JAK_RESULT_EXTRACT_VALUE(result, bool, JAK_RESULT_BOOL_VALUE)
+#define FN_PTR(result)            __JAK_RESULT_EXTRACT_VALUE(result, void *, JAK_RESULT_PTR_VALUE)
 
 #define JAK_FAIL_FORWARD()                                                \
 ({                                                                        \
@@ -138,7 +140,7 @@ typedef struct fn_result {
 #define JAK_RESULT_GET_LAST_ERROR()                                       \
     &jak_global_error;
 
-#define JAK_NONULL_OR_FAIL(...)                                                                                        \
+#define FN_FAIL_IF_NULL(...)                                                                                        \
     if (!__jak_fn_test_nonnull(JAK_VA_ARGS_LENGTH(__VA_ARGS__), __VA_ARGS__)) {                                        \
         return JAK_RESULT_FAIL(JAK_ERR_NULLPTR, "function argument is not allowed to be null");                        \
     }

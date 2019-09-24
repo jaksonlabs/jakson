@@ -74,53 +74,6 @@
 
 JAK_BEGIN_DECL
 
-typedef struct jak_carbon {
-        jak_memblock *memblock;
-        jak_memfile memfile;
-
-        struct {
-                jak_spinlock write_lock;
-                bool commit_lock;
-                bool is_latest;
-        } versioning;
-
-        jak_error err;
-} jak_carbon;
-
-typedef struct jak_carbon_revise {
-        jak_carbon *original;
-        jak_carbon *revised_doc;
-        jak_error err;
-} jak_carbon_revise;
-
-typedef struct jak_carbon_binary {
-        const char *mime_type;
-        jak_u64 mime_type_strlen;
-        const void *blob;
-        jak_u64 blob_len;
-} jak_carbon_binary;
-
-typedef struct jak_carbon_new {
-        jak_error err;
-        jak_carbon original;
-        jak_carbon_revise revision_context;
-        jak_carbon_array_it *content_it;
-        jak_carbon_insert *inserter;
-        /* options shrink or compact (or both) documents, see
-         * CARBON_KEEP, CARBON_SHRINK, CARBON_COMPACT, and CARBON_OPTIMIZE  */
-        int mode;
-} jak_carbon_new;
-
-typedef enum jak_carbon_container_type {
-        JAK_CARBON_OBJECT, JAK_CARBON_ARRAY, JAK_CARBON_COLUMN
-} jak_carbon_container_e;
-
-typedef enum jak_carbon_printer_impl {
-        JAK_JSON_EXTENDED, JAK_JSON_COMPACT
-} jak_carbon_printer_impl_e;
-
-#define JAK_CARBON_NIL_STR "_nil"
-
 // ---------------------------------------------------------------------------------------------------------------------
 //  format markers, see carbonspec.org/format-specs/format-overview/marker-format.html
 // ---------------------------------------------------------------------------------------------------------------------
@@ -236,6 +189,82 @@ typedef enum jak_carbon_printer_impl {
 #define CARBON_MSORTED_MULTISET_BOOLEAN    '_'
 #define CARBON_MUNSORTED_SET_BOOLEAN       '\''
 #define CARBON_MSORTED_SET_BOOLEAN         0x7F /* DEL */
+
+typedef struct jak_carbon {
+        jak_memblock *memblock;
+        jak_memfile memfile;
+
+        struct {
+                jak_spinlock write_lock;
+                bool commit_lock;
+                bool is_latest;
+        } versioning;
+
+        jak_error err;
+} jak_carbon;
+
+typedef struct jak_carbon_revise {
+        jak_carbon *original;
+        jak_carbon *revised_doc;
+        jak_error err;
+} jak_carbon_revise;
+
+typedef struct jak_carbon_binary {
+        const char *mime_type;
+        jak_u64 mime_type_strlen;
+        const void *blob;
+        jak_u64 blob_len;
+} jak_carbon_binary;
+
+typedef struct jak_carbon_new {
+        jak_error err;
+        jak_carbon original;
+        jak_carbon_revise revision_context;
+        jak_carbon_array_it *content_it;
+        jak_carbon_insert *inserter;
+        /* options shrink or compact (or both) documents, see
+         * CARBON_KEEP, CARBON_SHRINK, CARBON_COMPACT, and CARBON_OPTIMIZE  */
+        int mode;
+} jak_carbon_new;
+
+typedef enum jak_carbon_container_type {
+        JAK_CARBON_OBJECT, JAK_CARBON_ARRAY, JAK_CARBON_COLUMN
+} jak_carbon_container_e;
+
+typedef enum jak_carbon_list_container_sub_type {
+        CARBON_CONTAINER_OBJECT = CARBON_MOBJECT_BEGIN,
+        CARBON_CONTAINER_ARRAY = CARBON_MARRAY_BEGIN,
+        CARBON_CONTAINER_COLUMN_U8 = CARBON_MCOLUMN_U8,
+        CARBON_CONTAINER_COLUMN_U16 = CARBON_MCOLUMN_U16,
+        CARBON_CONTAINER_COLUMN_U32 = CARBON_MCOLUMN_U32,
+        CARBON_CONTAINER_COLUMN_U64 = CARBON_MCOLUMN_U64,
+        CARBON_CONTAINER_COLUMN_I8 = CARBON_MCOLUMN_I8,
+        CARBON_CONTAINER_COLUMN_I16 = CARBON_MCOLUMN_I16,
+        CARBON_CONTAINER_COLUMN_I32 = CARBON_MCOLUMN_I32,
+        CARBON_CONTAINER_COLUMN_I64 = CARBON_MCOLUMN_I64,
+        CARBON_CONTAINER_COLUMN_BOOLEAN = CARBON_MCOLUMN_BOOLEAN,
+        CARBON_CONTAINER_COLUMN_FLOAT = CARBON_MCOLUMN_FLOAT
+} jak_carbon_container_sub_type_e;
+
+typedef enum jak_carbon_list_container {
+        CARBON_LIST_CONTAINER_ARRAY = CARBON_MARRAY_BEGIN,
+        CARBON_LIST_CONTAINER_COLUMN_U8 = CARBON_MCOLUMN_U8,
+        CARBON_LIST_CONTAINER_COLUMN_U16 = CARBON_MCOLUMN_U16,
+        CARBON_LIST_CONTAINER_COLUMN_U32 = CARBON_MCOLUMN_U32,
+        CARBON_LIST_CONTAINER_COLUMN_U64 = CARBON_MCOLUMN_U64,
+        CARBON_LIST_CONTAINER_COLUMN_I8 = CARBON_MCOLUMN_I8,
+        CARBON_LIST_CONTAINER_COLUMN_I16 = CARBON_MCOLUMN_I16,
+        CARBON_LIST_CONTAINER_COLUMN_I32 = CARBON_MCOLUMN_I32,
+        CARBON_LIST_CONTAINER_COLUMN_I64 = CARBON_MCOLUMN_I64,
+        CARBON_LIST_CONTAINER_COLUMN_BOOLEAN = CARBON_MCOLUMN_BOOLEAN,
+        CARBON_LIST_CONTAINER_COLUMN_FLOAT = CARBON_MCOLUMN_FLOAT
+} jak_carbon_list_container_e;
+
+typedef enum jak_carbon_printer_impl {
+        JAK_JSON_EXTENDED, JAK_JSON_COMPACT
+} jak_carbon_printer_impl_e;
+
+#define JAK_CARBON_NIL_STR "_nil"
 
 typedef enum jak_carbon_key_type {
         /* no key, no revision number */

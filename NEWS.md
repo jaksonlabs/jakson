@@ -5,6 +5,10 @@
 - Jakson Developer Documentation, see [book/](book/README.md) and examples in [examples/](examples).
 - Add *abstract types* (abstract base types, and derived abstract types) to the specification and documentation
 - Add *abstract types* to implementation (`jak_carbon_abstract`)
+- Add `fn_result` type that simplifies function error handling and function results. In a nutshell, `fn_result`
+  is a 64bit value holding 48bit for a function return value (if any), and a 16bit error code encoding success,
+  success with return result (32bit integer/unsigned integer, boolean, 48bit pointer), or a particular failure. In
+  case of failure, a (thread-local) global error structure is filled and can be read from the caller.  
 
 ## 0.5.00.02 [2019-08-23]
 - JSON parser for carbon files (see `carbon_from_json` in `carbon.h`)

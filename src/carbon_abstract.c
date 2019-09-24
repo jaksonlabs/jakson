@@ -19,9 +19,9 @@
 
 fn_result carbon_abstract_type(carbon_abstract_e *type, jak_memfile *memfile)
 {
-        JAK_NONULL_OR_FAIL(memfile)
+        FN_FAIL_IF_NULL(memfile)
         carbon_derived_e derived;
-        if (JAK_LIKELY(JAK_IS_OK(carbon_abstract_get_derived_type(&derived, memfile)))) {
+        if (JAK_LIKELY(FN_IS_OK(carbon_abstract_get_derived_type(&derived, memfile)))) {
                 switch (derived) {
                         case CARBON_UNSORTED_MULTIMAP:
                         case CARBON_UNSORTED_MULTISET_ARRAY:
@@ -76,10 +76,10 @@ fn_result carbon_abstract_type(carbon_abstract_e *type, jak_memfile *memfile)
                                 JAK_OPTIONAL_SET(type, CARBON_ABSTRACT_DERIVED);
                                 goto return_true;
                         default:
-                                return JAK_OK_BOOL(false);
+                                return FN_OK_BOOL(false);
                 }
 return_true:
-                return JAK_OK_BOOL(true);
+                return FN_OK_BOOL(true);
         } else {
                 return JAK_FAIL_FORWARD();
         }
@@ -88,8 +88,8 @@ return_true:
 fn_result ofType(bool) carbon_abstract_is_base(jak_memfile *memfile)
 {
         carbon_abstract_e type;
-        if (JAK_LIKELY(JAK_IS_OK(carbon_abstract_type(&type, memfile)))) {
-                return JAK_OK_BOOL(type == CARBON_ABSTRACT_BASE);
+        if (JAK_LIKELY(FN_IS_OK(carbon_abstract_type(&type, memfile)))) {
+                return FN_OK_BOOL(type == CARBON_ABSTRACT_BASE);
         } else {
                 return JAK_FAIL_FORWARD();
         }
@@ -98,15 +98,15 @@ fn_result ofType(bool) carbon_abstract_is_base(jak_memfile *memfile)
 fn_result ofType(bool) carbon_abstract_is_derived(jak_memfile *memfile)
 {
         fn_result ofType(bool) ret = carbon_abstract_is_base(memfile);
-        bool result = JAK_BOOL(ret);
-        return JAK_OK_BOOL(!result);
+        bool result = FN_BOOL(ret);
+        return FN_OK_BOOL(!result);
 }
 
 fn_result carbon_abstract_get_class(carbon_abstract_type_class_e *type, jak_memfile *memfile)
 {
-        JAK_NONULL_OR_FAIL(type, memfile)
+        FN_FAIL_IF_NULL(type, memfile)
         carbon_derived_e derived;
-        if (JAK_LIKELY(JAK_IS_OK(carbon_abstract_get_derived_type(&derived, memfile)))) {
+        if (JAK_LIKELY(FN_IS_OK(carbon_abstract_get_derived_type(&derived, memfile)))) {
                 switch (derived) {
                         case CARBON_SORTED_MAP:
                                 *type = CARBON_TYPE_SORTED_MAP;
@@ -173,10 +173,10 @@ fn_result carbon_abstract_get_class(carbon_abstract_type_class_e *type, jak_memf
                                 *type = CARBON_TYPE_UNSORTED_SET;
                                 goto return_true;
                         default:
-                                return JAK_OK_BOOL(false);
+                                return FN_OK_BOOL(false);
                 }
                 return_true:
-                return JAK_OK_BOOL(true);
+                return FN_OK_BOOL(true);
         } else {
                 return JAK_FAIL_FORWARD();
         }
@@ -187,9 +187,9 @@ fn_result ofType(bool) carbon_abstract_is_multiset(carbon_abstract_type_class_e 
         switch (type) {
                 case CARBON_TYPE_UNSORTED_MULTISET:
                 case CARBON_TYPE_SORTED_MULTISET:
-                        return JAK_OK_BOOL(true);
+                        return FN_OK_BOOL(true);
                 default:
-                        return JAK_OK_BOOL(false);
+                        return FN_OK_BOOL(false);
         }
 }
 
@@ -198,9 +198,9 @@ fn_result ofType(bool) carbon_abstract_is_set(carbon_abstract_type_class_e type)
         switch (type) {
                 case CARBON_TYPE_UNSORTED_SET:
                 case CARBON_TYPE_SORTED_SET:
-                        return JAK_OK_BOOL(true);
+                        return FN_OK_BOOL(true);
                 default:
-                        return JAK_OK_BOOL(false);
+                        return FN_OK_BOOL(false);
         }
 }
 
@@ -209,9 +209,9 @@ fn_result ofType(bool) carbon_abstract_is_multimap(carbon_abstract_type_class_e 
         switch (type) {
                 case CARBON_TYPE_UNSORTED_MULTIMAP:
                 case CARBON_TYPE_SORTED_MULTIMAP:
-                        return JAK_OK_BOOL(true);
+                        return FN_OK_BOOL(true);
                 default:
-                        return JAK_OK_BOOL(false);
+                        return FN_OK_BOOL(false);
         }
 }
 
@@ -220,9 +220,9 @@ fn_result ofType(bool) carbon_abstract_is_map(carbon_abstract_type_class_e type)
         switch (type) {
                 case CARBON_TYPE_SORTED_MAP:
                 case CARBON_TYPE_UNSORTED_MAP:
-                        return JAK_OK_BOOL(true);
+                        return FN_OK_BOOL(true);
                 default:
-                        return JAK_OK_BOOL(false);
+                        return FN_OK_BOOL(false);
         }
 }
 
@@ -233,9 +233,9 @@ fn_result ofType(bool) carbon_abstract_is_sorted(carbon_abstract_type_class_e ty
                 case CARBON_TYPE_SORTED_SET:
                 case CARBON_TYPE_SORTED_MAP:
                 case CARBON_TYPE_SORTED_MULTIMAP:
-                        return JAK_OK_BOOL(true);
+                        return FN_OK_BOOL(true);
                 default:
-                        return JAK_OK_BOOL(false);
+                        return FN_OK_BOOL(false);
         }
 }
 
@@ -246,15 +246,344 @@ fn_result ofType(bool) carbon_abstract_is_distinct(carbon_abstract_type_class_e 
                 case CARBON_TYPE_SORTED_SET:
                 case CARBON_TYPE_SORTED_MAP:
                 case CARBON_TYPE_UNSORTED_MAP:
-                        return JAK_OK_BOOL(true);
+                        return FN_OK_BOOL(true);
                 default:
-                        return JAK_OK_BOOL(false);
+                        return FN_OK_BOOL(false);
+        }
+}
+
+fn_result carbon_abstract_write_base_type(jak_memfile *memfile, jak_carbon_container_sub_type_e type)
+{
+        FN_FAIL_IF_NULL(memfile)
+        jak_memfile_write(memfile, &type, sizeof(jak_u8));
+        return FN_OK();
+}
+
+fn_result carbon_abstract_write_derived_type(jak_memfile *memfile, carbon_derived_e type)
+{
+        FN_FAIL_IF_NULL(type, memfile)
+        jak_memfile_write(memfile, &type, sizeof(jak_u8));
+        return FN_OK();
+}
+
+fn_result carbon_abstract_get_container_subtype(jak_carbon_container_sub_type_e *type, jak_memfile *memfile)
+{
+        FN_FAIL_IF_NULL(type, memfile)
+        jak_u8 marker = jak_memfile_peek_byte(memfile);
+        switch (marker) {
+                /* abstract types for object containers */
+                case CARBON_UNSORTED_MULTIMAP:
+                case CARBON_SORTED_MULTIMAP:
+                case CARBON_UNSORTED_MAP:
+                case CARBON_SORTED_MAP:
+                        *type = CARBON_CONTAINER_OBJECT;
+                        return FN_OK();
+                /* abstract types for array containers */
+                case CARBON_UNSORTED_MULTISET_ARRAY:
+                case CARBON_SORTED_MULTISET_ARRAY:
+                case CARBON_UNSORTED_SET_ARRAY:
+                case CARBON_SORTED_SET_ARRAY:
+                        *type = CARBON_CONTAINER_ARRAY;
+                        return FN_OK();
+                /* abstract types for column-u8 containers */
+                case CARBON_UNSORTED_MULTISET_COL_U8:
+                case CARBON_SORTED_MULTISET_COL_U8:
+                case CARBON_UNSORTED_SET_COL_U8:
+                case CARBON_SORTED_SET_COL_U8:
+                        *type = CARBON_CONTAINER_COLUMN_U8;
+                        return FN_OK();
+                /* abstract types for column-u16 containers */
+                case CARBON_UNSORTED_MULTISET_COL_U16:
+                case CARBON_SORTED_MULTISET_COL_U16:
+                case CARBON_UNSORTED_SET_COL_U16:
+                case CARBON_SORTED_SET_COL_U16:
+                        *type = CARBON_CONTAINER_COLUMN_U16;
+                        return FN_OK();
+                /* abstract types for column-u32 containers */
+                case CARBON_UNSORTED_MULTISET_COL_U32:
+                case CARBON_SORTED_MULTISET_COL_U32:
+                case CARBON_UNSORTED_SET_COL_U32:
+                case CARBON_SORTED_SET_COL_U32:
+                        *type = CARBON_CONTAINER_COLUMN_U32;
+                        return FN_OK();
+                /* abstract types for column-u64 containers */
+                case CARBON_UNSORTED_MULTISET_COL_U64:
+                case CARBON_SORTED_MULTISET_COL_U64:
+                case CARBON_UNSORTED_SET_COL_U64:
+                case CARBON_SORTED_SET_COL_U64:
+                        *type = CARBON_CONTAINER_COLUMN_U64;
+                        return FN_OK();
+                /* abstract types for column-i8 containers */
+                case CARBON_UNSORTED_MULTISET_COL_I8:
+                case CARBON_SORTED_MULTISET_COL_I8:
+                case CARBON_UNSORTED_SET_COL_I8:
+                case CARBON_SORTED_SET_COL_I8:
+                        *type = CARBON_CONTAINER_COLUMN_I8;
+                        return FN_OK();
+                /* abstract types for column-i16 containers */
+                case CARBON_UNSORTED_MULTISET_COL_I16:
+                case CARBON_SORTED_MULTISET_COL_I16:
+                case CARBON_UNSORTED_SET_COL_I16:
+                case CARBON_SORTED_SET_COL_I16:
+                        *type = CARBON_CONTAINER_COLUMN_I16;
+                        return FN_OK();
+                /* abstract types for column-i32 containers */
+                case CARBON_UNSORTED_MULTISET_COL_I32:
+                case CARBON_SORTED_MULTISET_COL_I32:
+                case CARBON_UNSORTED_SET_COL_I32:
+                case CARBON_SORTED_SET_COL_I32:
+                        *type = CARBON_CONTAINER_COLUMN_I32;
+                        return FN_OK();
+                /* abstract types for column-i64 containers */
+                case CARBON_UNSORTED_MULTISET_COL_I64:
+                case CARBON_SORTED_MULTISET_COL_I64:
+                case CARBON_UNSORTED_SET_COL_I64:
+                case CARBON_SORTED_SET_COL_I64:
+                        *type = CARBON_CONTAINER_COLUMN_I64;
+                        return FN_OK();
+                /* abstract types for column-float containers */
+                case CARBON_UNSORTED_MULTISET_COL_FLOAT:
+                case CARBON_SORTED_MULTISET_COL_FLOAT:
+                case CARBON_UNSORTED_SET_COL_FLOAT:
+                case CARBON_SORTED_SET_COL_FLOAT:
+                        *type = CARBON_CONTAINER_COLUMN_FLOAT;
+                        return FN_OK();
+                /* abstract types for column-boolean containers */
+                case CARBON_UNSORTED_MULTISET_COL_BOOLEAN:
+                case CARBON_SORTED_MULTISET_COL_BOOLEAN:
+                case CARBON_UNSORTED_SET_COL_BOOLEAN:
+                case CARBON_SORTED_SET_COL_BOOLEAN:
+                        *type = CARBON_CONTAINER_COLUMN_BOOLEAN;
+                        return FN_OK();
+                default:
+                        return FN_FAIL(JAK_ERR_MARKERMAPPING, "unknown marker encoding an abstract type");
+        }
+        return FN_OK();
+}
+
+fn_result carbon_abstract_derive_list_to(carbon_derived_e *concrete, jak_carbon_list_container_e is,
+                                         carbon_list_derivable_e should)
+{
+        FN_FAIL_IF_NULL(concrete)
+        switch (is) {
+                case CARBON_LIST_CONTAINER_ARRAY:
+                        switch (should) {
+                                case CARBON_LIST_UNSORTED_MULTISET:
+                                        *concrete = CARBON_UNSORTED_MULTISET_ARRAY;
+                                        return FN_OK();
+                                case CARBON_LIST_SORTED_MULTISET:
+                                        *concrete = CARBON_SORTED_MULTISET_ARRAY;
+                                        return FN_OK();
+                                case CARBON_LIST_UNSORTED_SET:
+                                        *concrete = CARBON_UNSORTED_SET_ARRAY;
+                                        return FN_OK();
+                                case CARBON_LIST_SORTED_SET:
+                                        *concrete = CARBON_SORTED_SET_ARRAY;
+                                        return FN_OK();
+                                default:
+                                        goto error_case;
+                        }
+                case CARBON_LIST_CONTAINER_COLUMN_U8:
+                        switch (should) {
+                                case CARBON_LIST_UNSORTED_MULTISET:
+                                        *concrete = CARBON_UNSORTED_MULTISET_COL_U8;
+                                        return FN_OK();
+                                case CARBON_LIST_SORTED_MULTISET:
+                                        *concrete = CARBON_SORTED_MULTISET_COL_U8;
+                                        return FN_OK();
+                                case CARBON_LIST_UNSORTED_SET:
+                                        *concrete = CARBON_UNSORTED_SET_COL_U8;
+                                        return FN_OK();
+                                case CARBON_LIST_SORTED_SET:
+                                        *concrete = CARBON_SORTED_SET_COL_U8;
+                                        return FN_OK();
+                                default:
+                                        goto error_case;
+                        }
+                case CARBON_LIST_CONTAINER_COLUMN_U16:
+                        switch (should) {
+                                case CARBON_LIST_UNSORTED_MULTISET:
+                                        *concrete = CARBON_UNSORTED_MULTISET_COL_U16;
+                                        return FN_OK();
+                                case CARBON_LIST_SORTED_MULTISET:
+                                        *concrete = CARBON_SORTED_MULTISET_COL_U16;
+                                        return FN_OK();
+                                case CARBON_LIST_UNSORTED_SET:
+                                        *concrete = CARBON_UNSORTED_SET_COL_U16;
+                                        return FN_OK();
+                                case CARBON_LIST_SORTED_SET:
+                                        *concrete = CARBON_SORTED_SET_COL_U16;
+                                        return FN_OK();
+                                default:
+                                        goto error_case;
+                        }
+                case CARBON_LIST_CONTAINER_COLUMN_U32:
+                        switch (should) {
+                                case CARBON_LIST_UNSORTED_MULTISET:
+                                        *concrete = CARBON_UNSORTED_MULTISET_COL_U32;
+                                        return FN_OK();
+                                case CARBON_LIST_SORTED_MULTISET:
+                                        *concrete = CARBON_SORTED_MULTISET_COL_U32;
+                                        return FN_OK();
+                                case CARBON_LIST_UNSORTED_SET:
+                                        *concrete = CARBON_UNSORTED_SET_COL_U32;
+                                        return FN_OK();
+                                case CARBON_LIST_SORTED_SET:
+                                        *concrete = CARBON_SORTED_SET_COL_U32;
+                                        return FN_OK();
+                                default:
+                                        goto error_case;
+                        }
+                case CARBON_LIST_CONTAINER_COLUMN_U64:
+                        switch (should) {
+                                case CARBON_LIST_UNSORTED_MULTISET:
+                                        *concrete = CARBON_UNSORTED_MULTISET_COL_U64;
+                                        return FN_OK();
+                                case CARBON_LIST_SORTED_MULTISET:
+                                        *concrete = CARBON_SORTED_MULTISET_COL_U64;
+                                        return FN_OK();
+                                case CARBON_LIST_UNSORTED_SET:
+                                        *concrete = CARBON_UNSORTED_SET_COL_U64;
+                                        return FN_OK();
+                                case CARBON_LIST_SORTED_SET:
+                                        *concrete = CARBON_SORTED_SET_COL_U64;
+                                        return FN_OK();
+                                default:
+                                        goto error_case;
+                        }
+                case CARBON_LIST_CONTAINER_COLUMN_I8:
+                        switch (should) {
+                                case CARBON_LIST_UNSORTED_MULTISET:
+                                        *concrete = CARBON_UNSORTED_MULTISET_COL_I8;
+                                        return FN_OK();
+                                case CARBON_LIST_SORTED_MULTISET:
+                                        *concrete = CARBON_SORTED_MULTISET_COL_I8;
+                                        return FN_OK();
+                                case CARBON_LIST_UNSORTED_SET:
+                                        *concrete = CARBON_UNSORTED_SET_COL_I8;
+                                        return FN_OK();
+                                case CARBON_LIST_SORTED_SET:
+                                        *concrete = CARBON_SORTED_SET_COL_I8;
+                                        return FN_OK();
+                                default:
+                                        goto error_case;
+                        }
+                case CARBON_LIST_CONTAINER_COLUMN_I16:
+                        switch (should) {
+                                case CARBON_LIST_UNSORTED_MULTISET:
+                                        *concrete = CARBON_UNSORTED_MULTISET_COL_I16;
+                                        return FN_OK();
+                                case CARBON_LIST_SORTED_MULTISET:
+                                        *concrete = CARBON_SORTED_MULTISET_COL_I16;
+                                        return FN_OK();
+                                case CARBON_LIST_UNSORTED_SET:
+                                        *concrete = CARBON_UNSORTED_SET_COL_I16;
+                                        return FN_OK();
+                                case CARBON_LIST_SORTED_SET:
+                                        *concrete = CARBON_SORTED_SET_COL_I16;
+                                        return FN_OK();
+                                default:
+                                        goto error_case;
+                        }
+                case CARBON_LIST_CONTAINER_COLUMN_I32:
+                        switch (should) {
+                                case CARBON_LIST_UNSORTED_MULTISET:
+                                        *concrete = CARBON_UNSORTED_MULTISET_COL_I32;
+                                        return FN_OK();
+                                case CARBON_LIST_SORTED_MULTISET:
+                                        *concrete = CARBON_SORTED_MULTISET_COL_I32;
+                                        return FN_OK();
+                                case CARBON_LIST_UNSORTED_SET:
+                                        *concrete = CARBON_UNSORTED_SET_COL_I32;
+                                        return FN_OK();
+                                case CARBON_LIST_SORTED_SET:
+                                        *concrete = CARBON_SORTED_SET_COL_I32;
+                                        return FN_OK();
+                                default:
+                                        goto error_case;
+                        }
+                case CARBON_LIST_CONTAINER_COLUMN_I64:
+                        switch (should) {
+                                case CARBON_LIST_UNSORTED_MULTISET:
+                                        *concrete = CARBON_UNSORTED_MULTISET_COL_I64;
+                                        return FN_OK();
+                                case CARBON_LIST_SORTED_MULTISET:
+                                        *concrete = CARBON_SORTED_MULTISET_COL_I64;
+                                        return FN_OK();
+                                case CARBON_LIST_UNSORTED_SET:
+                                        *concrete = CARBON_UNSORTED_SET_COL_I64;
+                                        return FN_OK();
+                                case CARBON_LIST_SORTED_SET:
+                                        *concrete = CARBON_SORTED_SET_COL_I64;
+                                        return FN_OK();
+                                default:
+                                        goto error_case;
+                        }
+                case CARBON_LIST_CONTAINER_COLUMN_BOOLEAN:
+                        switch (should) {
+                                case CARBON_LIST_UNSORTED_MULTISET:
+                                        *concrete = CARBON_UNSORTED_MULTISET_COL_BOOLEAN;
+                                        return FN_OK();
+                                case CARBON_LIST_SORTED_MULTISET:
+                                        *concrete = CARBON_SORTED_MULTISET_COL_BOOLEAN;
+                                        return FN_OK();
+                                case CARBON_LIST_UNSORTED_SET:
+                                        *concrete = CARBON_UNSORTED_SET_COL_BOOLEAN;
+                                        return FN_OK();
+                                case CARBON_LIST_SORTED_SET:
+                                        *concrete = CARBON_SORTED_SET_COL_BOOLEAN;
+                                        return FN_OK();
+                                default:
+                                        goto error_case;
+                        }
+                case CARBON_LIST_CONTAINER_COLUMN_FLOAT:
+                        switch (should) {
+                                case CARBON_LIST_UNSORTED_MULTISET:
+                                        *concrete = CARBON_UNSORTED_MULTISET_COL_FLOAT;
+                                        return FN_OK();
+                                case CARBON_LIST_SORTED_MULTISET:
+                                        *concrete = CARBON_SORTED_MULTISET_COL_FLOAT;
+                                        return FN_OK();
+                                case CARBON_LIST_UNSORTED_SET:
+                                        *concrete = CARBON_UNSORTED_SET_COL_FLOAT;
+                                        return FN_OK();
+                                case CARBON_LIST_SORTED_SET:
+                                        *concrete = CARBON_SORTED_SET_COL_FLOAT;
+                                        return FN_OK();
+                                default:
+                                        goto error_case;
+                        }
+                default:
+                        goto error_case;
+        }
+error_case:
+        return FN_FAIL(JAK_ERR_INTERNALERR, "unknown list container type");
+}
+
+fn_result carbon_abstract_derive_map_to(carbon_derived_e *concrete, carbon_map_derivable_e should)
+{
+        FN_FAIL_IF_NULL(concrete)
+        switch (should) {
+                case CARBON_MAP_UNSORTED_MULTIMAP:
+                        *concrete = CARBON_UNSORTED_MULTIMAP;
+                        return FN_OK();
+                case CARBON_MAP_SORTED_MULTIMAP:
+                        *concrete = CARBON_SORTED_MULTIMAP;
+                        return FN_OK();
+                case CARBON_MAP_UNSORTED_MAP:
+                        *concrete = CARBON_UNSORTED_MAP;
+                        return FN_OK();
+                case CARBON_MAP_SORTED_MAP:
+                        *concrete = CARBON_SORTED_MAP;
+                        return FN_OK();
+                default:
+                        return FN_FAIL(JAK_ERR_INTERNALERR, "unknown list container type");
         }
 }
 
 fn_result carbon_abstract_get_derived_type(carbon_derived_e *type, jak_memfile *memfile)
 {
-        JAK_NONULL_OR_FAIL(type, memfile)
+        FN_FAIL_IF_NULL(type, memfile)
         jak_u8 c = jak_memfile_peek_byte(memfile);
         assert(c == CARBON_MUNSORTED_MULTIMAP || c == CARBON_MSORTED_MULTIMAP || c == CARBON_MUNSORTED_MAP ||
                        c == CARBON_MSORTED_MAP || c == CARBON_MUNSORTED_MULTISET_ARR ||
@@ -280,5 +609,6 @@ fn_result carbon_abstract_get_derived_type(carbon_derived_e *type, jak_memfile *
                        c == CARBON_MSORTED_SET_FLOAT || c == CARBON_MUNSORTED_MULTISET_BOOLEAN ||
                        c == CARBON_MSORTED_MULTISET_BOOLEAN || c == CARBON_MUNSORTED_SET_BOOLEAN ||
                        c == CARBON_MSORTED_SET_BOOLEAN);
-        return JAK_OK();
+        *type = c;
+        return FN_OK();
 }

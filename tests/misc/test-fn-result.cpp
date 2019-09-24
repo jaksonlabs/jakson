@@ -64,7 +64,7 @@ TEST(CarbonResultTest, CreateOKPtr) {
 }
 
 fn_result f(void *p1, void *p2, void *p3) {
-        JAK_NONULL_OR_FAIL(p1, p2, p3)
+        FN_FAIL_IF_NULL(p1, p2, p3)
         return JAK_RESULT_OK();
 }
 

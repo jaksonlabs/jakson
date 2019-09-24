@@ -148,6 +148,58 @@ typedef enum carbon_derived {
         CARBON_SORTED_SET_COL_BOOLEAN = CARBON_MSORTED_SET_BOOLEAN
 } carbon_derived_e;
 
+/* derivable types for a list container (column or array) */
+typedef enum carbon_list_derivable
+{
+        /* the container type that implements the list */
+        CARBON_LIST_UNSORTED_MULTISET,
+        /* mark list as sorted */
+        CARBON_LIST_SORTED_MULTISET,
+        /* mark list as non-distinct */
+        CARBON_LIST_UNSORTED_SET,
+        /* mark list as sorted and distinct */
+        CARBON_LIST_SORTED_SET
+} carbon_list_derivable_e;
+
+/* derivable types for a map container (object) */
+typedef enum carbon_map_derivable
+{
+        /* the container type that implements the map */
+        CARBON_MAP_UNSORTED_MULTIMAP,
+        /* mark map as sorted */
+        CARBON_MAP_SORTED_MULTIMAP,
+        /* mark map as non-distinct */
+        CARBON_MAP_UNSORTED_MAP,
+        /* mark map as sorted and non-distinct */
+        CARBON_MAP_SORTED_MAP
+} carbon_map_derivable_e;
+
+/* Writes the marker for a particular base type to the actual position in the memory file, and steps
+ * the memory file cursor one byte towards the end. */
+fn_result carbon_abstract_write_base_type(jak_memfile *memfile, jak_carbon_container_sub_type_e type);
+
+/* Writes the marker for the particular derived abstract type to the actual position in the memory file, and
+ * steps the memory file cursor one byte towards the end. */
+fn_result carbon_abstract_write_derived_type(jak_memfile *memfile, carbon_derived_e type);
+
+/* Peeks a byte from the memory file and returns the encoded container sub type. This is either an object
+ * container, an array container, or and particular column container. In case a derived type is found, the
+ * actual container type that implements that derived type is returned. For instance, if '[1]' is read,
+ * a column-u8 container type is returned, and if [SOH] is read (which is CARBON_MSORTED_MULTISET_U8),
+ * a column-u8 container type is returned, too. */
+fn_result carbon_abstract_get_container_subtype(jak_carbon_container_sub_type_e *type, jak_memfile *memfile);
+
+/* Returns the concrete derived type <code>concrete</code> (e.g., CARBON_SORTED_SET_COL_BOOLEAN) for a
+ * given list type <code>is</code> (e.g., CARBON_LIST_CONTAINER_COLUMN_BOOLEAN) when deriving that
+ * list type to a particular abstract type <code>should</code> (e.g., CARBON_SORTED_SET) */
+fn_result carbon_abstract_derive_list_to(carbon_derived_e *concrete, jak_carbon_list_container_e is,
+                                         carbon_list_derivable_e should);
+
+/* Returns the concrete derived type <code>concrete</code> (e.g., CARBON_MAP_SORTED_MULTIMAP) for a
+ * given map when deriving that map type to a particular abstract type <code>should</code>
+ * (e.g., CARBON_SORTED_MULTIMAP) */
+fn_result carbon_abstract_derive_map_to(carbon_derived_e *concrete, carbon_map_derivable_e should);
+
 fn_result carbon_abstract_get_derived_type(carbon_derived_e *type, jak_memfile *memfile);
 
 JAK_END_DECL
