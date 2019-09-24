@@ -28,6 +28,7 @@
 #include <jak_carbon_column_it.h>
 #include <jak_carbon_array_it.h>
 #include <jak_carbon_object_it.h>
+#include <carbon-containers.h>
 #include <jak_carbon_dot.h>
 #include <jak_carbon_path.h>
 

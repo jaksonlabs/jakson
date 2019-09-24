@@ -20,6 +20,7 @@
 #include <jak_carbon_column_it.h>
 #include <jak_carbon_insert.h>
 #include <jak_carbon_media.h>
+#include <carbon-containers.h>
 #include <jak_carbon_int.h>
 #include <jak_carbon_string.h>
 #include <jak_carbon_object_it.h>

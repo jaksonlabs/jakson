@@ -23,7 +23,8 @@
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <jak_carbon.h>
+#include <carbon-markers.h>
+#include <carbon-containers.h>
 #include <jak_fn_result.h>
 
 JAK_BEGIN_DECL

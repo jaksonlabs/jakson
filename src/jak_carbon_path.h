@@ -24,6 +24,7 @@
 
 #include <jak_stdinc.h>
 #include <jak_carbon_dot.h>
+#include <carbon-containers.h>
 
 JAK_BEGIN_DECL
 

@@ -16,6 +16,7 @@
  */
 
 #include <carbon_abstract.h>
+#include <jak_memfile.h>
 
 fn_result carbon_abstract_type(carbon_abstract_e *type, jak_memfile *memfile)
 {
