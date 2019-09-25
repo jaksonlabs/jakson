@@ -314,7 +314,8 @@ jak_json_parse(jak_json *json, jak_json_err *error_desc, jak_json_parser *parser
         }
 
         if (!parse_token_stream(&retval, &parser->err, &token_stream)) {
-                return false;
+                status = false;
+                goto cleanup;
         }
 
         JAK_OPTIONAL_SET_OR_ELSE(json, retval, jak_json_drop(json));
@@ -412,6 +413,11 @@ static jak_json_token get_token(jak_vector ofType(jak_json_token) *token_stream,
         return *(jak_json_token *) jak_vector_at(token_stream, token_idx);
 }
 
+static bool has_next_token(size_t token_idx, jak_vector ofType(jak_json_token) *token_stream)
+{
+        return token_idx < token_stream->num_elems;
+}
+
 bool parse_members(jak_error *err, jak_json_members *members,
                    jak_vector ofType(jak_json_token) *token_stream,
                    size_t *token_idx)
@@ -427,8 +433,22 @@ bool parse_members(jak_error *err, jak_json_members *members,
                 strncpy(member->key.value, keyNameToken.string, keyNameToken.length);
                 member->key.value[keyNameToken.length] = '\0';
 
-                NEXT_TOKEN(token_idx); /** skip assignment token */
+                /** assignment token */
                 NEXT_TOKEN(token_idx);
+                if (!has_next_token(*token_idx, token_stream)) {
+                        return false;
+                }
+                jak_json_token assignment_token = get_token(token_stream, *token_idx);
+                if (assignment_token.type != JAK_ASSIGN) {
+                        return false;
+                }
+
+                /** value assignment token */
+                NEXT_TOKEN(token_idx);
+                if (!has_next_token(*token_idx, token_stream)) {
+                        return false;
+                }
+
                 jak_json_token valueToken = get_token(token_stream, *token_idx);
 
                 switch (valueToken.type) {
