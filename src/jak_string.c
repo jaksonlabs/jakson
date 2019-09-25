@@ -17,6 +17,7 @@
 
 #include <inttypes.h>
 #include <jak_string.h>
+#include <ctype.h>
 
 bool jak_string_create(jak_string *builder)
 {
@@ -178,6 +179,32 @@ size_t jak_string_len(jak_string *builder)
 {
         JAK_ERROR_IF_NULL(builder)
         return builder->end;
+}
+
+bool jak_string_trim(jak_string *builder)
+{
+        JAK_ERROR_IF_NULL(builder)
+        if (builder->end > 0) {
+                char *string = builder->data;
+                int len = strlen(string);
+
+                while (isspace(string[len - 1])) {
+                        string[--len] = '\0';
+                }
+                while (*string && isspace(*string)) {
+                        ++string;
+                        --len;
+                }
+
+                builder->end = len + 1;
+                memmove(builder->data, string, builder->end);
+        }
+        return true;
+}
+
+bool jak_string_is_empty(jak_string *builder)
+{
+        return builder ? (builder->end == 0 || (builder->end == 1 && builder->data[0] == '\0')) : true;
 }
 
 bool jak_string_drop(jak_string *builder)

@@ -57,6 +57,8 @@ bool jak_string_add_float(jak_string *builder, float value);
 bool jak_string_clear(jak_string *builder);
 bool jak_string_ensure_capacity(jak_string *builder, jak_u64 cap);
 size_t jak_string_len(jak_string *builder);
+bool jak_string_trim(jak_string *builder);
+bool jak_string_is_empty(jak_string *builder);
 
 const char *jak_string_cstr(jak_string *builder);
 

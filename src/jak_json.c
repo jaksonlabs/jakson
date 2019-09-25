@@ -277,6 +277,18 @@ jak_json_parse(jak_json *json, jak_json_err *error_desc, jak_json_parser *parser
         JAK_ERROR_IF_NULL(parser)
         JAK_ERROR_IF_NULL(input)
 
+        jak_string str;
+        jak_string_create(&str);
+        jak_string_add(&str, input);
+        jak_string_trim(&str);
+        if (jak_string_is_empty(&str)) {
+                set_error(error_desc, NULL, "input string is empty");
+                jak_string_drop(&str);
+                return false;
+        }
+        jak_string_drop(&str);
+
+
         jak_vector ofType(jak_json_token_e) brackets;
         jak_vector ofType(jak_json_token) token_stream;
 
@@ -591,6 +603,9 @@ static void parse_number(jak_json_number *number, jak_vector ofType(jak_json_tok
 static bool parse_element(jak_json_element *element, jak_error *err,
                           jak_vector ofType(jak_json_token) *token_stream, size_t *token_idx)
 {
+        if (!has_next_token(*token_idx, token_stream)) {
+                return false;
+        }
         jak_json_token token = get_token(token_stream, *token_idx);
 
         if (token.type == JAK_OBJECT_OPEN) { /** Parse object */

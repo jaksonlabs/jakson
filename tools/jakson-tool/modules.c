@@ -462,7 +462,8 @@ bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *
         if (!jak_archive_from_json(&archive, pathCarbonFileOut, &err, jsonContent,
                                       compressor, dic_type, jak_string_dic_async_nthreads, flagReadOptimized,
                                       flagBakeStringIdIndex, &progress_tracker)) {
-            jak_error_print_and_abort(&err);
+            jak_error_print_to_stderr(&err);
+            return false;
         } else {
             jak_archive_close(&archive);
         }

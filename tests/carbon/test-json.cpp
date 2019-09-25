@@ -5,6 +5,30 @@
 
 #include <jakson/jakson.h>
 
+TEST(CarbonTest, InvalidObject) {
+        jak_carbon carbon;
+        jak_error err;
+        const char *json_in = "{\"foo\"}";
+        bool status = jak_carbon_from_json(&carbon, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
+        ASSERT_FALSE(status);
+}
+
+TEST(CarbonTest, EmptyInput) {
+        jak_carbon carbon;
+        jak_error err;
+        const char *json_in = "";
+        bool status = jak_carbon_from_json(&carbon, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
+        ASSERT_FALSE(status);
+}
+
+TEST(CarbonTest, SingleString) {
+        jak_carbon carbon;
+        jak_error err;
+        const char *json_in = "  foo  ";
+        jak_carbon_from_json(&carbon, json_in, JAK_CARBON_KEY_NOKEY, NULL, &err);
+        JAK_UNUSED(carbon);
+}
+
 TEST(JsonTest, JsonListTypeForColumnEqualTypes) {
         auto result = jak_json_fitting_type(JAK_JSON_LIST_EMPTY, JAK_JSON_LIST_EMPTY);
         ASSERT_EQ(result, JAK_JSON_LIST_EMPTY);
