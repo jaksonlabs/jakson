@@ -95,7 +95,7 @@ bool bench_bson_get_doc(char* str, bench_bson_mgr *manager) {
 bool bench_bson_insert_int32(bench_bson_mgr *manager, bson_iter_t *it, const char *key, int32_t val)
 {
     JAK_ERROR_IF_NULL(manager);
-    if(it) {
+    if(!it) {
         return bson_append_int32(manager->b, key, strlen(key), val);
     } else {
         // TODO? : Insert at current iterator position
@@ -124,9 +124,32 @@ bool bench_bson_convert_entry_int32(bench_bson_mgr *manager, bson_iter_t *it, co
     JAK_ERROR_IF_NULL(key);
     JAK_UNUSED(it);
 
-    // TODO : Proper implementation instead of just blind iterating and copy pasta.
-
-    return 0;
+    bson_iter_t itStart;
+    bson_t *bNew = bson_new();
+    /*
+    if(bson_iter_find(it, key)) {
+        uint8_t *newDoc = malloc(sizeof(manager->b->padding) - sizeof(bson_iter_type(it)));
+        memcpy(newDoc, manager->b->padding, bson_iter_offset(it));
+    } else {
+        return false;
+    }
+    */
+    if (bson_iter_init(&itStart, manager->b)) {
+        while (bson_iter_next (&itStart)) {
+            if (!strcmp(key, bson_iter_key(&itStart))) {
+                if (!bson_append_iter (bNew, NULL, 0, &itStart))
+                    return false;
+            } else {
+                if (!bson_append_int32(bNew, key, strlen(key), (int32_t) bson_iter_value(&itStart)))
+                    return false;
+                bson_iter_init_from_data_at_offset(it, bson_get_data(bNew), bNew->len,
+                                                   bson_iter_offset(&itStart), bson_iter_key_len(&itStart));
+            }
+        }
+    }
+    bson_free(manager->b);
+    manager->b = bNew;
+    return true;
 }
 
 bool bench_bson_convert_entry_int64(bench_bson_mgr *manager, bson_iter_t *it, const char *key) {
@@ -134,9 +157,24 @@ bool bench_bson_convert_entry_int64(bench_bson_mgr *manager, bson_iter_t *it, co
     JAK_ERROR_IF_NULL(key);
     JAK_UNUSED(it);
 
-    // TODO : Proper implementation instead of just blind iterating and copy pasta.
-
-    return 0;
+    bson_iter_t itStart;
+    bson_t *bNew = bson_new();
+    if (bson_iter_init(&itStart, manager->b)) {
+        while (bson_iter_next (&itStart)) {
+            if (strcmp(key, bson_iter_key(&itStart))) {
+                if (!bson_append_iter (bNew, NULL, 0, &itStart))
+                    return false;
+            } else {
+                if (!bson_append_int64(bNew, key, strlen(key), (int64_t) bson_iter_value(&itStart)))
+                    return false;
+                bson_iter_init_from_data_at_offset(it, bson_get_data(bNew), bNew->len,
+                                                    bson_iter_offset(&itStart), bson_iter_key_len(&itStart));
+            }
+        }
+    }
+    bson_free(manager->b);
+    manager->b = bNew;
+    return true;
 }
 
 bool bench_bson_delete_int32(bench_bson_mgr *manager, bson_iter_t *it, const char *key) {
@@ -152,8 +190,6 @@ bool bench_bson_delete_int32(bench_bson_mgr *manager, bson_iter_t *it, const cha
 bool bench_bson_execute_benchmark(bench_bson_mgr *manager, const char *benchType) {
     JAK_ERROR_IF_NULL(manager);
     JAK_UNUSED(benchType);
-    bson_iter_t it;
-    bson_iter_init(&it, manager->b);
 
     assert(bench_bson_insert_int32(manager, 0, "Test1", 41));
     assert(bench_bson_insert_int32(manager, 0, "Test2", 42));
@@ -162,19 +198,22 @@ bool bench_bson_execute_benchmark(bench_bson_mgr *manager, const char *benchType
     assert(bench_bson_insert_int32(manager, 0, "Test5", 45));
     assert(bench_bson_insert_int32(manager, 0, "Test6", 46));
 
+    bson_iter_t it;
+    bson_iter_init(&it, manager->b);
+
     if(!bench_bson_find_int32(manager, &it, "Test3", 0))
         return bench_bson_error_write(manager->error, "Failed to find int32 value.", 0);
 
     if(!bench_bson_change_val_int32(manager, &it, 0, 21))
         return bench_bson_error_write(manager->error, "Failed to change int32 value.", 0);
 
-    if(!bench_bson_convert_entry_int64(manager, &it, 0))
+    if(!bench_bson_convert_entry_int64(manager, &it, "Test4"))
         return bench_bson_error_write(manager->error, "Failed to convert to int64 entry.", 0);
 
-    if(!bench_bson_convert_entry_int32(manager, &it, 0))
+    if(!bench_bson_convert_entry_int32(manager, &it, "Test4"))
         return bench_bson_error_write(manager->error, "Failed to convert to int32 entry.", 0);
 
-    if(!bench_bson_delete_int32(manager, &it, 0))
+    if(!bench_bson_delete_int32(manager, &it, "Test4"))
         return bench_bson_error_write(manager->error, "Failed to delete int32 entry.", 0);
 
     return true;

@@ -84,3 +84,5 @@ bool bench_bson_delete_string(bench_bson_mgr *manager, const char *key);
 bool bench_bson_execute_benchmark(bench_bson_mgr *manager, const char *benchType);
 
 #endif
+
+BSON_ENDIAN_H

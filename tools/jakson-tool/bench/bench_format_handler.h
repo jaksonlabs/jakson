@@ -31,6 +31,12 @@
 #include <jak_carbon_find.h>
 #include <jak_carbon_array_it.h>
 
+#define BENCH_FORMAT_BSON "BSON"
+#define BENCH_FORMAT_CARBON "CARBON"
+#define BENCH_FORMAT_UBJSON "UBJSON"
+
+#define BENCH_TYPE_TEST "test"
+
 typedef struct bench_bson_error bench_bson_error;
 
 typedef struct bench_error {
@@ -96,6 +102,7 @@ bool bench_format_handler_delete_int32(bench_format_handler *handler, const char
 bool bench_format_handler_delete_int64(bench_format_handler *handler, const char *key);
 bool bench_format_handler_delete_string(bench_format_handler *handler, const char *key);
 
-
+// TODO : Write centralized benchmark access point
+bool bench_format_handler_execute_benchmark(bench_format_handler *handler, const char *benchType);
 
 #endif
