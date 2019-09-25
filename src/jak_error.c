@@ -59,7 +59,7 @@ bool jak_error_set_wdetails(jak_error *err, int code, const char *file, jak_u32 
                 err->line = line;
                 err->details = details ? strdup(details) : NULL;
 #ifndef NDEBUG
-                jak_error_print_and_abort(err);
+                jak_error_print_to_stderr(err);
 #endif
         }
         return (err != NULL);
