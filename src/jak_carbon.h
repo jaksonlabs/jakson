@@ -72,6 +72,7 @@
 #include <jak_carbon_printers.h>
 #include <jak_uintvar_stream.h>
 #include <carbon-markers.h>
+#include <carbon_abstract.h>
 
 JAK_BEGIN_DECL
 
@@ -134,20 +135,28 @@ typedef enum jak_carbon_key_type {
 JAK_DEFINE_ERROR_GETTER(jak_carbon);
 JAK_DEFINE_ERROR_GETTER(jak_carbon_new);
 
-#define JAK_CARBON_KEEP              0x0
-#define JAK_CARBON_SHRINK            0x1
-#define JAK_CARBON_COMPACT           0x2
-#define JAK_CARBON_OPTIMIZE          (JAK_CARBON_SHRINK | JAK_CARBON_COMPACT)
+#define JAK_CARBON_KEEP              0x00 /* do not shrink, do not compact, use UNSORTED_MULTISET (equiv. JSON array) */
+#define JAK_CARBON_SHRINK            0x01 /* perform shrinking, i.e., remove tail-buffer from carbon file */
+#define JAK_CARBON_COMPACT           0x02 /* perform compacting, i.e., remove reserved memory from containers */
+#define JAK_CARBON_UNSORTED_MULTISET 0x04 /* annotate the record outer-most array as unsorted multi set */
+#define JAK_CARBON_SORTED_MULTISET   0x08 /* annotate the record outer-most array as sorted multi set */
+#define JAK_CARBON_UNSORTED_SET      0x10 /* annotate the record outer-most array as unsorted set */
+#define JAK_CARBON_SORTED_SET        0x20 /* annotate the record outer-most array as sorted set */
+
+#define JAK_CARBON_OPTIMIZE          (JAK_CARBON_SHRINK | JAK_CARBON_COMPACT | JAK_CARBON_UNSORTED_MULTISET)
 
 /**
  * Constructs a new context in which a new document can be created. The parameter <b>options</b> controls
- * how reserved spaces should be handled after document creation is done. Set <code>options</code> to
- * <code>CARBON_KEEP</code> for no optimization. With this option, all capacities (i.e., additional ununsed but free
- * space) in containers (objects, arrays, and columns) are kept and tailing free space after the document is
- * kept, too. Use this option to optimize for "insertion-heavy" documents since keeping all capacities lowerst the
- * probability of reallocations and memory movements. Set <b>options</b> to <code>CARBON_COMPACT</code> if capacities in
- * containers should be removed after creation, and <code>CARBON_COMPACT</code> to remove tailing free space. Use
- * <code>CARBON_OPTIMIZE</code> to use both <code>CARBON_SHRINK</code> and <code>CARBON_COMPACT</code>.
+ * how reserved spaces should be handled after document creation is done, and which abstract type for the outer-most
+ * record array should be used.
+ *
+ * Set <code>options</code> to <code>CARBON_KEEP</code> for no optimization. With this option, all capacities
+ * (i.e., additional ununsed but free space) in containers (objects, arrays, and columns) are kept and tailing free
+ * space after the document is kept, too. Use this option to optimize for "insertion-heavy" documents since keeping all
+ * capacities lowest the probability of reallocations and memory movements. Set <b>options</b> to
+ * <code>CARBON_COMPACT</code> if capacities in containers should be removed after creation, and
+ * <code>CARBON_COMPACT</code> to remove tailing free space. Use <code>CARBON_OPTIMIZE</code> to use both
+ * <code>CARBON_SHRINK</code> and <code>CARBON_COMPACT</code>.
  *
  * As a rule of thumb for <b>options</b>. The resulting document...
  * <ul>
@@ -166,11 +175,24 @@ JAK_DEFINE_ERROR_GETTER(jak_carbon_new);
  *  <li>...is read-mostly, or updates will not change the type or type-width of fields, use <code>CARBON_OPTIMIZE</code>.
  *      The document will have the smallest memory footprint possible.</li>
  * </ul>
+ *
+ * To annotate the outer-most record array as an array container with particular properties, set <code>options</code>
+ * to...
+ * <ul>
+ *  <li>...<code>CARBON_UNSORTED_MULTISET</code> that allows duplicates and has no sorting</li>
+ *  <li>...<code>CARBON_SORTED_MULTISET</code> that allows duplicates and has a particular sorting</li>
+ *  <li>...<code>CARBON_UNSORTED_SET</code> that disallows duplicates and has no sorting</li>
+ *  <li>...<code>CARBON_SORTED_SET</code> that disallows duplicates and has a particular sorting</li>
+ *  </ul>
+ *  If no annotation is given, the outer-most record array is annotated as <code>CARBON_UNSORTED_MULTISET</code>, which
+ *  matches the semantics of a JSON array. Please note that this library does not provide any features to make
+ *  deduplication and sorting work. Instead, the annotation stores the semantics of that particular container, which
+ *  functionality must be effectively implemented at caller site.
  */
 jak_carbon_insert *jak_carbon_create_begin(jak_carbon_new *context, jak_carbon *doc, jak_carbon_key_e type, int options);
 bool jak_carbon_create_end(jak_carbon_new *context);
-bool jak_carbon_create_empty(jak_carbon *doc, jak_carbon_key_e type);
-bool jak_carbon_create_empty_ex(jak_carbon *doc, jak_carbon_key_e type, jak_u64 doc_cap, jak_u64 array_cap);
+bool jak_carbon_create_empty(jak_carbon *doc, carbon_list_derivable_e derivation, jak_carbon_key_e type);
+bool jak_carbon_create_empty_ex(jak_carbon *doc, carbon_list_derivable_e derivation, jak_carbon_key_e type, jak_u64 doc_cap, jak_u64 array_cap);
 
 bool jak_carbon_from_json(jak_carbon *doc, const char *json, jak_carbon_key_e type, const void *key, jak_error *err);
 bool jak_carbon_from_raw_data(jak_carbon *doc, jak_error *err, const void *data, jak_u64 len);

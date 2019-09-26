@@ -27,8 +27,8 @@
 #include <jak_carbon_int.h>
 #include <jak_utils_numbers.h>
 
-#define check_type_if_container_is_column(inserter, expected)                                                          \
-if (JAK_UNLIKELY(inserter->context_type == JAK_CARBON_COLUMN && inserter->context.column->type != expected)) {                 \
+#define check_type_if_container_is_column(inserter, expr)                                                              \
+if (JAK_UNLIKELY(inserter->context_type == JAK_CARBON_COLUMN && !(expr))) {                                            \
         JAK_ERROR_WDETAILS(&inserter->err, JAK_ERR_TYPEMISMATCH, "Element type does not match container type");        \
 }
 
@@ -102,74 +102,85 @@ bool jak_carbon_int_insert_create_for_object(jak_carbon_insert *inserter, jak_ca
 bool jak_carbon_insert_null(jak_carbon_insert *inserter)
 {
         if (JAK_UNLIKELY(inserter->context_type == JAK_CARBON_COLUMN &&
-                         inserter->context.column->type != JAK_CARBON_FIELD_TYPE_COLUMN_U8 &&
-                         inserter->context.column->type != JAK_CARBON_FIELD_TYPE_COLUMN_U16 &&
-                         inserter->context.column->type != JAK_CARBON_FIELD_TYPE_COLUMN_U32 &&
-                         inserter->context.column->type != JAK_CARBON_FIELD_TYPE_COLUMN_U64 &&
-                         inserter->context.column->type != JAK_CARBON_FIELD_TYPE_COLUMN_I8 &&
-                         inserter->context.column->type != JAK_CARBON_FIELD_TYPE_COLUMN_I16 &&
-                         inserter->context.column->type != JAK_CARBON_FIELD_TYPE_COLUMN_I32 &&
-                         inserter->context.column->type != JAK_CARBON_FIELD_TYPE_COLUMN_I64 &&
-                         inserter->context.column->type != JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT &&
-                         inserter->context.column->type != JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN)) {
+                !jak_carbon_field_type_is_column_or_subtype(inserter->context.column->type))) {
                 JAK_ERROR_WDETAILS(&inserter->err, JAK_ERR_TYPEMISMATCH, "Element type does not match container type");
         }
 
         switch (inserter->context_type) {
                 case JAK_CARBON_ARRAY:
-                        return push_media_type_for_array(inserter, JAK_CARBON_FIELD_TYPE_NULL);
+                        return push_media_type_for_array(inserter, CARBON_FIELD_NULL);
                 case JAK_CARBON_COLUMN: {
                         switch (inserter->context.column->type) {
-                                case JAK_CARBON_FIELD_TYPE_COLUMN_U8: {
+                                case CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET:
+                                case CARBON_FIELD_DERIVED_COLUMN_U8_SORTED_MULTISET:
+                                case CARBON_FIELD_DERIVED_COLUMN_U8_UNSORTED_SET:
+                                case CARBON_FIELD_DERIVED_COLUMN_U8_SORTED_SET: {
                                         jak_u8 value = JAK_U8_NULL;
                                         return push_in_column(inserter, &value, inserter->context.column->type);
                                 }
-                                        break;
-                                case JAK_CARBON_FIELD_TYPE_COLUMN_U16: {
+                                case CARBON_FIELD_COLUMN_U16_UNSORTED_MULTISET:
+                                case CARBON_FIELD_DERIVED_COLUMN_U16_SORTED_MULTISET:
+                                case CARBON_FIELD_DERIVED_COLUMN_U16_UNSORTED_SET:
+                                case CARBON_FIELD_DERIVED_COLUMN_U16_SORTED_SET: {
                                         jak_u16 value = JAK_U16_NULL;
                                         return push_in_column(inserter, &value, inserter->context.column->type);
                                 }
-                                        break;
-                                case JAK_CARBON_FIELD_TYPE_COLUMN_U32: {
+                                case CARBON_FIELD_COLUMN_U32_UNSORTED_MULTISET:
+                                case CARBON_FIELD_DERIVED_COLUMN_U32_SORTED_MULTISET:
+                                case CARBON_FIELD_DERIVED_COLUMN_U32_UNSORTED_SET:
+                                case CARBON_FIELD_DERIVED_COLUMN_U32_SORTED_SET: {
                                         jak_u32 value = JAK_U32_NULL;
                                         return push_in_column(inserter, &value, inserter->context.column->type);
                                 }
-                                        break;
-                                case JAK_CARBON_FIELD_TYPE_COLUMN_U64: {
+                                case CARBON_FIELD_COLUMN_U64_UNSORTED_MULTISET:
+                                case CARBON_FIELD_DERIVED_COLUMN_U64_SORTED_MULTISET:
+                                case CARBON_FIELD_DERIVED_COLUMN_U64_UNSORTED_SET:
+                                case CARBON_FIELD_DERIVED_COLUMN_U64_SORTED_SET: {
                                         jak_u64 value = JAK_U64_NULL;
                                         return push_in_column(inserter, &value, inserter->context.column->type);
                                 }
-                                        break;
-                                case JAK_CARBON_FIELD_TYPE_COLUMN_I8: {
+                                case CARBON_FIELD_COLUMN_I8_UNSORTED_MULTISET:
+                                case CARBON_FIELD_DERIVED_COLUMN_I8_SORTED_MULTISET:
+                                case CARBON_FIELD_DERIVED_COLUMN_I8_UNSORTED_SET:
+                                case CARBON_FIELD_DERIVED_COLUMN_I8_SORTED_SET: {
                                         jak_i8 value = JAK_I8_NULL;
                                         return push_in_column(inserter, &value, inserter->context.column->type);
                                 }
-                                        break;
-                                case JAK_CARBON_FIELD_TYPE_COLUMN_I16: {
+                                case CARBON_FIELD_COLUMN_I16_UNSORTED_MULTISET:
+                                case CARBON_FIELD_DERIVED_COLUMN_I16_SORTED_MULTISET:
+                                case CARBON_FIELD_DERIVED_COLUMN_I16_UNSORTED_SET:
+                                case CARBON_FIELD_DERIVED_COLUMN_I16_SORTED_SET: {
                                         jak_i16 value = JAK_I16_NULL;
                                         return push_in_column(inserter, &value, inserter->context.column->type);
                                 }
-                                        break;
-                                case JAK_CARBON_FIELD_TYPE_COLUMN_I32: {
+                                case CARBON_FIELD_COLUMN_I32_UNSORTED_MULTISET:
+                                case CARBON_FIELD_DERIVED_COLUMN_I32_SORTED_MULTISET:
+                                case CARBON_FIELD_DERIVED_COLUMN_I32_UNSORTED_SET:
+                                case CARBON_FIELD_DERIVED_COLUMN_I32_SORTED_SET: {
                                         jak_i32 value = JAK_I32_NULL;
                                         return push_in_column(inserter, &value, inserter->context.column->type);
                                 }
-                                        break;
-                                case JAK_CARBON_FIELD_TYPE_COLUMN_I64: {
+                                case CARBON_FIELD_COLUMN_I64_UNSORTED_MULTISET:
+                                case CARBON_FIELD_DERIVED_COLUMN_I64_SORTED_MULTISET:
+                                case CARBON_FIELD_DERIVED_COLUMN_I64_UNSORTED_SET:
+                                case CARBON_FIELD_DERIVED_COLUMN_I64_SORTED_SET: {
                                         jak_i64 value = JAK_I64_NULL;
                                         return push_in_column(inserter, &value, inserter->context.column->type);
                                 }
-                                        break;
-                                case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT: {
+                                case CARBON_FIELD_COLUMN_FLOAT_UNSORTED_MULTISET:
+                                case CARBON_FIELD_DERIVED_COLUMN_FLOAT_SORTED_MULTISET:
+                                case CARBON_FIELD_DERIVED_COLUMN_FLOAT_UNSORTED_SET:
+                                case CARBON_FIELD_DERIVED_COLUMN_FLOAT_SORTED_SET: {
                                         float value = JAK_FLOAT_NULL;
                                         return push_in_column(inserter, &value, inserter->context.column->type);
                                 }
-                                        break;
-                                case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
+                                case CARBON_FIELD_COLUMN_BOOLEAN_UNSORTED_MULTISET:
+                                case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_MULTISET:
+                                case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_UNSORTED_SET:
+                                case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_SET: {
                                         jak_u8 value = JAK_CARBON_BOOLEAN_COLUMN_NULL;
                                         return push_in_column(inserter, &value, inserter->context.column->type);
                                 }
-                                        break;
                                 default: JAK_ERROR(&inserter->err, JAK_ERR_INTERNALERR)
                                         return false;
                         }
@@ -181,13 +192,13 @@ bool jak_carbon_insert_null(jak_carbon_insert *inserter)
 
 bool jak_carbon_insert_true(jak_carbon_insert *inserter)
 {
-        check_type_if_container_is_column(inserter, JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
+        check_type_if_container_is_column(inserter, jak_carbon_field_type_is_column_bool_or_subtype(inserter->context.column->type));
         switch (inserter->context_type) {
                 case JAK_CARBON_ARRAY:
-                        return push_media_type_for_array(inserter, JAK_CARBON_FIELD_TYPE_TRUE);
+                        return push_media_type_for_array(inserter, CARBON_FIELD_TRUE);
                 case JAK_CARBON_COLUMN: {
                         jak_u8 value = JAK_CARBON_BOOLEAN_COLUMN_TRUE;
-                        return push_in_column(inserter, &value, JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
+                        return push_in_column(inserter, &value, CARBON_FIELD_COLUMN_BOOLEAN_UNSORTED_MULTISET);
                 }
                 default: JAK_ERROR(&inserter->err, JAK_ERR_INTERNALERR);
                         return false;
@@ -196,13 +207,13 @@ bool jak_carbon_insert_true(jak_carbon_insert *inserter)
 
 bool jak_carbon_insert_false(jak_carbon_insert *inserter)
 {
-        check_type_if_container_is_column(inserter, JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
+        check_type_if_container_is_column(inserter, jak_carbon_field_type_is_column_bool_or_subtype(inserter->context.column->type));
         switch (inserter->context_type) {
                 case JAK_CARBON_ARRAY:
-                        return push_media_type_for_array(inserter, JAK_CARBON_FIELD_TYPE_FALSE);
+                        return push_media_type_for_array(inserter, CARBON_FIELD_FALSE);
                 case JAK_CARBON_COLUMN: {
                         jak_u8 value = JAK_CARBON_BOOLEAN_COLUMN_FALSE;
-                        return push_in_column(inserter, &value, JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
+                        return push_in_column(inserter, &value, CARBON_FIELD_COLUMN_BOOLEAN_UNSORTED_MULTISET);
                 }
                 default: JAK_ERROR(&inserter->err, JAK_ERR_INTERNALERR);
                         return false;
@@ -211,13 +222,13 @@ bool jak_carbon_insert_false(jak_carbon_insert *inserter)
 
 bool jak_carbon_insert_u8(jak_carbon_insert *inserter, jak_u8 value)
 {
-        check_type_if_container_is_column(inserter, JAK_CARBON_FIELD_TYPE_COLUMN_U8);
+        check_type_if_container_is_column(inserter, jak_carbon_field_type_is_column_u8_or_subtype(inserter->context.column->type));
         switch (inserter->context_type) {
                 case JAK_CARBON_ARRAY:
-                        write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_U8, &value, sizeof(jak_u8));
+                        write_field_data(inserter, CARBON_FIELD_NUMBER_U8, &value, sizeof(jak_u8));
                         break;
                 case JAK_CARBON_COLUMN:
-                        push_in_column(inserter, &value, JAK_CARBON_FIELD_TYPE_COLUMN_U8);
+                        push_in_column(inserter, &value, CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET);
                         break;
                 default: JAK_ERROR(&inserter->err, JAK_ERR_INTERNALERR);
                         return false;
@@ -227,13 +238,13 @@ bool jak_carbon_insert_u8(jak_carbon_insert *inserter, jak_u8 value)
 
 bool jak_carbon_insert_u16(jak_carbon_insert *inserter, jak_u16 value)
 {
-        check_type_if_container_is_column(inserter, JAK_CARBON_FIELD_TYPE_COLUMN_U16);
+        check_type_if_container_is_column(inserter, jak_carbon_field_type_is_column_u16_or_subtype(inserter->context.column->type));
         switch (inserter->context_type) {
                 case JAK_CARBON_ARRAY:
-                        write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_U16, &value, sizeof(jak_u16));
+                        write_field_data(inserter, CARBON_FIELD_NUMBER_U16, &value, sizeof(jak_u16));
                         break;
                 case JAK_CARBON_COLUMN:
-                        push_in_column(inserter, &value, JAK_CARBON_FIELD_TYPE_COLUMN_U16);
+                        push_in_column(inserter, &value, CARBON_FIELD_COLUMN_U16_UNSORTED_MULTISET);
                         break;
                 default: JAK_ERROR(&inserter->err, JAK_ERR_INTERNALERR);
                         return false;
@@ -243,13 +254,13 @@ bool jak_carbon_insert_u16(jak_carbon_insert *inserter, jak_u16 value)
 
 bool jak_carbon_insert_u32(jak_carbon_insert *inserter, jak_u32 value)
 {
-        check_type_if_container_is_column(inserter, JAK_CARBON_FIELD_TYPE_COLUMN_U32);
+        check_type_if_container_is_column(inserter, jak_carbon_field_type_is_column_u32_or_subtype(inserter->context.column->type));
         switch (inserter->context_type) {
                 case JAK_CARBON_ARRAY:
-                        write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_U32, &value, sizeof(jak_u32));
+                        write_field_data(inserter, CARBON_FIELD_NUMBER_U32, &value, sizeof(jak_u32));
                         break;
                 case JAK_CARBON_COLUMN:
-                        push_in_column(inserter, &value, JAK_CARBON_FIELD_TYPE_COLUMN_U32);
+                        push_in_column(inserter, &value, CARBON_FIELD_COLUMN_U32_UNSORTED_MULTISET);
                         break;
                 default: JAK_ERROR(&inserter->err, JAK_ERR_INTERNALERR);
                         return false;
@@ -259,13 +270,13 @@ bool jak_carbon_insert_u32(jak_carbon_insert *inserter, jak_u32 value)
 
 bool jak_carbon_insert_u64(jak_carbon_insert *inserter, jak_u64 value)
 {
-        check_type_if_container_is_column(inserter, JAK_CARBON_FIELD_TYPE_COLUMN_U64);
+        check_type_if_container_is_column(inserter, jak_carbon_field_type_is_column_u64_or_subtype(inserter->context.column->type));
         switch (inserter->context_type) {
                 case JAK_CARBON_ARRAY:
-                        write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_U64, &value, sizeof(jak_u64));
+                        write_field_data(inserter, CARBON_FIELD_NUMBER_U64, &value, sizeof(jak_u64));
                         break;
                 case JAK_CARBON_COLUMN:
-                        push_in_column(inserter, &value, JAK_CARBON_FIELD_TYPE_COLUMN_U64);
+                        push_in_column(inserter, &value, CARBON_FIELD_COLUMN_U64_UNSORTED_MULTISET);
                         break;
                 default: JAK_ERROR(&inserter->err, JAK_ERR_INTERNALERR);
                         return false;
@@ -275,13 +286,13 @@ bool jak_carbon_insert_u64(jak_carbon_insert *inserter, jak_u64 value)
 
 bool jak_carbon_insert_i8(jak_carbon_insert *inserter, jak_i8 value)
 {
-        check_type_if_container_is_column(inserter, JAK_CARBON_FIELD_TYPE_COLUMN_I8);
+        check_type_if_container_is_column(inserter, jak_carbon_field_type_is_column_i8_or_subtype(inserter->context.column->type));
         switch (inserter->context_type) {
                 case JAK_CARBON_ARRAY:
-                        write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_I8, &value, sizeof(jak_i8));
+                        write_field_data(inserter, CARBON_FIELD_NUMBER_I8, &value, sizeof(jak_i8));
                         break;
                 case JAK_CARBON_COLUMN:
-                        push_in_column(inserter, &value, JAK_CARBON_FIELD_TYPE_COLUMN_I8);
+                        push_in_column(inserter, &value, CARBON_FIELD_COLUMN_I8_UNSORTED_MULTISET);
                         break;
                 default: JAK_ERROR(&inserter->err, JAK_ERR_INTERNALERR);
                         return false;
@@ -291,13 +302,13 @@ bool jak_carbon_insert_i8(jak_carbon_insert *inserter, jak_i8 value)
 
 bool jak_carbon_insert_i16(jak_carbon_insert *inserter, jak_i16 value)
 {
-        check_type_if_container_is_column(inserter, JAK_CARBON_FIELD_TYPE_COLUMN_I16);
+        check_type_if_container_is_column(inserter, jak_carbon_field_type_is_column_i16_or_subtype(inserter->context.column->type));
         switch (inserter->context_type) {
                 case JAK_CARBON_ARRAY:
-                        write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_I16, &value, sizeof(jak_i16));
+                        write_field_data(inserter, CARBON_FIELD_NUMBER_I16, &value, sizeof(jak_i16));
                         break;
                 case JAK_CARBON_COLUMN:
-                        push_in_column(inserter, &value, JAK_CARBON_FIELD_TYPE_COLUMN_I16);
+                        push_in_column(inserter, &value, CARBON_FIELD_COLUMN_I16_UNSORTED_MULTISET);
                         break;
                 default: JAK_ERROR(&inserter->err, JAK_ERR_INTERNALERR);
                         return false;
@@ -307,13 +318,13 @@ bool jak_carbon_insert_i16(jak_carbon_insert *inserter, jak_i16 value)
 
 bool jak_carbon_insert_i32(jak_carbon_insert *inserter, jak_i32 value)
 {
-        check_type_if_container_is_column(inserter, JAK_CARBON_FIELD_TYPE_COLUMN_I32);
+        check_type_if_container_is_column(inserter, jak_carbon_field_type_is_column_i32_or_subtype(inserter->context.column->type));
         switch (inserter->context_type) {
                 case JAK_CARBON_ARRAY:
-                        write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_I32, &value, sizeof(jak_i32));
+                        write_field_data(inserter, CARBON_FIELD_NUMBER_I32, &value, sizeof(jak_i32));
                         break;
                 case JAK_CARBON_COLUMN:
-                        push_in_column(inserter, &value, JAK_CARBON_FIELD_TYPE_COLUMN_I32);
+                        push_in_column(inserter, &value, CARBON_FIELD_COLUMN_I32_UNSORTED_MULTISET);
                         break;
                 default: JAK_ERROR(&inserter->err, JAK_ERR_INTERNALERR);
                         return false;
@@ -323,13 +334,13 @@ bool jak_carbon_insert_i32(jak_carbon_insert *inserter, jak_i32 value)
 
 bool jak_carbon_insert_i64(jak_carbon_insert *inserter, jak_i64 value)
 {
-        check_type_if_container_is_column(inserter, JAK_CARBON_FIELD_TYPE_COLUMN_I64);
+        check_type_if_container_is_column(inserter, jak_carbon_field_type_is_column_i64_or_subtype(inserter->context.column->type));
         switch (inserter->context_type) {
                 case JAK_CARBON_ARRAY:
-                        write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_I64, &value, sizeof(jak_i64));
+                        write_field_data(inserter, CARBON_FIELD_NUMBER_I64, &value, sizeof(jak_i64));
                         break;
                 case JAK_CARBON_COLUMN:
-                        push_in_column(inserter, &value, JAK_CARBON_FIELD_TYPE_COLUMN_I64);
+                        push_in_column(inserter, &value, CARBON_FIELD_COLUMN_I64_UNSORTED_MULTISET);
                         break;
                 default: JAK_ERROR(&inserter->err, JAK_ERR_INTERNALERR);
                         return false;
@@ -376,13 +387,13 @@ bool jak_carbon_insert_signed(jak_carbon_insert *inserter, jak_i64 value)
 bool jak_carbon_insert_float(jak_carbon_insert *inserter, float value)
 {
         JAK_ERROR_IF_NULL(inserter)
-        check_type_if_container_is_column(inserter, JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT);
+        check_type_if_container_is_column(inserter, jak_carbon_field_type_is_column_float_or_subtype(inserter->context.column->type));
         switch (inserter->context_type) {
                 case JAK_CARBON_ARRAY:
-                        write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT, &value, sizeof(float));
+                        write_field_data(inserter, CARBON_FIELD_NUMBER_FLOAT, &value, sizeof(float));
                         break;
                 case JAK_CARBON_COLUMN:
-                        push_in_column(inserter, &value, JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT);
+                        push_in_column(inserter, &value, CARBON_FIELD_COLUMN_FLOAT_UNSORTED_MULTISET);
                         break;
                 default: JAK_ERROR(&inserter->err, JAK_ERR_INTERNALERR);
                         return false;
@@ -409,7 +420,7 @@ static void insert_binary(jak_carbon_insert *inserter, const void *value, size_t
 {
         if (user_type && strlen(user_type) > 0) {
                 /* write media type 'user binary' */
-                push_media_type_for_array(inserter, JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM);
+                push_media_type_for_array(inserter, CARBON_FIELD_BINARY_CUSTOM);
 
                 /* write length of 'user_type' string with variable-length integer type */
                 jak_u64 user_type_strlen = strlen(user_type);
@@ -425,7 +436,7 @@ static void insert_binary(jak_carbon_insert *inserter, const void *value, size_t
 
         } else {
                 /* write media type 'binary' */
-                push_media_type_for_array(inserter, JAK_CARBON_FIELD_TYPE_BINARY);
+                push_media_type_for_array(inserter, CARBON_FIELD_BINARY);
 
                 /* write mime type with variable-length integer type */
                 jak_u64 mime_type_id = jak_carbon_media_mime_type_by_ext(file_ext);
@@ -450,8 +461,9 @@ bool jak_carbon_insert_binary(jak_carbon_insert *inserter, const void *value, si
         return true;
 }
 
-jak_carbon_insert *jak_carbon_insert_object_begin(jak_carbon_insert_object_state *out,
-                                                     jak_carbon_insert *inserter, jak_u64 object_capacity)
+jak_carbon_insert *__carbon_insert_map_begin(jak_carbon_insert_object_state *out,
+                                                  jak_carbon_insert *inserter, carbon_map_derivable_e derivation,
+                                                  jak_u64 object_capacity)
 {
         JAK_ERROR_IF_NULL(out)
         JAK_ERROR_IF_NULL(inserter)
@@ -470,13 +482,20 @@ jak_carbon_insert *jak_carbon_insert_object_begin(jak_carbon_insert_object_state
         };
 
 
-        jak_carbon_int_insert_object(&inserter->memfile, object_capacity);
+        jak_carbon_int_insert_object(&inserter->memfile, derivation, object_capacity);
         jak_u64 payload_start = jak_memfile_tell(&inserter->memfile) - 1;
 
         jak_carbon_object_it_create(out->it, &inserter->memfile, &inserter->err, payload_start);
         jak_carbon_object_it_insert_begin(&out->inserter, out->it);
 
         return &out->inserter;
+}
+
+jak_carbon_insert *jak_carbon_insert_object_begin(jak_carbon_insert_object_state *out,
+                                                  jak_carbon_insert *inserter,
+                                                  jak_u64 object_capacity)
+{
+        return __carbon_insert_map_begin(out, inserter, CARBON_MAP_UNSORTED_MULTIMAP, object_capacity);
 }
 
 bool jak_carbon_insert_object_end(jak_carbon_insert_object_state *state)
@@ -503,8 +522,18 @@ bool jak_carbon_insert_object_end(jak_carbon_insert_object_state *state)
         return true;
 }
 
-jak_carbon_insert *jak_carbon_insert_array_begin(jak_carbon_insert_array_state *state_out,
-                                                    jak_carbon_insert *inserter_in, jak_u64 array_capacity)
+jak_carbon_insert *jak_carbon_insert_map_begin(jak_carbon_insert_object_state *out, jak_carbon_insert *inserter, carbon_map_derivable_e derivation, jak_u64 object_capacity)
+{
+        return __carbon_insert_map_begin(out, inserter, derivation, object_capacity);
+}
+
+bool jak_carbon_insert_map_end(jak_carbon_insert_object_state *state)
+{
+        return jak_carbon_insert_object_end(state);
+}
+
+jak_carbon_insert *__carbon_insert_array_list_begin(jak_carbon_insert_array_state *state_out,
+                                                 jak_carbon_insert *inserter_in, carbon_list_derivable_e derivation, jak_u64 array_capacity)
 {
         JAK_ERROR_IF_AND_RETURN(!state_out, &inserter_in->err, JAK_ERR_NULLPTR, NULL);
         if (!inserter_in) {
@@ -513,7 +542,7 @@ jak_carbon_insert *jak_carbon_insert_array_begin(jak_carbon_insert_array_state *
         }
 
         JAK_ERROR_IF(inserter_in->context_type != JAK_CARBON_ARRAY && inserter_in->context_type != JAK_CARBON_OBJECT,
-                 &inserter_in->err, JAK_ERR_UNSUPPCONTAINER);
+                     &inserter_in->err, JAK_ERR_UNSUPPCONTAINER);
 
         *state_out = (jak_carbon_insert_array_state) {
                 .parent_inserter = inserter_in,
@@ -522,13 +551,19 @@ jak_carbon_insert *jak_carbon_insert_array_begin(jak_carbon_insert_array_state *
                 .array_end = 0
         };
 
-        jak_carbon_int_insert_array(&inserter_in->memfile, array_capacity);
+        jak_carbon_int_insert_array(&inserter_in->memfile, derivation, array_capacity);
         jak_u64 payload_start = jak_memfile_tell(&inserter_in->memfile) - 1;
 
         jak_carbon_array_it_create(state_out->nested_array, &inserter_in->memfile, &inserter_in->err, payload_start);
         jak_carbon_array_it_insert_begin(&state_out->nested_inserter, state_out->nested_array);
 
         return &state_out->nested_inserter;
+}
+
+jak_carbon_insert *jak_carbon_insert_array_begin(jak_carbon_insert_array_state *state_out,
+                                                    jak_carbon_insert *inserter_in, jak_u64 array_capacity)
+{
+        return __carbon_insert_array_list_begin(state_out, inserter_in, CARBON_LIST_UNSORTED_MULTISET, array_capacity);
 }
 
 bool jak_carbon_insert_array_end(jak_carbon_insert_array_state *state_in)
@@ -552,17 +587,29 @@ bool jak_carbon_insert_array_end(jak_carbon_insert_array_state *state_in)
         return true;
 }
 
-jak_carbon_insert *jak_carbon_insert_column_begin(jak_carbon_insert_column_state *state_out,
+jak_carbon_insert *jak_carbon_insert_array_list_begin(jak_carbon_insert_array_state *state_out, jak_carbon_insert *inserter_in, carbon_list_derivable_e derivation, jak_u64 array_capacity)
+{
+        return __carbon_insert_array_list_begin(state_out, inserter_in, derivation, array_capacity);
+}
+
+bool jak_carbon_insert_array_list_end(jak_carbon_insert_array_state *state_in)
+{
+        return jak_carbon_insert_array_end(state_in);
+}
+
+
+jak_carbon_insert *__carbon_insert_column_list_begin(jak_carbon_insert_column_state *state_out,
                                                      jak_carbon_insert *inserter_in,
+                                                     carbon_list_derivable_e derivation,
                                                      jak_carbon_column_type_e type,
                                                      jak_u64 column_capacity)
 {
         JAK_ERROR_IF_AND_RETURN(!state_out, &inserter_in->err, JAK_ERR_NULLPTR, NULL);
         JAK_ERROR_IF_AND_RETURN(!inserter_in, &inserter_in->err, JAK_ERR_NULLPTR, NULL);
         JAK_ERROR_IF(inserter_in->context_type != JAK_CARBON_ARRAY && inserter_in->context_type != JAK_CARBON_OBJECT,
-                 &inserter_in->err, JAK_ERR_UNSUPPCONTAINER);
+                     &inserter_in->err, JAK_ERR_UNSUPPCONTAINER);
 
-        jak_carbon_field_type_e field_type = jak_carbon_field_type_for_column(type);
+        jak_carbon_field_type_e field_type = jak_carbon_field_type_for_column(derivation, type);
 
         *state_out = (jak_carbon_insert_column_state) {
                 .parent_inserter = inserter_in,
@@ -573,13 +620,21 @@ jak_carbon_insert *jak_carbon_insert_column_begin(jak_carbon_insert_column_state
         };
 
         jak_u64 container_start_off = jak_memfile_tell(&inserter_in->memfile);
-        jak_carbon_int_insert_column(&inserter_in->memfile, &inserter_in->err, type, column_capacity);
+        jak_carbon_int_insert_column(&inserter_in->memfile, &inserter_in->err, derivation, type, column_capacity);
 
         jak_carbon_column_it_create(state_out->nested_column, &inserter_in->memfile, &inserter_in->err,
-                                container_start_off);
+                                    container_start_off);
         jak_carbon_column_it_insert(&state_out->nested_inserter, state_out->nested_column);
 
         return &state_out->nested_inserter;
+}
+
+jak_carbon_insert *jak_carbon_insert_column_begin(jak_carbon_insert_column_state *state_out,
+                                                     jak_carbon_insert *inserter_in,
+                                                     jak_carbon_column_type_e type,
+                                                     jak_u64 column_capacity)
+{
+        return __carbon_insert_column_list_begin(state_out, inserter_in, CARBON_LIST_UNSORTED_MULTISET, type, column_capacity);
 }
 
 bool jak_carbon_insert_column_end(jak_carbon_insert_column_state *state_in)
@@ -597,6 +652,16 @@ bool jak_carbon_insert_column_end(jak_carbon_insert_column_state *state_in)
         jak_carbon_insert_drop(&state_in->nested_inserter);
         free(state_in->nested_column);
         return true;
+}
+
+jak_carbon_insert *jak_carbon_insert_column_list_begin(jak_carbon_insert_column_state *state_out, jak_carbon_insert *inserter_in, carbon_list_derivable_e derivation, jak_carbon_column_type_e type, jak_u64 column_capacity)
+{
+        return __carbon_insert_column_list_begin(state_out, inserter_in, derivation, type, column_capacity);
+}
+
+bool jak_carbon_insert_column_list_end(jak_carbon_insert_column_state *state_in)
+{
+        return jak_carbon_insert_column_end(state_in);
 }
 
 static void inserter_refresh_mod_size(jak_carbon_insert *inserter, jak_i64 mod_size)
@@ -624,7 +689,7 @@ bool jak_carbon_insert_prop_null(jak_carbon_insert *inserter, const char *key)
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
-        push_media_type_for_array(inserter, JAK_CARBON_FIELD_TYPE_NULL);
+        push_media_type_for_array(inserter, CARBON_FIELD_NULL);
         jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
@@ -635,7 +700,7 @@ bool jak_carbon_insert_prop_true(jak_carbon_insert *inserter, const char *key)
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
-        push_media_type_for_array(inserter, JAK_CARBON_FIELD_TYPE_TRUE);
+        push_media_type_for_array(inserter, CARBON_FIELD_TRUE);
         jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
@@ -646,7 +711,7 @@ bool jak_carbon_insert_prop_false(jak_carbon_insert *inserter, const char *key)
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
-        push_media_type_for_array(inserter, JAK_CARBON_FIELD_TYPE_FALSE);
+        push_media_type_for_array(inserter, CARBON_FIELD_FALSE);
         jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
@@ -657,7 +722,7 @@ bool jak_carbon_insert_prop_u8(jak_carbon_insert *inserter, const char *key, jak
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
-        write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_U8, &value, sizeof(jak_u8));
+        write_field_data(inserter, CARBON_FIELD_NUMBER_U8, &value, sizeof(jak_u8));
         jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
@@ -668,7 +733,7 @@ bool jak_carbon_insert_prop_u16(jak_carbon_insert *inserter, const char *key, ja
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
-        write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_U16, &value, sizeof(jak_u16));
+        write_field_data(inserter, CARBON_FIELD_NUMBER_U16, &value, sizeof(jak_u16));
         jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
@@ -679,7 +744,7 @@ bool jak_carbon_insert_prop_u32(jak_carbon_insert *inserter, const char *key, ja
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
-        write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_U32, &value, sizeof(jak_u32));
+        write_field_data(inserter, CARBON_FIELD_NUMBER_U32, &value, sizeof(jak_u32));
         jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
@@ -690,7 +755,7 @@ bool jak_carbon_insert_prop_u64(jak_carbon_insert *inserter, const char *key, ja
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
-        write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_U64, &value, sizeof(jak_u64));
+        write_field_data(inserter, CARBON_FIELD_NUMBER_U64, &value, sizeof(jak_u64));
         jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
@@ -701,7 +766,7 @@ bool jak_carbon_insert_prop_i8(jak_carbon_insert *inserter, const char *key, jak
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
-        write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_I8, &value, sizeof(jak_i8));
+        write_field_data(inserter, CARBON_FIELD_NUMBER_I8, &value, sizeof(jak_i8));
         jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
@@ -712,7 +777,7 @@ bool jak_carbon_insert_prop_i16(jak_carbon_insert *inserter, const char *key, ja
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
-        write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_I16, &value, sizeof(jak_i16));
+        write_field_data(inserter, CARBON_FIELD_NUMBER_I16, &value, sizeof(jak_i16));
         jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
@@ -723,7 +788,7 @@ bool jak_carbon_insert_prop_i32(jak_carbon_insert *inserter, const char *key, ja
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
-        write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_I32, &value, sizeof(jak_i32));
+        write_field_data(inserter, CARBON_FIELD_NUMBER_I32, &value, sizeof(jak_i32));
         jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
@@ -734,7 +799,7 @@ bool jak_carbon_insert_prop_i64(jak_carbon_insert *inserter, const char *key, ja
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
-        write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_I64, &value, sizeof(jak_i64));
+        write_field_data(inserter, CARBON_FIELD_NUMBER_I64, &value, sizeof(jak_i64));
         jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
@@ -781,7 +846,7 @@ bool jak_carbon_insert_prop_float(jak_carbon_insert *inserter, const char *key, 
         JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
         jak_offset_t prop_start = jak_memfile_tell(&inserter->memfile);
         jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
-        write_field_data(inserter, JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT, &value, sizeof(float));
+        write_field_data(inserter, CARBON_FIELD_NUMBER_FLOAT, &value, sizeof(float));
         jak_offset_t prop_end = jak_memfile_tell(&inserter->memfile);
         inserter_refresh_mod_size(inserter, prop_end - prop_start);
         return true;
@@ -815,19 +880,38 @@ bool jak_carbon_insert_prop_binary(jak_carbon_insert *inserter, const char *key,
         return true;
 }
 
+static jak_carbon_insert *__carbon_insert_prop_object_container_begin(jak_carbon_insert_object_state *out,
+                                                       jak_carbon_insert *inserter, carbon_map_derivable_e derivation, const char *key,
+                                                       jak_u64 object_capacity)
+{
+        JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
+        jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
+        return jak_carbon_insert_map_begin(out, inserter, derivation, object_capacity);
+}
+
 jak_carbon_insert *jak_carbon_insert_prop_object_begin(jak_carbon_insert_object_state *out,
                                                           jak_carbon_insert *inserter, const char *key,
                                                           jak_u64 object_capacity)
 {
-        JAK_ERROR_IF(inserter->context_type != JAK_CARBON_OBJECT, &inserter->err, JAK_ERR_UNSUPPCONTAINER);
-        jak_carbon_jak_string_nomarker_write(&inserter->memfile, key);
-        return jak_carbon_insert_object_begin(out, inserter, object_capacity);
+        return __carbon_insert_prop_object_container_begin(out, inserter, CARBON_MAP_UNSORTED_MULTIMAP,
+                                                           key, object_capacity);
 }
 
 jak_u64 jak_carbon_insert_prop_object_end(jak_carbon_insert_object_state *state)
 {
         jak_carbon_insert_object_end(state);
         return state->object_end - state->object_begin;
+}
+
+jak_carbon_insert *jak_carbon_insert_prop_map_begin(jak_carbon_insert_object_state *out, jak_carbon_insert *inserter, carbon_map_derivable_e derivation, const char *key, jak_u64 object_capacity)
+{
+        return __carbon_insert_prop_object_container_begin(out, inserter, derivation,
+                                                           key, object_capacity);
+}
+
+jak_u64 jak_carbon_insert_prop_map_end(jak_carbon_insert_object_state *state)
+{
+        return jak_carbon_insert_prop_object_end(state);
 }
 
 jak_carbon_insert *jak_carbon_insert_prop_array_begin(jak_carbon_insert_array_state *state,

@@ -31,6 +31,7 @@
 #include <carbon-containers.h>
 #include <jak_carbon_field.h>
 #include <jak_carbon_array_it.h>
+#include <carbon_abstract.h>
 
 JAK_BEGIN_DECL
 
@@ -69,9 +70,9 @@ typedef struct jak_carbon_insert_column_state {
         jak_offset_t column_begin, column_end;
 } jak_carbon_insert_column_state;
 
-bool jak_carbon_int_insert_object(jak_memfile *memfile, size_t nbytes);
-bool jak_carbon_int_insert_array(jak_memfile *memfile, size_t nbytes);
-bool jak_carbon_int_insert_column(jak_memfile *jak_memfile_in, jak_error *err_in, jak_carbon_column_type_e type, size_t capactity);
+bool jak_carbon_int_insert_object(jak_memfile *memfile, carbon_map_derivable_e derivation, size_t nbytes);
+bool jak_carbon_int_insert_array(jak_memfile *memfile, carbon_list_derivable_e derivation, size_t nbytes);
+bool jak_carbon_int_insert_column(jak_memfile *jak_memfile_in, jak_error *err_in, carbon_list_derivable_e derivation, jak_carbon_column_type_e type, size_t capactity);
 
 /**
  * Returns the number of bytes required to store a field type including its type marker in a byte sequence.

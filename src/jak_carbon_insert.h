@@ -65,11 +65,20 @@ bool jak_carbon_insert_binary(jak_carbon_insert *inserter, const void *value, si
 jak_carbon_insert *jak_carbon_insert_object_begin(jak_carbon_insert_object_state *out, jak_carbon_insert *inserter, jak_u64 object_capacity);
 bool jak_carbon_insert_object_end(jak_carbon_insert_object_state *state);
 
+jak_carbon_insert *jak_carbon_insert_map_begin(jak_carbon_insert_object_state *out, jak_carbon_insert *inserter, carbon_map_derivable_e derivation, jak_u64 object_capacity);
+bool jak_carbon_insert_map_end(jak_carbon_insert_object_state *state);
+
 jak_carbon_insert *jak_carbon_insert_array_begin(jak_carbon_insert_array_state *state_out, jak_carbon_insert *inserter_in, jak_u64 array_capacity);
 bool jak_carbon_insert_array_end(jak_carbon_insert_array_state *state_in);
 
+jak_carbon_insert *jak_carbon_insert_array_list_begin(jak_carbon_insert_array_state *state_out, jak_carbon_insert *inserter_in, carbon_list_derivable_e derivation, jak_u64 array_capacity);
+bool jak_carbon_insert_array_list_end(jak_carbon_insert_array_state *state_in);
+
 jak_carbon_insert *jak_carbon_insert_column_begin(jak_carbon_insert_column_state *state_out, jak_carbon_insert *inserter_in, jak_carbon_column_type_e type, jak_u64 column_capacity);
 bool jak_carbon_insert_column_end(jak_carbon_insert_column_state *state_in);
+
+jak_carbon_insert *jak_carbon_insert_column_list_begin(jak_carbon_insert_column_state *state_out, jak_carbon_insert *inserter_in, carbon_list_derivable_e derivation, jak_carbon_column_type_e type, jak_u64 column_capacity);
+bool jak_carbon_insert_column_list_end(jak_carbon_insert_column_state *state_in);
 
 bool jak_carbon_insert_prop_null(jak_carbon_insert *inserter, const char *key);
 bool jak_carbon_insert_prop_true(jak_carbon_insert *inserter, const char *key);
@@ -91,6 +100,9 @@ bool jak_carbon_insert_prop_binary(jak_carbon_insert *inserter, const char *key,
 
 jak_carbon_insert *jak_carbon_insert_prop_object_begin(jak_carbon_insert_object_state *out, jak_carbon_insert *inserter, const char *key, jak_u64 object_capacity);
 jak_u64 jak_carbon_insert_prop_object_end(jak_carbon_insert_object_state *state);
+
+jak_carbon_insert *jak_carbon_insert_prop_map_begin(jak_carbon_insert_object_state *out, jak_carbon_insert *inserter, carbon_map_derivable_e derivation, const char *key, jak_u64 object_capacity);
+jak_u64 jak_carbon_insert_prop_map_end(jak_carbon_insert_object_state *state);
 
 jak_carbon_insert *jak_carbon_insert_prop_array_begin(jak_carbon_insert_array_state *state, jak_carbon_insert *inserter, const char *key, jak_u64 array_capacity);
 jak_u64 jak_carbon_insert_prop_array_end(jak_carbon_insert_array_state *state);

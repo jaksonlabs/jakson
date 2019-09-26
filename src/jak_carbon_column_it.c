@@ -28,9 +28,9 @@
 
 #define safe_cast(builtin_type, nvalues, it, field_type_expr)                                                          \
 ({                                                                                                                     \
-        jak_carbon_field_type_e type;                                                                                    \
-        const void *raw = jak_carbon_column_it_values(&type, nvalues, it);                                                  \
-        JAK_ERROR_IF(!(field_type_expr), &it->err, JAK_ERR_TYPEMISMATCH);                                                  \
+        jak_carbon_field_type_e type;                                                                                  \
+        const void *raw = jak_carbon_column_it_values(&type, nvalues, it);                                             \
+        JAK_ERROR_IF(!(field_type_expr), &it->err, JAK_ERR_TYPEMISMATCH);                                              \
         (const builtin_type *) raw;                                                                                    \
 })
 
@@ -155,25 +155,55 @@ bool jak_carbon_column_it_value_is_null(jak_carbon_column_it *it, jak_u32 pos)
         jak_carbon_column_it_values_info(&type, &nvalues, it);
         JAK_ERROR_IF(pos >= nvalues, &it->err, JAK_ERR_OUTOFBOUNDS);
         switch (type) {
-                case JAK_CARBON_FIELD_TYPE_COLUMN_U8:
+                case CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U8_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U8_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_U8_SORTED_SET:
                         return JAK_IS_NULL_U8(jak_carbon_column_it_u8_values(NULL, it)[pos]);
-                case JAK_CARBON_FIELD_TYPE_COLUMN_U16:
+                case CARBON_FIELD_COLUMN_U16_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U16_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U16_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_U16_SORTED_SET:
                         return JAK_IS_NULL_U16(jak_carbon_column_it_u16_values(NULL, it)[pos]);
-                case JAK_CARBON_FIELD_TYPE_COLUMN_U32:
+                case CARBON_FIELD_COLUMN_U32_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U32_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U32_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_U32_SORTED_SET:
                         return JAK_IS_NULL_U32(jak_carbon_column_it_u32_values(NULL, it)[pos]);
-                case JAK_CARBON_FIELD_TYPE_COLUMN_U64:
+                case CARBON_FIELD_COLUMN_U64_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U64_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U64_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_U64_SORTED_SET:
                         return JAK_IS_NULL_U64(jak_carbon_column_it_u64_values(NULL, it)[pos]);
-                case JAK_CARBON_FIELD_TYPE_COLUMN_I8:
+                case CARBON_FIELD_COLUMN_I8_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I8_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I8_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_I8_SORTED_SET:
                         return JAK_IS_NULL_I8(jak_carbon_column_it_i8_values(NULL, it)[pos]);
-                case JAK_CARBON_FIELD_TYPE_COLUMN_I16:
+                case CARBON_FIELD_COLUMN_I16_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I16_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I16_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_I16_SORTED_SET:
                         return JAK_IS_NULL_I16(jak_carbon_column_it_i16_values(NULL, it)[pos]);
-                case JAK_CARBON_FIELD_TYPE_COLUMN_I32:
+                case CARBON_FIELD_COLUMN_I32_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I32_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I32_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_I32_SORTED_SET:
                         return JAK_IS_NULL_I32(jak_carbon_column_it_i32_values(NULL, it)[pos]);
-                case JAK_CARBON_FIELD_TYPE_COLUMN_I64:
+                case CARBON_FIELD_COLUMN_I64_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I64_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I64_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_I64_SORTED_SET:
                         return JAK_IS_NULL_I64(jak_carbon_column_it_i64_values(NULL, it)[pos]);
-                case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT:
+                case CARBON_FIELD_COLUMN_FLOAT_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_FLOAT_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_FLOAT_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_FLOAT_SORTED_SET:
                         return JAK_IS_NULL_FLOAT(jak_carbon_column_it_float_values(NULL, it)[pos]);
-                case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN:
+                case CARBON_FIELD_COLUMN_BOOLEAN_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_SET:
                         return JAK_IS_NULL_BOOLEAN(jak_carbon_column_it_boolean_values(NULL, it)[pos]);
                 default: JAK_ERROR(&it->err, JAK_ERR_UNSUPPCONTAINER)
                         return false;
@@ -201,52 +231,52 @@ const void *jak_carbon_column_it_values(jak_carbon_field_type_e *type, jak_u32 *
 
 const jak_u8 *jak_carbon_column_it_boolean_values(jak_u32 *nvalues, jak_carbon_column_it *it)
 {
-        return safe_cast(jak_u8, nvalues, it, (type == JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN));
+        return safe_cast(jak_u8, nvalues, it, jak_carbon_field_type_is_column_bool_or_subtype(type));
 }
 
 const jak_u8 *jak_carbon_column_it_u8_values(jak_u32 *nvalues, jak_carbon_column_it *it)
 {
-        return safe_cast(jak_u8, nvalues, it, (type == JAK_CARBON_FIELD_TYPE_COLUMN_U8));
+        return safe_cast(jak_u8, nvalues, it, jak_carbon_field_type_is_column_u8_or_subtype(type));
 }
 
 const jak_u16 *jak_carbon_column_it_u16_values(jak_u32 *nvalues, jak_carbon_column_it *it)
 {
-        return safe_cast(jak_u16, nvalues, it, (type == JAK_CARBON_FIELD_TYPE_COLUMN_U16));
+        return safe_cast(jak_u16, nvalues, it, jak_carbon_field_type_is_column_u16_or_subtype(type));
 }
 
 const jak_u32 *jak_carbon_column_it_u32_values(jak_u32 *nvalues, jak_carbon_column_it *it)
 {
-        return safe_cast(jak_u32, nvalues, it, (type == JAK_CARBON_FIELD_TYPE_COLUMN_U32));
+        return safe_cast(jak_u32, nvalues, it, jak_carbon_field_type_is_column_u32_or_subtype(type));
 }
 
 const jak_u64 *jak_carbon_column_it_u64_values(jak_u32 *nvalues, jak_carbon_column_it *it)
 {
-        return safe_cast(jak_u64, nvalues, it, (type == JAK_CARBON_FIELD_TYPE_COLUMN_U64));
+        return safe_cast(jak_u64, nvalues, it, jak_carbon_field_type_is_column_u64_or_subtype(type));
 }
 
 const jak_i8 *jak_carbon_column_it_i8_values(jak_u32 *nvalues, jak_carbon_column_it *it)
 {
-        return safe_cast(jak_i8, nvalues, it, (type == JAK_CARBON_FIELD_TYPE_COLUMN_I8));
+        return safe_cast(jak_i8, nvalues, it, jak_carbon_field_type_is_column_i8_or_subtype(type));
 }
 
 const jak_i16 *jak_carbon_column_it_i16_values(jak_u32 *nvalues, jak_carbon_column_it *it)
 {
-        return safe_cast(jak_i16, nvalues, it, (type == JAK_CARBON_FIELD_TYPE_COLUMN_I16));
+        return safe_cast(jak_i16, nvalues, it, jak_carbon_field_type_is_column_i16_or_subtype(type));
 }
 
 const jak_i32 *jak_carbon_column_it_i32_values(jak_u32 *nvalues, jak_carbon_column_it *it)
 {
-        return safe_cast(jak_i32, nvalues, it, (type == JAK_CARBON_FIELD_TYPE_COLUMN_I32));
+        return safe_cast(jak_i32, nvalues, it, jak_carbon_field_type_is_column_i32_or_subtype(type));
 }
 
 const jak_i64 *jak_carbon_column_it_i64_values(jak_u32 *nvalues, jak_carbon_column_it *it)
 {
-        return safe_cast(jak_i64, nvalues, it, (type == JAK_CARBON_FIELD_TYPE_COLUMN_I64));
+        return safe_cast(jak_i64, nvalues, it, jak_carbon_field_type_is_column_i64_or_subtype(type));
 }
 
 const float *jak_carbon_column_it_float_values(jak_u32 *nvalues, jak_carbon_column_it *it)
 {
-        return safe_cast(float, nvalues, it, (type == JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT));
+        return safe_cast(float, nvalues, it, jak_carbon_field_type_is_column_float_or_subtype(type));
 }
 
 bool jak_carbon_column_it_remove(jak_carbon_column_it *it, jak_u32 pos)
@@ -292,73 +322,109 @@ bool jak_carbon_column_it_update_set_null(jak_carbon_column_it *it, jak_u32 pos)
         jak_memfile_seek(&it->memfile, payload_start + pos * jak_carbon_int_get_type_value_size(it->type));
 
         switch (it->type) {
-                case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
+                case CARBON_FIELD_COLUMN_BOOLEAN_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_SET: {
                         jak_u8 null_value = JAK_CARBON_BOOLEAN_COLUMN_NULL;
                         jak_memfile_write(&it->memfile, &null_value, sizeof(jak_u8));
                 }
                         break;
-                case JAK_CARBON_FIELD_TYPE_COLUMN_U8: {
+                case CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U8_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U8_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_U8_SORTED_SET: {
                         jak_u8 null_value = JAK_U8_NULL;
                         jak_memfile_write(&it->memfile, &null_value, sizeof(jak_u8));
                 }
                         break;
-                case JAK_CARBON_FIELD_TYPE_COLUMN_U16: {
+                case CARBON_FIELD_COLUMN_U16_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U16_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U16_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_U16_SORTED_SET: {
                         jak_u16 null_value = JAK_U16_NULL;
                         jak_memfile_write(&it->memfile, &null_value, sizeof(jak_u16));
                 }
                         break;
-                case JAK_CARBON_FIELD_TYPE_COLUMN_U32: {
+                case CARBON_FIELD_COLUMN_U32_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U32_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U32_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_U32_SORTED_SET: {
                         jak_u32 null_value = JAK_U32_NULL;
                         jak_memfile_write(&it->memfile, &null_value, sizeof(jak_u32));
                 }
                         break;
-                case JAK_CARBON_FIELD_TYPE_COLUMN_U64: {
+                case CARBON_FIELD_COLUMN_U64_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U64_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U64_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_U64_SORTED_SET: {
                         jak_u64 null_value = JAK_U64_NULL;
                         jak_memfile_write(&it->memfile, &null_value, sizeof(jak_u64));
                 }
                         break;
-                case JAK_CARBON_FIELD_TYPE_COLUMN_I8: {
+                case CARBON_FIELD_COLUMN_I8_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I8_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I8_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_I8_SORTED_SET: {
                         jak_i8 null_value = JAK_I8_NULL;
                         jak_memfile_write(&it->memfile, &null_value, sizeof(jak_i8));
                 }
                         break;
-                case JAK_CARBON_FIELD_TYPE_COLUMN_I16: {
+                case CARBON_FIELD_COLUMN_I16_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I16_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I16_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_I16_SORTED_SET: {
                         jak_i16 null_value = JAK_I16_NULL;
                         jak_memfile_write(&it->memfile, &null_value, sizeof(jak_i16));
                 }
                         break;
-                case JAK_CARBON_FIELD_TYPE_COLUMN_I32: {
+                case CARBON_FIELD_COLUMN_I32_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I32_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I32_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_I32_SORTED_SET: {
                         jak_i32 null_value = JAK_I32_NULL;
                         jak_memfile_write(&it->memfile, &null_value, sizeof(jak_i32));
                 }
                         break;
-                case JAK_CARBON_FIELD_TYPE_COLUMN_I64: {
+                case CARBON_FIELD_COLUMN_I64_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I64_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I64_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_I64_SORTED_SET: {
                         jak_i64 null_value = JAK_I64_NULL;
                         jak_memfile_write(&it->memfile, &null_value, sizeof(jak_i64));
                 }
                         break;
-                case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT: {
+                case CARBON_FIELD_COLUMN_FLOAT_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_FLOAT_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_FLOAT_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_FLOAT_SORTED_SET: {
                         float null_value = JAK_FLOAT_NULL;
                         jak_memfile_write(&it->memfile, &null_value, sizeof(float));
                 }
                         break;
-                case JAK_CARBON_FIELD_TYPE_NULL:
-                case JAK_CARBON_FIELD_TYPE_TRUE:
-                case JAK_CARBON_FIELD_TYPE_FALSE:
-                case JAK_CARBON_FIELD_TYPE_OBJECT:
-                case JAK_CARBON_FIELD_TYPE_ARRAY:
-                case JAK_CARBON_FIELD_TYPE_STRING:
-                case JAK_CARBON_FIELD_TYPE_NUMBER_U8:
-                case JAK_CARBON_FIELD_TYPE_NUMBER_U16:
-                case JAK_CARBON_FIELD_TYPE_NUMBER_U32:
-                case JAK_CARBON_FIELD_TYPE_NUMBER_U64:
-                case JAK_CARBON_FIELD_TYPE_NUMBER_I8:
-                case JAK_CARBON_FIELD_TYPE_NUMBER_I16:
-                case JAK_CARBON_FIELD_TYPE_NUMBER_I32:
-                case JAK_CARBON_FIELD_TYPE_NUMBER_I64:
-                case JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT:
-                case JAK_CARBON_FIELD_TYPE_BINARY:
-                case JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM:
+                case CARBON_FIELD_NULL:
+                case CARBON_FIELD_TRUE:
+                case CARBON_FIELD_FALSE:
+                case CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP:
+                case CARBON_FIELD_DERIVED_OBJECT_SORTED_MULTIMAP:
+                case CARBON_FIELD_DERIVED_OBJECT_CARBON_UNSORTED_MAP:
+                case CARBON_FIELD_DERIVED_OBJECT_CARBON_SORTED_MAP:
+                case CARBON_FIELD_ARRAY_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_ARRAY_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_ARRAY_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_ARRAY_SORTED_SET:
+                case CARBON_FIELD_STRING:
+                case CARBON_FIELD_NUMBER_U8:
+                case CARBON_FIELD_NUMBER_U16:
+                case CARBON_FIELD_NUMBER_U32:
+                case CARBON_FIELD_NUMBER_U64:
+                case CARBON_FIELD_NUMBER_I8:
+                case CARBON_FIELD_NUMBER_I16:
+                case CARBON_FIELD_NUMBER_I32:
+                case CARBON_FIELD_NUMBER_I64:
+                case CARBON_FIELD_NUMBER_FLOAT:
+                case CARBON_FIELD_BINARY:
+                case CARBON_FIELD_BINARY_CUSTOM:
                         jak_memfile_restore_position(&it->memfile);
                         JAK_ERROR(&it->err, JAK_ERR_UNSUPPCONTAINER)
                         return false;
@@ -395,17 +461,23 @@ for (jak_u32 i = 0; i < num_values; i++) {                                      
 
 static bool rewrite_column_to_array(jak_carbon_column_it *it)
 {
+        carbon_abstract_type_class_e type_class;
+        carbon_list_derivable_e list_type;
         jak_carbon_array_it array_it;
         jak_carbon_insert array_ins;
 
         jak_memfile_save_position(&it->memfile);
+        assert(jak_carbon_field_type_is_column_or_subtype(jak_memfile_peek_byte(&it->memfile)));
+
+        carbon_abstract_get_class(&type_class, &it->memfile);
+        carbon_abstract_class_to_list_derivable(&list_type, type_class);
 
         /* Potentially tailing space after the last ']' marker of the outer most array is used for temporary space */
         jak_memfile_seek_to_end(&it->memfile);
         jak_offset_t array_marker_begin = jak_memfile_tell(&it->memfile);
 
         size_t capacity = it->column_num_elements * jak_carbon_int_get_type_value_size(it->type);
-        jak_carbon_int_insert_array(&it->memfile, capacity);
+        jak_carbon_int_insert_array(&it->memfile, list_type, capacity);
         jak_carbon_array_it_create(&array_it, &it->memfile, &it->err, array_marker_begin);
         jak_carbon_array_it_insert_begin(&array_ins, &array_it);
 
@@ -413,42 +485,42 @@ static bool rewrite_column_to_array(jak_carbon_column_it *it)
         jak_u32 num_values;
         const void *data = jak_carbon_column_it_values(&type, &num_values, it);
         switch (type) {
-                case JAK_CARBON_FIELD_TYPE_NULL:
+                case CARBON_FIELD_NULL:
                         while (num_values--) {
                                 jak_carbon_insert_null(&array_ins);
                         }
                         break;
-                case JAK_CARBON_FIELD_TYPE_TRUE:
+                case CARBON_FIELD_TRUE:
                         push_array_element(num_values, data, jak_u8, JAK_IS_NULL_BOOLEAN, jak_carbon_insert_true);
                         break;
-                case JAK_CARBON_FIELD_TYPE_FALSE:
+                case CARBON_FIELD_FALSE:
                         push_array_element(num_values, data, jak_u8, JAK_IS_NULL_BOOLEAN, jak_carbon_insert_false);
                         break;
-                case JAK_CARBON_FIELD_TYPE_NUMBER_U8:
+                case CARBON_FIELD_NUMBER_U8:
                         push_array_element_wvalue(num_values, data, jak_u8, JAK_IS_NULL_U8, jak_carbon_insert_u8);
                         break;
-                case JAK_CARBON_FIELD_TYPE_NUMBER_U16:
+                case CARBON_FIELD_NUMBER_U16:
                         push_array_element_wvalue(num_values, data, jak_u16, JAK_IS_NULL_U16, jak_carbon_insert_u16);
                         break;
-                case JAK_CARBON_FIELD_TYPE_NUMBER_U32:
+                case CARBON_FIELD_NUMBER_U32:
                         push_array_element_wvalue(num_values, data, jak_u32, JAK_IS_NULL_U32, jak_carbon_insert_u32);
                         break;
-                case JAK_CARBON_FIELD_TYPE_NUMBER_U64:
+                case CARBON_FIELD_NUMBER_U64:
                         push_array_element_wvalue(num_values, data, jak_u64, JAK_IS_NULL_U64, jak_carbon_insert_u64);
                         break;
-                case JAK_CARBON_FIELD_TYPE_NUMBER_I8:
+                case CARBON_FIELD_NUMBER_I8:
                         push_array_element_wvalue(num_values, data, jak_i8, JAK_IS_NULL_I8, jak_carbon_insert_i8);
                         break;
-                case JAK_CARBON_FIELD_TYPE_NUMBER_I16:
+                case CARBON_FIELD_NUMBER_I16:
                         push_array_element_wvalue(num_values, data, jak_i16, JAK_IS_NULL_I16, jak_carbon_insert_i16);
                         break;
-                case JAK_CARBON_FIELD_TYPE_NUMBER_I32:
+                case CARBON_FIELD_NUMBER_I32:
                         push_array_element_wvalue(num_values, data, jak_i32, JAK_IS_NULL_I32, jak_carbon_insert_i32);
                         break;
-                case JAK_CARBON_FIELD_TYPE_NUMBER_I64:
+                case CARBON_FIELD_NUMBER_I64:
                         push_array_element_wvalue(num_values, data, jak_i64, JAK_IS_NULL_I64, jak_carbon_insert_i64);
                         break;
-                case JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT:
+                case CARBON_FIELD_NUMBER_FLOAT:
                         push_array_element_wvalue(num_values, data, float, JAK_IS_NULL_FLOAT, jak_carbon_insert_float);
                         break;
                 default: JAK_ERROR(&it->err, JAK_ERR_UNSUPPORTEDTYPE);
@@ -474,22 +546,34 @@ bool jak_carbon_column_it_update_set_true(jak_carbon_column_it *it, jak_u32 pos)
         jak_memfile_seek(&it->memfile, payload_start + pos * jak_carbon_int_get_type_value_size(it->type));
 
         switch (it->type) {
-                case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
+                case CARBON_FIELD_COLUMN_BOOLEAN_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_SET: {
                         jak_u8 value = JAK_CARBON_BOOLEAN_COLUMN_TRUE;
                         jak_memfile_write(&it->memfile, &value, sizeof(jak_u8));
                 }
                         break;
-                case JAK_CARBON_FIELD_TYPE_COLUMN_U8: {
+                case CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U8_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U8_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_U8_SORTED_SET: {
                         jak_u8 null_value = JAK_U8_NULL;
                         jak_memfile_write(&it->memfile, &null_value, sizeof(jak_u8));
                 }
                         break;
-                case JAK_CARBON_FIELD_TYPE_COLUMN_U16: {
+                case CARBON_FIELD_COLUMN_U16_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U16_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U16_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_U16_SORTED_SET: {
                         jak_u16 null_value = JAK_U16_NULL;
                         jak_memfile_write(&it->memfile, &null_value, sizeof(jak_u16));
                 }
                         break;
-                case JAK_CARBON_FIELD_TYPE_COLUMN_U32: {
+                case CARBON_FIELD_COLUMN_U32_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U32_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U32_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_U32_SORTED_SET: {
                         //jak_u32 null_value = JAK_U32_NULL;
                         //jak_memfile_write(&it->memfile, &null_value, sizeof(jak_u32));
                         rewrite_column_to_array(it);
@@ -497,53 +581,77 @@ bool jak_carbon_column_it_update_set_true(jak_carbon_column_it *it, jak_u32 pos)
 
                 }
                         break;
-                case JAK_CARBON_FIELD_TYPE_COLUMN_U64: {
+                case CARBON_FIELD_COLUMN_U64_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U64_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_U64_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_U64_SORTED_SET: {
                         jak_u64 null_value = JAK_U64_NULL;
                         jak_memfile_write(&it->memfile, &null_value, sizeof(jak_u64));
                 }
                         break;
-                case JAK_CARBON_FIELD_TYPE_COLUMN_I8: {
+                case CARBON_FIELD_COLUMN_I8_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I8_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I8_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_I8_SORTED_SET: {
                         jak_i8 null_value = JAK_I8_NULL;
                         jak_memfile_write(&it->memfile, &null_value, sizeof(jak_i8));
                 }
                         break;
-                case JAK_CARBON_FIELD_TYPE_COLUMN_I16: {
+                case CARBON_FIELD_COLUMN_I16_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I16_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I16_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_I16_SORTED_SET: {
                         jak_i16 null_value = JAK_I16_NULL;
                         jak_memfile_write(&it->memfile, &null_value, sizeof(jak_i16));
                 }
                         break;
-                case JAK_CARBON_FIELD_TYPE_COLUMN_I32: {
+                case CARBON_FIELD_COLUMN_I32_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I32_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I32_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_I32_SORTED_SET: {
                         jak_i32 null_value = JAK_I32_NULL;
                         jak_memfile_write(&it->memfile, &null_value, sizeof(jak_i32));
                 }
                         break;
-                case JAK_CARBON_FIELD_TYPE_COLUMN_I64: {
+                case CARBON_FIELD_COLUMN_I64_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I64_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_I64_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_I64_SORTED_SET: {
                         jak_i64 null_value = JAK_I64_NULL;
                         jak_memfile_write(&it->memfile, &null_value, sizeof(jak_i64));
                 }
                         break;
-                case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT: {
+                case CARBON_FIELD_COLUMN_FLOAT_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_FLOAT_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_COLUMN_FLOAT_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_COLUMN_FLOAT_SORTED_SET: {
                         float null_value = JAK_FLOAT_NULL;
                         jak_memfile_write(&it->memfile, &null_value, sizeof(float));
                 }
                         break;
-                case JAK_CARBON_FIELD_TYPE_NULL:
-                case JAK_CARBON_FIELD_TYPE_TRUE:
-                case JAK_CARBON_FIELD_TYPE_FALSE:
-                case JAK_CARBON_FIELD_TYPE_OBJECT:
-                case JAK_CARBON_FIELD_TYPE_ARRAY:
-                case JAK_CARBON_FIELD_TYPE_STRING:
-                case JAK_CARBON_FIELD_TYPE_NUMBER_U8:
-                case JAK_CARBON_FIELD_TYPE_NUMBER_U16:
-                case JAK_CARBON_FIELD_TYPE_NUMBER_U32:
-                case JAK_CARBON_FIELD_TYPE_NUMBER_U64:
-                case JAK_CARBON_FIELD_TYPE_NUMBER_I8:
-                case JAK_CARBON_FIELD_TYPE_NUMBER_I16:
-                case JAK_CARBON_FIELD_TYPE_NUMBER_I32:
-                case JAK_CARBON_FIELD_TYPE_NUMBER_I64:
-                case JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT:
-                case JAK_CARBON_FIELD_TYPE_BINARY:
-                case JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM:
+                case CARBON_FIELD_NULL:
+                case CARBON_FIELD_TRUE:
+                case CARBON_FIELD_FALSE:
+                case CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP:
+                case CARBON_FIELD_DERIVED_OBJECT_SORTED_MULTIMAP:
+                case CARBON_FIELD_DERIVED_OBJECT_CARBON_UNSORTED_MAP:
+                case CARBON_FIELD_DERIVED_OBJECT_CARBON_SORTED_MAP:
+                case CARBON_FIELD_ARRAY_UNSORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_ARRAY_SORTED_MULTISET:
+                case CARBON_FIELD_DERIVED_ARRAY_UNSORTED_SET:
+                case CARBON_FIELD_DERIVED_ARRAY_SORTED_SET:
+                case CARBON_FIELD_STRING:
+                case CARBON_FIELD_NUMBER_U8:
+                case CARBON_FIELD_NUMBER_U16:
+                case CARBON_FIELD_NUMBER_U32:
+                case CARBON_FIELD_NUMBER_U64:
+                case CARBON_FIELD_NUMBER_I8:
+                case CARBON_FIELD_NUMBER_I16:
+                case CARBON_FIELD_NUMBER_I32:
+                case CARBON_FIELD_NUMBER_I64:
+                case CARBON_FIELD_NUMBER_FLOAT:
+                case CARBON_FIELD_BINARY:
+                case CARBON_FIELD_BINARY_CUSTOM:
                         jak_memfile_restore_position(&it->memfile);
                         JAK_ERROR(&it->err, JAK_ERR_UNSUPPCONTAINER)
                         return false;

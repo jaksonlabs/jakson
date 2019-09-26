@@ -18,47 +18,47 @@
 #include <jak_fn_result.h>
 #include <stdarg.h>
 
-void jak_fn_result_ok(fn_result *result)
+void __fn_result_ok(fn_result *result)
 {
-        __jak_fn_result_create(result, JAK_ERR_NOERR, NULL, 0);
+        __fn_result_create(result, JAK_ERR_NOERR, NULL, 0);
 }
 
-void jak_fn_result_fail(fn_result *result, jak_error_code code, const char *file, jak_u32 line, const char *msg)
+void __fn_result_fail(fn_result *result, jak_error_code code, const char *file, jak_u32 line, const char *msg)
 {
         assert(code != JAK_ERR_NOERR && code != JAK_ERR_NOERR_RESULT_BOOLEAN &&
                        code != JAK_ERR_NOERR_RESULT_INT && code != JAK_ERR_NOERR_RESULT_UINT &&
                        code != JAK_ERR_NOERR_RESULT_PTR);
-        __jak_fn_result_create(result, code, NULL, 0);
+        __fn_result_create(result, code, NULL, 0);
         jak_error_set_wdetails_no_abort(&jak_global_error, code, file, line, msg);
 }
 
-void jak_fn_result_fail_forward(fn_result *result)
+void __fn_result_fail_forward(fn_result *result)
 {
-        __jak_fn_result_create(result, jak_global_error.code, NULL, 0);
+        __fn_result_create(result, jak_global_error.code, NULL, 0);
 }
 
-void jak_fn_result_ok_uint32(fn_result *result, jak_u32 value)
+void __fn_result_ok_uint32(fn_result *result, jak_u32 value)
 {
-        __jak_fn_result_create(result, JAK_ERR_NOERR_RESULT_UINT, &value, sizeof(jak_u32));
+        __fn_result_create(result, JAK_ERR_NOERR_RESULT_UINT, &value, sizeof(jak_u32));
 }
 
-void jak_fn_result_ok_int32(fn_result *result, jak_i32 value)
+void __fn_result_ok_int32(fn_result *result, jak_i32 value)
 {
-        __jak_fn_result_create(result, JAK_ERR_NOERR_RESULT_INT, &value, sizeof(jak_i32));
+        __fn_result_create(result, JAK_ERR_NOERR_RESULT_INT, &value, sizeof(jak_i32));
 }
 
-void jak_fn_result_ok_bool(fn_result *result, bool value)
+void __fn_result_ok_bool(fn_result *result, bool value)
 {
-        __jak_fn_result_create(result, JAK_ERR_NOERR_RESULT_BOOLEAN, &value, sizeof(bool));
+        __fn_result_create(result, JAK_ERR_NOERR_RESULT_BOOLEAN, &value, sizeof(bool));
 }
 
-void jak_fn_result_ok_ptr(fn_result *result, const void *value)
+void __fn_result_ok_ptr(fn_result *result, const void *value)
 {
         size_t adr = (size_t) value;
-        __jak_fn_result_create(result, JAK_ERR_NOERR_RESULT_PTR, &adr, sizeof(size_t));
+        __fn_result_create(result, JAK_ERR_NOERR_RESULT_PTR, &adr, sizeof(size_t));
 }
 
-void __jak_fn_result_create(fn_result *result, jak_error_code error_code, const void *payload, size_t payload_size)
+void __fn_result_create(fn_result *result, jak_error_code error_code, const void *payload, size_t payload_size)
 {
         result->error_code = error_code;
         if (payload_size) {
@@ -75,63 +75,63 @@ void __jak_fn_result_create(fn_result *result, jak_error_code error_code, const 
         }
 }
 
-bool jak_fn_result_is_ok(fn_result result)
+bool __fn_result_is_ok(fn_result result)
 {
         return (result.error_code == JAK_ERR_NOERR || result.error_code == JAK_ERR_NOERR_RESULT_BOOLEAN ||
                 result.error_code == JAK_ERR_NOERR_RESULT_INT ||result.error_code == JAK_ERR_NOERR_RESULT_UINT ||
                 result.error_code == JAK_ERR_NOERR_RESULT_PTR);
 }
 
-bool jak_fn_result_has_value(fn_result result)
+bool __fn_result_has_value(fn_result result)
 {
-        return jak_fn_result_is_ok(result) && result.error_code != JAK_ERR_NOERR;
+        return __fn_result_is_ok(result) && result.error_code != JAK_ERR_NOERR;
 }
 
-jak_error_code jak_fn_result_error_code(fn_result result)
+jak_error_code __fn_result_error_code(fn_result result)
 {
         return result.error_code;
 }
 
-bool jak_fn_result_is_int(fn_result result)
+bool __fn_result_is_int(fn_result result)
 {
         return result.error_code == JAK_ERR_NOERR_RESULT_INT;
 }
 
-bool jak_fn_result_is_uint(fn_result result)
+bool __fn_result_is_uint(fn_result result)
 {
         return result.error_code == JAK_ERR_NOERR_RESULT_UINT;
 }
 
-bool jak_fn_result_is_bool(fn_result result)
+bool __fn_result_is_bool(fn_result result)
 {
         return result.error_code == JAK_ERR_NOERR_RESULT_BOOLEAN;
 }
 
-bool jak_fn_result_is_ptr(fn_result result)
+bool __fn_result_is_ptr(fn_result result)
 {
         return result.error_code == JAK_ERR_NOERR_RESULT_PTR;
 }
 
-jak_i32 jak_fn_result_int(fn_result result)
+jak_i32 __fn_result_int(fn_result result)
 {
-        return jak_fn_result_is_int(result) ? *(jak_i32*) &result.result : 0;
+        return __fn_result_is_int(result) ? *(jak_i32*) &result.result : 0;
 }
 
-jak_u32 jak_fn_result_uint(fn_result result)
+jak_u32 __fn_result_uint(fn_result result)
 {
-        return jak_fn_result_is_uint(result) ? *(jak_u32*) &result.result : 0;
+        return __fn_result_is_uint(result) ? *(jak_u32*) &result.result : 0;
 }
 
-bool jak_fn_result_bool(fn_result result)
+bool __fn_result_bool(fn_result result)
 {
-        return jak_fn_result_is_bool(result) ? *(bool*) &result.result : 0;
+        return __fn_result_is_bool(result) ? *(bool*) &result.result : 0;
 }
 
-void *jak_fn_result_ptr(fn_result result)
+void *__fn_result_ptr(fn_result result)
 {
         void *ret = 0;
         size_t adr = 0;
-        if (jak_fn_result_is_ptr(result)) {
+        if (__fn_result_is_ptr(result)) {
                 size_t max_payload_bytes = JAK_PAYLOAD_SIZE / 8;
                 memcpy(&adr, &result.result, max_payload_bytes);
                 ret = (void *) adr;

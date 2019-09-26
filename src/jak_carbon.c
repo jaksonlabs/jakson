@@ -51,16 +51,25 @@ jak_carbon_insert *jak_carbon_create_begin(jak_carbon_new *context, jak_carbon *
                                            jak_carbon_key_e type, int options)
 {
         if (JAK_LIKELY(context != NULL && doc != NULL)) {
-                JAK_ERROR_IF (options != JAK_CARBON_KEEP && options != JAK_CARBON_SHRINK && options != JAK_CARBON_COMPACT &&
-                          options != JAK_CARBON_OPTIMIZE,
-                          &doc->err, JAK_ERR_ILLEGALARG);
-
                 JAK_SUCCESS_ELSE_NULL(jak_error_init(&context->err), &doc->err);
                 context->content_it = JAK_MALLOC(sizeof(jak_carbon_array_it));
                 context->inserter = JAK_MALLOC(sizeof(jak_carbon_insert));
                 context->mode = options;
 
-                JAK_SUCCESS_ELSE_NULL(jak_carbon_create_empty(&context->original, type), &doc->err);
+                /* get the annotation type for that records outer-most array from options*/
+                carbon_list_derivable_e derivation;
+
+                if (context->mode & JAK_CARBON_SORTED_MULTISET) {
+                        derivation = CARBON_LIST_SORTED_MULTISET;
+                } else if (context->mode & JAK_CARBON_UNSORTED_SET) {
+                        derivation = CARBON_LIST_UNSORTED_SET;
+                } else if (context->mode & JAK_CARBON_SORTED_SET) {
+                        derivation = CARBON_LIST_SORTED_SET;
+                } else { /* JAK_CARBON_UNSORTED_MULTISET is default */
+                        derivation = CARBON_LIST_UNSORTED_MULTISET;
+                }
+
+                JAK_SUCCESS_ELSE_NULL(jak_carbon_create_empty(&context->original, derivation, type), &doc->err);
                 JAK_SUCCESS_ELSE_NULL(jak_carbon_revise_begin(&context->revision_context, doc, &context->original), &doc->err);
                 JAK_SUCCESS_ELSE_NULL(jak_carbon_revise_iterator_open(context->content_it, &context->revision_context),
                                   &doc->err);
@@ -99,13 +108,13 @@ bool jak_carbon_create_end(jak_carbon_new *context)
         }
 }
 
-bool jak_carbon_create_empty(jak_carbon *doc, jak_carbon_key_e type)
+bool jak_carbon_create_empty(jak_carbon *doc, carbon_list_derivable_e derivation, jak_carbon_key_e type)
 {
-        return jak_carbon_create_empty_ex(doc, type, 1024, 1);
+        return jak_carbon_create_empty_ex(doc, derivation, type, 1024, 1);
 }
 
-bool jak_carbon_create_empty_ex(jak_carbon *doc, jak_carbon_key_e type, jak_u64 doc_cap,
-                                jak_u64 array_cap)
+bool jak_carbon_create_empty_ex(jak_carbon *doc, carbon_list_derivable_e derivation, jak_carbon_key_e type,
+                                jak_u64 doc_cap, jak_u64 array_cap)
 {
         JAK_ERROR_IF_NULL(doc);
 
@@ -122,7 +131,7 @@ bool jak_carbon_create_empty_ex(jak_carbon *doc, jak_carbon_key_e type, jak_u64 
         doc->versioning.is_latest = true;
 
         carbon_header_init(doc, type);
-        jak_carbon_int_insert_array(&doc->memfile, array_cap);
+        jak_carbon_int_insert_array(&doc->memfile, derivation, array_cap);
 
         return true;
 }

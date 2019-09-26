@@ -13,7 +13,7 @@ TEST(CarbonTest, CreateCarbon) {
 
         jak_string_create(&builder);
 
-        status = jak_carbon_create_empty(&doc, JAK_CARBON_KEY_AUTOKEY);
+        status = jak_carbon_create_empty(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_AUTOKEY);
         EXPECT_TRUE(status);
 
         //jak_carbon_hexdump_print(stderr, &doc);
@@ -89,7 +89,7 @@ TEST(CarbonTest, CreateCarbonRevisionNumbering) {
 
         jak_string_create(&builder);
 
-        status = jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
+        status = jak_carbon_create_empty(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY);
         EXPECT_TRUE(status);
 
         status = jak_carbon_commit_hash(&rev, &doc);
@@ -130,7 +130,7 @@ TEST(CarbonTest, CreateCarbonRevisionAbort) {
 
         jak_string_create(&builder);
 
-        status = jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
+        status = jak_carbon_create_empty(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY);
         EXPECT_TRUE(status);
 
         status = jak_carbon_commit_hash(&rev, &doc);
@@ -160,7 +160,7 @@ TEST(CarbonTest, CreateCarbonRevisionAsyncReading) {
 
         jak_string_create(&builder);
 
-        status = jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
+        status = jak_carbon_create_empty(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY);
         EXPECT_TRUE(status);
 
         status = jak_carbon_commit_hash(&rev, &doc);
@@ -195,7 +195,7 @@ TEST(CarbonTest, ModifyCarbonObjectId) {
         jak_carbon_revise revise;
         jak_u64 commit_hash_old, commit_hash_new;
 
-        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_AUTOKEY);
+        jak_carbon_create_empty(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_AUTOKEY);
 
         jak_carbon_key_unsigned_value(&oid, &doc);
         EXPECT_EQ(oid, 0U);
@@ -224,7 +224,7 @@ TEST(CarbonTest, CarbonArrayIteratorOpenAfterNew) {
         jak_carbon_revise revise;
         jak_carbon_array_it it;
 
-        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_AUTOKEY);
+        jak_carbon_create_empty(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_AUTOKEY);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_key_generate(NULL, &revise);
@@ -247,7 +247,7 @@ TEST(CarbonTest, CarbonArrayIteratorInsertNullAfterNew) {
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
 
-        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_AUTOKEY);
+        jak_carbon_create_empty(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_AUTOKEY);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -271,7 +271,7 @@ TEST(CarbonTest, CarbonArrayIteratorInsertMultipleLiteralsAfterNewNoOverflow) {
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
 
-        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
+        jak_carbon_create_empty(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -309,7 +309,7 @@ TEST(CarbonTest, CarbonArrayIteratorOverwriteLiterals) {
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
 
-        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
+        jak_carbon_create_empty(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -350,7 +350,7 @@ TEST(CarbonTest, CarbonArrayIteratorOverwriteLiteralsWithDocOverflow) {
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY, 20, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -395,7 +395,7 @@ TEST(CarbonTest, CarbonArrayIteratorUnsignedAndConstants) {
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,20, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -436,7 +436,7 @@ TEST(CarbonTest, CarbonArrayIteratorStrings) {
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,20, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -470,7 +470,7 @@ TEST(CarbonTest, CarbonInsertMimeTypedBlob) {
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,20, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -495,7 +495,7 @@ TEST(CarbonTest, CarbonInsertCustomTypedBlob) {
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,20, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -520,7 +520,7 @@ TEST(CarbonTest, CarbonInsertTwoMimeTypedBlob) {
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,20, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -548,7 +548,7 @@ TEST(CarbonTest, CarbonInsertMimeTypedBlobsWithOverflow) {
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,20, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -578,7 +578,7 @@ TEST(CarbonTest, CarbonInsertMixedTypedBlobsWithOverflow) {
         jak_carbon_array_it it;
         jak_carbon_insert inserter;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,20, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -608,7 +608,7 @@ TEST(CarbonTest, CarbonInsertArrayWithNoOverflow) {
         jak_carbon_insert inserter;
         jak_carbon_insert_array_state array_state;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,20, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -638,7 +638,7 @@ TEST(CarbonTest, CarbonInsertValuesIntoNestedArrayWithNoOverflow) {
         jak_carbon_insert inserter;
         jak_carbon_insert_array_state array_state;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,20, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -678,7 +678,7 @@ TEST(CarbonTest, CarbonInsert2xNestedArrayWithNoOverflow) {
         jak_carbon_insert inserter;
         jak_carbon_insert_array_state array_state_l1, array_state_l2;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,20, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -726,7 +726,7 @@ TEST(CarbonTest, CarbonInsertXxNestedArrayWithoutOverflow) {
         jak_carbon_insert inserter;
         jak_carbon_insert_array_state array_state_l1;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,20, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -772,7 +772,7 @@ TEST(CarbonTest, CarbonInsertXxNestedArrayWithOverflow) {
         jak_carbon_insert inserter;
         jak_carbon_insert_array_state array_state_l1;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,20, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -828,7 +828,7 @@ TEST(CarbonTest, CarbonInsertInsertColumnWithoutOverflow) {
         jak_carbon_insert inserter;
         jak_carbon_insert_column_state column_state;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,20, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -868,7 +868,7 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersWithoutOverflow) {
         jak_carbon_insert inserter;
         jak_carbon_insert_column_state column_state;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,20, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -906,7 +906,7 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersZeroWithoutOverflow) {
         jak_carbon_insert inserter;
         jak_carbon_insert_column_state column_state;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,20, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -945,7 +945,7 @@ TEST(CarbonTest, CarbonInsertInsertMultileTypedColumnsWithoutOverflow) {
         jak_carbon_insert_column_state column_state;
         jak_carbon_insert *ins;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,20, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -1048,7 +1048,7 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersZeroWithOverflow) {
         jak_carbon_insert inserter;
         jak_carbon_insert_column_state column_state;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,16, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,16, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -1088,7 +1088,7 @@ TEST(CarbonTest, CarbonInsertInsertColumnNumbersWithHighOverflow) {
         jak_carbon_insert inserter;
         jak_carbon_insert_column_state column_state;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,16, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,16, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -1131,7 +1131,7 @@ TEST(CarbonTest, CarbonInsertInsertMultipleColumnsNumbersWithHighOverflow) {
         jak_carbon_insert inserter;
         jak_carbon_insert_column_state column_state;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,16, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,16, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -1177,7 +1177,7 @@ TEST(CarbonTest, CarbonInsertNullTest) {
         jak_carbon_insert_column_state column_state;
         jak_carbon_insert *ins;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,20, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -1280,7 +1280,7 @@ TEST(CarbonTest, CarbonShrinkColumnListTest) {
         jak_carbon_insert_column_state column_state;
         jak_carbon_insert *ins;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,20, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -1381,7 +1381,7 @@ TEST(CarbonTest, CarbonShrinkArrayListTest) {
         jak_carbon_insert_array_state array_state;
         jak_carbon_insert *ins;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,20, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -1434,7 +1434,7 @@ TEST(CarbonTest, CarbonShrinkNestedArrayListTest) {
         jak_carbon_insert_array_state array_state, nested_array_state;
         jak_carbon_insert *ins, *nested_ins;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,20, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -1510,7 +1510,7 @@ TEST(CarbonTest, CarbonShrinkNestedArrayListAndColumnListTest) {
         jak_carbon_insert_array_state array_state, nested_array_state;
         jak_carbon_insert *ins, *nested_ins, *column_ins;
 
-        jak_carbon_create_empty_ex(&doc, JAK_CARBON_KEY_NOKEY,20, 1);
+        jak_carbon_create_empty_ex(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY,20, 1);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -1683,7 +1683,7 @@ TEST(CarbonTest, CarbonFind) {
         jak_carbon_find finder;
         jak_u64 result_unsigned;
         jak_carbon_field_type_e type;
-        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
+        jak_carbon_create_empty(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
 
@@ -1703,7 +1703,7 @@ TEST(CarbonTest, CarbonFind) {
                 ASSERT_TRUE(jak_carbon_find_has_result(&finder));
 
                 jak_carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
+                ASSERT_EQ(type, CARBON_FIELD_NUMBER_U8);
 
                 jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, (jak_u64) 'a');
@@ -1717,7 +1717,7 @@ TEST(CarbonTest, CarbonFind) {
                 ASSERT_TRUE(jak_carbon_find_has_result(&finder));
 
                 jak_carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
+                ASSERT_EQ(type, CARBON_FIELD_NUMBER_U8);
 
                 jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, (jak_u64) 'b');
@@ -1731,7 +1731,7 @@ TEST(CarbonTest, CarbonFind) {
                 ASSERT_TRUE(jak_carbon_find_has_result(&finder));
 
                 jak_carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
+                ASSERT_EQ(type, CARBON_FIELD_NUMBER_U8);
 
                 jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, (jak_u64) 'c');
@@ -1762,7 +1762,7 @@ TEST(CarbonTest, CarbonFindTypes) {
         jak_carbon_find finder;
         jak_u64 result_unsigned;
         jak_carbon_field_type_e type;
-        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
+        jak_carbon_create_empty(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY);
 
         jak_carbon_revise_begin(&revise, &rev_doc, &doc);
         jak_carbon_revise_iterator_open(&it, &revise);
@@ -1803,7 +1803,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 jak_carbon_find_open(&finder, "0", &rev_doc);
                 ASSERT_TRUE(jak_carbon_find_has_result(&finder));
                 jak_carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U64);
+                ASSERT_EQ(type, CARBON_FIELD_NUMBER_U64);
                 jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 4223U);
                 jak_carbon_find_close(&finder);
@@ -1813,7 +1813,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 jak_carbon_find_open(&finder, "1", &rev_doc);
                 ASSERT_TRUE(jak_carbon_find_has_result(&finder));
                 jak_carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_ARRAY);
+                ASSERT_EQ(type, CARBON_FIELD_ARRAY_UNSORTED_MULTISET);
                 jak_carbon_array_it *retval = jak_carbon_find_result_array(&finder);
                 ASSERT_TRUE(retval != NULL);
                 jak_carbon_find_close(&finder);
@@ -1823,16 +1823,16 @@ TEST(CarbonTest, CarbonFindTypes) {
                 jak_carbon_find_open(&finder, "1.0", &rev_doc);
                 ASSERT_TRUE(jak_carbon_find_has_result(&finder));
                 jak_carbon_find_result_type(&type, &finder);
-                ASSERT_TRUE(type == JAK_CARBON_FIELD_TYPE_COLUMN_U8 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_U16 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_U32 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_U64 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_I8 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_I16 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_I32 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_I64 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
+                ASSERT_TRUE(type == CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_U16_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_U32_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_U64_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_I8_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_I16_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_I32_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_I64_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_FLOAT_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_BOOLEAN_UNSORTED_MULTISET);
                 jak_carbon_column_it *retval = jak_carbon_find_result_column(&finder);
                 ASSERT_TRUE(retval != NULL);
                 jak_carbon_find_close(&finder);
@@ -1842,7 +1842,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 jak_carbon_find_open(&finder, "1.0.0", &rev_doc);
                 ASSERT_TRUE(jak_carbon_find_has_result(&finder));
                 jak_carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U32);
+                ASSERT_EQ(type, CARBON_FIELD_NUMBER_U32);
                 jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 88U);
                 jak_carbon_find_close(&finder);
@@ -1852,7 +1852,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 jak_carbon_find_open(&finder, "1.0.1", &rev_doc);
                 ASSERT_TRUE(jak_carbon_find_has_result(&finder));
                 jak_carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U32);
+                ASSERT_EQ(type, CARBON_FIELD_NUMBER_U32);
                 jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 89U);
                 jak_carbon_find_close(&finder);
@@ -1862,7 +1862,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 jak_carbon_find_open(&finder, "1.0.2", &rev_doc);
                 ASSERT_TRUE(jak_carbon_find_has_result(&finder));
                 jak_carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U32);
+                ASSERT_EQ(type, CARBON_FIELD_NUMBER_U32);
                 jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 90U);
                 jak_carbon_find_close(&finder);
@@ -1878,7 +1878,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 jak_carbon_find_open(&finder, "1.1", &rev_doc);
                 ASSERT_TRUE(jak_carbon_find_has_result(&finder));
                 jak_carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_ARRAY);
+                ASSERT_EQ(type, CARBON_FIELD_ARRAY_UNSORTED_MULTISET);
                 jak_carbon_array_it *retval = jak_carbon_find_result_array(&finder);
                 ASSERT_TRUE(retval != NULL);
                 jak_carbon_find_close(&finder);
@@ -1888,7 +1888,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 jak_carbon_find_open(&finder, "1.1.0", &rev_doc);
                 ASSERT_TRUE(jak_carbon_find_has_result(&finder));
                 jak_carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_STRING);
+                ASSERT_EQ(type, CARBON_FIELD_STRING);
                 jak_u64 str_len;
                 const char *retval = jak_carbon_find_result_string(&str_len, &finder);
                 ASSERT_TRUE(strncmp(retval, "Hello", str_len) == 0);
@@ -1899,16 +1899,16 @@ TEST(CarbonTest, CarbonFindTypes) {
                 jak_carbon_find_open(&finder, "1.1.1", &rev_doc);
                 ASSERT_TRUE(jak_carbon_find_has_result(&finder));
                 jak_carbon_find_result_type(&type, &finder);
-                ASSERT_TRUE(type == JAK_CARBON_FIELD_TYPE_COLUMN_U8 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_U16 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_U32 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_U64 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_I8 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_I16 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_I32 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_I64 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
+                ASSERT_TRUE(type == CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_U16_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_U32_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_U64_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_I8_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_I16_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_I32_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_I64_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_FLOAT_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_BOOLEAN_UNSORTED_MULTISET);
                 jak_carbon_column_it *retval = jak_carbon_find_result_column(&finder);
                 ASSERT_TRUE(retval != NULL);
                 jak_carbon_find_close(&finder);
@@ -1918,7 +1918,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 jak_carbon_find_open(&finder, "1.1.1.0", &rev_doc);
                 ASSERT_TRUE(jak_carbon_find_has_result(&finder));
                 jak_carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U32);
+                ASSERT_EQ(type, CARBON_FIELD_NUMBER_U32);
                 jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 65U);
                 jak_carbon_find_close(&finder);
@@ -1928,7 +1928,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 jak_carbon_find_open(&finder, "1.1.1.1", &rev_doc);
                 ASSERT_TRUE(jak_carbon_find_has_result(&finder));
                 jak_carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U32);
+                ASSERT_EQ(type, CARBON_FIELD_NUMBER_U32);
                 jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 66U);
                 jak_carbon_find_close(&finder);
@@ -1938,7 +1938,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 jak_carbon_find_open(&finder, "1.1.1.2", &rev_doc);
                 ASSERT_TRUE(jak_carbon_find_has_result(&finder));
                 jak_carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U32);
+                ASSERT_EQ(type, CARBON_FIELD_NUMBER_U32);
                 jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 67U);
                 jak_carbon_find_close(&finder);
@@ -1953,7 +1953,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 jak_carbon_find_open(&finder, "1.1.2", &rev_doc);
                 ASSERT_TRUE(jak_carbon_find_has_result(&finder));
                 jak_carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_STRING);
+                ASSERT_EQ(type, CARBON_FIELD_STRING);
                 jak_u64 str_len;
                 const char *retval = jak_carbon_find_result_string(&str_len, &finder);
                 ASSERT_TRUE(strncmp(retval, "World", str_len) == 0);
@@ -1970,7 +1970,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 jak_carbon_find_open(&finder, "1.2", &rev_doc);
                 ASSERT_TRUE(jak_carbon_find_has_result(&finder));
                 jak_carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
+                ASSERT_EQ(type, CARBON_FIELD_NUMBER_U8);
                 jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 1U);
                 jak_carbon_find_close(&finder);
@@ -1980,7 +1980,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 jak_carbon_find_open(&finder, "1.3", &rev_doc);
                 ASSERT_TRUE(jak_carbon_find_has_result(&finder));
                 jak_carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
+                ASSERT_EQ(type, CARBON_FIELD_NUMBER_U8);
                 jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 1U);
                 jak_carbon_find_close(&finder);
@@ -1990,16 +1990,16 @@ TEST(CarbonTest, CarbonFindTypes) {
                 jak_carbon_find_open(&finder, "1.4", &rev_doc);
                 ASSERT_TRUE(jak_carbon_find_has_result(&finder));
                 jak_carbon_find_result_type(&type, &finder);
-                ASSERT_TRUE(type == JAK_CARBON_FIELD_TYPE_COLUMN_U8 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_U16 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_U32 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_U64 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_I8 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_I16 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_I32 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_I64 ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT ||
-                        type == JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
+                ASSERT_TRUE(type == CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_U16_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_U32_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_U64_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_I8_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_I16_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_I32_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_I64_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_FLOAT_UNSORTED_MULTISET ||
+                        type == CARBON_FIELD_COLUMN_BOOLEAN_UNSORTED_MULTISET);
                 jak_carbon_column_it *retval = jak_carbon_find_result_column(&finder);
                 ASSERT_TRUE(retval != NULL);
                 jak_carbon_find_close(&finder);
@@ -2009,7 +2009,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 jak_carbon_find_open(&finder, "1.4.0", &rev_doc);
                 ASSERT_TRUE(jak_carbon_find_has_result(&finder));
                 jak_carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U32);
+                ASSERT_EQ(type, CARBON_FIELD_NUMBER_U32);
                 jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 23U);
                 jak_carbon_find_close(&finder);
@@ -2019,7 +2019,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 jak_carbon_find_open(&finder, "1.4.1", &rev_doc);
                 ASSERT_TRUE(jak_carbon_find_has_result(&finder));
                 jak_carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U32);
+                ASSERT_EQ(type, CARBON_FIELD_NUMBER_U32);
                 jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 24U);
                 jak_carbon_find_close(&finder);
@@ -2029,7 +2029,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 jak_carbon_find_open(&finder, "1.4.2", &rev_doc);
                 ASSERT_TRUE(jak_carbon_find_has_result(&finder));
                 jak_carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U32);
+                ASSERT_EQ(type, CARBON_FIELD_NUMBER_U32);
                 jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 25U);
                 jak_carbon_find_close(&finder);
@@ -2045,7 +2045,7 @@ TEST(CarbonTest, CarbonFindTypes) {
                 jak_carbon_find_open(&finder, "1.5", &rev_doc);
                 ASSERT_TRUE(jak_carbon_find_has_result(&finder));
                 jak_carbon_find_result_type(&type, &finder);
-                ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
+                ASSERT_EQ(type, CARBON_FIELD_NUMBER_U8);
                 jak_carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 1U);
                 jak_carbon_find_close(&finder);
@@ -2077,7 +2077,7 @@ TEST(CarbonTest, CarbonUpdateU8Simple)
         const char *jak_json;
 
         jak_string_create(&sb);
-        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
+        jak_carbon_create_empty(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2171,7 +2171,7 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesSimple)
         const char *jak_json;
 
         jak_string_create(&sb);
-        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
+        jak_carbon_create_empty(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -2220,7 +2220,7 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesSimple)
         jak_carbon_find_open(&find, "0", &rev_doc2);
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         jak_carbon_find_result_type(&result_type, &find);
-        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
+        ASSERT_EQ(result_type, CARBON_FIELD_NUMBER_U8);
         jak_carbon_find_result_unsigned(&result, &find);
         jak_carbon_find_close(&find);
         ASSERT_EQ(result, 1U);
@@ -2228,7 +2228,7 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesSimple)
         jak_carbon_find_open(&find, "1", &rev_doc2);
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         jak_carbon_find_result_type(&result_type, &find);
-        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_NUMBER_I64);
+        ASSERT_EQ(result_type, CARBON_FIELD_NUMBER_I64);
         jak_carbon_find_result_signed(&resulti64, &find);
         jak_carbon_find_close(&find);
         ASSERT_EQ(resulti64, 1024U);
@@ -2236,7 +2236,7 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesSimple)
         jak_carbon_find_open(&find, "2", &rev_doc2);
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         jak_carbon_find_result_type(&result_type, &find);
-        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT);
+        ASSERT_EQ(result_type, CARBON_FIELD_NUMBER_FLOAT);
         jak_carbon_find_result_float(&resultfloat, &find);
         jak_carbon_find_close(&find);
         ASSERT_GE(resultfloat, 22.9f);
@@ -2332,7 +2332,7 @@ TEST(CarbonTest, CarbonRemoveFirstConstants)
         ASSERT_TRUE(has_next);
         jak_carbon_field_type_e next_type;
         jak_carbon_array_it_field_type(&next_type, &rev_it);
-        ASSERT_EQ(next_type, JAK_CARBON_FIELD_TYPE_FALSE);
+        ASSERT_EQ(next_type, CARBON_FIELD_FALSE);
         jak_carbon_revise_iterator_close(&rev_it);
         jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
@@ -2440,7 +2440,7 @@ TEST(CarbonTest, CarbonRemoveMiddleConstants)
         ASSERT_TRUE(has_next);
         jak_carbon_field_type_e type;
         jak_carbon_array_it_field_type(&type, &rev_it);
-        ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_FALSE);
+        ASSERT_EQ(type, CARBON_FIELD_FALSE);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
         jak_carbon_revise_iterator_close(&rev_it);
@@ -2543,7 +2543,7 @@ TEST(CarbonTest, CarbonRemoveFirstNumber)
         ASSERT_TRUE(has_next);
         jak_carbon_field_type_e next_type;
         jak_carbon_array_it_field_type(&next_type, &rev_it);
-        ASSERT_EQ(next_type, JAK_CARBON_FIELD_TYPE_NUMBER_U32);
+        ASSERT_EQ(next_type, CARBON_FIELD_NUMBER_U32);
         jak_carbon_revise_iterator_close(&rev_it);
         jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
@@ -2651,7 +2651,7 @@ TEST(CarbonTest, CarbonRemoveMiddleNumber)
         ASSERT_TRUE(has_next);
         jak_carbon_field_type_e type;
         jak_carbon_array_it_field_type(&type, &rev_it);
-        ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NUMBER_U32);
+        ASSERT_EQ(type, CARBON_FIELD_NUMBER_U32);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
         jak_carbon_revise_iterator_close(&rev_it);
@@ -2755,7 +2755,7 @@ TEST(CarbonTest, CarbonRemoveFirstString)
         ASSERT_TRUE(has_next);
         jak_carbon_field_type_e next_type;
         jak_carbon_array_it_field_type(&next_type, &rev_it);
-        ASSERT_EQ(next_type, JAK_CARBON_FIELD_TYPE_STRING);
+        ASSERT_EQ(next_type, CARBON_FIELD_STRING);
         jak_carbon_revise_iterator_close(&rev_it);
         jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
@@ -2863,7 +2863,7 @@ TEST(CarbonTest, CarbonRemoveMiddleString)
         ASSERT_TRUE(has_next);
         jak_carbon_field_type_e type;
         jak_carbon_array_it_field_type(&type, &rev_it);
-        ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_STRING);
+        ASSERT_EQ(type, CARBON_FIELD_STRING);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
         jak_carbon_revise_iterator_close(&rev_it);
@@ -2974,7 +2974,7 @@ TEST(CarbonTest, CarbonRemoveFirstBinary)
         ASSERT_TRUE(has_next);
         jak_carbon_field_type_e next_type;
         jak_carbon_array_it_field_type(&next_type, &rev_it);
-        ASSERT_EQ(next_type, JAK_CARBON_FIELD_TYPE_BINARY);
+        ASSERT_EQ(next_type, CARBON_FIELD_BINARY);
         jak_carbon_revise_iterator_close(&rev_it);
         jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
@@ -3090,7 +3090,7 @@ TEST(CarbonTest, CarbonRemoveMiddleBinary)
         ASSERT_TRUE(has_next);
         jak_carbon_field_type_e type;
         jak_carbon_array_it_field_type(&type, &rev_it);
-        ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_BINARY);
+        ASSERT_EQ(type, CARBON_FIELD_BINARY);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
         jak_carbon_revise_iterator_close(&rev_it);
@@ -3209,7 +3209,7 @@ TEST(CarbonTest, CarbonRemoveFirstCustomBinary)
         ASSERT_TRUE(has_next);
         jak_carbon_field_type_e next_type;
         jak_carbon_array_it_field_type(&next_type, &rev_it);
-        ASSERT_EQ(next_type, JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM);
+        ASSERT_EQ(next_type, CARBON_FIELD_BINARY_CUSTOM);
         jak_carbon_revise_iterator_close(&rev_it);
         jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
@@ -3325,7 +3325,7 @@ TEST(CarbonTest, CarbonRemoveMiddleCustomBinary)
         ASSERT_TRUE(has_next);
         jak_carbon_field_type_e type;
         jak_carbon_array_it_field_type(&type, &rev_it);
-        ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM);
+        ASSERT_EQ(type, CARBON_FIELD_BINARY_CUSTOM);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
         jak_carbon_revise_iterator_close(&rev_it);
@@ -3457,7 +3457,7 @@ TEST(CarbonTest, CarbonRemoveFirstArray)
         ASSERT_TRUE(has_next);
         jak_carbon_field_type_e next_type;
         jak_carbon_array_it_field_type(&next_type, &rev_it);
-        ASSERT_EQ(next_type, JAK_CARBON_FIELD_TYPE_ARRAY);
+        ASSERT_EQ(next_type, CARBON_FIELD_ARRAY_UNSORTED_MULTISET);
         jak_carbon_revise_iterator_close(&rev_it);
         jak_carbon_revise_end(&revise);
         // -------------------------------------------------------------------------------------------------------------
@@ -3594,7 +3594,7 @@ TEST(CarbonTest, CarbonRemoveMiddleArray)
         ASSERT_TRUE(has_next);
         jak_carbon_field_type_e type;
         jak_carbon_array_it_field_type(&type, &rev_it);
-        ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_ARRAY);
+        ASSERT_EQ(type, CARBON_FIELD_ARRAY_UNSORTED_MULTISET);
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_FALSE(has_next);
         jak_carbon_revise_iterator_close(&rev_it);
@@ -3656,13 +3656,13 @@ TEST(CarbonTest, CarbonColumnRemoveTest)
         jak_carbon_field_type_e type;
         jak_u32 num_elems;
         jak_carbon_column_it_values_info(&type, &num_elems, cit);
-        ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_COLUMN_U16);
+        ASSERT_EQ(type, CARBON_FIELD_COLUMN_U16_UNSORTED_MULTISET);
         ASSERT_EQ(num_elems, 3u);
 
         status = jak_carbon_column_it_remove(cit, 1);
         ASSERT_TRUE(status);
         jak_carbon_column_it_values_info(&type, &num_elems, cit);
-        ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_COLUMN_U16);
+        ASSERT_EQ(type, CARBON_FIELD_COLUMN_U16_UNSORTED_MULTISET);
         ASSERT_EQ(num_elems, 2u);
         values = jak_carbon_column_it_u16_values(&num_elems, cit);
         ASSERT_EQ(values[0], 1);
@@ -3673,7 +3673,7 @@ TEST(CarbonTest, CarbonColumnRemoveTest)
         status = jak_carbon_column_it_remove(cit, 0);
         ASSERT_TRUE(status);
         jak_carbon_column_it_values_info(&type, &num_elems, cit);
-        ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_COLUMN_U16);
+        ASSERT_EQ(type, CARBON_FIELD_COLUMN_U16_UNSORTED_MULTISET);
         ASSERT_EQ(num_elems, 1u);
         values = jak_carbon_column_it_u16_values(&num_elems, cit);
         ASSERT_EQ(values[0], 3);
@@ -3683,7 +3683,7 @@ TEST(CarbonTest, CarbonColumnRemoveTest)
         status = jak_carbon_column_it_remove(cit, 0);
         ASSERT_TRUE(status);
         jak_carbon_column_it_values_info(&type, &num_elems, cit);
-        ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_COLUMN_U16);
+        ASSERT_EQ(type, CARBON_FIELD_COLUMN_U16_UNSORTED_MULTISET);
         ASSERT_EQ(num_elems, 0u);
 
         char *json_4 = strdup(jak_carbon_to_json_extended(&sb, &rev_doc));
@@ -3884,7 +3884,7 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesTypeChangeSimple)
         const char *jak_json;
 
         jak_string_create(&sb);
-        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
+        jak_carbon_create_empty(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -5500,7 +5500,7 @@ TEST(CarbonTest, CarbonObjectInsertColumnNonEmpty)
 //        jak_carbon_insert_array_state array_state, nested_array_state;
 //        jak_carbon_insert_column_state column_state;
 //
-//        jak_carbon_create_empty(&doc, JAK_CARBON_KEY_NOKEY);
+//        jak_carbon_create_empty(&doc, CARBON_LIST_UNSORTED_MULTISET, JAK_CARBON_KEY_NOKEY);
 //        jak_carbon_revise_begin(&revise, rev_doc, &doc);
 //        jak_carbon_revise_iterator_open(&it, &revise);
 //
@@ -5661,7 +5661,7 @@ TEST(CarbonTest, CarbonObjectRemoveTest)
 
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP);
 
         jak_carbon_array_it_remove(&rev_it);
         has_next = jak_carbon_array_it_next(&rev_it);
@@ -5751,7 +5751,7 @@ TEST(CarbonTest, CarbonObjectRemoveSkipOneTest)
 
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP);
 
         has_next = jak_carbon_array_it_next(&rev_it);
         ASSERT_TRUE(has_next);
@@ -5824,7 +5824,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringIt)
 
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP);
         jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
         has_next = jak_carbon_object_it_next(obj_it);
         ASSERT_TRUE(has_next);
@@ -5902,7 +5902,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex1)
 
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP);
         jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
         ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
         ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
@@ -5977,7 +5977,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex2)
 
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP);
         jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
         ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
         ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
@@ -6052,7 +6052,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex3)
 
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP);
         jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
         ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
         ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
@@ -6128,7 +6128,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex4)
 
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP);
         jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
         ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
         ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
@@ -6205,7 +6205,7 @@ TEST(CarbonTest, CarbonObjectInsertPropDuringItAtIndex5)
 
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP);
         jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
         ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
         ASSERT_TRUE(jak_carbon_object_it_next(obj_it));
@@ -6283,7 +6283,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKey)
 
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP);
         jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
         has_next = jak_carbon_object_it_next(obj_it);
         ASSERT_TRUE(has_next);
@@ -6364,7 +6364,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectNonEmpty)
 
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP);
         jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
         has_next = jak_carbon_object_it_next(obj_it);
         ASSERT_TRUE(has_next);
@@ -6442,7 +6442,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayEmpty)
 
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP);
         jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
         has_next = jak_carbon_object_it_next(obj_it);
         ASSERT_TRUE(has_next);
@@ -6525,7 +6525,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeArrayNonEmpty)
 
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP);
         jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
         has_next = jak_carbon_object_it_next(obj_it);
         ASSERT_TRUE(has_next);
@@ -6603,7 +6603,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeColumnEmpty)
 
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP);
         jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
         has_next = jak_carbon_object_it_next(obj_it);
         ASSERT_TRUE(has_next);
@@ -6680,7 +6680,7 @@ TEST(CarbonTest, CarbonObjectRemovePropByKeyTypeObjectEmpty)
 
         jak_carbon_field_type_e field_type;
         jak_carbon_array_it_field_type(&field_type, &rev_it);
-        ASSERT_EQ(field_type, JAK_CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(field_type, CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP);
         jak_carbon_object_it *obj_it = jak_carbon_array_it_object_value(&rev_it);
         has_next = jak_carbon_object_it_next(obj_it);
         ASSERT_TRUE(has_next);
@@ -7717,12 +7717,12 @@ TEST(CarbonTest, CarbonFromJsonColumnNumber)
         jak_carbon_iterator_open(&it, &doc);
         ASSERT_TRUE(jak_carbon_array_it_next(&it));
         jak_carbon_array_it_field_type(&field_type, &it);
-        ASSERT_TRUE(field_type == JAK_CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_TRUE(field_type == CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP);
         jak_carbon_object_it *oit = jak_carbon_array_it_object_value(&it);
         ASSERT_TRUE(jak_carbon_object_it_next(oit));
         jak_carbon_object_it_prop_type(&field_type, oit);
-        ASSERT_TRUE(jak_carbon_field_type_is_column(field_type));
-        ASSERT_TRUE(field_type == JAK_CARBON_FIELD_TYPE_COLUMN_U8);
+        ASSERT_TRUE(jak_carbon_field_type_is_column_or_subtype(field_type));
+        ASSERT_TRUE(field_type == CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET);
         jak_carbon_object_it_drop(oit);
         jak_carbon_iterator_close(&it);
 
@@ -7758,12 +7758,12 @@ TEST(CarbonTest, CarbonFromJsonColumnNullableNumber)
         jak_carbon_iterator_open(&it, &doc);
         ASSERT_TRUE(jak_carbon_array_it_next(&it));
         jak_carbon_array_it_field_type(&field_type, &it);
-        ASSERT_TRUE(field_type == JAK_CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_TRUE(field_type == CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP);
         jak_carbon_object_it *oit = jak_carbon_array_it_object_value(&it);
         ASSERT_TRUE(jak_carbon_object_it_next(oit));
         jak_carbon_object_it_prop_type(&field_type, oit);
-        ASSERT_TRUE(jak_carbon_field_type_is_column(field_type));
-        ASSERT_TRUE(field_type == JAK_CARBON_FIELD_TYPE_COLUMN_U8);
+        ASSERT_TRUE(jak_carbon_field_type_is_column_or_subtype(field_type));
+        ASSERT_TRUE(field_type == CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET);
         jak_carbon_object_it_drop(oit);
         jak_carbon_iterator_close(&it);
 
@@ -7982,7 +7982,7 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
         ASSERT_TRUE(jak_carbon_find_open(&find, "0", &doc));
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(result_type, CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP);
         ASSERT_TRUE(jak_carbon_find_close(&find));
 
         ASSERT_TRUE(jak_carbon_find_open(&find, "1", &doc));
@@ -7992,13 +7992,13 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
         ASSERT_TRUE(jak_carbon_find_open(&find, "0.a", &doc));
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
+        ASSERT_EQ(result_type, CARBON_FIELD_NUMBER_U8);
         ASSERT_TRUE(jak_carbon_find_close(&find));
 
         ASSERT_TRUE(jak_carbon_find_open(&find, "0.b", &doc));
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_OBJECT);
+        ASSERT_EQ(result_type, CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP);
         ASSERT_TRUE(jak_carbon_find_close(&find));
 
         ASSERT_TRUE(jak_carbon_find_open(&find, "0.c", &doc));
@@ -8008,13 +8008,13 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
         ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.c", &doc));
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_COLUMN_U8);
+        ASSERT_EQ(result_type, CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET);
         ASSERT_TRUE(jak_carbon_find_close(&find));
 
         ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.c.0", &doc));
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
+        ASSERT_EQ(result_type, CARBON_FIELD_NUMBER_U8);
         ASSERT_TRUE(jak_carbon_find_result_unsigned(&number, &find));
         ASSERT_EQ(number, 1U);
         ASSERT_TRUE(jak_carbon_find_close(&find));
@@ -8022,7 +8022,7 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
         ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.c.1", &doc));
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
+        ASSERT_EQ(result_type, CARBON_FIELD_NUMBER_U8);
         ASSERT_TRUE(jak_carbon_find_result_unsigned(&number, &find));
         ASSERT_EQ(number, 2U);
         ASSERT_TRUE(jak_carbon_find_close(&find));
@@ -8030,7 +8030,7 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
         ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.c.2", &doc));
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
+        ASSERT_EQ(result_type, CARBON_FIELD_NUMBER_U8);
         ASSERT_TRUE(jak_carbon_find_result_unsigned(&number, &find));
         ASSERT_EQ(number, 3U);
         ASSERT_TRUE(jak_carbon_find_close(&find));
@@ -8042,20 +8042,20 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
         ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.d", &doc));
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_ARRAY);
+        ASSERT_EQ(result_type, CARBON_FIELD_ARRAY_UNSORTED_MULTISET);
         ASSERT_TRUE(jak_carbon_find_close(&find));
 
         ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.d.0", &doc));
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_STRING);
+        ASSERT_EQ(result_type, CARBON_FIELD_STRING);
         ASSERT_TRUE(strncmp(jak_carbon_find_result_string(&number, &find), "Hello", number) == 0);
         ASSERT_TRUE(jak_carbon_find_close(&find));
 
         ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.d.1", &doc));
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_STRING);
+        ASSERT_EQ(result_type, CARBON_FIELD_STRING);
         ASSERT_TRUE(strncmp(jak_carbon_find_result_string(&number, &find), "World", number) == 0);
         ASSERT_TRUE(jak_carbon_find_close(&find));
 
@@ -8066,13 +8066,13 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
         ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.e", &doc));
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_COLUMN_U8);
+        ASSERT_EQ(result_type, CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET);
         ASSERT_TRUE(jak_carbon_find_close(&find));
 
         ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.e.0", &doc));
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_NUMBER_U8);
+        ASSERT_EQ(result_type, CARBON_FIELD_NUMBER_U8);
         ASSERT_TRUE(jak_carbon_find_result_unsigned(&number, &find));
         ASSERT_EQ(number, 4U);
         ASSERT_TRUE(jak_carbon_find_close(&find));
@@ -8084,13 +8084,13 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
         ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.f", &doc));
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_ARRAY);
+        ASSERT_EQ(result_type, CARBON_FIELD_ARRAY_UNSORTED_MULTISET);
         ASSERT_TRUE(jak_carbon_find_close(&find));
 
         ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.f.0", &doc));
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_STRING);
+        ASSERT_EQ(result_type, CARBON_FIELD_STRING);
         ASSERT_TRUE(strncmp(jak_carbon_find_result_string(&number, &find), "!", number) == 0);
         ASSERT_TRUE(jak_carbon_find_close(&find));
 
@@ -8101,7 +8101,7 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
         ASSERT_TRUE(jak_carbon_find_open(&find, "0.b.\"the key\"", &doc));
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         ASSERT_TRUE(jak_carbon_find_result_type(&result_type, &find));
-        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_STRING);
+        ASSERT_EQ(result_type, CARBON_FIELD_STRING);
         ASSERT_TRUE(strncmp(jak_carbon_find_result_string(&number, &find), "x", number) == 0);
         ASSERT_TRUE(jak_carbon_find_close(&find));
 
@@ -8272,14 +8272,14 @@ TEST(CarbonTest, CarbonFromJsonShortenedDotPath)
         jak_carbon_find_open(&find, "0.x", &doc);
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         jak_carbon_find_result_type(&result_type, &find);
-        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_STRING);
+        ASSERT_EQ(result_type, CARBON_FIELD_STRING);
         jak_carbon_find_close(&find);
 
         /* with shortened dot path rule, the jak_json object can be referenced without providing its index in the record */
         jak_carbon_find_open(&find, "x", &doc);
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         jak_carbon_find_result_type(&result_type, &find);
-        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_STRING);
+        ASSERT_EQ(result_type, CARBON_FIELD_STRING);
         jak_carbon_find_close(&find);
 
         jak_carbon_drop(&doc);
@@ -8291,13 +8291,13 @@ TEST(CarbonTest, CarbonFromJsonShortenedDotPath)
         jak_carbon_find_open(&find, "0.x", &doc);
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         jak_carbon_find_result_type(&result_type, &find);
-        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_STRING);
+        ASSERT_EQ(result_type, CARBON_FIELD_STRING);
         jak_carbon_find_close(&find);
 
         jak_carbon_find_open(&find, "1.x", &doc);
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         jak_carbon_find_result_type(&result_type, &find);
-        ASSERT_EQ(result_type, JAK_CARBON_FIELD_TYPE_ARRAY);
+        ASSERT_EQ(result_type, CARBON_FIELD_ARRAY_UNSORTED_MULTISET);
         jak_carbon_find_close(&find);
 
         jak_carbon_find_open(&find, "x", &doc);
@@ -8687,25 +8687,25 @@ TEST(CarbonTest, ParseBooleanArray) {
         ASSERT_TRUE(jak_carbon_find_open(&find, "0.col", &doc));
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         jak_carbon_find_result_type(&type, &find);
-        ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
+        ASSERT_EQ(type, CARBON_FIELD_COLUMN_BOOLEAN_UNSORTED_MULTISET);
         jak_carbon_find_close(&find);
 
         ASSERT_TRUE(jak_carbon_find_open(&find, "0.col.0", &doc));
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         jak_carbon_find_result_type(&type, &find);
-        ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_TRUE);
+        ASSERT_EQ(type, CARBON_FIELD_TRUE);
         jak_carbon_find_close(&find);
 
         ASSERT_TRUE(jak_carbon_find_open(&find, "0.col.1", &doc));
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         jak_carbon_find_result_type(&type, &find);
-        ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_NULL);
+        ASSERT_EQ(type, CARBON_FIELD_NULL);
         jak_carbon_find_close(&find);
 
         ASSERT_TRUE(jak_carbon_find_open(&find, "0.col.2", &doc));
         ASSERT_TRUE(jak_carbon_find_has_result(&find));
         jak_carbon_find_result_type(&type, &find);
-        ASSERT_EQ(type, JAK_CARBON_FIELD_TYPE_FALSE);
+        ASSERT_EQ(type, CARBON_FIELD_FALSE);
         jak_carbon_find_close(&find);
 
         jak_carbon_drop(&doc);

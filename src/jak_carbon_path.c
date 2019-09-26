@@ -106,7 +106,7 @@ bool jak_carbon_path_is_array(jak_carbon *doc, const char *path)
 
         if (jak_carbon_find_open(&find, path, doc)) {
                 jak_carbon_find_result_type(&field_type, &find);
-                result = jak_carbon_field_type_is_array(field_type);
+                result = jak_carbon_field_type_is_array_or_subtype(field_type);
         }
 
         jak_carbon_find_close(&find);
@@ -121,7 +121,7 @@ bool jak_carbon_path_is_column(jak_carbon *doc, const char *path)
 
         if (jak_carbon_find_open(&find, path, doc)) {
                 jak_carbon_find_result_type(&field_type, &find);
-                result = jak_carbon_field_type_is_column(field_type);
+                result = jak_carbon_field_type_is_column_or_subtype(field_type);
         }
 
         jak_carbon_find_close(&find);
@@ -136,7 +136,7 @@ bool jak_carbon_path_is_object(jak_carbon *doc, const char *path)
 
         if (jak_carbon_find_open(&find, path, doc)) {
                 jak_carbon_find_result_type(&field_type, &find);
-                result = jak_carbon_field_type_is_object(field_type);
+                result = jak_carbon_field_type_is_object_or_subtype(field_type);
         }
 
         jak_carbon_find_close(&find);
@@ -248,20 +248,59 @@ static inline jak_carbon_path_status_e traverse_object(jak_carbon_path_evaluator
                                         if (!jak_carbon_field_type_is_traversable(prop_type)) {
                                                 return JAK_CARBON_PATH_NOTTRAVERSABLE;
                                         } else {
-                                                JAK_ASSERT(prop_type == JAK_CARBON_FIELD_TYPE_OBJECT ||
-                                                           prop_type == JAK_CARBON_FIELD_TYPE_ARRAY ||
-                                                           prop_type == JAK_CARBON_FIELD_TYPE_COLUMN_U8 ||
-                                                           prop_type == JAK_CARBON_FIELD_TYPE_COLUMN_U16 ||
-                                                           prop_type == JAK_CARBON_FIELD_TYPE_COLUMN_U32 ||
-                                                           prop_type == JAK_CARBON_FIELD_TYPE_COLUMN_U64 ||
-                                                           prop_type == JAK_CARBON_FIELD_TYPE_COLUMN_I8 ||
-                                                           prop_type == JAK_CARBON_FIELD_TYPE_COLUMN_I16 ||
-                                                           prop_type == JAK_CARBON_FIELD_TYPE_COLUMN_I32 ||
-                                                           prop_type == JAK_CARBON_FIELD_TYPE_COLUMN_I64 ||
-                                                           prop_type == JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT ||
-                                                           prop_type == JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
+                                                JAK_ASSERT(prop_type == CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP ||
+                                                           prop_type == CARBON_FIELD_DERIVED_OBJECT_SORTED_MULTIMAP ||
+                                                           prop_type == CARBON_FIELD_DERIVED_OBJECT_CARBON_UNSORTED_MAP ||
+                                                           prop_type == CARBON_FIELD_DERIVED_OBJECT_CARBON_SORTED_MAP ||
+                                                           prop_type == CARBON_FIELD_ARRAY_UNSORTED_MULTISET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_ARRAY_SORTED_MULTISET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_ARRAY_UNSORTED_SET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_ARRAY_SORTED_SET ||
+                                                           prop_type == CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_U8_SORTED_MULTISET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_U8_UNSORTED_SET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_U8_SORTED_SET ||
+                                                           prop_type == CARBON_FIELD_COLUMN_U16_UNSORTED_MULTISET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_U16_SORTED_MULTISET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_U16_UNSORTED_SET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_U16_SORTED_SET ||
+                                                           prop_type == CARBON_FIELD_COLUMN_U32_UNSORTED_MULTISET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_U32_SORTED_MULTISET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_U32_UNSORTED_SET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_U32_SORTED_SET ||
+                                                           prop_type == CARBON_FIELD_COLUMN_U64_UNSORTED_MULTISET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_U64_SORTED_MULTISET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_U64_UNSORTED_SET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_U64_SORTED_SET ||
+                                                           prop_type == CARBON_FIELD_COLUMN_I8_UNSORTED_MULTISET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_I8_SORTED_MULTISET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_I8_UNSORTED_SET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_I8_SORTED_SET ||
+                                                           prop_type == CARBON_FIELD_COLUMN_I16_UNSORTED_MULTISET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_I16_SORTED_MULTISET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_I16_UNSORTED_SET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_I16_SORTED_SET ||
+                                                           prop_type == CARBON_FIELD_COLUMN_I32_UNSORTED_MULTISET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_I32_SORTED_MULTISET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_I32_UNSORTED_SET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_I32_SORTED_SET ||
+                                                           prop_type == CARBON_FIELD_COLUMN_I64_UNSORTED_MULTISET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_I64_SORTED_MULTISET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_I64_UNSORTED_SET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_I64_SORTED_SET ||
+                                                           prop_type == CARBON_FIELD_COLUMN_FLOAT_UNSORTED_MULTISET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_FLOAT_SORTED_MULTISET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_FLOAT_UNSORTED_SET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_FLOAT_SORTED_SET ||
+                                                           prop_type == CARBON_FIELD_COLUMN_BOOLEAN_UNSORTED_MULTISET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_MULTISET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_UNSORTED_SET ||
+                                                           prop_type == CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_SET);
                                                 switch (prop_type) {
-                                                        case JAK_CARBON_FIELD_TYPE_OBJECT: {
+                                                        case CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP:
+                                                        case CARBON_FIELD_DERIVED_OBJECT_SORTED_MULTIMAP:
+                                                        case CARBON_FIELD_DERIVED_OBJECT_CARBON_UNSORTED_MAP:
+                                                        case CARBON_FIELD_DERIVED_OBJECT_CARBON_SORTED_MAP: {
                                                                 jak_carbon_object_it *sub_it = jak_carbon_object_it_object_value(
                                                                         it);
                                                                 jak_carbon_path_status_e ret = traverse_object(state,
@@ -271,7 +310,10 @@ static inline jak_carbon_path_status_e traverse_object(jak_carbon_path_evaluator
                                                                 jak_carbon_object_it_drop(sub_it);
                                                                 return ret;
                                                         }
-                                                        case JAK_CARBON_FIELD_TYPE_ARRAY: {
+                                                        case CARBON_FIELD_ARRAY_UNSORTED_MULTISET:
+                                                        case CARBON_FIELD_DERIVED_ARRAY_SORTED_MULTISET:
+                                                        case CARBON_FIELD_DERIVED_ARRAY_UNSORTED_SET:
+                                                        case CARBON_FIELD_DERIVED_ARRAY_SORTED_SET: {
                                                                 jak_carbon_array_it *sub_it = jak_carbon_object_it_array_value(
                                                                         it);
                                                                 jak_carbon_path_status_e ret = traverse_array(state,
@@ -282,16 +324,46 @@ static inline jak_carbon_path_status_e traverse_object(jak_carbon_path_evaluator
                                                                 jak_carbon_array_it_drop(sub_it);
                                                                 return ret;
                                                         }
-                                                        case JAK_CARBON_FIELD_TYPE_COLUMN_U8:
-                                                        case JAK_CARBON_FIELD_TYPE_COLUMN_U16:
-                                                        case JAK_CARBON_FIELD_TYPE_COLUMN_U32:
-                                                        case JAK_CARBON_FIELD_TYPE_COLUMN_U64:
-                                                        case JAK_CARBON_FIELD_TYPE_COLUMN_I8:
-                                                        case JAK_CARBON_FIELD_TYPE_COLUMN_I16:
-                                                        case JAK_CARBON_FIELD_TYPE_COLUMN_I32:
-                                                        case JAK_CARBON_FIELD_TYPE_COLUMN_I64:
-                                                        case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT:
-                                                        case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
+                                                        case CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_U8_SORTED_MULTISET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_U8_UNSORTED_SET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_U8_SORTED_SET:
+                                                        case CARBON_FIELD_COLUMN_U16_UNSORTED_MULTISET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_U16_SORTED_MULTISET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_U16_UNSORTED_SET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_U16_SORTED_SET:
+                                                        case CARBON_FIELD_COLUMN_U32_UNSORTED_MULTISET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_U32_SORTED_MULTISET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_U32_UNSORTED_SET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_U32_SORTED_SET:
+                                                        case CARBON_FIELD_COLUMN_U64_UNSORTED_MULTISET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_U64_SORTED_MULTISET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_U64_UNSORTED_SET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_U64_SORTED_SET:
+                                                        case CARBON_FIELD_COLUMN_I8_UNSORTED_MULTISET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_I8_SORTED_MULTISET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_I8_UNSORTED_SET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_I8_SORTED_SET:
+                                                        case CARBON_FIELD_COLUMN_I16_UNSORTED_MULTISET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_I16_SORTED_MULTISET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_I16_UNSORTED_SET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_I16_SORTED_SET:
+                                                        case CARBON_FIELD_COLUMN_I32_UNSORTED_MULTISET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_I32_SORTED_MULTISET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_I32_UNSORTED_SET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_I32_SORTED_SET:
+                                                        case CARBON_FIELD_COLUMN_I64_UNSORTED_MULTISET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_I64_SORTED_MULTISET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_I64_UNSORTED_SET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_I64_SORTED_SET:
+                                                        case CARBON_FIELD_COLUMN_FLOAT_UNSORTED_MULTISET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_FLOAT_SORTED_MULTISET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_FLOAT_UNSORTED_SET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_FLOAT_SORTED_SET:
+                                                        case CARBON_FIELD_COLUMN_BOOLEAN_UNSORTED_MULTISET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_MULTISET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_UNSORTED_SET:
+                                                        case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_SET: {
                                                                 jak_carbon_column_it *sub_it = jak_carbon_object_it_column_value(
                                                                         it);
                                                                 return traverse_column(state,
@@ -349,7 +421,8 @@ static inline jak_carbon_path_status_e traverse_array(jak_carbon_path_evaluator 
                                         /* requested index is reached; depending on the subsequent path, lookup may stops */
                                         jak_carbon_array_it_field_type(&elem_type, it);
                                         jak_u32 next_path_pos = current_path_pos + 1;
-                                        if (is_unit_array && is_record && jak_carbon_field_type_is_column(elem_type)) {
+                                        if (is_unit_array && is_record &&
+                                                jak_carbon_field_type_is_column_or_subtype(elem_type)) {
                                                 jak_carbon_column_it *sub_it = jak_carbon_array_it_column_value(
                                                         it);
                                                 return traverse_column(state,
@@ -371,32 +444,10 @@ static inline jak_carbon_path_status_e traverse_array(jak_carbon_path_evaluator 
                                                                         case JAK_DOT_NODE_ARRAY_IDX:
                                                                                 /* next node in path is an array index which requires that
                                                                                  * the current array element is an array or column */
-                                                                                if (elem_type !=
-                                                                                    JAK_CARBON_FIELD_TYPE_ARRAY &&
-                                                                                    elem_type !=
-                                                                                    JAK_CARBON_FIELD_TYPE_COLUMN_U8 &&
-                                                                                    elem_type !=
-                                                                                    JAK_CARBON_FIELD_TYPE_COLUMN_U16 &&
-                                                                                    elem_type !=
-                                                                                    JAK_CARBON_FIELD_TYPE_COLUMN_U32 &&
-                                                                                    elem_type !=
-                                                                                    JAK_CARBON_FIELD_TYPE_COLUMN_U64 &&
-                                                                                    elem_type !=
-                                                                                    JAK_CARBON_FIELD_TYPE_COLUMN_I8 &&
-                                                                                    elem_type !=
-                                                                                    JAK_CARBON_FIELD_TYPE_COLUMN_I16 &&
-                                                                                    elem_type !=
-                                                                                    JAK_CARBON_FIELD_TYPE_COLUMN_I32 &&
-                                                                                    elem_type !=
-                                                                                    JAK_CARBON_FIELD_TYPE_COLUMN_I64 &&
-                                                                                    elem_type !=
-                                                                                    JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT &&
-                                                                                    elem_type !=
-                                                                                    JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN) {
+                                                                                if (!jak_carbon_field_type_is_list_or_subtype(elem_type)) {
                                                                                         return JAK_CARBON_PATH_NOCONTAINER;
                                                                                 } else {
-                                                                                        if (elem_type ==
-                                                                                            JAK_CARBON_FIELD_TYPE_ARRAY) {
+                                                                                        if (jak_carbon_field_type_is_array_or_subtype(elem_type)) {
                                                                                                 jak_carbon_array_it *sub_it = jak_carbon_array_it_array_value(
                                                                                                         it);
                                                                                                 status = traverse_array(
@@ -408,26 +459,7 @@ static inline jak_carbon_path_status_e traverse_array(jak_carbon_path_evaluator 
                                                                                                         sub_it);
                                                                                                 return status;
                                                                                         } else {
-                                                                                                JAK_ASSERT(elem_type ==
-                                                                                                           JAK_CARBON_FIELD_TYPE_COLUMN_U8 ||
-                                                                                                           elem_type ==
-                                                                                                           JAK_CARBON_FIELD_TYPE_COLUMN_U16 ||
-                                                                                                           elem_type ==
-                                                                                                           JAK_CARBON_FIELD_TYPE_COLUMN_U32 ||
-                                                                                                           elem_type ==
-                                                                                                           JAK_CARBON_FIELD_TYPE_COLUMN_U64 ||
-                                                                                                           elem_type ==
-                                                                                                           JAK_CARBON_FIELD_TYPE_COLUMN_I8 ||
-                                                                                                           elem_type ==
-                                                                                                           JAK_CARBON_FIELD_TYPE_COLUMN_I16 ||
-                                                                                                           elem_type ==
-                                                                                                           JAK_CARBON_FIELD_TYPE_COLUMN_I32 ||
-                                                                                                           elem_type ==
-                                                                                                           JAK_CARBON_FIELD_TYPE_COLUMN_I64 ||
-                                                                                                           elem_type ==
-                                                                                                           JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT ||
-                                                                                                           elem_type ==
-                                                                                                           JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN);
+                                                                                                JAK_ASSERT(jak_carbon_field_type_is_column_or_subtype(elem_type));
                                                                                                 jak_carbon_column_it *sub_it = jak_carbon_array_it_column_value(
                                                                                                         it);
                                                                                                 return traverse_column(
@@ -440,8 +472,8 @@ static inline jak_carbon_path_status_e traverse_array(jak_carbon_path_evaluator 
                                                                         case JAK_DOT_NODE_KEY_NAME:
                                                                                 /* next node in path is a key name which requires that
                                                                                  * the current array element is of type object */
-                                                                                if (elem_type !=
-                                                                                    JAK_CARBON_FIELD_TYPE_OBJECT) {
+                                                                                if (!jak_carbon_field_type_is_object_or_subtype(
+                                                                                        elem_type)) {
                                                                                         return JAK_CARBON_PATH_NOTANOBJECT;
                                                                                 } else {
                                                                                         jak_carbon_object_it *sub_it = jak_carbon_array_it_object_value(
@@ -468,14 +500,14 @@ static inline jak_carbon_path_status_e traverse_array(jak_carbon_path_evaluator 
                         case JAK_DOT_NODE_KEY_NAME:
                                 /* first array element exists, which must be of type object */
                                 jak_carbon_array_it_field_type(&elem_type, it);
-                                if (elem_type != JAK_CARBON_FIELD_TYPE_OBJECT) {
+                                if (!jak_carbon_field_type_is_object_or_subtype(elem_type)) {
                                         /* first array element is not of type object and a key lookup cannot
                                          * be executed, consequentially */
                                         return JAK_CARBON_PATH_NOTANOBJECT;
                                 } else {
                                         /* next node in path is a key name which requires that
                                                                          * the current array element is of type object */
-                                        if (elem_type != JAK_CARBON_FIELD_TYPE_OBJECT) {
+                                        if (!jak_carbon_field_type_is_object_or_subtype(elem_type)) {
                                                 return JAK_CARBON_PATH_NOTANOBJECT;
                                         } else {
                                                 if (is_unit_array && is_record) {

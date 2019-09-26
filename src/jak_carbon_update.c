@@ -50,29 +50,29 @@ static bool array_update_##type_name(jak_carbon_array_it *it, jak_##type_name va
         return try_array_update(type_match, in_place_update_fn, insert_fn);                                            \
 }
 
-DEFINE_ARRAY_UPDATE_FUNCTION(u8, JAK_CARBON_FIELD_TYPE_NUMBER_U8, jak_carbon_array_it_update_in_place_u8, jak_carbon_insert_u8)
+DEFINE_ARRAY_UPDATE_FUNCTION(u8, CARBON_FIELD_NUMBER_U8, jak_carbon_array_it_update_in_place_u8, jak_carbon_insert_u8)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(u16, JAK_CARBON_FIELD_TYPE_NUMBER_U16, jak_carbon_array_it_update_in_place_u16,
+DEFINE_ARRAY_UPDATE_FUNCTION(u16, CARBON_FIELD_NUMBER_U16, jak_carbon_array_it_update_in_place_u16,
                              jak_carbon_insert_u16)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(u32, JAK_CARBON_FIELD_TYPE_NUMBER_U32, jak_carbon_array_it_update_in_place_u32,
+DEFINE_ARRAY_UPDATE_FUNCTION(u32, CARBON_FIELD_NUMBER_U32, jak_carbon_array_it_update_in_place_u32,
                              jak_carbon_insert_u32)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(u64, JAK_CARBON_FIELD_TYPE_NUMBER_U64, jak_carbon_array_it_update_in_place_u64,
+DEFINE_ARRAY_UPDATE_FUNCTION(u64, CARBON_FIELD_NUMBER_U64, jak_carbon_array_it_update_in_place_u64,
                              jak_carbon_insert_u64)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(i8, JAK_CARBON_FIELD_TYPE_NUMBER_I8, jak_carbon_array_it_update_in_place_i8, jak_carbon_insert_i8)
+DEFINE_ARRAY_UPDATE_FUNCTION(i8, CARBON_FIELD_NUMBER_I8, jak_carbon_array_it_update_in_place_i8, jak_carbon_insert_i8)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(i16, JAK_CARBON_FIELD_TYPE_NUMBER_I16, jak_carbon_array_it_update_in_place_i16,
+DEFINE_ARRAY_UPDATE_FUNCTION(i16, CARBON_FIELD_NUMBER_I16, jak_carbon_array_it_update_in_place_i16,
                              jak_carbon_insert_i16)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(i32, JAK_CARBON_FIELD_TYPE_NUMBER_I32, jak_carbon_array_it_update_in_place_i32,
+DEFINE_ARRAY_UPDATE_FUNCTION(i32, CARBON_FIELD_NUMBER_I32, jak_carbon_array_it_update_in_place_i32,
                              jak_carbon_insert_i32)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(i64, JAK_CARBON_FIELD_TYPE_NUMBER_I64, jak_carbon_array_it_update_in_place_i64,
+DEFINE_ARRAY_UPDATE_FUNCTION(i64, CARBON_FIELD_NUMBER_I64, jak_carbon_array_it_update_in_place_i64,
                              jak_carbon_insert_i64)
 
-DEFINE_ARRAY_UPDATE_FUNCTION(float, JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT, jak_carbon_array_it_update_in_place_float,
+DEFINE_ARRAY_UPDATE_FUNCTION(float, CARBON_FIELD_NUMBER_FLOAT, jak_carbon_array_it_update_in_place_float,
                              jak_carbon_insert_float)
 
 #define try_update_generic(context, path, array_exec, column_exec)                                                     \

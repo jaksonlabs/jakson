@@ -47,23 +47,23 @@ bool jak_carbon_array_it_update_in_place_##type_name(jak_carbon_array_it *it, ja
         }                                                                                                              \
 }
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(u8, JAK_CARBON_FIELD_TYPE_NUMBER_U8)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(u8, CARBON_FIELD_NUMBER_U8)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(u16, JAK_CARBON_FIELD_TYPE_NUMBER_U16)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(u16, CARBON_FIELD_NUMBER_U16)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(u32, JAK_CARBON_FIELD_TYPE_NUMBER_U32)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(u32, CARBON_FIELD_NUMBER_U32)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(u64, JAK_CARBON_FIELD_TYPE_NUMBER_U64)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(u64, CARBON_FIELD_NUMBER_U64)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(i8, JAK_CARBON_FIELD_TYPE_NUMBER_I8)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(i8, CARBON_FIELD_NUMBER_I8)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(i16, JAK_CARBON_FIELD_TYPE_NUMBER_I16)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(i16, CARBON_FIELD_NUMBER_I16)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(i32, JAK_CARBON_FIELD_TYPE_NUMBER_I32)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(i32, CARBON_FIELD_NUMBER_I32)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(i64, JAK_CARBON_FIELD_TYPE_NUMBER_I64)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(i64, CARBON_FIELD_NUMBER_I64)
 
-DEFINE_IN_PLACE_UPDATE_FUNCTION(float, JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT)
+DEFINE_IN_PLACE_UPDATE_FUNCTION(float, CARBON_FIELD_NUMBER_FLOAT)
 
 static bool update_in_place_constant(jak_carbon_array_it *it, jak_carbon_constant_e constant)
 {
@@ -75,13 +75,13 @@ static bool update_in_place_constant(jak_carbon_array_it *it, jak_carbon_constan
                 jak_u8 value;
                 switch (constant) {
                         case JAK_CARBON_CONSTANT_TRUE:
-                                value = JAK_CARBON_FIELD_TYPE_TRUE;
+                                value = CARBON_FIELD_TRUE;
                                 break;
                         case JAK_CARBON_CONSTANT_FALSE:
-                                value = JAK_CARBON_FIELD_TYPE_FALSE;
+                                value = CARBON_FIELD_FALSE;
                                 break;
                         case JAK_CARBON_CONSTANT_NULL:
-                                value = JAK_CARBON_FIELD_TYPE_NULL;
+                                value = CARBON_FIELD_NULL;
                                 break;
                         default: JAK_ERROR(&it->err, JAK_ERR_INTERNALERR);
                                 break;

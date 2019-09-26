@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef JAK_RESULT
-#define JAK_RESULT
+#ifndef FN_RESULT
+#define FN_RESULT
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  includes
@@ -40,68 +40,135 @@ typedef struct fn_result {
         char result[48]; /* 48 bit for the result value */
 } fn_result;
 
+// ---------------------------------------------------------------------------------------------------------------------
+//  function result creation macros
+//
+//  For ease of understanding, use the 'ofType(X)' annotation in case the function carries any value in addition to
+//  its success or fail state, e.g., fn_result ofType(bool) foo();
+//  Annotating a function in this way helps the caller to figure out if there is any value to get for a successful
+//  function call.
+//
+// ---------------------------------------------------------------------------------------------------------------------
 
-#define FN_IS_OK(result)          JAK_RESULT_IS_OK(result)
-
+/* constructs a new fn_result that encodes a successful call */
 #define FN_OK()                   JAK_RESULT_OK()
+
+/* constructs a new fn_result that encodes a successful call, and carries a 32bit integer (function) return value */
 #define FN_OK_INT(value)          JAK_RESULT_OK_INT(value)
+
+/* constructs a new fn_result that encodes a successful call, and carries a 32bit unsigned (function) return value */
 #define FN_OK_UINT(value)         JAK_RESULT_OK_UINT(value)
+
+/* constructs a new fn_result that encodes a successful call, and carries a boolean return value */
 #define FN_OK_BOOL(value)         JAK_RESULT_OK_BOOL(value)
+
+/* constructs a new fn_result that encodes a successful call, and carries a (48bit) pointer value */
 #define FN_OK_PTR(value)          JAK_RESULT_OK_PTR(value)
 
+/* constructs a new fn_result that encodes a successful call, and carries 'true' as boolean value */
+#define FN_OK_TRUE()              FN_OK_BOOL(true)
+
+/* constructs a new fn_result that encodes a successful call, and carries 'false' as boolean value */
+#define FN_OK_FALSE()             FN_OK_BOOL(false)
+
+/* constructs a new fn_result that encodes an unsuccessful call with error code and message */
 #define FN_FAIL(code, msg)        JAK_RESULT_FAIL(code, msg)
 
-#define FN_INT(result)            __JAK_RESULT_EXTRACT_VALUE(result, jak_iu32, JAK_RESULT_INT_VALUE)
-#define FN_UINT(result)           __JAK_RESULT_EXTRACT_VALUE(result, jak_u32, JAK_RESULT_UINT_VALUE)
-#define FN_BOOL(result)           __JAK_RESULT_EXTRACT_VALUE(result, bool, JAK_RESULT_BOOL_VALUE)
-#define FN_PTR(result)            __JAK_RESULT_EXTRACT_VALUE(result, void *, JAK_RESULT_PTR_VALUE)
-
-#define JAK_FAIL_FORWARD()                                                \
+/* use this macro for the return statement inside a fn_result-returning function (outer), if a function call within
+ * outer results in a failed fn_result object, and the error information (error code, and message) should be return by
+ * outer without modifying it */
+#define FN_FAIL_FORWARD()                                                 \
 ({                                                                        \
         fn_result __jak_result;                                           \
-        jak_fn_result_fail_forward(&__jak_result);                        \
+        __fn_result_fail_forward(&__jak_result);                          \
         __jak_result;                                                     \
 })
+
+// ---------------------------------------------------------------------------------------------------------------------
+//  function error state resolver macro about success or fail of a function call
+// ---------------------------------------------------------------------------------------------------------------------
+
+/* checks if a fn_result 'result' encodes a successful call */
+#define FN_IS_OK(result)          JAK_RESULT_IS_OK(result)
+
+// ---------------------------------------------------------------------------------------------------------------------
+//  function return value resolver macro for successful calls
+// ---------------------------------------------------------------------------------------------------------------------
+
+/* returns true if 'expr' returns a fn_result object that encodes success and carries a boolean value true */
+#define FN_IS_TRUE(expr)                                                                                               \
+({                                                                                                                     \
+        fn_result fn_true_result;                                                                                      \
+        bool fn_true_ret = FN_IS_OK((fn_true_result = (expr))) && FN_BOOL(fn_true_result);                             \
+        fn_true_ret;                                                                                                   \
+})
+
+/* returns the signed 32bit integer value carried by a success function call; undefined for not successful calls */
+#define FN_INT(result)            __JAK_RESULT_EXTRACT_VALUE(result, jak_iu32, JAK_RESULT_INT_VALUE)
+
+/* returns the unsigned 32bit integer value carried by a success function call; undefined for not successful calls */
+#define FN_UINT(result)           __JAK_RESULT_EXTRACT_VALUE(result, jak_u32, JAK_RESULT_UINT_VALUE)
+
+/* returns the boolean value carried by a success function call; undefined for not successful calls */
+#define FN_BOOL(result)           __JAK_RESULT_EXTRACT_VALUE(result, bool, JAK_RESULT_BOOL_VALUE)
+
+/* returns the pointer value carried by a success function call and cast it to T*; undefined for not successful calls */
+#define FN_PTR(result, T)         ((T *) __JAK_RESULT_EXTRACT_VALUE(result, void *, JAK_RESULT_PTR_VALUE))
+
+// ---------------------------------------------------------------------------------------------------------------------
+//  helper macro to check if a list of (up to eleven) function parameters is non-null
+// ---------------------------------------------------------------------------------------------------------------------
+
+/* constructs a new fn_result that encodes an unsuccessful call with error code 'null pointer' if one of the arguments
+ * is a pointer to NULL */
+#define FN_FAIL_IF_NULL(...)                                                                                           \
+    if (!__jak_fn_test_nonnull(JAK_VA_ARGS_LENGTH(__VA_ARGS__), __VA_ARGS__)) {                                        \
+        return JAK_RESULT_FAIL(JAK_ERR_NULLPTR, "function argument is not allowed to be null");                        \
+    }
+
+// ---------------------------------------------------------------------------------------------------------------------
+//  lower-level macros, no need to use them outside this module
+// ---------------------------------------------------------------------------------------------------------------------
 
 #define JAK_RESULT_OK()                                                   \
 ({                                                                        \
         fn_result __jak_result;                                           \
-        jak_fn_result_ok(&__jak_result);                                  \
+        __fn_result_ok(&__jak_result);                                    \
         __jak_result;                                                     \
 })
 
 #define JAK_RESULT_OK_INT(int32_value)                                    \
 ({                                                                        \
         fn_result __jak_result;                                           \
-        jak_fn_result_ok_int32(&__jak_result, int32_value);               \
+        __fn_result_ok_int32(&__jak_result, int32_value);                 \
         __jak_result;                                                     \
 })
 
 #define JAK_RESULT_OK_UINT(uint32_value)                                  \
 ({                                                                        \
         fn_result __jak_result;                                           \
-        jak_fn_result_ok_uint32(&__jak_result, uint32_value);             \
+        __fn_result_ok_uint32(&__jak_result, uint32_value);               \
         __jak_result;                                                     \
 })
 
 #define JAK_RESULT_OK_BOOL(bool_value)                                    \
 ({                                                                        \
         fn_result __jak_result;                                           \
-        jak_fn_result_ok_bool(&__jak_result, (bool_value));               \
+        __fn_result_ok_bool(&__jak_result, (bool_value));                 \
         __jak_result;                                                     \
 })
 
 #define JAK_RESULT_OK_PTR(ptr_value)                                      \
 ({                                                                        \
         fn_result __jak_result;                                           \
-        jak_fn_result_ok_ptr(&__jak_result, ptr_value);                   \
+        __fn_result_ok_ptr(&__jak_result, ptr_value);                     \
         __jak_result;                                                     \
 })
 
 #define JAK_RESULT_FAIL(code, msg)                                        \
 ({                                                                        \
     fn_result __jak_result;                                               \
-    jak_fn_result_fail(&__jak_result, code, __FILE__, __LINE__, msg);     \
+    __fn_result_fail(&__jak_result, code, __FILE__, __LINE__, msg);       \
     __jak_result;                                                         \
 })
 
@@ -111,65 +178,59 @@ typedef struct fn_result {
         if (JAK_LIKELY(JAK_RESULT_IS_OK(result))) {                       \
                 __jak_retval = result_fn(result);                         \
         } else {                                                          \
-                return JAK_FAIL_FORWARD();                                \
+                return FN_FAIL_FORWARD();                                 \
         }                                                                 \
         __jak_retval;                                                     \
 })
 
 #define JAK_RESULT_IS_OK(result)                                          \
-    jak_fn_result_is_ok(result)
+    __fn_result_is_ok(result)
 
 #define JAK_RESULT_HAS_VALUE(result)                                      \
-    jak_fn_result_has_value(result)
+    __fn_result_has_value(result)
 
 #define JAK_RESULT_INT_VALUE(result)                                      \
-    jak_fn_result_int(result)
+    __fn_result_int(result)
 
 #define JAK_RESULT_UINT_VALUE(result)                                     \
-    jak_fn_result_uint(result)
+    __fn_result_uint(result)
 
 #define JAK_RESULT_BOOL_VALUE(result)                                     \
-    jak_fn_result_bool(result)
+    __fn_result_bool(result)
 
 #define JAK_RESULT_PTR_VALUE(result)                                      \
-    jak_fn_result_ptr(result)
+    __fn_result_ptr(result)
 
 #define JAK_RESULT_CODE(result)                                           \
-    jak_fn_result_error_code(result)
+    __fn_result_error_code(result)
 
 #define JAK_RESULT_GET_LAST_ERROR()                                       \
     &jak_global_error;
 
-#define FN_FAIL_IF_NULL(...)                                                                                        \
-    if (!__jak_fn_test_nonnull(JAK_VA_ARGS_LENGTH(__VA_ARGS__), __VA_ARGS__)) {                                        \
-        return JAK_RESULT_FAIL(JAK_ERR_NULLPTR, "function argument is not allowed to be null");                        \
-    }
+void __fn_result_ok(fn_result *result);
+void __fn_result_fail(fn_result *result, jak_error_code code, const char *file, jak_u32 line, const char *msg);
+void __fn_result_fail_forward(fn_result *result);
+void __fn_result_ok_uint32(fn_result *result, jak_u32 value);
+void __fn_result_ok_int32(fn_result *result, jak_i32 value);
+void __fn_result_ok_bool(fn_result *result, bool value);
+void __fn_result_ok_ptr(fn_result *result, const void *value);
 
+void __fn_result_create(fn_result *result, jak_error_code error_code, const void *payload, size_t payload_size);
 
-void jak_fn_result_ok(fn_result *result);
-void jak_fn_result_fail(fn_result *result, jak_error_code code, const char *file, jak_u32 line, const char *msg);
-void jak_fn_result_fail_forward(fn_result *result);
-void jak_fn_result_ok_uint32(fn_result *result, jak_u32 value);
-void jak_fn_result_ok_int32(fn_result *result, jak_i32 value);
-void jak_fn_result_ok_bool(fn_result *result, bool value);
-void jak_fn_result_ok_ptr(fn_result *result, const void *value);
+bool __fn_result_is_ok(fn_result result);
+bool __fn_result_has_value(fn_result result);
 
-void __jak_fn_result_create(fn_result *result, jak_error_code error_code, const void *payload, size_t payload_size);
+jak_error_code __fn_result_error_code(fn_result result);
 
-bool jak_fn_result_is_ok(fn_result result);
-bool jak_fn_result_has_value(fn_result result);
+bool __fn_result_is_int(fn_result result);
+bool __fn_result_is_uint(fn_result result);
+bool __fn_result_is_bool(fn_result result);
+bool __fn_result_is_ptr(fn_result result);
 
-jak_error_code jak_fn_result_error_code(fn_result result);
-
-bool jak_fn_result_is_int(fn_result result);
-bool jak_fn_result_is_uint(fn_result result);
-bool jak_fn_result_is_bool(fn_result result);
-bool jak_fn_result_is_ptr(fn_result result);
-
-jak_i32 jak_fn_result_int(fn_result result);
-jak_u32 jak_fn_result_uint(fn_result result);
-bool jak_fn_result_bool(fn_result result);
-void *jak_fn_result_ptr(fn_result result);
+jak_i32 __fn_result_int(fn_result result);
+jak_u32 __fn_result_uint(fn_result result);
+bool __fn_result_bool(fn_result result);
+void *__fn_result_ptr(fn_result result);
 
 bool __jak_fn_test_nonnull(size_t n,...);
 

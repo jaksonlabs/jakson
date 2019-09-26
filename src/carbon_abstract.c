@@ -77,12 +77,12 @@ fn_result carbon_abstract_type(carbon_abstract_e *type, jak_memfile *memfile)
                                 JAK_OPTIONAL_SET(type, CARBON_ABSTRACT_DERIVED);
                                 goto return_true;
                         default:
-                                return FN_OK_BOOL(false);
+                                return FN_FAIL(JAK_ERR_MARKERMAPPING, "unknown abstract type marker detected");
                 }
 return_true:
-                return FN_OK_BOOL(true);
+                return FN_OK();
         } else {
-                return JAK_FAIL_FORWARD();
+                return FN_FAIL_FORWARD();
         }
 }
 
@@ -92,7 +92,7 @@ fn_result ofType(bool) carbon_abstract_is_base(jak_memfile *memfile)
         if (JAK_LIKELY(FN_IS_OK(carbon_abstract_type(&type, memfile)))) {
                 return FN_OK_BOOL(type == CARBON_ABSTRACT_BASE);
         } else {
-                return JAK_FAIL_FORWARD();
+                return FN_FAIL_FORWARD();
         }
 }
 
@@ -174,12 +174,12 @@ fn_result carbon_abstract_get_class(carbon_abstract_type_class_e *type, jak_memf
                                 *type = CARBON_TYPE_UNSORTED_SET;
                                 goto return_true;
                         default:
-                                return FN_OK_BOOL(false);
+                                return FN_FAIL(JAK_ERR_MARKERMAPPING, "unknown marker detected");
                 }
                 return_true:
-                return FN_OK_BOOL(true);
+                return FN_OK();
         } else {
-                return JAK_FAIL_FORWARD();
+                return FN_FAIL_FORWARD();
         }
 }
 
@@ -188,9 +188,9 @@ fn_result ofType(bool) carbon_abstract_is_multiset(carbon_abstract_type_class_e 
         switch (type) {
                 case CARBON_TYPE_UNSORTED_MULTISET:
                 case CARBON_TYPE_SORTED_MULTISET:
-                        return FN_OK_BOOL(true);
+                        return FN_OK_TRUE();
                 default:
-                        return FN_OK_BOOL(false);
+                        return FN_OK_FALSE();
         }
 }
 
@@ -199,9 +199,9 @@ fn_result ofType(bool) carbon_abstract_is_set(carbon_abstract_type_class_e type)
         switch (type) {
                 case CARBON_TYPE_UNSORTED_SET:
                 case CARBON_TYPE_SORTED_SET:
-                        return FN_OK_BOOL(true);
+                        return FN_OK_TRUE();
                 default:
-                        return FN_OK_BOOL(false);
+                        return FN_OK_FALSE();
         }
 }
 
@@ -210,9 +210,9 @@ fn_result ofType(bool) carbon_abstract_is_multimap(carbon_abstract_type_class_e 
         switch (type) {
                 case CARBON_TYPE_UNSORTED_MULTIMAP:
                 case CARBON_TYPE_SORTED_MULTIMAP:
-                        return FN_OK_BOOL(true);
+                        return FN_OK_TRUE();
                 default:
-                        return FN_OK_BOOL(false);
+                        return FN_OK_FALSE();
         }
 }
 
@@ -221,9 +221,9 @@ fn_result ofType(bool) carbon_abstract_is_map(carbon_abstract_type_class_e type)
         switch (type) {
                 case CARBON_TYPE_SORTED_MAP:
                 case CARBON_TYPE_UNSORTED_MAP:
-                        return FN_OK_BOOL(true);
+                        return FN_OK_TRUE();
                 default:
-                        return FN_OK_BOOL(false);
+                        return FN_OK_FALSE();
         }
 }
 
@@ -234,9 +234,9 @@ fn_result ofType(bool) carbon_abstract_is_sorted(carbon_abstract_type_class_e ty
                 case CARBON_TYPE_SORTED_SET:
                 case CARBON_TYPE_SORTED_MAP:
                 case CARBON_TYPE_SORTED_MULTIMAP:
-                        return FN_OK_BOOL(true);
+                        return FN_OK_TRUE();
                 default:
-                        return FN_OK_BOOL(false);
+                        return FN_OK_FALSE();
         }
 }
 
@@ -247,10 +247,32 @@ fn_result ofType(bool) carbon_abstract_is_distinct(carbon_abstract_type_class_e 
                 case CARBON_TYPE_SORTED_SET:
                 case CARBON_TYPE_SORTED_MAP:
                 case CARBON_TYPE_UNSORTED_MAP:
-                        return FN_OK_BOOL(true);
+                        return FN_OK_TRUE();
                 default:
-                        return FN_OK_BOOL(false);
+                        return FN_OK_FALSE();
         }
+}
+
+fn_result carbon_abstract_class_to_list_derivable(carbon_list_derivable_e *out, carbon_abstract_type_class_e in)
+{
+        FN_FAIL_IF_NULL(out)
+        switch (in) {
+                case CARBON_TYPE_UNSORTED_MULTISET:
+                        *out = CARBON_LIST_UNSORTED_MULTISET;
+                        break;
+                case CARBON_TYPE_SORTED_MULTISET:
+                        *out = CARBON_LIST_SORTED_MULTISET;
+                        break;
+                case CARBON_TYPE_UNSORTED_SET:
+                        *out = CARBON_LIST_UNSORTED_SET;
+                        break;
+                case CARBON_TYPE_SORTED_SET:
+                        *out = CARBON_LIST_SORTED_SET;
+                        break;
+                default:
+                        return FN_FAIL(JAK_ERR_TYPEMISMATCH, "abstract class type does not encode a list type");
+        }
+        return FN_OK();
 }
 
 fn_result carbon_abstract_write_base_type(jak_memfile *memfile, jak_carbon_container_sub_type_e type)
@@ -360,6 +382,104 @@ fn_result carbon_abstract_get_container_subtype(jak_carbon_container_sub_type_e 
                         return FN_FAIL(JAK_ERR_MARKERMAPPING, "unknown marker encoding an abstract type");
         }
         return FN_OK();
+}
+
+static fn_result ofType(bool) __carbon_abstract_is_instanceof(jak_memfile *memfile, jak_carbon_container_sub_type_e T)
+{
+        jak_carbon_container_sub_type_e type;
+        if (JAK_LIKELY(FN_IS_OK(carbon_abstract_get_container_subtype(&type, memfile)))) {
+                return FN_OK_BOOL(type == T);
+        } else {
+                return FN_FAIL_FORWARD();
+        }
+}
+
+fn_result ofType(bool) carbon_abstract_is_instanceof_object(jak_memfile *memfile)
+{
+        return __carbon_abstract_is_instanceof(memfile, CARBON_CONTAINER_OBJECT);
+}
+
+fn_result ofType(bool) carbon_abstract_is_instanceof_array(jak_memfile *memfile)
+{
+        return __carbon_abstract_is_instanceof(memfile, CARBON_CONTAINER_ARRAY);
+}
+
+fn_result ofType(bool) carbon_abstract_is_instanceof_column_u8(jak_memfile *memfile)
+{
+        return __carbon_abstract_is_instanceof(memfile, CARBON_CONTAINER_COLUMN_U8);
+}
+
+fn_result ofType(bool) carbon_abstract_is_instanceof_column_u16(jak_memfile *memfile)
+{
+        return __carbon_abstract_is_instanceof(memfile, CARBON_CONTAINER_COLUMN_U16);
+}
+
+fn_result ofType(bool) carbon_abstract_is_instanceof_column_u32(jak_memfile *memfile)
+{
+        return __carbon_abstract_is_instanceof(memfile, CARBON_CONTAINER_COLUMN_U32);
+}
+
+fn_result ofType(bool) carbon_abstract_is_instanceof_column_u64(jak_memfile *memfile)
+{
+        return __carbon_abstract_is_instanceof(memfile, CARBON_CONTAINER_COLUMN_U64);
+}
+
+fn_result ofType(bool) carbon_abstract_is_instanceof_column_i8(jak_memfile *memfile)
+{
+        return __carbon_abstract_is_instanceof(memfile, CARBON_CONTAINER_COLUMN_I8);
+}
+
+fn_result ofType(bool) carbon_abstract_is_instanceof_column_i16(jak_memfile *memfile)
+{
+        return __carbon_abstract_is_instanceof(memfile, CARBON_CONTAINER_COLUMN_I16);
+}
+
+fn_result ofType(bool) carbon_abstract_is_instanceof_column_i32(jak_memfile *memfile)
+{
+        return __carbon_abstract_is_instanceof(memfile, CARBON_CONTAINER_COLUMN_I32);
+}
+
+fn_result ofType(bool) carbon_abstract_is_instanceof_column_i64(jak_memfile *memfile)
+{
+        return __carbon_abstract_is_instanceof(memfile, CARBON_CONTAINER_COLUMN_I64);
+}
+
+fn_result ofType(bool) carbon_abstract_is_instanceof_column_float(jak_memfile *memfile)
+{
+        return __carbon_abstract_is_instanceof(memfile, CARBON_CONTAINER_COLUMN_FLOAT);
+}
+
+fn_result ofType(bool) carbon_abstract_is_instanceof_column_boolean(jak_memfile *memfile)
+{
+        return __carbon_abstract_is_instanceof(memfile, CARBON_CONTAINER_COLUMN_BOOLEAN);
+}
+
+fn_result ofType(bool) carbon_abstract_is_instanceof_column(jak_memfile *memfile)
+{
+       if (FN_IS_TRUE(carbon_abstract_is_instanceof_column_u8(memfile)) ||
+                FN_IS_TRUE(carbon_abstract_is_instanceof_column_u16(memfile)) ||
+                FN_IS_TRUE(carbon_abstract_is_instanceof_column_u32(memfile)) ||
+                FN_IS_TRUE(carbon_abstract_is_instanceof_column_u64(memfile)) ||
+                FN_IS_TRUE(carbon_abstract_is_instanceof_column_i8(memfile)) ||
+                FN_IS_TRUE(carbon_abstract_is_instanceof_column_i16(memfile)) ||
+                FN_IS_TRUE(carbon_abstract_is_instanceof_column_i32(memfile)) ||
+                FN_IS_TRUE(carbon_abstract_is_instanceof_column_i64(memfile)) ||
+                FN_IS_TRUE(carbon_abstract_is_instanceof_column_float(memfile)) ||
+                FN_IS_TRUE(carbon_abstract_is_instanceof_column_boolean(memfile))) {
+                return FN_OK_TRUE();
+        } else {
+                return FN_OK_FALSE();
+        }
+}
+
+fn_result ofType(bool) carbon_abstract_is_instanceof_list(jak_memfile *memfile)
+{
+        if (FN_IS_TRUE(carbon_abstract_is_instanceof_array(memfile)) ||
+            FN_IS_TRUE(carbon_abstract_is_instanceof_column(memfile))) {
+                return FN_OK_TRUE();
+        } else {
+                return FN_OK_FALSE();
+        }
 }
 
 fn_result carbon_abstract_derive_list_to(carbon_derived_e *concrete, jak_carbon_list_container_e is,

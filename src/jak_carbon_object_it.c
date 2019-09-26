@@ -44,9 +44,11 @@ bool jak_carbon_object_it_create(jak_carbon_object_it *it, jak_memfile *memfile,
 
         JAK_ERROR_IF(jak_memfile_remain_size(&it->memfile) < sizeof(jak_u8), err, JAK_ERR_CORRUPTED);
 
-        jak_u8 marker = *jak_memfile_read(&it->memfile, sizeof(jak_u8));
-        JAK_ERROR_IF_WDETAILS(marker != CARBON_MOBJECT_BEGIN, err, JAK_ERR_ILLEGALOP,
-                              "object begin marker ('{') not found");
+        jak_carbon_container_sub_type_e sub_type;
+        carbon_abstract_get_container_subtype(&sub_type, &it->memfile);
+        JAK_ERROR_IF_WDETAILS(sub_type != CARBON_CONTAINER_OBJECT, err, JAK_ERR_ILLEGALOP,
+                              "object begin marker ('{') or abstract derived type marker for 'map' not found");
+        jak_memfile_skip(&it->memfile, sizeof(jak_u8));
 
         it->object_contents_off += sizeof(jak_u8);
 

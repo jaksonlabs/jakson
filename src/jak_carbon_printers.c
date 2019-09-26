@@ -370,82 +370,118 @@ bool jak_carbon_printer_print_object(jak_carbon_object_it *it, jak_carbon_printe
 
                 jak_carbon_object_it_prop_type(&type, it);
                 switch (type) {
-                        case JAK_CARBON_FIELD_TYPE_NULL:
+                        case CARBON_FIELD_NULL:
                                 jak_carbon_printer_prop_null(printer, builder, key_name, key_len);
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_TRUE:
+                        case CARBON_FIELD_TRUE:
                                 /* in an array, there is no TRUE constant that is set to NULL because it will be replaced with
                                  * a constant NULL. In columns, there might be a NULL-encoded value */
                                 jak_carbon_printer_prop_true(printer, builder, key_name, key_len);
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_FALSE:
+                        case CARBON_FIELD_FALSE:
                                 /* in an array, there is no FALSE constant that is set to NULL because it will be replaced with
                                  * a constant NULL. In columns, there might be a NULL-encoded value */
                                 jak_carbon_printer_prop_false(printer, builder, key_name, key_len);
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_NUMBER_U8:
-                        case JAK_CARBON_FIELD_TYPE_NUMBER_U16:
-                        case JAK_CARBON_FIELD_TYPE_NUMBER_U32:
-                        case JAK_CARBON_FIELD_TYPE_NUMBER_U64: {
+                        case CARBON_FIELD_NUMBER_U8:
+                        case CARBON_FIELD_NUMBER_U16:
+                        case CARBON_FIELD_NUMBER_U32:
+                        case CARBON_FIELD_NUMBER_U64: {
                                 jak_u64 value;
                                 jak_carbon_object_it_unsigned_value(&is_null_value, &value, it);
                                 jak_carbon_printer_prop_unsigned(printer, builder, key_name, key_len,
                                                              is_null_value ? NULL : &value);
                         }
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_NUMBER_I8:
-                        case JAK_CARBON_FIELD_TYPE_NUMBER_I16:
-                        case JAK_CARBON_FIELD_TYPE_NUMBER_I32:
-                        case JAK_CARBON_FIELD_TYPE_NUMBER_I64: {
+                        case CARBON_FIELD_NUMBER_I8:
+                        case CARBON_FIELD_NUMBER_I16:
+                        case CARBON_FIELD_NUMBER_I32:
+                        case CARBON_FIELD_NUMBER_I64: {
                                 jak_i64 value;
                                 jak_carbon_object_it_signed_value(&is_null_value, &value, it);
                                 jak_carbon_printer_prop_signed(printer, builder, key_name, key_len,
                                                            is_null_value ? NULL : &value);
                         }
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT: {
+                        case CARBON_FIELD_NUMBER_FLOAT: {
                                 float value;
                                 jak_carbon_object_it_float_value(&is_null_value, &value, it);
                                 jak_carbon_printer_prop_float(printer, builder, key_name, key_len,
                                                           is_null_value ? NULL : &value);
                         }
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_STRING: {
+                        case CARBON_FIELD_STRING: {
                                 jak_u64 strlen;
                                 const char *value = jak_carbon_object_it_jak_string_value(&strlen, it);
                                 jak_carbon_printer_prop_string(printer, builder, key_name, key_len, value, strlen);
                         }
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_BINARY:
-                        case JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM: {
+                        case CARBON_FIELD_BINARY:
+                        case CARBON_FIELD_BINARY_CUSTOM: {
                                 jak_carbon_binary binary;
                                 jak_carbon_object_it_binary_value(&binary, it);
                                 jak_carbon_printer_prop_binary(printer, builder, key_name, key_len, &binary);
                         }
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_ARRAY: {
+                        case CARBON_FIELD_ARRAY_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_ARRAY_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_ARRAY_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_ARRAY_SORTED_SET: {
                                 jak_carbon_array_it *array = jak_carbon_object_it_array_value(it);
                                 jak_carbon_printer_array_prop_name(printer, builder, key_name, key_len);
                                 jak_carbon_printer_print_array(array, printer, builder, false);
                                 jak_carbon_array_it_drop(array);
                         }
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_U8:
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_U16:
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_U32:
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_U64:
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_I8:
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_I16:
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_I32:
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_I64:
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT:
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
+                        case CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U8_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U8_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U8_SORTED_SET:
+                        case CARBON_FIELD_COLUMN_U16_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U16_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U16_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U16_SORTED_SET:
+                        case CARBON_FIELD_COLUMN_U32_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U32_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U32_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U32_SORTED_SET:
+                        case CARBON_FIELD_COLUMN_U64_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U64_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U64_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U64_SORTED_SET:
+                        case CARBON_FIELD_COLUMN_I8_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I8_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I8_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I8_SORTED_SET:
+                        case CARBON_FIELD_COLUMN_I16_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I16_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I16_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I16_SORTED_SET:
+                        case CARBON_FIELD_COLUMN_I32_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I32_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I32_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I32_SORTED_SET:
+                        case CARBON_FIELD_COLUMN_I64_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I64_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I64_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I64_SORTED_SET:
+                        case CARBON_FIELD_COLUMN_FLOAT_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_FLOAT_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_FLOAT_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_FLOAT_SORTED_SET:
+                        case CARBON_FIELD_COLUMN_BOOLEAN_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_SET: {
                                 jak_carbon_column_it *column = jak_carbon_object_it_column_value(it);
                                 jak_carbon_printer_column_prop_name(printer, builder, key_name, key_len);
                                 jak_carbon_printer_print_column(column, printer, builder);
                         }
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_OBJECT: {
+                        case CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP:
+                        case CARBON_FIELD_DERIVED_OBJECT_SORTED_MULTIMAP:
+                        case CARBON_FIELD_DERIVED_OBJECT_CARBON_UNSORTED_MAP:
+                        case CARBON_FIELD_DERIVED_OBJECT_CARBON_SORTED_MAP: {
                                 jak_carbon_object_it *object = jak_carbon_object_it_object_value(it);
                                 jak_carbon_printer_object_prop_name(printer, builder, key_name, key_len);
                                 jak_carbon_printer_print_object(object, printer, builder);
@@ -491,77 +527,113 @@ bool jak_carbon_printer_print_array(jak_carbon_array_it *it, jak_carbon_printer 
                 jak_carbon_field_type_e type;
                 jak_carbon_array_it_field_type(&type, it);
                 switch (type) {
-                        case JAK_CARBON_FIELD_TYPE_NULL:
+                        case CARBON_FIELD_NULL:
                                 jak_carbon_printer_null(printer, builder);
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_TRUE:
+                        case CARBON_FIELD_TRUE:
                                 /* in an array, there is no TRUE constant that is set to NULL because it will be replaced with
                                  * a constant NULL. In columns, there might be a NULL-encoded value */
                                 jak_carbon_printer_true(printer, false, builder);
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_FALSE:
+                        case CARBON_FIELD_FALSE:
                                 /* in an array, there is no FALSE constant that is set to NULL because it will be replaced with
                                  * a constant NULL. In columns, there might be a NULL-encoded value */
                                 jak_carbon_printer_false(printer, false, builder);
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_NUMBER_U8:
-                        case JAK_CARBON_FIELD_TYPE_NUMBER_U16:
-                        case JAK_CARBON_FIELD_TYPE_NUMBER_U32:
-                        case JAK_CARBON_FIELD_TYPE_NUMBER_U64: {
+                        case CARBON_FIELD_NUMBER_U8:
+                        case CARBON_FIELD_NUMBER_U16:
+                        case CARBON_FIELD_NUMBER_U32:
+                        case CARBON_FIELD_NUMBER_U64: {
                                 jak_u64 value;
                                 jak_carbon_array_it_unsigned_value(&is_null_value, &value, it);
                                 jak_carbon_printer_unsigned_nonull(printer, builder, is_null_value ? NULL : &value);
                         }
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_NUMBER_I8:
-                        case JAK_CARBON_FIELD_TYPE_NUMBER_I16:
-                        case JAK_CARBON_FIELD_TYPE_NUMBER_I32:
-                        case JAK_CARBON_FIELD_TYPE_NUMBER_I64: {
+                        case CARBON_FIELD_NUMBER_I8:
+                        case CARBON_FIELD_NUMBER_I16:
+                        case CARBON_FIELD_NUMBER_I32:
+                        case CARBON_FIELD_NUMBER_I64: {
                                 jak_i64 value;
                                 jak_carbon_array_it_signed_value(&is_null_value, &value, it);
                                 jak_carbon_printer_signed_nonull(printer, builder, is_null_value ? NULL : &value);
                         }
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_NUMBER_FLOAT: {
+                        case CARBON_FIELD_NUMBER_FLOAT: {
                                 float value;
                                 jak_carbon_array_it_float_value(&is_null_value, &value, it);
                                 jak_carbon_printer_float(printer, builder, is_null_value ? NULL : &value);
                         }
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_STRING: {
+                        case CARBON_FIELD_STRING: {
                                 jak_u64 strlen;
                                 const char *value = jak_carbon_array_it_jak_string_value(&strlen, it);
                                 jak_carbon_printer_string(printer, builder, value, strlen);
                         }
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_BINARY:
-                        case JAK_CARBON_FIELD_TYPE_BINARY_CUSTOM: {
+                        case CARBON_FIELD_BINARY:
+                        case CARBON_FIELD_BINARY_CUSTOM: {
                                 jak_carbon_binary binary;
                                 jak_carbon_array_it_binary_value(&binary, it);
                                 jak_carbon_printer_binary(printer, builder, &binary);
                         }
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_ARRAY: {
+                        case CARBON_FIELD_ARRAY_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_ARRAY_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_ARRAY_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_ARRAY_SORTED_SET: {
                                 jak_carbon_array_it *array = jak_carbon_array_it_array_value(it);
                                 jak_carbon_printer_print_array(array, printer, builder, false);
                                 jak_carbon_array_it_drop(array);
                         }
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_U8:
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_U16:
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_U32:
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_U64:
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_I8:
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_I16:
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_I32:
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_I64:
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT:
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
+                        case CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U8_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U8_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U8_SORTED_SET:
+                        case CARBON_FIELD_COLUMN_U16_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U16_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U16_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U16_SORTED_SET:
+                        case CARBON_FIELD_COLUMN_U32_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U32_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U32_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U32_SORTED_SET:
+                        case CARBON_FIELD_COLUMN_U64_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U64_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U64_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U64_SORTED_SET:
+                        case CARBON_FIELD_COLUMN_I8_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I8_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I8_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I8_SORTED_SET:
+                        case CARBON_FIELD_COLUMN_I16_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I16_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I16_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I16_SORTED_SET:
+                        case CARBON_FIELD_COLUMN_I32_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I32_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I32_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I32_SORTED_SET:
+                        case CARBON_FIELD_COLUMN_I64_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I64_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I64_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I64_SORTED_SET:
+                        case CARBON_FIELD_COLUMN_FLOAT_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_FLOAT_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_FLOAT_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_FLOAT_SORTED_SET:
+                        case CARBON_FIELD_COLUMN_BOOLEAN_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_SET: {
                                 jak_carbon_column_it *column = jak_carbon_array_it_column_value(it);
                                 jak_carbon_printer_print_column(column, printer, builder);
                         }
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_OBJECT: {
+                        case CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP:
+                        case CARBON_FIELD_DERIVED_OBJECT_SORTED_MULTIMAP:
+                        case CARBON_FIELD_DERIVED_OBJECT_CARBON_UNSORTED_MAP:
+                        case CARBON_FIELD_DERIVED_OBJECT_CARBON_SORTED_MAP: {
                                 jak_carbon_object_it *object = jak_carbon_array_it_object_value(it);
                                 jak_carbon_printer_print_object(object, printer, builder);
                                 jak_carbon_object_it_drop(object);
@@ -606,7 +678,10 @@ bool jak_carbon_printer_print_column(jak_carbon_column_it *it, jak_carbon_printe
         jak_carbon_printer_array_begin(printer, builder);
         for (jak_u32 i = 0; i < nvalues; i++) {
                 switch (type) {
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_BOOLEAN: {
+                        case CARBON_FIELD_COLUMN_BOOLEAN_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_SET: {
                                 jak_u8 value = ((jak_u8 *) values)[i];
                                 if (JAK_IS_NULL_BOOLEAN(value)) {
                                         jak_carbon_printer_null(printer, builder);
@@ -617,47 +692,74 @@ bool jak_carbon_printer_print_column(jak_carbon_column_it *it, jak_carbon_printe
                                 }
                         }
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_U8: {
+                        case CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U8_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U8_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U8_SORTED_SET: {
                                 jak_u64 number = ((jak_u8 *) values)[i];
                                 jak_carbon_printer_unsigned_nonull(printer, builder, JAK_IS_NULL_U8(number) ? NULL : &number);
                         }
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_U16: {
+                        case CARBON_FIELD_COLUMN_U16_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U16_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U16_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U16_SORTED_SET: {
                                 jak_u64 number = ((jak_u16 *) values)[i];
                                 jak_carbon_printer_unsigned_nonull(printer, builder, JAK_IS_NULL_U16(number) ? NULL : &number);
                         }
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_U32: {
+                        case CARBON_FIELD_COLUMN_U32_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U32_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U32_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U32_SORTED_SET: {
                                 jak_u64 number = ((jak_u32 *) values)[i];
                                 jak_carbon_printer_unsigned_nonull(printer, builder, JAK_IS_NULL_U32(number) ? NULL : &number);
                         }
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_U64: {
+                        case CARBON_FIELD_COLUMN_U64_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U64_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U64_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_U64_SORTED_SET: {
                                 jak_u64 number = ((jak_u64 *) values)[i];
                                 jak_carbon_printer_unsigned_nonull(printer, builder, JAK_IS_NULL_U64(number) ? NULL : &number);
                         }
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_I8: {
+                        case CARBON_FIELD_COLUMN_I8_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I8_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I8_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I8_SORTED_SET: {
                                 jak_i64 number = ((jak_i8 *) values)[i];
                                 jak_carbon_printer_signed_nonull(printer, builder, JAK_IS_NULL_I8(number) ? NULL : &number);
                         }
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_I16: {
+                        case CARBON_FIELD_COLUMN_I16_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I16_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I16_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I16_SORTED_SET: {
                                 jak_i64 number = ((jak_i16 *) values)[i];
                                 jak_carbon_printer_signed_nonull(printer, builder, JAK_IS_NULL_I16(number) ? NULL : &number);
                         }
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_I32: {
+                        case CARBON_FIELD_COLUMN_I32_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I32_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I32_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I32_SORTED_SET: {
                                 jak_i64 number = ((jak_i32 *) values)[i];
                                 jak_carbon_printer_signed_nonull(printer, builder, JAK_IS_NULL_I32(number) ? NULL : &number);
                         }
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_I64: {
+                        case CARBON_FIELD_COLUMN_I64_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I64_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I64_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_I64_SORTED_SET: {
                                 jak_i64 number = ((jak_i64 *) values)[i];
                                 jak_carbon_printer_signed_nonull(printer, builder, JAK_IS_NULL_I64(number) ? NULL : &number);
                         }
                                 break;
-                        case JAK_CARBON_FIELD_TYPE_COLUMN_FLOAT: {
+                        case CARBON_FIELD_COLUMN_FLOAT_UNSORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_FLOAT_SORTED_MULTISET:
+                        case CARBON_FIELD_DERIVED_COLUMN_FLOAT_UNSORTED_SET:
+                        case CARBON_FIELD_DERIVED_COLUMN_FLOAT_SORTED_SET: {
                                 float number = ((float *) values)[i];
                                 jak_carbon_printer_float(printer, builder, JAK_IS_NULL_FLOAT(number) ? NULL : &number);
                         }

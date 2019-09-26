@@ -204,14 +204,18 @@ typedef enum carbon_list_derivable
 typedef enum carbon_map_derivable
 {
         /* the container type that implements the map */
-        CARBON_MAP_UNSORTED_MULTIMAP,
+        CARBON_MAP_UNSORTED_MULTIMAP = CARBON_MUNSORTED_MULTIMAP,
         /* mark map as sorted */
-        CARBON_MAP_SORTED_MULTIMAP,
+        CARBON_MAP_SORTED_MULTIMAP = CARBON_MSORTED_MULTIMAP,
         /* mark map as non-distinct */
-        CARBON_MAP_UNSORTED_MAP,
+        CARBON_MAP_UNSORTED_MAP = CARBON_MUNSORTED_MAP,
         /* mark map as sorted and non-distinct */
-        CARBON_MAP_SORTED_MAP
+        CARBON_MAP_SORTED_MAP = CARBON_MSORTED_MAP
 } carbon_map_derivable_e;
+
+/* Converts an abstract type class to a list derivable type. In case the abstract type class does not define
+ * a list type, the function fails */
+fn_result carbon_abstract_class_to_list_derivable(carbon_list_derivable_e *out, carbon_abstract_type_class_e in);
 
 /* Writes the marker for a particular base type to the actual position in the memory file, and steps
  * the memory file cursor one byte towards the end. */
@@ -227,6 +231,62 @@ fn_result carbon_abstract_write_derived_type(jak_memfile *memfile, carbon_derive
  * a column-u8 container type is returned, and if [SOH] is read (which is CARBON_MSORTED_MULTISET_U8),
  * a column-u8 container type is returned, too. */
 fn_result carbon_abstract_get_container_subtype(jak_carbon_container_sub_type_e *type, jak_memfile *memfile);
+
+/* Peeks a byte as marker from the memory file without moving the memory file cursor and returns true if this
+ * marker sets an object container or a derived type of that container type. */
+fn_result ofType(bool) carbon_abstract_is_instanceof_object(jak_memfile *memfile);
+
+/* Peeks a byte as marker from the memory file without moving the memory file cursor and returns true if this
+ * marker sets an array container or a derived type of that container type. */
+fn_result ofType(bool) carbon_abstract_is_instanceof_array(jak_memfile *memfile);
+
+/* Peeks a byte as marker from the memory file without moving the memory file cursor and returns true if this
+ * marker sets an column-u8 container or a derived type of that container type. */
+fn_result ofType(bool) carbon_abstract_is_instanceof_column_u8(jak_memfile *memfile);
+
+/* Peeks a byte as marker from the memory file without moving the memory file cursor and returns true if this
+ * marker sets an column-u16 container or a derived type of that container type. */
+fn_result ofType(bool) carbon_abstract_is_instanceof_column_u16(jak_memfile *memfile);
+
+/* Peeks a byte as marker from the memory file without moving the memory file cursor and returns true if this
+ * marker sets an column-u32 container or a derived type of that container type. */
+fn_result ofType(bool) carbon_abstract_is_instanceof_column_u32(jak_memfile *memfile);
+
+/* Peeks a byte as marker from the memory file without moving the memory file cursor and returns true if this
+ * marker sets an column-u64 container or a derived type of that container type. */
+fn_result ofType(bool) carbon_abstract_is_instanceof_column_u64(jak_memfile *memfile);
+
+/* Peeks a byte as marker from the memory file without moving the memory file cursor and returns true if this
+ * marker sets an column-i8 container or a derived type of that container type. */
+fn_result ofType(bool) carbon_abstract_is_instanceof_column_i8(jak_memfile *memfile);
+
+/* Peeks a byte as marker from the memory file without moving the memory file cursor and returns true if this
+ * marker sets an column-i16 container or a derived type of that container type. */
+fn_result ofType(bool) carbon_abstract_is_instanceof_column_i16(jak_memfile *memfile);
+
+/* Peeks a byte as marker from the memory file without moving the memory file cursor and returns true if this
+ * marker sets an column-i32 container or a derived type of that container type. */
+fn_result ofType(bool) carbon_abstract_is_instanceof_column_i32(jak_memfile *memfile);
+
+/* Peeks a byte as marker from the memory file without moving the memory file cursor and returns true if this
+ * marker sets an column-i64 container or a derived type of that container type. */
+fn_result ofType(bool) carbon_abstract_is_instanceof_column_i64(jak_memfile *memfile);
+
+/* Peeks a byte as marker from the memory file without moving the memory file cursor and returns true if this
+ * marker sets an column-float container or a derived type of that container type. */
+fn_result ofType(bool) carbon_abstract_is_instanceof_column_float(jak_memfile *memfile);
+
+/* Peeks a byte as marker from the memory file without moving the memory file cursor and returns true if this
+ * marker sets an column-boolean container or a derived type of that container type. */
+fn_result ofType(bool) carbon_abstract_is_instanceof_column_boolean(jak_memfile *memfile);
+
+/* Peeks a byte as marker from the memory file without moving the memory file cursor and returns true if this
+ * marker sets a type of column container (u8, u16,...) or a derived type of that container type. */
+fn_result ofType(bool) carbon_abstract_is_instanceof_column(jak_memfile *memfile);
+
+/* Peeks a byte as marker from the memory file without moving the memory file cursor and returns true if this
+ * marker sets a type of column container or array container or a derived type of that container type. */
+fn_result ofType(bool) carbon_abstract_is_instanceof_list(jak_memfile *memfile);
 
 /* Returns the concrete derived type <code>concrete</code> (e.g., CARBON_SORTED_SET_COL_BOOLEAN) for a
  * given list type <code>is</code> (e.g., CARBON_LIST_CONTAINER_COLUMN_BOOLEAN) when deriving that
