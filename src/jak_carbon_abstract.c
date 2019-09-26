@@ -15,7 +15,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <carbon_abstract.h>
+#include <jak_carbon_abstract.h>
 #include <jak_memfile.h>
 
 fn_result carbon_abstract_type(carbon_abstract_e *type, jak_memfile *memfile)

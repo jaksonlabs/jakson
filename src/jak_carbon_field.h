@@ -22,7 +22,7 @@
 #include <jak_stdinc.h>
 #include <jak_error.h>
 #include <jak_carbon.h>
-#include <carbon_abstract.h>
+#include <jak_carbon_abstract.h>
 
 #ifndef JAK_CARBON_JAK_FIELD_H
 #define JAK_CARBON_JAK_FIELD_H

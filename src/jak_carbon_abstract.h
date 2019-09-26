@@ -23,8 +23,8 @@
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <carbon-markers.h>
-#include <carbon-containers.h>
+#include <jak_carbon_markers.h>
+#include <jak_carbon_containers.h>
 #include <jak_fn_result.h>
 
 JAK_BEGIN_DECL
@@ -34,7 +34,7 @@ JAK_BEGIN_DECL
 // ---------------------------------------------------------------------------------------------------------------------
 
 /* derivation type of any abstract type */
-typedef enum carbon_abstract {
+typedef enum jak_carbon_abstract {
         /* Does not need further treatment to guarantee properties (unsorted, and not duplicate-free) */
         CARBON_ABSTRACT_BASE,
         /* particular abstract type with further properties (such as uniqueness of contained elements), enabling the

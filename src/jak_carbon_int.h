@@ -28,10 +28,10 @@
 #include <jak_uintvar_stream.h>
 #include <jak_json.h>
 #include <jak_carbon_int.h>
-#include <carbon-containers.h>
+#include <jak_carbon_containers.h>
 #include <jak_carbon_field.h>
 #include <jak_carbon_array_it.h>
-#include <carbon_abstract.h>
+#include <jak_carbon_abstract.h>
 
 JAK_BEGIN_DECL
 

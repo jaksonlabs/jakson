@@ -25,7 +25,7 @@
 #include <jak_carbon_media.h>
 #include <jak_carbon_array_it.h>
 #include <jak_carbon_object_it.h>
-#include <carbon_abstract.h>
+#include <jak_carbon_abstract.h>
 
 const char *jak_carbon_field_type_str(jak_error *err, jak_carbon_field_type_e type)
 {

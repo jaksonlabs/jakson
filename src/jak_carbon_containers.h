@@ -23,7 +23,7 @@
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <carbon-markers.h>
+#include <jak_carbon_markers.h>
 
 JAK_BEGIN_DECL
 
