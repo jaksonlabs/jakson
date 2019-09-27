@@ -23,10 +23,10 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jakson/jak_stdinc.h>
-#include "jakson/jak_stdinc.h"
+#include <jakson/stdinc.h>
+#include "jakson/stdinc.h"
 #include "stdbool.h"
-#include "jakson/jak_types.h"
+#include "jakson/types.h"
 
 /**
  * This type is for variable-length unsigned integer types.

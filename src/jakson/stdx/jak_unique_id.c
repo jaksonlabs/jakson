@@ -17,7 +17,7 @@
 
 #include <jakson/stdx/jak_unique_id.h>
 #include <jakson/utils/jak_time.h>
-#include <jakson/jak_error.h>
+#include <jakson/error.h>
 #include <jakson/std/jak_hash.h>
 
 _Thread_local bool thread_local_init;

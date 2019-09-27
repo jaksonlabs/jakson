@@ -22,9 +22,9 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jakson/jak_stdinc.h>
+#include <jakson/stdinc.h>
 #include <jakson/std/jak_string.h>
-#include <jakson/jak_utils_hexdump.h>
+#include <jakson/hexdump.h>
 #include <jakson/memfile/jak_memblock.h>
 
 JAK_BEGIN_DECL

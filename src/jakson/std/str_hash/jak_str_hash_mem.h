@@ -22,7 +22,7 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jakson/jak_stdinc.h>
+#include <jakson/stdinc.h>
 #include <jakson/stdx/jak_alloc.h>
 #include <jakson/std/jak_str_hash.h>
 

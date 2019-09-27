@@ -28,13 +28,13 @@
 #include <jakson/archive/jak_archive_int.h>
 #include <jakson/archive/jak_archive_query.h>
 #include <jakson/archive/jak_archive_cache.h>
-#include <jakson/jak_archive.h>
+#include <jakson/archive.h>
 #include <jakson/archive/jak_encode_sync.h>
-#include <jakson/jak_stdinc.h>
+#include <jakson/stdinc.h>
 #include <jakson/memfile/jak_memblock.h>
 #include <jakson/memfile/jak_memfile.h>
 #include <jakson/archive/jak_huffman.h>
-#include <jakson/jak_archive.h>
+#include <jakson/archive.h>
 
 #define WRITE_PRIMITIVE_VALUES(memfile, values_vec, type)                                                              \
 {                                                                                                                      \

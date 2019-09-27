@@ -18,7 +18,7 @@
 #ifndef JAK_THREAD_POOL_STATISTICS_H
 #define JAK_THREAD_POOL_STATISTICS_H
 
-#include <jakson/jak_stdinc.h>
+#include <jakson/stdinc.h>
 
 JAK_BEGIN_DECL
 

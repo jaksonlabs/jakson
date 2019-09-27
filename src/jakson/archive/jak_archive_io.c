@@ -19,7 +19,7 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jakson/jak_archive.h>
+#include <jakson/archive.h>
 #include <jakson/std/jak_spinlock.h>
 #include <jakson/archive/jak_archive_io.h>
 

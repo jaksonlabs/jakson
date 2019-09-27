@@ -22,7 +22,7 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jakson/jak_stdinc.h>
+#include <jakson/stdinc.h>
 #include <jakson/carbon/jak_carbon_dot.h>
 #include <jakson/carbon/jak_carbon_containers.h>
 

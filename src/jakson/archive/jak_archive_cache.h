@@ -22,8 +22,8 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jakson/jak_stdinc.h>
-#include <jakson/jak_types.h>
+#include <jakson/stdinc.h>
+#include <jakson/types.h>
 #include <jakson/archive/jak_archive_query.h>
 
 JAK_BEGIN_DECL

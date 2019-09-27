@@ -22,8 +22,8 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jakson/jak_stdinc.h>
-#include <jakson/jak_archive.h>
+#include <jakson/stdinc.h>
+#include <jakson/archive.h>
 #include <jakson/archive/jak_archive_strid_it.h>
 #include <jakson/archive/jak_archive_pred.h>
 #include <jakson/std/hash/jak_hash_table.h>

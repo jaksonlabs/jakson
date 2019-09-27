@@ -15,7 +15,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <jakson/jak_carbon.h>
+#include <jakson/carbon.h>
 #include <jakson/carbon/jak_carbon_revise.h>
 #include <jakson/carbon/jak_carbon_array_it.h>
 #include <jakson/carbon/jak_carbon_int.h>

@@ -22,13 +22,13 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jakson/jak_stdinc.h>
+#include <jakson/stdinc.h>
 #include <jakson/std/jak_vector.h>
 #include <jakson/std/jak_bitmap.h>
 #include <jakson/std/jak_spinlock.h>
 #include <jakson/std/jak_bloom.h>
 #include <jakson/std/jak_hash.h>
-#include <jakson/jak_types.h>
+#include <jakson/types.h>
 
 JAK_BEGIN_DECL
 

@@ -17,7 +17,7 @@
 
 #include <stdio.h>
 
-#include <jakson/jak_stdinc.h>
+#include <jakson/stdinc.h>
 #include <jakson/std/jak_thread_pool.h>
 
 jak_thread_pool_stats jak_thread_pool_get_stats(jak_thread_pool *pool)

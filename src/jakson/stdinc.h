@@ -36,7 +36,7 @@
 #include <limits.h>
 #include <math.h>
 
-#include "jak_forwdecl.h"
+#include "forwdecl.h"
 
 #ifndef __cplusplus
 

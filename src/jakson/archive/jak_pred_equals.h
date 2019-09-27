@@ -22,7 +22,7 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jakson/jak_stdinc.h>
+#include <jakson/stdinc.h>
 #include <jakson/archive/jak_archive_pred.h>
 
 JAK_BEGIN_DECL

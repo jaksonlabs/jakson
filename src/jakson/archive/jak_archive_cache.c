@@ -19,9 +19,9 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jakson/jak_stdinc.h>
+#include <jakson/stdinc.h>
 #include <jakson/std/jak_hash.h>
-#include <jakson/jak_error.h>
+#include <jakson/error.h>
 #include <jakson/archive/jak_archive_cache.h>
 
 struct cache_entry {

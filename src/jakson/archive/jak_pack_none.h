@@ -22,8 +22,8 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jakson/jak_types.h>
-#include <jakson/jak_stdinc.h>
+#include <jakson/types.h>
+#include <jakson/stdinc.h>
 #include <jakson/std/jak_vector.h>
 #include <jakson/memfile/jak_memfile.h>
 

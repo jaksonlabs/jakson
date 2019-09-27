@@ -24,8 +24,8 @@
 
 #include <stdlib.h>
 
-#include <jakson/jak_stdinc.h>
-#include <jakson/jak_error.h>
+#include <jakson/stdinc.h>
+#include <jakson/error.h>
 
 JAK_BEGIN_DECL
 

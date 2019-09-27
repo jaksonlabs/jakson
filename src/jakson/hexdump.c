@@ -16,7 +16,7 @@
  */
 
 #include <ctype.h>
-#include <jakson/jak_utils_hexdump.h>
+#include <jakson/hexdump.h>
 
 bool jak_hexdump(jak_string *dst, const void *base, jak_u64 nbytes)
 {

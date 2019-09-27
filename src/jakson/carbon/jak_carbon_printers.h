@@ -22,8 +22,8 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jakson/jak_stdinc.h>
-#include <jakson/jak_types.h>
+#include <jakson/stdinc.h>
+#include <jakson/types.h>
 #include <jakson/std/jak_string.h>
 #include <jakson/stdx/jak_unique_id.h>
 

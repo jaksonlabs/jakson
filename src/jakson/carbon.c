@@ -23,7 +23,7 @@
 #include <inttypes.h>
 
 #include <jakson/std/uintvar/jak_uintvar_stream.h>
-#include <jakson/jak_carbon.h>
+#include <jakson/carbon.h>
 #include <jakson/carbon/jak_carbon_array_it.h>
 #include <jakson/carbon/jak_carbon_column_it.h>
 #include <jakson/carbon/jak_carbon_object_it.h>

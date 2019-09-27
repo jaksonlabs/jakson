@@ -22,7 +22,7 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jakson/jak_types.h>
+#include <jakson/types.h>
 
 typedef enum jak_number_min_type_e {
         JAK_NUMBER_U8,

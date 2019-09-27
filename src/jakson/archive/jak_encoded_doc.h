@@ -22,11 +22,11 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jakson/jak_stdinc.h>
+#include <jakson/stdinc.h>
 #include <jakson/std/hash/jak_hash_table.h>
 #include <jakson/stdx/jak_unique_id.h>
-#include <jakson/jak_types.h>
-#include <jakson/jak_archive.h>
+#include <jakson/types.h>
+#include <jakson/archive.h>
 
 JAK_BEGIN_DECL
 

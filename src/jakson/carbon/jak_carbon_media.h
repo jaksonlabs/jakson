@@ -22,10 +22,10 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jakson/jak_stdinc.h>
-#include <jakson/jak_error.h>
+#include <jakson/stdinc.h>
+#include <jakson/error.h>
 #include <jakson/memfile/jak_memfile.h>
-#include <jakson/jak_carbon.h>
+#include <jakson/carbon.h>
 #include <jakson/carbon/jak_carbon_field.h>
 
 JAK_BEGIN_DECL

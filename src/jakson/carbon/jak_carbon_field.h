@@ -19,9 +19,9 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jakson/jak_stdinc.h>
-#include <jakson/jak_error.h>
-#include <jakson/jak_carbon.h>
+#include <jakson/stdinc.h>
+#include <jakson/error.h>
+#include <jakson/carbon.h>
 #include <jakson/carbon/jak_carbon_abstract.h>
 
 #ifndef JAK_CARBON_JAK_FIELD_H

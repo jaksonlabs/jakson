@@ -15,7 +15,7 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <jakson/jak_fn_result.h>
+#include <jakson/fn_result.h>
 #include <stdarg.h>
 
 void __fn_result_ok(fn_result *result)

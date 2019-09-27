@@ -23,7 +23,7 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jakson/jak_stdinc.h>
+#include <jakson/stdinc.h>
 #include <jakson/memfile/jak_memfile.h>
 #include <jakson/std/uintvar/jak_uintvar_stream.h>
 #include <jakson/json/jak_json.h>

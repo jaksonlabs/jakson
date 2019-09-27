@@ -22,8 +22,8 @@
 #ifndef JAK_CARBON_COMMIT_HASH_H
 #define JAK_CARBON_COMMIT_HASH_H
 
-#include <jakson/jak_stdinc.h>
-#include <jakson/jak_error.h>
+#include <jakson/stdinc.h>
+#include <jakson/error.h>
 #include <jakson/memfile/jak_memfile.h>
 #include <jakson/std/jak_string.h>
 

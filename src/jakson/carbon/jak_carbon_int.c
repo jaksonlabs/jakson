@@ -17,7 +17,7 @@
  */
 
 #include <jakson/std/uintvar/jak_uintvar_stream.h>
-#include <jakson/jak_carbon.h>
+#include <jakson/carbon.h>
 #include <jakson/carbon/jak_carbon_insert.h>
 #include <jakson/carbon/jak_carbon_media.h>
 #include <jakson/carbon/jak_carbon_int.h>

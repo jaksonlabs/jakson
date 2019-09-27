@@ -22,12 +22,12 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jakson/jak_stdinc.h>
-#include <jakson/jak_error.h>
+#include <jakson/stdinc.h>
+#include <jakson/error.h>
 #include <jakson/memfile/jak_memblock.h>
 #include <jakson/memfile/jak_memfile.h>
 #include <jakson/std/jak_spinlock.h>
-#include <jakson/jak_carbon.h>
+#include <jakson/carbon.h>
 #include <jakson/carbon/jak_carbon_dot.h>
 #include <jakson/carbon/jak_carbon_path.h>
 #include <jakson/carbon/jak_carbon_int.h>

@@ -24,7 +24,7 @@
 
 #include <sys/mman.h>
 
-#include <jakson/jak_stdinc.h>
+#include <jakson/stdinc.h>
 #include <jakson/stdx/jak_alloc.h>
 #include <jakson/memfile/jak_memfile.h>
 

@@ -3,7 +3,7 @@
 #include <jakson/archive/jak_pack.h>
 #include <jakson/archive/jak_archive_query.h>
 #include <jakson/archive/jak_archive_int.h>
-#include <jakson/jak_carbon.h>
+#include <jakson/carbon.h>
 
 #include "modules.h"
 

@@ -22,9 +22,9 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jakson/jak_stdinc.h>
-#include <jakson/jak_error.h>
-#include <jakson/jak_types.h>
+#include <jakson/stdinc.h>
+#include <jakson/error.h>
+#include <jakson/types.h>
 
 JAK_BEGIN_DECL
 

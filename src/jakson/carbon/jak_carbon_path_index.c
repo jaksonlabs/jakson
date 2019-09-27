@@ -19,7 +19,7 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jakson/jak_utils_hexdump.h>
+#include <jakson/hexdump.h>
 #include <jakson/carbon/jak_carbon_path_index.h>
 #include <jakson/carbon/jak_carbon_key.h>
 #include <jakson/carbon/jak_carbon_int.h>

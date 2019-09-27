@@ -22,7 +22,7 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jakson/jak_stdinc.h>
+#include <jakson/stdinc.h>
 #include <jakson/utils/jak_priority_queue.h>
 #include <jakson/std/thread_pool/jak_thread_pool_status.h>
 #include <jakson/std/thread_pool/jak_thread_pool_stats.h>

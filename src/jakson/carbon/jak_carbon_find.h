@@ -22,9 +22,9 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jakson/jak_stdinc.h>
-#include <jakson/jak_error.h>
-#include <jakson/jak_carbon.h>
+#include <jakson/stdinc.h>
+#include <jakson/error.h>
+#include <jakson/carbon.h>
 #include <jakson/carbon/jak_carbon_column_it.h>
 #include <jakson/carbon/jak_carbon_array_it.h>
 #include <jakson/carbon/jak_carbon_object_it.h>

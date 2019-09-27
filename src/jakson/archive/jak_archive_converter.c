@@ -19,7 +19,7 @@
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jakson/jak_stdinc.h>
+#include <jakson/stdinc.h>
 #include <jakson/archive/jak_archive_visitor.h>
 #include <jakson/archive/jak_archive_converter.h>
 
