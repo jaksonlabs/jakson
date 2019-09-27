@@ -1,6 +1,6 @@
 # Donors to Jakson
 
-[libcarbon](https://github.com/protolabs/libcarbon) is a not-for-profit, community-driven open source project. It is 
+[libcarbon](https://github.com/jaksonlabs/jakson) is a not-for-profit, community-driven open source project. It is 
 legally represented by [Marcus Pinnecke](http://www.pinnecke.info). The project lives of the energetic efforts of its 
 contributors and by the donations from the community.
 
@@ -27,7 +27,7 @@ Currently, we are looking for sponors: [Become a sponsor!](mailto:pinnecke@ovgu.
 
 ## Donors (Monthly)
 
-Donors who support [libcarbon](https://github.com/protolabs/libcarbon) with a monthly donation find themselves with 
+Donors who support [libcarbon](https://github.com/jaksonlabs/jakson) with a monthly donation find themselves with 
 great thanks in the following list.
 
 ### Gold
@@ -44,7 +44,7 @@ great thanks in the following list.
 
 ## Donors (One-Shot)
 
-Donors who support [libcarbon](https://github.com/protolabs/libcarbon) with a single donation find themselves with 
+Donors who support [libcarbon](https://github.com/jaksonlabs/jakson) with a single donation find themselves with 
 great thanks in the following list.
 
 ### Gold

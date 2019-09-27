@@ -1,6 +1,6 @@
 # Columnar Binary JSON Books
 
-This directory (`book`) contains the Carbon Specification document, and a developer manual for [Jakson](https://github.com/protolabs/libcarbon) (including the Carbon API).
+This directory (`book`) contains the Carbon Specification document, and a developer manual for [Jakson](https://github.com/jaksonlabs/jakson) (including the Carbon API).
 
 ## Specification 
 

@@ -374,12 +374,12 @@ bool carbon_printer_print_object(carbon_object_it *it, carbon_printer *printer, 
                                 carbon_printer_prop_null(printer, builder, key_name, key_len);
                                 break;
                         case CARBON_FIELD_TRUE:
-                                /* in an array, there is no TRUE constant that is set to NULL because it will be replaced with
+                                /** in an array, there is no TRUE constant that is set to NULL because it will be replaced with
                                  * a constant NULL. In columns, there might be a NULL-encoded value */
                                 carbon_printer_prop_true(printer, builder, key_name, key_len);
                                 break;
                         case CARBON_FIELD_FALSE:
-                                /* in an array, there is no FALSE constant that is set to NULL because it will be replaced with
+                                /** in an array, there is no FALSE constant that is set to NULL because it will be replaced with
                                  * a constant NULL. In columns, there might be a NULL-encoded value */
                                 carbon_printer_prop_false(printer, builder, key_name, key_len);
                                 break;
@@ -531,12 +531,12 @@ bool carbon_printer_print_array(carbon_array_it *it, carbon_printer *printer, st
                                 carbon_printer_null(printer, builder);
                                 break;
                         case CARBON_FIELD_TRUE:
-                                /* in an array, there is no TRUE constant that is set to NULL because it will be replaced with
+                                /** in an array, there is no TRUE constant that is set to NULL because it will be replaced with
                                  * a constant NULL. In columns, there might be a NULL-encoded value */
                                 carbon_printer_true(printer, false, builder);
                                 break;
                         case CARBON_FIELD_FALSE:
-                                /* in an array, there is no FALSE constant that is set to NULL because it will be replaced with
+                                /** in an array, there is no FALSE constant that is set to NULL because it will be replaced with
                                  * a constant NULL. In columns, there might be a NULL-encoded value */
                                 carbon_printer_false(printer, false, builder);
                                 break;

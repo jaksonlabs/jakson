@@ -40,33 +40,33 @@ _Thread_local u32 thread_local_counter_limit;
  */
 union global_id {
         struct {
-                /* global */
+                /** global */
                 u64 global_wallclock
-                        : 5;   /* increasing wall clock time (ms) */
+                        : 5;   /** increasing wall clock time (ms) */
                 u64 global_build_date
-                        : 1;   /* fix bit dependent on compilation time */
+                        : 1;   /** fix bit dependent on compilation time */
                 u64 global_build_path
-                        : 1;   /* fix bit dependent on compilation path */
+                        : 1;   /** fix bit dependent on compilation path */
 
-                /* per-process */
+                /** per-process */
                 u64 process_id
-                        : 7;   /* fix id */
+                        : 7;   /** fix id */
                 u64 process_magic
-                        : 2;   /* random fix value */
+                        : 2;   /** random fix value */
                 u64 process_counter
-                        : 8;   /* increasing counter */
+                        : 8;   /** increasing counter */
 
-                /* per-thread  */
+                /** per-thread  */
                 u64 thread_id
-                        : 7;   /* fix id */
+                        : 7;   /** fix id */
                 u64 thread_magic
-                        : 2;   /* random fix value */
+                        : 2;   /** random fix value */
                 u64 thread_counter
-                        : 29;  /* increasing counter (< 536mio ids per thread) */
+                        : 29;  /** increasing counter (< 536mio ids per thread) */
 
-                /* per-call */
+                /** per-call */
                 u64 call_random
-                        :  2;  /* random value */
+                        :  2;  /** random value */
         };
 
         u64 value;

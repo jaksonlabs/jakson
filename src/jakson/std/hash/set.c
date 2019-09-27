@@ -247,7 +247,7 @@ static inline uint_fast32_t _hash_set_insert_or_update(hashset *map, const u32 *
 
                 next_round:
                 if (map->size >= FIX_MAP_AUTO_REHASH_LOADFACTOR * map->table.cap_elems) {
-                        return i + 1; /* tell the caller that pair i was inserted, but it successors not */
+                        return i + 1; /** tell the caller that pair i was inserted, but it successors not */
                 }
 
         }
@@ -283,7 +283,7 @@ bool hashset_insert_or_update(hashset *map, const void *keys, uint_fast32_t num_
                                             keys + cont_idx * map->key_data.elem_size,
                                             num_pairs - cont_idx);
                 if (cont_idx != 0) {
-                        /* rehashing is required, and [status, num_pairs) are left to be inserted */
+                        /** rehashing is required, and [status, num_pairs) are left to be inserted */
                         if (!hashset_rehash(map)) {
                                 hashset_unlock(map);
                                 return false;

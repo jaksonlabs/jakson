@@ -37,7 +37,7 @@ typedef struct carbon_printer
         void (*record_begin)(carbon_printer *self, string_buffer *builder);
         void (*record_end)(carbon_printer *self, string_buffer *builder);
         void (*meta_begin)(carbon_printer *self, string_buffer *builder);
-        /* type is of carbon_key_e */
+        /** type is of carbon_key_e */
         void (*meta_data)(carbon_printer *self, string_buffer *builder, int key_type, const void *key, u64 key_length, u64 commit_hash);
         void (*meta_end)(carbon_printer *self, string_buffer *builder);
         void (*doc_begin)(carbon_printer *self, string_buffer *builder);
@@ -50,11 +50,11 @@ typedef struct carbon_printer
         void (*const_null)(carbon_printer *self, string_buffer *builder);
         void (*const_true)(carbon_printer *self, bool is_null, string_buffer *builder);
         void (*const_false)(carbon_printer *self, bool is_null, string_buffer *builder);
-        /* if <code>value</code> is NULL, <code>value</code> is interpreted as null-value'd entry */
+        /** if <code>value</code> is NULL, <code>value</code> is interpreted as null-value'd entry */
         void (*val_signed)(carbon_printer *self, string_buffer *builder, const i64 *value);
-        /* if <code>value</code> is NULL, <code>value</code> is interpreted as null-value'd entry */
+        /** if <code>value</code> is NULL, <code>value</code> is interpreted as null-value'd entry */
         void (*val_unsigned)(carbon_printer *self, string_buffer *builder, const u64 *value);
-        /* if <code>value</code> is NULL, <code>value</code> is interpreted as null-value'd entry */
+        /** if <code>value</code> is NULL, <code>value</code> is interpreted as null-value'd entry */
         void (*val_float)(carbon_printer *self, string_buffer *builder, const float *value);
         void (*val_string)(carbon_printer *self, string_buffer *builder, const char *value, u64 strlen);
         void (*val_binary)(carbon_printer *self, string_buffer *builder, const carbon_binary *binary);
@@ -74,14 +74,14 @@ typedef struct carbon_printer
         void (*obj_prop_name)(carbon_printer *self, string_buffer *builder, const char *key_name, u64 key_len);
 } carbon_printer;
 
-/* 'impl' is of carbon_printer_impl_e */
+/** 'impl' is of carbon_printer_impl_e */
 bool carbon_printer_drop(carbon_printer *printer);
 bool carbon_printer_by_type(carbon_printer *printer, int impl);
 
 bool carbon_printer_begin(carbon_printer *printer, string_buffer *str);
 bool carbon_printer_end(carbon_printer *printer, string_buffer *str);
 bool carbon_printer_header_begin(carbon_printer *printer, string_buffer *str);
-/* 'key_type' is of carbon_key_e */
+/** 'key_type' is of carbon_key_e */
 bool carbon_printer_header_contents(carbon_printer *printer, string_buffer *str, int key_type, const void *key, u64 key_length, u64 rev);
 bool carbon_printer_header_end(carbon_printer *printer, string_buffer *str);
 bool carbon_printer_payload_begin(carbon_printer *printer, string_buffer *str);

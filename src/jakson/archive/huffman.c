@@ -131,7 +131,7 @@ bool pack_huffman_read_extra(packer *self, FILE *src, size_t nbytes)
         UNUSED(src);
         UNUSED(nbytes);
 
-        abort(); /* not implemented */
+        abort(); /** not implemented */
         return false;
 }
 
@@ -175,6 +175,6 @@ bool pack_huffman_decode_string(packer *self, char *dst, size_t strlen, FILE *sr
         UNUSED(dst);
         UNUSED(strlen);
         UNUSED(src);
-        abort(); /* not implemented */
+        abort(); /** not implemented */
         return false;
 }

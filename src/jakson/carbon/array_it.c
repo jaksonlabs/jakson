@@ -303,7 +303,7 @@ bool carbon_array_it_next(carbon_array_it *it)
                 carbon_int_history_push(&it->history, last_off);
                 return true;
         } else {
-                /* skip remaining zeros until end of array is reached */
+                /** skip remaining zeros until end of array is reached */
                 if (!it->array_end_reached) {
                         ERROR_IF(!is_empty_slot, &it->err, ERR_CORRUPTED);
 
@@ -481,7 +481,7 @@ bool carbon_array_it_remove(carbon_array_it *it)
         }
 }
 
-/* Checks if this array is annotated as a multi set abstract type. Returns true if it is is a multi set, and false if
+/** Checks if this array is annotated as a multi set abstract type. Returns true if it is is a multi set, and false if
  * it is a set. In case of any error, a failure is returned. */
 fn_result ofType(bool) carbon_array_it_is_multiset(carbon_array_it *it)
 {
@@ -491,7 +491,7 @@ fn_result ofType(bool) carbon_array_it_is_multiset(carbon_array_it *it)
         return carbon_abstract_is_multiset(type_class);
 }
 
-/* Checks if this array is annotated as a sorted abstract type. Returns true if this is the case,
+/** Checks if this array is annotated as a sorted abstract type. Returns true if this is the case,
  * otherwise false. In case of any error, a failure is returned. */
 fn_result ofType(bool) carbon_array_it_is_sorted(carbon_array_it *it)
 {

@@ -145,7 +145,7 @@ static void path_index_node_set_field_type(struct path_index_node *node, carbon_
 static struct path_index_node *
 path_index_node_add_array_elem(struct path_index_node *parent, u64 pos, offset_t value_off)
 {
-        /* For elements in array, the type marker (e.g., [c]) is contained. That is needed since the element might
+        /** For elements in array, the type marker (e.g., [c]) is contained. That is needed since the element might
          * be a container */
         struct path_index_node *sub = VECTOR_NEW_AND_GET(&parent->sub_entries, struct path_index_node);
         path_index_node_new_array_element(sub, pos, value_off);
@@ -155,7 +155,7 @@ path_index_node_add_array_elem(struct path_index_node *parent, u64 pos, offset_t
 static struct path_index_node *
 path_index_node_add_column_elem(struct path_index_node *parent, u64 pos, offset_t value_off)
 {
-        /* For elements in column, there is no type marker since no value is allowed to be a container */
+        /** For elements in column, there is no type marker since no value is allowed to be a container */
         struct path_index_node *sub = VECTOR_NEW_AND_GET(&parent->sub_entries, struct path_index_node);
         path_index_node_new_column_element(sub, pos, value_off);
         return sub;
@@ -216,12 +216,12 @@ static void record_ref_create(memfile *memfile, carbon *doc)
         carbon_key_type(&key_type, doc);
         carbon_commit_hash(&commit_hash, doc);
 
-        /* write record key */
+        /** write record key */
         memfile_seek(memfile, 0);
         carbon_key_create(memfile, key_type, &doc->err);
         switch (key_type) {
                 case CARBON_KEY_NOKEY: {
-                        /* nothing to do */
+                        /** nothing to do */
                 }
                         break;
                 case CARBON_KEY_AUTOKEY:
@@ -249,7 +249,7 @@ static void record_ref_create(memfile *memfile, carbon *doc)
                 default: ERROR(&doc->err, ERR_TYPEMISMATCH)
         }
 
-        /* write record version */
+        /** write record version */
         memfile_write(memfile, &commit_hash, sizeof(u64));
 }
 
@@ -322,7 +322,7 @@ static void object_build_index(struct path_index_node *parent, carbon_object_it 
                 case CARBON_FIELD_NUMBER_FLOAT:
                 case CARBON_FIELD_BINARY:
                 case CARBON_FIELD_BINARY_CUSTOM:
-                        /* path ends here */
+                        /** path ends here */
                         break;
                 case CARBON_FIELD_COLUMN_FLOAT_UNSORTED_MULTISET:
                 case CARBON_FIELD_DERIVED_COLUMN_FLOAT_SORTED_MULTISET:
@@ -413,7 +413,7 @@ static void array_build_index(struct path_index_node *parent, carbon_array_it *e
                 case CARBON_FIELD_NUMBER_FLOAT:
                 case CARBON_FIELD_BINARY:
                 case CARBON_FIELD_BINARY_CUSTOM:
-                        /* path ends here */
+                        /** path ends here */
                         break;
                 case CARBON_FIELD_COLUMN_FLOAT_UNSORTED_MULTISET:
                 case CARBON_FIELD_DERIVED_COLUMN_FLOAT_SORTED_MULTISET:
@@ -487,7 +487,7 @@ static void field_ref_write(memfile *file, struct path_index_node *node)
         memfile_write_byte(file, node->field_type);
         if (node->field_type != CARBON_FIELD_NULL && node->field_type != CARBON_FIELD_TRUE &&
             node->field_type != CARBON_FIELD_FALSE) {
-                /* only in case of field type that is not null, true, or false, there is more information behind
+                /** only in case of field type that is not null, true, or false, there is more information behind
                  * the field offset */
                 memfile_write_uintvar_stream(NULL, file, node->field_offset);
         }
@@ -497,7 +497,7 @@ static void container_contents_flat(memfile *file, struct path_index_node *node)
 {
         memfile_write_uintvar_stream(NULL, file, node->sub_entries.num_elems);
 
-        /* write position offsets */
+        /** write position offsets */
         offset_t position_off_latest = memfile_tell(file);
         for (u32 i = 0; i < node->sub_entries.num_elems; i++) {
                 memfile_write_uintvar_stream(NULL, file, 0);
@@ -534,7 +534,7 @@ static void container_field_flat(memfile *file, struct path_index_node *node)
                 case CARBON_FIELD_NUMBER_FLOAT:
                 case CARBON_FIELD_BINARY:
                 case CARBON_FIELD_BINARY_CUSTOM:
-                        /* any path will end with this kind of field, and therefore no subsequent elements exists */
+                        /** any path will end with this kind of field, and therefore no subsequent elements exists */
                         JAK_ASSERT(node->sub_entries.num_elems == 0);
                         break;
                 case CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP:
@@ -585,7 +585,7 @@ static void container_field_flat(memfile *file, struct path_index_node *node)
                 case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_MULTISET:
                 case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_UNSORTED_SET:
                 case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_SET:
-                        /* each of these field types allows for further path traversals, and therefore at least one
+                        /** each of these field types allows for further path traversals, and therefore at least one
                          * subsequent path element must exist */
                         container_contents_flat(file, node);
                         break;
@@ -662,7 +662,7 @@ static u8 field_ref_into_carbon(carbon_insert *ins, carbon_path_index *index, bo
 
         if (field_type != CARBON_FIELD_NULL && field_type != CARBON_FIELD_TRUE &&
             field_type != CARBON_FIELD_FALSE) {
-                /* only in case of field type that is not null, true, or false, there is more information behind
+                /** only in case of field type that is not null, true, or false, there is more information behind
                  * the field offset */
                 u64 field_offset = memfile_read_uintvar_stream(NULL, &index->memfile);
                 if (is_root) {
@@ -690,7 +690,7 @@ static u8 field_ref_to_str(string_buffer *str, carbon_path_index *index)
 
         if (field_type != CARBON_FIELD_NULL && field_type != CARBON_FIELD_TRUE &&
             field_type != CARBON_FIELD_FALSE) {
-                /* only in case of field type that is not null, true, or false, there is more information behind
+                /** only in case of field type that is not null, true, or false, there is more information behind
                  * the field offset */
                 u64 field_offset = memfile_read_uintvar_stream(NULL, &index->memfile);
                 string_buffer_add_char(str, '(');
@@ -800,7 +800,7 @@ container_to_str(string_buffer *str, carbon_path_index *index, u8 field_type, un
                 case CARBON_FIELD_NUMBER_FLOAT:
                 case CARBON_FIELD_BINARY:
                 case CARBON_FIELD_BINARY_CUSTOM:
-                        /* nothing to do */
+                        /** nothing to do */
                         break;
                 case CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP:
                 case CARBON_FIELD_DERIVED_OBJECT_SORTED_MULTIMAP:
@@ -850,7 +850,7 @@ container_to_str(string_buffer *str, carbon_path_index *index, u8 field_type, un
                 case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_MULTISET:
                 case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_UNSORTED_SET:
                 case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_SET: {
-                        /* subsequent path elements to be printed */
+                        /** subsequent path elements to be printed */
                         container_contents_to_str(str, index, ++intent_level);
                 }
                         break;
@@ -876,7 +876,7 @@ static void container_into_carbon(carbon_insert *ins, carbon_path_index *index, 
                 case CARBON_FIELD_NUMBER_FLOAT:
                 case CARBON_FIELD_BINARY:
                 case CARBON_FIELD_BINARY_CUSTOM:
-                        /* nothing to do */
+                        /** nothing to do */
                         break;
                 case CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP:
                 case CARBON_FIELD_DERIVED_OBJECT_SORTED_MULTIMAP:
@@ -926,7 +926,7 @@ static void container_into_carbon(carbon_insert *ins, carbon_path_index *index, 
                 case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_MULTISET:
                 case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_UNSORTED_SET:
                 case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_SET: {
-                        /* subsequent path elements to be printed */
+                        /** subsequent path elements to be printed */
                         container_contents_into_carbon(ins, index);
                 }
                         break;
@@ -1042,14 +1042,14 @@ static void index_build(memfile *file, carbon *doc)
 {
         struct path_index_node root_array;
 
-        /* init */
+        /** init */
         path_index_node_init(&root_array);
 
         carbon_array_it it;
         u64 array_pos = 0;
         carbon_iterator_open(&it, doc);
 
-        /* build index as tree structure */
+        /** build index as tree structure */
         while (carbon_array_it_next(&it)) {
                 offset_t entry_offset = carbon_array_it_tell(&it);
                 struct path_index_node *node = path_index_node_add_array_elem(&root_array, array_pos, entry_offset);
@@ -1058,13 +1058,13 @@ static void index_build(memfile *file, carbon *doc)
         }
         carbon_iterator_close(&it);
 
-        /* for debug */
+        /** for debug */
         path_index_node_print_level(stdout, &root_array, 0); // TODO: Debug remove
 
         index_flat(file, &root_array);
         memfile_shrink(file);
 
-        /* cleanup */
+        /** cleanup */
         path_index_node_drop(&root_array);
 }
 
@@ -1077,7 +1077,7 @@ static void record_ref_to_str(string_buffer *str, carbon_path_index *index)
 
         switch (key_type) {
                 case CARBON_KEY_NOKEY:
-                        /* nothing to do */
+                        /** nothing to do */
                         break;
                 case CARBON_KEY_AUTOKEY:
                 case CARBON_KEY_UKEY: {
@@ -1117,7 +1117,7 @@ static void record_ref_to_carbon(carbon_insert *roins, carbon_path_index *index)
 
         switch (key_type) {
                 case CARBON_KEY_NOKEY:
-                        /* nothing to do */
+                        /** nothing to do */
                         break;
                 case CARBON_KEY_AUTOKEY:
                 case CARBON_KEY_UKEY: {

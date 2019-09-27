@@ -316,84 +316,84 @@ fn_result carbon_abstract_get_container_subtype(carbon_container_sub_type_e *typ
         FN_FAIL_IF_NULL(type, memfile)
         u8 marker = memfile_peek_byte(memfile);
         switch (marker) {
-                /* abstract types for object containers */
+                /** abstract types for object containers */
                 case CARBON_UNSORTED_MULTIMAP:
                 case CARBON_SORTED_MULTIMAP:
                 case CARBON_UNSORTED_MAP:
                 case CARBON_SORTED_MAP:
                         *type = CARBON_CONTAINER_OBJECT;
                         return FN_OK();
-                /* abstract types for array containers */
+                /** abstract types for array containers */
                 case CARBON_UNSORTED_MULTISET_ARRAY:
                 case CARBON_SORTED_MULTISET_ARRAY:
                 case CARBON_UNSORTED_SET_ARRAY:
                 case CARBON_SORTED_SET_ARRAY:
                         *type = CARBON_CONTAINER_ARRAY;
                         return FN_OK();
-                /* abstract types for column-u8 containers */
+                /** abstract types for column-u8 containers */
                 case CARBON_UNSORTED_MULTISET_COL_U8:
                 case CARBON_SORTED_MULTISET_COL_U8:
                 case CARBON_UNSORTED_SET_COL_U8:
                 case CARBON_SORTED_SET_COL_U8:
                         *type = CARBON_CONTAINER_COLUMN_U8;
                         return FN_OK();
-                /* abstract types for column-u16 containers */
+                /** abstract types for column-u16 containers */
                 case CARBON_UNSORTED_MULTISET_COL_U16:
                 case CARBON_SORTED_MULTISET_COL_U16:
                 case CARBON_UNSORTED_SET_COL_U16:
                 case CARBON_SORTED_SET_COL_U16:
                         *type = CARBON_CONTAINER_COLUMN_U16;
                         return FN_OK();
-                /* abstract types for column-u32 containers */
+                /** abstract types for column-u32 containers */
                 case CARBON_UNSORTED_MULTISET_COL_U32:
                 case CARBON_SORTED_MULTISET_COL_U32:
                 case CARBON_UNSORTED_SET_COL_U32:
                 case CARBON_SORTED_SET_COL_U32:
                         *type = CARBON_CONTAINER_COLUMN_U32;
                         return FN_OK();
-                /* abstract types for column-u64 containers */
+                /** abstract types for column-u64 containers */
                 case CARBON_UNSORTED_MULTISET_COL_U64:
                 case CARBON_SORTED_MULTISET_COL_U64:
                 case CARBON_UNSORTED_SET_COL_U64:
                 case CARBON_SORTED_SET_COL_U64:
                         *type = CARBON_CONTAINER_COLUMN_U64;
                         return FN_OK();
-                /* abstract types for column-i8 containers */
+                /** abstract types for column-i8 containers */
                 case CARBON_UNSORTED_MULTISET_COL_I8:
                 case CARBON_SORTED_MULTISET_COL_I8:
                 case CARBON_UNSORTED_SET_COL_I8:
                 case CARBON_SORTED_SET_COL_I8:
                         *type = CARBON_CONTAINER_COLUMN_I8;
                         return FN_OK();
-                /* abstract types for column-i16 containers */
+                /** abstract types for column-i16 containers */
                 case CARBON_UNSORTED_MULTISET_COL_I16:
                 case CARBON_SORTED_MULTISET_COL_I16:
                 case CARBON_UNSORTED_SET_COL_I16:
                 case CARBON_SORTED_SET_COL_I16:
                         *type = CARBON_CONTAINER_COLUMN_I16;
                         return FN_OK();
-                /* abstract types for column-i32 containers */
+                /** abstract types for column-i32 containers */
                 case CARBON_UNSORTED_MULTISET_COL_I32:
                 case CARBON_SORTED_MULTISET_COL_I32:
                 case CARBON_UNSORTED_SET_COL_I32:
                 case CARBON_SORTED_SET_COL_I32:
                         *type = CARBON_CONTAINER_COLUMN_I32;
                         return FN_OK();
-                /* abstract types for column-i64 containers */
+                /** abstract types for column-i64 containers */
                 case CARBON_UNSORTED_MULTISET_COL_I64:
                 case CARBON_SORTED_MULTISET_COL_I64:
                 case CARBON_UNSORTED_SET_COL_I64:
                 case CARBON_SORTED_SET_COL_I64:
                         *type = CARBON_CONTAINER_COLUMN_I64;
                         return FN_OK();
-                /* abstract types for column-float containers */
+                /** abstract types for column-float containers */
                 case CARBON_UNSORTED_MULTISET_COL_FLOAT:
                 case CARBON_SORTED_MULTISET_COL_FLOAT:
                 case CARBON_UNSORTED_SET_COL_FLOAT:
                 case CARBON_SORTED_SET_COL_FLOAT:
                         *type = CARBON_CONTAINER_COLUMN_FLOAT;
                         return FN_OK();
-                /* abstract types for column-boolean containers */
+                /** abstract types for column-boolean containers */
                 case CARBON_UNSORTED_MULTISET_COL_BOOLEAN:
                 case CARBON_SORTED_MULTISET_COL_BOOLEAN:
                 case CARBON_UNSORTED_SET_COL_BOOLEAN:

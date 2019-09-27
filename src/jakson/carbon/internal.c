@@ -58,7 +58,7 @@ insert_embedded_container(memfile *memfile, u8 begin_marker, u8 end_marker, u8 c
 
         marker_insert(memfile, end_marker);
 
-        /* seek to first entry in container */
+        /** seek to first entry in container */
         memfile_seek(memfile, payload_begin);
 }
 
@@ -110,7 +110,7 @@ bool carbon_int_insert_column(memfile *memfile_in, err *err_in, carbon_list_deri
         size_t nbytes = capactity * type_size;
         memfile_ensure_space(memfile_in, nbytes + sizeof(u8) + 2 * sizeof(u32));
 
-        /* seek to first entry in column */
+        /** seek to first entry in column */
         memfile_seek(memfile_in, payload_begin);
 
         return true;
@@ -118,12 +118,12 @@ bool carbon_int_insert_column(memfile *memfile_in, err *err_in, carbon_list_deri
 
 size_t carbon_int_get_type_size_encoded(carbon_field_type_e type)
 {
-        size_t type_size = sizeof(media_type); /* at least the media type marker is required */
+        size_t type_size = sizeof(media_type); /** at least the media type marker is required */
         switch (type) {
                 case CARBON_FIELD_NULL:
                 case CARBON_FIELD_TRUE:
                 case CARBON_FIELD_FALSE:
-                        /* only media type marker is required */
+                        /** only media type marker is required */
                         break;
                 case CARBON_FIELD_NUMBER_U8:
                 case CARBON_FIELD_NUMBER_I8:
@@ -160,7 +160,7 @@ size_t carbon_int_get_type_value_size(carbon_field_type_e type)
                 case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_MULTISET:
                 case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_UNSORTED_SET:
                 case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_SET:
-                        return sizeof(media_type); /* these constant values are determined by their media type markers */
+                        return sizeof(media_type); /** these constant values are determined by their media type markers */
                 case CARBON_FIELD_NUMBER_U8:
                 case CARBON_FIELD_NUMBER_I8:
                 case CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET:
@@ -347,27 +347,27 @@ bool carbon_int_field_data_access(memfile *file, err *err, field_access *field_a
                 }
                         break;
                 case CARBON_FIELD_BINARY: {
-                        /* read mime type with variable-length integer type */
+                        /** read mime type with variable-length integer type */
                         u64 mime_type_id = memfile_read_uintvar_stream(NULL, file);
 
                         field_access->it_mime_type = carbon_media_mime_type_by_id(mime_type_id);
                         field_access->it_mime_type_strlen = strlen(field_access->it_mime_type);
 
-                        /* read blob length */
+                        /** read blob length */
                         field_access->it_field_len = memfile_read_uintvar_stream(NULL, file);
 
-                        /* the mem points now to the actual blob data, which is used by the iterator to set the field */
+                        /** the mem points now to the actual blob data, which is used by the iterator to set the field */
                 }
                         break;
                 case CARBON_FIELD_BINARY_CUSTOM: {
-                        /* read mime type string_buffer */
+                        /** read mime type string_buffer */
                         field_access->it_mime_type_strlen = memfile_read_uintvar_stream(NULL, file);
                         field_access->it_mime_type = memfile_read(file, field_access->it_mime_type_strlen);
 
-                        /* read blob length */
+                        /** read blob length */
                         field_access->it_field_len = memfile_read_uintvar_stream(NULL, file);
 
-                        /* the mem points now to the actual blob data, which is used by the iterator to set the field */
+                        /** the mem points now to the actual blob data, which is used by the iterator to set the field */
                 }
                         break;
                 case CARBON_FIELD_ARRAY_UNSORTED_MULTISET:
@@ -862,12 +862,12 @@ bool carbon_int_field_remove(memfile *memfile, err *err, carbon_field_type_e typ
         JAK_ASSERT((carbon_field_type_e) *memfile_peek(memfile, sizeof(u8)) == type);
         offset_t start_off = memfile_tell(memfile);
         memfile_skip(memfile, sizeof(u8));
-        size_t rm_nbytes = sizeof(u8); /* at least the type marker must be removed */
+        size_t rm_nbytes = sizeof(u8); /** at least the type marker must be removed */
         switch (type) {
                 case CARBON_FIELD_NULL:
                 case CARBON_FIELD_TRUE:
                 case CARBON_FIELD_FALSE:
-                        /* nothing to do */
+                        /** nothing to do */
                         break;
                 case CARBON_FIELD_NUMBER_U8:
                 case CARBON_FIELD_NUMBER_I8:
@@ -889,8 +889,8 @@ bool carbon_int_field_remove(memfile *memfile, err *err, carbon_field_type_e typ
                         rm_nbytes += sizeof(float);
                         break;
                 case CARBON_FIELD_STRING: {
-                        u8 len_nbytes;  /* number of bytes used to store string_buffer length */
-                        u64 str_len; /* the number of characters of the string_buffer field */
+                        u8 len_nbytes;  /** number of bytes used to store string_buffer length */
+                        u64 str_len; /** the number of characters of the string_buffer field */
 
                         str_len = memfile_read_uintvar_stream(&len_nbytes, memfile);
 
@@ -898,30 +898,30 @@ bool carbon_int_field_remove(memfile *memfile, err *err, carbon_field_type_e typ
                 }
                         break;
                 case CARBON_FIELD_BINARY: {
-                        u8 mime_type_nbytes; /* number of bytes for mime type */
-                        u8 blob_length_nbytes; /* number of bytes to store blob length */
-                        u64 blob_nbytes; /* number of bytes to store actual blob data */
+                        u8 mime_type_nbytes; /** number of bytes for mime type */
+                        u8 blob_length_nbytes; /** number of bytes to store blob length */
+                        u64 blob_nbytes; /** number of bytes to store actual blob data */
 
-                        /* get bytes used for mime type id */
+                        /** get bytes used for mime type id */
                         memfile_read_uintvar_stream(&mime_type_nbytes, memfile);
 
-                        /* get bytes used for blob length info */
+                        /** get bytes used for blob length info */
                         blob_nbytes = memfile_read_uintvar_stream(&blob_length_nbytes, memfile);
 
                         rm_nbytes += mime_type_nbytes + blob_length_nbytes + blob_nbytes;
                 }
                         break;
                 case CARBON_FIELD_BINARY_CUSTOM: {
-                        u8 custom_type_strlen_nbytes; /* number of bytes for type name string_buffer length info */
-                        u8 custom_type_strlen; /* number of characters to encode type name string_buffer */
-                        u8 blob_length_nbytes; /* number of bytes to store blob length */
-                        u64 blob_nbytes; /* number of bytes to store actual blob data */
+                        u8 custom_type_strlen_nbytes; /** number of bytes for type name string_buffer length info */
+                        u8 custom_type_strlen; /** number of characters to encode type name string_buffer */
+                        u8 blob_length_nbytes; /** number of bytes to store blob length */
+                        u64 blob_nbytes; /** number of bytes to store actual blob data */
 
-                        /* get bytes for custom type string_buffer len, and the actual length */
+                        /** get bytes for custom type string_buffer len, and the actual length */
                         custom_type_strlen = memfile_read_uintvar_stream(&custom_type_strlen_nbytes, memfile);
                         memfile_skip(memfile, custom_type_strlen);
 
-                        /* get bytes used for blob length info */
+                        /** get bytes used for blob length info */
                         blob_nbytes = memfile_read_uintvar_stream(&blob_length_nbytes, memfile);
 
                         rm_nbytes += custom_type_strlen_nbytes + custom_type_strlen + blob_length_nbytes + blob_nbytes;
@@ -1344,7 +1344,7 @@ static void int_carbon_from_json_elem(carbon_insert *ins, const json_element *el
                         switch (type) {
                                 case JSON_LIST_EMPTY: {
                                         if (is_root) {
-                                                /* nothing to do */
+                                                /** nothing to do */
                                         } else {
                                                 carbon_insert_array_state state;
                                                 carbon_insert_array_begin(&state, ins, 0);
@@ -1565,7 +1565,7 @@ fn_result carbon_int_from_json(carbon *doc, const json *data,
 
 static void marker_insert(memfile *memfile, u8 marker)
 {
-        /* check whether marker can be written, otherwise make space for it */
+        /** check whether marker can be written, otherwise make space for it */
         char c = *memfile_peek(memfile, sizeof(u8));
         if (c != 0) {
                 memfile_inplace_insert(memfile, sizeof(u8));

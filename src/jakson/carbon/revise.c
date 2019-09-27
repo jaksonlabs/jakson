@@ -295,7 +295,7 @@ static bool internal_pack_array(carbon_array_it *it)
 {
         JAK_ASSERT(it);
 
-        /* shrink this array */
+        /** shrink this array */
         {
                 carbon_array_it this_array_it;
                 bool is_empty_slot, is_array_end;
@@ -324,7 +324,7 @@ static bool internal_pack_array(carbon_array_it *it)
                 carbon_array_it_drop(&this_array_it);
         }
 
-        /* shrink contained containers */
+        /** shrink contained containers */
         {
                 while (carbon_array_it_next(it)) {
                         carbon_field_type_e type;
@@ -345,7 +345,7 @@ static bool internal_pack_array(carbon_array_it *it)
                                 case CARBON_FIELD_NUMBER_FLOAT:
                                 case CARBON_FIELD_BINARY:
                                 case CARBON_FIELD_BINARY_CUSTOM:
-                                        /* nothing to shrink, because there are no padded zeros here */
+                                        /** nothing to shrink, because there are no padded zeros here */
                                         break;
                                 case CARBON_FIELD_ARRAY_UNSORTED_MULTISET:
                                 case CARBON_FIELD_DERIVED_ARRAY_SORTED_MULTISET:
@@ -439,7 +439,7 @@ static bool internal_pack_object(carbon_object_it *it)
 {
         JAK_ASSERT(it);
 
-        /* shrink this object */
+        /** shrink this object */
         {
                 carbon_object_it this_object_it;
                 bool is_empty_slot, is_object_end;
@@ -468,7 +468,7 @@ static bool internal_pack_object(carbon_object_it *it)
                 carbon_object_it_drop(&this_object_it);
         }
 
-        /* shrink contained containers */
+        /** shrink contained containers */
         {
                 while (carbon_object_it_next(it)) {
                         carbon_field_type_e type;
@@ -489,7 +489,7 @@ static bool internal_pack_object(carbon_object_it *it)
                                 case CARBON_FIELD_NUMBER_FLOAT:
                                 case CARBON_FIELD_BINARY:
                                 case CARBON_FIELD_BINARY_CUSTOM:
-                                        /* nothing to shrink, because there are no padded zeros here */
+                                        /** nothing to shrink, because there are no padded zeros here */
                                         break;
                                 case CARBON_FIELD_ARRAY_UNSORTED_MULTISET:
                                 case CARBON_FIELD_DERIVED_ARRAY_SORTED_MULTISET:

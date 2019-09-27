@@ -222,7 +222,7 @@ static inline carbon_path_status_e traverse_object(carbon_path_evaluator *state,
         u32 next_path_pos = current_path_pos + 1;
 
         if (!status) {
-                /* empty document */
+                /** empty document */
                 return CARBON_PATH_EMPTY_DOC;
         } else {
                 DECLARE_AND_INIT(u64, key_len)
@@ -234,7 +234,7 @@ static inline carbon_path_status_e traverse_object(carbon_path_evaluator *state,
                                         carbon_object_it_clone(&state->result.containers.object.it, it);
                                         return CARBON_PATH_RESOLVED;
                                 } else {
-                                        /* path end not reached, traverse further if possible */
+                                        /** path end not reached, traverse further if possible */
                                         JAK_ASSERT(next_path_pos < path_length);
 
                                         carbon_field_type_e prop_type;
@@ -400,7 +400,7 @@ static inline carbon_path_status_e traverse_array(carbon_path_evaluator *state,
         carbon_dot_path_len(&path_length, path);
 
         if (!carbon_array_it_next(it)) {
-                /* empty document */
+                /** empty document */
                 return CARBON_PATH_EMPTY_DOC;
         } else {
                 switch (node_type) {
@@ -410,10 +410,10 @@ static inline carbon_path_status_e traverse_array(carbon_path_evaluator *state,
                                        carbon_array_it_next(it)) { current_array_idx++; }
                                 JAK_ASSERT(current_array_idx <= requested_array_idx);
                                 if (current_array_idx != requested_array_idx) {
-                                        /* root array has too less elements to reach the requested index */
+                                        /** root array has too less elements to reach the requested index */
                                         return CARBON_PATH_NOSUCHINDEX;
                                 } else {
-                                        /* requested index is reached; depending on the subsequent path, lookup may stops */
+                                        /** requested index is reached; depending on the subsequent path, lookup may stops */
                                         carbon_array_it_field_type(&elem_type, it);
                                         u32 next_path_pos = current_path_pos + 1;
                                         if (is_unit_array && is_record &&
@@ -426,18 +426,18 @@ static inline carbon_path_status_e traverse_array(carbon_path_evaluator *state,
                                                                        sub_it);
                                         } else {
                                                 if (next_path_pos < path_length) {
-                                                        /* path must be further evaluated in the next step, which requires a container
+                                                        /** path must be further evaluated in the next step, which requires a container
                                                          * type (for traversability) */
                                                         carbon_dot_node_type_e next_node_type;
                                                         carbon_dot_path_type_at(&next_node_type, next_path_pos, path);
                                                         if (!carbon_field_type_is_traversable(elem_type)) {
-                                                                /* the array element is not a container; path evaluation stops here */
+                                                                /** the array element is not a container; path evaluation stops here */
                                                                 return CARBON_PATH_NOTTRAVERSABLE;
                                                         } else {
-                                                                /* array element is traversable */
+                                                                /** array element is traversable */
                                                                 switch (next_node_type) {
                                                                         case DOT_NODE_ARRAY_IDX:
-                                                                                /* next node in path is an array index which requires that
+                                                                                /** next node in path is an array index which requires that
                                                                                  * the current array element is an array or column */
                                                                                 if (!carbon_field_type_is_list_or_subtype(elem_type)) {
                                                                                         return CARBON_PATH_NOCONTAINER;
@@ -465,7 +465,7 @@ static inline carbon_path_status_e traverse_array(carbon_path_evaluator *state,
                                                                                         }
                                                                                 }
                                                                         case DOT_NODE_KEY_NAME:
-                                                                                /* next node in path is a key name which requires that
+                                                                                /** next node in path is a key name which requires that
                                                                                  * the current array element is of type object */
                                                                                 if (!carbon_field_type_is_object_or_subtype(
                                                                                         elem_type)) {
@@ -485,7 +485,7 @@ static inline carbon_path_status_e traverse_array(carbon_path_evaluator *state,
                                                                 }
                                                         }
                                                 } else {
-                                                        /* path end is reached */
+                                                        /** path end is reached */
                                                         state->result.container_type = CARBON_ARRAY;
                                                         carbon_array_it_clone(&state->result.containers.array.it, it);
                                                         return CARBON_PATH_RESOLVED;
@@ -493,14 +493,14 @@ static inline carbon_path_status_e traverse_array(carbon_path_evaluator *state,
                                         }
                                 }
                         case DOT_NODE_KEY_NAME:
-                                /* first array element exists, which must be of type object */
+                                /** first array element exists, which must be of type object */
                                 carbon_array_it_field_type(&elem_type, it);
                                 if (!carbon_field_type_is_object_or_subtype(elem_type)) {
-                                        /* first array element is not of type object and a key lookup cannot
+                                        /** first array element is not of type object and a key lookup cannot
                                          * be executed, consequentially */
                                         return CARBON_PATH_NOTANOBJECT;
                                 } else {
-                                        /* next node in path is a key name which requires that
+                                        /** next node in path is a key name which requires that
                                                                          * the current array element is of type object */
                                         if (!carbon_field_type_is_object_or_subtype(elem_type)) {
                                                 return CARBON_PATH_NOTANOBJECT;
@@ -537,7 +537,7 @@ static inline carbon_path_status_e traverse_column(carbon_path_evaluator *state,
         DECLARE_AND_INIT(carbon_field_type_e, column_type)
         carbon_dot_path_len(&total_path_len, path);
         if (current_path_pos + 1 != total_path_len) {
-                /* a column cannot contain further containers; since the current path node is not
+                /** a column cannot contain further containers; since the current path node is not
                  * the last one, traversal cannot be continued */
                 return CARBON_PATH_NONESTING;
         } else {
@@ -546,7 +546,7 @@ static inline carbon_path_status_e traverse_column(carbon_path_evaluator *state,
                 carbon_dot_path_idx_at(&requested_idx, current_path_pos, path);
                 carbon_column_it_values_info(&column_type, &nun_values_contained, it);
                 if (requested_idx >= nun_values_contained) {
-                        /* requested index does not exists in this column */
+                        /** requested index does not exists in this column */
                         return CARBON_PATH_NOSUCHINDEX;
                 } else {
                         state->result.container_type = CARBON_COLUMN;

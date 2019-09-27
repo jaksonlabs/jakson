@@ -62,7 +62,7 @@ typedef struct carbon_array_it {
 
         carbon_list_derivable_e abstract_type;
 
-        /* in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
+        /** in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
         i64 mod_size;
         bool array_end_reached;
 
@@ -159,11 +159,11 @@ fn_result carbon_array_it_insert_begin(carbon_insert *inserter, carbon_array_it 
 fn_result carbon_array_it_insert_end(carbon_insert *inserter);
 bool carbon_array_it_remove(carbon_array_it *it);
 
-/* Checks if this array is annotated as a multi set abstract type. Returns true if it is is a multi set, and false if
+/** Checks if this array is annotated as a multi set abstract type. Returns true if it is is a multi set, and false if
  * it is a set. In case of any error, a failure is returned. */
 fn_result ofType(bool) carbon_array_it_is_multiset(carbon_array_it *it);
 
-/* Checks if this array is annotated as a sorted abstract type. Returns true if this is the case,
+/** Checks if this array is annotated as a sorted abstract type. Returns true if this is the case,
  * otherwise false. In case of any error, a failure is returned. */
 fn_result ofType(bool) carbon_array_it_is_sorted(carbon_array_it *it);
 

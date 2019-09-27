@@ -77,7 +77,7 @@ typedef int64_t i64;
 #define IS_NULL_I64(x)          (x == I64_NULL)
 #define IS_NULL_FLOAT(x)        (isnan(x))
 
-typedef u64 archive_field_sid_t;  /* string_buffer identifier, resolvable by a string_buffer dictionary */
+typedef u64 archive_field_sid_t;  /** string_buffer identifier, resolvable by a string_buffer dictionary */
 typedef char field_null_t;
 typedef i8 archive_field_boolean_t;
 typedef i8 archive_field_i8_t;

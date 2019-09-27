@@ -40,7 +40,7 @@ typedef struct carbon_column_it {
         err err;
         carbon_field_type_e type;
 
-        /* in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
+        /** in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
         i64 mod_size;
 
         u32 column_capacity;

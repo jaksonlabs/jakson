@@ -418,32 +418,32 @@ static void insert_binary(carbon_insert *inserter, const void *value, size_t nby
                           const char *file_ext, const char *user_type)
 {
         if (user_type && strlen(user_type) > 0) {
-                /* write media type 'user binary' */
+                /** write media type 'user binary' */
                 push_media_type_for_array(inserter, CARBON_FIELD_BINARY_CUSTOM);
 
-                /* write length of 'user_type' string_buffer with variable-length integer type */
+                /** write length of 'user_type' string_buffer with variable-length integer type */
                 u64 user_type_strlen = strlen(user_type);
 
                 memfile_write_uintvar_stream(NULL, &inserter->memfile, user_type_strlen);
 
-                /* write 'user_type' string_buffer */
+                /** write 'user_type' string_buffer */
                 memfile_ensure_space(&inserter->memfile, user_type_strlen);
                 memfile_write(&inserter->memfile, user_type, user_type_strlen);
 
-                /* write binary blob */
+                /** write binary blob */
                 write_binary_blob(inserter, value, nbytes);
 
         } else {
-                /* write media type 'binary' */
+                /** write media type 'binary' */
                 push_media_type_for_array(inserter, CARBON_FIELD_BINARY);
 
-                /* write mime type with variable-length integer type */
+                /** write mime type with variable-length integer type */
                 u64 mime_type_id = carbon_media_mime_type_by_ext(file_ext);
 
-                /* write mime type id */
+                /** write mime type id */
                 memfile_write_uintvar_stream(NULL, &inserter->memfile, mime_type_id);
 
-                /* write binary blob */
+                /** write binary blob */
                 write_binary_blob(inserter, value, nbytes);
         }
 }
@@ -1028,10 +1028,10 @@ static void internal_create(carbon_insert *inserter, memfile *src, offset_t pos)
 
 static void write_binary_blob(carbon_insert *inserter, const void *value, size_t nbytes)
 {
-        /* write blob length */
+        /** write blob length */
         memfile_write_uintvar_stream(NULL, &inserter->memfile, nbytes);
 
-        /* write blob */
+        /** write blob */
         memfile_ensure_space(&inserter->memfile, nbytes);
         memfile_write(&inserter->memfile, value, nbytes);
 }

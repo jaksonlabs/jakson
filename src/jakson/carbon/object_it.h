@@ -52,7 +52,7 @@ typedef struct carbon_object_it {
         } field;
 
         spinlock lock;
-        /* in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
+        /** in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
         i64 mod_size;
 } carbon_object_it;
 

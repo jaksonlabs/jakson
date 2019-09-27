@@ -50,7 +50,7 @@ bool string_buffer_add_nchar(string_buffer *builder, const char *str, u64 strlen
         ERROR_IF_NULL(builder)
         ERROR_IF_NULL(str)
 
-        /* resize if needed */
+        /** resize if needed */
         if (UNLIKELY(builder->end + strlen >= builder->cap)) {
                 size_t new_cap = (builder->end + strlen) * 1.7f;
                 builder->data = realloc(builder->data, new_cap);
@@ -59,7 +59,7 @@ bool string_buffer_add_nchar(string_buffer *builder, const char *str, u64 strlen
                 builder->cap = new_cap;
         }
 
-        /* append string_buffer */
+        /** append string_buffer */
         memcpy(builder->data + builder->end, str, strlen);
         builder->end += strlen;
 
@@ -164,7 +164,7 @@ bool string_buffer_clear(string_buffer *builder)
 bool string_buffer_ensure_capacity(string_buffer *builder, u64 cap)
 {
         ERROR_IF_NULL(builder)
-        /* resize if needed */
+        /** resize if needed */
         if (UNLIKELY(cap > builder->cap)) {
                 size_t new_cap = cap * 1.7f;
                 builder->data = realloc(builder->data, new_cap);

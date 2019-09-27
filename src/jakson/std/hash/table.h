@@ -29,10 +29,10 @@
 BEGIN_DECL
 
 typedef struct hashtable_bucket {
-        bool in_use_flag;  /* flag indicating if bucket is in use */
-        i32 displacement; /* difference between intended position during insert, and actual position in table */
-        u32 num_probs;    /* number of probe calls to this bucket */
-        u64 data_idx;      /* position of key element in owning hashtable structure */
+        bool in_use_flag;  /** flag indicating if bucket is in use */
+        i32 displacement; /** difference between intended position during insert, and actual position in table */
+        u32 num_probs;    /** number of probe calls to this bucket */
+        u64 data_idx;      /** position of key element in owning hashtable structure */
 } hashtable_bucket;
 
 /**

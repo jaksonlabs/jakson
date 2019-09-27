@@ -25,5 +25,5 @@ Please note that the Carbon implementation is improved from version to version. 
 
 ## License
 
-This developer documentation, all the example source code, is released under the [MIT Licsense](https://github.com/protolabs/libcarbon/blob/master/LICENSE).
+This developer documentation, all the example source code, is released under the [MIT Licsense](https://github.com/jaksonlabs/jakson/blob/master/LICENSE).
 
