@@ -22,5 +22,5 @@ This documentations covers the majority of Jaksons core data structures and func
 
 ## License
 
-This developer documentation, all the example source code, is released under the [MIT Licsense](https://github.com/protolabs/libcarbon/blob/master/LICENSE).
+This developer documentation, all the example source code, is released under the [MIT Licsense](https://github.com/jaksonlabs/jakson/blob/master/LICENSE).
 

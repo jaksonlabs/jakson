@@ -7,7 +7,7 @@ The Carbon API is part of Jakson source code, but can be accessed in a library f
 The starting point is to get the Jakson sources. Typically, this is done by cloning a stable version of Jaksons public git repository hosted at GitHub:
 
 ```bash
-$ git clone https://github.com/protolabs/libcarbon.git
+$ git clone https://github.com/jaksonlabs/jakson.git
 ```
 
 
