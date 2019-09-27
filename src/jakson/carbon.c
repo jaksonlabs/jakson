@@ -341,6 +341,16 @@ fn_result ofType(bool) carbon_is_sorted(carbon *doc)
         return FN_IS_OK(ret) ? ret : FN_FAIL_FORWARD();
 }
 
+fn_result carbon_update_list_type(carbon *revised_doc, carbon *doc, carbon_list_derivable_e derivation)
+{
+        FN_FAIL_IF_NULL(revised_doc, doc);
+        carbon_revise context;
+        carbon_revise_begin(&context, revised_doc, doc);
+        carbon_revise_set_list_type(&context, derivation);
+        carbon_revise_end(&context);
+        return FN_OK();
+}
+
 bool carbon_to_str(string_buffer *dst, carbon_printer_impl_e printer, carbon *doc)
 {
         ERROR_IF_NULL(doc);

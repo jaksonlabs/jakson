@@ -327,6 +327,53 @@ fn_result carbon_find_result_type(carbon_field_type_e *type, carbon_find *find)
         return FN_OK();
 }
 
+fn_result carbon_find_update_array_type(carbon_find *find, carbon_list_derivable_e derivation)
+{
+        FN_FAIL_IF_NULL(find)
+        carbon_field_type_e type;
+        carbon_find_result_type(&type, find);
+        if (carbon_field_type_is_array_or_subtype(type)) {
+                memfile mod;
+                carbon_array_it *it = FN_PTR(carbon_array_it, carbon_find_result_array(find));
+                memfile_clone(&mod, &it->memfile);
+                memfile_seek_from_here(&mod, -sizeof(u8));
+                carbon_derived_e derive_marker;
+                carbon_abstract_derive_list_to(&derive_marker, CARBON_LIST_CONTAINER_ARRAY, derivation);
+                carbon_abstract_write_derived_type(&mod, derive_marker);
+
+                return FN_OK();
+
+        } else {
+                return FN_FAIL(ERR_TYPEMISMATCH, "find: array type update must be invoked on array or sub type");
+        }
+}
+
+fn_result ofType(bool) carbon_find_array_is_multiset(carbon_find *find)
+{
+        FN_FAIL_IF_NULL(find)
+        carbon_field_type_e type;
+        carbon_find_result_type(&type, find);
+        if (carbon_field_type_is_array_or_subtype(type)) {
+                carbon_array_it *it = FN_PTR(carbon_array_it, carbon_find_result_array(find));
+                return carbon_array_it_is_multiset(it);
+        } else {
+                return FN_FAIL(ERR_TYPEMISMATCH, "find: array type update must be invoked on array or sub type");
+        }
+}
+
+fn_result ofType(bool) carbon_find_array_is_sorted(carbon_find *find)
+{
+        FN_FAIL_IF_NULL(find)
+        carbon_field_type_e type;
+        carbon_find_result_type(&type, find);
+        if (carbon_field_type_is_array_or_subtype(type)) {
+                carbon_array_it *it = FN_PTR(carbon_array_it, carbon_find_result_array(find));
+                return carbon_array_it_is_sorted(it);
+        } else {
+                return FN_FAIL(ERR_TYPEMISMATCH, "find: array type update must be invoked on array or sub type");
+        }
+}
+
 fn_result __check_path_evaluator_has_result(carbon_find *find)
 {
         assert(find);
@@ -469,6 +516,7 @@ static void result_from_array(carbon_find *find, carbon_array_it *it)
                 case CARBON_FIELD_DERIVED_ARRAY_UNSORTED_SET:
                 case CARBON_FIELD_DERIVED_ARRAY_SORTED_SET:
                         find->value.array_it = carbon_array_it_array_value(it);
+                        find->value.array_it->memfile.mode = find->doc->memfile.mode;
                         break;
                 case CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET:
                 case CARBON_FIELD_DERIVED_COLUMN_U8_SORTED_MULTISET:
@@ -511,12 +559,14 @@ static void result_from_array(carbon_find *find, carbon_array_it *it)
                 case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_UNSORTED_SET:
                 case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_SET:
                         find->value.column_it = carbon_array_it_column_value(it);
+                        find->value.column_it->memfile.mode = find->doc->memfile.mode;
                         break;
                 case CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP:
                 case CARBON_FIELD_DERIVED_OBJECT_SORTED_MULTIMAP:
                 case CARBON_FIELD_DERIVED_OBJECT_CARBON_UNSORTED_MAP:
                 case CARBON_FIELD_DERIVED_OBJECT_CARBON_SORTED_MAP:
                         find->value.object_it = carbon_array_it_object_value(it);
+                        find->value.object_it->memfile.mode = find->doc->memfile.mode;
                         break;
                 case CARBON_FIELD_STRING:
                         find->value.string.base = carbon_array_it_string_value(&find->value.string.len, it);
@@ -559,6 +609,7 @@ static void result_from_object(carbon_find *find, carbon_object_it *it)
                 case CARBON_FIELD_DERIVED_ARRAY_UNSORTED_SET:
                 case CARBON_FIELD_DERIVED_ARRAY_SORTED_SET:
                         find->value.array_it = carbon_object_it_array_value(it);
+                        find->value.array_it->memfile.mode = find->doc->memfile.mode;
                         break;
                 case CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET:
                 case CARBON_FIELD_DERIVED_COLUMN_U8_SORTED_MULTISET:
@@ -601,12 +652,14 @@ static void result_from_object(carbon_find *find, carbon_object_it *it)
                 case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_UNSORTED_SET:
                 case CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_SET:
                         find->value.column_it = carbon_object_it_column_value(it);
+                        find->value.column_it->memfile.mode = find->doc->memfile.mode;
                         break;
                 case CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP:
                 case CARBON_FIELD_DERIVED_OBJECT_SORTED_MULTIMAP:
                 case CARBON_FIELD_DERIVED_OBJECT_CARBON_UNSORTED_MAP:
                 case CARBON_FIELD_DERIVED_OBJECT_CARBON_SORTED_MAP:
                         find->value.object_it = carbon_object_it_object_value(it);
+                        find->value.object_it->memfile.mode = find->doc->memfile.mode;
                         break;
                 case CARBON_FIELD_STRING:
                         find->value.string.base = carbon_object_it_string_value(&find->value.string.len, it);

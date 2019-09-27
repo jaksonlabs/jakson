@@ -132,6 +132,13 @@ bool carbon_array_it_update_in_place_null(carbon_array_it *it)
         return update_in_place_constant(it, CARBON_CONSTANT_NULL);
 }
 
+static void __carbon_array_it_load_abstract_type(carbon_array_it *it)
+{
+        carbon_abstract_type_class_e type_class;
+        carbon_abstract_get_class(&type_class, &it->memfile);
+        carbon_abstract_class_to_list_derivable(&it->abstract_type, type_class);
+}
+
 fn_result carbon_array_it_create(carbon_array_it *it, memfile *memfile, err *err,
                             offset_t payload_start)
 {
@@ -160,9 +167,9 @@ fn_result carbon_array_it_create(carbon_array_it *it, memfile *memfile, err *err
                         return FN_FAIL(ERR_MARKERMAPPING, "expected array or sub type marker");
                 }
         }
-        carbon_abstract_type_class_e type_class;
-        carbon_abstract_get_class(&type_class, &it->memfile);
-        carbon_abstract_class_to_list_derivable(&it->abstract_type, type_class);
+
+        __carbon_array_it_load_abstract_type(it);
+
         memfile_skip(&it->memfile, sizeof(u8));
 
 
@@ -191,6 +198,7 @@ bool carbon_array_it_clone(carbon_array_it *dst, carbon_array_it *src)
         error_cpy(&dst->err, &src->err);
         dst->mod_size = src->mod_size;
         dst->array_end_reached = src->array_end_reached;
+        dst->abstract_type = src->abstract_type;
         vector_cpy(&dst->history, &src->history);
         carbon_int_field_access_clone(&dst->field_access, &src->field_access);
         dst->field_offset = src->field_offset;
@@ -499,4 +507,20 @@ fn_result ofType(bool) carbon_array_it_is_sorted(carbon_array_it *it)
         carbon_abstract_type_class_e type_class;
         carbon_abstract_list_derivable_to_class(&type_class, it->abstract_type);
         return carbon_abstract_is_sorted(type_class);
+}
+
+fn_result carbon_array_it_update_type(carbon_array_it *it, carbon_list_derivable_e derivation)
+{
+        FN_FAIL_IF_NULL(it)
+
+        carbon_array_it_prev(it);
+        memfile_save_position(&it->memfile);
+
+        carbon_derived_e derive_marker;
+        carbon_abstract_derive_list_to(&derive_marker, CARBON_LIST_CONTAINER_ARRAY, derivation);
+        carbon_abstract_write_derived_type(&it->memfile, derive_marker);
+
+        memfile_restore_position(&it->memfile);
+        carbon_array_it_next(it);
+        return FN_OK();
 }

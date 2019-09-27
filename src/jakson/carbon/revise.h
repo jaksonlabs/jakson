@@ -50,6 +50,8 @@ bool carbon_revise_key_set_unsigned(carbon_revise *context, u64 key_value);
 bool carbon_revise_key_set_signed(carbon_revise *context, i64 key_value);
 bool carbon_revise_key_set_string(carbon_revise *context, const char *key_value);
 
+fn_result carbon_revise_set_list_type(carbon_revise *context, carbon_list_derivable_e derivation);
+
 fn_result carbon_revise_iterator_open(carbon_array_it *it, carbon_revise *context);
 fn_result carbon_revise_iterator_close(carbon_array_it *it);
 

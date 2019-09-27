@@ -72,6 +72,10 @@ fn_result ofType(char *) carbon_find_result_to_json_compact_dup(carbon_find *fin
 
 fn_result carbon_find_result_type(carbon_field_type_e *type, carbon_find *find);
 
+fn_result carbon_find_update_array_type(carbon_find *find, carbon_list_derivable_e derivation);
+fn_result ofType(bool) carbon_find_array_is_multiset(carbon_find *find);
+fn_result ofType(bool) carbon_find_array_is_sorted(carbon_find *find);
+
 fn_result ofType(carbon_array_it *) carbon_find_result_array(carbon_find *find);
 fn_result ofType(carbon_object_it *) carbon_find_result_object(carbon_find *find);
 fn_result ofType(carbon_column_it *) carbon_find_result_column(carbon_find *find);

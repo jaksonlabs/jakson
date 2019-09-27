@@ -220,6 +220,9 @@ fn_result ofType(bool) carbon_is_multiset(carbon *doc);
  * otherwise false. In case of any error, a failure is returned. */
 fn_result ofType(bool) carbon_is_sorted(carbon *doc);
 
+/** Changes the abstract type of the most-outer record array to the given abstract type */
+fn_result carbon_update_list_type(carbon *revised_doc, carbon *doc, carbon_list_derivable_e derivation);
+
 bool carbon_to_str(string_buffer *dst, carbon_printer_impl_e printer, carbon *doc);
 const char *carbon_to_json_extended(string_buffer *dst, carbon *doc);
 const char *carbon_to_json_compact(string_buffer *dst, carbon *doc);

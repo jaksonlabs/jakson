@@ -167,6 +167,9 @@ fn_result ofType(bool) carbon_array_it_is_multiset(carbon_array_it *it);
  * otherwise false. In case of any error, a failure is returned. */
 fn_result ofType(bool) carbon_array_it_is_sorted(carbon_array_it *it);
 
+/** Updates this arrays abstract type to the given abstract type */
+fn_result carbon_array_it_update_type(carbon_array_it *it, carbon_list_derivable_e derivation);
+
 END_DECL
 
 #endif

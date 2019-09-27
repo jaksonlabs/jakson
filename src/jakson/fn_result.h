@@ -153,14 +153,17 @@ typedef struct fn_result {
 // ---------------------------------------------------------------------------------------------------------------------
 
 /** break outside the fn_result environment by converting an fn_result object to a boolean, which is true if
- * the object does not carry a boolean value but the function call was successful, and which is true if
- * the object carries a "true" boolean value and the function call was successful, or false otherwise */
+ * the object does not carry any value but the function call was successful, or which is true if
+ * the object carries a non-zero value and the function call was successful, or false otherwise */
 #define FN_STATUS(expr)                                                                                                \
 ({                                                                                                                     \
         fn_result result = (expr);                                                                                     \
         (__fn_result_is_ok(result) && (!RESULT_HAS_VALUE(result) ||                                                    \
-                                       (RESULT_HAS_VALUE(result) && __fn_result_is_bool(result) &&                     \
-                                        __fn_result_bool(result))));                                                   \
+                                       (RESULT_HAS_VALUE(result) &&                                                    \
+                                                ((__fn_result_is_bool(result) && __fn_result_bool(result)) ||          \
+                                                 (__fn_result_is_int(result) &&  __fn_result_int(result))) ||          \
+                                                 (__fn_result_is_uint(result)  &&  __fn_result_uint(result)) ||        \
+                                                 (__fn_result_is_ptr(result)  &&  __fn_result_ptr(result)))));         \
 })
 
 #define FN_GET_PTR(T, expr)                                                                                            \
@@ -172,6 +175,17 @@ typedef struct fn_result {
                 __get_ptr_ret = __fn_result_ptr(__get_ptr_result);                                                     \
         }                                                                                                              \
         ((T *)__get_ptr_ret);                                                                                          \
+})
+
+#define FN_GET_BOOL(expr)                                                                                              \
+({                                                                                                                     \
+        bool __get_bool_ret = false;                                                                                   \
+        fn_result __get_bool_result = (expr);                                                                          \
+        if (__fn_result_is_ok(__get_bool_result) && RESULT_HAS_VALUE(__get_bool_result) &&                             \
+            __fn_result_is_bool(__get_bool_result)) {                                                                  \
+                __get_bool_ret = __fn_result_bool(__get_bool_result);                                                  \
+        }                                                                                                              \
+        __get_bool_ret;                                                                                                \
 })
 
 // ---------------------------------------------------------------------------------------------------------------------

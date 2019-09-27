@@ -157,6 +157,21 @@ bool carbon_revise_key_set_string(carbon_revise *context, const char *key_value)
         }
 }
 
+fn_result carbon_revise_set_list_type(carbon_revise *context, carbon_list_derivable_e derivation)
+{
+        FN_FAIL_IF_NULL(context)
+        carbon_array_it it;
+        carbon_revise_iterator_open(&it, context);
+
+        memfile_seek_from_here(&it.memfile, -sizeof(u8));
+        carbon_derived_e derive_marker;
+        carbon_abstract_derive_list_to(&derive_marker, CARBON_LIST_CONTAINER_ARRAY, derivation);
+        carbon_abstract_write_derived_type(&it.memfile, derive_marker);
+
+        carbon_revise_iterator_close(&it);
+        return FN_OK();
+}
+
 fn_result carbon_revise_iterator_open(carbon_array_it *it, carbon_revise *context)
 {
         FN_FAIL_IF_NULL(it, context);
