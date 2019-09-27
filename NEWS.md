@@ -1,4 +1,4 @@
-## 0.5.00.03 [2019-XX-XX]
+## 0.5.00.03 [2019-09-27]
 - Add source amalgamation as optional build option to increase runtime performance by generating a single translation 
   unit for Jaksons sources. Set `-DUSE_AMALGAMATION=ON` to use amalgamation, and see [INSTALL.md](INSTALL.md) for more
   information. Implementation details are given in [CMakeLists.txt](CMakeLists.txt).
