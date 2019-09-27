@@ -1,19 +1,19 @@
 #include <gtest/gtest.h>
 #include <jakson/jakson.h>
 
-static void make_memfile(jak_memfile *memfile) {
-        jak_memblock *memblock;
-        jak_memblock_create(&memblock, 1024);
-        jak_memfile_open(memfile, memblock, JAK_READ_WRITE);
+static void make_memfile(memfile *memfile) {
+        memblock *memblock;
+        memblock_create(&memblock, 1024);
+        memfile_open(memfile, memblock, READ_WRITE);
 }
 
-static void drop_memfile(jak_memfile *memfile) {
-        jak_memblock_drop(memfile->memblock);
+static void drop_memfile(memfile *memfile) {
+        memblock_drop(memfile->memblock);
 }
 
 TEST(TestAbstractTypeMarker, DetectBaseTypeByBase) {
 
-        jak_memfile memfile;
+        memfile memfile;
         make_memfile(&memfile);
 
         carbon_abstract_e abstract_type;
@@ -21,7 +21,7 @@ TEST(TestAbstractTypeMarker, DetectBaseTypeByBase) {
         /* object is base type */
         {
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_base_type(&memfile, CARBON_CONTAINER_OBJECT)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
         }
@@ -29,7 +29,7 @@ TEST(TestAbstractTypeMarker, DetectBaseTypeByBase) {
         /* array is base type */
         {
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_base_type(&memfile, CARBON_CONTAINER_ARRAY)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
         }
@@ -37,52 +37,52 @@ TEST(TestAbstractTypeMarker, DetectBaseTypeByBase) {
         /* column-... is base type */
         {
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_base_type(&memfile, CARBON_CONTAINER_COLUMN_U8)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
 
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_base_type(&memfile, CARBON_CONTAINER_COLUMN_U16)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
 
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_base_type(&memfile, CARBON_CONTAINER_COLUMN_U32)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
 
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_base_type(&memfile, CARBON_CONTAINER_COLUMN_U64)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
 
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_base_type(&memfile, CARBON_CONTAINER_COLUMN_I8)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
 
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_base_type(&memfile, CARBON_CONTAINER_COLUMN_I16)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
 
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_base_type(&memfile, CARBON_CONTAINER_COLUMN_I32)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
 
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_base_type(&memfile, CARBON_CONTAINER_COLUMN_I64)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
 
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_base_type(&memfile, CARBON_CONTAINER_COLUMN_FLOAT)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
 
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_base_type(&memfile, CARBON_CONTAINER_COLUMN_BOOLEAN)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
         }
@@ -91,7 +91,7 @@ TEST(TestAbstractTypeMarker, DetectBaseTypeByBase) {
 
 TEST(TestAbstractTypeMarker, DetectBaseTypeByDerivedType) {
 
-        jak_memfile memfile;
+        memfile memfile;
         make_memfile(&memfile);
 
         carbon_abstract_e abstract_type;
@@ -99,7 +99,7 @@ TEST(TestAbstractTypeMarker, DetectBaseTypeByDerivedType) {
         /* CARBON_UNSORTED_MULTIMAP is base type */
         {
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_derived_type(&memfile, CARBON_UNSORTED_MULTIMAP)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
         }
@@ -107,7 +107,7 @@ TEST(TestAbstractTypeMarker, DetectBaseTypeByDerivedType) {
         /* CARBON_UNSORTED_MULTISET_ARRAY is base type */
         {
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_derived_type(&memfile, CARBON_UNSORTED_MULTISET_ARRAY)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
         }
@@ -115,7 +115,7 @@ TEST(TestAbstractTypeMarker, DetectBaseTypeByDerivedType) {
         /* CARBON_UNSORTED_MULTISET_COL_U8 is base type */
         {
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_derived_type(&memfile, CARBON_UNSORTED_MULTISET_COL_U8)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
         }
@@ -123,7 +123,7 @@ TEST(TestAbstractTypeMarker, DetectBaseTypeByDerivedType) {
         /* CARBON_UNSORTED_MULTISET_COL_U16 is base type */
         {
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_derived_type(&memfile, CARBON_UNSORTED_MULTISET_COL_U16)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
         }
@@ -131,7 +131,7 @@ TEST(TestAbstractTypeMarker, DetectBaseTypeByDerivedType) {
         /* CARBON_UNSORTED_MULTISET_COL_U32 is base type */
         {
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_derived_type(&memfile, CARBON_UNSORTED_MULTISET_COL_U32)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
         }
@@ -139,7 +139,7 @@ TEST(TestAbstractTypeMarker, DetectBaseTypeByDerivedType) {
         /* CARBON_UNSORTED_MULTISET_COL_U64 is base type */
         {
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_derived_type(&memfile, CARBON_UNSORTED_MULTISET_COL_U64)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
         }
@@ -147,7 +147,7 @@ TEST(TestAbstractTypeMarker, DetectBaseTypeByDerivedType) {
         /* CARBON_UNSORTED_MULTISET_COL_I8 is base type */
         {
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_derived_type(&memfile, CARBON_UNSORTED_MULTISET_COL_I8)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
         }
@@ -155,7 +155,7 @@ TEST(TestAbstractTypeMarker, DetectBaseTypeByDerivedType) {
         /* CARBON_UNSORTED_MULTISET_COL_I16 is base type */
         {
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_derived_type(&memfile, CARBON_UNSORTED_MULTISET_COL_I16)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
         }
@@ -163,7 +163,7 @@ TEST(TestAbstractTypeMarker, DetectBaseTypeByDerivedType) {
         /* CARBON_UNSORTED_MULTISET_COL_I32 is base type */
         {
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_derived_type(&memfile, CARBON_UNSORTED_MULTISET_COL_I32)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
         }
@@ -171,7 +171,7 @@ TEST(TestAbstractTypeMarker, DetectBaseTypeByDerivedType) {
         /* CARBON_UNSORTED_MULTISET_COL_I32 is base type */
         {
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_derived_type(&memfile, CARBON_UNSORTED_MULTISET_COL_I32)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
         }
@@ -179,7 +179,7 @@ TEST(TestAbstractTypeMarker, DetectBaseTypeByDerivedType) {
         /* CARBON_UNSORTED_MULTISET_COL_I64 is base type */
         {
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_derived_type(&memfile, CARBON_UNSORTED_MULTISET_COL_I64)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
         }
@@ -187,7 +187,7 @@ TEST(TestAbstractTypeMarker, DetectBaseTypeByDerivedType) {
         /* CARBON_UNSORTED_MULTISET_COL_FLOAT is base type */
         {
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_derived_type(&memfile, CARBON_UNSORTED_MULTISET_COL_FLOAT)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
         }
@@ -195,7 +195,7 @@ TEST(TestAbstractTypeMarker, DetectBaseTypeByDerivedType) {
         /* CARBON_UNSORTED_MULTISET_COL_BOOLEAN is base type */
         {
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_derived_type(&memfile, CARBON_UNSORTED_MULTISET_COL_BOOLEAN)));
-                jak_memfile_seek_from_here(&memfile, -1);
+                memfile_seek_from_here(&memfile, -1);
                 ASSERT_TRUE(FN_IS_OK(carbon_abstract_type(&abstract_type, &memfile)));
                 ASSERT_EQ(abstract_type, CARBON_ABSTRACT_BASE);
         }
@@ -209,11 +209,11 @@ static fn_result gtest_helper_get_bool(bool *value, fn_result result)
         return FN_OK();
 }
 
-static void test_derived_is_base(jak_memfile *memfile, carbon_derived_e type, bool is_base)
+static void test_derived_is_base(memfile *memfile, carbon_derived_e type, bool is_base)
 {
         bool status;
         ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_derived_type(memfile, type)));
-        jak_memfile_seek_from_here(memfile, -1);
+        memfile_seek_from_here(memfile, -1);
         fn_result result = carbon_abstract_is_base(memfile);
         ASSERT_TRUE(FN_IS_OK(result)); gtest_helper_get_bool(&status, result);
         ASSERT_EQ(status, is_base);
@@ -221,7 +221,7 @@ static void test_derived_is_base(jak_memfile *memfile, carbon_derived_e type, bo
 
 TEST(TestAbstractTypeMarker, DetectNonBaseTypeByDerivedType) {
 
-        jak_memfile memfile;
+        memfile memfile;
         make_memfile(&memfile);
 
         test_derived_is_base(&memfile, CARBON_UNSORTED_MULTIMAP, true);
@@ -287,19 +287,19 @@ TEST(TestAbstractTypeMarker, DetectNonBaseTypeByDerivedType) {
         drop_memfile(&memfile);
 }
 
-static void test_get_class_of_concrete_derived(jak_memfile *file, carbon_derived_e concrete,
+static void test_get_class_of_concrete_derived(memfile *file, carbon_derived_e concrete,
         carbon_abstract_type_class_e expected)
 {
         carbon_abstract_type_class_e clazz;
         ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_derived_type(file, concrete)));
-        jak_memfile_seek_from_here(file, -1);
+        memfile_seek_from_here(file, -1);
         ASSERT_TRUE(FN_IS_OK(carbon_abstract_get_class(&clazz, file)));
         ASSERT_EQ(clazz, expected);
 }
 
 TEST(TestAbstractTypeMarker, GetClassOfConcreteDerivedType) {
 
-        jak_memfile memfile;
+        memfile memfile;
         make_memfile(&memfile);
 
         test_get_class_of_concrete_derived(&memfile, CARBON_UNSORTED_MULTIMAP, CARBON_TYPE_UNSORTED_MULTIMAP);
@@ -365,19 +365,19 @@ TEST(TestAbstractTypeMarker, GetClassOfConcreteDerivedType) {
         drop_memfile(&memfile);
 }
 
-static void test_get_container_for_derived_type(jak_memfile *memfile, carbon_derived_e derived,
-                                                jak_carbon_container_sub_type_e expected)
+static void test_get_container_for_derived_type(memfile *memfile, carbon_derived_e derived,
+                                                carbon_container_sub_type_e expected)
 {
-        jak_carbon_container_sub_type_e sub_type;
+        carbon_container_sub_type_e sub_type;
         ASSERT_TRUE(FN_IS_OK(carbon_abstract_write_derived_type(memfile, derived)));
-        jak_memfile_seek_from_here(memfile, -1);
+        memfile_seek_from_here(memfile, -1);
         ASSERT_TRUE(FN_IS_OK(carbon_abstract_get_container_subtype(&sub_type, memfile)));
         ASSERT_EQ(sub_type, expected);
 }
 
 TEST(TestAbstractTypeMarker, GetContainerForDerivedType)
 {
-        jak_memfile memfile;
+        memfile memfile;
         make_memfile(&memfile);
 
         /* abstract types for object containers */
@@ -455,7 +455,7 @@ TEST(TestAbstractTypeMarker, GetContainerForDerivedType)
         drop_memfile(&memfile);
 }
 
-static void test_get_derive_from_list(jak_carbon_list_container_e is, carbon_list_derivable_e should,
+static void test_get_derive_from_list(carbon_list_container_e is, carbon_list_derivable_e should,
                                       carbon_derived_e expected)
 {
         carbon_derived_e concrete;

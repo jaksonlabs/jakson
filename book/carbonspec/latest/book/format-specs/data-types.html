@@ -161,7 +161,7 @@
 <tr><td><code>i32</code></td><td>signed 32-bit int</td><td>4 B</td><td><code>null</code>, -2<sup>31</sup></td><td><code>[I]</code>, <code>[7]</code></td></tr>
 <tr><td><code>i64</code></td><td>signed 64-bit int</td><td>8 B</td><td><code>null</code>, -2<sup>63</sup></td><td><code>[L]</code>, <code>[8]</code></td></tr>
 <tr><td><code>float</code></td><td>32-bit float</td><td>4 byte</td><td><code>null</code>,  <code>NAN</code></td><td><code>[r]</code>, <code>[R]</code></td></tr>
-<tr><td><code>string</code></td><td>string of <code>n</code> chars</td><td><code>n</code> bytes</td><td><code>null</code></td><td><code>[s]</code></td></tr>
+<tr><td><code>string_buffer</code></td><td>string_buffer of <code>n</code> chars</td><td><code>n</code> bytes</td><td><code>null</code></td><td><code>[s]</code></td></tr>
 <tr><td><code>binary</code></td><td>binary of <code>n</code> bytes</td><td><code>n</code> + 2<sup>+</sup> bytes</td><td><code>null</code></td><td><code>[b]</code></td></tr>
 <tr><td><code>custom binary</code></td><td>binary of <code>n</code> bytes</td><td><code>n</code> + 3<sup>+</sup> bytes</td><td><code>null</code></td><td><code>[x]</code></td></tr>
 <tr><td><code>null</code></td><td>absence of data (user-defined)</td><td>0<sup>+</sup> byte</td><td><code>null</code></td><td><code>[n]</code></td></tr>
@@ -170,7 +170,7 @@
 <h2><a class="header" href="#null-and-nil" id="null-and-nil">Null and Nil</a></h2>
 <p>In carbon, there are two way to express absence of data, <code>null</code> and <code>nil</code>. The first one, <code>null</code>, is a
 mapping of the Json constant <code>null</code>, and is used to express non-present data by the user, e.g., by the
-Json string <code>&quot;x&quot;: null</code>. In contrast, the second one, <code>nil</code> is used to express absence of data that is
+Json string_buffer <code>&quot;x&quot;: null</code>. In contrast, the second one, <code>nil</code> is used to express absence of data that is
 not only annotated as non-present, but in fact not contained. In no cases, the user can express a <code>nil</code>
 with its input, but will receive a <code>nil</code> (&quot;not in list&quot;) value whenever the user <code>queries</code> for non-existing
 data by a <a href="traversals-queries/path-eval/path-eval.html">dot path expression</a>.</p>

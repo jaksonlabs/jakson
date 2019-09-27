@@ -1,3 +1,3 @@
-# JAK_ERROR_IF
+# ERROR_IF
 
 > **This document is work-in-progress**. 

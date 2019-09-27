@@ -18,42 +18,42 @@
 #include <ctype.h>
 #include <jakson/hexdump.h>
 
-bool jak_hexdump(jak_string *dst, const void *base, jak_u64 nbytes)
+bool hexdump(string_buffer *dst, const void *base, u64 nbytes)
 {
-        JAK_ERROR_IF_NULL(dst);
-        JAK_ERROR_IF_NULL(base);
+        ERROR_IF_NULL(dst);
+        ERROR_IF_NULL(base);
         char buffer[11];
 
         sprintf(buffer, "%08x  ", 0);
-        jak_string_add(dst, buffer);
+        string_buffer_add(dst, buffer);
 
-        for (jak_u64 hex_block_id = 0; hex_block_id < nbytes;) {
+        for (u64 hex_block_id = 0; hex_block_id < nbytes;) {
 
-                jak_u8 step = JAK_MIN(16, nbytes - hex_block_id);
+                u8 step = JAK_MIN(16, nbytes - hex_block_id);
 
-                for (jak_u64 i = 0; i < step; i++) {
+                for (u64 i = 0; i < step; i++) {
                         char c = *((const char *) (base + hex_block_id + i));
                         sprintf(buffer, "%02x ", (unsigned char) c);
-                        jak_string_add(dst, buffer);
+                        string_buffer_add(dst, buffer);
                         if (i == 7) {
-                                jak_string_add_char(dst, ' ');
+                                string_buffer_add_char(dst, ' ');
                         }
                 }
 
-                if (JAK_UNLIKELY(step == 7)) {
-                        jak_string_add_char(dst, ' ');
+                if (UNLIKELY(step == 7)) {
+                        string_buffer_add_char(dst, ' ');
                 }
 
-                if (JAK_UNLIKELY(step < 16)) {
-                        for (jak_u8 pad = 0; pad < 16 - step; pad++) {
+                if (UNLIKELY(step < 16)) {
+                        for (u8 pad = 0; pad < 16 - step; pad++) {
                                 sprintf(buffer, "   ");
-                                jak_string_add(dst, buffer);
+                                string_buffer_add(dst, buffer);
                         }
                 }
 
-                jak_string_add(dst, " | ");
+                string_buffer_add(dst, " | ");
 
-                for (jak_u64 i = 0; i < step; i++) {
+                for (u64 i = 0; i < step; i++) {
                         char c = *((const char *) (base + hex_block_id + i));
                         if (isgraph(c)) {
                                 sprintf(buffer, "%c", c);
@@ -61,43 +61,43 @@ bool jak_hexdump(jak_string *dst, const void *base, jak_u64 nbytes)
                                 sprintf(buffer, ".");
                         }
 
-                        jak_string_add(dst, buffer);
+                        string_buffer_add(dst, buffer);
                 }
 
-                if (JAK_UNLIKELY(step < 16)) {
-                        for (jak_u8 pad = 0; pad < 16 - step; pad++) {
+                if (UNLIKELY(step < 16)) {
+                        for (u8 pad = 0; pad < 16 - step; pad++) {
                                 sprintf(buffer, " ");
-                                jak_string_add(dst, buffer);
+                                string_buffer_add(dst, buffer);
                         }
                 }
 
-                jak_string_add_char(dst, '|');
+                string_buffer_add_char(dst, '|');
 
 
-                if (JAK_LIKELY(hex_block_id + step < nbytes)) {
-                        jak_string_add(dst, "\n");
-                        sprintf(buffer, "%08x  ", ((jak_u32) hex_block_id + 16));
-                        jak_string_add(dst, buffer);
+                if (LIKELY(hex_block_id + step < nbytes)) {
+                        string_buffer_add(dst, "\n");
+                        sprintf(buffer, "%08x  ", ((u32) hex_block_id + 16));
+                        string_buffer_add(dst, buffer);
                 }
 
 
                 hex_block_id += step;
         }
 
-        jak_string_add(dst, "\n");
+        string_buffer_add(dst, "\n");
 
         return true;
 }
 
-bool jak_hexdump_print(FILE *file, const void *base, jak_u64 nbytes)
+bool hexdump_print(FILE *file, const void *base, u64 nbytes)
 {
         bool status;
-        jak_string sb;
-        jak_string_create(&sb);
-        if ((status = jak_hexdump(&sb, base, nbytes))) {
-                fprintf(file, "%s", jak_string_cstr(&sb));
+        string_buffer sb;
+        string_buffer_create(&sb);
+        if ((status = hexdump(&sb, base, nbytes))) {
+                fprintf(file, "%s", string_cstr(&sb));
         }
-        jak_string_drop(&sb);
+        string_buffer_drop(&sb);
         return status;
 
 }

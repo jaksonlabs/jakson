@@ -465,7 +465,7 @@ window.search = window.search || {};
     fetch(path_to_root + 'searchindex.json')
         .then(response => response.json())
         .then(json => init(json))        
-        .catch(error => { // Try to load searchindex.js if fetch failed
+        .catch(err => { // Try to load searchindex.js if fetch failed
             var script = document.createElement('script');
             script.src = path_to_root + 'searchindex.js';
             script.onload = () => init(window.search);

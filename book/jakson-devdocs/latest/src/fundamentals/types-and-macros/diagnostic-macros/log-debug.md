@@ -1,3 +1,3 @@
-# JAK_LOG_DEBUG
+# LOG_DEBUG
 
 > **This document is work-in-progress**. 

@@ -56,9 +56,9 @@ Here, a fixed-sized memory area is denoted with `[...]`, and variable-length mem
 
 In short, the document from above is encoded as an intermediate record without any record identification (cf., `nokey`), that contains of exactly one element (cf., `[[] ... []]`). This element is one object (cf., `[{] ... [}]`) with six properties. 
 
-The first property has a key of 5 characters (cf., `(5)`), which is variable-length encoded using 1B, named `title`. The value for that property is a string (cf. `[s]`) of the eighteen `(18)` character string `Back to the Future`. In addition to that, `sub-title` is a null field (cf. `[n]`), `year` is a fixed-length unsigned 2B integer property with value `1985`, and `imdb-rating` is a 4B floating point property. 
+The first property has a key of 5 characters (cf., `(5)`), which is variable-length encoded using 1B, named `title`. The value for that property is a string_buffer (cf. `[s]`) of the eighteen `(18)` character string_buffer `Back to the Future`. In addition to that, `sub-title` is a null field (cf. `[n]`), `year` is a fixed-length unsigned 2B integer property with value `1985`, and `imdb-rating` is a 4B floating point property. 
 
-Further,  properties called `keywords` and `release-dates` are contained, which are both list types. The first is a list type for variable-length, potentially nesting data types (called *array*) while the second is a list type for fixed-length number types (called *column*). The array `keywords` consists of three string fields, and the `release-dates` column contains nine element slots (cf. second `[9]`) where all these slots are in use (cf. first `[9]`) over a fixed-number type of unsigned 2B integers (a `column-u16` type, cf. `[2]`). The contained nine values are then listed after the column header in one continuous memory area of nine 2B elements.
+Further,  properties called `keywords` and `release-dates` are contained, which are both list types. The first is a list type for variable-length, potentially nesting data types (called *array*) while the second is a list type for fixed-length number types (called *column*). The array `keywords` consists of three string_buffer fields, and the `release-dates` column contains nine element slots (cf. second `[9]`) where all these slots are in use (cf. first `[9]`) over a fixed-number type of unsigned 2B integers (a `column-u16` type, cf. `[2]`). The contained nine values are then listed after the column header in one continuous memory area of nine 2B elements.
 
 **Relationship to UBJSON**
 
@@ -101,11 +101,11 @@ A more detailed view on the actual encoding of carbon columns can be found in th
 
 Similar to both [UBJSON](http://www.ubjson.org) and [BSON](www.bsonspec.org), binary strings can be stored in Carbon records either as fields in arrays or values in objects. 
 
-For instance, when storing a PNG-formatted image inside an array, [UBJSON](http://www.ubjson.org) and [BSON](www.bsonspec.org) store the raw binary string as-is without any further information. How, if, and where the actual data type is stored in a [BSON](www.bsonspec.org) file or [UBJSON](http://www.ubjson.org) file is delegated to the user. 
+For instance, when storing a PNG-formatted image inside an array, [UBJSON](http://www.ubjson.org) and [BSON](www.bsonspec.org) store the raw binary string_buffer as-is without any further information. How, if, and where the actual data type is stored in a [BSON](www.bsonspec.org) file or [UBJSON](http://www.ubjson.org) file is delegated to the user. 
 
-In contrast to both alternatives, Carbon has a well-defined process for that, which bundles type information directly to the user-defined binary string in an space-efficient way. In a nutshell, a binary string is stored as a tuple containing a type annotation and the raw binary string. The type annotation is either one constant integer that represents the Internet Media Type (*MIME* type), or a character string in case of an user-defined data type if the MIME type is unknown.
+In contrast to both alternatives, Carbon has a well-defined process for that, which bundles type information directly to the user-defined binary string_buffer in an space-efficient way. In a nutshell, a binary string_buffer is stored as a tuple containing a type annotation and the raw binary string_buffer. The type annotation is either one constant integer that represents the Internet Media Type (*MIME* type), or a character string_buffer in case of an user-defined data type if the MIME type is unknown.
 
-The benefit of allowing user-defined data types and storing the type information near the raw binary string is, that a system using Carbon is able to be extended towards support of particular user-defined types which are not natively supported by the system, such as image types, audio types, or mathematical types, such as matrices.
+The benefit of allowing user-defined data types and storing the type information near the raw binary string_buffer is, that a system using Carbon is able to be extended towards support of particular user-defined types which are not natively supported by the system, such as image types, audio types, or mathematical types, such as matrices.
 
 ## More Details
 

@@ -1,3 +1,3 @@
-# JAK_BIT_NUM_OF
+# BIT_NUM_OF
 
 > **This document is work-in-progress**. 

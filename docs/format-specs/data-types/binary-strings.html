@@ -161,8 +161,8 @@
 </tbody></table>
 <table><thead><tr><th>Payload</th><th>Description</th><th>Encoding Type</th><th>Size</th></tr></thead><tbody>
 <tr><td><code>(mime-type-id)</code></td><td>MIME Type Id (see below)</td><td>variable-length integer</td><td><code>k</code> byte</td></tr>
-<tr><td><code>(str-len)</code></td><td>binary string length in bytes</td><td>variable-length integer</td><td><code>l</code> byte</td></tr>
-<tr><td><code>&lt;binary&gt;</code></td><td>the binary string itself</td><td>fixed-sized binary string</td><td><code>n</code> byte</td></tr>
+<tr><td><code>(str-len)</code></td><td>binary string_buffer length in bytes</td><td>variable-length integer</td><td><code>l</code> byte</td></tr>
+<tr><td><code>&lt;binary&gt;</code></td><td>the binary string_buffer itself</td><td>fixed-sized binary string_buffer</td><td><code>n</code> byte</td></tr>
 </tbody></table>
 <h2><a class="header" href="#example" id="example">Example</a></h2>
 <p>snippet</p>
@@ -173,16 +173,16 @@ Content:	&lt;html&gt;&lt;body&gt;&lt;p&gt;Hello, World!&lt;/p&gt;&lt;/body&gt;&l
 <pre><code>[b](219)(46) [&lt;html&gt;&lt;body&gt;&lt;p&gt;Hello, World!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;]
 </code></pre>
 <h3><a class="header" href="#with-unknown-mime-types" id="with-unknown-mime-types">With Unknown MIME Types</a></h3>
-<pre><code>[x](type-str-len)&lt;type-str&gt;(str-len) &lt;binary-string&gt;
+<pre><code>[x](type-str-len)&lt;type-str&gt;(str-len) &lt;binary-string_buffer&gt;
 </code></pre>
 <table><thead><tr><th>Description</th><th>Size (in Byte)</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
 <tr><td>binary of <code>n</code> bytes</td><td>1 + <code>p</code> + <code>q</code> + <code>l</code> + <code>n</code></td><td><code>[x]</code> (<code>custom binary</code>)</td><td><em>see below</em></td></tr>
 </tbody></table>
 <table><thead><tr><th>Payload</th><th>Description</th><th>Encoding Type</th><th>Size</th></tr></thead><tbody>
-<tr><td><code>(type-str-len)</code></td><td>used-def type string length</td><td>variable-length integer</td><td><code>k</code> byte</td></tr>
-<tr><td><code>&lt;type-str&gt;</code></td><td>the user-def type string itself</td><td>fixed-sized string</td><td><code>q</code> byte</td></tr>
-<tr><td><code>(str-len)</code></td><td>binary string length in bytes</td><td>variable-length integer</td><td><code>l</code> byte</td></tr>
-<tr><td><code>&lt;binary&gt;</code></td><td>the binary string itself</td><td>fixed-sized binary string</td><td><code>n</code> byte</td></tr>
+<tr><td><code>(type-str-len)</code></td><td>used-def type string_buffer length</td><td>variable-length integer</td><td><code>k</code> byte</td></tr>
+<tr><td><code>&lt;type-str&gt;</code></td><td>the user-def type string_buffer itself</td><td>fixed-sized string_buffer</td><td><code>q</code> byte</td></tr>
+<tr><td><code>(str-len)</code></td><td>binary string_buffer length in bytes</td><td>variable-length integer</td><td><code>l</code> byte</td></tr>
+<tr><td><code>&lt;binary&gt;</code></td><td>the binary string_buffer itself</td><td>fixed-sized binary string_buffer</td><td><code>n</code> byte</td></tr>
 </tbody></table>
 <h2><a class="header" href="#example-1" id="example-1">Example</a></h2>
 <p>snippet</p>
@@ -194,25 +194,25 @@ Content:        c3RpbGwgYSBzZWNyZXQ=
 </code></pre>
 <h3><a class="header" href="#parsing-from-json" id="parsing-from-json">Parsing from JSON</a></h3>
 <p>JSON does not support the definition of <code>binary</code> or <code>custom binary</code> types as used in Carbon. To enable conversion from JSON that describes (<code>custom</code>) <code>binary</code> Carbon types, the follow convention is used. </p>
-<p>A binary is encoded in JSON using an JSON object with exactly the following string properties:</p>
+<p>A binary is encoded in JSON using an JSON object with exactly the following string_buffer properties:</p>
 <ul>
 <li><code>type</code> store a (custom) type description</li>
 <li><code>encoding</code> stores the value <code>base64</code></li>
-<li><code>binary-string</code> stores a base64-encoded binary value</li>
+<li><code>binary-string_buffer</code> stores a base64-encoded binary value</li>
 </ul>
-<p>A particular order of these properties inside the object is not required. Once an object satisfying the definition from above was found, the object is replaced with a (<code>custom</code>) <code>binary</code> type (called <em>auto-conversion</em>). If the string <code>type</code> matches a built-in MIME type (see blow) by character equality, and the auto-conversion option is <em>not</em> turned off, a <code>binary</code> type with the described contents is created. Otherwise a <code>custom binary</code> is created.</p>
+<p>A particular order of these properties inside the object is not required. Once an object satisfying the definition from above was found, the object is replaced with a (<code>custom</code>) <code>binary</code> type (called <em>auto-conversion</em>). If the string_buffer <code>type</code> matches a built-in MIME type (see blow) by character equality, and the auto-conversion option is <em>not</em> turned off, a <code>binary</code> type with the described contents is created. Otherwise a <code>custom binary</code> is created.</p>
 <p>Libaries implementing the Carbon specification <strong>must</strong> provide an option to turn off auto-conversion, such that there is a possibility to still store an object satisfying the definition from above without converting its content to a (<code>custom</code>) (<code>binary</code>) type.</p>
 <p>JSON snippet</p>
 <pre><code class="language-json">{
    &quot;type&quot;:&quot;text/html&quot;,
    &quot;encoding&quot;:&quot;base64&quot;,
-   &quot;binary-string&quot;:&quot;PGh0bWw+PGJvZHk+PHA+SGVsbG8sIFdvcmxkITwvcD48L2JvZHk+PC9odG1sPgAA&quot;
+   &quot;binary-string_buffer&quot;:&quot;PGh0bWw+PGJvZHk+PHA+SGVsbG8sIFdvcmxkITwvcD48L2JvZHk+PC9odG1sPgAA&quot;
 }
 </code></pre>
 <p>Carbon file snippet</p>
 <pre><code>[b](219)(46) [&lt;html&gt;&lt;body&gt;&lt;p&gt;Hello, World!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;]
 </code></pre>
-<p>Vice versa, a Carbon file converted into a JSON string using the standard JSON formatter will produce the JSON snippet from above for the Carbon file snippet from above.</p>
+<p>Vice versa, a Carbon file converted into a JSON string_buffer using the standard JSON formatter will produce the JSON snippet from above for the Carbon file snippet from above.</p>
 <blockquote>
 <p><strong>TODO:</strong> Not yet implemented</p>
 </blockquote>
@@ -220,7 +220,7 @@ Content:        c3RpbGwgYSBzZWNyZXQ=
 <p>Binary strings are not supported for column containers.</p>
 <h2><a class="header" href="#mime-type-ids" id="mime-type-ids">MIME Type Ids</a></h2>
 <blockquote>
-<p><strong>Note:</strong> To the point of this writing, the MIME type to identifier mapping is done via alphanumeric ordering of MIME type strings for improved lookup performance given a particular mime type string. In a future specification version, the order may change to reflect likelihood of certain type strings. With simpler words, to minimmize the variable number of bytes used to encode a MIME type id, more often used mime type strings will be assigned to a lower MIME type id compared to less-frequent used mime types.</p>
+<p><strong>Note:</strong> To the point of this writing, the MIME type to identifier mapping is done via alphanumeric ordering of MIME type strings for improved lookup performance given a particular mime type string_buffer. In a future specification version, the order may change to reflect likelihood of certain type strings. With simpler words, to minimmize the variable number of bytes used to encode a MIME type id, more often used mime type strings will be assigned to a lower MIME type id compared to less-frequent used mime types.</p>
 </blockquote>
 <table><thead><tr><th>MIME Type</th><th>File Extension</th><th>MIME Type Id</th></tr></thead><tbody>
 <tr><td>application/vnd.lotus-1-2-3</td><td>123</td><td>0</td></tr>
@@ -873,7 +873,7 @@ Content:        c3RpbGwgYSBzZWNyZXQ=
 <tr><td>application/dssc+xml</td><td>xdssc</td><td>647</td></tr>
 <tr><td>application/vnd.fujixerox.docuworks</td><td>xdw</td><td>648</td></tr>
 <tr><td>application/xenc+xml</td><td>xenc</td><td>649</td></tr>
-<tr><td>application/patch-ops-error+xml</td><td>xer</td><td>650</td></tr>
+<tr><td>application/patch-ops-err+xml</td><td>xer</td><td>650</td></tr>
 <tr><td>application/vnd.adobe.xfdf</td><td>xfdf</td><td>651</td></tr>
 <tr><td>application/vnd.xfdl</td><td>xfdl</td><td>652</td></tr>
 <tr><td>application/xhtml+xml</td><td>xhtml</td><td>653</td></tr>

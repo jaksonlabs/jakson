@@ -188,7 +188,7 @@
 </blockquote>
 <h1><a class="header" href="#notation" id="notation">Notation</a></h1>
 <table><thead><tr><th>Notation</th><th>Description</th><th>Example</th></tr></thead><tbody>
-<tr><td><code>[x]</code></td><td>Fixed-length block <code>x</code> of certain number of bytes</td><td><code>[{]</code> an object start marker, <code>[n]</code> a null value, <code>[21]</code> an integer value, <code>[Hello, World!]</code> a character string</td></tr>
+<tr><td><code>[x]</code></td><td>Fixed-length block <code>x</code> of certain number of bytes</td><td><code>[{]</code> an object start marker, <code>[n]</code> a null value, <code>[21]</code> an integer value, <code>[Hello, World!]</code> a character string_buffer</td></tr>
 <tr><td><code>(x)</code></td><td>Varialbe-length value <code>x</code> with varying bytes</td><td><code>(len)</code> variable-length unsigned integer encoding a length <code>len</code></td></tr>
 <tr><td><code>&lt;x&gt;</code></td><td>Optional, context-dependent value <code>x</code></td><td><code>[[] &lt;data&gt; []]</code> an array block <code>[</code> <code>]</code> with content <code>data</code> that may be of varying length</td></tr>
 <tr><td><code>...</code></td><td>Memory range of zero or more zeros</td><td><code>[...]...</code> an empty array block containing reserved memory, followed by (unused) reserved memory</td></tr>
@@ -218,15 +218,15 @@
 <pre><code>[nokey, 1B]
 [array-begin, 1B]
 [object-begin, 1B]
-   (str-len, 1B)[title, 5B] [string-field, 1B](str-len, 1B)[Back to the Future, 18B]
+   (str-len, 1B)[title, 5B] [string_buffer-field, 1B](str-len, 1B)[Back to the Future, 18B]
    (str-len, 1B)[sub-title, 9B] [null-field, 1B]
    (str-len, 1B)[year, 4B] [short-integer-field, 1B][1985, 2B]
    (str-len, 1B)[imdb-rating, 11B] [float-field, 1B][8.5, 4B]
    (str-len, 1B)[keywords, 8B] 
       [array-begin, 1B] 
-         [string-field, 1B](str-len, 1B)[time travel, 11B] 
-         [string-field, 1B](str-len, 1B)[delorean, 8B]       
-         [string-field, 1B](str-len, 1B)[comedy, 6B]            
+         [string_buffer-field, 1B](str-len, 1B)[time travel, 11B]
+         [string_buffer-field, 1B](str-len, 1B)[delorean, 8B]
+         [string_buffer-field, 1B](str-len, 1B)[comedy, 6B]
       [array-end, 1B]
    (str-len, 1B)[release-dates,13B] 
       [short-int-column, 1B](num-elems, 1B)(cap-elems, 1B)
@@ -252,15 +252,15 @@
 <h1><a class="header" href="#binary-json" id="binary-json">Binary JSON</a></h1>
 <h2><a class="header" href="#bson-running-example" id="bson-running-example">BSON Running Example</a></h2>
 <pre><code>[object-size, 4B]
-	[string-field, 1B] [title\0, 6B] [byte-num, 4B] [Back to the Future\0, 19B]
+	[string_buffer-field, 1B] [title\0, 6B] [byte-num, 4B] [Back to the Future\0, 19B]
 	[null-field, 1B] [sub-title\0, 10B] 
 	[integer-field, 1B] [year\0, 5B] [1985, 4B]
 	[float-field, 1B] [imdb-rating\0, 12B] [8.5, 8B]
 	[array-field, 1B] [keywords\0, 9B] 
 		[doc-size, 4 B]
-			[string-field, 1B] [0\0, 2B] [byte-num, 4B] [time travel\0, 12B]
-			[string-field, 1B] [1\0, 2B] [byte-num, 4B] [delorean\0, 9B]
-			[string-field, 1B] [2\0, 2B] [byte-num, 4B] [comedy\0, 7B]
+			[string_buffer-field, 1B] [0\0, 2B] [byte-num, 4B] [time travel\0, 12B]
+			[string_buffer-field, 1B] [1\0, 2B] [byte-num, 4B] [delorean\0, 9B]
+			[string_buffer-field, 1B] [2\0, 2B] [byte-num, 4B] [comedy\0, 7B]
 		[null, 1 B]
 	[array-field, 1B] [release-dates\0, 9B] 
 		[doc-size, 4 B]
@@ -288,13 +288,13 @@
 <h2><a class="header" href="#ubjson-running-example" id="ubjson-running-example">UBJSON Running Example</a></h2>
 <p>(size-optimized UBJSON)</p>
 <pre><code>[object-begin, 1B]
-   [small-int, 1B] [str-len, 1B][title, 5B] [string-field, 1B]
+   [small-int, 1B] [str-len, 1B][title, 5B] [string_buffer-field, 1B]
                         [small-int, 1B] [str-len, 1B][Back to the Future, 18B]
    [small-int, 1B] [str-len, 1B][sub-title, 9B] [null-field, 1B]
    [small-int, 1B] [str-len, 1B][year, 4B] [short-integer-field, 1B][1985, 2B]
    [small-int, 1B] [str-len, 1B][imdb-rating, 11B] [float-field, 1B][8.5, 4B]
    [small-int, 1B] [str-len, 1B][keywords, 8B] 
-      [array-begin, 1B] [strong-type-marker, 1B] [string-type, 1B]
+      [array-begin, 1B] [strong-type-marker, 1B] [string_buffer-type, 1B]
          [small-int, 1B] [str-len, 1B][time travel, 11B] 
          [small-int, 1B] [str-len, 1B][delorean, 8B]       
          [small-int, 1B] [str-len, 1B][comedy, 6B]            
@@ -331,8 +331,8 @@
 <p>In direct comparison, Carbon focus more on semantics (e.g., embedding additional meta-data) and focus more on support for operations of typical operational document stores (e.g., on-the-fly updates), while UBJSON focusses on efficient data exchange between two actors. Both, Carbon and UBJSON share the concept of a minimalistic type-support to have full compatibility to the latest JSON specification. However, Carbon adds one additional data type (<code>custom</code>) <code>binary</code> to enable user-defined function (UDF) support on user-defined types, though.</p>
 <ul>
 <li>Carbon supports three-valued logic for <code>boolean</code> values, and encodes <code>null</code> values not only for the JSON constant <em>null</em> but also as valid value in strongly typed arrays (e.g., intermixing of <code>null</code> and number values in <code>column</code> containers of Carbon). UBJSON cannot store a <code>null</code> value in a strongly typed array of a particular non-null type, and must fallback to size-inefficient standard arrays in UBJSON. </li>
-<li>Variable-length integer encoding for string lengths, or counters in Carbon</li>
-<li>Encoding of binary data: while in UBJON a (strongly typed) unsigned 8-bit integer array is used, in Carbon there is a dedicated type <code>binary</code> (resp. <code>custom binary</code>) that encoded the actual binary string data type (i.e., the <em>what is stored</em> information gets not lost in Carbon as it does in UBJSON)</li>
+<li>Variable-length integer encoding for string_buffer lengths, or counters in Carbon</li>
+<li>Encoding of binary data: while in UBJON a (strongly typed) unsigned 8-bit integer array is used, in Carbon there is a dedicated type <code>binary</code> (resp. <code>custom binary</code>) that encoded the actual binary string_buffer data type (i.e., the <em>what is stored</em> information gets not lost in Carbon as it does in UBJSON)</li>
 <li>Revision numbering as dedicated (variable-length) meta-data field in Carbon</li>
 <li>Record identification via (optional) primary key as meta-data field in Carbon, and defined semantic about record identity</li>
 <li>Overall, typically smaller binary size for Carbon files compared to UBJSON files</li>
@@ -396,9 +396,9 @@
 <tr><td><code>[I]</code></td><td><code>u32</code></td><td>a signed 32-bit integer field</td></tr>
 <tr><td><code>[L]</code></td><td><code>u64</code></td><td>a signed 64-bit integer field</td></tr>
 <tr><td><code>[r]</code></td><td><code>float</code></td><td>a single-precision floating number field</td></tr>
-<tr><td><code>[s]</code></td><td><code>string</code></td><td>a character string field</td></tr>
-<tr><td><code>[b]</code></td><td><code>binary</code></td><td>a binary string field with known MIME type</td></tr>
-<tr><td><code>[x]</code></td><td><code>custom binary</code></td><td>a binary string field with user-defined type</td></tr>
+<tr><td><code>[s]</code></td><td><code>string_buffer</code></td><td>a character string_buffer field</td></tr>
+<tr><td><code>[b]</code></td><td><code>binary</code></td><td>a binary string_buffer field with known MIME type</td></tr>
+<tr><td><code>[x]</code></td><td><code>custom binary</code></td><td>a binary string_buffer field with user-defined type</td></tr>
 <tr><td><code>[n]</code></td><td><code>null</code></td><td>absence of data</td></tr>
 </tbody></table>
 <p><span class="caption">Figure MF-1: Data Type Markers</span></p>
@@ -481,7 +481,7 @@
 <tr><td><code>[*]</code></td><td><code>autokey</code></td><td>record identifier is auto-generated a <code>u64</code> value</td></tr>
 <tr><td><code>[+]</code></td><td><code>ukey</code></td><td>record identifier is user-defined a <code>u64</code> value</td></tr>
 <tr><td><code>[-]</code></td><td><code>ikey</code></td><td>record identifier is user-defined a <code>i64</code> value</td></tr>
-<tr><td><code>[!]</code></td><td><code>ikey</code></td><td>record identifier is user-defined a <code>string</code> value</td></tr>
+<tr><td><code>[!]</code></td><td><code>ikey</code></td><td>record identifier is user-defined a <code>string_buffer</code> value</td></tr>
 </tbody></table>
 <p><span class="caption">Figure MF-3: Record Identifier Type Markers</span></p>
 <table><thead><tr><th>Marker</th><th>Carbon Type</th><th>Descriptions</th></tr></thead><tbody>
@@ -515,14 +515,14 @@
 <tr><td><code>autokey</code></td><td>64-bit auto-generated unsigned identifier</td><td>8 B</td><td><code>[*]</code></td><td><code>u64</code></td></tr>
 <tr><td><code>ukey</code></td><td>64-bit user-defined unsigned identifier</td><td>8 B</td><td><code>[+]</code></td><td><code>u64</code></td></tr>
 <tr><td><code>ikey</code></td><td>64-bit user-defined signed identifier</td><td>8 B</td><td><code>[-]</code></td><td><code>i64</code></td></tr>
-<tr><td><code>skey</code></td><td><code>n</code>-char string user-def. identifier</td><td><code>n</code> B</td><td><code>[!]</code></td><td><code>string</code></td></tr>
+<tr><td><code>skey</code></td><td><code>n</code>-char string_buffer user-def. identifier</td><td><code>n</code> B</td><td><code>[!]</code></td><td><code>string_buffer</code></td></tr>
 </tbody></table>
 <p><span class="caption">Table FO-1: Record Primary Key Types and Encoding</span></p>
 <blockquote>
 <p>The value generation of <code>autokey</code> is implementation-dependent.</p>
 </blockquote>
 <blockquote>
-<p>The default value for numeric keys (<code>autokey</code>, <code>ukey</code>, and <code>ikey</code>) is <code>0</code>. The empty string <code>&quot;&quot;</code> is used to encode the default value for character string keys (<code>skey</code>). JSON formatters are required to format the value of <code>nokey</code> and the default value for character string keys as JSON <code>null</code>.</p>
+<p>The default value for numeric keys (<code>autokey</code>, <code>ukey</code>, and <code>ikey</code>) is <code>0</code>. The empty string_buffer <code>&quot;&quot;</code> is used to encode the default value for character string_buffer keys (<code>skey</code>). JSON formatters are required to format the value of <code>nokey</code> and the default value for character string_buffer keys as JSON <code>null</code>.</p>
 </blockquote>
 <blockquote>
 <p>If <code>nokey</code> is set, the <code>commit-hash</code> field for a carbon <code>record</code> is omitted. In any case of revison, the commit hash for such a <code>record</code> is <code>0</code>.</p>
@@ -549,7 +549,7 @@
 <tr><td><code>i32</code></td><td>signed 32-bit int</td><td>4 B</td><td><code>null</code>, -2<sup>31</sup></td><td><code>[I]</code>, <code>[7]</code></td></tr>
 <tr><td><code>i64</code></td><td>signed 64-bit int</td><td>8 B</td><td><code>null</code>, -2<sup>63</sup></td><td><code>[L]</code>, <code>[8]</code></td></tr>
 <tr><td><code>float</code></td><td>32-bit float</td><td>4 byte</td><td><code>null</code>,  <code>NAN</code></td><td><code>[r]</code>, <code>[R]</code></td></tr>
-<tr><td><code>string</code></td><td>string of <code>n</code> chars</td><td><code>n</code> bytes</td><td><code>null</code></td><td><code>[s]</code></td></tr>
+<tr><td><code>string_buffer</code></td><td>string_buffer of <code>n</code> chars</td><td><code>n</code> bytes</td><td><code>null</code></td><td><code>[s]</code></td></tr>
 <tr><td><code>binary</code></td><td>binary of <code>n</code> bytes</td><td><code>n</code> + 2<sup>+</sup> bytes</td><td><code>null</code></td><td><code>[b]</code></td></tr>
 <tr><td><code>custom binary</code></td><td>binary of <code>n</code> bytes</td><td><code>n</code> + 3<sup>+</sup> bytes</td><td><code>null</code></td><td><code>[x]</code></td></tr>
 <tr><td><code>null</code></td><td>absence of data (user-defined)</td><td>0<sup>+</sup> byte</td><td><code>null</code></td><td><code>[n]</code></td></tr>
@@ -558,7 +558,7 @@
 <h2><a class="header" href="#null-and-nil" id="null-and-nil">Null and Nil</a></h2>
 <p>In carbon, there are two way to express absence of data, <code>null</code> and <code>nil</code>. The first one, <code>null</code>, is a
 mapping of the Json constant <code>null</code>, and is used to express non-present data by the user, e.g., by the
-Json string <code>&quot;x&quot;: null</code>. In contrast, the second one, <code>nil</code> is used to express absence of data that is
+Json string_buffer <code>&quot;x&quot;: null</code>. In contrast, the second one, <code>nil</code> is used to express absence of data that is
 not only annotated as non-present, but in fact not contained. In no cases, the user can express a <code>nil</code>
 with its input, but will receive a <code>nil</code> (&quot;not in list&quot;) value whenever the user <code>queries</code> for non-existing
 data by a <a href="format-specs/traversals-queries/path-eval/path-eval.html">dot path expression</a>.</p>
@@ -657,19 +657,19 @@ value. In contrast, asking for the value of an non-existing property <code>&quot
 </code></pre>
 <h1><a class="header" href="#character-strings" id="character-strings">Character Strings</a></h1>
 <table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
-<tr><td><code>string</code></td><td>a (Pascal) character string of <code>n</code> characters</td><td><code>n</code> bytes</td><td><code>null</code></td><td><code>[s]</code></td></tr>
+<tr><td><code>string_buffer</code></td><td>a (Pascal) character string_buffer of <code>n</code> characters</td><td><code>n</code> bytes</td><td><code>null</code></td><td><code>[s]</code></td></tr>
 </tbody></table>
 <h2><a class="header" href="#encoding-as-field-value-3" id="encoding-as-field-value-3">Encoding as Field Value</a></h2>
-<pre><code>[s](n) &lt;character-string&gt;
+<pre><code>[s](n) &lt;character-string_buffer&gt;
 </code></pre>
 <table><thead><tr><th>Description</th><th>Size</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
-<tr><td>a <code>n</code>-char string</td><td>1 + <code>l</code> + <code>n</code> bytes</td><td><code>[s]</code> (string)</td><td><code>(n)</code> length (<code>l</code> byte), <code>n</code> chars</td></tr>
+<tr><td>a <code>n</code>-char string_buffer</td><td>1 + <code>l</code> + <code>n</code> bytes</td><td><code>[s]</code> (string_buffer)</td><td><code>(n)</code> length (<code>l</code> byte), <code>n</code> chars</td></tr>
 </tbody></table>
 <h3><a class="header" href="#example-7" id="example-7">Example</a></h3>
 <p>JSON snippet</p>
 <pre><code class="language-json">[&quot;Hello&quot;, &quot;World&quot;, &quot;!&quot;]
 </code></pre>
-<p>A (compacted) Carbon file, which encodes the JSON array as <code>array</code> of character-string values.</p>
+<p>A (compacted) Carbon file, which encodes the JSON array as <code>array</code> of character-string_buffer values.</p>
 <pre><code>[[] [s](5)[Hello] [s](5)[World] [s](1)[!] []]
 </code></pre>
 <h2><a class="header" href="#encoding-as-column-value-3" id="encoding-as-column-value-3">Encoding as Column Value</a></h2>
@@ -688,8 +688,8 @@ value. In contrast, asking for the value of an non-existing property <code>&quot
 </tbody></table>
 <table><thead><tr><th>Payload</th><th>Description</th><th>Encoding Type</th><th>Size</th></tr></thead><tbody>
 <tr><td><code>(mime-type-id)</code></td><td>MIME Type Id (see below)</td><td>variable-length integer</td><td><code>k</code> byte</td></tr>
-<tr><td><code>(str-len)</code></td><td>binary string length in bytes</td><td>variable-length integer</td><td><code>l</code> byte</td></tr>
-<tr><td><code>&lt;binary&gt;</code></td><td>the binary string itself</td><td>fixed-sized binary string</td><td><code>n</code> byte</td></tr>
+<tr><td><code>(str-len)</code></td><td>binary string_buffer length in bytes</td><td>variable-length integer</td><td><code>l</code> byte</td></tr>
+<tr><td><code>&lt;binary&gt;</code></td><td>the binary string_buffer itself</td><td>fixed-sized binary string_buffer</td><td><code>n</code> byte</td></tr>
 </tbody></table>
 <h2><a class="header" href="#example-8" id="example-8">Example</a></h2>
 <p>snippet</p>
@@ -700,16 +700,16 @@ Content:	&lt;html&gt;&lt;body&gt;&lt;p&gt;Hello, World!&lt;/p&gt;&lt;/body&gt;&l
 <pre><code>[b](219)(46) [&lt;html&gt;&lt;body&gt;&lt;p&gt;Hello, World!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;]
 </code></pre>
 <h3><a class="header" href="#with-unknown-mime-types" id="with-unknown-mime-types">With Unknown MIME Types</a></h3>
-<pre><code>[x](type-str-len)&lt;type-str&gt;(str-len) &lt;binary-string&gt;
+<pre><code>[x](type-str-len)&lt;type-str&gt;(str-len) &lt;binary-string_buffer&gt;
 </code></pre>
 <table><thead><tr><th>Description</th><th>Size (in Byte)</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
 <tr><td>binary of <code>n</code> bytes</td><td>1 + <code>p</code> + <code>q</code> + <code>l</code> + <code>n</code></td><td><code>[x]</code> (<code>custom binary</code>)</td><td><em>see below</em></td></tr>
 </tbody></table>
 <table><thead><tr><th>Payload</th><th>Description</th><th>Encoding Type</th><th>Size</th></tr></thead><tbody>
-<tr><td><code>(type-str-len)</code></td><td>used-def type string length</td><td>variable-length integer</td><td><code>k</code> byte</td></tr>
-<tr><td><code>&lt;type-str&gt;</code></td><td>the user-def type string itself</td><td>fixed-sized string</td><td><code>q</code> byte</td></tr>
-<tr><td><code>(str-len)</code></td><td>binary string length in bytes</td><td>variable-length integer</td><td><code>l</code> byte</td></tr>
-<tr><td><code>&lt;binary&gt;</code></td><td>the binary string itself</td><td>fixed-sized binary string</td><td><code>n</code> byte</td></tr>
+<tr><td><code>(type-str-len)</code></td><td>used-def type string_buffer length</td><td>variable-length integer</td><td><code>k</code> byte</td></tr>
+<tr><td><code>&lt;type-str&gt;</code></td><td>the user-def type string_buffer itself</td><td>fixed-sized string_buffer</td><td><code>q</code> byte</td></tr>
+<tr><td><code>(str-len)</code></td><td>binary string_buffer length in bytes</td><td>variable-length integer</td><td><code>l</code> byte</td></tr>
+<tr><td><code>&lt;binary&gt;</code></td><td>the binary string_buffer itself</td><td>fixed-sized binary string_buffer</td><td><code>n</code> byte</td></tr>
 </tbody></table>
 <h2><a class="header" href="#example-9" id="example-9">Example</a></h2>
 <p>snippet</p>
@@ -721,25 +721,25 @@ Content:        c3RpbGwgYSBzZWNyZXQ=
 </code></pre>
 <h3><a class="header" href="#parsing-from-json" id="parsing-from-json">Parsing from JSON</a></h3>
 <p>JSON does not support the definition of <code>binary</code> or <code>custom binary</code> types as used in Carbon. To enable conversion from JSON that describes (<code>custom</code>) <code>binary</code> Carbon types, the follow convention is used. </p>
-<p>A binary is encoded in JSON using an JSON object with exactly the following string properties:</p>
+<p>A binary is encoded in JSON using an JSON object with exactly the following string_buffer properties:</p>
 <ul>
 <li><code>type</code> store a (custom) type description</li>
 <li><code>encoding</code> stores the value <code>base64</code></li>
-<li><code>binary-string</code> stores a base64-encoded binary value</li>
+<li><code>binary-string_buffer</code> stores a base64-encoded binary value</li>
 </ul>
-<p>A particular order of these properties inside the object is not required. Once an object satisfying the definition from above was found, the object is replaced with a (<code>custom</code>) <code>binary</code> type (called <em>auto-conversion</em>). If the string <code>type</code> matches a built-in MIME type (see blow) by character equality, and the auto-conversion option is <em>not</em> turned off, a <code>binary</code> type with the described contents is created. Otherwise a <code>custom binary</code> is created.</p>
+<p>A particular order of these properties inside the object is not required. Once an object satisfying the definition from above was found, the object is replaced with a (<code>custom</code>) <code>binary</code> type (called <em>auto-conversion</em>). If the string_buffer <code>type</code> matches a built-in MIME type (see blow) by character equality, and the auto-conversion option is <em>not</em> turned off, a <code>binary</code> type with the described contents is created. Otherwise a <code>custom binary</code> is created.</p>
 <p>Libaries implementing the Carbon specification <strong>must</strong> provide an option to turn off auto-conversion, such that there is a possibility to still store an object satisfying the definition from above without converting its content to a (<code>custom</code>) (<code>binary</code>) type.</p>
 <p>JSON snippet</p>
 <pre><code class="language-json">{
    &quot;type&quot;:&quot;text/html&quot;,
    &quot;encoding&quot;:&quot;base64&quot;,
-   &quot;binary-string&quot;:&quot;PGh0bWw+PGJvZHk+PHA+SGVsbG8sIFdvcmxkITwvcD48L2JvZHk+PC9odG1sPgAA&quot;
+   &quot;binary-string_buffer&quot;:&quot;PGh0bWw+PGJvZHk+PHA+SGVsbG8sIFdvcmxkITwvcD48L2JvZHk+PC9odG1sPgAA&quot;
 }
 </code></pre>
 <p>Carbon file snippet</p>
 <pre><code>[b](219)(46) [&lt;html&gt;&lt;body&gt;&lt;p&gt;Hello, World!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;]
 </code></pre>
-<p>Vice versa, a Carbon file converted into a JSON string using the standard JSON formatter will produce the JSON snippet from above for the Carbon file snippet from above.</p>
+<p>Vice versa, a Carbon file converted into a JSON string_buffer using the standard JSON formatter will produce the JSON snippet from above for the Carbon file snippet from above.</p>
 <blockquote>
 <p><strong>TODO:</strong> Not yet implemented</p>
 </blockquote>
@@ -747,7 +747,7 @@ Content:        c3RpbGwgYSBzZWNyZXQ=
 <p>Binary strings are not supported for column containers.</p>
 <h2><a class="header" href="#mime-type-ids" id="mime-type-ids">MIME Type Ids</a></h2>
 <blockquote>
-<p><strong>Note:</strong> To the point of this writing, the MIME type to identifier mapping is done via alphanumeric ordering of MIME type strings for improved lookup performance given a particular mime type string. In a future specification version, the order may change to reflect likelihood of certain type strings. With simpler words, to minimmize the variable number of bytes used to encode a MIME type id, more often used mime type strings will be assigned to a lower MIME type id compared to less-frequent used mime types.</p>
+<p><strong>Note:</strong> To the point of this writing, the MIME type to identifier mapping is done via alphanumeric ordering of MIME type strings for improved lookup performance given a particular mime type string_buffer. In a future specification version, the order may change to reflect likelihood of certain type strings. With simpler words, to minimmize the variable number of bytes used to encode a MIME type id, more often used mime type strings will be assigned to a lower MIME type id compared to less-frequent used mime types.</p>
 </blockquote>
 <table><thead><tr><th>MIME Type</th><th>File Extension</th><th>MIME Type Id</th></tr></thead><tbody>
 <tr><td>application/vnd.lotus-1-2-3</td><td>123</td><td>0</td></tr>
@@ -1400,7 +1400,7 @@ Content:        c3RpbGwgYSBzZWNyZXQ=
 <tr><td>application/dssc+xml</td><td>xdssc</td><td>647</td></tr>
 <tr><td>application/vnd.fujixerox.docuworks</td><td>xdw</td><td>648</td></tr>
 <tr><td>application/xenc+xml</td><td>xenc</td><td>649</td></tr>
-<tr><td>application/patch-ops-error+xml</td><td>xer</td><td>650</td></tr>
+<tr><td>application/patch-ops-err+xml</td><td>xer</td><td>650</td></tr>
 <tr><td>application/vnd.adobe.xfdf</td><td>xfdf</td><td>651</td></tr>
 <tr><td>application/vnd.xfdl</td><td>xfdl</td><td>652</td></tr>
 <tr><td>application/xhtml+xml</td><td>xhtml</td><td>653</td></tr>
@@ -1484,7 +1484,7 @@ is queried for a non-existing path using a <a href="format-specs/data-types/trav
 <pre><code>[[] [N] []] 
 </code></pre>
 <p>Note that <code>nil</code> does not match to a Json <code>null</code>, use a Carbon <code>null</code> type instead. For more, see Section <a href="format-specs/data-types/format-specs/data-types/nulls.html">Nulls</a>.</p>
-<p>Since there is no mapping from a Carbon <code>nil</code> value to a Json value for Json-formatted output, a <code>nil</code> value is formatted as a Json-string prefixed with <code>_</code>.</p>
+<p>Since there is no mapping from a Carbon <code>nil</code> value to a Json value for Json-formatted output, a <code>nil</code> value is formatted as a Json-string_buffer prefixed with <code>_</code>.</p>
 <p>Json File snippet</p>
 <pre><code class="language-json">&quot;_nil&quot;
 </code></pre>
@@ -1501,7 +1501,7 @@ is queried for a non-existing path using a <a href="format-specs/data-types/trav
 <p><span class="caption">Table CT-1: Container Types in Carbon</span></p>
 <h2><a class="header" href="#container-type-support" id="container-type-support">Container Type Support</a></h2>
 <h3><a class="header" href="#object-array-and-record-containers" id="object-array-and-record-containers">Object, Array and Record Containers</a></h3>
-<pre><code>true, false, u8, u16, u32, u64, i8, i16, i32, i64, float, string, 
+<pre><code>true, false, u8, u16, u32, u64, i8, i16, i32, i64, float, string_buffer,
 binary, custom binary, null, array, column-u8, column-u16, column-u32, 
 column-u64, column-i8, column-i16, column-i32, column-i64, column-float, 
 column-boolean, object 
@@ -1522,7 +1522,7 @@ column-boolean, object
 <pre><code>&lt;values&gt;
 </code></pre>
 <h4><a class="header" href="#type-support" id="type-support">Type Support</a></h4>
-<pre><code>true, false, u8, u16, u32, u64, i8, i16, i32, i64, float, string, 
+<pre><code>true, false, u8, u16, u32, u64, i8, i16, i32, i64, float, string_buffer,
 binary, custom binary, null, array, column-u8, column-u16, column-u32, 
 column-u64, column-i8, column-i16, column-i32, column-i64, column-float, 
 column-boolean, object 
@@ -1536,7 +1536,7 @@ column-boolean, object
 <p>JSON snippet</p>
 <pre><code class="language-json">[ &quot;The&quot;, &quot;Number&quot;, 23 ]
 </code></pre>
-<p>A (compacted) Carbon <code>array</code> of two <code>string</code> values and one <code>u8</code> value.</p>
+<p>A (compacted) Carbon <code>array</code> of two <code>string_buffer</code> values and one <code>u8</code> value.</p>
 <pre><code>[[] [s](3)[The] [s](6)[Number] [c][23] []] 
 </code></pre>
 <h1><a class="header" href="#columns" id="columns">Columns</a></h1>
@@ -1577,7 +1577,7 @@ column-boolean, object
 </code></pre>
 <h3><a class="header" href="#record-container-compatibility" id="record-container-compatibility">Record Container Compatibility</a></h3>
 <blockquote>
-<p>Note that a <code>column</code> container cannot replace a <code>record</code> container. If the input Json string is a plain Json array, this array is always stored as <code>record</code> (i.e., an array) rather than a column. To force a <code>column</code> container, the input Json array must be wrapped with an object.</p>
+<p>Note that a <code>column</code> container cannot replace a <code>record</code> container. If the input Json string_buffer is a plain Json array, this array is always stored as <code>record</code> (i.e., an array) rather than a column. To force a <code>column</code> container, the input Json array must be wrapped with an object.</p>
 </blockquote>
 <p>JSON file</p>
 <pre><code class="language-json">[ 1, 2, 3 ]
@@ -1595,17 +1595,17 @@ column-boolean, object
 <h3><a class="header" href="#properties" id="properties">Properties</a></h3>
 <pre><code>&lt;props&gt;
 </code></pre>
-<pre><code>&lt;key-string&gt; &lt;value&gt;
+<pre><code>&lt;key-string_buffer&gt; &lt;value&gt;
 </code></pre>
 <h4><a class="header" href="#keys" id="keys">Keys</a></h4>
-<pre><code>&lt;key-string&gt;
+<pre><code>&lt;key-string_buffer&gt;
 </code></pre>
-<p>A <code>&lt;key-string&gt;</code> is any value of type <code>string</code> where the <code>[s]</code> marker is omitted.</p>
+<p>A <code>&lt;key-string_buffer&gt;</code> is any value of type <code>string_buffer</code> where the <code>[s]</code> marker is omitted.</p>
 <h4><a class="header" href="#values-3" id="values-3">Values</a></h4>
 <pre><code>&lt;value&gt;
 </code></pre>
 <p>A <code>&lt;value&gt;</code> is any value of a supported type.</p>
-<pre><code>true, false, u8, u16, u32, u64, i8, i16, i32, i64, float, string, 
+<pre><code>true, false, u8, u16, u32, u64, i8, i16, i32, i64, float, string_buffer,
 binary, custom binary, null, array, column-u8, column-u16, column-u32, 
 column-u64, column-i8, column-i16, column-i32, column-i64, column-float, 
 column-boolean, object 
@@ -1718,7 +1718,7 @@ column-boolean, object
 }
 </code></pre>
 <h3><a class="header" href="#encoding-with-base-type-object" id="encoding-with-base-type-object">Encoding with Base Type <code>object</code></a></h3>
-<p>A (compacted) Carbon <code>unsorted-multimap</code> for the JSON snippet from above, encoding the JSON object with the base type <code>object</code> holding four string properties.</p>
+<p>A (compacted) Carbon <code>unsorted-multimap</code> for the JSON snippet from above, encoding the JSON object with the base type <code>object</code> holding four string_buffer properties.</p>
 <pre><code>[{] 
 	(1)[x] [s](1)[y]
 	(1)[x] [s](1)[y]
@@ -1906,7 +1906,7 @@ column-boolean, object
 }
 </code></pre>
 <h3><a class="header" href="#carbon-encoding" id="carbon-encoding">Carbon Encoding</a></h3>
-<p>A (compacted) Carbon <code>sorted-map</code> for the JSON snippet from above, encoding the JSON object with the base type <code>object</code> holding two string properties (assuming <code>&quot;a&quot;:&quot;c&quot;</code> was added after <code>&quot;a&quot;:&quot;b&quot;</code>).</p>
+<p>A (compacted) Carbon <code>sorted-map</code> for the JSON snippet from above, encoding the JSON object with the base type <code>object</code> holding two string_buffer properties (assuming <code>&quot;a&quot;:&quot;c&quot;</code> was added after <code>&quot;a&quot;:&quot;b&quot;</code>).</p>
 <pre><code>[#] 
 	(1)[a] [s](1)[c]	
 	(1)[x] [s](1)[y]
@@ -1926,7 +1926,7 @@ column-boolean, object
 }
 </code></pre>
 <h3><a class="header" href="#carbon-encoding-1" id="carbon-encoding-1">Carbon Encoding</a></h3>
-<p>A (compacted) Carbon <code>sorted-multimap</code> for the JSON snippet from above, encoding the JSON object with the base type <code>object</code> holding four string properties.</p>
+<p>A (compacted) Carbon <code>sorted-multimap</code> for the JSON snippet from above, encoding the JSON object with the base type <code>object</code> holding four string_buffer properties.</p>
 <pre><code>[~] 
 	(1)[a] [s](1)[b]
 	(1)[a] [s](1)[c]
@@ -1948,7 +1948,7 @@ column-boolean, object
 }
 </code></pre>
 <h3><a class="header" href="#carbon-encoding-2" id="carbon-encoding-2">Carbon Encoding</a></h3>
-<p>A (compacted) Carbon <code>unsorted-map</code> for the JSON snippet from above, encoding the JSON object with the base type <code>object</code> holding two string properties (assuming <code>&quot;a&quot;:&quot;c&quot;</code> was added after <code>&quot;a&quot;:&quot;b&quot;</code>).</p>
+<p>A (compacted) Carbon <code>unsorted-map</code> for the JSON snippet from above, encoding the JSON object with the base type <code>object</code> holding two string_buffer properties (assuming <code>&quot;a&quot;:&quot;c&quot;</code> was added after <code>&quot;a&quot;:&quot;b&quot;</code>).</p>
 <pre><code>[:] 
 	(1)[x] [s](1)[y]
 	(1)[a] [s](1)[c]
@@ -1981,8 +1981,8 @@ column-boolean, object
                 const char *file = __FILE__;
                 const char *time = __TIME__;
 
-                global_build_path_bit = JAK_HASH_BERNSTEIN(strlen(file), file) % 2;
-                global_build_date_bit = JAK_HASH_BERNSTEIN(strlen(time), time) % 2;
+                global_build_path_bit = HASH_BERNSTEIN(strlen(file), file) % 2;
+                global_build_date_bit = HASH_BERNSTEIN(strlen(time), time) % 2;
         }
 
         if (!thread_local_init) {
@@ -1995,7 +1995,7 @@ column-boolean, object
         }
 
         bool capacity_left = (thread_local_counter != thread_local_counter_limit);
-        error_print_if(!capacity_left, JAK_ERR_THREADOOOBJIDS)
+        error_print_if(!capacity_left, ERR_THREADOOOBJIDS)
         if (likely(capacity_left)) {
                 union global_id internal =
                         {.global_wallclock  = time_now_wallclock(), 
@@ -2023,8 +2023,8 @@ for (size_t i = 0; i &lt; key_size; i++){
 }
 </code></pre>
 <h2><a class="header" href="#stringified-commit-hash" id="stringified-commit-hash">Stringified Commit Hash</a></h2>
-<p>The base 16 (hex) value string of a commit hash value with exactly 16 letters without any leading prefix.</p>
-<p>Example base 10 commit hash <code>2072006001577230657</code> is printed to string as <code>1cc13e7b007d0141</code>.</p>
+<p>The base 16 (hex) value string_buffer of a commit hash value with exactly 16 letters without any leading prefix.</p>
+<p>Example base 10 commit hash <code>2072006001577230657</code> is printed to string_buffer as <code>1cc13e7b007d0141</code>.</p>
 <h2><a class="header" href="#initial-commit-hash-1" id="initial-commit-hash-1">Initial Commit Hash</a></h2>
 <h1><a class="header" href="#atomic-operations" id="atomic-operations">Atomic Operations</a></h1>
 <blockquote>
@@ -2071,11 +2071,11 @@ a path that does not resolve to any value (i.e., a <code>nil</code> is returned)
 <pre><code>dot-path-unit           ::= path-expression ('.' path-expression)*
 path-expression         ::= array-accessor | property-accessor 
 array-accessor          ::= [0] | [1-9][0-9]* 
-property-accessor       ::= field-name | '&quot;' string '&quot;' | key-predicate
+property-accessor       ::= field-name | '&quot;' string_buffer '&quot;' | key-predicate
 key-predicate           ::= '$' function-name '(' function-parameter-list ')'
 field-name              ::= [a-zA-Z]('\&quot;' | [a-zA-Z0-9])*
 function-name           ::= [a-zA-Z][a-zA-Z0-9]*
-function-parameter-list ::= non-strict-json-string
+function-parameter-list ::= non-strict-json-string_buffer
 </code></pre>
 <h2><a class="header" href="#property-access" id="property-access">Property Access</a></h2>
 <p>JSON snippet</p>
@@ -2128,7 +2128,7 @@ function-parameter-list ::= non-strict-json-string
 <pre><code class="language-json">[
     {
     	&quot;value&quot;: &quot;Back to the Future&quot;,
-    	&quot;type&quot;: &quot;string&quot;,
+    	&quot;type&quot;: &quot;string_buffer&quot;,
     	&quot;path&quot;: &quot;title&quot;
     },
     {
@@ -2190,7 +2190,7 @@ See Section <a href="traversals-queries/traversals-queries/path-functions.html">
 <pre><code class="language-json">[
     {
     	&quot;value&quot;: &quot;Back to the Future Part II&quot;,
-    	&quot;type&quot;: &quot;string&quot;,
+    	&quot;type&quot;: &quot;string_buffer&quot;,
     	&quot;path&quot;: &quot;1.title&quot;
     }
 ]
@@ -2258,13 +2258,13 @@ type:  MOVIE
 year:  1985
 
 </code></pre>
-<p>A Lax (&quot;non-strict&quot;) JSON string is a valid JSON string that additionally allows the following:</p>
+<p>A Lax (&quot;non-strict&quot;) JSON string_buffer is a valid JSON string_buffer that additionally allows the following:</p>
 <ul>
 <li>
-<p><strong>Optional Key Enquoting</strong>. For key names that only contain of alphanumeric characters without leading numbers and no spaces, double quoting can be omitted (i.e., <code>{ x: &quot;y&quot; }</code> is a valid non-strict Json string)</p>
+<p><strong>Optional Key Enquoting</strong>. For key names that only contain of alphanumeric characters without leading numbers and no spaces, double quoting can be omitted (i.e., <code>{ x: &quot;y&quot; }</code> is a valid non-strict Json string_buffer)</p>
 </li>
 <li>
-<p><strong>Optional Value Enquoting</strong>. For string values that only contain of alphanumeric characters, underscore, without leading numbers and no spaces, double quoting can be omitted (i.e., <code>{ &quot;x&quot;: my_value }</code> is a valid non-strict Json string)</p>
+<p><strong>Optional Value Enquoting</strong>. For string_buffer values that only contain of alphanumeric characters, underscore, without leading numbers and no spaces, double quoting can be omitted (i.e., <code>{ &quot;x&quot;: my_value }</code> is a valid non-strict Json string_buffer)</p>
 </li>
 <li>
 <p><strong>Optional Object Scoping</strong>. The object block symbols <code>{</code> and <code>}</code> can be omitted for the outermost object that is not contained in an array (i.e., <code>&quot;x&quot;: &quot;y&quot;</code> is a valid non-strict Json object)</p>

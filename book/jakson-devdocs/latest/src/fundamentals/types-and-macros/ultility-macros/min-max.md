@@ -1,3 +1,3 @@
-# JAK_MIN and JAK_MAX
+# MIN and MAX
 
 > **This document is work-in-progress**. 

@@ -15,8 +15,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef JAK_CARBON_H
-#define JAK_CARBON_H
+#ifndef CARBON_H
+#define CARBON_H
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  includes
@@ -24,126 +24,123 @@
 
 #include <jakson/stdinc.h>
 #include <jakson/error.h>
-#include <jakson/memfile/jak_memblock.h>
-#include <jakson/memfile/jak_memfile.h>
-#include <jakson/stdx/jak_unique_id.h>
-#include <jakson/std/jak_string.h>
-#include <jakson/std/jak_spinlock.h>
-#include <jakson/std/jak_vector.h>
+#include <jakson/mem/block.h>
+#include <jakson/mem/file.h>
+#include <jakson/stdx/unique_id.h>
+#include <jakson/std/string.h>
+#include <jakson/std/spinlock.h>
+#include <jakson/std/vector.h>
 #include <jakson/stdinc.h>
-#include <jakson/stdx/jak_alloc.h>
-#include <jakson/std/jak_bitmap.h>
-#include <jakson/std/jak_bloom.h>
+#include <jakson/stdx/alloc.h>
+#include <jakson/std/bitmap.h>
+#include <jakson/std/bloom.h>
 #include <jakson/archive.h>
-#include <jakson/archive/jak_archive_it.h>
-#include <jakson/archive/jak_archive_visitor.h>
-#include <jakson/archive/jak_archive_converter.h>
-#include <jakson/archive/jak_encoded_doc.h>
+#include <jakson/archive/it.h>
+#include <jakson/archive/visitor.h>
+#include <jakson/archive/converter.h>
+#include <jakson/archive/encoded_doc.h>
 #include <jakson/stdinc.h>
-#include <jakson/utils/jak_utils_convert.h>
-#include <jakson/archive/jak_column_doc.h>
-#include <jakson/archive/jak_doc.h>
+#include <jakson/utils/convert.h>
+#include <jakson/archive/column_doc.h>
+#include <jakson/archive/doc.h>
 #include <jakson/error.h>
-#include <jakson/std/hash/jak_hash_table.h>
-#include <jakson/std/jak_hash.h>
-#include <jakson/archive/jak_huffman.h>
-#include <jakson/json/jak_json.h>
-#include <jakson/memfile/jak_memblock.h>
-#include <jakson/memfile/jak_memfile.h>
-#include <jakson/stdx/jak_unique_id.h>
-#include <jakson/utils/jak_utils_sort.h>
-#include <jakson/std/jak_async.h>
-#include <jakson/stdx/jak_slicelist.h>
-#include <jakson/std/jak_spinlock.h>
-#include <jakson/std/jak_string_dict.h>
-#include <jakson/std/jak_str_hash.h>
-#include <jakson/archive/jak_archive_strid_it.h>
-#include <jakson/archive/jak_archive_cache.h>
-#include <jakson/utils/jak_time.h>
+#include <jakson/std/hash/table.h>
+#include <jakson/std/hash.h>
+#include <jakson/archive/huffman.h>
+#include <jakson/json/parser.h>
+#include <jakson/mem/block.h>
+#include <jakson/mem/file.h>
+#include <jakson/stdx/unique_id.h>
+#include <jakson/utils/sort.h>
+#include <jakson/std/async.h>
+#include <jakson/stdx/slicelist.h>
+#include <jakson/std/spinlock.h>
+#include <jakson/std/string_dict.h>
+#include <jakson/std/str_hash.h>
+#include <jakson/archive/strid_it.h>
+#include <jakson/archive/cache.h>
+#include <jakson/utils/time.h>
 #include <jakson/types.h>
-#include <jakson/archive/jak_archive_query.h>
-#include <jakson/std/jak_vector.h>
-#include <jakson/stdx/jak_alloc_trace.h>
-#include <jakson/archive/jak_encode_async.h>
-#include <jakson/archive/jak_encode_sync.h>
-#include <jakson/std/str_hash/jak_str_hash_mem.h>
-#include <jakson/archive/jak_pred_contains.h>
-#include <jakson/archive/jak_pred_equals.h>
-#include <jakson/carbon/jak_carbon_printers.h>
-#include <jakson/std/uintvar/jak_uintvar_stream.h>
-#include <jakson/carbon/jak_carbon_markers.h>
-#include <jakson/carbon/jak_carbon_abstract.h>
+#include <jakson/archive/query.h>
+#include <jakson/std/vector.h>
+#include <jakson/stdx/alloc/trace.h>
+#include <jakson/archive/encode_async.h>
+#include <jakson/archive/encode_sync.h>
+#include <jakson/std/str_hash/mem.h>
+#include <jakson/archive/pred/contains.h>
+#include <jakson/archive/pred/equals.h>
+#include <jakson/carbon/printers.h>
+#include <jakson/std/uintvar/stream.h>
+#include <jakson/carbon/markers.h>
+#include <jakson/carbon/abstract.h>
 
-JAK_BEGIN_DECL
+BEGIN_DECL
 
-typedef struct jak_carbon {
-        jak_memblock *memblock;
-        jak_memfile memfile;
+typedef struct carbon {
+        memblock *memblock;
+        memfile memfile;
 
         struct {
-                jak_spinlock write_lock;
+                spinlock write_lock;
                 bool commit_lock;
                 bool is_latest;
         } versioning;
 
-        jak_error err;
-} jak_carbon;
+        err err;
+} carbon;
 
-typedef struct jak_carbon_revise {
-        jak_carbon *original;
-        jak_carbon *revised_doc;
-        jak_error err;
-} jak_carbon_revise;
+typedef struct carbon_revise {
+        carbon *original;
+        carbon *revised_doc;
+        err err;
+} carbon_revise;
 
-typedef struct jak_carbon_binary {
+typedef struct carbon_binary {
         const char *mime_type;
-        jak_u64 mime_type_strlen;
+        u64 mime_type_strlen;
         const void *blob;
-        jak_u64 blob_len;
-} jak_carbon_binary;
+        u64 blob_len;
+} carbon_binary;
 
-typedef struct jak_carbon_new {
-        jak_error err;
-        jak_carbon original;
-        jak_carbon_revise revision_context;
-        jak_carbon_array_it *content_it;
-        jak_carbon_insert *inserter;
+typedef struct carbon_new {
+        err err;
+        carbon original;
+        carbon_revise revision_context;
+        carbon_array_it *content_it;
+        carbon_insert *inserter;
         /* options shrink or compact (or both) documents, see
          * CARBON_KEEP, CARBON_SHRINK, CARBON_COMPACT, and CARBON_OPTIMIZE  */
         int mode;
-} jak_carbon_new;
+} carbon_new;
 
-typedef enum jak_carbon_printer_impl {
-        JAK_JSON_EXTENDED, JAK_JSON_COMPACT
-} jak_carbon_printer_impl_e;
+typedef enum carbon_printer_impl {
+        JSON_EXTENDED, JSON_COMPACT
+} carbon_printer_impl_e;
 
-#define JAK_CARBON_NIL_STR "_nil"
+#define CARBON_NIL_STR "_nil"
 
-typedef enum jak_carbon_key_type {
+typedef enum carbon_key_type {
         /* no key, no revision number */
-        JAK_CARBON_KEY_NOKEY = CARBON_MNOKEY,
+        CARBON_KEY_NOKEY = CARBON_MNOKEY,
         /* auto-generated 64bit unsigned integer key */
-        JAK_CARBON_KEY_AUTOKEY = CARBON_MAUTOKEY,
+        CARBON_KEY_AUTOKEY = CARBON_MAUTOKEY,
         /* user-defined 64bit unsigned integer key */
-        JAK_CARBON_KEY_UKEY = CARBON_MUKEY,
+        CARBON_KEY_UKEY = CARBON_MUKEY,
         /* user-defined 64bit signed integer key */
-        JAK_CARBON_KEY_IKEY = CARBON_MIKEY,
-        /* user-defined n-char string key */
-        JAK_CARBON_KEY_SKEY = CARBON_MSKEY
-} jak_carbon_key_e;
+        CARBON_KEY_IKEY = CARBON_MIKEY,
+        /* user-defined n-char string_buffer key */
+        CARBON_KEY_SKEY = CARBON_MSKEY
+} carbon_key_e;
 
-JAK_DEFINE_ERROR_GETTER(jak_carbon);
-JAK_DEFINE_ERROR_GETTER(jak_carbon_new);
+#define CARBON_KEEP              0x00 /* do not shrink, do not compact, use UNSORTED_MULTISET (equiv. JSON array) */
+#define CARBON_SHRINK            0x01 /* perform shrinking, i.e., remove tail-buffer from carbon file */
+#define CARBON_COMPACT           0x02 /* perform compacting, i.e., remove reserved memory from containers */
+#define CARBON_UNSORTED_MULTISET 0x04 /* annotate the record outer-most array as unsorted multi set */
+#define CARBON_SORTED_MULTISET   0x08 /* annotate the record outer-most array as sorted multi set */
+#define CARBON_UNSORTED_SET      0x10 /* annotate the record outer-most array as unsorted set */
+#define CARBON_SORTED_SET        0x20 /* annotate the record outer-most array as sorted set */
 
-#define JAK_CARBON_KEEP              0x00 /* do not shrink, do not compact, use UNSORTED_MULTISET (equiv. JSON array) */
-#define JAK_CARBON_SHRINK            0x01 /* perform shrinking, i.e., remove tail-buffer from carbon file */
-#define JAK_CARBON_COMPACT           0x02 /* perform compacting, i.e., remove reserved memory from containers */
-#define JAK_CARBON_UNSORTED_MULTISET 0x04 /* annotate the record outer-most array as unsorted multi set */
-#define JAK_CARBON_SORTED_MULTISET   0x08 /* annotate the record outer-most array as sorted multi set */
-#define JAK_CARBON_UNSORTED_SET      0x10 /* annotate the record outer-most array as unsorted set */
-#define JAK_CARBON_SORTED_SET        0x20 /* annotate the record outer-most array as sorted set */
-
-#define JAK_CARBON_OPTIMIZE          (JAK_CARBON_SHRINK | JAK_CARBON_COMPACT | JAK_CARBON_UNSORTED_MULTISET)
+#define CARBON_OPTIMIZE          (CARBON_SHRINK | CARBON_COMPACT | CARBON_UNSORTED_MULTISET)
 
 /**
  * Constructs a new context in which a new document can be created. The parameter <b>options</b> controls
@@ -189,41 +186,41 @@ JAK_DEFINE_ERROR_GETTER(jak_carbon_new);
  *  deduplication and sorting work. Instead, the annotation stores the semantics of that particular container, which
  *  functionality must be effectively implemented at caller site.
  */
-jak_carbon_insert *jak_carbon_create_begin(jak_carbon_new *context, jak_carbon *doc, jak_carbon_key_e type, int options);
-bool jak_carbon_create_end(jak_carbon_new *context);
-bool jak_carbon_create_empty(jak_carbon *doc, carbon_list_derivable_e derivation, jak_carbon_key_e type);
-bool jak_carbon_create_empty_ex(jak_carbon *doc, carbon_list_derivable_e derivation, jak_carbon_key_e type, jak_u64 doc_cap, jak_u64 array_cap);
+carbon_insert *carbon_create_begin(carbon_new *context, carbon *doc, carbon_key_e type, int options);
+bool carbon_create_end(carbon_new *context);
+bool carbon_create_empty(carbon *doc, carbon_list_derivable_e derivation, carbon_key_e type);
+bool carbon_create_empty_ex(carbon *doc, carbon_list_derivable_e derivation, carbon_key_e type, u64 doc_cap, u64 array_cap);
 
-bool jak_carbon_from_json(jak_carbon *doc, const char *json, jak_carbon_key_e type, const void *key, jak_error *err);
-bool jak_carbon_from_raw_data(jak_carbon *doc, jak_error *err, const void *data, jak_u64 len);
+bool carbon_from_json(carbon *doc, const char *json, carbon_key_e type, const void *key, err *err);
+bool carbon_from_raw_data(carbon *doc, err *err, const void *data, u64 len);
 
-bool jak_carbon_drop(jak_carbon *doc);
+bool carbon_drop(carbon *doc);
 
-const void *jak_carbon_raw_data(jak_u64 *len, jak_carbon *doc);
+const void *carbon_raw_data(u64 *len, carbon *doc);
 
-bool jak_carbon_is_up_to_date(jak_carbon *doc);
-bool jak_carbon_key_type(jak_carbon_key_e *out, jak_carbon *doc);
-const void *jak_carbon_key_raw_value(jak_u64 *len, jak_carbon_key_e *type, jak_carbon *doc);
-bool jak_carbon_key_signed_value(jak_i64 *key, jak_carbon *doc);
-bool jak_carbon_key_unsigned_value(jak_u64 *key, jak_carbon *doc);
-const char *jak_carbon_key_jak_string_value(jak_u64 *len, jak_carbon *doc);
-bool jak_carbon_has_key(jak_carbon_key_e type);
-bool jak_carbon_key_is_unsigned(jak_carbon_key_e type);
-bool jak_carbon_key_is_signed(jak_carbon_key_e type);
-bool jak_carbon_key_is_string(jak_carbon_key_e type);
-bool jak_carbon_clone(jak_carbon *clone, jak_carbon *doc);
-bool jak_carbon_commit_hash(jak_u64 *hash, jak_carbon *doc);
+bool carbon_is_up_to_date(carbon *doc);
+bool carbon_key_type(carbon_key_e *out, carbon *doc);
+const void *carbon_key_raw_value(u64 *len, carbon_key_e *type, carbon *doc);
+bool carbon_key_signed_value(i64 *key, carbon *doc);
+bool carbon_key_unsigned_value(u64 *key, carbon *doc);
+const char *carbon_key_string_value(u64 *len, carbon *doc);
+bool carbon_has_key(carbon_key_e type);
+bool carbon_key_is_unsigned(carbon_key_e type);
+bool carbon_key_is_signed(carbon_key_e type);
+bool carbon_key_is_string(carbon_key_e type);
+bool carbon_clone(carbon *clone, carbon *doc);
+bool carbon_commit_hash(u64 *hash, carbon *doc);
 
-bool jak_carbon_to_str(jak_string *dst, jak_carbon_printer_impl_e printer, jak_carbon *doc);
-const char *jak_carbon_to_json_extended(jak_string *dst, jak_carbon *doc);
-const char *jak_carbon_to_json_compact(jak_string *dst, jak_carbon *doc);
-char *jak_carbon_to_json_extended_dup(jak_carbon *doc);
-char *jak_carbon_to_json_compact_dup(jak_carbon *doc);
-bool jak_carbon_iterator_open(jak_carbon_array_it *it, jak_carbon *doc);
-bool jak_carbon_iterator_close(jak_carbon_array_it *it);
-bool jak_carbon_print(FILE *file, jak_carbon_printer_impl_e printer, jak_carbon *doc);
-bool jak_carbon_hexdump_print(FILE *file, jak_carbon *doc);
+bool carbon_to_str(string_buffer *dst, carbon_printer_impl_e printer, carbon *doc);
+const char *carbon_to_json_extended(string_buffer *dst, carbon *doc);
+const char *carbon_to_json_compact(string_buffer *dst, carbon *doc);
+char *carbon_to_json_extended_dup(carbon *doc);
+char *carbon_to_json_compact_dup(carbon *doc);
+bool carbon_iterator_open(carbon_array_it *it, carbon *doc);
+bool carbon_iterator_close(carbon_array_it *it);
+bool carbon_print(FILE *file, carbon_printer_impl_e printer, carbon *doc);
+bool carbon_hexdump_print(FILE *file, carbon *doc);
 
-JAK_END_DECL
+END_DECL
 
 #endif

@@ -5,28 +5,28 @@
 
 int main (void)
 {
-    jak_carbon_new context;
-    jak_carbon record;
-    jak_carbon_insert *ins, *nested_ins;
-    jak_carbon_insert_array_state state;
+    carbon_new context;
+    carbon record;
+    carbon_insert *ins, *nested_ins;
+    carbon_insert_array_state state;
     char *as_json;
 
-    ins = jak_carbon_create_begin(&context, &record, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
+    ins = carbon_create_begin(&context, &record, CARBON_KEY_NOKEY, CARBON_KEEP);
 
-    jak_carbon_insert_string(ins, "Hello");
-    nested_ins = jak_carbon_insert_array_begin(&state, ins, 1024);
-        jak_carbon_insert_string(nested_ins, "you");
-        jak_carbon_insert_string(nested_ins, "nested") ;
-    jak_carbon_insert_array_end(&state);
-    jak_carbon_insert_string(ins, "array!");
+    carbon_insert_string(ins, "Hello");
+    nested_ins = carbon_insert_array_begin(&state, ins, 1024);
+        carbon_insert_string(nested_ins, "you");
+        carbon_insert_string(nested_ins, "nested") ;
+    carbon_insert_array_end(&state);
+    carbon_insert_string(ins, "array!");
 
-    jak_carbon_create_end(&context);
+    carbon_create_end(&context);
 
-    as_json = jak_carbon_to_json_compact_dup(&record);
+    as_json = carbon_to_json_compact_dup(&record);
 
     printf ("%s\n", as_json);
 
-    jak_carbon_drop(&record);
+    carbon_drop(&record);
     free(as_json);
 
     return 0;

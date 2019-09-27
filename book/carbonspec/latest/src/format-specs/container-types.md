@@ -16,7 +16,7 @@ Carbon Type  | Description                                 | Size | JSON Mapping
 ### Object, Array and Record Containers
 
 ```
-true, false, u8, u16, u32, u64, i8, i16, i32, i64, float, string, 
+true, false, u8, u16, u32, u64, i8, i16, i32, i64, float, string_buffer, 
 binary, custom binary, null, array, column-u8, column-u16, column-u32, 
 column-u64, column-i8, column-i16, column-i32, column-i64, column-float, 
 column-boolean, object 

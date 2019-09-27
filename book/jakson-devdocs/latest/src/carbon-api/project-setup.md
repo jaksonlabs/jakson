@@ -40,7 +40,7 @@ For third-party projects, it is recommended to configure Jakson as a single tran
 
 ##### Cherry-Picking Modules
 
-> **Not Recommended**. Although it is possible for third-party projects to use particular Carbon modules by directly cherry-picking required modules, it is not recommended due to a non-trivial dependency graph between Carbon API modules and other modules outside the Carbon sub-system (e.g., error handling facilities). 
+> **Not Recommended**. Although it is possible for third-party projects to use particular Carbon modules by directly cherry-picking required modules, it is not recommended due to a non-trivial dependency graph between Carbon API modules and other modules outside the Carbon sub-system (e.g., err handling facilities). 
 
 In a scenario where cherry-picking of modules is intended, including `jakson.h` is not sufficient if the desired effect is to exclude particular modules. Rather than just including `jakson.h` as a single translation unit, required module header files (including their transitive dependencies) must be included manually. For these cases it must be considered, that source amalgamation is explicitly not used and therefore runtime performance potential (due to exhaustive compiler optimization inside one huge tanslation unit) is left unexploited. 
 
@@ -49,31 +49,31 @@ Hence, cherry-picking modules must be done with the intention of decreasing the 
 
 ## Structure
 
-Public functionality that belongs to Carbon in Jakson is prefixed with `jak_carbon`, such as `jak_carbon.h` or `jak_carbon_find.h`, and located in Jaksons source directoy `src/`. 
+Public functionality that belongs to Carbon in Jakson is prefixed with `carbon`, such as `carbon.h` or `carbon_find.h`, and located in Jaksons source directoy `src/`. 
 
 Like other components of Jakson, the Carbon implementation is modularized. 
 
 These modules are
 
-- `jak_carbon`, the main entry point for Carbon records, which contains functionality to create, load, and store carbon records, open iterators, open atomic modification operations, accessing and modifying primary keys, and printing Carbon records
-- `jak_carbon_array_it`, provides iterator facilities over array containers in Carbon records, arrays, fields, and for values of properties inside objects, including iterator state information, element access, low-level data access, and modification operations
-- `jak_carbon_column_it`, provides iterator facilities over column containers in fields or values of properties inside objects, including iterator state information, bulk element access, low-level data access, and modification operations
-- `jak_carbon_object_it`, provides iterator facilities over object containers in Carbon records, arrays, fields, and for values of properties inside objects, including iterator state information, key and value type information and access, low-level data access, and modification operations
-- `jak_carbon_commit`, is about low-level functionality related to commit revision hashs for Carbon record, including functions to create, skip, read, and update these commit hash stored in memory files
-- `jak_carbon_dot`, is the module that implements dot-notated path objects, including manual creation, accessing, and parsing from user-defined character strings
-- `jak_carbon_field`, provides field type information, abstraction, stringification, property querying, and low-level memory files based functions for constants, containers, character strings, numbers, and binary data of user-defined types for fields, property values, and, where possible, for columns
-- `jak_carbon_find`, implements a exact query to a field, a property, or an object given a dot-notated path, and includes functions to query for the result type (if any), and safe data access 
-- `jak_carbon_insert`, is the module responsible for atomic data insertions to containers (arrays, columns, and objects), providing functions to insert fixed- and variable-length data, and nesting facilities
-- `jak_carbon_key`, provides functionalities to create, skip, read, write and update Carbon record primary keys on the low-level memory files abstraction layer
-- `jak_carbon_media`, is the module for media-type information of user-defined binary strings with functionalities to encode and decode pre-defined types (i.e., a subset of MIME typing) for embedded binary data
-- `jak_carbon_path`, is the concrete evaluator for *find* operations on dot-notated paths, internally evaluating a path via (array, column, or object) iterators, or by the use of a special (optional) path index above a Carbon record
-- `jak_carbon_path_index`, is the module realizing a path index, which focuses on query performance by statefull random access iteration and efficient string comparison to the cost of an increased memory footprint and loss of (binary) readability, in order to speedup *find* operations on a single Carbon record by indexing a records structure to exactly the form a path evaluation is done
-- `jak_carbon_printers`, is the conversion framework for Carbon record at a fine-grained level by exposing an "interface" to a printer comonent to enable printing of records in any user-defined way, including access to built-in printers for JSON with and without additional meta data, such as primary key information
-- `jak_carbon_revise`, is the module responsible for (abortable) atomic update operations (called *revisions*) on Carbon records by providing write-access to a Carbon records low-level memory file, primary key modifications, write-enabled iterator access, remove operations, and low-level Carbon record optimization functions to remove potentially existing memory reserves in a Carbon file
-- `jak_carbon_string`, is a low-level module for reading, writing, update, skip of strings in the low-level memory file of a Carbon record for several encoding types (e.g., with or without preceeding type marker)
-- `jak_carbon_update`, provides facilities to perform in-place update with potentially type-rewriting for fields, containers, and properties in an atomic manner
+- `carbon`, the main entry point for Carbon records, which contains functionality to create, load, and store carbon records, open iterators, open atomic modification operations, accessing and modifying primary keys, and printing Carbon records
+- `carbon_array_it`, provides iterator facilities over array containers in Carbon records, arrays, fields, and for values of properties inside objects, including iterator state information, element access, low-level data access, and modification operations
+- `carbon_column_it`, provides iterator facilities over column containers in fields or values of properties inside objects, including iterator state information, bulk element access, low-level data access, and modification operations
+- `carbon_object_it`, provides iterator facilities over object containers in Carbon records, arrays, fields, and for values of properties inside objects, including iterator state information, key and value type information and access, low-level data access, and modification operations
+- `carbon_commit`, is about low-level functionality related to commit revision hashs for Carbon record, including functions to create, skip, read, and update these commit hash stored in memory files
+- `carbon_dot`, is the module that implements dot-notated path objects, including manual creation, accessing, and parsing from user-defined character strings
+- `carbon_field`, provides field type information, abstraction, stringification, property querying, and low-level memory files based functions for constants, containers, character strings, numbers, and binary data of user-defined types for fields, property values, and, where possible, for columns
+- `carbon_find`, implements a exact query to a field, a property, or an object given a dot-notated path, and includes functions to query for the result type (if any), and safe data access 
+- `carbon_insert`, is the module responsible for atomic data insertions to containers (arrays, columns, and objects), providing functions to insert fixed- and variable-length data, and nesting facilities
+- `carbon_key`, provides functionalities to create, skip, read, write and update Carbon record primary keys on the low-level memory files abstraction layer
+- `carbon_media`, is the module for media-type information of user-defined binary strings with functionalities to encode and decode pre-defined types (i.e., a subset of MIME typing) for embedded binary data
+- `carbon_path`, is the concrete evaluator for *find* operations on dot-notated paths, internally evaluating a path via (array, column, or object) iterators, or by the use of a special (optional) path index above a Carbon record
+- `carbon_path_index`, is the module realizing a path index, which focuses on query performance by statefull random access iteration and efficient string_buffer comparison to the cost of an increased memory footprint and loss of (binary) readability, in order to speedup *find* operations on a single Carbon record by indexing a records structure to exactly the form a path evaluation is done
+- `carbon_printers`, is the conversion framework for Carbon record at a fine-grained level by exposing an "interface" to a printer comonent to enable printing of records in any user-defined way, including access to built-in printers for JSON with and without additional meta data, such as primary key information
+- `carbon_revise`, is the module responsible for (abortable) atomic update operations (called *revisions*) on Carbon records by providing write-access to a Carbon records low-level memory file, primary key modifications, write-enabled iterator access, remove operations, and low-level Carbon record optimization functions to remove potentially existing memory reserves in a Carbon file
+- `carbon_string`, is a low-level module for reading, writing, update, skip of strings in the low-level memory file of a Carbon record for several encoding types (e.g., with or without preceeding type marker)
+- `carbon_update`, provides facilities to perform in-place update with potentially type-rewriting for fields, containers, and properties in an atomic manner
 
-In addition to the modules from above, the module `jak_carbon_int` contains internal structures and functions, such as iterator state manipulations or low-level field access, that are typically not called by user-code.
+In addition to the modules from above, the module `carbon_int` contains internal structures and functions, such as iterator state manipulations or low-level field access, that are typically not called by user-code.
 
 ## Source Amalgamation
 
@@ -109,22 +109,22 @@ Independent of whether the Carbon API is accessed inside the Jakson project, or 
 
 int main (void)
 {
-    jak_carbon_new context;
-    jak_carbon record;
-    jak_carbon_insert *ins;
+    carbon_new context;
+    carbon record;
+    carbon_insert *ins;
     char *as_json;
 
-    ins = jak_carbon_create_begin(&context, &record, 
-    		JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
-    jak_carbon_insert_string(ins, "Hello");
-    jak_carbon_insert_string(ins, "Carbon!");
-    jak_carbon_create_end(&context);
+    ins = carbon_create_begin(&context, &record, 
+    		CARBON_KEY_NOKEY, CARBON_KEEP);
+    carbon_insert_string(ins, "Hello");
+    carbon_insert_string(ins, "Carbon!");
+    carbon_create_end(&context);
 
-    as_json = jak_carbon_to_json_compact_dup(&record);
+    as_json = carbon_to_json_compact_dup(&record);
 
     printf ("%s\n", as_json);
 
-    jak_carbon_drop(&record);
+    carbon_drop(&record);
     free(as_json);
 
     return 0;

@@ -1,3 +1,3 @@
-# JAK_OPTIONAL
+# OPTIONAL
 
 > **This document is work-in-progress**. 

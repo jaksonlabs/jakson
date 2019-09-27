@@ -4,17 +4,17 @@
 #include <jakson/jakson.h>
 
 TEST(GlobalIdTest, CreateId) {
-    jak_uid_t id;
-    bool result = jak_unique_id_create(&id);
+    unique_id_t id;
+    bool result = unique_id_create(&id);
     EXPECT_TRUE(result);
     EXPECT_NE(id, 0U);
 }
 
 TEST(GlobalIdTest, CreateUniqueIds) {
-    std::set<jak_uid_t> haystack;
+    std::set<unique_id_t> haystack;
     for (size_t i = 0; i < 1000000; i++) {
-        jak_uid_t id;
-        bool result = jak_unique_id_create(&id);
+        unique_id_t id;
+        bool result = unique_id_create(&id);
         if (!result) {
             printf("NO CAPACITY LEFT %zu\n", i);
         } else {

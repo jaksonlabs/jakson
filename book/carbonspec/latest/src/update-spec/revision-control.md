@@ -26,8 +26,8 @@ bool global_id_create(global_id_t *out)
                 const char *file = __FILE__;
                 const char *time = __TIME__;
 
-                global_build_path_bit = JAK_HASH_BERNSTEIN(strlen(file), file) % 2;
-                global_build_date_bit = JAK_HASH_BERNSTEIN(strlen(time), time) % 2;
+                global_build_path_bit = HASH_BERNSTEIN(strlen(file), file) % 2;
+                global_build_date_bit = HASH_BERNSTEIN(strlen(time), time) % 2;
         }
 
         if (!thread_local_init) {
@@ -40,7 +40,7 @@ bool global_id_create(global_id_t *out)
         }
 
         bool capacity_left = (thread_local_counter != thread_local_counter_limit);
-        error_print_if(!capacity_left, JAK_ERR_THREADOOOBJIDS)
+        error_print_if(!capacity_left, ERR_THREADOOOBJIDS)
         if (likely(capacity_left)) {
                 union global_id internal =
                         {.global_wallclock  = time_now_wallclock(), 
@@ -74,9 +74,9 @@ for (size_t i = 0; i < key_size; i++){
 
 ## Stringified Commit Hash
 
-The base 16 (hex) value string of a commit hash value with exactly 16 letters without any leading prefix.
+The base 16 (hex) value string_buffer of a commit hash value with exactly 16 letters without any leading prefix.
 
-Example base 10 commit hash `2072006001577230657` is printed to string as `1cc13e7b007d0141`.
+Example base 10 commit hash `2072006001577230657` is printed to string_buffer as `1cc13e7b007d0141`.
 
 ## Initial Commit Hash
 

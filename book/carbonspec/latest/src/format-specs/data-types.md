@@ -14,7 +14,7 @@ Carbon Type  | Description             | Size                | *null*-Value     
 `i32`        | signed 32-bit int   | 4 B | `null`, -2<sup>31</sup>    | `[I]`, `[7]`
 `i64`        | signed 64-bit int   | 8 B | `null`, -2<sup>63</sup>    | `[L]`, `[8]`
 `float`      | 32-bit float | 4 byte  | `null`,  `NAN` | `[r]`, `[R]` 
-`string`        | string of `n` chars | `n` bytes | `null`       | `[s]`
+`string_buffer`        | string_buffer of `n` chars | `n` bytes | `null`       | `[s]`
 `binary`        | binary of `n` bytes | `n` + 2<sup>+</sup> bytes | `null`       | `[b]`
 `custom binary` | binary of `n` bytes | `n` + 3<sup>+</sup> bytes | `null`       | `[x]`
 `null`      | absence of data (user-defined) | 0<sup>+</sup> byte | `null` | `[n]`
@@ -23,7 +23,7 @@ Carbon Type  | Description             | Size                | *null*-Value     
 ## Null and Nil
 In carbon, there are two way to express absence of data, `null` and `nil`. The first one, `null`, is a
 mapping of the Json constant `null`, and is used to express non-present data by the user, e.g., by the
-Json string `"x": null`. In contrast, the second one, `nil` is used to express absence of data that is
+Json string_buffer `"x": null`. In contrast, the second one, `nil` is used to express absence of data that is
 not only annotated as non-present, but in fact not contained. In no cases, the user can express a `nil`
 with its input, but will receive a `nil` ("not in list") value whenever the user `queries` for non-existing
 data by a [dot path expression](traversals-queries/path-eval/path-eval.md).

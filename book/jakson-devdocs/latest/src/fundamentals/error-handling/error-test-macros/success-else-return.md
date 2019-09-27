@@ -1,3 +1,3 @@
-# JAK_SUCCESS_ELSE_RETURN
+# SUCCESS_ELSE_RETURN
 
 > **This document is work-in-progress**. 

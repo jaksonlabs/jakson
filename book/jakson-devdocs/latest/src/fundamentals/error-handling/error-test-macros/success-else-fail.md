@@ -1,3 +1,3 @@
-# JAK_SUCCESS_ELSE_FAIL
+# SUCCESS_ELSE_FAIL
 
 > **This document is work-in-progress**. 

@@ -128,7 +128,7 @@ function playpen_text(playpen) {
         })
         .then(response => response.json())
         .then(response => result_block.innerText = response.result)
-        .catch(error => result_block.innerText = "Playground Communication: " + error.message);
+        .catch(err => result_block.innerText = "Playground Communication: " + err.message);
     }
 
     // Syntax highlighting Configuration
@@ -582,8 +582,8 @@ function playpen_text(playpen) {
         showTooltip(e.trigger, "Copied!");
     });
 
-    clipboardSnippets.on('error', function (e) {
-        showTooltip(e.trigger, "Clipboard error!");
+    clipboardSnippets.on('err', function (e) {
+        showTooltip(e.trigger, "Clipboard err!");
     });
 })();
 

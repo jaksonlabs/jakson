@@ -5,18 +5,18 @@
 
 int main (void)
 {
-    jak_carbon_new context;
-    jak_carbon record;
+    carbon_new context;
+    carbon record;
     char *as_json;
 
-    jak_carbon_create_begin(&context, &record, JAK_CARBON_KEY_NOKEY, JAK_CARBON_KEEP);
-    jak_carbon_create_end(&context);
+    carbon_create_begin(&context, &record, CARBON_KEY_NOKEY, CARBON_KEEP);
+    carbon_create_end(&context);
 
-    as_json = jak_carbon_to_json_compact_dup(&record);
+    as_json = carbon_to_json_compact_dup(&record);
 
     printf ("%s\n", as_json);
 
-    jak_carbon_drop(&record);
+    carbon_drop(&record);
     free(as_json);
 
     return 0;

@@ -157,14 +157,14 @@
 <tr><td><code>autokey</code></td><td>64-bit auto-generated identifier</td><td>8 B</td><td><code>[*]</code></td><td><code>u64</code></td></tr>
 <tr><td><code>ukey</code></td><td>64-bit user-defined unsigned identifier</td><td>8 B</td><td><code>[+]</code></td><td><code>u64</code></td></tr>
 <tr><td><code>ikey</code></td><td>64-bit user-defined signed identifier</td><td>8 B</td><td><code>[-]</code></td><td><code>i64</code></td></tr>
-<tr><td><code>skey</code></td><td><code>n</code>-char string user-def. identifier</td><td><code>n</code> B</td><td><code>[!]</code></td><td><code>string</code></td></tr>
+<tr><td><code>skey</code></td><td><code>n</code>-char string_buffer user-def. identifier</td><td><code>n</code> B</td><td><code>[!]</code></td><td><code>string_buffer</code></td></tr>
 </tbody></table>
 <p><span class="caption">Table FO-1: Record Primary Key Types and Encoding</span></p>
 <blockquote>
 <p>The value generation of <code>autokey</code> is implementation-dependent.</p>
 </blockquote>
 <blockquote>
-<p>The default value for numeric keys (<code>autokey</code>, <code>ukey</code>, and <code>ikey</code>) is <code>0</code>. The empty string <code>&quot;&quot;</code> is used to encode the default value for character string keys (<code>skey</code>). JSON formatters are required to format the value of <code>nokey</code> and the default value for character string keys as JSON <code>null</code>.</p>
+<p>The default value for numeric keys (<code>autokey</code>, <code>ukey</code>, and <code>ikey</code>) is <code>0</code>. The empty string_buffer <code>&quot;&quot;</code> is used to encode the default value for character string_buffer keys (<code>skey</code>). JSON formatters are required to format the value of <code>nokey</code> and the default value for character string_buffer keys as JSON <code>null</code>.</p>
 </blockquote>
 <blockquote>
 <p>If <code>nokey</code> is set, the <code>rev-number</code> field for a carbon <code>record</code> is omitted. In any case of revison, the revision number for such a <code>record</code> is <code>0</code>.</p>

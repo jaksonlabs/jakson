@@ -20,7 +20,7 @@
 
 ### Carbon Encoding
 
-A (compacted) Carbon `sorted-multimap` for the JSON snippet from above, encoding the JSON object with the base type `object` holding four string properties.
+A (compacted) Carbon `sorted-multimap` for the JSON snippet from above, encoding the JSON object with the base type `object` holding four string_buffer properties.
 
 ```
 [~] 

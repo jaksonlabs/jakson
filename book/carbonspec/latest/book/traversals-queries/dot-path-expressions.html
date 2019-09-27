@@ -172,11 +172,11 @@ a path that does not resolve to any value (i.e., a <code>nil</code> is returned)
 <pre><code>dot-path-unit           ::= path-expression ('.' path-expression)*
 path-expression         ::= array-accessor | property-accessor 
 array-accessor          ::= [0] | [1-9][0-9]* 
-property-accessor       ::= field-name | '&quot;' string '&quot;' | key-predicate
+property-accessor       ::= field-name | '&quot;' string_buffer '&quot;' | key-predicate
 key-predicate           ::= '$' function-name '(' function-parameter-list ')'
 field-name              ::= [a-zA-Z]('\&quot;' | [a-zA-Z0-9])*
 function-name           ::= [a-zA-Z][a-zA-Z0-9]*
-function-parameter-list ::= non-strict-json-string
+function-parameter-list ::= non-strict-json-string_buffer
 </code></pre>
 <h2><a class="header" href="#property-access" id="property-access">Property Access</a></h2>
 <p>JSON snippet</p>
@@ -229,7 +229,7 @@ function-parameter-list ::= non-strict-json-string
 <pre><code class="language-json">[
     {
     	&quot;value&quot;: &quot;Back to the Future&quot;,
-    	&quot;type&quot;: &quot;string&quot;,
+    	&quot;type&quot;: &quot;string_buffer&quot;,
     	&quot;path&quot;: &quot;title&quot;
     },
     {
@@ -291,7 +291,7 @@ See Section <a href="traversals-queries/path-functions.html">Dot Path Functions<
 <pre><code class="language-json">[
     {
     	&quot;value&quot;: &quot;Back to the Future Part II&quot;,
-    	&quot;type&quot;: &quot;string&quot;,
+    	&quot;type&quot;: &quot;string_buffer&quot;,
     	&quot;path&quot;: &quot;1.title&quot;
     }
 ]

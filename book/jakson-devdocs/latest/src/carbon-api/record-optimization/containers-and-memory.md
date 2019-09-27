@@ -40,9 +40,9 @@ For abstraction, assume that all containers (including markers, `<data>`, and  `
 
 In case of an overflow of size *k* inside one container in `<containers>`, `<containers>` is enlarged by *k* bytes towords `[E]` by splitting `<containers>` at the overflow point in a `<head>` and `<tail>` part, and by moving `<tail>` *k* byte towards `[E]`, effectively shrinking the records tail buffer `<buffer>` left to right. This procedure is possible and solves the overflow situtation *without* reallocation of the underyling memory block, as long as the tail buffer `<buffer>` in the memory block exists. If `<buffer>` is exhausted, the memory block must be reallocated, which leads to a new tail buffer of a particular size. 
 
-> *Note*: A Carbon record structure `jak_carbon` can live on both the stack and the heap, but the underlying memory block, which is used to encode the actual record, always lives on the heap. Even in cases of reallocation, the API client must not care about pointer management.
+> *Note*: A Carbon record structure `carbon` can live on both the stack and the heap, but the underlying memory block, which is used to encode the actual record, always lives on the heap. Even in cases of reallocation, the API client must not care about pointer management.
 
 
 ### Capacity Optimization
 
-Both the `<reserved>` memory area in each container, and the tail buffer `<buffer>` may be removed by specifying a [optimization post-processing step](carbon-api/record-optimization.md), which can be triggered by defining optimization flags unequal to `JAK_CARBON_KEEP`, or by manually calling `jak_carbon_revise_shrink` resp. `jak_carbon_revise_pack`  (both defined in `jak_carbon_revise.h`).
+Both the `<reserved>` memory area in each container, and the tail buffer `<buffer>` may be removed by specifying a [optimization post-processing step](carbon-api/record-optimization.md), which can be triggered by defining optimization flags unequal to `CARBON_KEEP`, or by manually calling `carbon_revise_shrink` resp. `carbon_revise_pack`  (both defined in `carbon_revise.h`).

@@ -5,17 +5,17 @@
 
 int main (void)
 {
-    jak_carbon record;
-    jak_error error;
+    carbon record;
+    err err;
     char *as_json;
 
-    jak_carbon_from_json(&record, "{\"msg\": \"Hello from JSON\"}", JAK_CARBON_KEY_NOKEY, NULL, &error);
+    carbon_from_json(&record, "{\"msg\": \"Hello from JSON\"}", CARBON_KEY_NOKEY, NULL, &err);
 
-    as_json = jak_carbon_to_json_compact_dup(&record);
+    as_json = carbon_to_json_compact_dup(&record);
 
     printf ("%s\n", as_json);
 
-    jak_carbon_drop(&record);
+    carbon_drop(&record);
     free(as_json);
 
     return 0;

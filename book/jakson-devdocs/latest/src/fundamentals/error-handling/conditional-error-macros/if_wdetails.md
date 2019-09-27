@@ -1,3 +1,3 @@
-# JAK_ERROR_IF_WDETAILS
+# ERROR_IF_WDETAILS
 
 > **This document is work-in-progress**. 

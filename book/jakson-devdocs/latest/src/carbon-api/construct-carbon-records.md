@@ -1,10 +1,10 @@
 # Carbon Records
 
-Carbon records are implemented by the `jak_carbon` structured defined in `src/jak_carbon.h`. 
+Carbon records are implemented by the `carbon` structured defined in `src/carbon.h`. 
 
-In a nutshell, Carbon records are a memory file (`jak_memfile`), the memory block (`jak_memblock`) to which this memory file writes and reads, an error and status structure (`jak_error`), and some internal variables for book-keeping. A Carbon record is a flat object that is encoded according to the [Columnar Binary JSON (Carbon) specification](http://www.carbonspec.org) by using functionality of the contained memory file to read and write safly in one continuous memory area managned by the memory block.  
+In a nutshell, Carbon records are a memory file (`memfile`), the memory block (`memblock`) to which this memory file writes and reads, an err and status structure (`err`), and some internal variables for book-keeping. A Carbon record is a flat object that is encoded according to the [Columnar Binary JSON (Carbon) specification](http://www.carbonspec.org) by using functionality of the contained memory file to read and write safly in one continuous memory area managned by the memory block.  
 
-Modification on Carbon records (including their creation) are atomic operations that may consists of several sub operations, such as insertion or a particular property. Each atomic modification is managed by a record-local revision context (`jak_carbon_revise`), which is wrapped by a special context (`jak_carbon_new`) for creation of new Carbon records.
+Modification on Carbon records (including their creation) are atomic operations that may consists of several sub operations, such as insertion or a particular property. Each atomic modification is managed by a record-local revision context (`carbon_revise`), which is wrapped by a special context (`carbon_new`) for creation of new Carbon records.
 
 
 ## Abstract Types and Containers
@@ -31,7 +31,7 @@ The concrete type *array* corresponde to [JSON arrays](https://tools.ietf.org/ht
 
 A map is a finite sequence of key-value pairs (called properties). Properties are unique in context of their parent object w.r.t. to their key name, i.e., no two properties with the same key shall exist in the same object. Properties inside objects have no particular order on the logical level, and a particular order at the pyhsical level. Like lists, maps have a variable size, which is determined by the type and size of its properties.
 
-- **Objects** are key-value maps containing key-value pairs where the key is a (variable-length) string, and the value is of any Carbon type. 
+- **Objects** are key-value maps containing key-value pairs where the key is a (variable-length) string_buffer, and the value is of any Carbon type. 
 
 The concrete type *object* corresponde to an [JSON object](https://tools.ietf.org/html/rfc8259), effectively encoding it in a reasonable binary form. 
 
@@ -69,9 +69,9 @@ In addition, the third way is [reconstruction of a Carbon record by a byte strea
 
 For the first two ways, a [record identification type](record-identification.md), and an [record optimization flag](record-optimization.md) must be specified. 
 
-The [record identification type](record-identification.md) determines what kind of primary key is used for the new record. For ease of understanding, all records that are created in the following pages will have no primary key at all (controlled by the key type `JAK_CARBON_KEY_NOKEY`). What this means and how to use alternatives is covered in the [Section about Record Identification](record-identification.md). 
+The [record identification type](record-identification.md) determines what kind of primary key is used for the new record. For ease of understanding, all records that are created in the following pages will have no primary key at all (controlled by the key type `CARBON_KEY_NOKEY`). What this means and how to use alternatives is covered in the [Section about Record Identification](record-identification.md). 
 
-The [record optimization flag](record-optimization.md) controls what to do with reserved memory for nested vector-like structures `<data> <reserved>` and the tail buffer `<reserved>` beyond the carbon record `<carbon-record> <reserved>`. For ease of understanding, all records in the following pages will be left unoptimized (controlled by the flag `JAK_CARBON_KEEP`). More details on alternatives and when to use these, is described in the [Section about Record Optimization](record-optimization.md)
+The [record optimization flag](record-optimization.md) controls what to do with reserved memory for nested vector-like structures `<data> <reserved>` and the tail buffer `<reserved>` beyond the carbon record `<carbon-record> <reserved>`. For ease of understanding, all records in the following pages will be left unoptimized (controlled by the flag `CARBON_KEEP`). More details on alternatives and when to use these, is described in the [Section about Record Optimization](record-optimization.md)
 
 
 The next pages give a tutorial on each construction way. 

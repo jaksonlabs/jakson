@@ -166,9 +166,9 @@
 <tr><td><code>[I]</code></td><td><code>u32</code></td><td>a signed 32-bit integer field</td></tr>
 <tr><td><code>[L]</code></td><td><code>u64</code></td><td>a signed 64-bit integer field</td></tr>
 <tr><td><code>[r]</code></td><td><code>float</code></td><td>a single-precision floating number field</td></tr>
-<tr><td><code>[s]</code></td><td><code>string</code></td><td>a character string field</td></tr>
-<tr><td><code>[b]</code></td><td><code>binary</code></td><td>a binary string field with known MIME type</td></tr>
-<tr><td><code>[x]</code></td><td><code>custom binary</code></td><td>a binary string field with user-defined type</td></tr>
+<tr><td><code>[s]</code></td><td><code>string_buffer</code></td><td>a character string_buffer field</td></tr>
+<tr><td><code>[b]</code></td><td><code>binary</code></td><td>a binary string_buffer field with known MIME type</td></tr>
+<tr><td><code>[x]</code></td><td><code>custom binary</code></td><td>a binary string_buffer field with user-defined type</td></tr>
 <tr><td><code>[n]</code></td><td><code>null</code></td><td>absence of data</td></tr>
 </tbody></table>
 <p><span class="caption">Figure MF-1: Data Type Markers</span></p>
@@ -251,7 +251,7 @@
 <tr><td><code>[*]</code></td><td><code>autokey</code></td><td>record identifier is auto-generated a <code>u64</code> value</td></tr>
 <tr><td><code>[+]</code></td><td><code>ukey</code></td><td>record identifier is user-defined a <code>u64</code> value</td></tr>
 <tr><td><code>[-]</code></td><td><code>ikey</code></td><td>record identifier is user-defined a <code>i64</code> value</td></tr>
-<tr><td><code>[!]</code></td><td><code>ikey</code></td><td>record identifier is user-defined a <code>string</code> value</td></tr>
+<tr><td><code>[!]</code></td><td><code>ikey</code></td><td>record identifier is user-defined a <code>string_buffer</code> value</td></tr>
 </tbody></table>
 <p><span class="caption">Figure MF-3: Record Identifier Type Markers</span></p>
 <table><thead><tr><th>Marker</th><th>Carbon Type</th><th>Descriptions</th></tr></thead><tbody>

@@ -29,7 +29,7 @@ file(GLOB_RECURSE LIB_LIBS_SOURCE_FILES libs/*.c )
 # `jakson.c` located in `include`. This technique, called amalgamation, is inspired by SQLite and others Duktape, which
 # do similar. Amalgamation in its simplest form is realy just that: source concatenation. In order to let this
 # concatenation runs smoothly, implemenations files must make use of static functions and must avoid naming conflicts
-# (typically by the use of `__jak_` prefix in implementation files).
+# (typically by the use of `__` prefix in implementation files).
 #
 # The implementation of amalgamation for Jakson is done as follows. Independent of the build type, amalgamation can
 # turned off or on. If it is turned off, a header file 'jakson.h' is generated in `include/jakson` that includes all
@@ -43,12 +43,12 @@ file(GLOB_RECURSE LIB_LIBS_SOURCE_FILES libs/*.c )
 # amalgamation is smoothly.
 #
 
-set(JAK_SRC_IN "${CMAKE_SOURCE_DIR}/src")
-set(JAK_SRC_TEMP "${CMAKE_SOURCE_DIR}/src-tmp")
-set(JAK_SRC_AMALGAMATION "${CMAKE_SOURCE_DIR}/include/jakson")
+set(SRC_IN "${CMAKE_SOURCE_DIR}/src")
+set(SRC_TEMP "${CMAKE_SOURCE_DIR}/src-tmp")
+set(SRC_AMALGAMATION "${CMAKE_SOURCE_DIR}/include/jakson")
 
-file(GLOB_RECURSE LIB_HEADER_FILES ${JAK_SRC_IN}/*.h )
-file(GLOB_RECURSE LIB_SOURCE_FILES ${JAK_SRC_IN}/*.c )
+file(GLOB_RECURSE LIB_HEADER_FILES ${SRC_IN}/*.h )
+file(GLOB_RECURSE LIB_SOURCE_FILES ${SRC_IN}/*.c )
 
 set(LIB_SOURCES ${LIB_LIBS_HEADER_FILES} ${LIB_LIBS_SOURCE_FILES})
 
@@ -69,27 +69,27 @@ OPTION(USE_AMALGAMATION "Turns source amalgamation (source code concatenation) o
 
 if (USE_AMALGAMATION)
     message("-- *** source amalgamation is turned on ***")
-    message("     - concat '${JAK_SRC_IN}/*.h' to '${JAK_SRC_AMALGAMATION}/jakson.h'")
-    message("     - concat '${JAK_SRC_IN}/*.c' to '${JAK_SRC_AMALGAMATION}/jakson.c'")
+    message("     - concat '${SRC_IN}/*.h' to '${SRC_AMALGAMATION}/jakson.h'")
+    message("     - concat '${SRC_IN}/*.c' to '${SRC_AMALGAMATION}/jakson.c'")
 
     message("-- Building header file 'jakson.h'")
-    file(WRITE ${JAK_SRC_AMALGAMATION}/jakson.h "")
+    file(WRITE ${SRC_AMALGAMATION}/jakson.h "")
     foreach(LIB_HEADER_FILE ${LIB_HEADER_FILES})
-        cat(${LIB_HEADER_FILE} ${JAK_SRC_AMALGAMATION}/jakson.h)
+        cat(${LIB_HEADER_FILE} ${SRC_AMALGAMATION}/jakson.h)
         message("     - append ${LIB_HEADER_FILE}")
     endforeach()
 
     message("-- Building implementation file 'jakson.c'")
-    file(WRITE ${JAK_SRC_AMALGAMATION}/jakson.c "")
+    file(WRITE ${SRC_AMALGAMATION}/jakson.c "")
     foreach(LIB_SOURCE_FILE ${LIB_SOURCE_FILES})
-        cat(${LIB_SOURCE_FILE} ${JAK_SRC_AMALGAMATION}/jakson.c)
+        cat(${LIB_SOURCE_FILE} ${SRC_AMALGAMATION}/jakson.c)
         message("     - append ${LIB_SOURCE_FILE}")
     endforeach()
 
     message("-- Inclusion header 'jakson.h' has been successfully built")
     message("-- Implementation file 'jakson.c' has been successfully built")
 
-    set(LIB_SOURCES ${JAK_SRC_AMALGAMATION}/jakson.h ${JAK_SRC_AMALGAMATION}/jakson.c ${LIB_SOURCES})
+    set(LIB_SOURCES ${SRC_AMALGAMATION}/jakson.h ${SRC_AMALGAMATION}/jakson.c ${LIB_SOURCES})
     message("-- Source files are: ")
     foreach(LIB_SOURCE_FILE ${LIB_SOURCES})
         message("     - '${LIB_SOURCE_FILE}'")
@@ -97,20 +97,20 @@ if (USE_AMALGAMATION)
 else()
     message("-- *** source amalgamation is turned off ***")
 
-    message("-- Generating inclusion header 'jakson.h' in ${JAK_SRC_AMALGAMATION}/")
+    message("-- Generating inclusion header 'jakson.h' in ${SRC_AMALGAMATION}/")
 
-    file(WRITE ${JAK_SRC_AMALGAMATION}/jakson.h "/* This is the generated inclusion file of Jakson. Do not modify the contents. */\n#ifndef JAK_JAKSON\n#define JAK_JAKSON\n")
+    file(WRITE ${SRC_AMALGAMATION}/jakson.h "/* This is the generated inclusion file of Jakson. Do not modify the contents. */\n#ifndef JAKSON\n#define JAKSON\n")
 
     foreach(LIB_HEADER_FILE ${LIB_HEADER_FILES})
-        file(APPEND ${JAK_SRC_AMALGAMATION}/jakson.h "#include \"${LIB_HEADER_FILE}\"\n")
+        file(APPEND ${SRC_AMALGAMATION}/jakson.h "#include \"${LIB_HEADER_FILE}\"\n")
         message("     - include ${LIB_HEADER_FILE}")
     endforeach()
 
-    file(APPEND ${JAK_SRC_AMALGAMATION}/jakson.h "#endif")
+    file(APPEND ${SRC_AMALGAMATION}/jakson.h "#endif")
 
     message("-- Inclusion header 'jakson.h' has been successfully built")
 
-    set(LIB_SOURCES ${JAK_SRC_AMALGAMATION}/jakson.h ${LIB_HEADER_FILES} ${LIB_SOURCE_FILES} ${LIB_SOURCES})
+    set(LIB_SOURCES ${SRC_AMALGAMATION}/jakson.h ${LIB_HEADER_FILES} ${LIB_SOURCE_FILES} ${LIB_SOURCES})
 
     message("-- Source files are: ")
     foreach(LIB_SOURCE_FILE ${LIB_SOURCES})
@@ -124,7 +124,7 @@ endif()
 if (${LOG_INFO} MATCHES "on")
     if (${BUILD_TYPE} MATCHES Debug)
         message("-- Info log is enabled")
-        add_definitions(-DJAK_LOG_INFO)
+        add_definitions(-DLOG_INFO)
     else()
         message("-- ** WARNING ** Info log is enabled but ignored")
         message("   use `cmake -DBUILD_TYPE=Debug` to turn on logging")
@@ -133,7 +133,7 @@ endif()
 if (${LOG_TRACE} MATCHES "on")
     if (${BUILD_TYPE} MATCHES Debug)
         message("-- Trace log is enabled")
-        add_definitions(-DJAK_LOG_TRACE)
+        add_definitions(-DLOG_TRACE)
     else()
         message("-- ** WARNING ** Trace log is enabled but ignored")
         message("   use `cmake -DBUILD_TYPE=Debug` to turn on logging")
@@ -142,7 +142,7 @@ endif()
 if (${LOG_DEBUG} MATCHES "on")
     if (${BUILD_TYPE} MATCHES Debug)
         message("-- Debug log is enabled")
-        add_definitions(-DJAK_LOG_DEBUG)
+        add_definitions(-DLOG_DEBUG)
     else()
         message("-- ** WARNING ** Debug log is enabled but ignored")
         message("   use `cmake -DBUILD_TYPE=Debug` to turn on logging")
@@ -151,7 +151,7 @@ endif()
 if (${LOG_WARN} MATCHES "on")
     if (${BUILD_TYPE} MATCHES Debug)
         message("-- Warn log is enabled")
-        add_definitions(-DJAK_LOG_DEBUG)
+        add_definitions(-DLOG_DEBUG)
     else()
         message("-- ** WARNING ** Warn log is enabled but ignored")
         message("   use `cmake -DBUILD_TYPE=Debug` to turn on logging")

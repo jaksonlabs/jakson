@@ -15,21 +15,21 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef JAK_HEXDUMP_H
-#define JAK_HEXDUMP_H
+#ifndef HEXDUMP_H
+#define HEXDUMP_H
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jakson/stdinc.h>
-#include <jakson/std/jak_string.h>
+#include <jakson/std/string.h>
 
-JAK_BEGIN_DECL
+BEGIN_DECL
 
-bool jak_hexdump(jak_string *dst, const void *base, jak_u64 nbytes);
-bool jak_hexdump_print(FILE *file, const void *base, jak_u64 nbytes);
+bool hexdump(string_buffer *dst, const void *base, u64 nbytes);
+bool hexdump_print(FILE *file, const void *base, u64 nbytes);
 
-JAK_END_DECL
+END_DECL
 
 #endif

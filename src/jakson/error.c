@@ -17,12 +17,12 @@
 
 #include <jakson/error.h>
 
-_Thread_local jak_error jak_global_error;
+_Thread_local err global_error;
 
-bool jak_error_init(jak_error *err)
+bool error_init(err *err)
 {
         if (err) {
-                err->code = JAK_ERR_NOERR;
+                err->code = ERR_NOERR;
                 err->details = NULL;
                 err->file = NULL;
                 err->line = 0;
@@ -30,17 +30,17 @@ bool jak_error_init(jak_error *err)
         return (err != NULL);
 }
 
-bool jak_error_cpy(jak_error *dst, const jak_error *src)
+bool error_cpy(err *dst, const err *src)
 {
-        JAK_ERROR_IF_NULL(dst);
-        JAK_ERROR_IF_NULL(src);
+        ERROR_IF_NULL(dst);
+        ERROR_IF_NULL(src);
         *dst = *src;
         return true;
 }
 
-bool jak_error_drop(jak_error *err)
+bool error_drop(err *err)
 {
-        JAK_ERROR_IF_NULL(err);
+        ERROR_IF_NULL(err);
         if (err->details) {
                 free(err->details);
                 err->details = NULL;
@@ -48,12 +48,12 @@ bool jak_error_drop(jak_error *err)
         return true;
 }
 
-bool jak_error_set(jak_error *err, int code, const char *file, jak_u32 line)
+bool error_set(err *err, int code, const char *file, u32 line)
 {
-        return jak_error_set_wdetails(err, code, file, line, NULL);
+        return error_set_wdetails(err, code, file, line, NULL);
 }
 
-bool jak_error_set_wdetails(jak_error *err, int code, const char *file, jak_u32 line, const char *details)
+bool error_set_wdetails(err *err, int code, const char *file, u32 line, const char *details)
 {
         if (err) {
                 err->code = code;
@@ -61,18 +61,18 @@ bool jak_error_set_wdetails(jak_error *err, int code, const char *file, jak_u32 
                 err->line = line;
                 err->details = details ? strdup(details) : NULL;
 #ifndef NDEBUG
-                jak_error_print_to_stderr(err);
+                error_print_to_stderr(err);
 #endif
         }
         return (err != NULL);
 }
 
-bool jak_error_set_no_abort(jak_error *err, int code, const char *file, jak_u32 line)
+bool error_set_no_abort(err *err, int code, const char *file, u32 line)
 {
-        return jak_error_set_wdetails_no_abort(err, code, file, line, NULL);
+        return error_set_wdetails_no_abort(err, code, file, line, NULL);
 }
 
-bool jak_error_set_wdetails_no_abort(jak_error *err, int code, const char *file, jak_u32 line, const char *details)
+bool error_set_wdetails_no_abort(err *err, int code, const char *file, u32 line, const char *details)
 {
         if (err) {
                 err->code = code;
@@ -80,52 +80,52 @@ bool jak_error_set_wdetails_no_abort(jak_error *err, int code, const char *file,
                 err->line = line;
                 err->details = details ? strdup(details) : NULL;
 #ifndef NDEBUG
-                jak_error_print_to_stderr(err);
+                error_print_to_stderr(err);
 #endif
         }
         return (err != NULL);
 }
 
-bool jak_error_str(const char **errstr, const char **file, jak_u32 *line, bool *details, const char **detailsstr,
-               const jak_error *err)
+bool error_str(const char **errstr, const char **file, u32 *line, bool *details, const char **detailsstr,
+               const err *err)
 {
         if (err) {
-                if (err->code >= jak_global_nerr_str) {
-                        JAK_OPTIONAL_SET(errstr, JAK_ERRSTR_ILLEGAL_CODE)
+                if (err->code >= global_nerr_str) {
+                        OPTIONAL_SET(errstr, ERRSTR_ILLEGAL_CODE)
                 } else {
-                        JAK_OPTIONAL_SET(errstr, jak_global_err_str[err->code])
+                        OPTIONAL_SET(errstr, global_err_str[err->code])
                 }
-                JAK_OPTIONAL_SET(file, err->file)
-                JAK_OPTIONAL_SET(line, err->line)
-                JAK_OPTIONAL_SET(details, err->details != NULL);
-                JAK_OPTIONAL_SET(detailsstr, err->details)
+                OPTIONAL_SET(file, err->file)
+                OPTIONAL_SET(line, err->line)
+                OPTIONAL_SET(details, err->details != NULL);
+                OPTIONAL_SET(detailsstr, err->details)
                 return true;
         }
         return false;
 }
 
-bool jak_error_print_to_stderr(const jak_error *err)
+bool error_print_to_stderr(const err *err)
 {
         if (err) {
                 const char *errstr;
                 const char *file;
-                jak_u32 line;
+                u32 line;
                 bool has_details;
                 const char *details;
-                if (jak_error_str(&errstr, &file, &line, &has_details, &details, err)) {
+                if (error_str(&errstr, &file, &line, &has_details, &details, err)) {
                         fprintf(stderr, "*** ERROR ***   %s\n", errstr);
                         fprintf(stderr, "                details: %s\n", has_details ? details : "no details");
                         fprintf(stderr, "                source.: %s(%d)\n", file, line);
                 } else {
-                        fprintf(stderr, "*** ERROR ***   internal JAK_ERROR during JAK_ERROR information fetch");
+                        fprintf(stderr, "*** ERROR ***   internal ERROR during ERROR information fetch");
                 }
                 fflush(stderr);
         }
         return (err != NULL);
 }
 
-bool jak_error_print_and_abort(const jak_error *err)
+bool error_print_and_abort(const err *err)
 {
-        jak_error_print_to_stderr(err);
+        error_print_to_stderr(err);
         abort();
 }

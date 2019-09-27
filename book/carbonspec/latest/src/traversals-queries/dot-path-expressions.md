@@ -33,11 +33,11 @@ JSON/SQL Path Expressions is part of the SQL:2016 Standard and allows
 dot-path-unit           ::= path-expression ('.' path-expression)*
 path-expression         ::= array-accessor | property-accessor 
 array-accessor          ::= [0] | [1-9][0-9]* 
-property-accessor       ::= field-name | '"' string '"' | key-predicate
+property-accessor       ::= field-name | '"' string_buffer '"' | key-predicate
 key-predicate           ::= '$' function-name '(' function-parameter-list ')'
 field-name              ::= [a-zA-Z]('\"' | [a-zA-Z0-9])*
 function-name           ::= [a-zA-Z][a-zA-Z0-9]*
-function-parameter-list ::= non-strict-json-string
+function-parameter-list ::= non-strict-json-string_buffer
 ```
 
 
@@ -116,7 +116,7 @@ Result (Json)
 [
     {
     	"value": "Back to the Future",
-    	"type": "string",
+    	"type": "string_buffer",
     	"path": "title"
     },
     {
@@ -205,7 +205,7 @@ Result (Json)
 [
     {
     	"value": "Back to the Future Part II",
-    	"type": "string",
+    	"type": "string_buffer",
     	"path": "1.title"
     }
 ]

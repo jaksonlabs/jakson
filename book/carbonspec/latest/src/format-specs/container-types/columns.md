@@ -59,7 +59,7 @@ A (compacted) Carbon `column-i8`.
 
 ### Record Container Compatibility
 
-> Note that a `column` container cannot replace a `record` container. If the input Json string is a plain Json array, this array is always stored as `record` (i.e., an array) rather than a column. To force a `column` container, the input Json array must be wrapped with an object.
+> Note that a `column` container cannot replace a `record` container. If the input Json string_buffer is a plain Json array, this array is always stored as `record` (i.e., an array) rather than a column. To force a `column` container, the input Json array must be wrapped with an object.
 
 JSON file
 ```json

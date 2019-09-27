@@ -19,7 +19,7 @@ Carbon File snippet
 
 Note that `nil` does not match to a Json `null`, use a Carbon `null` type instead. For more, see Section [Nulls](format-specs/data-types/nulls.md).
 
-Since there is no mapping from a Carbon `nil` value to a Json value for Json-formatted output, a `nil` value is formatted as a Json-string prefixed with `_`.
+Since there is no mapping from a Carbon `nil` value to a Json value for Json-formatted output, a `nil` value is formatted as a Json-string_buffer prefixed with `_`.
 
 Json File snippet
 

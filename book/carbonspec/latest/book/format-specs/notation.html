@@ -149,7 +149,7 @@
                     <main>
                         <h1><a class="header" href="#notation" id="notation">Notation</a></h1>
 <table><thead><tr><th>Notation</th><th>Description</th><th>Example</th></tr></thead><tbody>
-<tr><td><code>[x]</code></td><td>Fixed-length block <code>x</code> of certain number of bytes</td><td><code>[{]</code> an object start marker, <code>[n]</code> a null value, <code>[21]</code> an integer value, <code>[Hello, World!]</code> a character string</td></tr>
+<tr><td><code>[x]</code></td><td>Fixed-length block <code>x</code> of certain number of bytes</td><td><code>[{]</code> an object start marker, <code>[n]</code> a null value, <code>[21]</code> an integer value, <code>[Hello, World!]</code> a character string_buffer</td></tr>
 <tr><td><code>(x)</code></td><td>Varialbe-length value <code>x</code> with varying bytes</td><td><code>(len)</code> variable-length unsigned integer encoding a length <code>len</code></td></tr>
 <tr><td><code>&lt;x&gt;</code></td><td>Optional, context-dependent value <code>x</code></td><td><code>[[] &lt;data&gt; []]</code> an array block <code>[</code> <code>]</code> with content <code>data</code> that may be of varying length</td></tr>
 <tr><td><code>...</code></td><td>Memory range of zero or more zeros</td><td><code>[...]...</code> an empty array block containing reserved memory, followed by (unused) reserved memory</td></tr>

@@ -1,3 +1,3 @@
-# JAK_ERROR_NO_ABORT
+# ERROR_NO_ABORT
 
 > **This document is work-in-progress**. 

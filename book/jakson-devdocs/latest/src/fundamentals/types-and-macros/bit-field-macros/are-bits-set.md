@@ -1,3 +1,3 @@
-# JAK_ARE_BITS_SET
+# ARE_BITS_SET
 
 > **This document is work-in-progress**. 

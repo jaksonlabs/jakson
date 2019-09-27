@@ -149,19 +149,19 @@
                     <main>
                         <h1><a class="header" href="#character-strings" id="character-strings">Character Strings</a></h1>
 <table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
-<tr><td><code>string</code></td><td>a (Pascal) character string of <code>n</code> characters</td><td><code>n</code> bytes</td><td><code>null</code></td><td><code>[s]</code></td></tr>
+<tr><td><code>string_buffer</code></td><td>a (Pascal) character string_buffer of <code>n</code> characters</td><td><code>n</code> bytes</td><td><code>null</code></td><td><code>[s]</code></td></tr>
 </tbody></table>
 <h2><a class="header" href="#encoding-as-field-value" id="encoding-as-field-value">Encoding as Field Value</a></h2>
-<pre><code>[s](n) &lt;character-string&gt;
+<pre><code>[s](n) &lt;character-string_buffer&gt;
 </code></pre>
 <table><thead><tr><th>Description</th><th>Size</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
-<tr><td>a <code>n</code>-char string</td><td>1 + <code>l</code> + <code>n</code> bytes</td><td><code>[s]</code> (string)</td><td><code>(n)</code> length (<code>l</code> byte), <code>n</code> chars</td></tr>
+<tr><td>a <code>n</code>-char string_buffer</td><td>1 + <code>l</code> + <code>n</code> bytes</td><td><code>[s]</code> (string_buffer)</td><td><code>(n)</code> length (<code>l</code> byte), <code>n</code> chars</td></tr>
 </tbody></table>
 <h3><a class="header" href="#example" id="example">Example</a></h3>
 <p>JSON snippet</p>
 <pre><code class="language-json">[&quot;Hello&quot;, &quot;World&quot;, &quot;!&quot;]
 </code></pre>
-<p>A (compacted) Carbon file, which encodes the JSON array as <code>array</code> of character-string values.</p>
+<p>A (compacted) Carbon file, which encodes the JSON array as <code>array</code> of character-string_buffer values.</p>
 <pre><code>[[] [s](5)[Hello] [s](5)[World] [s](1)[!] []]
 </code></pre>
 <h2><a class="header" href="#encoding-as-column-value" id="encoding-as-column-value">Encoding as Column Value</a></h2>

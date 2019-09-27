@@ -1,3 +1,3 @@
-# JAK_CONSOLE_WRITE_CONT
+# CONSOLE_WRITE_CONT
 
 > **This document is work-in-progress**. 
