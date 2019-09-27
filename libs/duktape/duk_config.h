@@ -325,7 +325,7 @@
 /* Convenience, e.g. gcc 4.5.1 == 40501; http://stackoverflow.com/questions/6031819/emulating-gccs-builtin-unreachable */
 #define DUK_F_GCC_VERSION  (__GNUC__ * 10000L + __GNUC_MINOR__ * 100L + __GNUC_PATCHLEVEL__)
 #else
-#error cannot figure out gcc version
+#err cannot figure out gcc version
 #endif
 #endif
 
@@ -412,7 +412,7 @@
 /* Orbis = PS4 */
 #define DUK_USE_DATE_NOW_GETTIMEOFDAY
 #define DUK_USE_DATE_TZO_GMTIME_S
-/* no parsing (not an error) */
+/* no parsing (not an err) */
 #define DUK_USE_DATE_FMT_STRFTIME
 #include <sys/types.h>
 #include <machine/endian.h>
@@ -452,7 +452,7 @@
 /* --- Atari ST TOS --- */
 #define DUK_USE_DATE_NOW_TIME
 #define DUK_USE_DATE_TZO_GMTIME
-/* no parsing (not an error) */
+/* no parsing (not an err) */
 #define DUK_USE_DATE_FMT_STRFTIME
 #include <time.h>
 
@@ -468,7 +468,7 @@
 /* AmigaOS on M68k */
 #define DUK_USE_DATE_NOW_TIME
 #define DUK_USE_DATE_TZO_GMTIME
-/* no parsing (not an error) */
+/* no parsing (not an err) */
 #define DUK_USE_DATE_FMT_STRFTIME
 #include <time.h>
 #elif defined(DUK_F_PPC)
@@ -481,7 +481,7 @@
 #define UINTPTR_MAX UINT_MAX
 #endif
 #else
-#error AmigaOS but not M68K/PPC, not supported now
+#err AmigaOS but not M68K/PPC, not supported now
 #endif
 
 #define DUK_USE_OS_STRING "amigaos"
@@ -724,7 +724,7 @@
 #endif  /* DUK_F_BCC */
 #include <sys/param.h>
 #include <sys/time.h>
-#include <jak_time.h>
+#include <time.h>
 
 #define DUK_USE_DATE_NOW_GETTIMEOFDAY
 #define DUK_USE_DATE_TZO_GMTIME_R
@@ -852,7 +852,7 @@
 /* Shared includes: C89 */
 #include <stdio.h>
 #include <stdlib.h>
-#include <jak_string.h>
+#include <jakson/std/string.h>
 #include <stdarg.h>  /* varargs */
 #include <setjmp.h>
 #include <stddef.h>  /* e.g. ptrdiff_t */
@@ -1569,7 +1569,7 @@
 /* XXX: add feature options to force basic types from outside? */
 
 #if !defined(INT_MAX)
-#error INT_MAX not defined
+#err INT_MAX not defined
 #endif
 
 /* Check that architecture is two's complement, standard C allows e.g.
@@ -1577,10 +1577,10 @@
  */
 #if defined(INT_MAX) && defined(INT_MIN)
 #if INT_MAX != -(INT_MIN + 1)
-#error platform does not seem complement of two
+#err platform does not seem complement of two
 #endif
 #else
-#error cannot check complement of two
+#err cannot check complement of two
 #endif
 
 /* Pointer size determination based on __WORDSIZE or architecture when
@@ -1734,7 +1734,7 @@ typedef intmax_t duk_intmax_t;
 typedef unsigned char duk_uint8_t;
 typedef signed char duk_int8_t;
 #else
-#error cannot detect 8-bit type
+#err cannot detect 8-bit type
 #endif
 
 #if defined(USHRT_MAX) && (USHRT_MAX == 65535UL)
@@ -1745,7 +1745,7 @@ typedef signed short duk_int16_t;
 typedef unsigned int duk_uint16_t;
 typedef signed int duk_int16_t;
 #else
-#error cannot detect 16-bit type
+#err cannot detect 16-bit type
 #endif
 
 #if defined(UINT_MAX) && (UINT_MAX == 4294967295UL)
@@ -1756,7 +1756,7 @@ typedef signed int duk_int32_t;
 typedef unsigned long duk_uint32_t;
 typedef signed long duk_int32_t;
 #else
-#error cannot detect 32-bit type
+#err cannot detect 32-bit type
 #endif
 
 /* 64-bit type detection is a bit tricky.
@@ -1812,7 +1812,7 @@ typedef unsigned __int64 duk_uint64_t;
 typedef signed __int64 duk_int64_t;
 #endif
 #if !defined(DUK_F_HAVE_64BIT)
-/* cannot detect 64-bit type, not always needed so don't error */
+/* cannot detect 64-bit type, not always needed so don't err */
 #endif
 
 typedef duk_uint8_t duk_uint_least8_t;
@@ -1949,7 +1949,7 @@ typedef duk_uint64_t duk_uintptr_t;
 #define DUK_INTPTR_MIN_COMPUTED
 #define DUK_INTPTR_MAX_COMPUTED
 #else
-#error cannot determine intptr type
+#err cannot determine intptr type
 #endif
 
 /* SIZE_MAX may be missing so use an approximate value for it. */
@@ -2041,7 +2041,7 @@ typedef duk_uint_t duk_uarridx_t;
 #define DUK_UARRIDX_MAX           DUK_UINT_MAX
 
 /* Duktape/C function return value, platform int is enough for now to
- * represent 0, 1, or negative error code.  Must be compatible with
+ * represent 0, 1, or negative err code.  Must be compatible with
  * assigning truth values (e.g. duk_ret_t rc = (foo == bar);).
  */
 typedef duk_small_int_t duk_ret_t;
@@ -2079,12 +2079,12 @@ typedef double duk_double_t;
  * preprocessor can't do a comparison.
  */
 #if !defined(DUK_SIZE_MAX)
-#error DUK_SIZE_MAX is undefined, probably missing SIZE_MAX
+#err DUK_SIZE_MAX is undefined, probably missing SIZE_MAX
 #elif !defined(DUK_SIZE_MAX_COMPUTED)
 #if DUK_SIZE_MAX < 0xffffffffUL
 /* On some systems SIZE_MAX can be smaller than max unsigned 32-bit value
  * which seems incorrect if size_t is (at least) an unsigned 32-bit type.
- * However, it doesn't seem useful to error out compilation if this is the
+ * However, it doesn't seem useful to err out compilation if this is the
  * case.
  */
 #endif
@@ -2112,7 +2112,7 @@ typedef struct duk_hthread duk_context;
  *  Fill-ins for platform, architecture, and compiler
  */
 
-/* An abort()-like primitive is needed by the default fatal error handler. */
+/* An abort()-like primitive is needed by the default fatal err handler. */
 #if !defined(DUK_ABORT)
 #define DUK_ABORT             abort
 #endif
@@ -2249,7 +2249,7 @@ typedef struct duk_hthread duk_context;
 #define DUK_DOUBLE_NAN       (0.0 / 0.0)
 #else
 /* In VBCC (0.0 / 0.0) results in a warning and 0.0 instead of NaN.
- * In MSVC (VS2010 Express) (0.0 / 0.0) results in a compile error.
+ * In MSVC (VS2010 Express) (0.0 / 0.0) results in a compile err.
  * Use a computed NaN (initialized when a heap is created at the
  * latest).
  */
@@ -2453,7 +2453,7 @@ typedef struct duk_hthread duk_context;
  *  used, and at the end we check if any of them worked.  This allows generic
  *  approaches to be tried first, and platform/compiler specific hacks tried
  *  last.  As a last resort, the user can force a specific endianness, as it's
- *  not JAK_LIKELY that automatic detection will work on the most exotic platforms.
+ *  not LIKELY that automatic detection will work on the most exotic platforms.
  *
  *  Duktape supports little and big endian machines.  There's also support
  *  for a hybrid used by some ARM machines where integers are little endian
@@ -2587,7 +2587,7 @@ typedef struct duk_hthread duk_context;
 #if !defined(DUK_VA_COPY)
 /* We need va_copy() which is defined in C99 / C++11, so an awkward
  * replacement is needed for pre-C99 / pre-C++11 environments.  This
- * will quite JAK_LIKELY need portability hacks for some non-C99
+ * will quite LIKELY need portability hacks for some non-C99
  * environments.
  */
 #if defined(DUK_F_C99) || defined(DUK_F_CPP11)
@@ -2607,7 +2607,7 @@ typedef struct duk_hthread duk_context;
 #endif
 
 #if !defined(DUK_MACRO_STRINGIFY)
-/* Macro hackery to convert e.g. __LINE__ to a string without formatting,
+/* Macro hackery to convert e.g. __LINE__ to a string_buffer without formatting,
  * see: http://stackoverflow.com/questions/240353/convert-a-preprocessor-token-to-a-string
  */
 #define DUK_MACRO_STRINGIFY_HELPER(x)  #x
@@ -2858,7 +2858,7 @@ typedef struct duk_hthread duk_context;
  * so refuse to compile.  Relax this if -ffast-math is tested to work.
  */
 #if defined(__FAST_MATH__)
-#error __FAST_MATH__ defined, refusing to compile
+#err __FAST_MATH__ defined, refusing to compile
 #endif
 
 /*
@@ -2983,7 +2983,7 @@ typedef struct duk_hthread duk_context;
 #define DUK_USE_LEXER_SLIDING_WINDOW
 #undef DUK_USE_LIGHTFUNC_BUILTINS
 #define DUK_USE_LITCACHE_SIZE 256
-#define DUK_USE_MJAK_AND_SWEEP_RECLIMIT 256
+#define DUK_USE_MAND_SWEEP_RECLIMIT 256
 #define DUK_USE_MATH_BUILTIN
 #define DUK_USE_NATIVE_CALL_RECLIMIT 1000
 #undef DUK_USE_NATIVE_STACK_CHECK
@@ -3090,7 +3090,7 @@ typedef struct duk_hthread duk_context;
 #elif defined(DUK_USE_DATE_NOW_WINDOWS_SUBMS)
 #define DUK_USE_DATE_GET_NOW(ctx)            duk_bi_date_get_now_windows_subms()
 #else
-#error no provider for DUK_USE_DATE_GET_NOW()
+#err no provider for DUK_USE_DATE_GET_NOW()
 #endif
 
 #if defined(DUK_USE_DATE_GET_LOCAL_TZOFFSET)
@@ -3102,7 +3102,7 @@ typedef struct duk_hthread duk_context;
 #elif defined(DUK_USE_DATE_TZO_WINDOWS_NO_DST)
 #define DUK_USE_DATE_GET_LOCAL_TZOFFSET(d)   duk_bi_date_get_local_tzoffset_windows_no_dst((d))
 #else
-#error no provider for DUK_USE_DATE_GET_LOCAL_TZOFFSET()
+#err no provider for DUK_USE_DATE_GET_LOCAL_TZOFFSET()
 #endif
 
 #if defined(DUK_USE_DATE_PARSE_STRING)
@@ -3141,298 +3141,298 @@ typedef struct duk_hthread duk_context;
  */
 
 #if defined(DUK_OPT_ASSERTIONS)
-#error unsupported legacy feature option DUK_OPT_ASSERTIONS used
+#err unsupported legacy feature option DUK_OPT_ASSERTIONS used
 #endif
 #if defined(DUK_OPT_BUFFEROBJECT_SUPPORT)
-#error unsupported legacy feature option DUK_OPT_BUFFEROBJECT_SUPPORT used
+#err unsupported legacy feature option DUK_OPT_BUFFEROBJECT_SUPPORT used
 #endif
 #if defined(DUK_OPT_BUFLEN16)
-#error unsupported legacy feature option DUK_OPT_BUFLEN16 used
+#err unsupported legacy feature option DUK_OPT_BUFLEN16 used
 #endif
 #if defined(DUK_OPT_DATAPTR16)
-#error unsupported legacy feature option DUK_OPT_DATAPTR16 used
+#err unsupported legacy feature option DUK_OPT_DATAPTR16 used
 #endif
 #if defined(DUK_OPT_DATAPTR_DEC16)
-#error unsupported legacy feature option DUK_OPT_DATAPTR_DEC16 used
+#err unsupported legacy feature option DUK_OPT_DATAPTR_DEC16 used
 #endif
 #if defined(DUK_OPT_DATAPTR_ENC16)
-#error unsupported legacy feature option DUK_OPT_DATAPTR_ENC16 used
+#err unsupported legacy feature option DUK_OPT_DATAPTR_ENC16 used
 #endif
 #if defined(DUK_OPT_DDDPRINT)
-#error unsupported legacy feature option DUK_OPT_DDDPRINT used
+#err unsupported legacy feature option DUK_OPT_DDDPRINT used
 #endif
 #if defined(DUK_OPT_DDPRINT)
-#error unsupported legacy feature option DUK_OPT_DDPRINT used
+#err unsupported legacy feature option DUK_OPT_DDPRINT used
 #endif
 #if defined(DUK_OPT_DEBUG)
-#error unsupported legacy feature option DUK_OPT_DEBUG used
+#err unsupported legacy feature option DUK_OPT_DEBUG used
 #endif
 #if defined(DUK_OPT_DEBUGGER_DUMPHEAP)
-#error unsupported legacy feature option DUK_OPT_DEBUGGER_DUMPHEAP used
+#err unsupported legacy feature option DUK_OPT_DEBUGGER_DUMPHEAP used
 #endif
 #if defined(DUK_OPT_DEBUGGER_FWD_LOGGING)
-#error unsupported legacy feature option DUK_OPT_DEBUGGER_FWD_LOGGING used
+#err unsupported legacy feature option DUK_OPT_DEBUGGER_FWD_LOGGING used
 #endif
 #if defined(DUK_OPT_DEBUGGER_FWD_PRINTALERT)
-#error unsupported legacy feature option DUK_OPT_DEBUGGER_FWD_PRINTALERT used
+#err unsupported legacy feature option DUK_OPT_DEBUGGER_FWD_PRINTALERT used
 #endif
 #if defined(DUK_OPT_DEBUGGER_SUPPORT)
-#error unsupported legacy feature option DUK_OPT_DEBUGGER_SUPPORT used
+#err unsupported legacy feature option DUK_OPT_DEBUGGER_SUPPORT used
 #endif
 #if defined(DUK_OPT_DEBUGGER_TRANSPORT_TORTURE)
-#error unsupported legacy feature option DUK_OPT_DEBUGGER_TRANSPORT_TORTURE used
+#err unsupported legacy feature option DUK_OPT_DEBUGGER_TRANSPORT_TORTURE used
 #endif
 #if defined(DUK_OPT_DEBUG_BUFSIZE)
-#error unsupported legacy feature option DUK_OPT_DEBUG_BUFSIZE used
+#err unsupported legacy feature option DUK_OPT_DEBUG_BUFSIZE used
 #endif
 #if defined(DUK_OPT_DECLARE)
-#error unsupported legacy feature option DUK_OPT_DECLARE used
+#err unsupported legacy feature option DUK_OPT_DECLARE used
 #endif
 #if defined(DUK_OPT_DEEP_C_STACK)
-#error unsupported legacy feature option DUK_OPT_DEEP_C_STACK used
+#err unsupported legacy feature option DUK_OPT_DEEP_C_STACK used
 #endif
 #if defined(DUK_OPT_DLL_BUILD)
-#error unsupported legacy feature option DUK_OPT_DLL_BUILD used
+#err unsupported legacy feature option DUK_OPT_DLL_BUILD used
 #endif
 #if defined(DUK_OPT_DPRINT)
-#error unsupported legacy feature option DUK_OPT_DPRINT used
+#err unsupported legacy feature option DUK_OPT_DPRINT used
 #endif
 #if defined(DUK_OPT_DPRINT_COLORS)
-#error unsupported legacy feature option DUK_OPT_DPRINT_COLORS used
+#err unsupported legacy feature option DUK_OPT_DPRINT_COLORS used
 #endif
 #if defined(DUK_OPT_DPRINT_RDTSC)
-#error unsupported legacy feature option DUK_OPT_DPRINT_RDTSC used
+#err unsupported legacy feature option DUK_OPT_DPRINT_RDTSC used
 #endif
 #if defined(DUK_OPT_EXEC_TIMEOUT_CHECK)
-#error unsupported legacy feature option DUK_OPT_EXEC_TIMEOUT_CHECK used
+#err unsupported legacy feature option DUK_OPT_EXEC_TIMEOUT_CHECK used
 #endif
 #if defined(DUK_OPT_EXTERNAL_STRINGS)
-#error unsupported legacy feature option DUK_OPT_EXTERNAL_STRINGS used
+#err unsupported legacy feature option DUK_OPT_EXTERNAL_STRINGS used
 #endif
 #if defined(DUK_OPT_EXTSTR_FREE)
-#error unsupported legacy feature option DUK_OPT_EXTSTR_FREE used
+#err unsupported legacy feature option DUK_OPT_EXTSTR_FREE used
 #endif
 #if defined(DUK_OPT_EXTSTR_INTERN_CHECK)
-#error unsupported legacy feature option DUK_OPT_EXTSTR_INTERN_CHECK used
+#err unsupported legacy feature option DUK_OPT_EXTSTR_INTERN_CHECK used
 #endif
 #if defined(DUK_OPT_FASTINT)
-#error unsupported legacy feature option DUK_OPT_FASTINT used
+#err unsupported legacy feature option DUK_OPT_FASTINT used
 #endif
 #if defined(DUK_OPT_FORCE_ALIGN)
-#error unsupported legacy feature option DUK_OPT_FORCE_ALIGN used
+#err unsupported legacy feature option DUK_OPT_FORCE_ALIGN used
 #endif
 #if defined(DUK_OPT_FORCE_BYTEORDER)
-#error unsupported legacy feature option DUK_OPT_FORCE_BYTEORDER used
+#err unsupported legacy feature option DUK_OPT_FORCE_BYTEORDER used
 #endif
 #if defined(DUK_OPT_FUNCPTR16)
-#error unsupported legacy feature option DUK_OPT_FUNCPTR16 used
+#err unsupported legacy feature option DUK_OPT_FUNCPTR16 used
 #endif
 #if defined(DUK_OPT_FUNCPTR_DEC16)
-#error unsupported legacy feature option DUK_OPT_FUNCPTR_DEC16 used
+#err unsupported legacy feature option DUK_OPT_FUNCPTR_DEC16 used
 #endif
 #if defined(DUK_OPT_FUNCPTR_ENC16)
-#error unsupported legacy feature option DUK_OPT_FUNCPTR_ENC16 used
+#err unsupported legacy feature option DUK_OPT_FUNCPTR_ENC16 used
 #endif
 #if defined(DUK_OPT_FUNC_NONSTD_CALLER_PROPERTY)
-#error unsupported legacy feature option DUK_OPT_FUNC_NONSTD_CALLER_PROPERTY used
+#err unsupported legacy feature option DUK_OPT_FUNC_NONSTD_CALLER_PROPERTY used
 #endif
 #if defined(DUK_OPT_FUNC_NONSTD_SOURCE_PROPERTY)
-#error unsupported legacy feature option DUK_OPT_FUNC_NONSTD_SOURCE_PROPERTY used
+#err unsupported legacy feature option DUK_OPT_FUNC_NONSTD_SOURCE_PROPERTY used
 #endif
 #if defined(DUK_OPT_GC_TORTURE)
-#error unsupported legacy feature option DUK_OPT_GC_TORTURE used
+#err unsupported legacy feature option DUK_OPT_GC_TORTURE used
 #endif
 #if defined(DUK_OPT_HAVE_CUSTOM_H)
-#error unsupported legacy feature option DUK_OPT_HAVE_CUSTOM_H used
+#err unsupported legacy feature option DUK_OPT_HAVE_CUSTOM_H used
 #endif
 #if defined(DUK_OPT_HEAPPTR16)
-#error unsupported legacy feature option DUK_OPT_HEAPPTR16 used
+#err unsupported legacy feature option DUK_OPT_HEAPPTR16 used
 #endif
 #if defined(DUK_OPT_HEAPPTR_DEC16)
-#error unsupported legacy feature option DUK_OPT_HEAPPTR_DEC16 used
+#err unsupported legacy feature option DUK_OPT_HEAPPTR_DEC16 used
 #endif
 #if defined(DUK_OPT_HEAPPTR_ENC16)
-#error unsupported legacy feature option DUK_OPT_HEAPPTR_ENC16 used
+#err unsupported legacy feature option DUK_OPT_HEAPPTR_ENC16 used
 #endif
 #if defined(DUK_OPT_INTERRUPT_COUNTER)
-#error unsupported legacy feature option DUK_OPT_INTERRUPT_COUNTER used
+#err unsupported legacy feature option DUK_OPT_INTERRUPT_COUNTER used
 #endif
 #if defined(DUK_OPT_JSON_STRINGIFY_FASTPATH)
-#error unsupported legacy feature option DUK_OPT_JSON_STRINGIFY_FASTPATH used
+#err unsupported legacy feature option DUK_OPT_JSON_STRINGIFY_FASTPATH used
 #endif
 #if defined(DUK_OPT_LIGHTFUNC_BUILTINS)
-#error unsupported legacy feature option DUK_OPT_LIGHTFUNC_BUILTINS used
+#err unsupported legacy feature option DUK_OPT_LIGHTFUNC_BUILTINS used
 #endif
 #if defined(DUK_OPT_NONSTD_FUNC_CALLER_PROPERTY)
-#error unsupported legacy feature option DUK_OPT_NONSTD_FUNC_CALLER_PROPERTY used
+#err unsupported legacy feature option DUK_OPT_NONSTD_FUNC_CALLER_PROPERTY used
 #endif
 #if defined(DUK_OPT_NONSTD_FUNC_SOURCE_PROPERTY)
-#error unsupported legacy feature option DUK_OPT_NONSTD_FUNC_SOURCE_PROPERTY used
+#err unsupported legacy feature option DUK_OPT_NONSTD_FUNC_SOURCE_PROPERTY used
 #endif
 #if defined(DUK_OPT_NO_ARRAY_SPLICE_NONSTD_DELCOUNT)
-#error unsupported legacy feature option DUK_OPT_NO_ARRAY_SPLICE_NONSTD_DELCOUNT used
+#err unsupported legacy feature option DUK_OPT_NO_ARRAY_SPLICE_NONSTD_DELCOUNT used
 #endif
 #if defined(DUK_OPT_NO_AUGMENT_ERRORS)
-#error unsupported legacy feature option DUK_OPT_NO_AUGMENT_ERRORS used
+#err unsupported legacy feature option DUK_OPT_NO_AUGMENT_ERRORS used
 #endif
 #if defined(DUK_OPT_NO_BROWSER_LIKE)
-#error unsupported legacy feature option DUK_OPT_NO_BROWSER_LIKE used
+#err unsupported legacy feature option DUK_OPT_NO_BROWSER_LIKE used
 #endif
 #if defined(DUK_OPT_NO_BUFFEROBJECT_SUPPORT)
-#error unsupported legacy feature option DUK_OPT_NO_BUFFEROBJECT_SUPPORT used
+#err unsupported legacy feature option DUK_OPT_NO_BUFFEROBJECT_SUPPORT used
 #endif
 #if defined(DUK_OPT_NO_BYTECODE_DUMP_SUPPORT)
-#error unsupported legacy feature option DUK_OPT_NO_BYTECODE_DUMP_SUPPORT used
+#err unsupported legacy feature option DUK_OPT_NO_BYTECODE_DUMP_SUPPORT used
 #endif
 #if defined(DUK_OPT_NO_COMMONJS_MODULES)
-#error unsupported legacy feature option DUK_OPT_NO_COMMONJS_MODULES used
+#err unsupported legacy feature option DUK_OPT_NO_COMMONJS_MODULES used
 #endif
 #if defined(DUK_OPT_NO_ES6_OBJECT_PROTO_PROPERTY)
-#error unsupported legacy feature option DUK_OPT_NO_ES6_OBJECT_PROTO_PROPERTY used
+#err unsupported legacy feature option DUK_OPT_NO_ES6_OBJECT_PROTO_PROPERTY used
 #endif
 #if defined(DUK_OPT_NO_ES6_OBJECT_SETPROTOTYPEOF)
-#error unsupported legacy feature option DUK_OPT_NO_ES6_OBJECT_SETPROTOTYPEOF used
+#err unsupported legacy feature option DUK_OPT_NO_ES6_OBJECT_SETPROTOTYPEOF used
 #endif
 #if defined(DUK_OPT_NO_ES6_PROXY)
-#error unsupported legacy feature option DUK_OPT_NO_ES6_PROXY used
+#err unsupported legacy feature option DUK_OPT_NO_ES6_PROXY used
 #endif
 #if defined(DUK_OPT_NO_FILE_IO)
-#error unsupported legacy feature option DUK_OPT_NO_FILE_IO used
+#err unsupported legacy feature option DUK_OPT_NO_FILE_IO used
 #endif
 #if defined(DUK_OPT_NO_FUNC_STMT)
-#error unsupported legacy feature option DUK_OPT_NO_FUNC_STMT used
+#err unsupported legacy feature option DUK_OPT_NO_FUNC_STMT used
 #endif
 #if defined(DUK_OPT_NO_JC)
-#error unsupported legacy feature option DUK_OPT_NO_JC used
+#err unsupported legacy feature option DUK_OPT_NO_JC used
 #endif
 #if defined(DUK_OPT_NO_JSONC)
-#error unsupported legacy feature option DUK_OPT_NO_JSONC used
+#err unsupported legacy feature option DUK_OPT_NO_JSONC used
 #endif
 #if defined(DUK_OPT_NO_JSONX)
-#error unsupported legacy feature option DUK_OPT_NO_JSONX used
+#err unsupported legacy feature option DUK_OPT_NO_JSONX used
 #endif
 #if defined(DUK_OPT_NO_JX)
-#error unsupported legacy feature option DUK_OPT_NO_JX used
+#err unsupported legacy feature option DUK_OPT_NO_JX used
 #endif
-#if defined(DUK_OPT_NO_MJAK_AND_SWEEP)
-#error unsupported legacy feature option DUK_OPT_NO_MJAK_AND_SWEEP used
+#if defined(DUK_OPT_NO_MAND_SWEEP)
+#err unsupported legacy feature option DUK_OPT_NO_MAND_SWEEP used
 #endif
 #if defined(DUK_OPT_NO_MS_STRINGTABLE_RESIZE)
-#error unsupported legacy feature option DUK_OPT_NO_MS_STRINGTABLE_RESIZE used
+#err unsupported legacy feature option DUK_OPT_NO_MS_STRINGTABLE_RESIZE used
 #endif
 #if defined(DUK_OPT_NO_NONSTD_ACCESSOR_KEY_ARGUMENT)
-#error unsupported legacy feature option DUK_OPT_NO_NONSTD_ACCESSOR_KEY_ARGUMENT used
+#err unsupported legacy feature option DUK_OPT_NO_NONSTD_ACCESSOR_KEY_ARGUMENT used
 #endif
 #if defined(DUK_OPT_NO_NONSTD_ARRAY_CONCAT_TRAILER)
-#error unsupported legacy feature option DUK_OPT_NO_NONSTD_ARRAY_CONCAT_TRAILER used
+#err unsupported legacy feature option DUK_OPT_NO_NONSTD_ARRAY_CONCAT_TRAILER used
 #endif
 #if defined(DUK_OPT_NO_NONSTD_ARRAY_MAP_TRAILER)
-#error unsupported legacy feature option DUK_OPT_NO_NONSTD_ARRAY_MAP_TRAILER used
+#err unsupported legacy feature option DUK_OPT_NO_NONSTD_ARRAY_MAP_TRAILER used
 #endif
 #if defined(DUK_OPT_NO_NONSTD_ARRAY_SPLICE_DELCOUNT)
-#error unsupported legacy feature option DUK_OPT_NO_NONSTD_ARRAY_SPLICE_DELCOUNT used
+#err unsupported legacy feature option DUK_OPT_NO_NONSTD_ARRAY_SPLICE_DELCOUNT used
 #endif
 #if defined(DUK_OPT_NO_NONSTD_FUNC_STMT)
-#error unsupported legacy feature option DUK_OPT_NO_NONSTD_FUNC_STMT used
+#err unsupported legacy feature option DUK_OPT_NO_NONSTD_FUNC_STMT used
 #endif
 #if defined(DUK_OPT_NO_NONSTD_JSON_ESC_U2028_U2029)
-#error unsupported legacy feature option DUK_OPT_NO_NONSTD_JSON_ESC_U2028_U2029 used
+#err unsupported legacy feature option DUK_OPT_NO_NONSTD_JSON_ESC_U2028_U2029 used
 #endif
 #if defined(DUK_OPT_NO_NONSTD_STRING_FROMCHARCODE_32BIT)
-#error unsupported legacy feature option DUK_OPT_NO_NONSTD_STRING_FROMCHARCODE_32BIT used
+#err unsupported legacy feature option DUK_OPT_NO_NONSTD_STRING_FROMCHARCODE_32BIT used
 #endif
 #if defined(DUK_OPT_NO_OBJECT_ES6_PROTO_PROPERTY)
-#error unsupported legacy feature option DUK_OPT_NO_OBJECT_ES6_PROTO_PROPERTY used
+#err unsupported legacy feature option DUK_OPT_NO_OBJECT_ES6_PROTO_PROPERTY used
 #endif
 #if defined(DUK_OPT_NO_OBJECT_ES6_SETPROTOTYPEOF)
-#error unsupported legacy feature option DUK_OPT_NO_OBJECT_ES6_SETPROTOTYPEOF used
+#err unsupported legacy feature option DUK_OPT_NO_OBJECT_ES6_SETPROTOTYPEOF used
 #endif
 #if defined(DUK_OPT_NO_OCTAL_SUPPORT)
-#error unsupported legacy feature option DUK_OPT_NO_OCTAL_SUPPORT used
+#err unsupported legacy feature option DUK_OPT_NO_OCTAL_SUPPORT used
 #endif
 #if defined(DUK_OPT_NO_PACKED_TVAL)
-#error unsupported legacy feature option DUK_OPT_NO_PACKED_TVAL used
+#err unsupported legacy feature option DUK_OPT_NO_PACKED_TVAL used
 #endif
 #if defined(DUK_OPT_NO_PC2LINE)
-#error unsupported legacy feature option DUK_OPT_NO_PC2LINE used
+#err unsupported legacy feature option DUK_OPT_NO_PC2LINE used
 #endif
 #if defined(DUK_OPT_NO_REFERENCE_COUNTING)
-#error unsupported legacy feature option DUK_OPT_NO_REFERENCE_COUNTING used
+#err unsupported legacy feature option DUK_OPT_NO_REFERENCE_COUNTING used
 #endif
 #if defined(DUK_OPT_NO_REGEXP_SUPPORT)
-#error unsupported legacy feature option DUK_OPT_NO_REGEXP_SUPPORT used
+#err unsupported legacy feature option DUK_OPT_NO_REGEXP_SUPPORT used
 #endif
 #if defined(DUK_OPT_NO_SECTION_B)
-#error unsupported legacy feature option DUK_OPT_NO_SECTION_B used
+#err unsupported legacy feature option DUK_OPT_NO_SECTION_B used
 #endif
 #if defined(DUK_OPT_NO_SOURCE_NONBMP)
-#error unsupported legacy feature option DUK_OPT_NO_SOURCE_NONBMP used
+#err unsupported legacy feature option DUK_OPT_NO_SOURCE_NONBMP used
 #endif
 #if defined(DUK_OPT_NO_STRICT_DECL)
-#error unsupported legacy feature option DUK_OPT_NO_STRICT_DECL used
+#err unsupported legacy feature option DUK_OPT_NO_STRICT_DECL used
 #endif
 #if defined(DUK_OPT_NO_TRACEBACKS)
-#error unsupported legacy feature option DUK_OPT_NO_TRACEBACKS used
+#err unsupported legacy feature option DUK_OPT_NO_TRACEBACKS used
 #endif
 #if defined(DUK_OPT_NO_VERBOSE_ERRORS)
-#error unsupported legacy feature option DUK_OPT_NO_VERBOSE_ERRORS used
+#err unsupported legacy feature option DUK_OPT_NO_VERBOSE_ERRORS used
 #endif
 #if defined(DUK_OPT_NO_VOLUNTARY_GC)
-#error unsupported legacy feature option DUK_OPT_NO_VOLUNTARY_GC used
+#err unsupported legacy feature option DUK_OPT_NO_VOLUNTARY_GC used
 #endif
 #if defined(DUK_OPT_NO_ZERO_BUFFER_DATA)
-#error unsupported legacy feature option DUK_OPT_NO_ZERO_BUFFER_DATA used
+#err unsupported legacy feature option DUK_OPT_NO_ZERO_BUFFER_DATA used
 #endif
 #if defined(DUK_OPT_OBJSIZES16)
-#error unsupported legacy feature option DUK_OPT_OBJSIZES16 used
+#err unsupported legacy feature option DUK_OPT_OBJSIZES16 used
 #endif
 #if defined(DUK_OPT_PANIC_HANDLER)
-#error unsupported legacy feature option DUK_OPT_PANIC_HANDLER used
+#err unsupported legacy feature option DUK_OPT_PANIC_HANDLER used
 #endif
 #if defined(DUK_OPT_REFCOUNT16)
-#error unsupported legacy feature option DUK_OPT_REFCOUNT16 used
+#err unsupported legacy feature option DUK_OPT_REFCOUNT16 used
 #endif
 #if defined(DUK_OPT_SEGFAULT_ON_PANIC)
-#error unsupported legacy feature option DUK_OPT_SEGFAULT_ON_PANIC used
+#err unsupported legacy feature option DUK_OPT_SEGFAULT_ON_PANIC used
 #endif
 #if defined(DUK_OPT_SELF_TESTS)
-#error unsupported legacy feature option DUK_OPT_SELF_TESTS used
+#err unsupported legacy feature option DUK_OPT_SELF_TESTS used
 #endif
 #if defined(DUK_OPT_SETJMP)
-#error unsupported legacy feature option DUK_OPT_SETJMP used
+#err unsupported legacy feature option DUK_OPT_SETJMP used
 #endif
 #if defined(DUK_OPT_SHUFFLE_TORTURE)
-#error unsupported legacy feature option DUK_OPT_SHUFFLE_TORTURE used
+#err unsupported legacy feature option DUK_OPT_SHUFFLE_TORTURE used
 #endif
 #if defined(DUK_OPT_SIGSETJMP)
-#error unsupported legacy feature option DUK_OPT_SIGSETJMP used
+#err unsupported legacy feature option DUK_OPT_SIGSETJMP used
 #endif
 #if defined(DUK_OPT_STRHASH16)
-#error unsupported legacy feature option DUK_OPT_STRHASH16 used
+#err unsupported legacy feature option DUK_OPT_STRHASH16 used
 #endif
 #if defined(DUK_OPT_STRICT_UTF8_SOURCE)
-#error unsupported legacy feature option DUK_OPT_STRICT_UTF8_SOURCE used
+#err unsupported legacy feature option DUK_OPT_STRICT_UTF8_SOURCE used
 #endif
 #if defined(DUK_OPT_STRLEN16)
-#error unsupported legacy feature option DUK_OPT_STRLEN16 used
+#err unsupported legacy feature option DUK_OPT_STRLEN16 used
 #endif
 #if defined(DUK_OPT_STRTAB_CHAIN)
-#error unsupported legacy feature option DUK_OPT_STRTAB_CHAIN used
+#err unsupported legacy feature option DUK_OPT_STRTAB_CHAIN used
 #endif
 #if defined(DUK_OPT_STRTAB_CHAIN_SIZE)
-#error unsupported legacy feature option DUK_OPT_STRTAB_CHAIN_SIZE used
+#err unsupported legacy feature option DUK_OPT_STRTAB_CHAIN_SIZE used
 #endif
 #if defined(DUK_OPT_TARGET_INFO)
-#error unsupported legacy feature option DUK_OPT_TARGET_INFO used
+#err unsupported legacy feature option DUK_OPT_TARGET_INFO used
 #endif
 #if defined(DUK_OPT_TRACEBACK_DEPTH)
-#error unsupported legacy feature option DUK_OPT_TRACEBACK_DEPTH used
+#err unsupported legacy feature option DUK_OPT_TRACEBACK_DEPTH used
 #endif
 #if defined(DUK_OPT_UNDERSCORE_SETJMP)
-#error unsupported legacy feature option DUK_OPT_UNDERSCORE_SETJMP used
+#err unsupported legacy feature option DUK_OPT_UNDERSCORE_SETJMP used
 #endif
 #if defined(DUK_OPT_USER_INITJS)
-#error unsupported legacy feature option DUK_OPT_USER_INITJS used
+#err unsupported legacy feature option DUK_OPT_USER_INITJS used
 #endif
 
 /*
@@ -3440,286 +3440,286 @@ typedef struct duk_hthread duk_context;
  */
 
 #if defined(DUK_USE_32BIT_PTRS)
-#error unsupported config option used (option has been removed): DUK_USE_32BIT_PTRS
+#err unsupported config option used (option has been removed): DUK_USE_32BIT_PTRS
 #endif
 #if defined(DUK_USE_ALIGN_4)
-#error unsupported config option used (option has been removed): DUK_USE_ALIGN_4
+#err unsupported config option used (option has been removed): DUK_USE_ALIGN_4
 #endif
 #if defined(DUK_USE_ALIGN_8)
-#error unsupported config option used (option has been removed): DUK_USE_ALIGN_8
+#err unsupported config option used (option has been removed): DUK_USE_ALIGN_8
 #endif
 #if defined(DUK_USE_BROWSER_LIKE)
-#error unsupported config option used (option has been removed): DUK_USE_BROWSER_LIKE
+#err unsupported config option used (option has been removed): DUK_USE_BROWSER_LIKE
 #endif
 #if defined(DUK_USE_BUILTIN_INITJS)
-#error unsupported config option used (option has been removed): DUK_USE_BUILTIN_INITJS
+#err unsupported config option used (option has been removed): DUK_USE_BUILTIN_INITJS
 #endif
 #if defined(DUK_USE_BYTEORDER_FORCED)
-#error unsupported config option used (option has been removed): DUK_USE_BYTEORDER_FORCED
+#err unsupported config option used (option has been removed): DUK_USE_BYTEORDER_FORCED
 #endif
 #if defined(DUK_USE_COMMONJS_MODULES)
-#error unsupported config option used (option has been removed): DUK_USE_COMMONJS_MODULES
+#err unsupported config option used (option has been removed): DUK_USE_COMMONJS_MODULES
 #endif
 #if defined(DUK_USE_DATAPTR_DEC16) && !defined(DUK_USE_DATAPTR16)
-#error config option DUK_USE_DATAPTR_DEC16 requires option DUK_USE_DATAPTR16 (which is missing)
+#err config option DUK_USE_DATAPTR_DEC16 requires option DUK_USE_DATAPTR16 (which is missing)
 #endif
 #if defined(DUK_USE_DATAPTR_ENC16) && !defined(DUK_USE_DATAPTR16)
-#error config option DUK_USE_DATAPTR_ENC16 requires option DUK_USE_DATAPTR16 (which is missing)
+#err config option DUK_USE_DATAPTR_ENC16 requires option DUK_USE_DATAPTR16 (which is missing)
 #endif
 #if defined(DUK_USE_DDDPRINT)
-#error unsupported config option used (option has been removed): DUK_USE_DDDPRINT
+#err unsupported config option used (option has been removed): DUK_USE_DDDPRINT
 #endif
 #if defined(DUK_USE_DDPRINT)
-#error unsupported config option used (option has been removed): DUK_USE_DDPRINT
+#err unsupported config option used (option has been removed): DUK_USE_DDPRINT
 #endif
 #if defined(DUK_USE_DEBUGGER_FWD_LOGGING)
-#error unsupported config option used (option has been removed): DUK_USE_DEBUGGER_FWD_LOGGING
+#err unsupported config option used (option has been removed): DUK_USE_DEBUGGER_FWD_LOGGING
 #endif
 #if defined(DUK_USE_DEBUGGER_FWD_PRINTALERT)
-#error unsupported config option used (option has been removed): DUK_USE_DEBUGGER_FWD_PRINTALERT
+#err unsupported config option used (option has been removed): DUK_USE_DEBUGGER_FWD_PRINTALERT
 #endif
 #if defined(DUK_USE_DEBUGGER_SUPPORT) && !defined(DUK_USE_INTERRUPT_COUNTER)
-#error config option DUK_USE_DEBUGGER_SUPPORT requires option DUK_USE_INTERRUPT_COUNTER (which is missing)
+#err config option DUK_USE_DEBUGGER_SUPPORT requires option DUK_USE_INTERRUPT_COUNTER (which is missing)
 #endif
 #if defined(DUK_USE_DEEP_C_STACK)
-#error unsupported config option used (option has been removed): DUK_USE_DEEP_C_STACK
+#err unsupported config option used (option has been removed): DUK_USE_DEEP_C_STACK
 #endif
 #if defined(DUK_USE_DOUBLE_BE)
-#error unsupported config option used (option has been removed): DUK_USE_DOUBLE_BE
+#err unsupported config option used (option has been removed): DUK_USE_DOUBLE_BE
 #endif
 #if defined(DUK_USE_DOUBLE_BE) && defined(DUK_USE_DOUBLE_LE)
-#error config option DUK_USE_DOUBLE_BE conflicts with option DUK_USE_DOUBLE_LE (which is also defined)
+#err config option DUK_USE_DOUBLE_BE conflicts with option DUK_USE_DOUBLE_LE (which is also defined)
 #endif
 #if defined(DUK_USE_DOUBLE_BE) && defined(DUK_USE_DOUBLE_ME)
-#error config option DUK_USE_DOUBLE_BE conflicts with option DUK_USE_DOUBLE_ME (which is also defined)
+#err config option DUK_USE_DOUBLE_BE conflicts with option DUK_USE_DOUBLE_ME (which is also defined)
 #endif
 #if defined(DUK_USE_DOUBLE_LE)
-#error unsupported config option used (option has been removed): DUK_USE_DOUBLE_LE
+#err unsupported config option used (option has been removed): DUK_USE_DOUBLE_LE
 #endif
 #if defined(DUK_USE_DOUBLE_LE) && defined(DUK_USE_DOUBLE_BE)
-#error config option DUK_USE_DOUBLE_LE conflicts with option DUK_USE_DOUBLE_BE (which is also defined)
+#err config option DUK_USE_DOUBLE_LE conflicts with option DUK_USE_DOUBLE_BE (which is also defined)
 #endif
 #if defined(DUK_USE_DOUBLE_LE) && defined(DUK_USE_DOUBLE_ME)
-#error config option DUK_USE_DOUBLE_LE conflicts with option DUK_USE_DOUBLE_ME (which is also defined)
+#err config option DUK_USE_DOUBLE_LE conflicts with option DUK_USE_DOUBLE_ME (which is also defined)
 #endif
 #if defined(DUK_USE_DOUBLE_ME)
-#error unsupported config option used (option has been removed): DUK_USE_DOUBLE_ME
+#err unsupported config option used (option has been removed): DUK_USE_DOUBLE_ME
 #endif
 #if defined(DUK_USE_DOUBLE_ME) && defined(DUK_USE_DOUBLE_LE)
-#error config option DUK_USE_DOUBLE_ME conflicts with option DUK_USE_DOUBLE_LE (which is also defined)
+#err config option DUK_USE_DOUBLE_ME conflicts with option DUK_USE_DOUBLE_LE (which is also defined)
 #endif
 #if defined(DUK_USE_DOUBLE_ME) && defined(DUK_USE_DOUBLE_BE)
-#error config option DUK_USE_DOUBLE_ME conflicts with option DUK_USE_DOUBLE_BE (which is also defined)
+#err config option DUK_USE_DOUBLE_ME conflicts with option DUK_USE_DOUBLE_BE (which is also defined)
 #endif
 #if defined(DUK_USE_DPRINT)
-#error unsupported config option used (option has been removed): DUK_USE_DPRINT
+#err unsupported config option used (option has been removed): DUK_USE_DPRINT
 #endif
 #if defined(DUK_USE_DPRINT) && !defined(DUK_USE_DEBUG)
-#error config option DUK_USE_DPRINT requires option DUK_USE_DEBUG (which is missing)
+#err config option DUK_USE_DPRINT requires option DUK_USE_DEBUG (which is missing)
 #endif
 #if defined(DUK_USE_DPRINT_COLORS)
-#error unsupported config option used (option has been removed): DUK_USE_DPRINT_COLORS
+#err unsupported config option used (option has been removed): DUK_USE_DPRINT_COLORS
 #endif
 #if defined(DUK_USE_DPRINT_RDTSC)
-#error unsupported config option used (option has been removed): DUK_USE_DPRINT_RDTSC
+#err unsupported config option used (option has been removed): DUK_USE_DPRINT_RDTSC
 #endif
 #if defined(DUK_USE_ES6_REGEXP_BRACES)
-#error unsupported config option used (option has been removed): DUK_USE_ES6_REGEXP_BRACES
+#err unsupported config option used (option has been removed): DUK_USE_ES6_REGEXP_BRACES
 #endif
 #if defined(DUK_USE_ESBC_MAX_BYTES) && !defined(DUK_USE_ESBC_LIMITS)
-#error config option DUK_USE_ESBC_MAX_BYTES requires option DUK_USE_ESBC_LIMITS (which is missing)
+#err config option DUK_USE_ESBC_MAX_BYTES requires option DUK_USE_ESBC_LIMITS (which is missing)
 #endif
 #if defined(DUK_USE_ESBC_MAX_LINENUMBER) && !defined(DUK_USE_ESBC_LIMITS)
-#error config option DUK_USE_ESBC_MAX_LINENUMBER requires option DUK_USE_ESBC_LIMITS (which is missing)
+#err config option DUK_USE_ESBC_MAX_LINENUMBER requires option DUK_USE_ESBC_LIMITS (which is missing)
 #endif
 #if defined(DUK_USE_EXEC_TIMEOUT_CHECK) && !defined(DUK_USE_INTERRUPT_COUNTER)
-#error config option DUK_USE_EXEC_TIMEOUT_CHECK requires option DUK_USE_INTERRUPT_COUNTER (which is missing)
+#err config option DUK_USE_EXEC_TIMEOUT_CHECK requires option DUK_USE_INTERRUPT_COUNTER (which is missing)
 #endif
 #if defined(DUK_USE_EXTSTR_FREE) && !defined(DUK_USE_HSTRING_EXTDATA)
-#error config option DUK_USE_EXTSTR_FREE requires option DUK_USE_HSTRING_EXTDATA (which is missing)
+#err config option DUK_USE_EXTSTR_FREE requires option DUK_USE_HSTRING_EXTDATA (which is missing)
 #endif
 #if defined(DUK_USE_EXTSTR_INTERN_CHECK) && !defined(DUK_USE_HSTRING_EXTDATA)
-#error config option DUK_USE_EXTSTR_INTERN_CHECK requires option DUK_USE_HSTRING_EXTDATA (which is missing)
+#err config option DUK_USE_EXTSTR_INTERN_CHECK requires option DUK_USE_HSTRING_EXTDATA (which is missing)
 #endif
 #if defined(DUK_USE_FASTINT) && !defined(DUK_USE_64BIT_OPS)
-#error config option DUK_USE_FASTINT requires option DUK_USE_64BIT_OPS (which is missing)
+#err config option DUK_USE_FASTINT requires option DUK_USE_64BIT_OPS (which is missing)
 #endif
 #if defined(DUK_USE_FILE_IO)
-#error unsupported config option used (option has been removed): DUK_USE_FILE_IO
+#err unsupported config option used (option has been removed): DUK_USE_FILE_IO
 #endif
 #if defined(DUK_USE_FULL_TVAL)
-#error unsupported config option used (option has been removed): DUK_USE_FULL_TVAL
+#err unsupported config option used (option has been removed): DUK_USE_FULL_TVAL
 #endif
 #if defined(DUK_USE_FUNCPTR_DEC16) && !defined(DUK_USE_FUNCPTR16)
-#error config option DUK_USE_FUNCPTR_DEC16 requires option DUK_USE_FUNCPTR16 (which is missing)
+#err config option DUK_USE_FUNCPTR_DEC16 requires option DUK_USE_FUNCPTR16 (which is missing)
 #endif
 #if defined(DUK_USE_FUNCPTR_ENC16) && !defined(DUK_USE_FUNCPTR16)
-#error config option DUK_USE_FUNCPTR_ENC16 requires option DUK_USE_FUNCPTR16 (which is missing)
+#err config option DUK_USE_FUNCPTR_ENC16 requires option DUK_USE_FUNCPTR16 (which is missing)
 #endif
 #if defined(DUK_USE_HASHBYTES_UNALIGNED_U32_ACCESS)
-#error unsupported config option used (option has been removed): DUK_USE_HASHBYTES_UNALIGNED_U32_ACCESS
+#err unsupported config option used (option has been removed): DUK_USE_HASHBYTES_UNALIGNED_U32_ACCESS
 #endif
 #if defined(DUK_USE_HEAPPTR16) && defined(DUK_USE_DEBUG)
-#error config option DUK_USE_HEAPPTR16 conflicts with option DUK_USE_DEBUG (which is also defined)
+#err config option DUK_USE_HEAPPTR16 conflicts with option DUK_USE_DEBUG (which is also defined)
 #endif
 #if defined(DUK_USE_HEAPPTR_DEC16) && !defined(DUK_USE_HEAPPTR16)
-#error config option DUK_USE_HEAPPTR_DEC16 requires option DUK_USE_HEAPPTR16 (which is missing)
+#err config option DUK_USE_HEAPPTR_DEC16 requires option DUK_USE_HEAPPTR16 (which is missing)
 #endif
 #if defined(DUK_USE_HEAPPTR_ENC16) && !defined(DUK_USE_HEAPPTR16)
-#error config option DUK_USE_HEAPPTR_ENC16 requires option DUK_USE_HEAPPTR16 (which is missing)
+#err config option DUK_USE_HEAPPTR_ENC16 requires option DUK_USE_HEAPPTR16 (which is missing)
 #endif
 #if defined(DUK_USE_INTEGER_BE)
-#error unsupported config option used (option has been removed): DUK_USE_INTEGER_BE
+#err unsupported config option used (option has been removed): DUK_USE_INTEGER_BE
 #endif
 #if defined(DUK_USE_INTEGER_BE) && defined(DUK_USE_INTEGER_LE)
-#error config option DUK_USE_INTEGER_BE conflicts with option DUK_USE_INTEGER_LE (which is also defined)
+#err config option DUK_USE_INTEGER_BE conflicts with option DUK_USE_INTEGER_LE (which is also defined)
 #endif
 #if defined(DUK_USE_INTEGER_BE) && defined(DUK_USE_INTEGER_ME)
-#error config option DUK_USE_INTEGER_BE conflicts with option DUK_USE_INTEGER_ME (which is also defined)
+#err config option DUK_USE_INTEGER_BE conflicts with option DUK_USE_INTEGER_ME (which is also defined)
 #endif
 #if defined(DUK_USE_INTEGER_LE)
-#error unsupported config option used (option has been removed): DUK_USE_INTEGER_LE
+#err unsupported config option used (option has been removed): DUK_USE_INTEGER_LE
 #endif
 #if defined(DUK_USE_INTEGER_LE) && defined(DUK_USE_INTEGER_BE)
-#error config option DUK_USE_INTEGER_LE conflicts with option DUK_USE_INTEGER_BE (which is also defined)
+#err config option DUK_USE_INTEGER_LE conflicts with option DUK_USE_INTEGER_BE (which is also defined)
 #endif
 #if defined(DUK_USE_INTEGER_LE) && defined(DUK_USE_INTEGER_ME)
-#error config option DUK_USE_INTEGER_LE conflicts with option DUK_USE_INTEGER_ME (which is also defined)
+#err config option DUK_USE_INTEGER_LE conflicts with option DUK_USE_INTEGER_ME (which is also defined)
 #endif
 #if defined(DUK_USE_INTEGER_ME)
-#error unsupported config option used (option has been removed): DUK_USE_INTEGER_ME
+#err unsupported config option used (option has been removed): DUK_USE_INTEGER_ME
 #endif
 #if defined(DUK_USE_INTEGER_ME) && defined(DUK_USE_INTEGER_LE)
-#error config option DUK_USE_INTEGER_ME conflicts with option DUK_USE_INTEGER_LE (which is also defined)
+#err config option DUK_USE_INTEGER_ME conflicts with option DUK_USE_INTEGER_LE (which is also defined)
 #endif
 #if defined(DUK_USE_INTEGER_ME) && defined(DUK_USE_INTEGER_BE)
-#error config option DUK_USE_INTEGER_ME conflicts with option DUK_USE_INTEGER_BE (which is also defined)
+#err config option DUK_USE_INTEGER_ME conflicts with option DUK_USE_INTEGER_BE (which is also defined)
 #endif
 #if defined(DUK_USE_MARKANDSWEEP_FINALIZER_TORTURE)
-#error unsupported config option used (option has been removed): DUK_USE_MARKANDSWEEP_FINALIZER_TORTURE
+#err unsupported config option used (option has been removed): DUK_USE_MARKANDSWEEP_FINALIZER_TORTURE
 #endif
-#if defined(DUK_USE_MJAK_AND_SWEEP)
-#error unsupported config option used (option has been removed): DUK_USE_MJAK_AND_SWEEP
+#if defined(DUK_USE_MAND_SWEEP)
+#err unsupported config option used (option has been removed): DUK_USE_MAND_SWEEP
 #endif
 #if defined(DUK_USE_MATH_FMAX)
-#error unsupported config option used (option has been removed): DUK_USE_MATH_FMAX
+#err unsupported config option used (option has been removed): DUK_USE_MATH_FMAX
 #endif
 #if defined(DUK_USE_MATH_FMIN)
-#error unsupported config option used (option has been removed): DUK_USE_MATH_FMIN
+#err unsupported config option used (option has been removed): DUK_USE_MATH_FMIN
 #endif
 #if defined(DUK_USE_MATH_ROUND)
-#error unsupported config option used (option has been removed): DUK_USE_MATH_ROUND
+#err unsupported config option used (option has been removed): DUK_USE_MATH_ROUND
 #endif
 #if defined(DUK_USE_MS_STRINGTABLE_RESIZE)
-#error unsupported config option used (option has been removed): DUK_USE_MS_STRINGTABLE_RESIZE
+#err unsupported config option used (option has been removed): DUK_USE_MS_STRINGTABLE_RESIZE
 #endif
 #if defined(DUK_USE_NONSTD_ARRAY_CONCAT_TRAILER)
-#error unsupported config option used (option has been removed): DUK_USE_NONSTD_ARRAY_CONCAT_TRAILER
+#err unsupported config option used (option has been removed): DUK_USE_NONSTD_ARRAY_CONCAT_TRAILER
 #endif
 #if defined(DUK_USE_NONSTD_ARRAY_MAP_TRAILER)
-#error unsupported config option used (option has been removed): DUK_USE_NONSTD_ARRAY_MAP_TRAILER
+#err unsupported config option used (option has been removed): DUK_USE_NONSTD_ARRAY_MAP_TRAILER
 #endif
 #if defined(DUK_USE_NONSTD_REGEXP_DOLLAR_ESCAPE)
-#error unsupported config option used (option has been removed): DUK_USE_NONSTD_REGEXP_DOLLAR_ESCAPE
+#err unsupported config option used (option has been removed): DUK_USE_NONSTD_REGEXP_DOLLAR_ESCAPE
 #endif
 #if defined(DUK_USE_NO_DOUBLE_ALIASING_SELFTEST)
-#error unsupported config option used (option has been removed): DUK_USE_NO_DOUBLE_ALIASING_SELFTEST
+#err unsupported config option used (option has been removed): DUK_USE_NO_DOUBLE_ALIASING_SELFTEST
 #endif
 #if defined(DUK_USE_OCTAL_SUPPORT)
-#error unsupported config option used (option has been removed): DUK_USE_OCTAL_SUPPORT
+#err unsupported config option used (option has been removed): DUK_USE_OCTAL_SUPPORT
 #endif
 #if defined(DUK_USE_PACKED_TVAL_POSSIBLE)
-#error unsupported config option used (option has been removed): DUK_USE_PACKED_TVAL_POSSIBLE
+#err unsupported config option used (option has been removed): DUK_USE_PACKED_TVAL_POSSIBLE
 #endif
 #if defined(DUK_USE_PANIC_ABORT)
-#error unsupported config option used (option has been removed): DUK_USE_PANIC_ABORT
+#err unsupported config option used (option has been removed): DUK_USE_PANIC_ABORT
 #endif
 #if defined(DUK_USE_PANIC_EXIT)
-#error unsupported config option used (option has been removed): DUK_USE_PANIC_EXIT
+#err unsupported config option used (option has been removed): DUK_USE_PANIC_EXIT
 #endif
 #if defined(DUK_USE_PANIC_HANDLER)
-#error unsupported config option used (option has been removed): DUK_USE_PANIC_HANDLER
+#err unsupported config option used (option has been removed): DUK_USE_PANIC_HANDLER
 #endif
 #if defined(DUK_USE_PANIC_SEGFAULT)
-#error unsupported config option used (option has been removed): DUK_USE_PANIC_SEGFAULT
+#err unsupported config option used (option has been removed): DUK_USE_PANIC_SEGFAULT
 #endif
 #if defined(DUK_USE_POW_NETBSD_WORKAROUND)
-#error unsupported config option used (option has been removed): DUK_USE_POW_NETBSD_WORKAROUND
+#err unsupported config option used (option has been removed): DUK_USE_POW_NETBSD_WORKAROUND
 #endif
 #if defined(DUK_USE_RDTSC)
-#error unsupported config option used (option has been removed): DUK_USE_RDTSC
+#err unsupported config option used (option has been removed): DUK_USE_RDTSC
 #endif
 #if defined(DUK_USE_REFZERO_FINALIZER_TORTURE)
-#error unsupported config option used (option has been removed): DUK_USE_REFZERO_FINALIZER_TORTURE
+#err unsupported config option used (option has been removed): DUK_USE_REFZERO_FINALIZER_TORTURE
 #endif
 #if defined(DUK_USE_ROM_GLOBAL_CLONE) && !defined(DUK_USE_ROM_STRINGS)
-#error config option DUK_USE_ROM_GLOBAL_CLONE requires option DUK_USE_ROM_STRINGS (which is missing)
+#err config option DUK_USE_ROM_GLOBAL_CLONE requires option DUK_USE_ROM_STRINGS (which is missing)
 #endif
 #if defined(DUK_USE_ROM_GLOBAL_CLONE) && !defined(DUK_USE_ROM_OBJECTS)
-#error config option DUK_USE_ROM_GLOBAL_CLONE requires option DUK_USE_ROM_OBJECTS (which is missing)
+#err config option DUK_USE_ROM_GLOBAL_CLONE requires option DUK_USE_ROM_OBJECTS (which is missing)
 #endif
 #if defined(DUK_USE_ROM_GLOBAL_CLONE) && defined(DUK_USE_ROM_GLOBAL_INHERIT)
-#error config option DUK_USE_ROM_GLOBAL_CLONE conflicts with option DUK_USE_ROM_GLOBAL_INHERIT (which is also defined)
+#err config option DUK_USE_ROM_GLOBAL_CLONE conflicts with option DUK_USE_ROM_GLOBAL_INHERIT (which is also defined)
 #endif
 #if defined(DUK_USE_ROM_GLOBAL_INHERIT) && !defined(DUK_USE_ROM_STRINGS)
-#error config option DUK_USE_ROM_GLOBAL_INHERIT requires option DUK_USE_ROM_STRINGS (which is missing)
+#err config option DUK_USE_ROM_GLOBAL_INHERIT requires option DUK_USE_ROM_STRINGS (which is missing)
 #endif
 #if defined(DUK_USE_ROM_GLOBAL_INHERIT) && !defined(DUK_USE_ROM_OBJECTS)
-#error config option DUK_USE_ROM_GLOBAL_INHERIT requires option DUK_USE_ROM_OBJECTS (which is missing)
+#err config option DUK_USE_ROM_GLOBAL_INHERIT requires option DUK_USE_ROM_OBJECTS (which is missing)
 #endif
 #if defined(DUK_USE_ROM_GLOBAL_INHERIT) && defined(DUK_USE_ROM_GLOBAL_CLONE)
-#error config option DUK_USE_ROM_GLOBAL_INHERIT conflicts with option DUK_USE_ROM_GLOBAL_CLONE (which is also defined)
+#err config option DUK_USE_ROM_GLOBAL_INHERIT conflicts with option DUK_USE_ROM_GLOBAL_CLONE (which is also defined)
 #endif
 #if defined(DUK_USE_ROM_OBJECTS) && !defined(DUK_USE_ROM_STRINGS)
-#error config option DUK_USE_ROM_OBJECTS requires option DUK_USE_ROM_STRINGS (which is missing)
+#err config option DUK_USE_ROM_OBJECTS requires option DUK_USE_ROM_STRINGS (which is missing)
 #endif
 #if defined(DUK_USE_ROM_STRINGS) && !defined(DUK_USE_ROM_OBJECTS)
-#error config option DUK_USE_ROM_STRINGS requires option DUK_USE_ROM_OBJECTS (which is missing)
+#err config option DUK_USE_ROM_STRINGS requires option DUK_USE_ROM_OBJECTS (which is missing)
 #endif
 #if defined(DUK_USE_SETJMP)
-#error unsupported config option used (option has been removed): DUK_USE_SETJMP
+#err unsupported config option used (option has been removed): DUK_USE_SETJMP
 #endif
 #if defined(DUK_USE_SIGSETJMP)
-#error unsupported config option used (option has been removed): DUK_USE_SIGSETJMP
+#err unsupported config option used (option has been removed): DUK_USE_SIGSETJMP
 #endif
 #if defined(DUK_USE_STRTAB_CHAIN)
-#error unsupported config option used (option has been removed): DUK_USE_STRTAB_CHAIN
+#err unsupported config option used (option has been removed): DUK_USE_STRTAB_CHAIN
 #endif
 #if defined(DUK_USE_STRTAB_CHAIN_SIZE)
-#error unsupported config option used (option has been removed): DUK_USE_STRTAB_CHAIN_SIZE
+#err unsupported config option used (option has been removed): DUK_USE_STRTAB_CHAIN_SIZE
 #endif
 #if defined(DUK_USE_STRTAB_CHAIN_SIZE) && !defined(DUK_USE_STRTAB_CHAIN)
-#error config option DUK_USE_STRTAB_CHAIN_SIZE requires option DUK_USE_STRTAB_CHAIN (which is missing)
+#err config option DUK_USE_STRTAB_CHAIN_SIZE requires option DUK_USE_STRTAB_CHAIN (which is missing)
 #endif
 #if defined(DUK_USE_STRTAB_PROBE)
-#error unsupported config option used (option has been removed): DUK_USE_STRTAB_PROBE
+#err unsupported config option used (option has been removed): DUK_USE_STRTAB_PROBE
 #endif
 #if defined(DUK_USE_STRTAB_PTRCOMP) && !defined(DUK_USE_HEAPPTR16)
-#error config option DUK_USE_STRTAB_PTRCOMP requires option DUK_USE_HEAPPTR16 (which is missing)
+#err config option DUK_USE_STRTAB_PTRCOMP requires option DUK_USE_HEAPPTR16 (which is missing)
 #endif
 #if defined(DUK_USE_TAILCALL) && defined(DUK_USE_NONSTD_FUNC_CALLER_PROPERTY)
-#error config option DUK_USE_TAILCALL conflicts with option DUK_USE_NONSTD_FUNC_CALLER_PROPERTY (which is also defined)
+#err config option DUK_USE_TAILCALL conflicts with option DUK_USE_NONSTD_FUNC_CALLER_PROPERTY (which is also defined)
 #endif
 #if defined(DUK_USE_UNALIGNED_ACCESSES_POSSIBLE)
-#error unsupported config option used (option has been removed): DUK_USE_UNALIGNED_ACCESSES_POSSIBLE
+#err unsupported config option used (option has been removed): DUK_USE_UNALIGNED_ACCESSES_POSSIBLE
 #endif
 #if defined(DUK_USE_UNDERSCORE_SETJMP)
-#error unsupported config option used (option has been removed): DUK_USE_UNDERSCORE_SETJMP
+#err unsupported config option used (option has been removed): DUK_USE_UNDERSCORE_SETJMP
 #endif
 #if defined(DUK_USE_USER_DECLARE)
-#error unsupported config option used (option has been removed): DUK_USE_USER_DECLARE
+#err unsupported config option used (option has been removed): DUK_USE_USER_DECLARE
 #endif
 #if defined(DUK_USE_USER_INITJS)
-#error unsupported config option used (option has been removed): DUK_USE_USER_INITJS
+#err unsupported config option used (option has been removed): DUK_USE_USER_INITJS
 #endif
 
 #if defined(DUK_USE_CPP_EXCEPTIONS) && !defined(__cplusplus)
-#error DUK_USE_CPP_EXCEPTIONS enabled but not compiling with a C++ compiler
+#err DUK_USE_CPP_EXCEPTIONS enabled but not compiling with a C++ compiler
 #endif
 
 /*
  *  Convert DUK_USE_BYTEORDER, from whatever source, into currently used
- *  internal defines.  If detection failed, #error out.
+ *  internal defines.  If detection failed, #err out.
  */
 
 #if defined(DUK_USE_BYTEORDER)
@@ -3733,10 +3733,10 @@ typedef struct duk_hthread duk_context;
 #define DUK_USE_INTEGER_BE
 #define DUK_USE_DOUBLE_BE
 #else
-#error unsupported: byte order invalid
+#err unsupported: byte order invalid
 #endif  /* byte order */
 #else
-#error unsupported: byte order detection failed
+#err unsupported: byte order detection failed
 #endif  /* defined(DUK_USE_BYTEORDER) */
 
 #endif  /* DUK_CONFIG_H_INCLUDED */

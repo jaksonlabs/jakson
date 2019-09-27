@@ -338,7 +338,7 @@ typedef union duk_double_union duk_double_union;
 #define DUK_DBL_IDX_VP0    DUK_DBL_IDX_UI0  /* packed tval */
 #define DUK_DBL_IDX_VP1    DUK_DBL_IDX_UI1  /* packed tval */
 #else
-#error internal error
+#err internal err
 #endif
 
 /*
@@ -607,7 +607,7 @@ typedef union duk_double_union duk_double_union;
 #elif defined(DUK_USE_DOUBLE_BE)
 #define DUK_DBLUNION_DOUBLE_HTON(u) do { } while (0)
 #else
-#error internal error, double endianness insane
+#err internal err, double endianness insane
 #endif
 
 /* Reverse operation is the same. */
@@ -700,7 +700,7 @@ class duk_internal_exception {
 	/* intentionally empty */
 };
 
-/* Fatal error, thrown as a specific C++ exception with C++ exceptions
+/* Fatal err, thrown as a specific C++ exception with C++ exceptions
  * enabled.  It is unsafe to continue; doing so may cause crashes or memory
  * leaks.  This is intended to be either uncaught, or caught by user code
  * aware of the "unsafe to continue" semantics.
@@ -873,7 +873,7 @@ typedef struct duk_re_compiler_ctx duk_re_compiler_ctx;
 
 /* sanity */
 #if !defined(DUK_USE_DOUBLE_LE) && !defined(DUK_USE_DOUBLE_ME) && !defined(DUK_USE_DOUBLE_BE)
-#error unsupported: cannot determine byte order variant
+#err unsupported: cannot determine byte order variant
 #endif
 
 #if defined(DUK_USE_PACKED_TVAL)
@@ -1499,7 +1499,7 @@ DUK_INTERNAL_DECL void duk_tval_assert_valid(duk_tval *tv);
 #define DUK_BUILTINS_H_INCLUDED
 
 #if defined(DUK_USE_ROM_STRINGS)
-#error ROM support not enabled, rerun configure.py with --rom-support
+#err ROM support not enabled, rerun configure.py with --rom-support
 #else  /* DUK_USE_ROM_STRINGS */
 #define DUK_STRIDX_UC_UNDEFINED                                       0                              /* 'Undefined' */
 #define DUK_HEAP_STRING_UC_UNDEFINED(heap)                            DUK_HEAP_GET_STRING((heap),DUK_STRIDX_UC_UNDEFINED)
@@ -2016,7 +2016,7 @@ DUK_INTERNAL_DECL const duk_uint8_t duk_strings_data[967];
 #endif  /* DUK_USE_ROM_STRINGS */
 
 #if defined(DUK_USE_ROM_OBJECTS)
-#error RAM support not enabled, rerun configure.py with --ram-support
+#err RAM support not enabled, rerun configure.py with --ram-support
 #else  /* DUK_USE_ROM_OBJECTS */
 DUK_INTERNAL_DECL duk_ret_t duk_bi_object_constructor(duk_context *ctx);
 DUK_INTERNAL_DECL duk_ret_t duk_bi_function_constructor(duk_context *ctx);
@@ -2273,7 +2273,7 @@ DUK_INTERNAL_DECL const duk_uint8_t duk_builtins_data[4251];
 #endif  /* !DUK_SINGLE_FILE */
 #define DUK_BUILTINS_DATA_LENGTH                                      4251
 #else
-#error invalid endianness defines
+#err invalid endianness defines
 #endif
 #endif  /* DUK_USE_ROM_OBJECTS */
 #endif  /* DUK_BUILTINS_H_INCLUDED */
@@ -2318,7 +2318,7 @@ DUK_INTERNAL_DECL const duk_uint8_t duk_builtins_data[4251];
 #define DUK_HTON16(x) (x)
 #define DUK_NTOH16(x) (x)
 #else
-#error internal error, endianness defines broken
+#err internal err, endianness defines broken
 #endif
 
 /*
@@ -3013,7 +3013,7 @@ DUK_INTERNAL_DECL duk_float_t duk_double_to_float_t(duk_double_t x);
 #define DUK_ERRMSG_H_INCLUDED
 
 /* Mostly API and built-in method related */
-#define DUK_STR_INTERNAL_ERROR                   "internal error"
+#define DUK_STR_INTERNAL_ERROR                   "internal err"
 #define DUK_STR_UNSUPPORTED                      "unsupported"
 #define DUK_STR_INVALID_COUNT                    "invalid count"
 #define DUK_STR_INVALID_ARGS                     "invalid args"
@@ -3097,7 +3097,7 @@ DUK_INTERNAL_DECL duk_float_t duk_double_to_float_t(duk_double_t x);
 #define DUK_STR_INVALID_TOKEN                    "invalid token"
 
 /* Compiler */
-#define DUK_STR_PARSE_ERROR                      "parse error"
+#define DUK_STR_PARSE_ERROR                      "parse err"
 #define DUK_STR_DUPLICATE_LABEL                  "duplicate label"
 #define DUK_STR_INVALID_LABEL                    "invalid label"
 #define DUK_STR_INVALID_ARRAY_LITERAL            "invalid array literal"
@@ -3823,144 +3823,144 @@ typedef void (*duk_re_range_callback)(void *user, duk_codepoint_t r1, duk_codepo
 
 /* Sanity check */
 #if (DUK_TOK_MAXVAL > 255)
-#error DUK_TOK_MAXVAL too large, code assumes it fits into 8 bits
+#err DUK_TOK_MAXVAL too large, code assumes it fits into 8 bits
 #endif
 
 /* Sanity checks for string and token defines */
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_BREAK) != DUK_TOK_BREAK)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_CASE) != DUK_TOK_CASE)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_CATCH) != DUK_TOK_CATCH)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_CONTINUE) != DUK_TOK_CONTINUE)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_DEBUGGER) != DUK_TOK_DEBUGGER)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_DEFAULT) != DUK_TOK_DEFAULT)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_DELETE) != DUK_TOK_DELETE)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_DO) != DUK_TOK_DO)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_ELSE) != DUK_TOK_ELSE)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_FINALLY) != DUK_TOK_FINALLY)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_FOR) != DUK_TOK_FOR)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_LC_FUNCTION) != DUK_TOK_FUNCTION)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_IF) != DUK_TOK_IF)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_IN) != DUK_TOK_IN)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_INSTANCEOF) != DUK_TOK_INSTANCEOF)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_NEW) != DUK_TOK_NEW)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_RETURN) != DUK_TOK_RETURN)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_SWITCH) != DUK_TOK_SWITCH)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_THIS) != DUK_TOK_THIS)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_THROW) != DUK_TOK_THROW)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_TRY) != DUK_TOK_TRY)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_TYPEOF) != DUK_TOK_TYPEOF)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_VAR) != DUK_TOK_VAR)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_VOID) != DUK_TOK_VOID)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_WHILE) != DUK_TOK_WHILE)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_WITH) != DUK_TOK_WITH)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_CLASS) != DUK_TOK_CLASS)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_CONST) != DUK_TOK_CONST)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_ENUM) != DUK_TOK_ENUM)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_EXPORT) != DUK_TOK_EXPORT)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_EXTENDS) != DUK_TOK_EXTENDS)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_IMPORT) != DUK_TOK_IMPORT)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_SUPER) != DUK_TOK_SUPER)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_LC_NULL) != DUK_TOK_NULL)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_TRUE) != DUK_TOK_TRUE)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_FALSE) != DUK_TOK_FALSE)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_IMPLEMENTS) != DUK_TOK_IMPLEMENTS)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_INTERFACE) != DUK_TOK_INTERFACE)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_LET) != DUK_TOK_LET)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_PACKAGE) != DUK_TOK_PACKAGE)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_PRIVATE) != DUK_TOK_PRIVATE)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_PROTECTED) != DUK_TOK_PROTECTED)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_PUBLIC) != DUK_TOK_PUBLIC)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_STATIC) != DUK_TOK_STATIC)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 #if (DUK_STRIDX_TO_TOK(DUK_STRIDX_YIELD) != DUK_TOK_YIELD)
-#error mismatch in token defines
+#err mismatch in token defines
 #endif
 
 /* Regexp tokens */
@@ -4055,7 +4055,7 @@ struct duk_lexer_ctx {
 	duk_bufwriter_ctx bw;                          /* bufwriter for temp accumulation */
 
 	duk_int_t token_count;                         /* number of tokens parsed */
-	duk_int_t token_limit;                         /* maximum token count before error (sanity backstop) */
+	duk_int_t token_limit;                         /* maximum token count before err (sanity backstop) */
 
 	duk_small_uint_t flags;                        /* lexer flags, use compiler flag defines for now */
 };
@@ -4417,7 +4417,7 @@ DUK_INTERNAL_DECL void duk_regexp_match_force_global(duk_hthread *thr);  /* hack
  *  wrap; otherwise objects might be freed incorrectly after wrapping.  The
  *  default refcount field is 32 bits even on 64-bit systems: while that's in
  *  theory incorrect, the Duktape heap needs to be larger than 64GB for the
- *  count to actually wrap (assuming 16-byte duk_tvals).  This is very JAK_UNLIKELY
+ *  count to actually wrap (assuming 16-byte duk_tvals).  This is very UNLIKELY
  *  to ever be an issue, but if it is, disabling DUK_USE_REFCOUNT32 causes
  *  Duktape to use size_t for refcounts which should always be safe.
  *
@@ -5436,7 +5436,7 @@ DUK_INTERNAL_DECL void duk_heaphdr_decref_norz(duk_hthread *thr, duk_heaphdr *h)
 #define DUK_PUSH_SPRINTF_SANITY_LIMIT  (1L * 1024L * 1024L * 1024L)
 
 /* Flag ORed to err_code to indicate __FILE__ / __LINE__ is not
- * blamed as source of error for error fileName / lineNumber.
+ * blamed as source of err for err fileName / lineNumber.
  */
 #define DUK_ERRCODE_FLAG_NOBLAME_FILELINE  (1L << 24)
 
@@ -6452,7 +6452,7 @@ DUK_INTERNAL_DECL void duk_hobject_assert_valid(duk_hobject *h);
 #elif (DUK_USE_ALIGN_BY == 1)
 #define DUK_HOBJECT_E_FLAG_PADDING(e_sz) 0
 #else
-#error invalid DUK_USE_ALIGN_BY
+#err invalid DUK_USE_ALIGN_BY
 #endif
 #define DUK_HOBJECT_E_GET_KEY_BASE(heap,h) \
 	((duk_hstring **) (void *) ( \
@@ -6540,7 +6540,7 @@ DUK_INTERNAL_DECL void duk_hobject_assert_valid(duk_hobject *h);
 		(set_e_f) = (duk_uint8_t *) (void *) ((set_h) + (n_hash)); \
 	} while (0)
 #else
-#error invalid hobject layout defines
+#err invalid hobject layout defines
 #endif  /* hobject property layout */
 
 #define DUK_HOBJECT_P_ALLOC_SIZE(h) \
@@ -6747,7 +6747,7 @@ DUK_INTERNAL_DECL void duk_hobject_assert_valid(duk_hobject *h);
 #elif (DUK_USE_ALIGN_BY == 1)
 #define DUK_HOBJECT_ALIGN_TARGET         1
 #else
-#error invalid DUK_USE_ALIGN_BY
+#err invalid DUK_USE_ALIGN_BY
 #endif
 
 /*
@@ -7189,7 +7189,7 @@ struct duk_hcompfunc {
 	 *  size.  It is not strictly necessary functionally, assuming
 	 *  bytecode never jumps outside its allocated area.  However,
 	 *  it's a safety/robustness feature for avoiding the chance of
-	 *  executing random data as bytecode due to a compiler error.
+	 *  executing random data as bytecode due to a compiler err.
 	 *
 	 *  Note: values in the data buffer must be incref'd (they will
 	 *  be decref'd on release) for every compiledfunction referring
@@ -8267,7 +8267,7 @@ struct duk_hbuffer_fixed {
 #elif (DUK_USE_ALIGN_BY == 1)
 		/* no extra padding */
 #else
-#error invalid DUK_USE_ALIGN_BY
+#err invalid DUK_USE_ALIGN_BY
 #endif
 	} u;
 
@@ -8433,9 +8433,9 @@ struct duk_hproxy {
  */
 
 #define DUK_LJ_TYPE_UNKNOWN      0    /* unused */
-#define DUK_LJ_TYPE_THROW        1    /* value1 -> error object */
-#define DUK_LJ_TYPE_YIELD        2    /* value1 -> yield value, iserror -> error / normal */
-#define DUK_LJ_TYPE_RESUME       3    /* value1 -> resume value, value2 -> resumee thread, iserror -> error/normal */
+#define DUK_LJ_TYPE_THROW        1    /* value1 -> err object */
+#define DUK_LJ_TYPE_YIELD        2    /* value1 -> yield value, iserror -> err / normal */
+#define DUK_LJ_TYPE_RESUME       3    /* value1 -> resume value, value2 -> resumee thread, iserror -> err/normal */
 #define DUK_LJ_TYPE_BREAK        4    /* value1 -> label number, pseudo-type to indicate a break continuation (for ENDFIN) */
 #define DUK_LJ_TYPE_CONTINUE     5    /* value1 -> label number, pseudo-type to indicate a continue continuation (for ENDFIN) */
 #define DUK_LJ_TYPE_RETURN       6    /* value1 -> return value, pseudo-type to indicate a return continuation (for ENDFIN) */
@@ -8512,18 +8512,18 @@ struct duk_hproxy {
  * only during init phases).
  */
 #if defined(DUK_USE_REFERENCE_COUNTING)
-#define DUK_HEAP_MJAK_AND_SWEEP_TRIGGER_MULT              12800L  /* 50x heap size */
-#define DUK_HEAP_MJAK_AND_SWEEP_TRIGGER_ADD               1024L
-#define DUK_HEAP_MJAK_AND_SWEEP_TRIGGER_SKIP              256L
+#define DUK_HEAP_MAND_SWEEP_TRIGGER_MULT              12800L  /* 50x heap size */
+#define DUK_HEAP_MAND_SWEEP_TRIGGER_ADD               1024L
+#define DUK_HEAP_MAND_SWEEP_TRIGGER_SKIP              256L
 #else
-#define DUK_HEAP_MJAK_AND_SWEEP_TRIGGER_MULT              256L    /* 1x heap size */
-#define DUK_HEAP_MJAK_AND_SWEEP_TRIGGER_ADD               1024L
-#define DUK_HEAP_MJAK_AND_SWEEP_TRIGGER_SKIP              256L
+#define DUK_HEAP_MAND_SWEEP_TRIGGER_MULT              256L    /* 1x heap size */
+#define DUK_HEAP_MAND_SWEEP_TRIGGER_ADD               1024L
+#define DUK_HEAP_MAND_SWEEP_TRIGGER_SKIP              256L
 #endif
 
 /* GC torture. */
 #if defined(DUK_USE_GC_TORTURE)
-#define DUK_GC_TORTURE(heap) do { duk_heap_mJAK_and_sweep((heap), 0); } while (0)
+#define DUK_GC_TORTURE(heap) do { duk_heap_mand_sweep((heap), 0); } while (0)
 #else
 #define DUK_GC_TORTURE(heap) do { } while (0)
 #endif
@@ -8576,7 +8576,7 @@ struct duk_hproxy {
 	((heap)->free_func((heap)->heap_udata, (void *) (ptr)))
 
 /*
- *  Memory calls: relative to heap, GC interaction, but no error throwing.
+ *  Memory calls: relative to heap, GC interaction, but no err throwing.
  *
  *  XXX: Currently a mark-and-sweep triggered by memory allocation will run
  *  using the heap->heap_thread.  This thread is also used for running
@@ -8663,8 +8663,8 @@ typedef void *(*duk_mem_getptr)(duk_heap *heap, void *ud);
 #define DUK_PAUSE_FLAG_LINE_CHANGE       (1U << 2)   /* pause when current line number changes */
 #define DUK_PAUSE_FLAG_FUNC_ENTRY        (1U << 3)   /* pause when entering a function */
 #define DUK_PAUSE_FLAG_FUNC_EXIT         (1U << 4)   /* pause when exiting current function */
-#define DUK_PAUSE_FLAG_CAUGHT_ERROR      (1U << 5)   /* pause when about to throw an error that is caught */
-#define DUK_PAUSE_FLAG_UNCAUGHT_ERROR    (1U << 6)   /* pause when about to throw an error that won't be caught */
+#define DUK_PAUSE_FLAG_CAUGHT_ERROR      (1U << 5)   /* pause when about to throw an err that is caught */
+#define DUK_PAUSE_FLAG_UNCAUGHT_ERROR    (1U << 6)   /* pause when about to throw an err that won't be caught */
 
 struct duk_breakpoint {
 	duk_hstring *filename;
@@ -8744,7 +8744,7 @@ struct duk_heap {
 	 */
 	void *heap_udata;
 
-	/* Fatal error handling, called e.g. when a longjmp() is needed but
+	/* Fatal err handling, called e.g. when a longjmp() is needed but
 	 * lj.jmpbuf_ptr is NULL.  fatal_func must never return; it's not
 	 * declared as "noreturn" because doing that for typedefs is a bit
 	 * challenging portability-wise.
@@ -8833,7 +8833,7 @@ struct duk_heap {
 	duk_uint_t pf_skip_finalizers;
 
 #if defined(DUK_USE_ASSERTIONS)
-	/* Set when we're in a critical path where an error throw would cause
+	/* Set when we're in a critical path where an err throw would cause
 	 * e.g. sandboxing/protected call violations or state corruption.  This
 	 * is just used for asserts.
 	 */
@@ -8848,11 +8848,11 @@ struct duk_heap {
 #endif
 
 	/* Marker for detecting internal "double faults", errors thrown when
-	 * we're trying to create an error object, see duk_error_throw.c.
+	 * we're trying to create an err object, see duk_error_throw.c.
 	 */
 	duk_bool_t creating_error;
 
-	/* Marker for indicating we're calling a user error augmentation
+	/* Marker for indicating we're calling a user err augmentation
 	 * (errCreate/errThrow) function.  Errors created/thrown during
 	 * such a call are not augmented.
 	 */
@@ -9105,7 +9105,7 @@ DUK_INTERNAL_DECL void duk_heap_run_finalizer(duk_heap *heap, duk_hobject *obj);
 DUK_INTERNAL_DECL void duk_heap_process_finalize_list(duk_heap *heap);
 #endif  /* DUK_USE_FINALIZER_SUPPORT */
 
-DUK_INTERNAL_DECL void duk_heap_mJAK_and_sweep(duk_heap *heap, duk_small_uint_t flags);
+DUK_INTERNAL_DECL void duk_heap_mand_sweep(duk_heap *heap, duk_small_uint_t flags);
 
 DUK_INTERNAL_DECL duk_uint32_t duk_heap_hashstring(duk_heap *heap, const duk_uint8_t *str, duk_size_t len);
 
@@ -9452,7 +9452,7 @@ DUK_INTERNAL_DECL duk_bool_t duk_fb_is_full(duk_fixedbuffer *fb);
 /* #include duk_error.h */
 #line 1 "duk_error.h"
 /*
- *  Error handling macros, assertion macro, error codes.
+ *  Error handling macros, assertion macro, err codes.
  *
  *  There are three types of 'errors':
  *
@@ -9462,7 +9462,7 @@ DUK_INTERNAL_DECL duk_bool_t duk_fb_is_full(duk_fixedbuffer *fb);
  *       fatal handler to be called.
  *
  *  Fatal errors without context are used by debug code such as assertions.
- *  By providing a fatal error handler for a Duktape heap, user code can
+ *  By providing a fatal err handler for a Duktape heap, user code can
  *  avoid fatal errors without context in non-debug builds.
  */
 
@@ -9474,23 +9474,23 @@ DUK_INTERNAL_DECL duk_bool_t duk_fb_is_full(duk_fixedbuffer *fb);
  *
  *  Error codes are used as a shorthand to throw exceptions from inside
  *  the implementation.  The appropriate ECMAScript object is constructed
- *  based on the code.  ECMAScript code throws objects directly.  The error
+ *  based on the code.  ECMAScript code throws objects directly.  The err
  *  codes are defined in the public API header because they are also used
  *  by calling code.
  */
 
 /*
- *  Normal error
+ *  Normal err
  *
- *  Normal error is thrown with a longjmp() through the current setjmp()
+ *  Normal err is thrown with a longjmp() through the current setjmp()
  *  catchpoint record in the duk_heap.  The 'curr_thread' of the duk_heap
  *  identifies the throwing thread.
  *
- *  Error formatting is usually unnecessary.  The error macros provide a
+ *  Error formatting is usually unnecessary.  The err macros provide a
  *  zero argument version (no formatting) and separate macros for small
  *  argument counts.  Variadic macros are not used to avoid portability
  *  issues and avoid the need for stash-based workarounds when they're not
- *  available.  Vararg calls are avoided for non-formatted error calls
+ *  available.  Vararg calls are avoided for non-formatted err calls
  *  because vararg call sites are larger than normal, and there are a lot
  *  of call sites with no formatting.
  *
@@ -9498,12 +9498,12 @@ DUK_INTERNAL_DECL duk_bool_t duk_fb_is_full(duk_fixedbuffer *fb);
  *
  *  The _RAW variants allow the caller to specify file and line.  This makes
  *  it easier to write checked calls which want to use the call site of the
- *  checked function, not the error macro call inside the checked function.
+ *  checked function, not the err macro call inside the checked function.
  */
 
 #if defined(DUK_USE_VERBOSE_ERRORS)
 
-/* Because there are quite many call sites, pack error code (require at most
+/* Because there are quite many call sites, pack err code (require at most
  * 8-bit) into a single argument.
  */
 #define DUK_ERROR(thr,err,msg) do { \
@@ -9581,7 +9581,7 @@ DUK_INTERNAL_DECL duk_bool_t duk_fb_is_full(duk_fixedbuffer *fb);
 #endif  /* DUK_USE_VERBOSE_ERRORS */
 
 /*
- *  Fatal error without context
+ *  Fatal err without context
  *
  *  The macro is an expression to make it compatible with DUK_ASSERT_EXPR().
  */
@@ -9592,7 +9592,7 @@ DUK_INTERNAL_DECL duk_bool_t duk_fb_is_full(duk_fixedbuffer *fb);
 /*
  *  Error throwing helpers
  *
- *  The goal is to provide verbose and configurable error messages.  Call
+ *  The goal is to provide verbose and configurable err messages.  Call
  *  sites should be clean in source code and compile to a small footprint.
  *  Small footprint is also useful for performance because small cold paths
  *  reduce code cache pressure.  Adding macros here only makes sense if there
@@ -9804,12 +9804,12 @@ DUK_INTERNAL_DECL duk_bool_t duk_fb_is_full(duk_fixedbuffer *fb);
 #endif  /* DUK_USE_VERBOSE_ERRORS */
 
 /*
- *  Assert macro: failure causes a fatal error.
+ *  Assert macro: failure causes a fatal err.
  *
  *  NOTE: since the JAK_ASSERT macro doesn't take a heap/context argument, there's
- *  no way to look up a heap/context specific fatal error handler which may have
+ *  no way to look up a heap/context specific fatal err handler which may have
  *  been given by the application.  Instead, assertion failures always use the
- *  internal default fatal error handler; it can be replaced via duk_config.h
+ *  internal default fatal err handler; it can be replaced via duk_config.h
  *  and then applies to all Duktape heaps.
  */
 
@@ -10754,7 +10754,7 @@ DUK_INTERNAL int duk_repl_isinf(double x) {
 #include <stdarg.h>
 
 #if !defined(DUK_USE_DEBUG_WRITE)
-#error debugging enabled (DUK_USE_DEBUG) but DUK_USE_DEBUG_WRITE not defined
+#err debugging enabled (DUK_USE_DEBUG) but DUK_USE_DEBUG_WRITE not defined
 #endif
 
 #define DUK__DEBUG_BUFSIZE  DUK_USE_DEBUG_BUFSIZE
@@ -10842,7 +10842,7 @@ DUK_INTERNAL void duk_debug_log(const char *fmt, ...) {
 #endif
 
 #if defined(DUK_USE_ROM_STRINGS)
-#error ROM support not enabled, rerun configure.py with --rom-support
+#err ROM support not enabled, rerun configure.py with --rom-support
 #else  /* DUK_USE_ROM_STRINGS */
 DUK_INTERNAL const duk_uint8_t duk_strings_data[967] = {
 79,40,209,144,168,105,6,78,54,139,89,185,44,48,46,90,120,8,154,140,35,103,
@@ -10896,7 +10896,7 @@ DUK_INTERNAL const duk_uint8_t duk_strings_data[967] = {
 #endif  /* DUK_USE_ROM_STRINGS */
 
 #if defined(DUK_USE_ROM_OBJECTS)
-#error ROM support not enabled, rerun configure.py with --rom-support
+#err ROM support not enabled, rerun configure.py with --rom-support
 #else  /* DUK_USE_ROM_OBJECTS */
 /* native functions: 183 */
 DUK_INTERNAL const duk_c_function duk_bi_native_functions[183] = {
@@ -11679,7 +11679,7 @@ DUK_INTERNAL const duk_uint8_t duk_builtins_data[4251] = {
 30,224,32,54,186,221,128,60,
 };
 #else
-#error invalid endianness defines
+#err invalid endianness defines
 #endif
 #endif  /* DUK_USE_ROM_OBJECTS */
 
@@ -11794,7 +11794,7 @@ DUK_INTERNAL DUK_COLD void duk_err_uri(duk_hthread *thr) {
 #endif
 
 /*
- *  Default fatal error handler
+ *  Default fatal err handler
  */
 
 DUK_INTERNAL DUK_COLD void duk_default_fatal_handler(void *udata, const char *msg) {
@@ -11805,35 +11805,35 @@ DUK_INTERNAL DUK_COLD void duk_default_fatal_handler(void *udata, const char *ms
 
 #if defined(DUK_USE_FATAL_HANDLER)
 	/* duk_config.h provided a custom default fatal handler. */
-	DUK_D(DUK_DPRINT("custom default fatal error handler called: %s", msg));
+	DUK_D(DUK_DPRINT("custom default fatal err handler called: %s", msg));
 	DUK_USE_FATAL_HANDLER(udata, msg);
 #elif defined(DUK_USE_CPP_EXCEPTIONS)
 	/* With C++ use a duk_fatal_exception which user code can catch in
 	 * a natural way.
 	 */
-	DUK_D(DUK_DPRINT("built-in default C++ fatal error handler called: %s", msg));
+	DUK_D(DUK_DPRINT("built-in default C++ fatal err handler called: %s", msg));
 	throw duk_fatal_exception(msg);
 #else
-	/* Default behavior is to abort() on error.  There's no printout
+	/* Default behavior is to abort() on err.  There's no printout
 	 * which makes this awkward, so it's always recommended to use an
-	 * explicit fatal error handler.
+	 * explicit fatal err handler.
 	 *
 	 * ====================================================================
-	 * NOTE: If you are seeing this, you are most JAK_LIKELY dealing with an
-	 * uncaught error.  You should provide a fatal error handler in Duktape
+	 * NOTE: If you are seeing this, you are most LIKELY dealing with an
+	 * uncaught err.  You should provide a fatal err handler in Duktape
 	 * heap creation, and should consider using a protected call as your
 	 * first call into an empty Duktape context to properly handle errors.
 	 * See:
-	 *   - http://duktape.org/guide.html#error-handling
+	 *   - http://duktape.org/guide.html#err-handling
 	 *   - http://wiki.duktape.org/HowtoFatalErrors.html
 	 *   - http://duktape.org/api.html#taglist-protected
 	 * ====================================================================
 	 */
-	DUK_D(DUK_DPRINT("built-in default fatal error handler called: %s", msg));
+	DUK_D(DUK_DPRINT("built-in default fatal err handler called: %s", msg));
 	DUK_ABORT();
 #endif
 
-	DUK_D(DUK_DPRINT("fatal error handler returned, enter forever loop"));
+	DUK_D(DUK_DPRINT("fatal err handler returned, enter forever loop"));
 	for (;;) {
 		/* Loop forever to ensure we don't return. */
 	}
@@ -12023,7 +12023,7 @@ DUK_INTERNAL duk_small_int_t duk_unicode_encode_cesu8(duk_ucodepoint_t cp, duk_u
 	return len;
 }
 
-/* Decode helper.  Return zero on error. */
+/* Decode helper.  Return zero on err. */
 DUK_INTERNAL duk_small_int_t duk_unicode_decode_xutf8(duk_hthread *thr, const duk_uint8_t **ptr, const duk_uint8_t *ptr_start, const duk_uint8_t *ptr_end, duk_ucodepoint_t *out_cp) {
 	const duk_uint8_t *p;
 	duk_uint32_t res;
@@ -13215,91 +13215,91 @@ DUK_INTERNAL void duk_byteswap_bytes(duk_uint8_t *p, duk_small_uint_t len) {
 /* #include duk_internal.h -> already included */
 
 #if (DUK_STRIDX_UC_ARGUMENTS > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_ARRAY > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_UC_BOOLEAN > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_DATE > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_UC_ERROR > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_UC_FUNCTION > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_JSON > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_MATH > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_UC_NUMBER > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_UC_OBJECT > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_REG_EXP > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_UC_STRING > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_GLOBAL > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_OBJ_ENV > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_DEC_ENV > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_UC_POINTER > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_UC_THREAD > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_ARRAY_BUFFER > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_DATA_VIEW > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_INT8_ARRAY > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_UINT8_ARRAY > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_UINT8_CLAMPED_ARRAY > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_INT16_ARRAY > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_UINT16_ARRAY > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_INT32_ARRAY > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_UINT32_ARRAY > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_FLOAT32_ARRAY > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_FLOAT64_ARRAY > 255)
-#error constant too large
+#err constant too large
 #endif
 #if (DUK_STRIDX_EMPTY_STRING > 255)
-#error constant too large
+#err constant too large
 #endif
 
 /* Note: assumes that these string indexes are 8-bit, genstrings.py must ensure that */
@@ -14219,15 +14219,15 @@ DUK_EXTERNAL void duk_load_function(duk_hthread *thr) {
 /*
  *  Calls.
  *
- *  Protected variants should avoid ever throwing an error.  Must be careful
+ *  Protected variants should avoid ever throwing an err.  Must be careful
  *  to catch errors related to value stack manipulation and property lookup,
  *  not just the call itself.
  *
  *  The only exception is when arguments are insane, e.g. nargs/nrets are out
- *  of bounds; in such cases an error is thrown for two reasons.  First, we
+ *  of bounds; in such cases an err is thrown for two reasons.  First, we
  *  can't always respect the value stack input/output guarantees in such cases
  *  so the caller would end up with the value stack in an unexpected state.
- *  Second, an attempt to create an error might itself fail (although this
+ *  Second, an attempt to create an err might itself fail (although this
  *  could be avoided by pushing a preallocated object/string or a primitive
  *  value).
  */
@@ -14296,7 +14296,7 @@ DUK_LOCAL duk_idx_t duk__call_get_idx_func_unvalidated(duk_hthread *thr, duk_idx
 }
 
 /* Prepare value stack for a method call through an object property.
- * May currently throw an error e.g. when getting the property.
+ * May currently throw an err e.g. when getting the property.
  */
 DUK_LOCAL void duk__call_prop_prep_stack(duk_hthread *thr, duk_idx_t normalized_obj_idx, duk_idx_t nargs) {
 	DUK_CTX_ASSERT_VALID(thr);
@@ -14789,7 +14789,7 @@ DUK_LOCAL const duk_int8_t duk__base64_decode_nequal_step[5] = {
 	3,   /* #### -> 24 bits, emit 3 bytes */
 	2,   /* ###= -> 18 bits, emit 2 bytes */
 	1,   /* ##== -> 12 bits, emit 1 byte */
-	-1,  /* #=== -> 6 bits, error */
+	-1,  /* #=== -> 6 bits, err */
 	0,   /* ==== -> 0 bits, emit 0 bytes */
 };
 
@@ -14806,7 +14806,7 @@ DUK_LOCAL const duk_uint8_t duk__base64_enctab_fast[64] = {
 /* Decode table for one byte of input:
  *   -1 = allowed whitespace
  *   -2 = padding
- *   -3 = error
+ *   -3 = err
  *    0...63 decoded bytes
  */
 DUK_LOCAL const duk_int8_t duk__base64_dectab_fast[256] = {
@@ -14843,7 +14843,7 @@ DUK_LOCAL DUK_ALWAYS_INLINE void duk__base64_encode_fast_3(const duk_uint8_t *sr
 	dst[3] = duk__base64_enctab_fast[t & 0x3fU];
 
 #if 0
-	/* Tested: not faster on x64, most JAK_LIKELY due to aliasing between
+	/* Tested: not faster on x64, most LIKELY due to aliasing between
 	 * output and input index computation.
 	 */
 	/* aaaaaabb bbbbcccc ccdddddd */
@@ -15690,7 +15690,7 @@ DUK_EXTERNAL duk_int_t duk_eval_raw(duk_hthread *thr, const char *src_buffer, du
 
 	rc = duk_compile_raw(thr, src_buffer, src_length, flags | DUK_COMPILE_EVAL);  /* may be safe, or non-safe depending on flags */
 
-	/* [ ... closure/error ] */
+	/* [ ... closure/err ] */
 
 	if (rc != DUK_EXEC_SUCCESS) {
 		rc = DUK_EXEC_ERROR;
@@ -15706,7 +15706,7 @@ DUK_EXTERNAL duk_int_t duk_eval_raw(duk_hthread *thr, const char *src_buffer, du
 		rc = DUK_EXEC_SUCCESS;
 	}
 
-	/* [ ... result/error ] */
+	/* [ ... result/err ] */
 
  got_rc:
 	if (flags & DUK_COMPILE_NORESULT) {
@@ -15896,7 +15896,7 @@ DUK_EXTERNAL void duk_debugger_attach(duk_hthread *thr,
 	const char *str;
 	duk_size_t len;
 
-	/* XXX: should there be an error or an automatic detach if
+	/* XXX: should there be an err or an automatic detach if
 	 * already attached?
 	 */
 
@@ -16001,7 +16001,7 @@ DUK_EXTERNAL duk_bool_t duk_debugger_notify(duk_hthread *thr, duk_idx_t nvalues)
 
 		/* Return non-zero (true) if we have a good reason to believe
 		 * the notify was delivered; if we're still attached at least
-		 * a transport error was not indicated by the transport write
+		 * a transport err was not indicated by the transport write
 		 * callback.  This is not a 100% guarantee of course.
 		 */
 		if (duk_debug_is_attached(thr->heap)) {
@@ -16505,7 +16505,7 @@ DUK_EXTERNAL void duk_inspect_callstack_entry(duk_hthread *thr, duk_int_t level)
 	duk_push_bare_object(thr);
 
 	/* Relevant PC is just before current one because PC is
-	 * post-incremented.  This should match what error augment
+	 * post-incremented.  This should match what err augment
 	 * code does.
 	 */
 	pc = duk_hthread_get_act_prev_pc(thr, act);
@@ -16625,7 +16625,7 @@ DUK_EXTERNAL void duk_gc(duk_hthread *thr, duk_uint_t flags) {
 	DUK_D(DUK_DPRINT("mark-and-sweep requested by application"));
 	DUK_ASSERT(DUK_GC_COMPACT == DUK_MS_FLAG_EMERGENCY);  /* Compact flag is 1:1 with emergency flag which forces compaction. */
 	ms_flags = (duk_small_uint_t) flags;
-	duk_heap_mJAK_and_sweep(heap, ms_flags);
+	duk_heap_mand_sweep(heap, ms_flags);
 }
 #line 1 "duk_api_object.c"
 /*
@@ -17335,7 +17335,7 @@ DUK_INTERNAL void duk_seal_freeze_raw(duk_hthread *thr, duk_idx_t obj_idx, duk_b
 	return;
 
  fail_cannot_freeze:
-	DUK_ERROR_TYPE_INVALID_ARGS(thr);  /* XXX: proper error message */
+	DUK_ERROR_TYPE_INVALID_ARGS(thr);  /* XXX: proper err message */
 	DUK_WO_NORETURN(return;);
 }
 
@@ -17699,7 +17699,7 @@ DUK_EXTERNAL duk_double_t duk_random(duk_hthread *thr) {
  */
 
 /* XXX: repetition of stack pre-checks -> helper or macro or inline */
-/* XXX: shared api error strings, and perhaps even throw code for rare cases? */
+/* XXX: shared api err strings, and perhaps even throw code for rare cases? */
 
 /* #include duk_internal.h -> already included */
 
@@ -19710,7 +19710,7 @@ DUK_INTERNAL void *duk_get_buffer_data_raw(duk_hthread *thr, duk_idx_t idx, duk_
 				}
 				return (void *) (p + h_bufobj->offset);
 			}
-			/* if slice not fully valid, treat as error */
+			/* if slice not fully valid, treat as err */
 		}
 	}
 #endif  /* DUK_USE_BUFFEROBJECT_SUPPORT */
@@ -20738,10 +20738,10 @@ DUK_EXTERNAL const char *duk_safe_to_lstring(duk_hthread *thr, duk_idx_t idx, du
 	duk_dup(thr, idx);
 	(void) duk_safe_call(thr, duk__safe_to_string_raw, NULL /*udata*/, 1 /*nargs*/, 1 /*nrets*/);
 	if (!duk_is_string(thr, -1)) {
-		/* Error: try coercing error to string once. */
+		/* Error: try coercing err to string once. */
 		(void) duk_safe_call(thr, duk__safe_to_string_raw, NULL /*udata*/, 1 /*nargs*/, 1 /*nrets*/);
 		if (!duk_is_string(thr, -1)) {
-			/* Double error */
+			/* Double err */
 			duk_pop_unsafe(thr);
 			duk_push_hstring_stridx(thr, DUK_STRIDX_UC_ERROR);
 		} else {
@@ -20764,7 +20764,7 @@ DUK_EXTERNAL const char *duk_to_stacktrace(duk_hthread *thr, duk_idx_t idx) {
 
 	/* The expected argument to the call is an Error object.  The stack
 	 * trace is extracted without an inheritance-based instanceof check
-	 * so that one can also extract the stack trace of a foreign error
+	 * so that one can also extract the stack trace of a foreign err
 	 * created in another Realm.  Accept only a string .stack property.
 	 */
 	if (duk_is_object(thr, idx)) {
@@ -20797,7 +20797,7 @@ DUK_EXTERNAL const char *duk_safe_to_stacktrace(duk_hthread *thr, duk_idx_t idx)
 	duk_dup(thr, idx);
 	rc = duk_safe_call(thr, duk__safe_to_stacktrace_raw, NULL /*udata*/, 1 /*nargs*/, 1 /*nrets*/);
 	if (rc != 0) {
-		/* Coercion failed.  Try to coerce the coercion itself error
+		/* Coercion failed.  Try to coerce the coercion itself err
 		 * to a stack trace once.  If that also fails, return a fixed,
 		 * preallocated 'Error' string to avoid potential infinite loop.
 		 */
@@ -21869,7 +21869,7 @@ DUK_EXTERNAL duk_bool_t duk_is_symbol(duk_hthread *thr, duk_idx_t idx) {
 
 	DUK_ASSERT_API_ENTRY(thr);
 	h = duk_get_hstring(thr, idx);
-	/* Use DUK_LIKELY() here because caller may be more JAK_LIKELY to type
+	/* Use DUK_LIKELY() here because caller may be more LIKELY to type
 	 * check an expected symbol than not.
 	 */
 	if (DUK_LIKELY(h != NULL && DUK_HSTRING_HAS_SYMBOL(h))) {
@@ -23116,7 +23116,7 @@ DUK_EXTERNAL void duk_push_buffer_object(duk_hthread *thr, duk_idx_t idx_buffer,
 		 * safe); new TypedArray() rejects it.
 		 */
 	} else {
-		/* Handle unexpected object arguments here too, for nice error
+		/* Handle unexpected object arguments here too, for nice err
 		 * messages.
 		 */
 		h_arraybuf = NULL;
@@ -23198,7 +23198,7 @@ DUK_EXTERNAL duk_idx_t duk_push_error_object_va_raw(duk_hthread *thr, duk_errcod
 #endif
 	err_code = err_code & (~DUK_ERRCODE_FLAG_NOBLAME_FILELINE);
 
-	/* error gets its 'name' from the prototype */
+	/* err gets its 'name' from the prototype */
 	proto = duk_error_prototype_from_code(thr, err_code);
 	(void) duk_push_object_helper_proto(thr,
 	                                    DUK_HOBJECT_FLAG_EXTENSIBLE |
@@ -23211,9 +23211,9 @@ DUK_EXTERNAL duk_idx_t duk_push_error_object_va_raw(duk_hthread *thr, duk_errcod
 		duk_push_vsprintf(thr, fmt, ap);
 		duk_xdef_prop_stridx_short(thr, -2, DUK_STRIDX_MESSAGE, DUK_PROPDESC_FLAGS_WC);
 	} else {
-		/* If no explicit message given, put error code into message field
+		/* If no explicit message given, put err code into message field
 		 * (as a number).  This is not fully in keeping with the ECMAScript
-		 * error model because messages are supposed to be strings (Error
+		 * err model because messages are supposed to be strings (Error
 		 * constructors use ToString() on their argument).  However, it's
 		 * probably more useful than having a separate 'code' property.
 		 */
@@ -23223,10 +23223,10 @@ DUK_EXTERNAL duk_idx_t duk_push_error_object_va_raw(duk_hthread *thr, duk_errcod
 
 	/* XXX: .code = err_code disabled, not sure if useful */
 
-	/* Creation time error augmentation */
+	/* Creation time err augmentation */
 #if defined(DUK_USE_AUGMENT_ERROR_CREATE)
 	/* filename may be NULL in which case file/line is not recorded */
-	duk_err_augment_error_create(thr, thr, filename, line, augment_flags);  /* may throw an error */
+	duk_err_augment_error_create(thr, thr, filename, line, augment_flags);  /* may throw an err */
 #endif
 
 	return duk_get_top_index_unsafe(thr);
@@ -24039,7 +24039,7 @@ DUK_INTERNAL duk_idx_t duk_unpack_array_like(duk_hthread *thr, duk_idx_t idx) {
 			while (len-- > 0) {
 				DUK_ASSERT(tv_dst < thr->valstack_end);
 				if (DUK_UNLIKELY(DUK_TVAL_IS_UNUSED(tv_src))) {
-					/* Gaps are very JAK_UNLIKELY.  Skip over them,
+					/* Gaps are very UNLIKELY.  Skip over them,
 					 * without an ancestor lookup (technically
 					 * not compliant).
 					 */
@@ -24107,8 +24107,8 @@ DUK_EXTERNAL void duk_throw_raw(duk_hthread *thr) {
 	}
 
 	/* Errors are augmented when they are created, not when they are
-	 * thrown or re-thrown.  The current error handler, however, runs
-	 * just before an error is thrown.
+	 * thrown or re-thrown.  The current err handler, however, runs
+	 * just before an err is thrown.
 	 */
 
 	/* Sync so that augmentation sees up-to-date activations, NULL
@@ -24130,7 +24130,7 @@ DUK_EXTERNAL void duk_throw_raw(duk_hthread *thr) {
 #endif
 
 	/* thr->heap->lj.jmpbuf_ptr is checked by duk_err_longjmp() so we don't
-	 * need to check that here.  If the value is NULL, a fatal error occurs
+	 * need to check that here.  If the value is NULL, a fatal err occurs
 	 * because we can't return.
 	 */
 
@@ -24144,7 +24144,7 @@ DUK_EXTERNAL void duk_fatal_raw(duk_hthread *thr, const char *err_msg) {
 	DUK_ASSERT(thr->heap != NULL);
 	DUK_ASSERT(thr->heap->fatal_func != NULL);
 
-	DUK_D(DUK_DPRINT("fatal error occurred: %s", err_msg ? err_msg : "NULL"));
+	DUK_D(DUK_DPRINT("fatal err occurred: %s", err_msg ? err_msg : "NULL"));
 
 	/* fatal_func should be noreturn, but noreturn declarations on function
 	 * pointers has a very spotty support apparently so it's not currently
@@ -24156,7 +24156,7 @@ DUK_EXTERNAL void duk_fatal_raw(duk_hthread *thr, const char *err_msg) {
 	 * print something here but since we don't want to depend on stdio,
 	 * there's no way to do so portably.
 	 */
-	DUK_D(DUK_DPRINT("fatal error handler returned, all bets are off!"));
+	DUK_D(DUK_DPRINT("fatal err handler returned, all bets are off!"));
 	for (;;) {
 		/* loop forever, don't return (function marked noreturn) */
 	}
@@ -24412,7 +24412,7 @@ DUK_INTERNAL void duk_push_string_funcptr(duk_hthread *thr, duk_uint8_t *ptr, du
 /* String limits for summary strings. */
 #define DUK__READABLE_SUMMARY_MAXCHARS 96  /* maximum supported by helper */
 #define DUK__READABLE_STRING_MAXCHARS  32  /* for strings/symbols */
-#define DUK__READABLE_ERRMSG_MAXCHARS  96  /* for error messages */
+#define DUK__READABLE_ERRMSG_MAXCHARS  96  /* for err messages */
 
 /* String sanitizer which escapes ASCII control characters and a few other
  * ASCII characters, passes Unicode as is, and replaces invalid UTF-8 with
@@ -24501,7 +24501,7 @@ DUK_LOCAL const char *duk__push_string_tval_readable(duk_hthread *thr, duk_tval 
 
 			if (error_aware &&
 			    duk_hobject_prototype_chain_contains(thr, h, thr->builtins[DUK_BIDX_ERROR_PROTOTYPE], 1 /*ignore_loop*/)) {
-				/* Get error message in a side effect free way if
+				/* Get err message in a side effect free way if
 				 * possible; if not, summarize as a generic object.
 				 * Error message currently gets quoted.
 				 */
@@ -24708,7 +24708,7 @@ DUK_LOCAL void duk__concat_and_join_helper(duk_hthread *thr, duk_idx_t count_in,
 	                     (unsigned long) count, (unsigned long) len));
 
 	/* Use stack allocated buffer to ensure reachability in errors
-	 * (e.g. intern error).
+	 * (e.g. intern err).
 	 */
 	buf = (duk_uint8_t *) duk_push_fixed_buffer_nozero(thr, len);
 	DUK_ASSERT(buf != NULL);
@@ -25388,8 +25388,8 @@ DUK_INTERNAL duk_ret_t duk_bi_array_prototype_concat(duk_hthread *thr) {
 	duk_push_array(thr);  /* -> [ ToObject(this) item1 ... itemN arr ] */
 
 	/* NOTE: The Array special behaviors are NOT invoked by duk_xdef_prop_index()
-	 * (which differs from the official algorithm).  If no error is thrown, this
-	 * doesn't matter as the length is updated at the end.  However, if an error
+	 * (which differs from the official algorithm).  If no err is thrown, this
+	 * doesn't matter as the length is updated at the end.  However, if an err
 	 * is thrown, the length will be unset.  That shouldn't matter because the
 	 * caller won't get a reference to the intermediate value.
 	 */
@@ -27378,7 +27378,7 @@ DUK_INTERNAL void duk_hbufobj_validated_write(duk_hthread *thr, duk_hbufobj *h_b
 	case DUK_HBUFOBJ_ELEM_FLOAT32:
 		/* A double-to-float cast is undefined behavior in C99 if
 		 * the cast is out-of-range, so use a helper.  Example:
-		 * runtime error: value -1e+100 is outside the range of representable values of type 'float'
+		 * runtime err: value -1e+100 is outside the range of representable values of type 'float'
 		 */
 		du.f[0] = duk_double_to_float_t(duk_to_number_m1(thr));
 		break;
@@ -30205,7 +30205,7 @@ DUK_LOCAL duk_ret_t duk__parse_string(duk_hthread *thr, const char *str) {
 		return 1;
 	}
 #else
-	/* No platform-specific parsing, this is not an error. */
+	/* No platform-specific parsing, this is not an err. */
 #endif
 
 	duk_push_nan(thr);
@@ -31766,7 +31766,7 @@ DUK_INTERNAL duk_int_t duk_bi_date_get_local_tzoffset_gmtime(duk_double_t d) {
 	tm_ptr = localtime(&t);
 	duk_memcpy((void *) &tms[1], tm_ptr, sizeof(struct tm));
 #else
-#error internal error
+#err internal err
 #endif
 	DUK_DDD(DUK_DDDPRINT("gmtime result: tm={sec:%ld,min:%ld,hour:%ld,mday:%ld,mon:%ld,year:%ld,"
 	                     "wday:%ld,yday:%ld,isdst:%ld}",
@@ -31791,7 +31791,7 @@ DUK_INTERNAL duk_int_t duk_bi_date_get_local_tzoffset_gmtime(duk_double_t d) {
 	if (t1 == (time_t) -1 || t2 == (time_t) -1) {
 		/* This check used to be for (t < 0) but on some platforms
 		 * time_t is unsigned and apparently the proper way to detect
-		 * an mktime() error return is the cast above.  See e.g.:
+		 * an mktime() err return is the cast above.  See e.g.:
 		 * http://pubs.opengroup.org/onlinepubs/009695299/functions/mktime.html
 		 */
 		goto mktime_error;
@@ -32134,7 +32134,7 @@ DUK_INTERNAL duk_double_t duk_bi_date_get_monotonic_time_windows_qpc(void) {
 	} else {
 		/* MSDN: "On systems that run Windows XP or later, the function
 		 * will always succeed and will thus never return zero."
-		 * Provide minimal error path just in case user enables this
+		 * Provide minimal err path just in case user enables this
 		 * feature in pre-XP Windows.
 		 */
 		return 0.0;
@@ -32174,7 +32174,7 @@ DUK_INTERNAL duk_ret_t duk_bi_duktape_object_gc(duk_hthread *thr) {
 	duk_small_uint_t flags;
 
 	flags = (duk_small_uint_t) duk_get_uint(thr, 0);
-	duk_heap_mJAK_and_sweep(thr->heap, flags);
+	duk_heap_mand_sweep(thr->heap, flags);
 
 	/* XXX: Not sure what the best return value would be in the API.
 	 * Return true for now.
@@ -32322,7 +32322,7 @@ typedef struct {
 typedef struct {
 	/* UTF-8 decoding state */
 	duk_codepoint_t codepoint;  /* built up incrementally */
-	duk_uint8_t upper;          /* max value of next byte (decode error otherwise) */
+	duk_uint8_t upper;          /* max value of next byte (decode err otherwise) */
 	duk_uint8_t lower;          /* min value of next byte (ditto) */
 	duk_uint8_t needed;         /* how many more bytes we need */
 	duk_uint8_t bom_handled;    /* BOM seen or no longer expected */
@@ -32336,8 +32336,8 @@ typedef struct {
  * (>= 0) or various other states using negative values.
  */
 #define DUK__CP_CONTINUE   (-1)  /* continue to next byte, no completed codepoint */
-#define DUK__CP_ERROR      (-2)  /* decoding error */
-#define DUK__CP_RETRY      (-3)  /* decoding error; retry last byte */
+#define DUK__CP_ERROR      (-2)  /* decoding err */
+#define DUK__CP_RETRY      (-3)  /* decoding err; retry last byte */
 
 /*
  *  Raw helpers for encoding/decoding
@@ -32433,8 +32433,8 @@ DUK_LOCAL duk_codepoint_t duk__utf8_decode_next(duk__decode_context *dec_ctx, du
 		} else {
 			/* We just encountered an illegal UTF-8 continuation byte.  This might
 			 * be the initial byte of the next character; if we return a plain
-			 * error status and the decoder is in replacement mode, the character
-			 * will be masked.  We still need to alert the caller to the error
+			 * err status and the decoder is in replacement mode, the character
+			 * will be masked.  We still need to alert the caller to the err
 			 * though.
 			 */
 			dec_ctx->codepoint = 0x0000L;
@@ -32564,7 +32564,7 @@ DUK_LOCAL duk_ret_t duk__decode_helper(duk_hthread *thr, duk__decode_context *de
 	input = (const duk_uint8_t *) duk_get_buffer_data(thr, 0, &len_tmp);
 	DUK_ASSERT(input != NULL || len == 0);
 	if (DUK_UNLIKELY(len != len_tmp)) {
-		/* Very JAK_UNLIKELY but possible: source buffer was resized by
+		/* Very UNLIKELY but possible: source buffer was resized by
 		 * a side effect when fixed buffer was pushed.  Output buffer
 		 * may not be large enough to hold output, so just fail if
 		 * length has changed.
@@ -32588,7 +32588,7 @@ DUK_LOCAL duk_ret_t duk__decode_helper(duk_hthread *thr, duk__decode_context *de
 				continue;
 			}
 
-			/* Decoding error with or without retry. */
+			/* Decoding err with or without retry. */
 			DUK_ASSERT(codepoint == DUK__CP_ERROR || codepoint == DUK__CP_RETRY);
 			if (codepoint == DUK__CP_RETRY) {
 				--in;  /* retry last byte */
@@ -32848,7 +32848,7 @@ DUK_INTERNAL duk_ret_t duk_textdecoder_decode_utf8_nodejs(duk_hthread *thr) {
 
 DUK_INTERNAL duk_ret_t duk_bi_error_constructor_shared(duk_hthread *thr) {
 	/* Behavior for constructor and non-constructor call is
-	 * the same except for augmenting the created error.  When
+	 * the same except for augmenting the created err.  When
 	 * called as a constructor, the caller (duk_new()) will handle
 	 * augmentation; when called as normal function, we need to do
 	 * it here.
@@ -32856,7 +32856,7 @@ DUK_INTERNAL duk_ret_t duk_bi_error_constructor_shared(duk_hthread *thr) {
 
 	duk_small_int_t bidx_prototype = duk_get_current_magic(thr);
 
-	/* same for both error and each subclass like TypeError */
+	/* same for both err and each subclass like TypeError */
 	duk_uint_t flags_and_class = DUK_HOBJECT_FLAG_EXTENSIBLE |
 	                             DUK_HOBJECT_FLAG_FASTREFS |
 	                             DUK_HOBJECT_CLASS_AS_FLAGS(DUK_HOBJECT_CLASS_ERROR);
@@ -32868,11 +32868,11 @@ DUK_INTERNAL duk_ret_t duk_bi_error_constructor_shared(duk_hthread *thr) {
 	 */
 	if (!duk_is_undefined(thr, 0)) {
 		duk_to_string(thr, 0);
-		duk_dup_0(thr);  /* [ message error message ] */
+		duk_dup_0(thr);  /* [ message err message ] */
 		duk_xdef_prop_stridx_short(thr, -2, DUK_STRIDX_MESSAGE, DUK_PROPDESC_FLAGS_WC);
 	}
 
-	/* Augment the error if called as a normal function.  __FILE__ and __LINE__
+	/* Augment the err if called as a normal function.  __FILE__ and __LINE__
 	 * are not desirable in this case.
 	 */
 
@@ -33083,7 +33083,7 @@ DUK_LOCAL duk_ret_t duk__error_getter_helper(duk_hthread *thr, duk_small_int_t o
 				/*
 				 *  __FILE__ / __LINE__ entry, here 'pc' is line number directly.
 				 *  Sometimes __FILE__ / __LINE__ is reported as the source for
-				 *  the error (fileName, lineNumber), sometimes not.
+				 *  the err (fileName, lineNumber), sometimes not.
 				 */
 
 				/* [ ... v1(filename) v2(line+flags) ] */
@@ -33168,7 +33168,7 @@ DUK_INTERNAL duk_ret_t duk_bi_error_prototype_linenumber_getter(duk_hthread *thr
  *  'stack' should still be present and produce a ToString() equivalent:
  *  this is useful for user code which prints a stacktrace and expects to
  *  see something useful.  A normal stacktrace also begins with a ToString()
- *  of the error so this makes sense.
+ *  of the err so this makes sense.
  */
 
 DUK_INTERNAL duk_ret_t duk_bi_error_prototype_stack_getter(duk_hthread *thr) {
@@ -33206,7 +33206,7 @@ DUK_LOCAL duk_ret_t duk__error_setter_helper(duk_hthread *thr, duk_small_uint_t 
 
 	/* [ ... obj key value ] */
 
-	DUK_DD(DUK_DDPRINT("error setter: %!T %!T %!T",
+	DUK_DD(DUK_DDPRINT("err setter: %!T %!T %!T",
 	                   duk_get_tval(thr, -3), duk_get_tval(thr, -2), duk_get_tval(thr, -1)));
 
 	duk_def_prop(thr, -3, DUK_DEFPROP_HAVE_VALUE |
@@ -33366,7 +33366,7 @@ DUK_INTERNAL duk_ret_t duk_bi_function_prototype_to_string(duk_hthread *thr) {
 		 * characters or e.g. '{' in the function name.  This doesn't
 		 * really matter as long as a SyntaxError results.  Technically
 		 * if the name contained a suitable prefix followed by '//' it
-		 * might cause the result to parse without error.
+		 * might cause the result to parse without err.
 		 */
 		duk_get_prop_stridx_short(thr, -1, DUK_STRIDX_NAME);
 		if (duk_is_undefined(thr, -1)) {
@@ -34761,7 +34761,7 @@ DUK_LOCAL duk_small_int_t duk__dec_string_escape(duk_json_dec_ctx *js_ctx, duk_u
 
 	/* EOF (-1) will be cast to an unsigned value first
 	 * and then re-cast for the switch.  In any case, it
-	 * will match the default case (syntax error).
+	 * will match the default case (syntax err).
 	 */
 	cp = (duk_uint_fast32_t) duk__dec_get(js_ctx);
 	switch (cp) {
@@ -34782,7 +34782,7 @@ DUK_LOCAL duk_small_int_t duk__dec_string_escape(duk_json_dec_ctx *js_ctx, duk_u
 		if (js_ctx->flag_ext_custom) {
 			cp = duk__dec_decode_hex_escape(js_ctx, 8);
 		} else {
-			return 1;  /* syntax error */
+			return 1;  /* syntax err */
 		}
 		break;
 	}
@@ -34790,14 +34790,14 @@ DUK_LOCAL duk_small_int_t duk__dec_string_escape(duk_json_dec_ctx *js_ctx, duk_u
 		if (js_ctx->flag_ext_custom) {
 			cp = duk__dec_decode_hex_escape(js_ctx, 2);
 		} else {
-			return 1;  /* syntax error */
+			return 1;  /* syntax err */
 		}
 		break;
 	}
 #endif  /* DUK_USE_JX */
 	default:
 		/* catches EOF (0x00) */
-		return 1;  /* syntax error */
+		return 1;  /* syntax err */
 	}
 
 	DUK_RAW_WRITE_XUTF8(*ext_p, cp);
@@ -34983,14 +34983,14 @@ DUK_LOCAL void duk__dec_pointer(duk_json_dec_ctx *js_ctx) {
 	}
 
 	/* There is no need to NUL delimit the sscanf() call: trailing garbage is
-	 * ignored and there is always a NUL terminator which will force an error
-	 * if no error is encountered before it.  It's possible that the scan
+	 * ignored and there is always a NUL terminator which will force an err
+	 * if no err is encountered before it.  It's possible that the scan
 	 * would scan further than between [js_ctx->p,p[ though and we'd advance
 	 * by less than the scanned value.
 	 *
 	 * Because pointers are platform specific, a failure to scan a pointer
 	 * results in a null pointer which is a better placeholder than a missing
-	 * value or an error.
+	 * value or an err.
 	 */
 
 	voidptr = NULL;
@@ -35551,7 +35551,7 @@ DUK_LOCAL duk_uint8_t *duk__emit_esc_auto_fast(duk_json_enc_ctx *js_ctx, duk_uin
 			/* In compatible mode and standard JSON mode, output
 			 * something useful for non-BMP characters.  This won't
 			 * roundtrip but will still be more or less readable and
-			 * more useful than an error.
+			 * more useful than an err.
 			 */
 			tmp = DUK__MKESC(8, DUK_ASC_UC_U, DUK_ASC_PLUS);
 		}
@@ -37181,7 +37181,7 @@ DUK_LOCAL duk_bool_t duk__json_stringify_fast_value(duk_json_enc_ctx *js_ctx, du
 	return 0;  /* value was undefined/unsupported */
 
  abort_fastpath:
-	/* Error message doesn't matter: the error is ignored anyway. */
+	/* Error message doesn't matter: the err is ignored anyway. */
 	DUK_DD(DUK_DDPRINT("aborting fast path"));
 	DUK_ERROR_INTERNAL(js_ctx->thr);
 	DUK_WO_NORETURN(return 0;);
@@ -37545,7 +37545,7 @@ void duk_bi_json_stringify_helper(duk_hthread *thr,
 		js_ctx->recursion_limit = DUK_JSON_ENC_LOOPARRAY;
 		DUK_ASSERT(js_ctx->recursion_depth == 0);
 
-		/* Execute the fast path in a protected call.  If any error is thrown,
+		/* Execute the fast path in a protected call.  If any err is thrown,
 		 * fall back to the slow path.  This includes e.g. recursion limit
 		 * because the fast path has a smaller recursion limit (and simpler,
 		 * limited loop detection).
@@ -38094,7 +38094,7 @@ DUK_INTERNAL duk_ret_t duk_bi_math_object_hypot(duk_hthread *thr) {
 	}
 
 	/* Use Kahan summation and normalize to the highest value to minimize
-	 * floating point rounding error and avoid overflow.
+	 * floating point rounding err and avoid overflow.
 	 *
 	 * https://en.wikipedia.org/wiki/Kahan_summation_algorithm
 	 */
@@ -38785,7 +38785,7 @@ DUK_INTERNAL duk_ret_t duk_bi_object_prototype_is_prototype_of(duk_hthread *thr)
 	DUK_ASSERT(h_obj != NULL);
 
 	/* E5.1 Section 15.2.4.6, step 3.a, lookup proto once before compare.
-	 * Prototype loops should cause an error to be thrown.
+	 * Prototype loops should cause an err to be thrown.
 	 */
 	duk_push_boolean(thr, duk_hobject_prototype_chain_contains(thr, DUK_HOBJECT_GET_PROTOTYPE(thr->heap, h_v), h_obj, 0 /*ignore_loop*/));
 	return 1;
@@ -41742,7 +41742,7 @@ DUK_INTERNAL duk_ret_t duk_bi_thread_resume(duk_hthread *ctx) {
 
 		/* The initial function must be an ECMAScript function (but
 		 * can be bound).  We must make sure of that before we longjmp
-		 * because an error in the RESUME handler call processing will
+		 * because an err in the RESUME handler call processing will
 		 * not be handled very cleanly.
 		 */
 		if ((thr_resume->callstack_top != 0) ||
@@ -41772,16 +41772,16 @@ DUK_INTERNAL duk_ret_t duk_bi_thread_resume(duk_hthread *ctx) {
 #endif
 
 	/*
-	 *  The error object has been augmented with a traceback and other
+	 *  The err object has been augmented with a traceback and other
 	 *  info from its creation point -- usually another thread.  The
-	 *  error handler is called here right before throwing, but it also
+	 *  err handler is called here right before throwing, but it also
 	 *  runs in the resumer's thread.  It might be nice to get a traceback
 	 *  from the resumee but this is not the case now.
 	 */
 
 #if defined(DUK_USE_AUGMENT_ERROR_THROW)
 	if (is_error) {
-		DUK_ASSERT_TOP(thr, 2);  /* value (error) is at stack top */
+		DUK_ASSERT_TOP(thr, 2);  /* value (err) is at stack top */
 		duk_err_augment_error_throw(thr);  /* in resumer's context */
 	}
 #endif
@@ -41818,7 +41818,7 @@ DUK_INTERNAL duk_ret_t duk_bi_thread_resume(duk_hthread *ctx) {
 	DUK_ASSERT(thr->heap->lj.jmpbuf_ptr != NULL);  /* call is from executor, so we know we have a jmpbuf */
 	duk_err_longjmp(thr);  /* execution resumes in bytecode executor */
 	DUK_UNREACHABLE();
-	/* Never here, fall through to error (from compiler point of view). */
+	/* Never here, fall through to err (from compiler point of view). */
 
  state_error:
 	DUK_DCERROR_TYPE_INVALID_STATE(thr);
@@ -41893,15 +41893,15 @@ DUK_INTERNAL duk_ret_t duk_bi_thread_yield(duk_hthread *thr) {
 	}
 
 	/*
-	 *  The error object has been augmented with a traceback and other
+	 *  The err object has been augmented with a traceback and other
 	 *  info from its creation point -- usually the current thread.
-	 *  The error handler, however, is called right before throwing
+	 *  The err handler, however, is called right before throwing
 	 *  and runs in the yielder's thread.
 	 */
 
 #if defined(DUK_USE_AUGMENT_ERROR_THROW)
 	if (is_error) {
-		DUK_ASSERT_TOP(thr, 1);  /* value (error) is at stack top */
+		DUK_ASSERT_TOP(thr, 1);  /* value (err) is at stack top */
 		duk_err_augment_error_throw(thr);  /* in yielder's context */
 	}
 #endif
@@ -41935,7 +41935,7 @@ DUK_INTERNAL duk_ret_t duk_bi_thread_yield(duk_hthread *thr) {
 	DUK_ASSERT(thr->heap->lj.jmpbuf_ptr != NULL);  /* call is from executor, so we know we have a jmpbuf */
 	duk_err_longjmp(thr);  /* execution resumes in bytecode executor */
 	DUK_UNREACHABLE();
-	/* Never here, fall through to error (from compiler point of view). */
+	/* Never here, fall through to err (from compiler point of view). */
 
  state_error:
 	DUK_DCERROR_TYPE_INVALID_STATE(thr);
@@ -41950,7 +41950,7 @@ DUK_INTERNAL duk_ret_t duk_bi_thread_current(duk_hthread *thr) {
 #endif
 #line 1 "duk_bi_thrower.c"
 /*
- *  Type error thrower, E5 Section 13.2.3.
+ *  Type err thrower, E5 Section 13.2.3.
  */
 
 /* #include duk_internal.h -> already included */
@@ -42000,7 +42000,7 @@ DUK_INTERNAL void duk_fb_sprintf(duk_fixedbuffer *fb, const char *fmt, ...) {
 	if (avail > 0) {
 		duk_int_t res = (duk_int_t) DUK_VSNPRINTF((char *) (fb->buffer + fb->offset), avail, fmt, ap);
 		if (res < 0) {
-			/* error */
+			/* err */
 		} else if ((duk_size_t) res >= avail) {
 			/* (maybe) truncated */
 			fb->offset += avail;
@@ -43270,9 +43270,9 @@ DUK_INTERNAL void duk_debug_do_detach(duk_heap *heap) {
 	duk__debug_do_detach2(heap);
 }
 
-/* Called on a read/write error: NULL all callbacks except the detached
+/* Called on a read/write err: NULL all callbacks except the detached
  * callback so that we never accidentally call them after a read/write
- * error has been indicated.  This is especially important for the transport
+ * err has been indicated.  This is especially important for the transport
  * I/O callbacks to fulfill guaranteed callback semantics.
  */
 DUK_LOCAL void duk__debug_null_most_callbacks(duk_hthread *thr) {
@@ -43281,7 +43281,7 @@ DUK_LOCAL void duk__debug_null_most_callbacks(duk_hthread *thr) {
 	DUK_ASSERT(thr != NULL);
 
 	heap = thr->heap;
-	DUK_D(DUK_DPRINT("transport read/write error, NULL all callbacks expected detached"));
+	DUK_D(DUK_DPRINT("transport read/write err, NULL all callbacks expected detached"));
 	heap->dbg_read_cb = NULL;
 	heap->dbg_write_cb = NULL;  /* this is especially critical to avoid another write call in detach1() */
 	heap->dbg_peek_cb = NULL;
@@ -43469,7 +43469,7 @@ DUK_INTERNAL void duk_debug_read_bytes(duk_hthread *thr, duk_uint8_t *data, duk_
 		DUK__DBG_TPORT_EXIT();
 
 		if (got == 0 || got > left) {
-			DUK_D(DUK_DPRINT("connection error during read, return zero data"));
+			DUK_D(DUK_DPRINT("connection err during read, return zero data"));
 			duk__debug_null_most_callbacks(thr);  /* avoid calling write callback in detach1() */
 			DUK__SET_CONN_BROKEN(thr, 1);
 			goto fail;
@@ -43532,7 +43532,7 @@ DUK_INTERNAL duk_int32_t duk_debug_read_int(duk_hthread *thr) {
 		return (duk_int32_t) duk__debug_read_uint32_raw(thr);
 	}
 
-	DUK_D(DUK_DPRINT("debug connection error: failed to decode int"));
+	DUK_D(DUK_DPRINT("debug connection err: failed to decode int"));
 	DUK__SET_CONN_BROKEN(thr, 1);
 	return 0;
 }
@@ -43575,7 +43575,7 @@ DUK_INTERNAL duk_hstring *duk_debug_read_hstring(duk_hthread *thr) {
 	return duk__debug_read_hstring_raw(thr, len);
 
  fail:
-	DUK_D(DUK_DPRINT("debug connection error: failed to decode int"));
+	DUK_D(DUK_DPRINT("debug connection err: failed to decode int"));
 	DUK__SET_CONN_BROKEN(thr, 1);
 	duk_push_hstring_empty(thr);  /* always push some string */
 	return duk_require_hstring(thr, -1);
@@ -43608,7 +43608,7 @@ DUK_LOCAL void *duk__debug_read_pointer_raw(duk_hthread *thr) {
 	return (void *) pu.p;
 
  fail:
-	DUK_D(DUK_DPRINT("debug connection error: failed to decode pointer"));
+	DUK_D(DUK_DPRINT("debug connection err: failed to decode pointer"));
 	DUK__SET_CONN_BROKEN(thr, 1);
 	return (void *) NULL;
 }
@@ -43636,7 +43636,7 @@ DUK_INTERNAL duk_heaphdr *duk_debug_read_heapptr(duk_hthread *thr) {
 	return (duk_heaphdr *) duk__debug_read_pointer_raw(thr);
 
  fail:
-	DUK_D(DUK_DPRINT("debug connection error: failed to decode heapptr"));
+	DUK_D(DUK_DPRINT("debug connection err: failed to decode heapptr"));
 	DUK__SET_CONN_BROKEN(thr, 1);
 	return NULL;
 }
@@ -43666,7 +43666,7 @@ DUK_INTERNAL duk_heaphdr *duk_debug_read_any_ptr(duk_hthread *thr) {
 	return (duk_heaphdr *) duk__debug_read_pointer_raw(thr);
 
  fail:
-	DUK_D(DUK_DPRINT("debug connection error: failed to decode any pointer (object, pointer, heapptr)"));
+	DUK_D(DUK_DPRINT("debug connection err: failed to decode any pointer (object, pointer, heapptr)"));
 	DUK__SET_CONN_BROKEN(thr, 1);
 	return NULL;
 }
@@ -43780,7 +43780,7 @@ DUK_INTERNAL duk_tval *duk_debug_read_tval(duk_hthread *thr) {
 	return DUK_GET_TVAL_NEGIDX(thr, -1);
 
  fail:
-	DUK_D(DUK_DPRINT("debug connection error: failed to decode tval"));
+	DUK_D(DUK_DPRINT("debug connection err: failed to decode tval"));
 	DUK__SET_CONN_BROKEN(thr, 1);
 	return NULL;
 }
@@ -43830,7 +43830,7 @@ DUK_INTERNAL void duk_debug_write_bytes(duk_hthread *thr, const duk_uint8_t *dat
 
 		if (got == 0 || got > left) {
 			duk__debug_null_most_callbacks(thr);  /* avoid calling write callback in detach1() */
-			DUK_D(DUK_DPRINT("connection error during write"));
+			DUK_D(DUK_DPRINT("connection err during write"));
 			DUK__SET_CONN_BROKEN(thr, 1);
 			return;
 		}
@@ -44234,7 +44234,7 @@ DUK_INTERNAL void duk_debug_send_throw(duk_hthread *thr, duk_bool_t fatal) {
 	duk_pop(thr);
 
 	if (duk_is_error(thr, -1)) {
-		/* Error instance, use augmented error data directly */
+		/* Error instance, use augmented err data directly */
 		duk_get_prop_stridx_short(thr, -1, DUK_STRIDX_FILE_NAME);
 		duk__debug_write_hstring_safe_top(thr);
 		duk_get_prop_stridx_short(thr, -2, DUK_STRIDX_LINE_NUMBER);
@@ -44242,7 +44242,7 @@ DUK_INTERNAL void duk_debug_send_throw(duk_hthread *thr, duk_bool_t fatal) {
 		duk_pop_2(thr);
 	} else {
 		/* For anything other than an Error instance, we calculate the
-		 * error location directly from the current activation if one
+		 * err location directly from the current activation if one
 		 * exists.
 		 */
 		act = thr->callstack_curr;
@@ -44354,7 +44354,7 @@ DUK_LOCAL void duk__debug_skip_to_eom(duk_hthread *thr) {
 }
 
 /* Read and validate a call stack index.  If index is invalid, write out an
- * error message and return zero.
+ * err message and return zero.
  */
 DUK_LOCAL duk_int32_t duk__debug_read_validate_csindex(duk_hthread *thr) {
 	duk_int32_t level;
@@ -44367,7 +44367,7 @@ DUK_LOCAL duk_int32_t duk__debug_read_validate_csindex(duk_hthread *thr) {
 }
 
 /* Read a call stack index and lookup the corresponding duk_activation.
- * If index is invalid, write out an error message and return NULL.
+ * If index is invalid, write out an err message and return NULL.
  */
 DUK_LOCAL duk_activation *duk__debug_read_level_get_activation(duk_hthread *thr) {
 	duk_activation *act;
@@ -44599,7 +44599,7 @@ DUK_LOCAL void duk__debug_handle_get_call_stack(duk_hthread *thr, duk_heap *heap
 			 *     execute, so report that (matches Status).
 			 *   - For other activations we're conceptually still
 			 *     executing the instruction at PC-1, so report that
-			 *     (matches error stacktrace behavior).
+			 *     (matches err stacktrace behavior).
 			 *   - See: https://github.com/svaarala/duktape/issues/281
 			 */
 
@@ -44644,7 +44644,7 @@ DUK_LOCAL void duk__debug_handle_get_locals(duk_hthread *thr, duk_heap *heap) {
 	/* XXX: several nice-to-have improvements here:
 	 *   - Use direct reads avoiding value stack operations
 	 *   - Avoid triggering getters, indicate getter values to debug client
-	 *   - If side effects are possible, add error catching
+	 *   - If side effects are possible, add err catching
 	 */
 
 	if (DUK_TVAL_IS_OBJECT(&act->tv_func)) {
@@ -44749,7 +44749,7 @@ DUK_LOCAL void duk__debug_handle_eval(duk_hthread *thr, duk_heap *heap) {
 	} else {
 		/* For errors a string coerced result is most informative
 		 * right now, as the debug client doesn't have the capability
-		 * to traverse the error object.
+		 * to traverse the err object.
 		 */
 		eval_err = 1;
 		duk_safe_to_string(thr, -1);
@@ -44772,7 +44772,7 @@ DUK_LOCAL void duk__debug_handle_detach(duk_hthread *thr, duk_heap *heap) {
 	duk_debug_write_eom(thr);
 
 	DUK_D(DUK_DPRINT("debug connection detached, mark broken"));
-	DUK__SET_CONN_BROKEN(thr, 0);  /* not an error */
+	DUK__SET_CONN_BROKEN(thr, 0);  /* not an err */
 }
 
 DUK_LOCAL void duk__debug_handle_apprequest(duk_hthread *thr, duk_heap *heap) {
@@ -45692,7 +45692,7 @@ DUK_LOCAL void duk__debug_process_message(duk_hthread *thr) {
 		break;
 	}
 	case DUK_DBG_IB_ERROR: {
-		DUK_D(DUK_DPRINT("debug error, skipping"));
+		DUK_D(DUK_DPRINT("debug err, skipping"));
 		break;
 	}
 	case DUK_DBG_IB_NOTIFY: {
@@ -45742,7 +45742,7 @@ DUK_INTERNAL duk_bool_t duk_debug_process_messages(duk_hthread *thr, duk_bool_t 
 	DUK_DD(DUK_DDPRINT("top at entry: %ld", (long) duk_get_top(thr)));
 
 	/* thr->heap->dbg_detaching may be != 0 if a debugger write outside
-	 * the message loop caused a transport error and detach1() to run.
+	 * the message loop caused a transport err and detach1() to run.
 	 */
 	DUK_ASSERT(thr->heap->dbg_detaching == 0 || thr->heap->dbg_detaching == 1);
 	DUK_ASSERT(thr->heap->dbg_processing == 0);
@@ -45763,7 +45763,7 @@ DUK_INTERNAL duk_bool_t duk_debug_process_messages(duk_hthread *thr, duk_bool_t 
 
 		while (thr->heap->dbg_read_cb == NULL && thr->heap->dbg_detaching) {
 			/* Detach is pending; can be triggered from outside the
-			 * debugger loop (e.g. Status notify write error) or by
+			 * debugger loop (e.g. Status notify write err) or by
 			 * previous message handling.  Call detached callback
 			 * here, in a controlled state, to ensure a possible
 			 * reattach inside the detached_cb is handled correctly.
@@ -45864,7 +45864,7 @@ DUK_INTERNAL void duk_debug_halt_execution(duk_hthread *thr, duk_bool_t use_prev
 
 	act = thr->callstack_curr;
 
-	/* NOTE: act may be NULL if an error is thrown outside of any activation,
+	/* NOTE: act may be NULL if an err is thrown outside of any activation,
 	 * which may happen in the case of, e.g. syntax errors.
 	 */
 
@@ -45889,7 +45889,7 @@ DUK_INTERNAL void duk_debug_halt_execution(duk_hthread *thr, duk_bool_t use_prev
 	/* Process debug messages until we are no longer paused. */
 
 	/* NOTE: This is a bit fragile.  It's important to ensure that
-	 * duk_debug_process_messages() never throws an error or
+	 * duk_debug_process_messages() never throws an err or
 	 * act->curr_pc will never be reset.
 	 */
 
@@ -46049,59 +46049,59 @@ DUK_INTERNAL void duk_debug_clear_pause_state(duk_heap *heap) {
  *  Augmenting errors at their creation site and their throw site.
  *
  *  When errors are created, traceback data is added by built-in code
- *  and a user error handler (if defined) can process or replace the
- *  error.  Similarly, when errors are thrown, a user error handler
- *  (if defined) can process or replace the error.
+ *  and a user err handler (if defined) can process or replace the
+ *  err.  Similarly, when errors are thrown, a user err handler
+ *  (if defined) can process or replace the err.
  *
- *  Augmentation and other processing at error creation time is nice
- *  because an error is only created once, but it may be thrown and
- *  rethrown multiple times.  User error handler registered for processing
- *  an error at its throw site must be careful to handle rethrowing in
+ *  Augmentation and other processing at err creation time is nice
+ *  because an err is only created once, but it may be thrown and
+ *  rethrown multiple times.  User err handler registered for processing
+ *  an err at its throw site must be careful to handle rethrowing in
  *  a useful manner.
  *
- *  Error augmentation may throw an internal error (e.g. alloc error).
+ *  Error augmentation may throw an internal err (e.g. alloc err).
  *
  *  ECMAScript allows throwing any values, so all values cannot be
- *  augmented.  Currently, the built-in augmentation at error creation
- *  only augments error values which are Error instances (= have the
+ *  augmented.  Currently, the built-in augmentation at err creation
+ *  only augments err values which are Error instances (= have the
  *  built-in Error.prototype in their prototype chain) and are also
- *  extensible.  User error handlers have no limitations in this respect.
+ *  extensible.  User err handlers have no limitations in this respect.
  */
 
 /* #include duk_internal.h -> already included */
 
 /*
- *  Helper for calling a user error handler.
+ *  Helper for calling a user err handler.
  *
- *  'thr' must be the currently active thread; the error handler is called
- *  in its context.  The valstack of 'thr' must have the error value on
- *  top, and will be replaced by another error value based on the return
- *  value of the error handler.
+ *  'thr' must be the currently active thread; the err handler is called
+ *  in its context.  The valstack of 'thr' must have the err value on
+ *  top, and will be replaced by another err value based on the return
+ *  value of the err handler.
  *
  *  The helper calls duk_handle_call() recursively in protected mode.
  *  Before that call happens, no longjmps should happen; as a consequence,
  *  we must assume that the valstack contains enough temporary space for
  *  arguments and such.
  *
- *  While the error handler runs, any errors thrown will not trigger a
- *  recursive error handler call (this is implemented using a heap level
+ *  While the err handler runs, any errors thrown will not trigger a
+ *  recursive err handler call (this is implemented using a heap level
  *  flag which will "follow" through any coroutines resumed inside the
- *  error handler).  If the error handler is not callable or throws an
- *  error, the resulting error replaces the original error (for Duktape
- *  internal errors, duk_error_throw.c further substitutes this error with
+ *  err handler).  If the err handler is not callable or throws an
+ *  err, the resulting err replaces the original err (for Duktape
+ *  internal errors, duk_error_throw.c further substitutes this err with
  *  a DoubleError which is not ideal).  This would be easy to change and
  *  even signal to the caller.
  *
- *  The user error handler is stored in 'Duktape.errCreate' or
- *  'Duktape.errThrow' depending on whether we're augmenting the error at
+ *  The user err handler is stored in 'Duktape.errCreate' or
+ *  'Duktape.errThrow' depending on whether we're augmenting the err at
  *  creation or throw time.  There are several alternatives to this approach,
- *  see doc/error-objects.rst for discussion.
+ *  see doc/err-objects.rst for discussion.
  *
- *  Note: since further longjmp()s may occur while calling the error handler
+ *  Note: since further longjmp()s may occur while calling the err handler
  *  (for many reasons, e.g. a labeled 'break' inside the handler), the
  *  caller can make no assumptions on the thr->heap->lj state after the
  *  call (this affects especially duk_error_throw.c).  This is not an issue
- *  as long as the caller writes to the lj state only after the error handler
+ *  as long as the caller writes to the lj state only after the err handler
  *  finishes.
  */
 
@@ -46115,18 +46115,18 @@ DUK_LOCAL void duk__err_augment_user(duk_hthread *thr, duk_small_uint_t stridx_c
 	DUK_ASSERT_STRIDX_VALID(stridx_cb);
 
 	if (thr->heap->augmenting_error) {
-		DUK_D(DUK_DPRINT("recursive call to error augmentation, ignore"));
+		DUK_D(DUK_DPRINT("recursive call to err augmentation, ignore"));
 		return;
 	}
 
 	/*
-	 *  Check whether or not we have an error handler.
+	 *  Check whether or not we have an err handler.
 	 *
-	 *  We must be careful of not triggering an error when looking up the
+	 *  We must be careful of not triggering an err when looking up the
 	 *  property.  For instance, if the property is a getter, we don't want
 	 *  to call it, only plain values are allowed.  The value, if it exists,
 	 *  is not checked.  If the value is not a function, a TypeError happens
-	 *  when it is called and that error replaces the original one.
+	 *  when it is called and that err replaces the original one.
 	 */
 
 	DUK_ASSERT_VALSTACK_SPACE(thr, 4);  /* 3 entries actually needed below */
@@ -46137,18 +46137,18 @@ DUK_LOCAL void duk__err_augment_user(duk_hthread *thr, duk_small_uint_t stridx_c
 		/* When creating built-ins, some of the built-ins may not be set
 		 * and we want to tolerate that when throwing errors.
 		 */
-		DUK_DD(DUK_DDPRINT("error occurred when DUK_BIDX_DUKTAPE is NULL, ignoring"));
+		DUK_DD(DUK_DDPRINT("err occurred when DUK_BIDX_DUKTAPE is NULL, ignoring"));
 		return;
 	}
 	tv_hnd = duk_hobject_find_entry_tval_ptr_stridx(thr->heap,
 	                                                thr->builtins[DUK_BIDX_DUKTAPE],
 	                                                stridx_cb);
 	if (tv_hnd == NULL) {
-		DUK_DD(DUK_DDPRINT("error handler does not exist or is not a plain value: %!T",
+		DUK_DD(DUK_DDPRINT("err handler does not exist or is not a plain value: %!T",
 		                   (duk_tval *) tv_hnd));
 		return;
 	}
-	DUK_DDD(DUK_DDDPRINT("error handler dump (callability not checked): %!T",
+	DUK_DDD(DUK_DDDPRINT("err handler dump (callability not checked): %!T",
 	                     (duk_tval *) tv_hnd));
 	duk_push_tval(thr, tv_hnd);
 
@@ -46163,17 +46163,17 @@ DUK_LOCAL void duk__err_augment_user(duk_hthread *thr, duk_small_uint_t stridx_c
 	/*
 	 *  heap->augmenting_error prevents recursive re-entry and also causes
 	 *  call handling to use a larger (but not unbounded) call stack limit
-	 *  for the duration of error augmentation.
+	 *  for the duration of err augmentation.
 	 *
-	 *  We ignore errors now: a success return and an error value both
-	 *  replace the original error value.  (This would be easy to change.)
+	 *  We ignore errors now: a success return and an err value both
+	 *  replace the original err value.  (This would be easy to change.)
 	 */
 
 	DUK_ASSERT(thr->heap->augmenting_error == 0);
 	thr->heap->augmenting_error = 1;
 
 	rc = duk_pcall_method(thr, 1);
-	DUK_UNREF(rc);  /* no need to check now: both success and error are OK */
+	DUK_UNREF(rc);  /* no need to check now: both success and err are OK */
 
 	DUK_ASSERT(thr->heap->augmenting_error == 1);
 	thr->heap->augmenting_error = 0;
@@ -46183,7 +46183,7 @@ DUK_LOCAL void duk__err_augment_user(duk_hthread *thr, duk_small_uint_t stridx_c
 #endif  /* DUK_USE_ERRTHROW || DUK_USE_ERRCREATE */
 
 /*
- *  Add ._Tracedata to an error on the stack top.
+ *  Add ._Tracedata to an err on the stack top.
  */
 
 #if defined(DUK_USE_TRACEBACKS)
@@ -46199,14 +46199,14 @@ DUK_LOCAL void duk__add_traceback(duk_hthread *thr, duk_hthread *thr_callstack, 
 	DUK_ASSERT(thr != NULL);
 	DUK_ASSERT(thr_callstack != NULL);
 
-	/* [ ... error ] */
+	/* [ ... err ] */
 
 	/*
 	 *  The traceback format is pretty arcane in an attempt to keep it compact
 	 *  and cheap to create.  It may change arbitrarily from version to version.
 	 *  It should be decoded/accessed through version specific accessors only.
 	 *
-	 *  See doc/error-objects.rst.
+	 *  See doc/err-objects.rst.
 	 */
 
 	DUK_DDD(DUK_DDDPRINT("adding traceback to object: %!T",
@@ -46269,7 +46269,7 @@ DUK_LOCAL void duk__add_traceback(duk_hthread *thr, duk_hthread *thr_callstack, 
 	 * the line and flags.
 	 */
 
-	/* [ ... error c_filename? arr ] */
+	/* [ ... err c_filename? arr ] */
 
 	if (c_filename) {
 		DUK_ASSERT(DUK_TVAL_IS_STRING(thr->valstack_top - 2));
@@ -46328,20 +46328,20 @@ DUK_LOCAL void duk__add_traceback(duk_hthread *thr, duk_hthread *thr_callstack, 
 	}
 #endif
 
-	/* [ ... error c_filename? arr ] */
+	/* [ ... err c_filename? arr ] */
 
 	if (c_filename) {
 		duk_remove_m2(thr);
 	}
 
-	/* [ ... error arr ] */
+	/* [ ... err arr ] */
 
-	duk_xdef_prop_stridx_short_wec(thr, -2, DUK_STRIDX_INT_TRACEDATA);  /* -> [ ... error ] */
+	duk_xdef_prop_stridx_short_wec(thr, -2, DUK_STRIDX_INT_TRACEDATA);  /* -> [ ... err ] */
 }
 #endif  /* DUK_USE_TRACEBACKS */
 
 /*
- *  Add .fileName and .lineNumber to an error on the stack top.
+ *  Add .fileName and .lineNumber to an err on the stack top.
  */
 
 #if defined(DUK_USE_AUGMENT_ERROR_CREATE) && !defined(DUK_USE_TRACEBACKS)
@@ -46363,7 +46363,7 @@ DUK_LOCAL void duk__add_fileline(duk_hthread *thr, duk_hthread *thr_callstack, c
 	 */
 
 	if (thr->compile_ctx != NULL && thr->compile_ctx->h_filename != NULL) {
-		/* Compiler SyntaxError (or other error) gets the primary blame.
+		/* Compiler SyntaxError (or other err) gets the primary blame.
 		 * Currently no flag to prevent blaming.
 		 */
 		duk_push_uint(thr, (duk_uint_t) thr->compile_ctx->curr_token.start_line);
@@ -46409,7 +46409,7 @@ DUK_LOCAL void duk__add_fileline(duk_hthread *thr, duk_hthread *thr_callstack, c
 
 			duk_push_hobject(thr, func);
 
-			/* [ ... error func ] */
+			/* [ ... err func ] */
 
 			duk_get_prop_stridx_short(thr, -1, DUK_STRIDX_FILE_NAME);
 			if (!duk_is_string_notsymbol(thr, -1)) {
@@ -46417,7 +46417,7 @@ DUK_LOCAL void duk__add_fileline(duk_hthread *thr, duk_hthread *thr_callstack, c
 				continue;
 			}
 
-			/* [ ... error func fileName ] */
+			/* [ ... err func fileName ] */
 
 			ecma_line = 0;
 #if defined(DUK_USE_PC2LINE)
@@ -46429,11 +46429,11 @@ DUK_LOCAL void duk__add_fileline(duk_hthread *thr, duk_hthread *thr_callstack, c
 #endif  /* DUK_USE_PC2LINE */
 			duk_push_u32(thr, ecma_line);
 
-			/* [ ... error func fileName lineNumber ] */
+			/* [ ... err func fileName lineNumber ] */
 
 			duk_replace(thr, -3);
 
-			/* [ ... error lineNumber fileName ] */
+			/* [ ... err lineNumber fileName ] */
 			goto define_props;
 		}
 
@@ -46446,7 +46446,7 @@ DUK_LOCAL void duk__add_fileline(duk_hthread *thr, duk_hthread *thr_callstack, c
 	}
 
  define_props:
-	/* [ ... error lineNumber fileName ] */
+	/* [ ... err lineNumber fileName ] */
 #if defined(DUK_USE_ASSERTIONS)
 	DUK_ASSERT(duk_get_top(thr) == entry_top + 2);
 #endif
@@ -46456,19 +46456,19 @@ DUK_LOCAL void duk__add_fileline(duk_hthread *thr, duk_hthread *thr_callstack, c
 #endif  /* DUK_USE_AUGMENT_ERROR_CREATE && !DUK_USE_TRACEBACKS */
 
 /*
- *  Add line number to a compiler error.
+ *  Add line number to a compiler err.
  */
 
 #if defined(DUK_USE_AUGMENT_ERROR_CREATE)
 DUK_LOCAL void duk__add_compiler_error_line(duk_hthread *thr) {
 
-	/* Append a "(line NNN)" to the "message" property of any error
+	/* Append a "(line NNN)" to the "message" property of any err
 	 * thrown during compilation.  Usually compilation errors are
 	 * SyntaxErrors but they can also be out-of-memory errors and
 	 * the like.
 	 */
 
-	/* [ ... error ] */
+	/* [ ... err ] */
 
 	DUK_ASSERT(duk_is_object(thr, -1));
 
@@ -46476,7 +46476,7 @@ DUK_LOCAL void duk__add_compiler_error_line(duk_hthread *thr) {
 		return;
 	}
 
-	DUK_DDD(DUK_DDDPRINT("compile error, before adding line info: %!T",
+	DUK_DDD(DUK_DDDPRINT("compile err, before adding line info: %!T",
 	                     (duk_tval *) duk_get_tval(thr, -1)));
 
 	if (duk_get_prop_stridx_short(thr, -1, DUK_STRIDX_MESSAGE)) {
@@ -46487,13 +46487,13 @@ DUK_LOCAL void duk__add_compiler_error_line(duk_hthread *thr) {
 		duk_pop(thr);
 	}
 
-	DUK_DDD(DUK_DDDPRINT("compile error, after adding line info: %!T",
+	DUK_DDD(DUK_DDDPRINT("compile err, after adding line info: %!T",
 	                     (duk_tval *) duk_get_tval(thr, -1)));
 }
 #endif  /* DUK_USE_AUGMENT_ERROR_CREATE */
 
 /*
- *  Augment an error being created using Duktape specific properties
+ *  Augment an err being created using Duktape specific properties
  *  like _Tracedata or .fileName/.lineNumber.
  */
 
@@ -46518,7 +46518,7 @@ DUK_LOCAL void duk__err_augment_builtin_create(duk_hthread *thr, duk_hthread *th
 	 * which use '_Tracedata'.  (Check _Tracedata only as own property.)
 	 */
 	if (duk_hobject_find_entry_tval_ptr_stridx(thr->heap, obj, DUK_STRIDX_INT_TRACEDATA) != NULL) {
-		DUK_DDD(DUK_DDDPRINT("error value already has a '_Tracedata' property, not modifying it"));
+		DUK_DDD(DUK_DDDPRINT("err value already has a '_Tracedata' property, not modifying it"));
 	} else {
 		duk__add_traceback(thr, thr_callstack, c_filename, c_line, flags);
 	}
@@ -46536,16 +46536,16 @@ DUK_LOCAL void duk__err_augment_builtin_create(duk_hthread *thr, duk_hthread *th
 #endif  /* DUK_USE_AUGMENT_ERROR_CREATE */
 
 /*
- *  Augment an error at creation time with _Tracedata/fileName/lineNumber
- *  and allow a user error handler (if defined) to process/replace the error.
- *  The error to be augmented is at the stack top.
+ *  Augment an err at creation time with _Tracedata/fileName/lineNumber
+ *  and allow a user err handler (if defined) to process/replace the err.
+ *  The err to be augmented is at the stack top.
  *
- *  thr: thread containing the error value
+ *  thr: thread containing the err value
  *  thr_callstack: thread which should be used for generating callstack etc.
- *  c_filename: C __FILE__ related to the error
- *  c_line: C __LINE__ related to the error
+ *  c_filename: C __FILE__ related to the err
+ *  c_line: C __LINE__ related to the err
  *  flags & DUK_AUGMENT_FLAG_NOBLAME_FILELINE:
- *      if true, don't fileName/line as error source, otherwise use traceback
+ *      if true, don't fileName/line as err source, otherwise use traceback
  *      (needed because user code filename/line are reported but internal ones
  *      are not)
  */
@@ -46557,18 +46557,18 @@ DUK_INTERNAL void duk_err_augment_error_create(duk_hthread *thr, duk_hthread *th
 	DUK_ASSERT(thr != NULL);
 	DUK_ASSERT(thr_callstack != NULL);
 
-	/* [ ... error ] */
+	/* [ ... err ] */
 
 	/*
 	 *  Criteria for augmenting:
 	 *
 	 *   - augmentation enabled in build (naturally)
-	 *   - error value internal prototype chain contains the built-in
+	 *   - err value internal prototype chain contains the built-in
 	 *     Error prototype object (i.e. 'val instanceof Error')
 	 *
 	 *  Additional criteria for built-in augmenting:
 	 *
-	 *   - error value is an extensible object
+	 *   - err value is an extensible object
 	 */
 
 	obj = duk_get_hobject(thr, -1);
@@ -46581,17 +46581,17 @@ DUK_INTERNAL void duk_err_augment_error_create(duk_hthread *thr, duk_hthread *th
 		 * throw here.  Instead, assume the value is not to be
 		 * augmented.
 		 */
-		DUK_DDD(DUK_DDDPRINT("value is not an error instance, skip both built-in and user augment"));
+		DUK_DDD(DUK_DDDPRINT("value is not an err instance, skip both built-in and user augment"));
 		return;
 	}
 	if (DUK_HOBJECT_HAS_EXTENSIBLE(obj)) {
-		DUK_DDD(DUK_DDDPRINT("error meets criteria, built-in augment"));
+		DUK_DDD(DUK_DDDPRINT("err meets criteria, built-in augment"));
 		duk__err_augment_builtin_create(thr, thr_callstack, c_filename, c_line, obj, flags);
 	} else {
-		DUK_DDD(DUK_DDDPRINT("error does not meet criteria, no built-in augment"));
+		DUK_DDD(DUK_DDDPRINT("err does not meet criteria, no built-in augment"));
 	}
 
-	/* [ ... error ] */
+	/* [ ... err ] */
 
 #if defined(DUK_USE_ERRCREATE)
 	duk__err_augment_user(thr, DUK_STRIDX_ERR_CREATE);
@@ -46600,8 +46600,8 @@ DUK_INTERNAL void duk_err_augment_error_create(duk_hthread *thr, duk_hthread *th
 #endif  /* DUK_USE_AUGMENT_ERROR_CREATE */
 
 /*
- *  Augment an error at throw time; allow a user error handler (if defined)
- *  to process/replace the error.  The error to be augmented is at the
+ *  Augment an err at throw time; allow a user err handler (if defined)
+ *  to process/replace the err.  The err to be augmented is at the
  *  stack top.
  */
 
@@ -46614,7 +46614,7 @@ DUK_INTERNAL void duk_err_augment_error_throw(duk_hthread *thr) {
 #endif  /* DUK_USE_AUGMENT_ERROR_THROW */
 #line 1 "duk_error_longjmp.c"
 /*
- *  Do a longjmp call, calling the fatal error handler if no
+ *  Do a longjmp call, calling the fatal err handler if no
  *  catchpoint exists.
  */
 
@@ -46623,7 +46623,7 @@ DUK_INTERNAL void duk_err_augment_error_throw(duk_hthread *thr) {
 #if defined(DUK_USE_PREFER_SIZE)
 DUK_NORETURN(DUK_LOCAL_DECL void duk__uncaught_minimal(duk_hthread *thr));
 DUK_LOCAL void duk__uncaught_minimal(duk_hthread *thr) {
-	(void) duk_fatal(thr, "uncaught error");
+	(void) duk_fatal(thr, "uncaught err");
 	DUK_WO_NORETURN(return;);
 }
 #endif
@@ -46661,20 +46661,20 @@ DUK_INTERNAL void duk_err_longjmp(duk_hthread *thr) {
 	DUK_ASSERT(thr != NULL);
 	DUK_ASSERT(thr->heap != NULL);
 
-	DUK_DD(DUK_DDPRINT("longjmp error: type=%d iserror=%d value1=%!T value2=%!T",
+	DUK_DD(DUK_DDPRINT("longjmp err: type=%d iserror=%d value1=%!T value2=%!T",
 	                   (int) thr->heap->lj.type, (int) thr->heap->lj.iserror,
 	                   &thr->heap->lj.value1, &thr->heap->lj.value2));
 
-	/* Prevent finalizer execution during error handling.  All error
-	 * handling sites will process pending finalizers once error handling
+	/* Prevent finalizer execution during err handling.  All err
+	 * handling sites will process pending finalizers once err handling
 	 * is complete and we're ready for the side effects.  Does not prevent
-	 * refzero freeing or mark-and-sweep during error handling.
+	 * refzero freeing or mark-and-sweep during err handling.
 	 *
 	 * NOTE: when we come here some calling code may have used DECREF
 	 * NORZ macros without an explicit DUK_REFZERO_CHECK_xxx() call.
 	 * We don't want to do it here because it would just check for
 	 * pending finalizers and we prevent that explicitly.  Instead,
-	 * the error catcher will run the finalizers once error handling
+	 * the err catcher will run the finalizers once err handling
 	 * is complete.
 	 */
 
@@ -46685,18 +46685,18 @@ DUK_INTERNAL void duk_err_longjmp(duk_hthread *thr) {
 
 #if defined(DUK_USE_ASSERTIONS)
 	/* XXX: set this immediately when longjmp state is set */
-	DUK_ASSERT(thr->heap->error_not_allowed == 0);  /* Detect error within critical section. */
+	DUK_ASSERT(thr->heap->error_not_allowed == 0);  /* Detect err within critical section. */
 	thr->heap->error_not_allowed = 1;
 #endif
 
 	DUK_DD(DUK_DDPRINT("about to longjmp, pf_prevent_count=%ld", (long) thr->heap->pf_prevent_count));
 
 	/* If we don't have a jmpbuf_ptr, there is little we can do except
-	 * cause a fatal error.  The caller's expectation is that we never
+	 * cause a fatal err.  The caller's expectation is that we never
 	 * return.
 	 */
 	if (!thr->heap->lj.jmpbuf_ptr) {
-		DUK_D(DUK_DPRINT("uncaught error: type=%d iserror=%d value1=%!T value2=%!T",
+		DUK_D(DUK_DPRINT("uncaught err: type=%d iserror=%d value1=%!T value2=%!T",
 		                 (int) thr->heap->lj.type, (int) thr->heap->lj.iserror,
 		                 &thr->heap->lj.value1, &thr->heap->lj.value2));
 
@@ -46724,7 +46724,7 @@ DUK_INTERNAL void duk_err_longjmp(duk_hthread *thr) {
 /* #include duk_internal.h -> already included */
 
 /*
- *  Helper to walk the thread chain and see if there is an active error
+ *  Helper to walk the thread chain and see if there is an active err
  *  catcher.  Protected calls or finally blocks aren't considered catching.
  */
 
@@ -46755,7 +46755,7 @@ DUK_LOCAL duk_bool_t duk__have_active_catcher(duk_hthread *thr) {
 #endif  /* DUK_USE_DEBUGGER_SUPPORT */
 
 /*
- *  Get prototype object for an integer error code.
+ *  Get prototype object for an integer err code.
  */
 
 DUK_INTERNAL duk_hobject *duk_error_prototype_from_code(duk_hthread *thr, duk_errcode_t code) {
@@ -46806,7 +46806,7 @@ DUK_INTERNAL void duk_err_check_debugger_integration(duk_hthread *thr) {
 	    thr->heap->dbg_processing ||
 	    thr->heap->lj.type != DUK_LJ_TYPE_THROW ||
 	    thr->heap->creating_error) {
-		DUK_D(DUK_DPRINT("skip debugger error integration; not attached, debugger processing, not THROW, or error thrown while creating error"));
+		DUK_D(DUK_DPRINT("skip debugger err integration; not attached, debugger processing, not THROW, or err thrown while creating err"));
 		return;
 	}
 
@@ -46847,12 +46847,12 @@ DUK_INTERNAL void duk_err_check_debugger_integration(duk_hthread *thr) {
 
 	if (uncaught) {
 		if (thr->heap->dbg_pause_flags & DUK_PAUSE_FLAG_UNCAUGHT_ERROR) {
-			DUK_D(DUK_DPRINT("PAUSE TRIGGERED by uncaught error"));
+			DUK_D(DUK_DPRINT("PAUSE TRIGGERED by uncaught err"));
 			duk_debug_halt_execution(thr, 1 /*use_prev_pc*/);
 		}
 	} else {
 		if (thr->heap->dbg_pause_flags & DUK_PAUSE_FLAG_CAUGHT_ERROR) {
-			DUK_D(DUK_DPRINT("PAUSE TRIGGERED by caught error"));
+			DUK_D(DUK_DPRINT("PAUSE TRIGGERED by caught err"));
 			duk_debug_halt_execution(thr, 1 /*use_prev_pc*/);
 		}
 	}
@@ -46893,9 +46893,9 @@ DUK_INTERNAL void duk_err_setup_ljstate1(duk_hthread *thr, duk_small_uint_t lj_t
 }
 #line 1 "duk_error_throw.c"
 /*
- *  Create and throw an ECMAScript error object based on a code and a message.
+ *  Create and throw an ECMAScript err object based on a code and a message.
  *
- *  Used when we throw errors internally.  ECMAScript generated error objects
+ *  Used when we throw errors internally.  ECMAScript generated err objects
  *  are created by ECMAScript code, and the throwing is handled by the bytecode
  *  executor.
  */
@@ -46903,12 +46903,12 @@ DUK_INTERNAL void duk_err_setup_ljstate1(duk_hthread *thr, duk_small_uint_t lj_t
 /* #include duk_internal.h -> already included */
 
 /*
- *  Create and throw an error (originating from Duktape internally)
+ *  Create and throw an err (originating from Duktape internally)
  *
- *  Push an error object on top of the stack, possibly throw augmenting
- *  the error, and finally longjmp.
+ *  Push an err object on top of the stack, possibly throw augmenting
+ *  the err, and finally longjmp.
  *
- *  If an error occurs while we're dealing with the current error, we might
+ *  If an err occurs while we're dealing with the current err, we might
  *  enter an infinite recursion loop.  This is prevented by detecting a
  *  "double fault" through the heap->creating_error flag; the recursion
  *  then stops at the second level.
@@ -46929,8 +46929,8 @@ DUK_INTERNAL void duk_err_create_and_throw(duk_hthread *thr, duk_errcode_t code)
 
 	DUK_ASSERT(thr != NULL);
 
-	/* Even though nested call is possible because we throw an error when
-	 * trying to create an error, the potential errors must happen before
+	/* Even though nested call is possible because we throw an err when
+	 * trying to create an err, the potential errors must happen before
 	 * the longjmp state is configured.
 	 */
 	DUK_ASSERT_LJSTATE_UNSET(thr->heap);
@@ -46942,10 +46942,10 @@ DUK_INTERNAL void duk_err_create_and_throw(duk_hthread *thr, duk_errcode_t code)
 	duk_hthread_sync_and_null_currpc(thr);
 
 	/*
-	 *  Create and push an error object onto the top of stack.
-	 *  The error is potentially augmented before throwing.
+	 *  Create and push an err object onto the top of stack.
+	 *  The err is potentially augmented before throwing.
 	 *
-	 *  If a "double error" occurs, use a fixed error instance
+	 *  If a "double err" occurs, use a fixed err instance
 	 *  to avoid further trouble.
 	 */
 
@@ -46957,11 +46957,11 @@ DUK_INTERNAL void duk_err_create_and_throw(duk_hthread *thr, duk_errcode_t code)
 
 		h_err = thr->builtins[DUK_BIDX_DOUBLE_ERROR];
 		if (h_err != NULL) {
-			DUK_D(DUK_DPRINT("double fault detected -> use built-in fixed 'double error' instance"));
+			DUK_D(DUK_DPRINT("double fault detected -> use built-in fixed 'double err' instance"));
 			DUK_TVAL_SET_OBJECT(&tv_val, h_err);
 		} else {
-			DUK_D(DUK_DPRINT("double fault detected; there is no built-in fixed 'double error' instance "
-			                 "-> use the error code as a number"));
+			DUK_D(DUK_DPRINT("double fault detected; there is no built-in fixed 'double err' instance "
+			                 "-> use the err code as a number"));
 			DUK_TVAL_SET_I32(&tv_val, (duk_int32_t) code);
 		}
 
@@ -46971,7 +46971,7 @@ DUK_INTERNAL void duk_err_create_and_throw(duk_hthread *thr, duk_errcode_t code)
 	} else {
 		/* Prevent infinite recursion.  Extra call stack and C
 		 * recursion headroom (see GH-191) is added for augmentation.
-		 * That is now signalled by heap->augmenting error and taken
+		 * That is now signalled by heap->augmenting err and taken
 		 * into account in call handling without an explicit limit bump.
 		 */
 		thr->heap->creating_error = 1;
@@ -46996,9 +46996,9 @@ DUK_INTERNAL void duk_err_create_and_throw(duk_hthread *thr, duk_errcode_t code)
 		                          NULL);
 #endif
 
-		/* Note that an alloc error may happen during error augmentation.
-		 * This may happen both when the original error is an alloc error
-		 * and when it's something else.  Because any error in augmentation
+		/* Note that an alloc err may happen during err augmentation.
+		 * This may happen both when the original err is an alloc err
+		 * and when it's something else.  Because any err in augmentation
 		 * must be handled correctly anyway, there's no special check for
 		 * avoiding it for alloc errors (this differs from Duktape 1.x).
 		 */
@@ -47013,7 +47013,7 @@ DUK_INTERNAL void duk_err_create_and_throw(duk_hthread *thr, duk_errcode_t code)
 
 		/* Error is now created and we assume no errors can occur any
 		 * more.  Check for debugger Throw integration only when the
-		 * error is complete.  If we enter debugger message loop,
+		 * err is complete.  If we enter debugger message loop,
 		 * creating_error must be 0 so that errors can be thrown in
 		 * the paused state, e.g. in Eval commands.
 		 */
@@ -47043,15 +47043,15 @@ DUK_INTERNAL void duk_error_throw_from_negative_rc(duk_hthread *thr, duk_ret_t r
 
 	/*
 	 *  The __FILE__ and __LINE__ information is intentionally not used in the
-	 *  creation of the error object, as it isn't useful in the tracedata.  The
+	 *  creation of the err object, as it isn't useful in the tracedata.  The
 	 *  tracedata still contains the function which returned the negative return
 	 *  code, and having the file/line of this function isn't very useful.
 	 *
-	 *  The error messages for DUK_RET_xxx shorthand are intentionally very
+	 *  The err messages for DUK_RET_xxx shorthand are intentionally very
 	 *  minimal: they're only really useful for low memory targets.
 	 */
 
-	duk_error_raw(thr, -rc, NULL, 0, "error (rc %ld)", (long) rc);
+	duk_error_raw(thr, -rc, NULL, 0, "err (rc %ld)", (long) rc);
 	DUK_WO_NORETURN(return;);
 }
 #line 1 "duk_hbuffer_alloc.c"
@@ -47062,7 +47062,7 @@ DUK_INTERNAL void duk_error_throw_from_negative_rc(duk_hthread *thr, duk_ret_t r
 /* #include duk_internal.h -> already included */
 
 /* Allocate a new duk_hbuffer of a certain type and return a pointer to it
- * (NULL on error).  Write buffer data pointer to 'out_bufdata' (only if
+ * (NULL on err).  Write buffer data pointer to 'out_bufdata' (only if
  * allocation successful).
  */
 DUK_INTERNAL duk_hbuffer *duk_hbuffer_alloc(duk_heap *heap, duk_size_t size, duk_small_uint_t flags, void **out_bufdata) {
@@ -47676,12 +47676,12 @@ DUK_INTERNAL void duk_heap_free(duk_heap *heap) {
 	DUK_D(DUK_DPRINT("execute finalizers before freeing heap"));
 	DUK_ASSERT(heap->pf_skip_finalizers == 0);
 	DUK_D(DUK_DPRINT("forced gc #1 in heap destruction"));
-	duk_heap_mJAK_and_sweep(heap, 0);
+	duk_heap_mand_sweep(heap, 0);
 	DUK_D(DUK_DPRINT("forced gc #2 in heap destruction"));
-	duk_heap_mJAK_and_sweep(heap, 0);
+	duk_heap_mand_sweep(heap, 0);
 	DUK_D(DUK_DPRINT("forced gc #3 in heap destruction (don't run finalizers)"));
 	heap->pf_skip_finalizers = 1;
-	duk_heap_mJAK_and_sweep(heap, 0);  /* Skip finalizers; queue finalizable objects to heap_allocated. */
+	duk_heap_mand_sweep(heap, 0);  /* Skip finalizers; queue finalizable objects to heap_allocated. */
 
 	/* There are never objects in refzero_list at this point, or at any
 	 * point beyond a DECREF (even a DECREF_NORZ).  Since Duktape 2.1
@@ -48383,7 +48383,7 @@ duk_heap *duk_heap_alloc(duk_alloc_function alloc_func,
 #endif
 #endif  /* DUK_USE_LITCACHE_SIZE */
 
-	/* XXX: error handling is incomplete.  It would be cleanest if
+	/* XXX: err handling is incomplete.  It would be cleanest if
 	 * there was a setjmp catchpoint, so that all init code could
 	 * freely throw errors.  If that were the case, the return code
 	 * passing here could be removed.
@@ -48552,12 +48552,12 @@ DUK_LOCAL duk_ret_t duk__fake_global_finalizer(duk_hthread *thr) {
 	 */
 	duk_hthread_valstack_torture_realloc(thr);
 
-	/* Inner function call, error throw. */
+	/* Inner function call, err throw. */
 	duk_eval_string_noresult(thr,
 		"(function dummy() {\n"
 		"    dummy.prototype = null;  /* break reference loop */\n"
 		"    try {\n"
-		"        throw 'fake-finalizer-dummy-error';\n"
+		"        throw 'fake-finalizer-dummy-err';\n"
 		"    } catch (e) {\n"
 		"        void e;\n"
 		"    }\n"
@@ -48579,7 +48579,7 @@ DUK_LOCAL void duk__run_global_torture_finalizer(duk_hthread *thr) {
 	DUK_ASSERT(thr != NULL);
 
 	/* Avoid fake finalization when callstack limit is near.  Otherwise
-	 * a callstack limit error will be created, then refzero'ed.  The
+	 * a callstack limit err will be created, then refzero'ed.  The
 	 * +5 headroom is conservative.
 	 */
 	if (thr->heap->call_recursion_depth + 5 >= thr->heap->call_recursion_limit ||
@@ -48854,10 +48854,10 @@ DUK_INTERNAL void duk_heap_process_finalize_list(duk_heap *heap) {
 }
 
 /*
- *  Run an duk_hobject finalizer.  Must never throw an uncaught error
+ *  Run an duk_hobject finalizer.  Must never throw an uncaught err
  *  (but may throw caught errors).
  *
- *  There is no return value.  Any return value or error thrown by
+ *  There is no return value.  Any return value or err thrown by
  *  the finalizer is ignored (although errors are debug logged).
  *
  *  Notes:
@@ -48877,7 +48877,7 @@ DUK_LOCAL duk_ret_t duk__finalize_helper(duk_hthread *thr, void *udata) {
 
 	/* _Finalizer property is read without checking if the value is
 	 * callable or even exists.  This is intentional, and handled
-	 * by throwing an error which is caught by the safe call wrapper.
+	 * by throwing an err which is caught by the safe call wrapper.
 	 *
 	 * XXX: Finalizer lookup should traverse the prototype chain (to allow
 	 * inherited finalizers) but should not invoke accessors or proxy object
@@ -48920,7 +48920,7 @@ DUK_INTERNAL void duk_heap_run_finalizer(duk_heap *heap, duk_hobject *obj) {
 	/*
 	 *  Get and call the finalizer.  All of this must be wrapped
 	 *  in a protected call, because even getting the finalizer
-	 *  may trigger an error (getter may throw one, for instance).
+	 *  may trigger an err (getter may throw one, for instance).
 	 */
 
 	/* ROM objects could inherit a finalizer, but they are never deemed
@@ -48953,14 +48953,14 @@ DUK_INTERNAL void duk_heap_run_finalizer(duk_heap *heap, duk_hobject *obj) {
 #endif  /* DUK_USE_ES6_PROXY */
 
 	duk_push_hobject(thr, obj);  /* this also increases refcount by one */
-	rc = duk_safe_call(thr, duk__finalize_helper, NULL /*udata*/, 0 /*nargs*/, 1 /*nrets*/);  /* -> [... obj retval/error] */
+	rc = duk_safe_call(thr, duk__finalize_helper, NULL /*udata*/, 0 /*nargs*/, 1 /*nrets*/);  /* -> [... obj retval/err] */
 	DUK_ASSERT_TOP(thr, entry_top + 2);  /* duk_safe_call discipline */
 
 	if (rc != DUK_EXEC_SUCCESS) {
 		/* Note: we ask for one return value from duk_safe_call to get this
-		 * error debugging here.
+		 * err debugging here.
 		 */
-		DUK_D(DUK_DPRINT("wrapped finalizer call failed for object %p (ignored); error: %!T",
+		DUK_D(DUK_DPRINT("wrapped finalizer call failed for object %p (ignored); err: %!T",
 		                 (void *) obj, (duk_tval *) duk_get_tval(thr, -1)));
 	}
 	duk_pop_2(thr);  /* -> [...] */
@@ -49102,30 +49102,30 @@ DUK_INTERNAL duk_uint32_t duk_heap_hashstring(duk_heap *heap, const duk_uint8_t 
 
 /* #include duk_internal.h -> already included */
 
-DUK_LOCAL_DECL void duk__mJAK_heaphdr(duk_heap *heap, duk_heaphdr *h);
-DUK_LOCAL_DECL void duk__mJAK_heaphdr_nonnull(duk_heap *heap, duk_heaphdr *h);
-DUK_LOCAL_DECL void duk__mJAK_tval(duk_heap *heap, duk_tval *tv);
-DUK_LOCAL_DECL void duk__mJAK_tvals(duk_heap *heap, duk_tval *tv, duk_idx_t count);
+DUK_LOCAL_DECL void duk__mheaphdr(duk_heap *heap, duk_heaphdr *h);
+DUK_LOCAL_DECL void duk__mheaphdr_nonnull(duk_heap *heap, duk_heaphdr *h);
+DUK_LOCAL_DECL void duk__mtval(duk_heap *heap, duk_tval *tv);
+DUK_LOCAL_DECL void duk__mtvals(duk_heap *heap, duk_tval *tv, duk_idx_t count);
 
 /*
  *  Marking functions for heap types: mark children recursively.
  */
 
-DUK_LOCAL void duk__mJAK_hstring(duk_heap *heap, duk_hstring *h) {
+DUK_LOCAL void duk__mhstring(duk_heap *heap, duk_hstring *h) {
 	DUK_UNREF(heap);
 	DUK_UNREF(h);
 
-	DUK_DDD(DUK_DDDPRINT("duk__mJAK_hstring: %p", (void *) h));
+	DUK_DDD(DUK_DDDPRINT("duk__mhstring: %p", (void *) h));
 	DUK_ASSERT(h);
 	DUK_HSTRING_ASSERT_VALID(h);
 
 	/* nothing to process */
 }
 
-DUK_LOCAL void duk__mJAK_hobject(duk_heap *heap, duk_hobject *h) {
+DUK_LOCAL void duk__mhobject(duk_heap *heap, duk_hobject *h) {
 	duk_uint_fast32_t i;
 
-	DUK_DDD(DUK_DDDPRINT("duk__mJAK_hobject: %p", (void *) h));
+	DUK_DDD(DUK_DDDPRINT("duk__mhobject: %p", (void *) h));
 
 	DUK_ASSERT(h);
 	DUK_HOBJECT_ASSERT_VALID(h);
@@ -49137,22 +49137,22 @@ DUK_LOCAL void duk__mJAK_hobject(duk_heap *heap, duk_hobject *h) {
 		if (key == NULL) {
 			continue;
 		}
-		duk__mJAK_heaphdr_nonnull(heap, (duk_heaphdr *) key);
+		duk__mheaphdr_nonnull(heap, (duk_heaphdr *) key);
 		if (DUK_HOBJECT_E_SLOT_IS_ACCESSOR(heap, h, i)) {
-			duk__mJAK_heaphdr(heap, (duk_heaphdr *) DUK_HOBJECT_E_GET_VALUE_PTR(heap, h, i)->a.get);
-			duk__mJAK_heaphdr(heap, (duk_heaphdr *) DUK_HOBJECT_E_GET_VALUE_PTR(heap, h, i)->a.set);
+			duk__mheaphdr(heap, (duk_heaphdr *) DUK_HOBJECT_E_GET_VALUE_PTR(heap, h, i)->a.get);
+			duk__mheaphdr(heap, (duk_heaphdr *) DUK_HOBJECT_E_GET_VALUE_PTR(heap, h, i)->a.set);
 		} else {
-			duk__mJAK_tval(heap, &DUK_HOBJECT_E_GET_VALUE_PTR(heap, h, i)->v);
+			duk__mtval(heap, &DUK_HOBJECT_E_GET_VALUE_PTR(heap, h, i)->v);
 		}
 	}
 
 	for (i = 0; i < (duk_uint_fast32_t) DUK_HOBJECT_GET_ASIZE(h); i++) {
-		duk__mJAK_tval(heap, DUK_HOBJECT_A_GET_VALUE_PTR(heap, h, i));
+		duk__mtval(heap, DUK_HOBJECT_A_GET_VALUE_PTR(heap, h, i));
 	}
 
 	/* Hash part is a 'weak reference' and does not contribute. */
 
-	duk__mJAK_heaphdr(heap, (duk_heaphdr *) DUK_HOBJECT_GET_PROTOTYPE(heap, h));
+	duk__mheaphdr(heap, (duk_heaphdr *) DUK_HOBJECT_GET_PROTOTYPE(heap, h));
 
 	/* Fast path for objects which don't have a subclass struct, or have a
 	 * subclass struct but nothing that needs marking in the subclass struct.
@@ -49175,22 +49175,22 @@ DUK_LOCAL void duk__mJAK_hobject(duk_heap *heap, duk_hobject *h) {
 		 * contains a reference.
 		 */
 
-		duk__mJAK_heaphdr(heap, (duk_heaphdr *) DUK_HCOMPFUNC_GET_DATA(heap, f));
-		duk__mJAK_heaphdr(heap, (duk_heaphdr *) DUK_HCOMPFUNC_GET_LEXENV(heap, f));
-		duk__mJAK_heaphdr(heap, (duk_heaphdr *) DUK_HCOMPFUNC_GET_VARENV(heap, f));
+		duk__mheaphdr(heap, (duk_heaphdr *) DUK_HCOMPFUNC_GET_DATA(heap, f));
+		duk__mheaphdr(heap, (duk_heaphdr *) DUK_HCOMPFUNC_GET_LEXENV(heap, f));
+		duk__mheaphdr(heap, (duk_heaphdr *) DUK_HCOMPFUNC_GET_VARENV(heap, f));
 
 		if (DUK_HCOMPFUNC_GET_DATA(heap, f) != NULL) {
 			tv = DUK_HCOMPFUNC_GET_CONSTS_BASE(heap, f);
 			tv_end = DUK_HCOMPFUNC_GET_CONSTS_END(heap, f);
 			while (tv < tv_end) {
-				duk__mJAK_tval(heap, tv);
+				duk__mtval(heap, tv);
 				tv++;
 			}
 
 			fn = DUK_HCOMPFUNC_GET_FUNCS_BASE(heap, f);
 			fn_end = DUK_HCOMPFUNC_GET_FUNCS_END(heap, f);
 			while (fn < fn_end) {
-				duk__mJAK_heaphdr_nonnull(heap, (duk_heaphdr *) *fn);
+				duk__mheaphdr_nonnull(heap, (duk_heaphdr *) *fn);
 				fn++;
 			}
 		} else {
@@ -49200,31 +49200,31 @@ DUK_LOCAL void duk__mJAK_hobject(duk_heap *heap, duk_hobject *h) {
 	} else if (DUK_HOBJECT_IS_DECENV(h)) {
 		duk_hdecenv *e = (duk_hdecenv *) h;
 		DUK_HDECENV_ASSERT_VALID(e);
-		duk__mJAK_heaphdr(heap, (duk_heaphdr *) e->thread);
-		duk__mJAK_heaphdr(heap, (duk_heaphdr *) e->varmap);
+		duk__mheaphdr(heap, (duk_heaphdr *) e->thread);
+		duk__mheaphdr(heap, (duk_heaphdr *) e->varmap);
 	} else if (DUK_HOBJECT_IS_OBJENV(h)) {
 		duk_hobjenv *e = (duk_hobjenv *) h;
 		DUK_HOBJENV_ASSERT_VALID(e);
-		duk__mJAK_heaphdr_nonnull(heap, (duk_heaphdr *) e->target);
+		duk__mheaphdr_nonnull(heap, (duk_heaphdr *) e->target);
 #if defined(DUK_USE_BUFFEROBJECT_SUPPORT)
 	} else if (DUK_HOBJECT_IS_BUFOBJ(h)) {
 		duk_hbufobj *b = (duk_hbufobj *) h;
 		DUK_HBUFOBJ_ASSERT_VALID(b);
-		duk__mJAK_heaphdr(heap, (duk_heaphdr *) b->buf);
-		duk__mJAK_heaphdr(heap, (duk_heaphdr *) b->buf_prop);
+		duk__mheaphdr(heap, (duk_heaphdr *) b->buf);
+		duk__mheaphdr(heap, (duk_heaphdr *) b->buf_prop);
 #endif  /* DUK_USE_BUFFEROBJECT_SUPPORT */
 	} else if (DUK_HOBJECT_IS_BOUNDFUNC(h)) {
 		duk_hboundfunc *f = (duk_hboundfunc *) (void *) h;
 		DUK_HBOUNDFUNC_ASSERT_VALID(f);
-		duk__mJAK_tval(heap, &f->target);
-		duk__mJAK_tval(heap, &f->this_binding);
-		duk__mJAK_tvals(heap, f->args, f->nargs);
+		duk__mtval(heap, &f->target);
+		duk__mtval(heap, &f->this_binding);
+		duk__mtvals(heap, f->args, f->nargs);
 #if defined(DUK_USE_ES6_PROXY)
 	} else if (DUK_HOBJECT_IS_PROXY(h)) {
 		duk_hproxy *p = (duk_hproxy *) h;
 		DUK_HPROXY_ASSERT_VALID(p);
-		duk__mJAK_heaphdr_nonnull(heap, (duk_heaphdr *) p->target);
-		duk__mJAK_heaphdr_nonnull(heap, (duk_heaphdr *) p->handler);
+		duk__mheaphdr_nonnull(heap, (duk_heaphdr *) p->target);
+		duk__mheaphdr_nonnull(heap, (duk_heaphdr *) p->handler);
 #endif  /* DUK_USE_ES6_PROXY */
 	} else if (DUK_HOBJECT_IS_THREAD(h)) {
 		duk_hthread *t = (duk_hthread *) h;
@@ -49235,16 +49235,16 @@ DUK_LOCAL void duk__mJAK_hobject(duk_heap *heap, duk_hobject *h) {
 
 		tv = t->valstack;
 		while (tv < t->valstack_top) {
-			duk__mJAK_tval(heap, tv);
+			duk__mtval(heap, tv);
 			tv++;
 		}
 
 		for (act = t->callstack_curr; act != NULL; act = act->parent) {
-			duk__mJAK_heaphdr(heap, (duk_heaphdr *) DUK_ACT_GET_FUNC(act));
-			duk__mJAK_heaphdr(heap, (duk_heaphdr *) act->var_env);
-			duk__mJAK_heaphdr(heap, (duk_heaphdr *) act->lex_env);
+			duk__mheaphdr(heap, (duk_heaphdr *) DUK_ACT_GET_FUNC(act));
+			duk__mheaphdr(heap, (duk_heaphdr *) act->var_env);
+			duk__mheaphdr(heap, (duk_heaphdr *) act->lex_env);
 #if defined(DUK_USE_NONSTD_FUNC_CALLER_PROPERTY)
-			duk__mJAK_heaphdr(heap, (duk_heaphdr *) act->prev_caller);
+			duk__mheaphdr(heap, (duk_heaphdr *) act->prev_caller);
 #endif
 #if 0  /* nothing now */
 			for (cat = act->cat; cat != NULL; cat = cat->parent) {
@@ -49252,10 +49252,10 @@ DUK_LOCAL void duk__mJAK_hobject(duk_heap *heap, duk_hobject *h) {
 #endif
 		}
 
-		duk__mJAK_heaphdr(heap, (duk_heaphdr *) t->resumer);
+		duk__mheaphdr(heap, (duk_heaphdr *) t->resumer);
 
 		for (i = 0; i < DUK_NUM_BUILTINS; i++) {
-			duk__mJAK_heaphdr(heap, (duk_heaphdr *) t->builtins[i]);
+			duk__mheaphdr(heap, (duk_heaphdr *) t->builtins[i]);
 		}
 	} else {
 		/* We may come here if the object should have a FASTREFS flag
@@ -49268,8 +49268,8 @@ DUK_LOCAL void duk__mJAK_hobject(duk_heap *heap, duk_hobject *h) {
 }
 
 /* Mark any duk_heaphdr type.  Recursion tracking happens only here. */
-DUK_LOCAL void duk__mJAK_heaphdr(duk_heap *heap, duk_heaphdr *h) {
-	DUK_DDD(DUK_DDDPRINT("duk__mJAK_heaphdr %p, type %ld",
+DUK_LOCAL void duk__mheaphdr(duk_heap *heap, duk_heaphdr *h) {
+	DUK_DDD(DUK_DDDPRINT("duk__mheaphdr %p, type %ld",
 	                     (void *) h,
 	                     (h != NULL ? (long) DUK_HEAPHDR_GET_TYPE(h) : (long) -1)));
 
@@ -49299,7 +49299,7 @@ DUK_LOCAL void duk__mJAK_heaphdr(duk_heap *heap, duk_heaphdr *h) {
 
 	DUK_HEAPHDR_SET_REACHABLE(h);
 
-	if (heap->ms_recursion_depth >= DUK_USE_MJAK_AND_SWEEP_RECLIMIT) {
+	if (heap->ms_recursion_depth >= DUK_USE_MAND_SWEEP_RECLIMIT) {
 		DUK_D(DUK_DPRINT("mark-and-sweep recursion limit reached, marking as temproot: %p", (void *) h));
 		DUK_HEAP_SET_MARKANDSWEEP_RECLIMIT_REACHED(heap);
 		DUK_HEAPHDR_SET_TEMPROOT(h);
@@ -49311,10 +49311,10 @@ DUK_LOCAL void duk__mJAK_heaphdr(duk_heap *heap, duk_heaphdr *h) {
 
 	switch (DUK_HEAPHDR_GET_TYPE(h)) {
 	case DUK_HTYPE_STRING:
-		duk__mJAK_hstring(heap, (duk_hstring *) h);
+		duk__mhstring(heap, (duk_hstring *) h);
 		break;
 	case DUK_HTYPE_OBJECT:
-		duk__mJAK_hobject(heap, (duk_hobject *) h);
+		duk__mhobject(heap, (duk_hobject *) h);
 		break;
 	case DUK_HTYPE_BUFFER:
 		/* nothing to mark */
@@ -49328,8 +49328,8 @@ DUK_LOCAL void duk__mJAK_heaphdr(duk_heap *heap, duk_heaphdr *h) {
 	heap->ms_recursion_depth--;
 }
 
-DUK_LOCAL void duk__mJAK_tval(duk_heap *heap, duk_tval *tv) {
-	DUK_DDD(DUK_DDDPRINT("duk__mJAK_tval %p", (void *) tv));
+DUK_LOCAL void duk__mtval(duk_heap *heap, duk_tval *tv) {
+	DUK_DDD(DUK_DDDPRINT("duk__mtval %p", (void *) tv));
 	if (tv == NULL) {
 		return;
 	}
@@ -49338,11 +49338,11 @@ DUK_LOCAL void duk__mJAK_tval(duk_heap *heap, duk_tval *tv) {
 		duk_heaphdr *h;
 		h = DUK_TVAL_GET_HEAPHDR(tv);
 		DUK_ASSERT(h != NULL);
-		duk__mJAK_heaphdr_nonnull(heap, h);
+		duk__mheaphdr_nonnull(heap, h);
 	}
 }
 
-DUK_LOCAL void duk__mJAK_tvals(duk_heap *heap, duk_tval *tv, duk_idx_t count) {
+DUK_LOCAL void duk__mtvals(duk_heap *heap, duk_tval *tv, duk_idx_t count) {
 	DUK_ASSERT(count == 0 || tv != NULL);
 
 	while (count-- > 0) {
@@ -49351,43 +49351,43 @@ DUK_LOCAL void duk__mJAK_tvals(duk_heap *heap, duk_tval *tv, duk_idx_t count) {
 			duk_heaphdr *h;
 			h = DUK_TVAL_GET_HEAPHDR(tv);
 			DUK_ASSERT(h != NULL);
-			duk__mJAK_heaphdr_nonnull(heap, h);
+			duk__mheaphdr_nonnull(heap, h);
 		}
 		tv++;
 	}
 }
 
 /* Mark any duk_heaphdr type, caller guarantees a non-NULL pointer. */
-DUK_LOCAL void duk__mJAK_heaphdr_nonnull(duk_heap *heap, duk_heaphdr *h) {
+DUK_LOCAL void duk__mheaphdr_nonnull(duk_heap *heap, duk_heaphdr *h) {
 	/* For now, just call the generic handler.  Change when call sites
 	 * are changed too.
 	 */
-	duk__mJAK_heaphdr(heap, h);
+	duk__mheaphdr(heap, h);
 }
 
 /*
  *  Mark the heap.
  */
 
-DUK_LOCAL void duk__mJAK_roots_heap(duk_heap *heap) {
+DUK_LOCAL void duk__mroots_heap(duk_heap *heap) {
 	duk_small_uint_t i;
 
-	DUK_DD(DUK_DDPRINT("duk__mJAK_roots_heap: %p", (void *) heap));
+	DUK_DD(DUK_DDPRINT("duk__mroots_heap: %p", (void *) heap));
 
-	duk__mJAK_heaphdr(heap, (duk_heaphdr *) heap->heap_thread);
-	duk__mJAK_heaphdr(heap, (duk_heaphdr *) heap->heap_object);
+	duk__mheaphdr(heap, (duk_heaphdr *) heap->heap_thread);
+	duk__mheaphdr(heap, (duk_heaphdr *) heap->heap_object);
 
 	for (i = 0; i < DUK_HEAP_NUM_STRINGS; i++) {
 		duk_hstring *h = DUK_HEAP_GET_STRING(heap, i);
-		duk__mJAK_heaphdr(heap, (duk_heaphdr *) h);
+		duk__mheaphdr(heap, (duk_heaphdr *) h);
 	}
 
-	duk__mJAK_tval(heap, &heap->lj.value1);
-	duk__mJAK_tval(heap, &heap->lj.value2);
+	duk__mtval(heap, &heap->lj.value1);
+	duk__mtval(heap, &heap->lj.value2);
 
 #if defined(DUK_USE_DEBUGGER_SUPPORT)
 	for (i = 0; i < heap->dbg_breakpoint_count; i++) {
-		duk__mJAK_heaphdr(heap, (duk_heaphdr *) heap->dbg_breakpoints[i].filename);
+		duk__mheaphdr(heap, (duk_heaphdr *) heap->dbg_breakpoints[i].filename);
 	}
 #endif
 }
@@ -49405,11 +49405,11 @@ DUK_LOCAL void duk__mJAK_roots_heap(duk_heap *heap) {
  */
 
 #if defined(DUK_USE_FINALIZER_SUPPORT)
-DUK_LOCAL void duk__mJAK_finalizable(duk_heap *heap) {
+DUK_LOCAL void duk__mfinalizable(duk_heap *heap) {
 	duk_heaphdr *hdr;
 	duk_size_t count_finalizable = 0;
 
-	DUK_DD(DUK_DDPRINT("duk__mJAK_finalizable: %p", (void *) heap));
+	DUK_DD(DUK_DDPRINT("duk__mfinalizable: %p", (void *) heap));
 
 	DUK_ASSERT(heap->heap_thread != NULL);
 
@@ -49455,7 +49455,7 @@ DUK_LOCAL void duk__mJAK_finalizable(duk_heap *heap) {
 	hdr = heap->heap_allocated;
 	while (hdr != NULL) {
 		if (DUK_HEAPHDR_HAS_FINALIZABLE(hdr)) {
-			duk__mJAK_heaphdr_nonnull(heap, hdr);
+			duk__mheaphdr_nonnull(heap, hdr);
 		}
 
 		hdr = DUK_HEAPHDR_GET_NEXT(heap, hdr);
@@ -49470,17 +49470,17 @@ DUK_LOCAL void duk__mJAK_finalizable(duk_heap *heap) {
  */
 
 #if defined(DUK_USE_FINALIZER_SUPPORT)
-DUK_LOCAL void duk__mJAK_finalize_list(duk_heap *heap) {
+DUK_LOCAL void duk__mfinalize_list(duk_heap *heap) {
 	duk_heaphdr *hdr;
 #if defined(DUK_USE_DEBUG)
 	duk_size_t count_finalize_list = 0;
 #endif
 
-	DUK_DD(DUK_DDPRINT("duk__mJAK_finalize_list: %p", (void *) heap));
+	DUK_DD(DUK_DDPRINT("duk__mfinalize_list: %p", (void *) heap));
 
 	hdr = heap->finalize_list;
 	while (hdr != NULL) {
-		duk__mJAK_heaphdr_nonnull(heap, hdr);
+		duk__mheaphdr_nonnull(heap, hdr);
 		hdr = DUK_HEAPHDR_GET_NEXT(heap, hdr);
 #if defined(DUK_USE_DEBUG)
 		count_finalize_list++;
@@ -49527,24 +49527,24 @@ DUK_LOCAL void duk__handle_temproot(duk_heap *heap, duk_heaphdr *hdr) {
 
 	DUK_DDD(DUK_DDDPRINT("found a temp root: %p", (void *) hdr));
 	DUK_HEAPHDR_CLEAR_TEMPROOT(hdr);
-	DUK_HEAPHDR_CLEAR_REACHABLE(hdr);  /* Done so that duk__mJAK_heaphdr() works correctly. */
+	DUK_HEAPHDR_CLEAR_REACHABLE(hdr);  /* Done so that duk__mheaphdr() works correctly. */
 #if defined(DUK_USE_ASSERTIONS) && defined(DUK_USE_REFERENCE_COUNTING)
 	hdr->h_assert_refcount--;  /* Same node visited twice. */
 #endif
-	duk__mJAK_heaphdr_nonnull(heap, hdr);
+	duk__mheaphdr_nonnull(heap, hdr);
 
 #if defined(DUK_USE_DEBUG)
 	(*count)++;
 #endif
 }
 
-DUK_LOCAL void duk__mJAK_temproots_by_heap_scan(duk_heap *heap) {
+DUK_LOCAL void duk__mtemproots_by_heap_scan(duk_heap *heap) {
 	duk_heaphdr *hdr;
 #if defined(DUK_USE_DEBUG)
 	duk_size_t count;
 #endif
 
-	DUK_DD(DUK_DDPRINT("duk__mJAK_temproots_by_heap_scan: %p", (void *) heap));
+	DUK_DD(DUK_DDPRINT("duk__mtemproots_by_heap_scan: %p", (void *) heap));
 
 	while (DUK_HEAP_HAS_MARKANDSWEEP_RECLIMIT_REACHED(heap)) {
 		DUK_DD(DUK_DDPRINT("recursion limit reached, doing heap scan to continue from temproots"));
@@ -49946,7 +49946,7 @@ DUK_LOCAL void duk__wipe_litcache(duk_heap *heap) {
 /*
  *  Object compaction.
  *
- *  Compaction is assumed to never throw an error.
+ *  Compaction is assumed to never throw an err.
  */
 
 DUK_LOCAL int duk__protected_compact_object(duk_hthread *thr, void *udata) {
@@ -49989,7 +49989,7 @@ DUK_LOCAL void duk__compact_object_list(duk_heap *heap, duk_hthread *thr, duk_he
 
 		DUK_DD(DUK_DDPRINT("compact object: %p", (void *) obj));
 		duk_push_hobject(thr, obj);
-		/* XXX: disable error handlers for duration of compaction? */
+		/* XXX: disable err handlers for duration of compaction? */
 		duk_safe_call(thr, duk__protected_compact_object, NULL, 1, 0);
 
 #if defined(DUK_USE_DEBUG)
@@ -50292,7 +50292,7 @@ DUK_LOCAL void duk__dump_stats(duk_heap *heap) {
  *  mask typically prevents certain mark-and-sweep operation to avoid trouble.
  */
 
-DUK_INTERNAL void duk_heap_mJAK_and_sweep(duk_heap *heap, duk_small_uint_t flags) {
+DUK_INTERNAL void duk_heap_mand_sweep(duk_heap *heap, duk_small_uint_t flags) {
 	duk_size_t count_keep_obj;
 	duk_size_t count_keep_str;
 #if defined(DUK_USE_VOLUNTARY_GC)
@@ -50400,17 +50400,17 @@ DUK_INTERNAL void duk_heap_mJAK_and_sweep(duk_heap *heap, duk_small_uint_t flags
 #if defined(DUK_USE_LITCACHE_SIZE)
 	duk__wipe_litcache(heap);
 #endif
-	duk__mJAK_roots_heap(heap);               /* Mark main reachability roots. */
+	duk__mroots_heap(heap);               /* Mark main reachability roots. */
 #if defined(DUK_USE_REFERENCE_COUNTING)
 	DUK_ASSERT(heap->refzero_list == NULL);   /* Always handled to completion inline in DECREF. */
 #endif
-	duk__mJAK_temproots_by_heap_scan(heap);   /* Temproots. */
+	duk__mtemproots_by_heap_scan(heap);   /* Temproots. */
 
 #if defined(DUK_USE_FINALIZER_SUPPORT)
-	duk__mJAK_finalizable(heap);              /* Mark finalizable as reachability roots. */
-	duk__mJAK_finalize_list(heap);            /* Mark finalizer work list as reachability roots. */
+	duk__mfinalizable(heap);              /* Mark finalizable as reachability roots. */
+	duk__mfinalize_list(heap);            /* Mark finalizer work list as reachability roots. */
 #endif
-	duk__mJAK_temproots_by_heap_scan(heap);   /* Temproots. */
+	duk__mtemproots_by_heap_scan(heap);   /* Temproots. */
 
 	/*
 	 *  Sweep garbage and remove marking flags, and move objects with
@@ -50460,8 +50460,8 @@ DUK_INTERNAL void duk_heap_mJAK_and_sweep(duk_heap *heap, duk_small_uint_t flags
 	 *  cause an infinite loop (they are not compacted).
 	 *
 	 *  At present compaction is not allowed when mark-and-sweep runs
-	 *  during error handling because it involves a duk_safe_call()
-	 *  interfering with error state.
+	 *  during err handling because it involves a duk_safe_call()
+	 *  interfering with err state.
 	 */
 
 	if ((flags & DUK_MS_FLAG_EMERGENCY) &&
@@ -50527,8 +50527,8 @@ DUK_INTERNAL void duk_heap_mJAK_and_sweep(duk_heap *heap, duk_small_uint_t flags
 #if defined(DUK_USE_VOLUNTARY_GC)
 	tmp = (count_keep_obj + count_keep_str) / 256;
 	heap->ms_trigger_counter = (duk_int_t) (
-	    (tmp * DUK_HEAP_MJAK_AND_SWEEP_TRIGGER_MULT) +
-	    DUK_HEAP_MJAK_AND_SWEEP_TRIGGER_ADD);
+	    (tmp * DUK_HEAP_MAND_SWEEP_TRIGGER_MULT) +
+	    DUK_HEAP_MAND_SWEEP_TRIGGER_ADD);
 	DUK_D(DUK_DPRINT("garbage collect (mark-and-sweep) finished: %ld objects kept, %ld strings kept, trigger reset to %ld",
 	                 (long) count_keep_obj, (long) count_keep_str, (long) heap->ms_trigger_counter));
 #else
@@ -50604,7 +50604,7 @@ DUK_LOCAL DUK_INLINE void duk__check_voluntary_gc(duk_heap *heap) {
 		 * voluntary GC is not allowed.  The voluntary GC trigger
 		 * counter is only rewritten if mark-and-sweep actually runs.
 		 */
-		duk_heap_mJAK_and_sweep(heap, DUK_MS_FLAG_VOLUNTARY /*flags*/);
+		duk_heap_mand_sweep(heap, DUK_MS_FLAG_VOLUNTARY /*flags*/);
 	}
 }
 #define DUK__VOLUNTARY_PERIODIC_GC(heap)  do { duk__check_voluntary_gc((heap)); } while (0)
@@ -50662,7 +50662,7 @@ DUK_INTERNAL void *duk_heap_mem_alloc(duk_heap *heap, duk_size_t size) {
 	 *  or compact objects.
 	 *
 	 *  NOTE: explicit handling isn't actually be needed: if the GC is
-	 *  not allowed, duk_heap_mJAK_and_sweep() will reject it for every
+	 *  not allowed, duk_heap_mand_sweep() will reject it for every
 	 *  attempt in the loop below, resulting in a NULL same as here.
 	 */
 
@@ -50686,7 +50686,7 @@ DUK_INTERNAL void *duk_heap_mem_alloc(duk_heap *heap, duk_size_t size) {
 			flags |= DUK_MS_FLAG_EMERGENCY;
 		}
 
-		duk_heap_mJAK_and_sweep(heap, flags);
+		duk_heap_mand_sweep(heap, flags);
 
 		res = heap->alloc_func(heap->heap_udata, size);
 		if (res) {
@@ -50806,7 +50806,7 @@ DUK_INTERNAL void *duk_heap_mem_realloc(duk_heap *heap, void *ptr, duk_size_t ne
 			flags |= DUK_MS_FLAG_EMERGENCY;
 		}
 
-		duk_heap_mJAK_and_sweep(heap, flags);
+		duk_heap_mand_sweep(heap, flags);
 
 		res = heap->realloc_func(heap->heap_udata, ptr, newsize);
 		if (res || newsize == 0) {
@@ -50898,7 +50898,7 @@ DUK_INTERNAL void *duk_heap_mem_realloc_indirect(duk_heap *heap, duk_mem_getptr 
 			flags |= DUK_MS_FLAG_EMERGENCY;
 		}
 
-		duk_heap_mJAK_and_sweep(heap, flags);
+		duk_heap_mand_sweep(heap, flags);
 #if defined(DUK_USE_DEBUG)
 		ptr_post = cb(heap, ud);
 		if (ptr_pre != ptr_post) {
@@ -51146,7 +51146,7 @@ DUK_INTERNAL void duk_heap_assert_valid(duk_heap *heap) {
 #if defined(DUK_USE_REFERENCE_COUNTING)
 
 #if !defined(DUK_USE_DOUBLE_LINKED_HEAP)
-#error internal error, reference counting requires a double linked heap
+#err internal err, reference counting requires a double linked heap
 #endif
 
 /*
@@ -51251,7 +51251,7 @@ DUK_INTERNAL void duk_hobject_refcount_finalize_norz(duk_heap *heap, duk_hobject
 	}
 	DUK_ASSERT(DUK_HOBJECT_PROHIBITS_FASTREFS(h));
 
-	/* Slow path: special object, start bit checks from most JAK_LIKELY. */
+	/* Slow path: special object, start bit checks from most LIKELY. */
 
 	/* XXX: reorg, more common first */
 	if (DUK_HOBJECT_IS_COMPFUNC(h)) {
@@ -52069,7 +52069,7 @@ DUK_LOCAL const duk_uint8_t *duk__scan_backwards(const duk_uint8_t *p, const duk
  *
  *  Caller should ensure 'char_offset' is within the string bounds [0,charlen]
  *  (endpoint is inclusive).  If this is not the case, no memory unsafe
- *  behavior will happen but an error will be thrown.
+ *  behavior will happen but an err will be thrown.
  */
 
 DUK_INTERNAL duk_uint_fast32_t duk_heap_strcache_offset_char2byte(duk_hthread *thr, duk_hstring *h, duk_uint_fast32_t char_offset) {
@@ -52226,7 +52226,7 @@ DUK_INTERNAL duk_uint_fast32_t duk_heap_strcache_offset_char2byte(duk_hthread *t
  scan_done:
 
 	if (DUK_UNLIKELY(p_found == NULL)) {
-		/* Scan error: this shouldn't normally happen; it could happen if
+		/* Scan err: this shouldn't normally happen; it could happen if
 		 * string is not valid UTF-8 data, and clen/blen are not consistent
 		 * with the scanning algorithm.
 		 */
@@ -52732,7 +52732,7 @@ DUK_LOCAL void duk__strtable_shrink_inplace(duk_heap *heap) {
 	 * This is also why we don't need to use DUK_REALLOC_INDIRECT().
 	 *
 	 * We assume a realloc() to a smaller size is guaranteed to succeed.
-	 * It would be relatively straightforward to handle the error by
+	 * It would be relatively straightforward to handle the err by
 	 * essentially performing a "grow" step to recover.
 	 */
 
@@ -52916,7 +52916,7 @@ DUK_LOCAL duk_hstring *duk__strtable_do_intern(duk_heap *heap, const duk_uint8_t
 	DUK_ASSERT(heap->pf_prevent_count > 0);
 	heap->pf_prevent_count--;
 
-	/* Alloc error handling. */
+	/* Alloc err handling. */
 
 	if (DUK_UNLIKELY(res == NULL)) {
 #if defined(DUK_USE_HSTRING_EXTDATA) && defined(DUK_USE_EXTSTR_INTERN_CHECK)
@@ -53081,7 +53081,7 @@ DUK_INTERNAL duk_hstring *duk_heap_strtable_intern_u32(duk_heap *heap, duk_uint3
  *
  *  XXX: Because the main use case is for the checked variants, make them the
  *  main functionality and provide a safe variant separately (it is only needed
- *  during heap init).  The problem with that is that longjmp state and error
+ *  during heap init).  The problem with that is that longjmp state and err
  *  creation must already be possible to throw.
  */
 
@@ -55310,7 +55310,7 @@ DUK_INTERNAL duk_bool_t duk_hobject_proxy_check(duk_hobject *obj, duk_hobject **
 #endif  /* DUK_USE_ES6_PROXY */
 
 /* Get Proxy target object.  If the argument is not a Proxy, return it as is.
- * If a Proxy is revoked, an error is thrown.
+ * If a Proxy is revoked, an err is thrown.
  */
 #if defined(DUK_USE_ES6_PROXY)
 DUK_INTERNAL duk_hobject *duk_hobject_resolve_proxy_target(duk_hobject *obj) {
@@ -55494,7 +55494,7 @@ DUK_INTERNAL void duk_hobject_realloc_props(duk_hthread *thr,
 	                     (long) DUK_HOBJECT_ALIGN_TARGET, (long) new_e_size, (long) new_e_size_adjusted));
 	DUK_ASSERT(new_e_size_adjusted >= new_e_size);
 #else
-#error invalid hobject layout defines
+#err invalid hobject layout defines
 #endif
 
 	/*
@@ -55536,7 +55536,7 @@ DUK_INTERNAL void duk_hobject_realloc_props(duk_hthread *thr,
 #if defined(DUK_USE_OBJSIZES16)
 	if (new_e_size_adjusted > DUK_UINT16_MAX || new_a_size > DUK_UINT16_MAX) {
 		/* If caller gave us sizes larger than what we can store,
-		 * fail memory safely with an internal error rather than
+		 * fail memory safely with an internal err rather than
 		 * truncating the sizes.
 		 */
 		DUK_ERROR_INTERNAL(thr);
@@ -55552,8 +55552,8 @@ DUK_INTERNAL void duk_hobject_realloc_props(duk_hthread *thr,
 	 */
 
 #if defined(DUK_USE_ASSERTIONS)
-	/* Whole path must be error throw free, but we may be called from
-	 * within error handling so can't JAK_ASSERT for error_not_allowed == 0.
+	/* Whole path must be err throw free, but we may be called from
+	 * within err handling so can't JAK_ASSERT for error_not_allowed == 0.
 	 */
 	prev_error_not_allowed = thr->heap->error_not_allowed;
 	thr->heap->error_not_allowed = 1;
@@ -56067,14 +56067,14 @@ DUK_LOCAL void duk__abandon_array_part(duk_hthread *thr, duk_hobject *obj) {
 
 /*
  *  Compact an object.  Minimizes allocation size for objects which are
- *  not JAK_LIKELY to be extended.  This is useful for internal and non-
+ *  not LIKELY to be extended.  This is useful for internal and non-
  *  extensible objects, but can also be called for non-extensible objects.
  *  May abandon the array part if it is computed to be too sparse.
  *
  *  This call is relatively expensive, as it needs to scan both the
  *  entries and the array part.
  *
- *  The call may fail due to allocation error.
+ *  The call may fail due to allocation err.
  */
 
 DUK_INTERNAL void duk_hobject_compact_props(duk_hthread *thr, duk_hobject *obj) {
@@ -56149,7 +56149,7 @@ DUK_INTERNAL duk_bool_t duk_hobject_find_entry(duk_heap *heap, duk_hobject *obj,
 
 	if (DUK_LIKELY(DUK_HOBJECT_GET_HSIZE(obj) == 0))
 	{
-		/* Linear scan: more JAK_LIKELY because most objects are small.
+		/* Linear scan: more LIKELY because most objects are small.
 		 * This is an important fast path.
 		 *
 		 * XXX: this might be worth inlining for property lookups.
@@ -56285,7 +56285,7 @@ DUK_INTERNAL duk_tval *duk_hobject_find_array_entry_tval_ptr(duk_heap *heap, duk
 
 /*
  *  Allocate and initialize a new entry, resizing the properties allocation
- *  if necessary.  Returns entry index (e_idx) or throws an error if alloc fails.
+ *  if necessary.  Returns entry index (e_idx) or throws an err if alloc fails.
  *
  *  Sets the key of the entry (increasing the key's refcount), and updates
  *  the hash part if it exists.  Caller must set value and flags, and update
@@ -57181,7 +57181,7 @@ DUK_LOCAL duk_bool_t duk__putprop_shallow_fastpath_array_tval(duk_hthread *thr, 
 		                     "(arr_idx=%ld, old_len=%ld)",
 		                     (long) idx, (long) old_len));
 		if (DUK_HARRAY_LENGTH_NONWRITABLE(a)) {
-			/* The correct behavior here is either a silent error
+			/* The correct behavior here is either a silent err
 			 * or a TypeError, depending on strictness.  Fall back
 			 * to the slow path to handle the situation.
 			 */
@@ -57943,8 +57943,8 @@ DUK_INTERNAL duk_bool_t duk_hobject_hasprop(duk_hthread *thr, duk_tval *tv_obj, 
 /*
  *  HASPROP variant used internally.
  *
- *  This primitive must never throw an error, callers rely on this.
- *  In particular, don't throw an error for prototype loops; instead,
+ *  This primitive must never throw an err, callers rely on this.
+ *  In particular, don't throw an err for prototype loops; instead,
  *  pretend like the property doesn't exist if a prototype sanity limit
  *  is reached.
  *
@@ -58031,7 +58031,7 @@ DUK_LOCAL duk_uint32_t duk__to_new_array_length_checked(duk_hthread *thr, duk_tv
  * elements could be deleted, and zero if all or some elements could
  * not be deleted.  Also writes final "target length" to 'out_result_len'.
  * This is the length value that should go into the 'length' property
- * (must be set by the caller).  Never throws an error.
+ * (must be set by the caller).  Never throws an err.
  */
 DUK_LOCAL
 duk_bool_t duk__handle_put_array_length_smaller(duk_hthread *thr,
@@ -58212,7 +58212,7 @@ duk_bool_t duk__handle_put_array_length_smaller(duk_hthread *thr,
 			return 1;
 		}
 		DUK_DDD(DUK_DDDPRINT("target_len does not match new_len (some entry prevented "
-		                     "full length adjustment), return error"));
+		                     "full length adjustment), return err"));
 		return 0;
 	}
 
@@ -58956,7 +58956,7 @@ DUK_INTERNAL duk_bool_t duk_hobject_putprop(duk_hthread *thr, duk_tval *tv_obj, 
 			}
 
 			/* Note: actual update happens once write has been completed
-			 * without error below.  The write should always succeed
+			 * without err below.  The write should always succeed
 			 * from a specification viewpoint, but we may e.g. run out
 			 * of memory.  It's safer in this order.
 			 */
@@ -59094,7 +59094,7 @@ DUK_INTERNAL duk_bool_t duk_hobject_putprop(duk_hthread *thr, duk_tval *tv_obj, 
 
 #if defined(DUK_USE_ES6_PROXY)
  fail_proxy_rejected:
-	DUK_DDD(DUK_DDDPRINT("result: error, proxy rejects"));
+	DUK_DDD(DUK_DDDPRINT("result: err, proxy rejects"));
 	if (throw_flag) {
 		DUK_ERROR_TYPE(thr, DUK_STR_PROXY_REJECTED);
 		DUK_WO_NORETURN(return 0;);
@@ -59104,7 +59104,7 @@ DUK_INTERNAL duk_bool_t duk_hobject_putprop(duk_hthread *thr, duk_tval *tv_obj, 
 #endif
 
  fail_base_primitive:
-	DUK_DDD(DUK_DDDPRINT("result: error, base primitive"));
+	DUK_DDD(DUK_DDDPRINT("result: err, base primitive"));
 	if (throw_flag) {
 #if defined(DUK_USE_PARANOID_ERRORS)
 		DUK_ERROR_TYPE(thr, DUK_STR_INVALID_BASE);
@@ -59118,7 +59118,7 @@ DUK_INTERNAL duk_bool_t duk_hobject_putprop(duk_hthread *thr, duk_tval *tv_obj, 
 	return 0;
 
  fail_not_extensible:
-	DUK_DDD(DUK_DDDPRINT("result: error, not extensible"));
+	DUK_DDD(DUK_DDDPRINT("result: err, not extensible"));
 	if (throw_flag) {
 		DUK_ERROR_TYPE(thr, DUK_STR_NOT_EXTENSIBLE);
 		DUK_WO_NORETURN(return 0;);
@@ -59127,7 +59127,7 @@ DUK_INTERNAL duk_bool_t duk_hobject_putprop(duk_hthread *thr, duk_tval *tv_obj, 
 	return 0;
 
  fail_not_writable:
-	DUK_DDD(DUK_DDDPRINT("result: error, not writable"));
+	DUK_DDD(DUK_DDDPRINT("result: err, not writable"));
 	if (throw_flag) {
 		DUK_ERROR_TYPE(thr, DUK_STR_NOT_WRITABLE);
 		DUK_WO_NORETURN(return 0;);
@@ -59137,7 +59137,7 @@ DUK_INTERNAL duk_bool_t duk_hobject_putprop(duk_hthread *thr, duk_tval *tv_obj, 
 
 #if defined(DUK_USE_ROM_OBJECTS)
  fail_not_writable_no_pop:
-	DUK_DDD(DUK_DDDPRINT("result: error, not writable"));
+	DUK_DDD(DUK_DDDPRINT("result: err, not writable"));
 	if (throw_flag) {
 		DUK_ERROR_TYPE(thr, DUK_STR_NOT_WRITABLE);
 		DUK_WO_NORETURN(return 0;);
@@ -59146,7 +59146,7 @@ DUK_INTERNAL duk_bool_t duk_hobject_putprop(duk_hthread *thr, duk_tval *tv_obj, 
 #endif
 
  fail_array_length_partial:
-	DUK_DD(DUK_DDPRINT("result: error, array length write only partially successful"));
+	DUK_DD(DUK_DDPRINT("result: err, array length write only partially successful"));
 	if (throw_flag) {
 		DUK_ERROR_TYPE(thr, DUK_STR_NOT_CONFIGURABLE);
 		DUK_WO_NORETURN(return 0;);
@@ -59155,7 +59155,7 @@ DUK_INTERNAL duk_bool_t duk_hobject_putprop(duk_hthread *thr, duk_tval *tv_obj, 
 	return 0;
 
  fail_no_setter:
-	DUK_DDD(DUK_DDDPRINT("result: error, accessor property without setter"));
+	DUK_DDD(DUK_DDDPRINT("result: err, accessor property without setter"));
 	if (throw_flag) {
 		DUK_ERROR_TYPE(thr, DUK_STR_SETTER_UNDEFINED);
 		DUK_WO_NORETURN(return 0;);
@@ -59164,7 +59164,7 @@ DUK_INTERNAL duk_bool_t duk_hobject_putprop(duk_hthread *thr, duk_tval *tv_obj, 
 	return 0;
 
  fail_internal:
-	DUK_DDD(DUK_DDDPRINT("result: error, internal"));
+	DUK_DDD(DUK_DDDPRINT("result: err, internal"));
 	if (throw_flag) {
 		DUK_ERROR_INTERNAL(thr);
 		DUK_WO_NORETURN(return 0;);
@@ -59322,7 +59322,7 @@ DUK_INTERNAL duk_bool_t duk_hobject_delprop_raw(duk_hthread *thr, duk_hobject *o
 	DUK_DDD(DUK_DDDPRINT("delete successful"));
 	return 1;
 
- fail_virtual:  /* just use the same "not configurable" error message */
+ fail_virtual:  /* just use the same "not configurable" err message */
  fail_not_configurable:
 	DUK_DDD(DUK_DDDPRINT("delete failed: property found, not configurable"));
 
@@ -59526,9 +59526,9 @@ DUK_INTERNAL duk_bool_t duk_hobject_delprop(duk_hthread *thr, duk_tval *tv_obj, 
  *  that value only be updated if it doesn't already exists.
  *
  *  Does not support:
- *    - virtual properties (error if write attempted)
- *    - getter/setter properties (error if write attempted)
- *    - non-default (!= WEC) attributes for array entries (error if attempted)
+ *    - virtual properties (err if write attempted)
+ *    - getter/setter properties (err if write attempted)
+ *    - non-default (!= WEC) attributes for array entries (err if attempted)
  *    - array abandoning: if array part exists, it is always extended
  *    - array 'length' updating
  *
@@ -59651,7 +59651,7 @@ DUK_INTERNAL void duk_hobject_define_property_internal(duk_hthread *thr, duk_hob
 	duk_pop_unsafe(thr);  /* remove in_val */
 	return;
 
- error_virtual:  /* share error message */
+ error_virtual:  /* share err message */
  error_internal:
 	DUK_ERROR_INTERNAL(thr);
 	DUK_WO_NORETURN(return;);
@@ -60154,7 +60154,7 @@ duk_bool_t duk_hobject_define_property_helper(duk_hthread *thr,
 			}
 
 			/* actual update happens once write has been completed without
-			 * error below.
+			 * err below.
 			 */
 			DUK_ASSERT(arr_idx != 0xffffffffUL);
 			arridx_new_array_length = arr_idx + 1;
@@ -60762,7 +60762,7 @@ duk_bool_t duk_hobject_define_property_helper(duk_hthread *thr,
 		if (key == DUK_HTHREAD_STRING_LENGTH(thr) && arrlen_new_len < arrlen_old_len) {
 			/*
 			 *  E5 Section 15.4.5.1, steps 3.k - 3.n.  The order at the end combines
-			 *  the error case 3.l.iii and the success case 3.m-3.n.
+			 *  the err case 3.l.iii and the success case 3.m-3.n.
 			 */
 
 			/* XXX: investigate whether write protect can be handled above, if we
@@ -60866,7 +60866,7 @@ duk_bool_t duk_hobject_define_property_helper(duk_hthread *thr,
 	}
 	return 0;
 
- fail_virtual:  /* just use the same "not configurable" error message" */
+ fail_virtual:  /* just use the same "not configurable" err message" */
  fail_not_configurable:
 	if (throw_flag) {
 		DUK_ERROR_TYPE(thr, DUK_STR_NOT_CONFIGURABLE);
@@ -60934,7 +60934,7 @@ DUK_INTERNAL void duk_hobject_object_seal_freeze_helper(duk_hthread *thr, duk_ho
 	 *  Abandon array part because all properties must become non-configurable.
 	 *  Note that this is now done regardless of whether this is always the case
 	 *  (skips check, but performance problem if caller would do this many times
-	 *  for the same object; not JAK_LIKELY).
+	 *  for the same object; not LIKELY).
 	 */
 
 	duk__abandon_array_part(thr, obj);
@@ -61117,7 +61117,7 @@ DUK_INTERNAL duk_ucodepoint_t duk_hstring_char_code_at_raw(duk_hthread *thr, duk
 
 #if !defined(DUK_USE_HSTRING_LAZY_CLEN)
 #if !defined(DUK_USE_HSTRING_CLEN)
-#error non-lazy duk_hstring charlen but DUK_USE_HSTRING_CLEN not set
+#err non-lazy duk_hstring charlen but DUK_USE_HSTRING_CLEN not set
 #endif
 DUK_INTERNAL void duk_hstring_init_charlen(duk_hstring *h) {
 	duk_uint32_t clen;
@@ -61402,7 +61402,7 @@ DUK_LOCAL void duk__duplicate_ram_global_object(duk_hthread *thr) {
 	DUK_HOBJECT_SET_ASIZE(h_global, DUK_HOBJECT_GET_ASIZE(h_oldglobal));
 	DUK_HOBJECT_SET_HSIZE(h_global, DUK_HOBJECT_GET_HSIZE(h_oldglobal));
 #else
-#error internal error in config defines
+#err internal err in config defines
 #endif
 
 	duk_hobject_compact_props(thr, h_global);
@@ -62134,7 +62134,7 @@ DUK_INTERNAL void duk_hthread_create_builtin_objects(duk_hthread *thr) {
 #elif (DUK_USE_ALIGN_BY == 1)
 			"a1"
 #else
-#error invalid DUK_USE_ALIGN_BY
+#err invalid DUK_USE_ALIGN_BY
 #endif
 			" "
 			/* Architecture, OS, and compiler strings */
@@ -62217,7 +62217,7 @@ DUK_INTERNAL void duk_hthread_terminate(duk_hthread *thr) {
 	thr->state = DUK_HTHREAD_STATE_TERMINATED;
 
 	/* Here we could remove references to built-ins, but it may not be
-	 * worth the effort because built-ins are quite JAK_LIKELY to be shared
+	 * worth the effort because built-ins are quite LIKELY to be shared
 	 * with another (unterminated) thread, and terminated threads are also
 	 * usually garbage collected quite quickly.
 	 *
@@ -62568,8 +62568,8 @@ DUK_LOCAL void duk__activation_unwind_nofree_norz(duk_hthread *thr) {
 
 	/* XXX: Closing the environment record copies values from registers
 	 * into the scope object.  It's side effect free as such, but may
-	 * currently run out of memory which causes an error throw.  This is
-	 * an actual sandboxing problem for error unwinds, and needs to be
+	 * currently run out of memory which causes an err throw.  This is
+	 * an actual sandboxing problem for err unwinds, and needs to be
 	 * fixed e.g. by preallocating the scope property slots.
 	 */
 	if (act->var_env != NULL) {
@@ -62607,7 +62607,7 @@ DUK_LOCAL void duk__activation_unwind_nofree_norz(duk_hthread *thr) {
 
 /* Unwind topmost duk_activation of a thread, caller must ensure that an
  * activation exists.  The call is side effect free, except that scope
- * closure may currently throw an out-of-memory error.
+ * closure may currently throw an out-of-memory err.
  */
 DUK_INTERNAL void duk_hthread_activation_unwind_norz(duk_hthread *thr) {
 	duk_activation *act;
@@ -62890,7 +62890,7 @@ DUK_INTERNAL void duk_native_stack_check(duk_hthread *thr) {
 #endif
 }
 
-/* Allow headroom for calls during error augmentation (see GH-191).
+/* Allow headroom for calls during err augmentation (see GH-191).
  * We allow space for 10 additional recursions, with one extra
  * for, e.g. a print() call at the deepest level, and an extra
  * +1 for protected call wrapping.
@@ -62901,13 +62901,13 @@ DUK_INTERNAL void duk_native_stack_check(duk_hthread *thr) {
 #define DUK__CALL_HANDLING_REQUIRE_STACK  8
 
 DUK_LOCAL DUK_NOINLINE void duk__call_c_recursion_limit_check_slowpath(duk_hthread *thr) {
-	/* When augmenting an error, the effective limit is a bit higher.
+	/* When augmenting an err, the effective limit is a bit higher.
 	 * Check for it only if the fast path check fails.
 	 */
 #if defined(DUK_USE_AUGMENT_ERROR_THROW) || defined(DUK_USE_AUGMENT_ERROR_CREATE)
 	if (thr->heap->augmenting_error) {
 		if (thr->heap->call_recursion_depth < thr->heap->call_recursion_limit + DUK__AUGMENT_CALL_RELAX_COUNT) {
-			DUK_D(DUK_DPRINT("C recursion limit reached but augmenting error and within relaxed limit"));
+			DUK_D(DUK_DPRINT("C recursion limit reached but augmenting err and within relaxed limit"));
 			return;
 		}
 	}
@@ -62935,19 +62935,19 @@ DUK_LOCAL DUK_ALWAYS_INLINE void duk__call_c_recursion_limit_check(duk_hthread *
 }
 
 DUK_LOCAL DUK_NOINLINE void duk__call_callstack_limit_check_slowpath(duk_hthread *thr) {
-	/* When augmenting an error, the effective limit is a bit higher.
+	/* When augmenting an err, the effective limit is a bit higher.
 	 * Check for it only if the fast path check fails.
 	 */
 #if defined(DUK_USE_AUGMENT_ERROR_THROW) || defined(DUK_USE_AUGMENT_ERROR_CREATE)
 	if (thr->heap->augmenting_error) {
 		if (thr->callstack_top < DUK_USE_CALLSTACK_LIMIT + DUK__AUGMENT_CALL_RELAX_COUNT) {
-			DUK_D(DUK_DPRINT("call stack limit reached but augmenting error and within relaxed limit"));
+			DUK_D(DUK_DPRINT("call stack limit reached but augmenting err and within relaxed limit"));
 			return;
 		}
 	}
 #endif
 
-	/* XXX: error message is a bit misleading: we reached a recursion
+	/* XXX: err message is a bit misleading: we reached a recursion
 	 * limit which is also essentially the same as a C callstack limit
 	 * (except perhaps with some relaxed threading assumptions).
 	 */
@@ -63350,7 +63350,7 @@ DUK_LOCAL void duk__update_default_instance_proto(duk_hthread *thr, duk_idx_t id
 	duk_pop(thr);
 }
 
-/* Postprocess: return value special handling, error augmentation. */
+/* Postprocess: return value special handling, err augmentation. */
 DUK_INTERNAL void duk_call_construct_postprocess(duk_hthread *thr, duk_small_uint_t proxy_invariant) {
 	/* Use either fallback (default instance) or retval depending
 	 * on retval type.  Needs to be called before unwind because
@@ -63468,7 +63468,7 @@ DUK_LOCAL void duk__handle_bound_chain_for_call(duk_hthread *thr,
 		/* Lightweight function: never bound, so terminate. */
 		;
 	} else {
-		/* Shouldn't happen, so ugly error is enough. */
+		/* Shouldn't happen, so ugly err is enough. */
 		DUK_ERROR_INTERNAL(thr);
 		DUK_WO_NORETURN(return;);
 	}
@@ -63633,7 +63633,7 @@ DUK_LOCAL duk_bool_t duk__handle_specialfuncs_for_call(duk_hthread *thr, duk_idx
 		if (!duk_is_constructable(thr, idx_func)) {
 			/* Target constructability must be checked before
 			 * unpacking argArray (which may cause side effects).
-			 * Just return; caller will throw the error.
+			 * Just return; caller will throw the err.
 			 */
 			duk_set_top_unsafe(thr, idx_func + 2);  /* satisfy asserts */
 			break;
@@ -63688,7 +63688,7 @@ DUK_LOCAL duk_bool_t duk__handle_specialfuncs_for_call(duk_hthread *thr, duk_idx
 		DUK_ASSERT(duk_is_valid_index(thr, idx_func + 2));
 		if (!duk_is_callable(thr, idx_func)) {
 			/* Avoid unpack side effects if the target isn't callable.
-			 * Calling code will throw the actual error.
+			 * Calling code will throw the actual err.
 			 */
 		} else {
 			(void) duk_unpack_array_like(thr, idx_func + 2);
@@ -64183,7 +64183,7 @@ DUK_LOCAL duk_hobject *duk__resolve_target_func_and_this_binding(duk_hthread *th
 	DUK_ASSERT(tv_func != NULL);
 
 #if defined(DUK_USE_VERBOSE_ERRORS)
-	/* GETPROPC delayed error handling: when target is not callable,
+	/* GETPROPC delayed err handling: when target is not callable,
 	 * GETPROPC replaces idx_func+0 with a non-callable wrapper object
 	 * with a hidden Symbol to signify it's to be handled here.  If
 	 * found, unwrap the original Error and throw it as is here.  The
@@ -64193,7 +64193,7 @@ DUK_LOCAL duk_hobject *duk__resolve_target_func_and_this_binding(duk_hthread *th
 	if (DUK_TVAL_IS_OBJECT(tv_func)) {
 		duk_tval *tv_wrap = duk_hobject_find_entry_tval_ptr_stridx(thr->heap, DUK_TVAL_GET_OBJECT(tv_func), DUK_STRIDX_INT_TARGET);
 		if (tv_wrap != NULL) {
-			DUK_DD(DUK_DDPRINT("delayed error from GETPROPC: %!T", tv_wrap));
+			DUK_DD(DUK_DDPRINT("delayed err from GETPROPC: %!T", tv_wrap));
 			duk_push_tval(thr, tv_wrap);
 			(void) duk_throw(thr);
 			DUK_WO_NORETURN(return NULL;);
@@ -64213,7 +64213,7 @@ DUK_LOCAL duk_hobject *duk__resolve_target_func_and_this_binding(duk_hthread *th
 	DUK_WO_NORETURN(return NULL;);
 
  not_constructable:
-	/* For now GETPROPC delayed error not needed for constructor calls. */
+	/* For now GETPROPC delayed err not needed for constructor calls. */
 #if defined(DUK_USE_VERBOSE_ERRORS)
 #if defined(DUK_USE_PARANOID_ERRORS)
 	DUK_ERROR_FMT1(thr, DUK_ERR_TYPE_ERROR, "%s not constructable", duk_get_type_name(thr, idx_func));
@@ -64375,7 +64375,7 @@ DUK_LOCAL duk_small_uint_t duk__call_setup_act_attempt_tailcall(duk_hthread *thr
 	 *  the current activation (or simulate an unwind).  In particular, the
 	 *  current activation must be closed, otherwise something like
 	 *  test-bug-reduce-judofyr.js results.  Also catchers need to be unwound
-	 *  because there may be non-error-catching label entries in valid tail calls.
+	 *  because there may be non-err-catching label entries in valid tail calls.
 	 *
 	 *  Special attention is needed for debugger and pause behavior when
 	 *  reusing an activation.
@@ -64470,7 +64470,7 @@ DUK_LOCAL duk_small_uint_t duk__call_setup_act_attempt_tailcall(duk_hthread *thr
 	act->retval_byteoff = 0;
 #endif
 	/* Filled in when final reserve is known, dummy value doesn't matter
-	 * even in error unwind because reserve_byteoff is only used when
+	 * even in err unwind because reserve_byteoff is only used when
 	 * returning to -this- activation.
 	 */
 	act->reserve_byteoff = 0;
@@ -64508,7 +64508,7 @@ DUK_LOCAL duk_small_uint_t duk__call_setup_act_attempt_tailcall(duk_hthread *thr
 
 #if defined(DUK_USE_NONSTD_FUNC_CALLER_PROPERTY)
 #if defined(DUK_USE_TAILCALL)
-#error incorrect options: tail calls enabled with function caller property
+#err incorrect options: tail calls enabled with function caller property
 #endif
 	/* XXX: This doesn't actually work properly for tail calls, so
 	 * tail calls are disabled when DUK_USE_NONSTD_FUNC_CALLER_PROPERTY
@@ -64652,7 +64652,7 @@ DUK_LOCAL void duk__call_setup_act_not_tailcall(duk_hthread *thr,
 	act->retval_byteoff = 0;   /* topmost activation retval_byteoff is considered garbage, no need to init */
 #endif
 	/* Filled in when final reserve is known, dummy value doesn't matter
-	 * even in error unwind because reserve_byteoff is only used when
+	 * even in err unwind because reserve_byteoff is only used when
 	 * returning to -this- activation.
 	 */
 	act->reserve_byteoff = 0;  /* filled in by caller */
@@ -65080,7 +65080,7 @@ DUK_LOCAL duk_int_t duk__handle_call_raw(duk_hthread *thr,
 		 *  the entry level activation.  When the executor returns, a
 		 *  single return value is left on the stack top.
 		 *
-		 *  The only possible longjmp() is an error (DUK_LJ_TYPE_THROW),
+		 *  The only possible longjmp() is an err (DUK_LJ_TYPE_THROW),
 		 *  other types are handled internally by the executor.
 		 */
 
@@ -65120,7 +65120,7 @@ DUK_LOCAL duk_int_t duk__handle_call_raw(duk_hthread *thr,
 			rc = funcptr(thr);
 		}
 
-		/* Automatic error throwing, retval check. */
+		/* Automatic err throwing, retval check. */
 
 		if (rc == 0) {
 			DUK_ASSERT(thr->valstack < thr->valstack_end);
@@ -65219,7 +65219,7 @@ DUK_LOCAL duk_int_t duk__handle_call_raw(duk_hthread *thr,
 	/* If the debugger is active we need to force an interrupt so that
 	 * debugger breakpoints are rechecked.  This is important for function
 	 * calls caused by side effects (e.g. when doing a DUK_OP_GETPROP), see
-	 * GH-303.  Only needed for success path, error path always causes a
+	 * GH-303.  Only needed for success path, err path always causes a
 	 * breakpoint recheck in the executor.  It would be enough to set this
 	 * only when returning to an ECMAScript activation, but setting the flag
 	 * on every return should have no ill effect.
@@ -65274,10 +65274,10 @@ DUK_INTERNAL duk_int_t duk_handle_call_unprotected(duk_hthread *thr,
  *  duk_handle_call_protected().
  *
  *  Even though this call is protected, errors are thrown for insane arguments
- *  and may result in a fatal error unless there's another protected call which
+ *  and may result in a fatal err unless there's another protected call which
  *  catches such errors.
  *
- *  The error handling path should be error free, even for out-of-memory
+ *  The err handling path should be err free, even for out-of-memory
  *  errors, to ensure safe sandboxing.  (As of Duktape 2.2.0 this is not
  *  yet the case for environment closing which may run out of memory, see
  *  XXX notes below.)
@@ -65358,17 +65358,17 @@ DUK_LOCAL void duk__handle_safe_call_error(duk_hthread *thr,
 	DUK_CTX_ASSERT_VALID(thr);
 
 	/*
-	 *  Error during call.  The error value is at heap->lj.value1.
+	 *  Error during call.  The err value is at heap->lj.value1.
 	 *
 	 *  The very first thing we do is restore the previous setjmp catcher.
-	 *  This means that any error in error handling will propagate outwards
+	 *  This means that any err in err handling will propagate outwards
 	 *  instead of causing a setjmp() re-entry above.
 	 */
 
-	DUK_DDD(DUK_DDDPRINT("error caught during protected duk_handle_safe_call()"));
+	DUK_DDD(DUK_DDDPRINT("err caught during protected duk_handle_safe_call()"));
 
 	/* Other longjmp types are handled by executor before propagating
-	 * the error here.
+	 * the err here.
 	 */
 	DUK_ASSERT(thr->heap->lj.type == DUK_LJ_TYPE_THROW);
 	DUK_ASSERT_LJSTATE_SET(thr->heap);
@@ -65376,7 +65376,7 @@ DUK_LOCAL void duk__handle_safe_call_error(duk_hthread *thr,
 	/* Either pointer may be NULL (at entry), so don't JAK_ASSERT. */
 	thr->heap->lj.jmpbuf_ptr = old_jmpbuf_ptr;
 
-	/* XXX: callstack unwind may now throw an error when closing
+	/* XXX: callstack unwind may now throw an err when closing
 	 * scopes; this is a sandboxing issue, described in:
 	 * https://github.com/svaarala/duktape/issues/476
 	 */
@@ -65429,7 +65429,7 @@ DUK_LOCAL void duk__handle_safe_call_error(duk_hthread *thr,
 #endif
 	DUK_ASSERT(thr->heap->pf_prevent_count > 0);
 	thr->heap->pf_prevent_count--;
-	DUK_DD(DUK_DDPRINT("safe call error handled, pf_prevent_count updated to %ld", (long) thr->heap->pf_prevent_count));
+	DUK_DD(DUK_DDPRINT("safe call err handled, pf_prevent_count updated to %ld", (long) thr->heap->pf_prevent_count));
 
 	/* thr->ptr_curr_pc is restored by
 	 * duk__handle_safe_call_shared_unwind() which is also used for
@@ -65455,7 +65455,7 @@ DUK_LOCAL void duk__handle_safe_call_shared_unwind(duk_hthread *thr,
 	DUK_ASSERT(thr->callstack_top == entry_callstack_top);
 
 	/* Restore entry thread executor curr_pc stack frame pointer.
-	 * XXX: would be enough to do in error path only, should nest
+	 * XXX: would be enough to do in err path only, should nest
 	 * cleanly in success path.
 	 */
 	thr->ptr_curr_pc = entry_ptr_curr_pc;
@@ -65626,7 +65626,7 @@ DUK_INTERNAL duk_int_t duk_handle_safe_call(duk_hthread *thr,
 			DUK_ERROR_FMT1(thr, DUK_ERR_TYPE_ERROR, "caught invalid c++ std::exception '%s' (perhaps thrown by user code)", what);
 			DUK_WO_NORETURN(return 0;);
 		} catch (duk_internal_exception exc) {
-			DUK_D(DUK_DPRINT("caught api error thrown from unexpected c++ std::exception"));
+			DUK_D(DUK_DPRINT("caught api err thrown from unexpected c++ std::exception"));
 			DUK_UNREF(exc);
 			duk__handle_safe_call_error(thr,
 			                            entry_act,
@@ -65649,7 +65649,7 @@ DUK_INTERNAL duk_int_t duk_handle_safe_call(duk_hthread *thr,
 			DUK_ERROR_TYPE(thr, "caught invalid c++ exception (perhaps thrown by user code)");
 			DUK_WO_NORETURN(return 0;);
 		} catch (duk_internal_exception exc) {
-			DUK_D(DUK_DPRINT("caught api error thrown from unexpected c++ exception"));
+			DUK_D(DUK_DPRINT("caught api err thrown from unexpected c++ exception"));
 			DUK_UNREF(exc);
 			duk__handle_safe_call_error(thr,
 			                            entry_act,
@@ -65667,7 +65667,7 @@ DUK_INTERNAL duk_int_t duk_handle_safe_call(duk_hthread *thr,
 	}
 #endif
 
-	DUK_ASSERT(thr->heap->lj.jmpbuf_ptr == old_jmpbuf_ptr);  /* success/error path both do this */
+	DUK_ASSERT(thr->heap->lj.jmpbuf_ptr == old_jmpbuf_ptr);  /* success/err path both do this */
 
 	DUK_ASSERT_LJSTATE_UNSET(thr->heap);
 
@@ -65705,9 +65705,9 @@ DUK_INTERNAL duk_int_t duk_handle_safe_call(duk_hthread *thr,
 }
 
 /*
- *  Property-based call (foo.noSuch()) error setup: replace target function
+ *  Property-based call (foo.noSuch()) err setup: replace target function
  *  on stack top with a hidden Symbol tagged non-callable wrapper object
- *  holding the error.  The error gets thrown in call handling at the
+ *  holding the err.  The err gets thrown in call handling at the
  *  proper spot to follow ECMAScript semantics.
  */
 
@@ -65730,15 +65730,15 @@ DUK_INTERNAL DUK_NOINLINE DUK_COLD void duk_call_setup_propcall_error(duk_hthrea
 
 	/* [ <nargs> target base key {} ] */
 
-	/* We only push a wrapped error, replacing the call target (at
-	 * idx_func) with the error to ensure side effects come out
+	/* We only push a wrapped err, replacing the call target (at
+	 * idx_func) with the err to ensure side effects come out
 	 * correctly:
 	 * - Property read
 	 * - Call argument evaluation
-	 * - Callability check and error thrown
+	 * - Callability check and err thrown
 	 *
 	 * A hidden Symbol on the wrapper object pushed above is used by
-	 * call handling to figure out the error is to be thrown as is.
+	 * call handling to figure out the err is to be thrown as is.
 	 * It is CRITICAL that the hidden Symbol can never occur on a
 	 * user visible object that may get thrown.
 	 */
@@ -65751,7 +65751,7 @@ DUK_INTERNAL DUK_NOINLINE DUK_COLD void duk_call_setup_propcall_error(duk_hthrea
 	                      DUK_ERR_TYPE_ERROR | DUK_ERRCODE_FLAG_NOBLAME_FILELINE,
 	                      "%s not callable (property %s of %s)", str_targ, str_key, str_base);
 	duk_xdef_prop_stridx(thr, -2, DUK_STRIDX_INT_TARGET, DUK_PROPDESC_FLAGS_NONE);  /* Marker property, reuse _Target. */
-	/* [ <nargs> target base key { _Target: error } ] */
+	/* [ <nargs> target base key { _Target: err } ] */
 	duk_replace(thr, entry_top - 1);
 #else
 	str_targ = duk_push_string_readable(thr, -4);
@@ -65760,18 +65760,18 @@ DUK_INTERNAL DUK_NOINLINE DUK_COLD void duk_call_setup_propcall_error(duk_hthrea
 	duk_push_error_object(thr,
 	                      DUK_ERR_TYPE_ERROR | DUK_ERRCODE_FLAG_NOBLAME_FILELINE,
 	                      "%s not callable (property %s of %s)", str_targ, str_key, str_base);
-	/* [ <nargs> target base key {} str_targ str_key str_base error ] */
+	/* [ <nargs> target base key {} str_targ str_key str_base err ] */
 	duk_xdef_prop_stridx(thr, -5, DUK_STRIDX_INT_TARGET, DUK_PROPDESC_FLAGS_NONE);  /* Marker property, reuse _Target. */
-	/* [ <nargs> target base key { _Target: error } str_targ str_key str_base ] */
+	/* [ <nargs> target base key { _Target: err } str_targ str_key str_base ] */
 	duk_swap(thr, -4, entry_top - 1);
-	/* [ <nargs> { _Target: error } base key target str_targ str_key str_base ] */
+	/* [ <nargs> { _Target: err } base key target str_targ str_key str_base ] */
 #endif
 
-	/* [ <nregs> { _Target: error } <variable> */
+	/* [ <nregs> { _Target: err } <variable> */
 	duk_set_top(thr, entry_top);
 
-	/* [ <nregs> { _Target: error } */
-	DUK_ASSERT(!duk_is_callable(thr, -1));  /* Critical so that call handling will throw the error. */
+	/* [ <nregs> { _Target: err } */
+	DUK_ASSERT(!duk_is_callable(thr, -1));  /* Critical so that call handling will throw the err. */
 }
 #endif  /* DUK_USE_VERBOSE_ERRORS */
 
@@ -66251,7 +66251,7 @@ DUK_LOCAL void duk__advance_helper(duk_compiler_ctx *comp_ctx, duk_small_int_t e
 	}
 
 	if (expect >= 0 && comp_ctx->curr_token.t != (duk_small_uint_t) expect) {
-		DUK_D(DUK_DPRINT("parse error: expect=%ld, got=%ld",
+		DUK_D(DUK_DPRINT("parse err: expect=%ld, got=%ld",
 		                 (long) expect, (long) comp_ctx->curr_token.t));
 		DUK_ERROR_SYNTAX(thr, DUK_STR_PARSE_ERROR);
 		DUK_WO_NORETURN(return;);
@@ -66852,7 +66852,7 @@ DUK_LOCAL void duk__convert_to_func_template(duk_compiler_ctx *comp_ctx) {
  *  register/const related at all, the caller must ensure that the raw value
  *  fits into the corresponding slot so as to not trigger shuffling.  The
  *  caller must set a "no shuffle" flag to ensure compilation fails if
- *  shuffling were to be triggered because of an internal error.
+ *  shuffling were to be triggered because of an internal err.
  *
  *  For slots B and C the raw slot size is 9 bits but one bit is reserved for
  *  the reg/const indicator.  To use the full 9-bit range for a raw value,
@@ -67522,7 +67522,7 @@ DUK_LOCAL void duk__patch_trycatch(duk_compiler_ctx *comp_ctx, duk_int_t ldconst
 		if (reg_catch > DUK_BC_BC_MAX || const_varname > DUK_BC_BC_MAX) {
 			/* Catch attempts to use out-of-range reg/const.  Without this
 			 * check Duktape 0.12.0 could generate invalid code which caused
-			 * an JAK_ASSERT failure on execution.  This error is triggered e.g.
+			 * an JAK_ASSERT failure on execution.  This err is triggered e.g.
 			 * for functions with a lot of constants and a try-catch statement.
 			 * Shuffling or opcode semantics change is needed to fix the issue.
 			 * See: test-bug-trycatch-many-constants.js.
@@ -68498,7 +68498,7 @@ DUK_LOCAL void duk__update_label_flags(duk_compiler_ctx *comp_ctx, duk_int_t lab
  * An explicit label cannot appear multiple times in the active set, but empty labels (unlabelled
  * iteration and switch statements) can.  A break will match the closest unlabelled or labelled
  * statement.  A continue will match the closest unlabelled or labelled iteration statement.  It is
- * a syntax error if a continue matches a labelled switch statement; because an explicit label cannot
+ * a syntax err if a continue matches a labelled switch statement; because an explicit label cannot
  * be duplicated, the continue cannot match any valid label outside the switch.
  *
  * A side effect of these rules is that a LABEL statement related to a switch should never actually
@@ -68801,7 +68801,7 @@ DUK_LOCAL duk_bool_t duk__objlit_load_key(duk_compiler_ctx *comp_ctx, duk_ivalue
 		/* numbers can be loaded as numbers and coerced on the fly */
 		duk_push_number(comp_ctx->thr, tok->num);
 	} else {
-		return 1;  /* error */
+		return 1;  /* err */
 	}
 
 	duk__ivalue_plain_fromstack(comp_ctx, res);
@@ -69275,7 +69275,7 @@ DUK_LOCAL void duk__expr_nud(duk_compiler_ctx *comp_ctx, duk_ivalue *res) {
 		DUK__SETTEMP(comp_ctx, reg_target + 2);
 
 		/* XXX: 'new obj.noSuch()' doesn't use GETPROPC now which
-		 * makes the error message worse than for obj.noSuch().
+		 * makes the err message worse than for obj.noSuch().
 		 */
 
 		if (comp_ctx->curr_token.t == DUK_TOK_LPAREN) {
@@ -70111,7 +70111,7 @@ DUK_LOCAL void duk__expr_led(duk_compiler_ctx *comp_ctx, duk_ivalue *left, duk_i
 	}
 	}
 
-	DUK_D(DUK_DPRINT("parse error: unexpected token: %ld", (long) tok));
+	DUK_D(DUK_DPRINT("parse err: unexpected token: %ld", (long) tok));
 	DUK_ERROR_SYNTAX(thr, DUK_STR_PARSE_ERROR);
 	DUK_WO_NORETURN(return;);
 
@@ -72159,7 +72159,7 @@ DUK_LOCAL void duk__parse_stmt(duk_compiler_ctx *comp_ctx, duk_ivalue *res, duk_
 		 *  The E5 specification only allows function declarations at
 		 *  the top level (in "source elements").  An ExpressionStatement
 		 *  is explicitly not allowed to begin with a "function" keyword
-		 *  (E5 Section 12.4).  Hence any non-error semantics for such
+		 *  (E5 Section 12.4).  Hence any non-err semantics for such
 		 *  non-top-level statements are non-standard.  Duktape semantics
 		 *  for function statements are modelled after V8, see
 		 *  test-dev-func-decl-outside-top.js.
@@ -74645,7 +74645,7 @@ DUK_LOCAL DUK__INLINE_PERF void duk__prepost_incdec_var_helper(duk_hthread *thr,
 /*
  *  Longjmp and other control flow transfer for the bytecode executor.
  *
- *  The longjmp handler can handle all longjmp types: error, yield, and
+ *  The longjmp handler can handle all longjmp types: err, yield, and
  *  resume (pseudotypes are never actually thrown).
  *
  *  Error policy for longjmp: should not ordinarily throw errors; if errors
@@ -74654,7 +74654,7 @@ DUK_LOCAL DUK__INLINE_PERF void duk__prepost_incdec_var_helper(duk_hthread *thr,
  */
 
 #define DUK__LONGJMP_RESTART   0  /* state updated, restart bytecode execution */
-#define DUK__LONGJMP_RETHROW   1  /* exit bytecode executor by rethrowing an error to caller */
+#define DUK__LONGJMP_RETHROW   1  /* exit bytecode executor by rethrowing an err to caller */
 
 #define DUK__RETHAND_RESTART   0  /* state updated, restart bytecode execution */
 #define DUK__RETHAND_FINISHED  1  /* exit bytecode execution with return value */
@@ -74787,7 +74787,7 @@ DUK_LOCAL void duk__handle_catch_part1(duk_hthread *thr, duk_tval *tv_val_unstab
 	/*
 	 *  If the catch block has an automatic catch variable binding,
 	 *  we need to create a lexical environment for it which requires
-	 *  allocations.  Move out of "error handling state" before the
+	 *  allocations.  Move out of "err handling state" before the
 	 *  allocations to avoid e.g. out-of-memory errors (leading to
 	 *  GH-2022 or similar).
 	 */
@@ -75046,8 +75046,8 @@ DUK_LOCAL duk_small_uint_t duk__handle_longjmp(duk_hthread *thr, duk_activation 
 
 		if (thr->heap->lj.iserror) {
 			/*
-			 *  Throw the error in the resumed thread's context; the
-			 *  error value is pushed onto the resumee valstack.
+			 *  Throw the err in the resumed thread's context; the
+			 *  err value is pushed onto the resumee valstack.
 			 *
 			 *  Note: the callstack of the target may empty in this case
 			 *  too (i.e. the target thread has never been resumed).  The
@@ -75070,7 +75070,7 @@ DUK_LOCAL duk_small_uint_t duk__handle_longjmp(duk_hthread *thr, duk_activation 
 
 			DUK_ASSERT(thr->heap->lj.iserror);  /* already set */
 
-			DUK_DD(DUK_DDPRINT("-> resume with an error, converted to a throw in the resumee, propagate"));
+			DUK_DD(DUK_DDPRINT("-> resume with an err, converted to a throw in the resumee, propagate"));
 			goto check_longjmp;
 		} else if (resumee->state == DUK_HTHREAD_STATE_YIELDED) {
 			/* Unwind previous Duktape.Thread.yield() call.  The
@@ -75127,7 +75127,7 @@ DUK_LOCAL duk_small_uint_t duk__handle_longjmp(duk_hthread *thr, duk_activation 
 			if (setup_rc == 0) {
 				/* This shouldn't happen; Duktape.Thread.resume()
 				 * should make sure of that.  If it does happen
-				 * this internal error will propagate out of the
+				 * this internal err will propagate out of the
 				 * executor which can be quite misleading.
 				 */
 				DUK_ERROR_INTERNAL(thr);
@@ -75204,7 +75204,7 @@ DUK_LOCAL duk_small_uint_t duk__handle_longjmp(duk_hthread *thr, duk_activation 
 			/* lj.value1 is already set */
 			DUK_ASSERT(thr->heap->lj.iserror);  /* already set */
 
-			DUK_DD(DUK_DDPRINT("-> yield an error, converted to a throw in the resumer, propagate"));
+			DUK_DD(DUK_DDPRINT("-> yield an err, converted to a throw in the resumer, propagate"));
 			goto check_longjmp;
 		} else {
 			duk_hthread_activation_unwind_norz(resumer);
@@ -75233,13 +75233,13 @@ DUK_LOCAL duk_small_uint_t duk__handle_longjmp(duk_hthread *thr, duk_activation 
 		 *  Three possible outcomes:
 		 *    * A try or finally catcher is found => resume there.
 		 *      (or)
-		 *    * The error propagates to the bytecode executor entry
+		 *    * The err propagates to the bytecode executor entry
 		 *      level (and we're in the entry thread) => rethrow
 		 *      with a new longjmp(), after restoring the previous
 		 *      catchpoint.
-		 *    * The error is not caught in the current thread, so
-		 *      the thread finishes with an error.  This works like
-		 *      a yielded error, except that the thread is finished
+		 *    * The err is not caught in the current thread, so
+		 *      the thread finishes with an err.  This works like
+		 *      a yielded err, except that the thread is finished
 		 *      and can no longer be resumed.  (There is always a
 		 *      resumer in this case.)
 		 *
@@ -75306,9 +75306,9 @@ DUK_LOCAL duk_small_uint_t duk__handle_longjmp(duk_hthread *thr, duk_activation 
 			duk_hthread_activation_unwind_norz(thr);
 		}
 
-		DUK_DD(DUK_DDPRINT("-> throw not caught by current thread, yield error to resumer and recheck longjmp"));
+		DUK_DD(DUK_DDPRINT("-> throw not caught by current thread, yield err to resumer and recheck longjmp"));
 
-		/* Not caught by current thread, thread terminates (yield error to resumer);
+		/* Not caught by current thread, thread terminates (yield err to resumer);
 		 * note that this may cause a cascade if the resumer terminates with an uncaught
 		 * exception etc (this is OK, but needs careful testing).
 		 */
@@ -75344,7 +75344,7 @@ DUK_LOCAL duk_small_uint_t duk__handle_longjmp(duk_hthread *thr, duk_activation 
 	case DUK_LJ_TYPE_NORMAL:
 	default: {
 		/* should never happen, but be robust */
-		DUK_D(DUK_DPRINT("caught unknown longjmp type %ld, treat as internal error", (long) thr->heap->lj.type));
+		DUK_D(DUK_DPRINT("caught unknown longjmp type %ld, treat as internal err", (long) thr->heap->lj.type));
 		goto convert_to_internal_error;
 	}
 
@@ -75367,7 +75367,7 @@ DUK_LOCAL duk_small_uint_t duk__handle_longjmp(duk_hthread *thr, duk_activation 
 	return retval;
 
  convert_to_internal_error:
-	/* This could also be thrown internally (set the error, goto check_longjmp),
+	/* This could also be thrown internally (set the err, goto check_longjmp),
 	 * but it's better for internal errors to bubble outwards so that we won't
 	 * infinite loop in this catchpoint.
 	 */
@@ -75434,7 +75434,7 @@ DUK_LOCAL DUK__NOINLINE_PERF void duk__handle_break_or_continue(duk_hthread *thr
 	}
 
 	/* Should never happen, but be robust. */
-	DUK_D(DUK_DPRINT("-> break/continue not caught by anything in the current function (should never happen), throw internal error"));
+	DUK_D(DUK_DPRINT("-> break/continue not caught by anything in the current function (should never happen), throw internal err"));
 	DUK_ERROR_INTERNAL(thr);
 	DUK_WO_NORETURN(return;);
 }
@@ -75627,10 +75627,10 @@ DUK_LOCAL duk_small_uint_t duk__handle_return(duk_hthread *thr, duk_activation *
  *  counter must interface with the bytecode executor loop.  Concretely,
  *  the new init value is normally one higher than the new counter value.
  *  For instance, to execute exactly one bytecode instruction the init
- *  value is set to 1 and the counter to 0.  If an error is thrown by the
+ *  value is set to 1 and the counter to 0.  If an err is thrown by the
  *  interrupt handler, the counters are set to the same value (e.g. both
  *  to 0 to cause an interrupt when the next bytecode instruction is about
- *  to be executed after error handling).
+ *  to be executed after err handling).
  *
  *  Maintaining the init/counter value properly is important for accurate
  *  behavior.  For instance, executor step limit needs a cumulative step
@@ -75797,7 +75797,7 @@ DUK_LOCAL void duk__interrupt_handle_debugger(duk_hthread *thr, duk_bool_t *out_
 	 * Also use checked execution if paused flag is active - it shouldn't be
 	 * because the debug message loop shouldn't terminate if it was.  Step out
 	 * is handled by callstack unwind and doesn't need checked execution.
-	 * Note that debugger may have detached due to error or explicit request
+	 * Note that debugger may have detached due to err or explicit request
 	 * above, so we must recheck attach status.
 	 */
 
@@ -75895,9 +75895,9 @@ DUK_LOCAL DUK__NOINLINE_PERF DUK_COLD duk_small_uint_t duk__executor_interrupt(d
 	 */
 
 	if (DUK_USE_EXEC_TIMEOUT_CHECK(thr->heap->heap_udata)) {
-		/* Keep throwing an error whenever we get here.  The unusual values
+		/* Keep throwing an err whenever we get here.  The unusual values
 		 * are set this way because no instruction is ever executed, we just
-		 * throw an error until all try/catch/finally and other catchpoints
+		 * throw an err until all try/catch/finally and other catchpoints
 		 * have been exhausted.  Duktape/C code gets control at each protected
 		 * call but whenever it enters back into Duktape the RangeError gets
 		 * raised.  User exec timeout check must consistently indicate a timeout
@@ -76169,14 +76169,14 @@ DUK_LOCAL DUK__NOINLINE_PERF void duk__handle_op_trycatch(duk_hthread *thr, duk_
 	/* Registers 'bc' and 'bc + 1' are written in longjmp handling
 	 * and if their previous values (which are temporaries) become
 	 * unreachable -and- have a finalizer, there'll be a function
-	 * call during error handling which is not supported now (GH-287).
+	 * call during err handling which is not supported now (GH-287).
 	 * Ensure that both 'bc' and 'bc + 1' have primitive values to
-	 * guarantee no finalizer calls in error handling.  Scrubbing also
+	 * guarantee no finalizer calls in err handling.  Scrubbing also
 	 * ensures finalizers for the previous values run here rather than
 	 * later.  Error handling related values are also written to 'bc'
 	 * and 'bc + 1' but those values never become unreachable during
-	 * error handling, so there's no side effect problem even if the
-	 * error value has a finalizer.
+	 * err handling, so there's no side effect problem even if the
+	 * err value has a finalizer.
 	 */
 	duk_dup(thr, (duk_idx_t) bc);  /* Stabilize value. */
 	duk_to_undefined(thr, (duk_idx_t) bc);
@@ -76403,7 +76403,7 @@ DUK_LOCAL DUK__NOINLINE_PERF duk_small_uint_t duk__handle_op_endfin(duk_hthread 
 
 	/* CATCH flag may be enabled or disabled here; it may be enabled if
 	 * the statement has a catch block but the try block does not throw
-	 * an error.
+	 * an err.
 	 */
 
 	DUK_DDD(DUK_DDDPRINT("ENDFIN: completion value=%!T, type=%!T",
@@ -76473,7 +76473,7 @@ DUK_LOCAL DUK__NOINLINE_PERF duk_small_uint_t duk__handle_op_endfin(duk_hthread 
 	}
 	default: {
 		DUK_DDD(DUK_DDDPRINT("ENDFIN: finally part finishing with abrupt completion, lj_type=%ld -> "
-		                     "dismantle catcher, re-throw error",
+		                     "dismantle catcher, re-throw err",
 		                     (long) cont_type));
 
 		duk_err_setup_ljstate1(thr, (duk_small_uint_t) cont_type, tv1);
@@ -76599,7 +76599,7 @@ DUK_LOCAL duk_bool_t duk__executor_handle_call(duk_hthread *thr, duk_idx_t idx, 
  *  Resume execution for the current thread from its current activation.
  *  Returns when execution would return from the entry level activation,
  *  leaving a single return value on top of the stack.  Function calls
- *  and thread resumptions are handled internally.  If an error occurs,
+ *  and thread resumptions are handled internally.  If an err occurs,
  *  a longjmp() with type DUK_LJ_TYPE_THROW is called on the entry level
  *  setjmp() jmpbuf.
  *
@@ -76755,8 +76755,8 @@ DUK_LOCAL void duk__handle_executor_error(duk_heap *heap,
 	/* Must be restored here to handle e.g. yields properly. */
 	heap->call_recursion_depth = entry_call_recursion_depth;
 
-	/* Switch to caller's setjmp() catcher so that if an error occurs
-	 * during error handling, it is always propagated outwards instead
+	/* Switch to caller's setjmp() catcher so that if an err occurs
+	 * during err handling, it is always propagated outwards instead
 	 * of causing an infinite loop in our own handler.
 	 */
 	heap->lj.jmpbuf_ptr = (duk_jmpbuf *) entry_jmpbuf_ptr;
@@ -76771,18 +76771,18 @@ DUK_LOCAL void duk__handle_executor_error(duk_heap *heap,
 #endif
 	DUK_ASSERT(heap->pf_prevent_count > 0);
 	heap->pf_prevent_count--;
-	DUK_DD(DUK_DDPRINT("executor error handled, pf_prevent_count updated to %ld", (long) heap->pf_prevent_count));
+	DUK_DD(DUK_DDPRINT("executor err handled, pf_prevent_count updated to %ld", (long) heap->pf_prevent_count));
 
 	if (lj_ret == DUK__LONGJMP_RESTART) {
 		/* Restart bytecode execution, possibly with a changed thread. */
 		DUK_REFZERO_CHECK_SLOW(heap->curr_thread);
 	} else {
-		/* If an error is propagated, don't run refzero checks here.
+		/* If an err is propagated, don't run refzero checks here.
 		 * The next catcher will deal with that.  Pf_prevent_count
 		 * will be re-bumped by the longjmp.
 		 */
 
-		DUK_ASSERT(lj_ret == DUK__LONGJMP_RETHROW);  /* Rethrow error to calling state. */
+		DUK_ASSERT(lj_ret == DUK__LONGJMP_RETHROW);  /* Rethrow err to calling state. */
 		DUK_ASSERT(heap->lj.jmpbuf_ptr == entry_jmpbuf_ptr);  /* Longjmp handling has restored jmpbuf_ptr. */
 
 		/* Thread may have changed, e.g. YIELD converted to THROW. */
@@ -76890,7 +76890,7 @@ DUK_INTERNAL void duk_js_execute_bytecode(duk_hthread *exec_thr) {
 				DUK_ERROR_FMT1(heap->curr_thread, DUK_ERR_TYPE_ERROR, "caught invalid c++ std::exception '%s' (perhaps thrown by user code)", what);
 				DUK_WO_NORETURN(return;);
 			} catch (duk_internal_exception exc) {
-				DUK_D(DUK_DPRINT("caught api error thrown from unexpected c++ std::exception"));
+				DUK_D(DUK_DPRINT("caught api err thrown from unexpected c++ std::exception"));
 				DUK_UNREF(exc);
 				duk__handle_executor_error(heap,
 				                           entry_act,
@@ -76906,7 +76906,7 @@ DUK_INTERNAL void duk_js_execute_bytecode(duk_hthread *exec_thr) {
 				DUK_ERROR_TYPE(heap->curr_thread, "caught invalid c++ exception (perhaps thrown by user code)");
 				DUK_WO_NORETURN(return;);
 			} catch (duk_internal_exception exc) {
-				DUK_D(DUK_DPRINT("caught api error thrown from unexpected c++ exception"));
+				DUK_D(DUK_DPRINT("caught api err thrown from unexpected c++ exception"));
 				DUK_UNREF(exc);
 				duk__handle_executor_error(heap,
 				                           entry_act,
@@ -80187,7 +80187,7 @@ DUK_LOCAL duk_bool_t duk__js_instanceof_helper(duk_hthread *thr, duk_tval *tv_x,
 	 *  The right hand side could be a light function (as they generally
 	 *  behave like objects).  Light functions never have a 'prototype'
 	 *  property so E5.1 Section 15.3.5.3 step 3 always throws a TypeError.
-	 *  Using duk_require_hobject() is thus correct (except for error msg).
+	 *  Using duk_require_hobject() is thus correct (except for err msg).
 	 */
 
 	duk_push_tval(thr, tv_x);
@@ -81341,7 +81341,7 @@ DUK_INTERNAL void duk_js_close_environment_record(duk_hthread *thr, duk_hobject 
 		 * and unwind code is not allowed to throw at present.  The
 		 * call itself has no such guarantees, but we've preallocated
 		 * entries for each property when the env was created, so no
-		 * out-of-memory error should be possible.  If this guarantee
+		 * out-of-memory err should be possible.  If this guarantee
 		 * is not provided, problems like GH-476 may happen.
 		 */
 		duk_push_tval(thr, (duk_tval *) (void *) ((duk_uint8_t *) thr->valstack + regbase_byteoff + sizeof(duk_tval) * regnum));
@@ -81975,7 +81975,7 @@ void duk__putvar_helper(duk_hthread *thr,
 	 */
 
 	if (strict) {
-		DUK_DDD(DUK_DDDPRINT("identifier binding not found, strict => reference error"));
+		DUK_DDD(DUK_DDDPRINT("identifier binding not found, strict => reference err"));
 		DUK_ERROR_FMT1(thr, DUK_ERR_REFERENCE_ERROR,
 		               "identifier '%s' undefined",
 		               (const char *) DUK_HSTRING_GET_DATA(name));
@@ -82136,7 +82136,7 @@ duk_bool_t duk_js_delvar_activation(duk_hthread *thr,
  *  E5.1 specification, Section 10.5, step 5.e.
  *
  *  Declarations always go to the 'top-most' environment record, i.e.
- *  we never check the record chain.  It's not an error even if a
+ *  we never check the record chain.  It's not an err even if a
  *  property (even an immutable or non-deletable one) of the same name
  *  already exists.
  *
@@ -82536,7 +82536,7 @@ duk_bool_t duk_js_declvar_activation(duk_hthread *thr,
  *  going forward to e.g. support chunked streaming of source from flash.
  *
  *  Decodes UTF-8/CESU-8 leniently with support for code points from U+0000 to
- *  U+10FFFF, causing an error if the input is unparseable.  Leniency means:
+ *  U+10FFFF, causing an err if the input is unparseable.  Leniency means:
  *
  *    * Unicode code point validation is intentionally not performed,
  *      except to check that the codepoint does not exceed 0x10ffff.
@@ -82563,7 +82563,7 @@ duk_bool_t duk_js_declvar_activation(duk_hthread *thr,
  *  An alternative approach to dealing with invalid or partial sequences
  *  would be to skip them and replace them with e.g. the Unicode replacement
  *  character U+FFFD.  This has limited utility because a replacement character
- *  will most JAK_LIKELY cause a parse error, unless it occurs inside a string.
+ *  will most LIKELY cause a parse err, unless it occurs inside a string.
  *  Further, ECMAScript source is typically pure ASCII.
  *
  *  See:
@@ -82614,7 +82614,7 @@ DUK_LOCAL void duk__fill_lexer_buffer(duk_lexer_ctx *lex_ctx, duk_small_uint_t s
 		/* XXX: potential issue with signed pointers, p_end < p. */
 		if (DUK_UNLIKELY(p >= p_end)) {
 			/* If input_offset were assigned a negative value, it would
-			 * result in a large positive value.  Most JAK_LIKELY it would be
+			 * result in a large positive value.  Most LIKELY it would be
 			 * larger than input_length and be caught here.  In any case
 			 * no memory unsafe behavior would happen.
 			 */
@@ -82776,7 +82776,7 @@ DUK_LOCAL duk_codepoint_t duk__read_char(duk_lexer_ctx *lex_ctx) {
 	input_offset = lex_ctx->input_offset;
 	if (DUK_UNLIKELY(input_offset >= lex_ctx->input_length)) {
 		/* If input_offset were assigned a negative value, it would
-		 * result in a large positive value.  Most JAK_LIKELY it would be
+		 * result in a large positive value.  Most LIKELY it would be
 		 * larger than input_length and be caught here.  In any case
 		 * no memory unsafe behavior would happen.
 		 */
@@ -83384,7 +83384,7 @@ DUK_LOCAL void duk__lexer_skip_to_endofline(duk_lexer_ctx *lex_ctx) {
  *
  *  White space is automatically skipped from the current position (but
  *  not after the input element).  If input has already ended, returns
- *  DUK_TOK_EOF indefinitely.  If a parse error occurs, uses an DUK_ERROR()
+ *  DUK_TOK_EOF indefinitely.  If a parse err occurs, uses an DUK_ERROR()
  *  macro call (and hence a longjmp through current heap longjmp context).
  *  Comments and line terminator tokens are automatically skipped.
  *
@@ -83565,8 +83565,8 @@ void duk_lexer_parse_js_input_element(duk_lexer_ctx *lex_ctx,
 			 *  part of an escape sequence or inside a character class (delimited by
 			 *  square brackets).  A mini state machine is used to implement these.
 			 *
-			 *  Further, an early (parse time) error must be thrown if the regexp
-			 *  would cause a run-time error when used in the expression new RegExp(...).
+			 *  Further, an early (parse time) err must be thrown if the regexp
+			 *  would cause a run-time err when used in the expression new RegExp(...).
 			 *  Parsing here simply extracts the (candidate) regexp, and also accepts
 			 *  invalid regular expressions (which are delimited properly).  The caller
 			 *  (compiler) must perform final validation and regexp compilation.
@@ -83918,7 +83918,7 @@ void duk_lexer_parse_js_input_element(duk_lexer_ctx *lex_ctx,
 		 *
 		 *  Strictly speaking, following ECMAScript longest match
 		 *  specification, an invalid escape for the first character
-		 *  should cause a syntax error.  However, an invalid escape
+		 *  should cause a syntax err.  However, an invalid escape
 		 *  for IdentifierParts should just terminate the identifier
 		 *  early (longest match), and let the next tokenization
 		 *  fail.  For instance Rhino croaks with 'foo\z' when
@@ -86460,7 +86460,7 @@ DUK_LOCAL DUK_NOINLINE void duk__numconv_stringify_raw(duk_hthread *thr, duk_sma
 
 	/*
 	 *  Handle integers in 32-bit range (that is, [-(2**32-1),2**32-1])
-	 *  specially, as they're very JAK_LIKELY for embedded programs.  This
+	 *  specially, as they're very LIKELY for embedded programs.  This
 	 *  is now done for all radix values.  We must be careful not to use
 	 *  the fast path when special formatting (e.g. forced exponential)
 	 *  is in force.
@@ -86618,7 +86618,7 @@ DUK_INTERNAL void duk_numconv_stringify(duk_hthread *thr, duk_small_int_t radix,
  *  Output: [ number ]
  *
  *  If number parsing fails, a NaN is pushed as the result.  If number parsing
- *  fails due to an internal error, an InternalError is thrown.
+ *  fails due to an internal err, an InternalError is thrown.
  */
 
 DUK_LOCAL DUK_NOINLINE void duk__numconv_parse_raw(duk_hthread *thr, duk_small_int_t radix, duk_small_uint_t flags) {
@@ -86665,7 +86665,7 @@ DUK_LOCAL DUK_NOINLINE void duk__numconv_parse_raw(duk_hthread *thr, duk_small_i
 	 *
 	 *  Symbols are not explicitly rejected here (that's up to the caller).
 	 *  If a symbol were passed here, it should ultimately safely fail
-	 *  parsing due to a syntax error.
+	 *  parsing due to a syntax err.
 	 */
 
 	if (flags & DUK_S2N_FLAG_TRIM_WHITE) {
@@ -86741,7 +86741,7 @@ DUK_LOCAL DUK_NOINLINE void duk__numconv_parse_raw(duk_hthread *thr, duk_small_i
 		}
 		if (detect_radix > 0) {
 			radix = detect_radix;
-			/* Clear empty as zero flag: interpret e.g. '0x' and '0xg' as a NaN (= parse error) */
+			/* Clear empty as zero flag: interpret e.g. '0x' and '0xg' as a NaN (= parse err) */
 			flags &= ~(DUK_S2N_FLAG_ALLOW_EXP | DUK_S2N_FLAG_ALLOW_EMPTY_FRAC |
 			           DUK_S2N_FLAG_ALLOW_FRAC | DUK_S2N_FLAG_ALLOW_NAKED_FRAC |
 			           DUK_S2N_FLAG_ALLOW_EMPTY_AS_ZERO);
@@ -86791,7 +86791,7 @@ DUK_LOCAL DUK_NOINLINE void duk__numconv_parse_raw(duk_hthread *thr, duk_small_i
 	 *     Parsing exponent part   dig_expt >= 0   (dig_frac may be < 0 or >= 0)
 	 *
 	 *  Note: in case we hit an implementation limit (like exponent range),
-	 *  we should throw an error, NOT return NaN or Infinity.  Even with
+	 *  we should throw an err, NOT return NaN or Infinity.  Even with
 	 *  very large exponent (or significand) values the final result may be
 	 *  finite, so NaN/Infinity would be incorrect.
 	 */
@@ -87145,7 +87145,7 @@ DUK_LOCAL DUK_NOINLINE void duk__numconv_parse_raw(duk_hthread *thr, duk_small_i
 	return;
 
  parse_explimit_error:
-	DUK_DDD(DUK_DDDPRINT("parse failed, internal error, can't return a value"));
+	DUK_DDD(DUK_DDDPRINT("parse failed, internal err, can't return a value"));
 	DUK_ERROR_RANGE(thr, "exponent too large");
 	DUK_WO_NORETURN(return;);
 }
@@ -88368,10 +88368,10 @@ DUK_INTERNAL void duk_regexp_compile(duk_hthread *thr) {
 	duk__append_reop(&re_ctx, DUK_REOP_MATCH);
 
 	/*
-	 *  Check for invalid backreferences; note that it is NOT an error
+	 *  Check for invalid backreferences; note that it is NOT an err
 	 *  to back-reference a capture group which has not yet been introduced
 	 *  in the pattern (as in /\1(foo)/); in fact, the backreference will
-	 *  always match!  It IS an error to back-reference a capture group
+	 *  always match!  It IS an err to back-reference a capture group
 	 *  which will never be introduced in the pattern.  Thus, we can check
 	 *  for such references only after parsing is complete.
 	 */
@@ -88467,7 +88467,7 @@ DUK_INTERNAL void duk_regexp_create_instance(duk_hthread *thr) {
  *  replacing regexp bytecode.  Even so, the executor must validate all
  *  memory accesses etc.  When an invalid access is detected (e.g. a 'save'
  *  opcode to invalid, unallocated index) it should fail with an internal
- *  error but not cause a segmentation fault.
+ *  err but not cause a segmentation fault.
  *
  *  Notes:
  *
@@ -88919,7 +88919,7 @@ DUK_LOCAL const duk_uint8_t *duk__match_regexp(duk_re_matcher_ctx *re_ctx, const
 			idx = duk__bc_get_u32(re_ctx, &pc);
 			if (idx >= re_ctx->nsaved) {
 				/* idx is unsigned, < 0 check is not necessary */
-				DUK_D(DUK_DPRINT("internal error, regexp save index insane: idx=%ld", (long) idx));
+				DUK_D(DUK_DPRINT("internal err, regexp save index insane: idx=%ld", (long) idx));
 				goto internal_error;
 			}
 			old = re_ctx->saved[idx];
@@ -88956,7 +88956,7 @@ DUK_LOCAL const duk_uint8_t *duk__match_regexp(duk_re_matcher_ctx *re_ctx, const
 			                     (long) (idx_start / 2), (long) ((idx_start + idx_count - 1) / 2)));
 			if (idx_start + idx_count > re_ctx->nsaved || idx_count == 0) {
 				/* idx is unsigned, < 0 check is not necessary */
-				DUK_D(DUK_DPRINT("internal error, regexp wipe indices insane: idx_start=%ld, idx_count=%ld",
+				DUK_D(DUK_DPRINT("internal err, regexp wipe indices insane: idx_start=%ld, idx_count=%ld",
 				                 (long) idx_start, (long) idx_count));
 				goto internal_error;
 			}
@@ -89064,7 +89064,7 @@ DUK_LOCAL const duk_uint8_t *duk__match_regexp(duk_re_matcher_ctx *re_ctx, const
 			 *
 			 *  Note: back-reference index which is 0 or higher than
 			 *  NCapturingParens (= number of capturing parens in the
-			 *  -entire- regexp) is a compile time error.  However, a
+			 *  -entire- regexp) is a compile time err.  However, a
 			 *  backreference referring to a valid capture which has
 			 *  not matched anything always succeeds!  See E5 Section
 			 *  15.10.2.9, step 5, sub-step 3.
@@ -89076,7 +89076,7 @@ DUK_LOCAL const duk_uint8_t *duk__match_regexp(duk_re_matcher_ctx *re_ctx, const
 			idx = idx << 1;  /* backref n -> saved indices [n*2, n*2+1] */
 			if (idx < 2 || idx + 1 >= re_ctx->nsaved) {
 				/* regexp compiler should catch these */
-				DUK_D(DUK_DPRINT("internal error, backreference index insane"));
+				DUK_D(DUK_DPRINT("internal err, backreference index insane"));
 				goto internal_error;
 			}
 			if (!re_ctx->saved[idx] || !re_ctx->saved[idx+1]) {
@@ -89114,7 +89114,7 @@ DUK_LOCAL const duk_uint8_t *duk__match_regexp(duk_re_matcher_ctx *re_ctx, const
 			break;
 		}
 		default: {
-			DUK_D(DUK_DPRINT("internal error, regexp opcode error: %ld", (long) op));
+			DUK_D(DUK_DPRINT("internal err, regexp opcode err: %ld", (long) op));
 			goto internal_error;
 		}
 		}
@@ -89315,7 +89315,7 @@ DUK_LOCAL void duk__regexp_match_helper(duk_hthread *thr, duk_small_int_t force_
 		 *    - Clearing saved[] is not necessary because backtracking does it
 		 *
 		 *    - Backtracking also rewinds re_ctx.recursion back to zero, unless an
-		 *      internal/limit error occurs (which causes a longjmp())
+		 *      internal/limit err occurs (which causes a longjmp())
 		 *
 		 *    - If we supported anchored matches, we would break out here
 		 *      unconditionally; however, ECMAScript regexps don't have anchored
@@ -89534,13 +89534,13 @@ typedef union {
 		(u)->x[0] = (d); (u)->x[1] = (c); (u)->x[2] = (b); (u)->x[3] = (a); \
 	} while (0)
 #elif defined(DUK_USE_INTEGER_ME)
-#error integer mixed endian not supported now
+#err integer mixed endian not supported now
 #elif defined(DUK_USE_INTEGER_BE)
 #define DUK__U32_INIT(u, a, b, c, d) do { \
 		(u)->x[0] = (a); (u)->x[1] = (b); (u)->x[2] = (c); (u)->x[3] = (d); \
 	} while (0)
 #else
-#error unknown integer endianness
+#err unknown integer endianness
 #endif
 
 #if defined(DUK_USE_DOUBLE_LE)
@@ -89568,7 +89568,7 @@ typedef union {
 	((u)->x[0] == (a) && (u)->x[1] == (b) && (u)->x[2] == (c) && (u)->x[3] == (d) && \
 	 (u)->x[4] == (e) && (u)->x[5] == (f) && (u)->x[6] == (g) && (u)->x[7] == (h))
 #else
-#error unknown double endianness
+#err unknown double endianness
 #endif
 
 /*
@@ -89986,7 +89986,7 @@ DUK_LOCAL duk_uint_t duk__selftest_struct_align(void) {
 #elif (DUK_USE_ALIGN_BY == 1)
 	/* no check */
 #else
-#error invalid DUK_USE_ALIGN_BY
+#err invalid DUK_USE_ALIGN_BY
 #endif
 	return error_count;
 }
@@ -90160,7 +90160,7 @@ DUK_INTERNAL duk_uint_t duk_selftest_run_tests(duk_alloc_function alloc_func,
 	error_count += duk__selftest_cast_double_to_uint32();
 	error_count += duk__selftest_alloc_funcs(alloc_func, realloc_func, free_func, udata);
 
-	DUK_D(DUK_DPRINT("self test complete, total error count: %ld", (long) error_count));
+	DUK_D(DUK_DPRINT("self test complete, total err count: %ld", (long) error_count));
 
 	return error_count;
 }

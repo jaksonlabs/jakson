@@ -1,11 +1,9 @@
-#include <jak_error.h>
-#include <jak_opt.h>
-
+#include <jakson/jakson.h>
 #include "modules.h"
 
 #define DESC_CHECK_JS "Test if JSON files are suitable for CARBON."
 #define DESC_CHECK_JS_USAGE "Test if input files given via <args> parameter are suitable for CARBON conversion.\n" \
-                            "\nEXAMPLE\n\t$ carbon checkjs myjson1.jak_json myjson2.jak_json"
+                            "\nEXAMPLE\n\t$ carbon checkjs myjson1.json myjson2.json"
 
 #define DESC_JS2CAB "Convert single JSON file into CARBON format"
 #define DESC_JS2CAB_USAGE "The parameter <args> is split into two parts <output> and <input>.\n" \
@@ -32,8 +30,8 @@
                           "                              parameter `--dic-type` is set to `async`.\n" \
                           "                              By default, 8 threads are spawned\n" \
                           "\nEXAMPLE\n" \
-                          "   $ jakson-tool convert out.carbon in.jak_json\n" \
-                          "   $ jakson-tool convert --size-optimized --read-optimized out.carbon in.jak_json" \
+                          "   $ jakson-tool convert out.carbon in.json\n" \
+                          "   $ jakson-tool convert --size-optimized --read-optimized out.carbon in.json" \
 
 #define DESC_CAB2JS_INFO  "Convert single CARBON file into JSON and print it to stdout"
 #define DESC_CAB2JS_USAGE "The parameter <args> is a path to a CARBON file that is converted JSON and printed on stdout.\n" \
@@ -55,10 +53,10 @@
 #define DEFINE_MODULE(module_name, moduleCommand, desc, invokeFunc)                                              \
 static int module##module_name##Entry(int argc, char **argv, FILE *file)                                         \
 {                                                                                                               \
-    jak_command_opt_mgr manager;                                                                        \
-    jak_opt_manager_create(&manager, moduleCommand, desc, JAK_MOD_ARG_REQUIRED, invokeFunc);            \
-    int status = jak_opt_manager_process(&manager, argc, argv, file);                                       \
-    jak_opt_manager_drop(&manager);                                                                         \
+    command_opt_mgr manager;                                                                        \
+    opt_manager_create(&manager, moduleCommand, desc, MOD_ARG_REQUIRED, invokeFunc);            \
+    int status = opt_manager_process(&manager, argc, argv, file);                                       \
+    opt_manager_drop(&manager);                                                                         \
     return status;                                                                                              \
 }
 
@@ -72,20 +70,20 @@ DEFINE_MODULE(Cab2Js, "to_json", DESC_CAB2JS_USAGE, moduleCab2JsInvoke);
 DEFINE_MODULE(List, "list", DESC_LIST_USAGE, moduleListInvoke);
 
 
-static bool showHelp(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager);
+static bool showHelp(int argc, char **argv, FILE *file, command_opt_mgr *manager);
 
 int main (int argc, char **argv)
 {
-    JAK_CONSOLE_OUTPUT_ON();
+    CONSOLE_OUTPUT_ON();
 
-    jak_command_opt_mgr manager;
-    jak_command_opt_group *group;
+    command_opt_mgr manager;
+    command_opt_group *group;
 
-    jak_opt_manager_create(&manager, "jakson-tool", "A tool to work with CARBON files.\n"
-                                 "Copyright (c) 2018-2019 Marcus Pinnecke (pinnecke@ovgu.de)", JAK_MOD_ARG_MAYBE_REQUIRED,
+    opt_manager_create(&manager, "jakson-tool", "A tool to work with CARBON files.\n"
+                                 "Copyright (c) 2018-2019 Marcus Pinnecke (pinnecke@ovgu.de)", MOD_ARG_MAYBE_REQUIRED,
                              showHelp);
 
-    jak_opt_manager_create_group(&group, "work with JSON files", &manager);
+    opt_manager_create_group(&group, "work with JSON files", &manager);
     opt_group_add_cmd(group,
                                 "checkjs", DESC_CHECK_JS,
                                 "manpages/types/checkjs",
@@ -95,7 +93,7 @@ int main (int argc, char **argv)
                                 "manpages/types/convert",
                                 moduleJs2CabEntry);
 
-    jak_opt_manager_create_group(&group, "work with CARBON files", &manager);
+    opt_manager_create_group(&group, "work with CARBON files", &manager);
     opt_group_add_cmd(group,
                                 "view", DESC_CAB_VIEW,
                                 "manpages/types/view",
@@ -109,21 +107,21 @@ int main (int argc, char **argv)
                                 "manpages/types/to_json",
                                 moduleCab2JsEntry);
 
-    jak_opt_manager_create_group(&group, "misc and orientation", &manager);
+    opt_manager_create_group(&group, "misc and orientation", &manager);
     opt_group_add_cmd(group,
                                 "list", DESC_LIST,
                                 "manpages/types/list",
                                 moduleListEntry);
 
-    int status = jak_opt_manager_process(&manager, argc - 1, argv + 1, stdout);
-    jak_opt_manager_drop(&manager);
+    int status = opt_manager_process(&manager, argc - 1, argv + 1, stdout);
+    opt_manager_drop(&manager);
     return status ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
-static bool showHelp(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager)
+static bool showHelp(int argc, char **argv, FILE *file, command_opt_mgr *manager)
 {
-    JAK_UNUSED(argc);
-    JAK_UNUSED(argv);
-    jak_opt_manager_show_help(file, manager);
+    UNUSED(argc);
+    UNUSED(argv);
+    opt_manager_show_help(file, manager);
     return true;
 }

@@ -427,7 +427,7 @@ struct duk_time_components {
 #define DUK_GC_COMPACT                    (1U << 0)    /* compact heap objects */
 
 /* Error codes (must be 8 bits at most, see duk_error.h) */
-#define DUK_ERR_NONE                      0    /* no error (e.g. from duk_get_error_code()) */
+#define DUK_ERR_NONE                      0    /* no err (e.g. from duk_get_error_code()) */
 #define DUK_ERR_ERROR                     1    /* Error */
 #define DUK_ERR_EVAL_ERROR                2    /* EvalError */
 #define DUK_ERR_RANGE_ERROR               3    /* RangeError */
@@ -436,7 +436,7 @@ struct duk_time_components {
 #define DUK_ERR_TYPE_ERROR                6    /* TypeError */
 #define DUK_ERR_URI_ERROR                 7    /* URIError */
 
-/* Return codes for C functions (shortcut for throwing an error) */
+/* Return codes for C functions (shortcut for throwing an err) */
 #define DUK_RET_ERROR                     (-DUK_ERR_ERROR)
 #define DUK_RET_EVAL_ERROR                (-DUK_ERR_EVAL_ERROR)
 #define DUK_RET_RANGE_ERROR               (-DUK_ERR_RANGE_ERROR)
@@ -463,7 +463,7 @@ struct duk_time_components {
  *  conflicting with the Duktape internal representation by e.g. prepending
  *  a '!' character: DUK_LOCAL_SYMBOL("myLocal", "!123").
  *
- *  Note that these can only be used for string constants, not dynamically
+ *  Note that these can only be used for string_buffer constants, not dynamically
  *  created strings.
  *
  *  You shouldn't normally use DUK_INTERNAL_SYMBOL() at all.  It is reserved
@@ -695,7 +695,7 @@ DUK_EXTERNAL_DECL void duk_push_pointer(duk_context *ctx, void *p);
 DUK_EXTERNAL_DECL const char *duk_push_sprintf(duk_context *ctx, const char *fmt, ...);
 DUK_EXTERNAL_DECL const char *duk_push_vsprintf(duk_context *ctx, const char *fmt, va_list ap);
 
-/* duk_push_literal() may evaluate its argument (a C string literal) more than
+/* duk_push_literal() may evaluate its argument (a C string_buffer literal) more than
  * once on purpose.  When speed is preferred, sizeof() avoids an unnecessary
  * strlen() at runtime.  Sizeof("foo") == 4, so subtract 1.  The argument
  * must be non-NULL and should not contain internal NUL characters as the
@@ -931,7 +931,7 @@ DUK_EXTERNAL_DECL duk_context *duk_opt_context(duk_context *ctx, duk_idx_t idx, 
 DUK_EXTERNAL_DECL void *duk_opt_heapptr(duk_context *ctx, duk_idx_t idx, void *def_value);
 
 /*
- *  Require operations: no coercion, throw error if index or type
+ *  Require operations: no coercion, throw err if index or type
  *  is incorrect.  No defaulting.
  */
 
@@ -972,9 +972,9 @@ DUK_EXTERNAL_DECL void *duk_require_heapptr(duk_context *ctx, duk_idx_t idx);
 
 /*
  *  Coercion operations: in-place coercion, return coerced value where
- *  applicable.  If index is invalid, throw error.  Some coercions may
- *  throw an expected error (e.g. from a toString() or valueOf() call)
- *  or an internal error (e.g. from out of memory).
+ *  applicable.  If index is invalid, throw err.  Some coercions may
+ *  throw an expected err (e.g. from a toString() or valueOf() call)
+ *  or an internal err (e.g. from out of memory).
  */
 
 DUK_EXTERNAL_DECL void duk_to_undefined(duk_context *ctx, duk_idx_t idx);
@@ -1046,8 +1046,8 @@ DUK_EXTERNAL_DECL void duk_config_buffer(duk_context *ctx, duk_idx_t idx, void *
 /*
  *  Property access
  *
- *  The basic function assumes key is on stack.  The _(l)string variant takes
- *  a C string as a property name; the _literal variant takes a C literal.
+ *  The basic function assumes key is on stack.  The _(l)string_buffer variant takes
+ *  a C string_buffer as a property name; the _literal variant takes a C literal.
  *  The _index variant takes an array index as a property name (e.g. 123 is
  *  equivalent to the key "123").  The _heapptr variant takes a raw, borrowed
  *  heap pointer.
@@ -1247,7 +1247,7 @@ DUK_EXTERNAL_DECL duk_int_t duk_compile_raw(duk_context *ctx, const char *src_bu
 #define duk_pcompile(ctx,flags)  \
 	(duk_compile_raw((ctx), NULL, 0, 2 /*args*/ | (flags) | DUK_COMPILE_SAFE))
 
-/* string */
+/* string_buffer */
 #define duk_eval_string(ctx,src)  \
 	((void) duk_eval_raw((ctx), (src), 0, 0 /*args*/ | DUK_COMPILE_EVAL | DUK_COMPILE_NOSOURCE | DUK_COMPILE_STRLEN | DUK_COMPILE_NOFILENAME))
 

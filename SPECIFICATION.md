@@ -14,9 +14,9 @@ In the following, ``u8``, ``u32``, and ``u64`` refer to a 8-bit, 32-bit resp. 64
 Using an EBNF notation, the structure of a CARBON file is:
 
 ```
-archive  ::= archive-header string-table record-header carbon-object baked-indexes
+archive  ::= archive-header string_buffer-table record-header carbon-object baked-indexes
 archive-header
-         ::= 'MP/CARBON' version record-offset string-id-offset-index-offset
+         ::= 'MP/CARBON' version record-offset string_buffer-id-offset-index-offset
 record-header
          ::= 'r' record-header-flags record-size
 record-header-flags
@@ -24,8 +24,8 @@ record-header-flags
 record-header-flags-8-bitmask
          ::= read-optimized-flag reserved-bit+
 baked-indexes         
-         ::= string-id-to-offset?
-string-id-to-offset
+         ::= string_buffer-id-to-offset?
+string_buffer-id-to-offset
          ::= '#' key-data-offset value-data-offset table-offset num-entries key-data value-data table-data
 key-data
          ::= vector-data                  
@@ -43,7 +43,7 @@ read-optimized-flag
 reserved-bit
          ::= '1'
            | '0'
-string-table
+string_buffer-table
          ::= 'D' num-strings table-flags first-entry-offset extra-field-size ( no-compressor | huffman-compressor )
 table-flags
          ::= table-flags-8-bitmask
@@ -56,17 +56,17 @@ huffman-compressed-flag
          ::= '1'
            | '0'
 no-compressor
-         ::= uncompressed-string+
-string-entry-header  
-         ::= '-' next-entry-offset string-id string-length 
-uncompressed-string
-         ::= string-entry-header character+
+         ::= uncompressed-string_buffer+
+string_buffer-entry-header  
+         ::= '-' next-entry-offset string_buffer-id string_buffer-length 
+uncompressed-string_buffer
+         ::= string_buffer-entry-header character+
 huffman-compressor
-         ::= huffman-dictionary huffman-string+
+         ::= huffman-dictionary huffman-string_buffer+
 huffman-dictionary
          ::= 'd' character prefix-length prefix-code+
-huffman-string
-         ::= string-entry-header data-length byte+
+huffman-string_buffer
+         ::= string_buffer-entry-header data-length byte+
 carbon-object
          ::= '{' object-id object-flags property-offset+ next-object columnified-props+ '}'
 columnified-props
@@ -123,7 +123,7 @@ nullable-column
 object-column
          ::= 'o' column-length offset-column positioning-column ( column-length carbon-object )+
 column-name
-         ::= string-id
+         ::= string_buffer-id
 length-column
          ::= u32+
 positioning-column
@@ -141,9 +141,9 @@ object-flags
 object-flags-32bitmask
          ::= prop-containment-13bitmask prop-array-containment-13bitmask reserved-bit+
 prop-containment-13bitmask
-         ::= has-null-props-flag has-bool-props-props-flag has-int8-props-flag has-int16-props-flag has-int32-props-flag has-int64-props-flag has-uint8-props-flag has- uint16-props-flag has-uint32-props-flag has-uint64-props-flag has-float-props-flag has-string-props-flag has-object-props-flag
+         ::= has-null-props-flag has-bool-props-props-flag has-int8-props-flag has-int16-props-flag has-int32-props-flag has-int64-props-flag has-uint8-props-flag has- uint16-props-flag has-uint32-props-flag has-uint64-props-flag has-float-props-flag has-string_buffer-props-flag has-object-props-flag
 prop-array-containment-13bitmask
-         ::= has-null-array-props-flag has-bool-props-array-props-flag has-int8-array-props-flag has-int16-array-props-flag has-int32-array-props-flag has-int64-array-props-flag has-uint8-array-props-flag has- uint16-array-props-flag has-uint32-array-props-flag has-uint64-array-props-flag has-float-array-props-flag has-string-array-props-flag has-object-array-props-flag
+         ::= has-null-array-props-flag has-bool-props-array-props-flag has-int8-array-props-flag has-int16-array-props-flag has-int32-array-props-flag has-int64-array-props-flag has-uint8-array-props-flag has- uint16-array-props-flag has-uint32-array-props-flag has-uint64-array-props-flag has-float-array-props-flag has-string_buffer-array-props-flag has-object-array-props-flag
 property-offset
          ::= u64
 column-length
@@ -151,7 +151,7 @@ column-length
 next-object
          ::= u64
 key-column
-         ::= string-id+
+         ::= string_buffer-id+
 value-column
          ::= ( nbyte | 'null' )+
 nbyte    
@@ -172,7 +172,7 @@ value-data-offset
          ::= u64 
 table-offset
          ::= u64
-string-id-offset-index-offset
+string_buffer-id-offset-index-offset
          ::= u64         
 prefix-length
          ::= u8
@@ -186,11 +186,11 @@ num-elements-32
          ::= u32
 cap-elements-32 
          ::= u32       
-string-length
+string_buffer-length
          ::= u32
 data-length
          ::= u32
-string-id
+string_buffer-id
          ::= u64
 object-id
          ::= u64

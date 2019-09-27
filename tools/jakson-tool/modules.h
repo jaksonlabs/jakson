@@ -17,17 +17,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef JAK_TOOLS_JAK_MODULES
-#define JAK_TOOLS_JAK_MODULES
+#ifndef TOOLS_MODULES
+#define TOOLS_MODULES
 
-#include <jak_opt.h>
+#include <jakson/std/opt.h>
 
-bool moduleCheckJsInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager);
-bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager);
-bool moduleViewCabInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager);
-bool moduleInspectInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager);
-bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager);
-bool moduleListInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager);
+bool moduleCheckJsInvoke(int argc, char **argv, FILE *file, command_opt_mgr *manager);
+bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, command_opt_mgr *manager);
+bool moduleViewCabInvoke(int argc, char **argv, FILE *file, command_opt_mgr *manager);
+bool moduleInspectInvoke(int argc, char **argv, FILE *file, command_opt_mgr *manager);
+bool moduleCab2JsInvoke(int argc, char **argv, FILE *file, command_opt_mgr *manager);
+bool moduleListInvoke(int argc, char **argv, FILE *file, command_opt_mgr *manager);
 
 
 #endif

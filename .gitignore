@@ -4,6 +4,7 @@
 *.cbp
 install_manifest.txt
 build
+bin
 cmake-build-debug
 CTestTestfile.cmake
 Testing/Temporary
@@ -28,3 +29,5 @@ cmake_install.cmake
 CMakeCache.txt
 
 libark-sources\.a
+
+include/
