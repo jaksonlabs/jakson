@@ -31,3 +31,4 @@ CMakeCache.txt
 libark-sources\.a
 
 include/
+libjakson-sources.a
