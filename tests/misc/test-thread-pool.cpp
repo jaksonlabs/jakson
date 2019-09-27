@@ -3,9 +3,9 @@
 #include <cmath>
 #include <fstream>
 
-#include <jak_priority_queue.h>
-#include <jak_thread_pool.h>
-#include <jak_thread_pool_monitor.h>
+#include <jakson/utils/jak_priority_queue.h>
+#include <jakson/std/jak_thread_pool.h>
+#include <jakson/std/thread_pool/jak_thread_pool_monitor.h>
 
 // Test if push and isEmpty works correkt
 TEST(PriorityQueue, IsEmpty)

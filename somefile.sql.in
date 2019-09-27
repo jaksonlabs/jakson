@@ -23,7 +23,7 @@
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <jak_error.h>
+#include <jakson/jak_error.h>
 
 JAK_BEGIN_DECL
 
@@ -788,7 +788,7 @@ JAK_END_DECL
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <jak_error.h>
+#include <jakson/jak_error.h>
 
 JAK_BEGIN_DECL
 
@@ -826,8 +826,8 @@ JAK_END_DECL
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <jak_error.h>
-#include <jak_archive.h>
+#include <jakson/jak_error.h>
+#include <jakson/jak_archive.h>
 
 JAK_BEGIN_DECL
 
@@ -1231,7 +1231,7 @@ JAK_END_DECL
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <jak_archive.h>
+#include <jakson/jak_archive.h>
 #include <jak_archive_strid_it.h>
 #include <jak_archive_pred.h>
 #include <jak_hash_table.h>
@@ -1287,7 +1287,7 @@ JAK_END_DECL
 
 #include <jak_stdinc.h>
 #include <jak_types.h>
-#include <jak_archive.h>
+#include <jakson/jak_archive.h>
 
 JAK_BEGIN_DECL
 
@@ -1335,7 +1335,7 @@ JAK_END_DECL
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include "jak_archive_it.h"
+#include <jakson/archive/jak_archive_it.h>
 
 typedef struct jak_path_entry {
         jak_archive_field_sid_t key;
@@ -1480,7 +1480,7 @@ bool jak_archive_visitor_path_compare(const jak_vector ofType(jak_path_entry) *p
 #include <stdlib.h>
 
 #include <jak_stdinc.h>
-#include <jak_error.h>
+#include <jakson/jak_error.h>
 
 JAK_BEGIN_DECL
 
@@ -1766,7 +1766,7 @@ JAK_END_DECL
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <jak_error.h>
+#include <jakson/jak_error.h>
 #include <jak_memblock.h>
 #include <jak_memfile.h>
 #include <jak_unique_id.h>
@@ -1777,7 +1777,7 @@ JAK_END_DECL
 #include <jak_alloc.h>
 #include <jak_bitmap.h>
 #include <jak_bloom.h>
-#include <jak_archive.h>
+#include <jakson/jak_archive.h>
 #include <jak_archive_it.h>
 #include <jak_archive_visitor.h>
 #include <jak_archive_converter.h>
@@ -1786,7 +1786,7 @@ JAK_END_DECL
 #include <jak_utils_convert.h>
 #include <jak_column_doc.h>
 #include <jak_doc.h>
-#include <jak_error.h>
+#include <jakson/jak_error.h>
 #include <jak_hash_table.h>
 #include <jak_hash.h>
 #include <jak_huffman.h>
@@ -1812,7 +1812,7 @@ JAK_END_DECL
 #include <jak_str_hash_mem.h>
 #include <jak_pred_contains.h>
 #include <jak_pred_equals.h>
-#include <jak_carbon_printers.h>
+#include <jakson/carbon/jak_carbon_printers.h>
 #include <jak_uintvar_stream.h>
 
 JAK_BEGIN_DECL
@@ -2009,11 +2009,11 @@ JAK_END_DECL
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <jak_error.h>
+#include <jakson/jak_error.h>
 #include <jak_vector.h>
 #include <jak_spinlock.h>
-#include <jak_carbon.h>
-#include <jak_carbon_field.h>
+#include <jakson/jak_carbon.h>
+#include <jakson/carbon/jak_carbon_field.h>
 
 JAK_BEGIN_DECL
 
@@ -2173,10 +2173,10 @@ JAK_END_DECL
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <jak_error.h>
+#include <jakson/jak_error.h>
 #include <jak_spinlock.h>
-#include <jak_carbon_field.h>
-#include <jak_carbon.h>
+#include <jakson/carbon/jak_carbon_field.h>
+#include <jakson/jak_carbon.h>
 
 JAK_BEGIN_DECL
 
@@ -2280,7 +2280,7 @@ JAK_END_DECL
 #define JAK_CARBON_COMMIT_HASH_H
 
 #include <jak_stdinc.h>
-#include <jak_error.h>
+#include <jakson/jak_error.h>
 #include <jak_memfile.h>
 #include <jak_string.h>
 
@@ -2325,12 +2325,12 @@ JAK_END_DECL
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <jak_error.h>
+#include <jakson/jak_error.h>
 #include <jak_types.h>
 #include <jak_string.h>
-#include <jak_carbon_array_it.h>
-#include <jak_carbon_column_it.h>
-#include <jak_carbon_object_it.h>
+#include <jakson/carbon/jak_carbon_array_it.h>
+#include <jakson/carbon/jak_carbon_column_it.h>
+#include <jakson/carbon/jak_carbon_object_it.h>
 
 JAK_BEGIN_DECL
 
@@ -2409,8 +2409,8 @@ JAK_END_DECL
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <jak_error.h>
-#include <jak_carbon.h>
+#include <jakson/jak_error.h>
+#include <jakson/jak_carbon.h>
 
 #ifndef JAK_CARBON_JAK_FIELD_H
 #define JAK_CARBON_JAK_FIELD_H
@@ -2575,13 +2575,13 @@ JAK_END_DECL
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <jak_error.h>
-#include <jak_carbon.h>
-#include <jak_carbon_column_it.h>
-#include <jak_carbon_array_it.h>
-#include <jak_carbon_object_it.h>
-#include <jak_carbon_dot.h>
-#include <jak_carbon_path.h>
+#include <jakson/jak_error.h>
+#include <jakson/jak_carbon.h>
+#include <jakson/carbon/jak_carbon_column_it.h>
+#include <jakson/carbon/jak_carbon_array_it.h>
+#include <jakson/carbon/jak_carbon_object_it.h>
+#include <jakson/carbon/jak_carbon_dot.h>
+#include <jakson/carbon/jak_carbon_path.h>
 
 JAK_BEGIN_DECL
 
@@ -2664,7 +2664,7 @@ JAK_END_DECL
 
 #include <jak_stdinc.h>
 #include <jak_types.h>
-#include <jak_carbon.h>
+#include <jakson/jak_carbon.h>
 
 JAK_BEGIN_DECL
 
@@ -2706,12 +2706,12 @@ JAK_END_DECL
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <jak_error.h>
+#include <jakson/jak_error.h>
 #include <jak_memblock.h>
 #include <jak_memfile.h>
 #include <jak_spinlock.h>
-#include <jak_carbon.h>
-#include <jak_carbon_int.h>
+#include <jakson/jak_carbon.h>
+#include <jakson/carbon/jak_carbon_int.h>
 
 JAK_BEGIN_DECL
 
@@ -2814,9 +2814,9 @@ JAK_END_DECL
 #include <jak_memfile.h>
 #include <jak_uintvar_stream.h>
 #include <jak_json.h>
-#include <jak_carbon_int.h>
-#include <jak_carbon_field.h>
-#include <jak_carbon_array_it.h>
+#include <jakson/carbon/jak_carbon_int.h>
+#include <jakson/carbon/jak_carbon_field.h>
+#include <jakson/carbon/jak_carbon_array_it.h>
 
 JAK_BEGIN_DECL
 
@@ -2957,8 +2957,8 @@ JAK_END_DECL
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <jak_error.h>
-#include <jak_carbon.h>
+#include <jakson/jak_error.h>
+#include <jakson/jak_carbon.h>
 #include <jak_memfile.h>
 
 JAK_BEGIN_DECL
@@ -3002,10 +3002,10 @@ JAK_END_DECL
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <jak_error.h>
+#include <jakson/jak_error.h>
 #include <jak_memfile.h>
-#include <jak_carbon.h>
-#include <jak_carbon_field.h>
+#include <jakson/jak_carbon.h>
+#include <jakson/carbon/jak_carbon_field.h>
 
 JAK_BEGIN_DECL
 
@@ -3751,10 +3751,10 @@ JAK_END_DECL
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <jak_error.h>
+#include <jakson/jak_error.h>
 #include <jak_memfile.h>
-#include <jak_carbon_field.h>
-#include <jak_carbon_array_it.h>
+#include <jakson/carbon/jak_carbon_field.h>
+#include <jakson/carbon/jak_carbon_array_it.h>
 
 JAK_BEGIN_DECL
 
@@ -3853,7 +3853,7 @@ JAK_END_DECL
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <jak_carbon_dot.h>
+#include <jakson/carbon/jak_carbon_dot.h>
 
 JAK_BEGIN_DECL
 
@@ -3929,10 +3929,10 @@ JAK_END_DECL
 #include <jak_stdinc.h>
 #include <jak_memfile.h>
 #include <jak_memblock.h>
-#include <jak_error.h>
-#include <jak_carbon.h>
-#include <jak_carbon_find.h>
-#include <jak_carbon_dot.h>
+#include <jakson/jak_error.h>
+#include <jakson/jak_carbon.h>
+#include <jakson/carbon/jak_carbon_find.h>
+#include <jakson/carbon/jak_carbon_dot.h>
 
 JAK_BEGIN_DECL
 
@@ -4196,7 +4196,7 @@ JAK_END_DECL
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <jak_carbon_field.h>
+#include <jakson/carbon/jak_carbon_field.h>
 
 JAK_BEGIN_DECL
 
@@ -4230,9 +4230,9 @@ JAK_END_DECL
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <jak_error.h>
+#include <jakson/jak_error.h>
 #include <jak_unique_id.h>
-#include <jak_carbon.h>
+#include <jakson/jak_carbon.h>
 
 JAK_BEGIN_DECL
 
@@ -4301,7 +4301,7 @@ JAK_END_DECL
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <jak_error.h>
+#include <jakson/jak_error.h>
 #include <jak_memfile.h>
 
 JAK_BEGIN_DECL
@@ -4347,14 +4347,14 @@ JAK_END_DECL
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <jak_error.h>
+#include <jakson/jak_error.h>
 #include <jak_memblock.h>
 #include <jak_memfile.h>
 #include <jak_spinlock.h>
-#include <jak_carbon.h>
-#include <jak_carbon_dot.h>
-#include <jak_carbon_path.h>
-#include <jak_carbon_int.h>
+#include <jakson/jak_carbon.h>
+#include <jakson/carbon/jak_carbon_dot.h>
+#include <jakson/carbon/jak_carbon_path.h>
+#include <jakson/carbon/jak_carbon_int.h>
 
 JAK_BEGIN_DECL
 
@@ -4876,7 +4876,7 @@ JAK_END_DECL
 #include <jak_hash_table.h>
 #include <jak_unique_id.h>
 #include <jak_types.h>
-#include <jak_archive.h>
+#include <jakson/jak_archive.h>
 
 JAK_BEGIN_DECL
 
@@ -6141,7 +6141,7 @@ JAK_END_DECL
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jak_carbon_printers.h>
+#include <jakson/carbon/jak_carbon_printers.h>
 
 bool jak_json_compact_printer_create(jak_carbon_printer *printer);
 
@@ -6170,7 +6170,7 @@ bool jak_json_compact_printer_create(jak_carbon_printer *printer);
 //  includes
 // ---------------------------------------------------------------------------------------------------------------------
 
-#include <jak_carbon_printers.h>
+#include <jakson/carbon/jak_carbon_printers.h>
 
 bool jak_json_extended_printer_create(jak_carbon_printer *printer);
 
@@ -6200,7 +6200,7 @@ bool jak_json_extended_printer_create(jak_carbon_printer *printer);
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <jak_error.h>
+#include <jakson/jak_error.h>
 
 JAK_BEGIN_DECL
 
@@ -7991,7 +7991,7 @@ JAK_END_DECL
 // ---------------------------------------------------------------------------------------------------------------------
 
 #include <jak_stdinc.h>
-#include <jak_error.h>
+#include <jakson/jak_error.h>
 
 JAK_BEGIN_DECL
 

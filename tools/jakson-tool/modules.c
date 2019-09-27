@@ -1,9 +1,9 @@
 
 #include <inttypes.h>
-#include <jak_pack.h>
-#include <jak_archive_query.h>
-#include <jak_archive_int.h>
-#include <jak_carbon.h>
+#include <jakson/archive/jak_pack.h>
+#include <jakson/archive/jak_archive_query.h>
+#include <jakson/archive/jak_archive_int.h>
+#include <jakson/jak_carbon.h>
 
 #include "modules.h"
 

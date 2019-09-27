@@ -852,7 +852,7 @@
 /* Shared includes: C89 */
 #include <stdio.h>
 #include <stdlib.h>
-#include <jak_string.h>
+#include <jakson/std/jak_string.h>
 #include <stdarg.h>  /* varargs */
 #include <setjmp.h>
 #include <stddef.h>  /* e.g. ptrdiff_t */

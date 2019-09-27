@@ -20,7 +20,7 @@
 #ifndef JAK_TOOLS_JAK_MODULES
 #define JAK_TOOLS_JAK_MODULES
 
-#include <jak_opt.h>
+#include <jakson/std/jak_opt.h>
 
 bool moduleCheckJsInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager);
 bool moduleJs2CabInvoke(int argc, char **argv, FILE *file, jak_command_opt_mgr *manager);
