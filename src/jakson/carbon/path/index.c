@@ -1464,7 +1464,7 @@ bool carbon_path_index_hexdump(FILE *file, carbon_path_index *index)
         return memfile_hexdump_printf(file, &index->memfile);
 }
 
-bool carbon_path_index_to_carbon(carbon *doc, carbon_path_index *index)
+fn_result carbon_path_index_to_carbon(carbon *doc, carbon_path_index *index)
 {
         carbon_new context;
         carbon_insert_object_state object;
@@ -1490,7 +1490,7 @@ bool carbon_path_index_to_carbon(carbon *doc, carbon_path_index *index)
 
         carbon_insert_object_end(&object);
         carbon_create_end(&context);
-        return true;
+        return FN_OK();
 }
 
 const char *carbon_path_index_to_str(string_buffer *str, carbon_path_index *index)

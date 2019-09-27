@@ -128,7 +128,7 @@ bool carbon_path_index_it_field_column_value(carbon_column_it *it_out, carbon_pa
 // ---------------------------------------------------------------------------------------------------------------------
 
 bool carbon_path_index_hexdump(FILE *file, carbon_path_index *index);
-bool carbon_path_index_to_carbon(carbon *doc, carbon_path_index *index);
+fn_result carbon_path_index_to_carbon(carbon *doc, carbon_path_index *index);
 const char *carbon_path_index_to_str(string_buffer *str, carbon_path_index *index);
 bool carbon_path_index_print(FILE *file, carbon_path_index *index);
 

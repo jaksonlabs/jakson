@@ -141,6 +141,7 @@ extern _Thread_local err global_error;
 #define ERR_NOERR_RESULT_INT 98         /** No ERROR, and result is 63bit int */
 #define ERR_NOERR_RESULT_UINT 99        /** No ERROR, and result is 63bit unsigned int */
 #define ERR_NOERR_RESULT_PTR 100        /** No ERROR, and result is 63bit pointer */
+#define ERR_PERMISSIONS 101             /** Permissions error */
 
 static const char *const global_err_str[] =
         {"No error", "Null pointer detected", "Function not implemented", "Index is out of bounds",
@@ -189,8 +190,8 @@ static const char *const global_err_str[] =
          "dot-notated path could not be parsed", "Illegal state", "Unsupported data type", "Operation failed",
          "Cleanup operation failed; potentially a memory leak occurred", "dot-notated path could not be compiled",
          "not a number", "buffer capacity exceeded", "tailing junk was detected in a stream", "not indexed",
-         "result is boolean", "result is 63bit int", "result is 63bit unsigned int", "result is 63bit pointer"
-
+         "result is boolean", "result is 63bit int", "result is 63bit unsigned int", "result is 63bit pointer",
+         "Permissions error"
         };
 
 #define ERRSTR_ILLEGAL_CODE "illegal ERROR code"

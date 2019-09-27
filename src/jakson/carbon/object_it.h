@@ -75,7 +75,7 @@ bool carbon_object_it_remove(carbon_object_it *it);
 bool carbon_object_it_prop_type(carbon_field_type_e *type, carbon_object_it *it);
 
 bool carbon_object_it_insert_begin(carbon_insert *inserter, carbon_object_it *it);
-bool carbon_object_it_insert_end(carbon_insert *inserter);
+fn_result carbon_object_it_insert_end(carbon_insert *inserter);
 
 bool carbon_object_it_lock(carbon_object_it *it);
 bool carbon_object_it_unlock(carbon_object_it *it);

@@ -286,9 +286,9 @@ bool carbon_object_it_insert_begin(carbon_insert *inserter, carbon_object_it *it
         return carbon_int_insert_create_for_object(inserter, it);
 }
 
-bool carbon_object_it_insert_end(carbon_insert *inserter)
+fn_result carbon_object_it_insert_end(carbon_insert *inserter)
 {
-        ERROR_IF_NULL(inserter)
+        FN_FAIL_IF_NULL(inserter)
         return carbon_insert_drop(inserter);
 }
 

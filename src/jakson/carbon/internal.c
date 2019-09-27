@@ -1548,7 +1548,7 @@ static void int_carbon_from_json_elem(carbon_insert *ins, const json_element *el
         }
 }
 
-bool carbon_int_from_json(carbon *doc, const json *data,
+fn_result carbon_int_from_json(carbon *doc, const json *data,
                           carbon_key_e key_type, const void *primary_key, int mode)
 {
         UNUSED(data)
@@ -1560,7 +1560,7 @@ bool carbon_int_from_json(carbon *doc, const json *data,
 
         carbon_create_end(&context);
 
-        return true;
+        return FN_OK();
 }
 
 static void marker_insert(memfile *memfile, u8 marker)

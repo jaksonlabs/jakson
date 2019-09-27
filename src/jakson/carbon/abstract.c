@@ -275,6 +275,28 @@ fn_result carbon_abstract_class_to_list_derivable(carbon_list_derivable_e *out, 
         return FN_OK();
 }
 
+fn_result carbon_abstract_list_derivable_to_class(carbon_abstract_type_class_e *out, carbon_list_derivable_e in)
+{
+        FN_FAIL_IF_NULL(out)
+        switch (in) {
+                case CARBON_LIST_UNSORTED_MULTISET:
+                        *out = CARBON_TYPE_UNSORTED_MULTISET;
+                        break;
+                case CARBON_LIST_SORTED_MULTISET:
+                        *out = CARBON_TYPE_SORTED_MULTISET;
+                        break;
+                case CARBON_LIST_UNSORTED_SET:
+                        *out = CARBON_TYPE_UNSORTED_SET;
+                        break;
+                case CARBON_LIST_SORTED_SET:
+                        *out = CARBON_TYPE_SORTED_SET;
+                        break;
+                default:
+                        return FN_FAIL(ERR_TYPEMISMATCH, "abstract class type does not encode a list type");
+        }
+        return FN_OK();
+}
+
 fn_result carbon_abstract_write_base_type(memfile *memfile, carbon_container_sub_type_e type)
 {
         FN_FAIL_IF_NULL(memfile)

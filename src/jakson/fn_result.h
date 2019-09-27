@@ -84,6 +84,28 @@ typedef struct fn_result {
         __result;                                                     \
 })
 
+/* use this macro to produce a function fail with forwarded error message from expr that returns a fn_result object if
+ * this fn_result object encodes a function call fail */
+#define FN_FAIL_FORWARD_IF_NOT_OK(expr)                                 \
+        if (!FN_IS_OK(expr)) {                                          \
+                return FN_FAIL_FORWARD();                               \
+        }
+
+/* use this macro to produce a function fail with forwarded error message from expr that returns a fn_result object if
+ * this fn_result object encodes a function call fail */
+#define FN_IF_NOT_OK_RETURN(expr, ret)                                  \
+        if (!FN_IS_OK(expr)) {                                          \
+                return (ret);                                           \
+        }
+
+/* use this macro to produce a function fail with forwarded error message from fn_result_obj that returns a fn_result
+ * object carrying a boolean value, if this boolean value is not true or the function call for fn_result_obj had a
+ * failure */
+#define FN_FAIL_FORWARD_IF_NOT_TRUE(fn_result_obj)                      \
+        if (!FN_BOOL(fn_result_obj)) {                                  \
+                return FN_FAIL_FORWARD();                               \
+        }
+
 // ---------------------------------------------------------------------------------------------------------------------
 //  function err state resolver macro about success or fail of a function call
 // ---------------------------------------------------------------------------------------------------------------------
@@ -103,17 +125,17 @@ typedef struct fn_result {
         fn_true_ret;                                                                                                   \
 })
 
-/* returns the signed 32bit integer value carried by a success function call; undefined for not successful calls */
+/* returns the signed 32bit integer value carried by a successful function call; undefined for not successful calls */
 #define FN_INT(result)            __RESULT_EXTRACT_VALUE(result, iu32, RESULT_INT_VALUE)
 
-/* returns the unsigned 32bit integer value carried by a success function call; undefined for not successful calls */
+/* returns the unsigned 32bit integer value carried by a successful function call; undefined for not successful calls */
 #define FN_UINT(result)           __RESULT_EXTRACT_VALUE(result, u32, RESULT_UINT_VALUE)
 
-/* returns the boolean value carried by a success function call; undefined for not successful calls */
+/* returns the boolean value carried by a successful function call; undefined for not successful calls */
 #define FN_BOOL(result)           __RESULT_EXTRACT_VALUE(result, bool, RESULT_BOOL_VALUE)
 
-/* returns the pointer value carried by a success function call and cast it to T*; undefined for not successful calls */
-#define FN_PTR(result, T)         ((T *) __RESULT_EXTRACT_VALUE(result, void *, RESULT_PTR_VALUE))
+/* returns the pointer value carried by a successful function call and cast it to T*; undefined for not successful calls */
+#define FN_PTR(T, result)         ((T *) __RESULT_EXTRACT_VALUE(result, void *, RESULT_PTR_VALUE))
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  helper macro to check if a list of (up to eleven) function parameters is non-null
@@ -122,23 +144,49 @@ typedef struct fn_result {
 /* constructs a new fn_result that encodes an unsuccessful call with err code 'null pointer' if one of the arguments
  * is a pointer to NULL */
 #define FN_FAIL_IF_NULL(...)                                                                                           \
-    if (!__fn_test_nonnull(VA_ARGS_LENGTH(__VA_ARGS__), __VA_ARGS__)) {                                        \
-        return RESULT_FAIL(ERR_NULLPTR, "function argument is not allowed to be null");                        \
+    if (!__fn_test_nonnull(VA_ARGS_LENGTH(__VA_ARGS__), __VA_ARGS__)) {                                                \
+        return RESULT_FAIL(ERR_NULLPTR, "function argument is not allowed to be null");                                \
     }
+
+// ---------------------------------------------------------------------------------------------------------------------
+//  breakouts of the fn_result environment
+// ---------------------------------------------------------------------------------------------------------------------
+
+/* break outside the fn_result environment by converting an fn_result object to a boolean, which is true if
+ * the object does not carry a boolean value but the function call was successful, and which is true if
+ * the object carries a "true" boolean value and the function call was successful, or false otherwise */
+#define FN_STATUS(expr)                                                                                                \
+({                                                                                                                     \
+        fn_result result = (expr);                                                                                     \
+        (__fn_result_is_ok(result) && (!RESULT_HAS_VALUE(result) ||                                                    \
+                                       (RESULT_HAS_VALUE(result) && __fn_result_is_bool(result) &&                     \
+                                        __fn_result_bool(result))));                                                   \
+})
+
+#define FN_GET_PTR(T, expr)                                                                                            \
+({                                                                                                                     \
+        void *__get_ptr_ret = NULL;                                                                                    \
+        fn_result __get_ptr_result = (expr);                                                                           \
+        if (__fn_result_is_ok(__get_ptr_result) && RESULT_HAS_VALUE(__get_ptr_result) &&                               \
+            __fn_result_is_ptr(__get_ptr_result)) {                                                                    \
+                __get_ptr_ret = __fn_result_ptr(__get_ptr_result);                                                     \
+        }                                                                                                              \
+        ((T *)__get_ptr_ret);                                                                                          \
+})
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  lower-level macros, no need to use them outside this module
 // ---------------------------------------------------------------------------------------------------------------------
 
 #define RESULT_OK()                                                   \
-({                                                                        \
+({                                                                    \
         fn_result __result;                                           \
         __fn_result_ok(&__result);                                    \
         __result;                                                     \
 })
 
 #define RESULT_OK_INT(int32_value)                                    \
-({                                                                        \
+({                                                                    \
         fn_result __result;                                           \
         __fn_result_ok_int32(&__result, int32_value);                 \
         __result;                                                     \
@@ -175,8 +223,9 @@ typedef struct fn_result {
 #define __RESULT_EXTRACT_VALUE(result, result_type, result_fn)        \
 ({                                                                        \
         result_type __retval;                                         \
-        if (LIKELY(RESULT_IS_OK(result))) {                       \
-                __retval = result_fn(result);                         \
+        fn_result __call_result = (result);                     \
+        if (LIKELY(RESULT_IS_OK(__call_result))) {                       \
+                __retval = result_fn(__call_result);                         \
         } else {                                                          \
                 return FN_FAIL_FORWARD();                                 \
         }                                                                 \
@@ -205,7 +254,7 @@ typedef struct fn_result {
     __fn_result_error_code(result)
 
 #define RESULT_GET_LAST_ERROR()                                       \
-    &global_error;
+    (&global_error)
 
 void __fn_result_ok(fn_result *result);
 void __fn_result_fail(fn_result *result, error_code code, const char *file, u32 line, const char *msg);

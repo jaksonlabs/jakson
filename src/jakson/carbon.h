@@ -73,6 +73,7 @@
 #include <jakson/std/uintvar/stream.h>
 #include <jakson/carbon/markers.h>
 #include <jakson/carbon/abstract.h>
+#include <jakson/fn_result.h>
 
 BEGIN_DECL
 
@@ -186,10 +187,10 @@ typedef enum carbon_key_type {
  *  deduplication and sorting work. Instead, the annotation stores the semantics of that particular container, which
  *  functionality must be effectively implemented at caller site.
  */
-carbon_insert *carbon_create_begin(carbon_new *context, carbon *doc, carbon_key_e type, int options);
-bool carbon_create_end(carbon_new *context);
-bool carbon_create_empty(carbon *doc, carbon_list_derivable_e derivation, carbon_key_e type);
-bool carbon_create_empty_ex(carbon *doc, carbon_list_derivable_e derivation, carbon_key_e type, u64 doc_cap, u64 array_cap);
+carbon_insert * carbon_create_begin(carbon_new *context, carbon *doc, carbon_key_e type, int options);
+fn_result carbon_create_end(carbon_new *context);
+fn_result carbon_create_empty(carbon *doc, carbon_list_derivable_e derivation, carbon_key_e type);
+fn_result carbon_create_empty_ex(carbon *doc, carbon_list_derivable_e derivation, carbon_key_e type, u64 doc_cap, u64 array_cap);
 
 bool carbon_from_json(carbon *doc, const char *json, carbon_key_e type, const void *key, err *err);
 bool carbon_from_raw_data(carbon *doc, err *err, const void *data, u64 len);
@@ -211,13 +212,21 @@ bool carbon_key_is_string(carbon_key_e type);
 bool carbon_clone(carbon *clone, carbon *doc);
 bool carbon_commit_hash(u64 *hash, carbon *doc);
 
+/* Checks if the records most-outer array is annotated as a multi set abstract type. Returns true if the record
+ * is a multi set, and false if the record is a set. In case of any error, a failure is returned. */
+fn_result ofType(bool) carbon_is_multiset(carbon *doc);
+
+/* Checks if the records most-outer array is annotated as a sorted abstract type. Returns true if this is the case,
+ * otherwise false. In case of any error, a failure is returned. */
+fn_result ofType(bool) carbon_is_sorted(carbon *doc);
+
 bool carbon_to_str(string_buffer *dst, carbon_printer_impl_e printer, carbon *doc);
 const char *carbon_to_json_extended(string_buffer *dst, carbon *doc);
 const char *carbon_to_json_compact(string_buffer *dst, carbon *doc);
 char *carbon_to_json_extended_dup(carbon *doc);
 char *carbon_to_json_compact_dup(carbon *doc);
-bool carbon_iterator_open(carbon_array_it *it, carbon *doc);
-bool carbon_iterator_close(carbon_array_it *it);
+fn_result carbon_iterator_open(carbon_array_it *it, carbon *doc);
+fn_result carbon_iterator_close(carbon_array_it *it);
 bool carbon_print(FILE *file, carbon_printer_impl_e printer, carbon *doc);
 bool carbon_hexdump_print(FILE *file, carbon *doc);
 

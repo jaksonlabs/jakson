@@ -27,35 +27,31 @@ static inline carbon_path_status_e traverse_array(carbon_path_evaluator *state,
                                                      const carbon_dot_path *path, u32 current_path_pos,
                                                      carbon_array_it *it, bool is_record);
 
-bool carbon_path_evaluator_begin(carbon_path_evaluator *eval, carbon_dot_path *path,
+fn_result carbon_path_evaluator_begin(carbon_path_evaluator *eval, carbon_dot_path *path,
                                  carbon *doc)
 {
-        ERROR_IF_NULL(eval)
-        ERROR_IF_NULL(path)
-        ERROR_IF_NULL(doc)
+        FN_FAIL_IF_NULL(eval, path, doc)
 
         ZERO_MEMORY(eval, sizeof(carbon_path_evaluator));
         eval->doc = doc;
-        CHECK_SUCCESS(error_init(&eval->err));
-        CHECK_SUCCESS(carbon_iterator_open(&eval->root_it, eval->doc));
+        error_init(&eval->err);
+        FN_FAIL_FORWARD_IF_NOT_OK(carbon_iterator_open(&eval->root_it, eval->doc));
         eval->status = traverse_array(eval, path, 0, &eval->root_it, true);
-        CHECK_SUCCESS(carbon_iterator_close(&eval->root_it));
-        return true;
+        FN_FAIL_FORWARD_IF_NOT_OK(carbon_iterator_close(&eval->root_it));
+        return FN_OK();
 }
 
-bool carbon_path_evaluator_begin_mutable(carbon_path_evaluator *eval, const carbon_dot_path *path,
+fn_result carbon_path_evaluator_begin_mutable(carbon_path_evaluator *eval, const carbon_dot_path *path,
                                          carbon_revise *context)
 {
-        ERROR_IF_NULL(eval)
-        ERROR_IF_NULL(path)
-        ERROR_IF_NULL(context)
+        FN_FAIL_IF_NULL(eval, path, context)
 
         eval->doc = context->revised_doc;
-        CHECK_SUCCESS(error_init(&eval->err));
-        CHECK_SUCCESS(carbon_revise_iterator_open(&eval->root_it, context));
+        error_init(&eval->err);
+        FN_FAIL_FORWARD_IF_NOT_OK(carbon_revise_iterator_open(&eval->root_it, context));
         eval->status = traverse_array(eval, path, 0, &eval->root_it, true);
-        CHECK_SUCCESS(carbon_iterator_close(&eval->root_it));
-        return true;
+        FN_FAIL_FORWARD_IF_NOT_OK(carbon_iterator_close(&eval->root_it));
+        return FN_OK();
 }
 
 bool carbon_path_evaluator_status(carbon_path_status_e *status, carbon_path_evaluator *state)
@@ -66,10 +62,10 @@ bool carbon_path_evaluator_status(carbon_path_status_e *status, carbon_path_eval
         return true;
 }
 
-bool carbon_path_evaluator_has_result(carbon_path_evaluator *state)
+fn_result ofType(bool) carbon_path_evaluator_has_result(carbon_path_evaluator *state)
 {
-        ERROR_IF_NULL(state)
-        return state->status == CARBON_PATH_RESOLVED;
+        FN_FAIL_IF_NULL(state)
+        return FN_OK_BOOL(state->status == CARBON_PATH_RESOLVED);
 }
 
 bool carbon_path_evaluator_end(carbon_path_evaluator *state)

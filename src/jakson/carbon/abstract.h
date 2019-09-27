@@ -217,6 +217,9 @@ typedef enum carbon_map_derivable
  * a list type, the function fails */
 fn_result carbon_abstract_class_to_list_derivable(carbon_list_derivable_e *out, carbon_abstract_type_class_e in);
 
+/* Converts a list derivable type to an abstract type class. In case of error, the function fails. */
+fn_result carbon_abstract_list_derivable_to_class(carbon_abstract_type_class_e *out, carbon_list_derivable_e in);
+
 /* Writes the marker for a particular base type to the actual position in the memory file, and steps
  * the memory file cursor one byte towards the end. */
 fn_result carbon_abstract_write_base_type(memfile *memfile, carbon_container_sub_type_e type);

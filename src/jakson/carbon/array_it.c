@@ -132,12 +132,10 @@ bool carbon_array_it_update_in_place_null(carbon_array_it *it)
         return update_in_place_constant(it, CARBON_CONSTANT_NULL);
 }
 
-bool carbon_array_it_create(carbon_array_it *it, memfile *memfile, err *err,
+fn_result carbon_array_it_create(carbon_array_it *it, memfile *memfile, err *err,
                             offset_t payload_start)
 {
-        ERROR_IF_NULL(it);
-        ERROR_IF_NULL(memfile);
-        ERROR_IF_NULL(err);
+        FN_FAIL_IF_NULL(it, memfile, err);
 
         ZERO_MEMORY(it, sizeof(carbon_array_it));
 
@@ -154,9 +152,19 @@ bool carbon_array_it_create(carbon_array_it *it, memfile *memfile, err *err,
 
         ERROR_IF(memfile_remain_size(&it->memfile) < sizeof(u8), err, ERR_CORRUPTED);
 
-        u8 marker = *memfile_read(&it->memfile, sizeof(u8));
-        ERROR_IF_WDETAILS(marker != CARBON_MARRAY_BEGIN, err, ERR_ILLEGALOP,
-                              "array begin marker ('[') not found");
+        fn_result ofType(bool) instance = carbon_abstract_is_instanceof_array(&it->memfile);
+        if (!FN_IS_OK(instance)) {
+                return FN_FAIL_FORWARD();
+        } else {
+                if (!FN_BOOL(instance)) {
+                        return FN_FAIL(ERR_MARKERMAPPING, "expected array or sub type marker");
+                }
+        }
+        carbon_abstract_type_class_e type_class;
+        carbon_abstract_get_class(&type_class, &it->memfile);
+        carbon_abstract_class_to_list_derivable(&it->abstract_type, type_class);
+        memfile_skip(&it->memfile, sizeof(u8));
+
 
         it->payload_start += sizeof(u8);
 
@@ -164,7 +172,7 @@ bool carbon_array_it_create(carbon_array_it *it, memfile *memfile, err *err,
 
         carbon_array_it_rewind(it);
 
-        return true;
+        return FN_OK();
 }
 
 bool carbon_array_it_copy(carbon_array_it *dst, carbon_array_it *src)
@@ -217,12 +225,12 @@ bool carbon_array_it_is_empty(carbon_array_it *it)
         return carbon_array_it_next(it);
 }
 
-bool carbon_array_it_drop(carbon_array_it *it)
+fn_result carbon_array_it_drop(carbon_array_it *it)
 {
         carbon_int_field_auto_close(&it->field_access);
         carbon_int_field_access_drop(&it->field_access);
         vector_drop(&it->history);
-        return true;
+        return FN_OK();
 }
 
 /**
@@ -442,16 +450,15 @@ carbon_column_it *carbon_array_it_column_value(carbon_array_it *it_in)
         return carbon_int_field_access_column_value(&it_in->field_access, &it_in->err);
 }
 
-bool carbon_array_it_insert_begin(carbon_insert *inserter, carbon_array_it *it)
+fn_result carbon_array_it_insert_begin(carbon_insert *inserter, carbon_array_it *it)
 {
-        ERROR_IF_NULL(inserter)
-        ERROR_IF_NULL(it)
+        FN_FAIL_IF_NULL(inserter, it)
         return carbon_int_insert_create_for_array(inserter, it);
 }
 
-bool carbon_array_it_insert_end(carbon_insert *inserter)
+fn_result carbon_array_it_insert_end(carbon_insert *inserter)
 {
-        ERROR_IF_NULL(inserter)
+        FN_FAIL_IF_NULL(inserter)
         return carbon_insert_drop(inserter);
 }
 
@@ -472,4 +479,24 @@ bool carbon_array_it_remove(carbon_array_it *it)
                 ERROR(&it->err, ERR_ILLEGALSTATE);
                 return false;
         }
+}
+
+/* Checks if this array is annotated as a multi set abstract type. Returns true if it is is a multi set, and false if
+ * it is a set. In case of any error, a failure is returned. */
+fn_result ofType(bool) carbon_array_it_is_multiset(carbon_array_it *it)
+{
+        FN_FAIL_IF_NULL(it)
+        carbon_abstract_type_class_e type_class;
+        carbon_abstract_list_derivable_to_class(&type_class, it->abstract_type);
+        return carbon_abstract_is_multiset(type_class);
+}
+
+/* Checks if this array is annotated as a sorted abstract type. Returns true if this is the case,
+ * otherwise false. In case of any error, a failure is returned. */
+fn_result ofType(bool) carbon_array_it_is_sorted(carbon_array_it *it)
+{
+        FN_FAIL_IF_NULL(it)
+        carbon_abstract_type_class_e type_class;
+        carbon_abstract_list_derivable_to_class(&type_class, it->abstract_type);
+        return carbon_abstract_is_sorted(type_class);
 }

@@ -53,12 +53,12 @@ typedef struct carbon_path_evaluator {
         } result;
 } carbon_path_evaluator;
 
-bool carbon_path_evaluator_begin(carbon_path_evaluator *eval, carbon_dot_path *path, carbon *doc);
-bool carbon_path_evaluator_begin_mutable(carbon_path_evaluator *eval, const carbon_dot_path *path, carbon_revise *context);
+fn_result carbon_path_evaluator_begin(carbon_path_evaluator *eval, carbon_dot_path *path, carbon *doc);
+fn_result carbon_path_evaluator_begin_mutable(carbon_path_evaluator *eval, const carbon_dot_path *path, carbon_revise *context);
 bool carbon_path_evaluator_end(carbon_path_evaluator *state);
 
 bool carbon_path_evaluator_status(carbon_path_status_e *status, carbon_path_evaluator *state);
-bool carbon_path_evaluator_has_result(carbon_path_evaluator *state);
+fn_result ofType(bool) carbon_path_evaluator_has_result(carbon_path_evaluator *state);
 bool carbon_path_exists(carbon *doc, const char *path);
 
 bool carbon_path_is_array(carbon *doc, const char *path);
