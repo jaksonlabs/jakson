@@ -264,7 +264,7 @@ static inline uint_fast32_t _hash_table_insert_or_update(hashtable *map, const u
 
                 next_round:
                 if (map->size >= FIX_MAP_AUTO_REHASH_LOADFACTOR * map->table.cap_elems) {
-                        return i + 1; /* tell the caller that pair i was inserted, but it successors not */
+                        return i + 1; /** tell the caller that pair i was inserted, but it successors not */
                 }
 
         }
@@ -305,7 +305,7 @@ bool hashtable_insert_or_update(hashtable *map, const void *keys, const void *va
                                             values + cont_idx * map->value_data.elem_size,
                                             num_pairs - cont_idx);
                 if (cont_idx != 0) {
-                        /* rehashing is required, and [status, num_pairs) are left to be inserted */
+                        /** rehashing is required, and [status, num_pairs) are left to be inserted */
                         if (!hashtable_rehash(map)) {
                                 hashtable_unlock(map);
                                 return false;

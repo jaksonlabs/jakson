@@ -108,7 +108,7 @@ typedef struct carbon_new {
         carbon_revise revision_context;
         carbon_array_it *content_it;
         carbon_insert *inserter;
-        /* options shrink or compact (or both) documents, see
+        /** options shrink or compact (or both) documents, see
          * CARBON_KEEP, CARBON_SHRINK, CARBON_COMPACT, and CARBON_OPTIMIZE  */
         int mode;
 } carbon_new;
@@ -120,25 +120,25 @@ typedef enum carbon_printer_impl {
 #define CARBON_NIL_STR "_nil"
 
 typedef enum carbon_key_type {
-        /* no key, no revision number */
+        /** no key, no revision number */
         CARBON_KEY_NOKEY = CARBON_MNOKEY,
-        /* auto-generated 64bit unsigned integer key */
+        /** auto-generated 64bit unsigned integer key */
         CARBON_KEY_AUTOKEY = CARBON_MAUTOKEY,
-        /* user-defined 64bit unsigned integer key */
+        /** user-defined 64bit unsigned integer key */
         CARBON_KEY_UKEY = CARBON_MUKEY,
-        /* user-defined 64bit signed integer key */
+        /** user-defined 64bit signed integer key */
         CARBON_KEY_IKEY = CARBON_MIKEY,
-        /* user-defined n-char string_buffer key */
+        /** user-defined n-char string_buffer key */
         CARBON_KEY_SKEY = CARBON_MSKEY
 } carbon_key_e;
 
-#define CARBON_KEEP              0x00 /* do not shrink, do not compact, use UNSORTED_MULTISET (equiv. JSON array) */
-#define CARBON_SHRINK            0x01 /* perform shrinking, i.e., remove tail-buffer from carbon file */
-#define CARBON_COMPACT           0x02 /* perform compacting, i.e., remove reserved memory from containers */
-#define CARBON_UNSORTED_MULTISET 0x04 /* annotate the record outer-most array as unsorted multi set */
-#define CARBON_SORTED_MULTISET   0x08 /* annotate the record outer-most array as sorted multi set */
-#define CARBON_UNSORTED_SET      0x10 /* annotate the record outer-most array as unsorted set */
-#define CARBON_SORTED_SET        0x20 /* annotate the record outer-most array as sorted set */
+#define CARBON_KEEP              0x00 /** do not shrink, do not compact, use UNSORTED_MULTISET (equiv. JSON array) */
+#define CARBON_SHRINK            0x01 /** perform shrinking, i.e., remove tail-buffer from carbon file */
+#define CARBON_COMPACT           0x02 /** perform compacting, i.e., remove reserved memory from containers */
+#define CARBON_UNSORTED_MULTISET 0x04 /** annotate the record outer-most array as unsorted multi set */
+#define CARBON_SORTED_MULTISET   0x08 /** annotate the record outer-most array as sorted multi set */
+#define CARBON_UNSORTED_SET      0x10 /** annotate the record outer-most array as unsorted set */
+#define CARBON_SORTED_SET        0x20 /** annotate the record outer-most array as sorted set */
 
 #define CARBON_OPTIMIZE          (CARBON_SHRINK | CARBON_COMPACT | CARBON_UNSORTED_MULTISET)
 

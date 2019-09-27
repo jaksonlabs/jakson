@@ -295,7 +295,7 @@ bool carbon_array_it_next(carbon_array_it *it)
                 carbon_int_history_push(&it->history, last_off);
                 return true;
         } else {
-                /* skip remaining zeros until end of array is reached */
+                /** skip remaining zeros until end of array is reached */
                 if (!it->array_end_reached) {
                         ERROR_IF(!is_empty_slot, &it->err, ERR_CORRUPTED);
 

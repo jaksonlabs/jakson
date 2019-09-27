@@ -413,7 +413,7 @@ bool archive_from_model(memblock **stream, err *err, column_doc *model,
         memfile_shrink(&memfile);
 
         if (bake_string_id_index) {
-                /* create string_buffer id to offset index, and append it to the CARBON file */
+                /** create string_buffer id to offset index, and append it to the CARBON file */
                 OPTIONAL_CALL(callback, begin_string_id_index_baking);
                 if (!run_string_id_baking(err, stream)) {
                         return false;
@@ -1085,7 +1085,7 @@ static bool write_object_array_props(memfile *memfile, err *err,
                                                                             column_doc_group);
                         offset_t this_column_offset_relative = memfile_tell(memfile) - root_object_header_offset;
 
-                        /* write an object-id for each position number */
+                        /** write an object-id for each position number */
                         size_t max_pos = 0;
                         for (size_t k = 0; k < column_group->columns.num_elems; k++) {
                                 column_doc_column

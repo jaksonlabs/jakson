@@ -30,13 +30,13 @@
 
 BEGIN_DECL
 
-typedef u8 media_type; /* byte to determine type at hand (e.g., JSON array, string_buffer, null, ...) */
+typedef u8 media_type; /** byte to determine type at hand (e.g., JSON array, string_buffer, null, ...) */
 
 static struct mime_type {
         const char *type;
         const char *ext;
 
-} global_mime_type_register[] = { /* the entries in this list must be sorted by extension! */
+} global_mime_type_register[] = { /** the entries in this list must be sorted by extension! */
         {"application/vnd.lotus-1-2-3",                                               "123"},
         {"text/vnd.in3d.3dml",                                                        "3dml"},
         {"video/3gpp2",                                                               "3g2"},

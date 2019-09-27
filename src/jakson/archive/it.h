@@ -60,10 +60,10 @@ typedef enum prop_iter_state {
 } prop_iter_state_e;
 
 typedef struct archive_object {
-        unique_id_t object_id;                  /* unique object id */
-        offset_t offset;                        /* this objects header offset */
-        archive_prop_offs prop_offsets;  /* per-property type offset in the record table byte stream */
-        offset_t next_obj_off;                  /* offset to next object in list, or NULL if no such exists */
+        unique_id_t object_id;                  /** unique object id */
+        offset_t offset;                        /** this objects header offset */
+        archive_prop_offs prop_offsets;  /** per-property type offset in the record table byte stream */
+        offset_t next_obj_off;                  /** offset to next object in list, or NULL if no such exists */
         memfile memfile;
         err err;
 } archive_object;
@@ -74,12 +74,12 @@ typedef enum prop_iter_mode {
 } prop_iter_mode_e;
 
 typedef struct object_iter_state {
-        fixed_prop prop_group_header;    /* type, num props and keys */
+        fixed_prop prop_group_header;    /** type, num props and keys */
         offset_t current_prop_group_off;
         offset_t prop_data_off;
-        const archive_field_sid_t *keys;                /* current property key in this iteration */
-        enum archive_field_type type;                   /* property basic value type (e.g., int8, or object) */
-        bool is_array;                          /* flag indicating that property is an array type */
+        const archive_field_sid_t *keys;                /** current property key in this iteration */
+        enum archive_field_type type;                   /** property basic value type (e.g., int8, or object) */
+        bool is_array;                          /** flag indicating that property is an array type */
 } object_iter_state;
 
 typedef struct collection_iter_state {
@@ -111,14 +111,14 @@ typedef struct collection_iter_state {
 } collection_iter_state;
 
 typedef struct archive_value_vector {
-        prop_iter *prop_iter;            /* pointer to property iterator that created this iterator */
-        memfile record_table_memfile;    /* iterator-local read-only mem on archive record table */
-        enum archive_field_type prop_type;              /* property basic value type (e.g., int8, or object) */
-        bool is_array;                          /* flag indicating whether value type is an array or not */
-        offset_t data_off;                      /* offset in mem where type-dependent data begins */
-        u32 value_max_idx;                      /* maximum index of a value callable by 'at' functions */
-        err err;                         /* ERROR information */
-        unique_id_t object_id;                  /* current object id */
+        prop_iter *prop_iter;            /** pointer to property iterator that created this iterator */
+        memfile record_table_memfile;    /** iterator-local read-only mem on archive record table */
+        enum archive_field_type prop_type;              /** property basic value type (e.g., int8, or object) */
+        bool is_array;                          /** flag indicating whether value type is an array or not */
+        offset_t data_off;                      /** offset in mem where type-dependent data begins */
+        u32 value_max_idx;                      /** maximum index of a value callable by 'at' functions */
+        err err;                         /** ERROR information */
+        unique_id_t object_id;                  /** current object id */
         const archive_field_sid_t *keys;
         union {
                 struct {
@@ -164,20 +164,20 @@ typedef struct archive_value_vector {
 } archive_value_vector;
 
 typedef struct prop_iter {
-        archive_object object;                 /* current object */
-        memfile record_table_memfile;          /* iterator-local read-only mem on archive record table */
-        u16 mask;                                     /* user-defined mask which properties to include */
-        prop_iter_mode_e mode;                     /* determines whether to iterating over object or collection */
-        err err;                               /* ERROR information */
-        prop_iter_state_e prop_cursor;             /* current property type in iteration */
+        archive_object object;                 /** current object */
+        memfile record_table_memfile;          /** iterator-local read-only mem on archive record table */
+        u16 mask;                                     /** user-defined mask which properties to include */
+        prop_iter_mode_e mode;                     /** determines whether to iterating over object or collection */
+        err err;                               /** ERROR information */
+        prop_iter_state_e prop_cursor;             /** current property type in iteration */
         object_iter_state mode_object;
         collection_iter_state mode_collection;
 } prop_iter;
 
 typedef struct independent_iter_state {
-        memfile record_table_memfile;           /* iterator-local read-only mem on archive record table */
-        collection_iter_state state;            /* iterator-local state */
-        err err;                                /* ERROR information */
+        memfile record_table_memfile;           /** iterator-local read-only mem on archive record table */
+        collection_iter_state state;            /** iterator-local state */
+        err err;                                /** ERROR information */
 } independent_iter_state;
 
 typedef struct column_object_iter {

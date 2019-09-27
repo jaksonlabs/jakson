@@ -22,7 +22,7 @@
 bool pack_none_init(packer *self)
 {
         UNUSED(self);
-        /* nothing to do for uncompressed dictionaries */
+        /** nothing to do for uncompressed dictionaries */
         return true;
 }
 
@@ -30,7 +30,7 @@ bool pack_none_cpy(const packer *self, packer *dst)
 {
         CHECK_TAG(self->tag, PACK_NONE);
 
-        /* nothing to hard copy but the function pointers */
+        /** nothing to hard copy but the function pointers */
         *dst = *self;
         return true;
 }
@@ -40,7 +40,7 @@ bool pack_none_drop(packer *self)
         CHECK_TAG(self->tag, PACK_NONE);
 
         UNUSED(self);
-        /* nothing to do for uncompressed dictionaries */
+        /** nothing to do for uncompressed dictionaries */
         return true;
 }
 
@@ -52,7 +52,7 @@ bool pack_none_write_extra(packer *self, memfile *dst,
         UNUSED(self);
         UNUSED(dst);
         UNUSED(strings);
-        /* nothing to do for uncompressed dictionaries */
+        /** nothing to do for uncompressed dictionaries */
         return true;
 }
 
@@ -63,7 +63,7 @@ bool pack_none_read_extra(packer *self, FILE *src, size_t nbytes)
         UNUSED(self);
         UNUSED(src);
         UNUSED(nbytes);
-        /* nothing to do for uncompressed dictionaries */
+        /** nothing to do for uncompressed dictionaries */
         return true;
 }
 
@@ -74,7 +74,7 @@ bool pack_none_print_extra(packer *self, FILE *file, memfile *src)
         UNUSED(self);
         UNUSED(file);
         UNUSED(src);
-        /* nothing to do for uncompressed dictionaries */
+        /** nothing to do for uncompressed dictionaries */
         return true;
 }
 

@@ -40,7 +40,7 @@
 #include <jakson/carbon/printers/compact.h>
 #include <jakson/carbon/printers/extended.h>
 
-#define MIN_DOC_CAPACITY 17 /* minimum number of bytes required to store header and empty document array */
+#define MIN_DOC_CAPACITY 17 /** minimum number of bytes required to store header and empty document array */
 
 static bool internal_drop(carbon *doc);
 
@@ -57,7 +57,7 @@ carbon_insert *carbon_create_begin(carbon_new *context, carbon *doc,
                 context->inserter = MALLOC(sizeof(carbon_insert));
                 context->mode = options;
 
-                /* get the annotation type for that records outer-most array from options*/
+                /** get the annotation type for that records outer-most array from options*/
                 carbon_list_derivable_e derivation;
 
                 if (context->mode & CARBON_SORTED_MULTISET) {
@@ -66,7 +66,7 @@ carbon_insert *carbon_create_begin(carbon_new *context, carbon *doc,
                         derivation = CARBON_LIST_UNSORTED_SET;
                 } else if (context->mode & CARBON_SORTED_SET) {
                         derivation = CARBON_LIST_SORTED_SET;
-                } else { /* CARBON_UNSORTED_MULTISET is default */
+                } else { /** CARBON_UNSORTED_MULTISET is default */
                         derivation = CARBON_LIST_UNSORTED_MULTISET;
                 }
 

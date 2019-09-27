@@ -379,7 +379,7 @@ signed_offset_t memfile_ensure_space(memfile *memfile, u64 nbytes)
         for (u32 i = 0; i < nbytes; i++) {
                 char c = *memfile_read(memfile, 1);
                 if (UNLIKELY(c != 0)) {
-                        /* not enough space; enlarge container */
+                        /** not enough space; enlarge container */
                         memfile_seek(memfile, current_off);
                         memfile_inplace_insert(memfile, nbytes - i);
                         shift += nbytes - i;

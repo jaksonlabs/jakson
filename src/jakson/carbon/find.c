@@ -422,7 +422,7 @@ static void result_from_array(carbon_find *find, carbon_array_it *it)
                 case CARBON_FIELD_NULL:
                 case CARBON_FIELD_TRUE:
                 case CARBON_FIELD_FALSE:
-                        /* no value to be stored */
+                        /** no value to be stored */
                         break;
                 case CARBON_FIELD_ARRAY_UNSORTED_MULTISET:
                 case CARBON_FIELD_DERIVED_ARRAY_SORTED_MULTISET:
@@ -512,7 +512,7 @@ static void result_from_object(carbon_find *find, carbon_object_it *it)
                 case CARBON_FIELD_NULL:
                 case CARBON_FIELD_TRUE:
                 case CARBON_FIELD_FALSE:
-                        /* no value to be stored */
+                        /** no value to be stored */
                         break;
                 case CARBON_FIELD_ARRAY_UNSORTED_MULTISET:
                 case CARBON_FIELD_DERIVED_ARRAY_SORTED_MULTISET:

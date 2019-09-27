@@ -164,17 +164,17 @@ static void _json_printer_compact_val_string(carbon_printer *self, string_buffer
 
 static void _json_printer_compact_print_binary(carbon_printer *self, string_buffer *builder, const carbon_binary *binary)
 {
-        /* base64 code will be written into the extra's buffer after a null-terminated copy of the binary data */
+        /** base64 code will be written into the extra's buffer after a null-terminated copy of the binary data */
         struct json_compact_extra *extra = (struct json_compact_extra *) self->extra;
-        /* buffer of at least 2x data length for base64 code + 1x data length to hold the null-terminated value */
+        /** buffer of at least 2x data length for base64 code + 1x data length to hold the null-terminated value */
         size_t required_buff_size = 3 * (binary->blob_len + 1);
-        /* increase buffer capacity if needed */
+        /** increase buffer capacity if needed */
         if (extra->buffer_size < required_buff_size) {
                 extra->buffer_size = required_buff_size * 1.7f;
                 extra->buffer = realloc(extra->buffer, extra->buffer_size);
                 ERROR_PRINT_IF(!extra->buffer, ERR_REALLOCERR);
         }
-        /* decrease buffer capacity if needed */
+        /** decrease buffer capacity if needed */
         if (extra->buffer_size * 0.3f > required_buff_size) {
                 extra->buffer_size = required_buff_size;
                 extra->buffer = realloc(extra->buffer, extra->buffer_size);
@@ -183,7 +183,7 @@ static void _json_printer_compact_print_binary(carbon_printer *self, string_buff
 
         JAK_ASSERT(extra->buffer_size >= required_buff_size);
         ZERO_MEMORY(extra->buffer, extra->buffer_size);
-        /* copy binary data into buffer, and leave one (zero'd) byte free; null-termination is required by libb64 */
+        /** copy binary data into buffer, and leave one (zero'd) byte free; null-termination is required by libb64 */
         memcpy(data_of(extra->buffer), binary->blob, binary->blob_len);
 
         string_buffer_add(builder, "{ ");

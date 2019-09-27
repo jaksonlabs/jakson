@@ -29,9 +29,9 @@
 BEGIN_DECL
 
 typedef struct hashset_bucket {
-        bool in_use_flag;  /* flag indicating if bucket is in use */
-        i32 displacement; /* difference between intended position during insert, and actual position in table */
-        u64 key_idx;      /* position of key element in owning hashset structure */
+        bool in_use_flag;  /** flag indicating if bucket is in use */
+        i32 displacement; /** difference between intended position during insert, and actual position in table */
+        u64 key_idx;      /** position of key element in owning hashset structure */
 } hashset_bucket;
 
 /**

@@ -288,16 +288,16 @@ bool carbon_column_it_remove(carbon_column_it *it, u32 pos)
 
         offset_t payload_start = carbon_int_column_get_payload_off(it);
 
-        /* remove element */
+        /** remove element */
         size_t elem_size = carbon_int_get_type_value_size(it->type);
         memfile_seek(&it->memfile, payload_start + pos * elem_size);
         memfile_inplace_remove(&it->memfile, elem_size);
 
-        /* add an empty element at the end to restore the column capacity property */
+        /** add an empty element at the end to restore the column capacity property */
         memfile_seek(&it->memfile, payload_start + it->column_num_elements * elem_size);
         memfile_inplace_insert(&it->memfile, elem_size);
 
-        /* update element counter */
+        /** update element counter */
         memfile_seek(&it->memfile, it->num_and_capacity_start_offset);
         u32 num_elems = memfile_peek_uintvar_stream(NULL, &it->memfile);
         JAK_ASSERT(num_elems > 0);
@@ -472,7 +472,7 @@ static bool rewrite_column_to_array(carbon_column_it *it)
         carbon_abstract_get_class(&type_class, &it->memfile);
         carbon_abstract_class_to_list_derivable(&list_type, type_class);
 
-        /* Potentially tailing space after the last ']' marker of the outer most array is used for temporary space */
+        /** Potentially tailing space after the last ']' marker of the outer most array is used for temporary space */
         memfile_seek_to_end(&it->memfile);
         offset_t array_marker_begin = memfile_tell(&it->memfile);
 

@@ -28,102 +28,102 @@
 #define CARBON_FIELD_H
 
 typedef enum carbon_field_type {
-        /* constants */
-        CARBON_FIELD_NULL = CARBON_MNULL, /* null */
-        CARBON_FIELD_TRUE = CARBON_MTRUE, /* true */
-        CARBON_FIELD_FALSE = CARBON_MFALSE, /* false */
+        /** constants */
+        CARBON_FIELD_NULL = CARBON_MNULL, /** null */
+        CARBON_FIELD_TRUE = CARBON_MTRUE, /** true */
+        CARBON_FIELD_FALSE = CARBON_MFALSE, /** false */
 
-        /* containers / abstract base types */
-        CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP = CARBON_UNSORTED_MULTIMAP, /* object */
-        CARBON_FIELD_ARRAY_UNSORTED_MULTISET = CARBON_UNSORTED_MULTISET_ARRAY, /* variable-type array of elements of varying type */
-        CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET = CARBON_UNSORTED_MULTISET_COL_U8, /* fixed-type array of elements of particular type */
-        CARBON_FIELD_COLUMN_U16_UNSORTED_MULTISET = CARBON_UNSORTED_MULTISET_COL_U16, /* fixed-type array of elements of particular type */
-        CARBON_FIELD_COLUMN_U32_UNSORTED_MULTISET = CARBON_UNSORTED_MULTISET_COL_U32, /* fixed-type array of elements of particular type */
-        CARBON_FIELD_COLUMN_U64_UNSORTED_MULTISET = CARBON_UNSORTED_MULTISET_COL_U64, /* fixed-type array of elements of particular type */
-        CARBON_FIELD_COLUMN_I8_UNSORTED_MULTISET = CARBON_UNSORTED_MULTISET_COL_I8, /* fixed-type array of elements of particular type */
-        CARBON_FIELD_COLUMN_I16_UNSORTED_MULTISET = CARBON_UNSORTED_MULTISET_COL_I16, /* fixed-type array of elements of particular type */
-        CARBON_FIELD_COLUMN_I32_UNSORTED_MULTISET = CARBON_UNSORTED_MULTISET_COL_I32, /* fixed-type array of elements of particular type */
-        CARBON_FIELD_COLUMN_I64_UNSORTED_MULTISET = CARBON_UNSORTED_MULTISET_COL_I64, /* fixed-type array of elements of particular type */
-        CARBON_FIELD_COLUMN_FLOAT_UNSORTED_MULTISET = CARBON_UNSORTED_MULTISET_COL_FLOAT, /* fixed-type array of elements of particular type */
-        CARBON_FIELD_COLUMN_BOOLEAN_UNSORTED_MULTISET = CARBON_UNSORTED_MULTISET_COL_BOOLEAN, /* fixed-type array of elements of particular type */
+        /** containers / abstract base types */
+        CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP = CARBON_UNSORTED_MULTIMAP, /** object */
+        CARBON_FIELD_ARRAY_UNSORTED_MULTISET = CARBON_UNSORTED_MULTISET_ARRAY, /** variable-type array of elements of varying type */
+        CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET = CARBON_UNSORTED_MULTISET_COL_U8, /** fixed-type array of elements of particular type */
+        CARBON_FIELD_COLUMN_U16_UNSORTED_MULTISET = CARBON_UNSORTED_MULTISET_COL_U16, /** fixed-type array of elements of particular type */
+        CARBON_FIELD_COLUMN_U32_UNSORTED_MULTISET = CARBON_UNSORTED_MULTISET_COL_U32, /** fixed-type array of elements of particular type */
+        CARBON_FIELD_COLUMN_U64_UNSORTED_MULTISET = CARBON_UNSORTED_MULTISET_COL_U64, /** fixed-type array of elements of particular type */
+        CARBON_FIELD_COLUMN_I8_UNSORTED_MULTISET = CARBON_UNSORTED_MULTISET_COL_I8, /** fixed-type array of elements of particular type */
+        CARBON_FIELD_COLUMN_I16_UNSORTED_MULTISET = CARBON_UNSORTED_MULTISET_COL_I16, /** fixed-type array of elements of particular type */
+        CARBON_FIELD_COLUMN_I32_UNSORTED_MULTISET = CARBON_UNSORTED_MULTISET_COL_I32, /** fixed-type array of elements of particular type */
+        CARBON_FIELD_COLUMN_I64_UNSORTED_MULTISET = CARBON_UNSORTED_MULTISET_COL_I64, /** fixed-type array of elements of particular type */
+        CARBON_FIELD_COLUMN_FLOAT_UNSORTED_MULTISET = CARBON_UNSORTED_MULTISET_COL_FLOAT, /** fixed-type array of elements of particular type */
+        CARBON_FIELD_COLUMN_BOOLEAN_UNSORTED_MULTISET = CARBON_UNSORTED_MULTISET_COL_BOOLEAN, /** fixed-type array of elements of particular type */
 
-        /* abstract derived types for object containers */
+        /** abstract derived types for object containers */
         CARBON_FIELD_DERIVED_OBJECT_SORTED_MULTIMAP = CARBON_SORTED_MULTIMAP,
         CARBON_FIELD_DERIVED_OBJECT_CARBON_UNSORTED_MAP = CARBON_UNSORTED_MAP,
         CARBON_FIELD_DERIVED_OBJECT_CARBON_SORTED_MAP = CARBON_SORTED_MAP,
 
-        /* abstract derived types for array containers */
+        /** abstract derived types for array containers */
         CARBON_FIELD_DERIVED_ARRAY_SORTED_MULTISET = CARBON_SORTED_MULTISET_ARRAY,
         CARBON_FIELD_DERIVED_ARRAY_UNSORTED_SET = CARBON_UNSORTED_SET_ARRAY,
         CARBON_FIELD_DERIVED_ARRAY_SORTED_SET = CARBON_SORTED_SET_ARRAY,
 
-        /* abstract derived types for column-u8 containers */
+        /** abstract derived types for column-u8 containers */
         CARBON_FIELD_DERIVED_COLUMN_U8_SORTED_MULTISET = CARBON_SORTED_MULTISET_COL_U8,
         CARBON_FIELD_DERIVED_COLUMN_U8_UNSORTED_SET = CARBON_UNSORTED_SET_COL_U8,
         CARBON_FIELD_DERIVED_COLUMN_U8_SORTED_SET = CARBON_SORTED_SET_COL_U8,
 
-        /* abstract derived types for column-u16 containers */
+        /** abstract derived types for column-u16 containers */
         CARBON_FIELD_DERIVED_COLUMN_U16_SORTED_MULTISET = CARBON_SORTED_MULTISET_COL_U16,
         CARBON_FIELD_DERIVED_COLUMN_U16_UNSORTED_SET = CARBON_UNSORTED_SET_COL_U16,
         CARBON_FIELD_DERIVED_COLUMN_U16_SORTED_SET = CARBON_SORTED_SET_COL_U16,
 
-        /* abstract derived types for column-u32 containers */
+        /** abstract derived types for column-u32 containers */
         CARBON_FIELD_DERIVED_COLUMN_U32_SORTED_MULTISET = CARBON_SORTED_MULTISET_COL_U32,
         CARBON_FIELD_DERIVED_COLUMN_U32_UNSORTED_SET = CARBON_UNSORTED_SET_COL_U32,
         CARBON_FIELD_DERIVED_COLUMN_U32_SORTED_SET = CARBON_SORTED_SET_COL_U32,
 
-        /* abstract derived types for column-u64 containers */
+        /** abstract derived types for column-u64 containers */
         CARBON_FIELD_DERIVED_COLUMN_U64_SORTED_MULTISET = CARBON_SORTED_MULTISET_COL_U64,
         CARBON_FIELD_DERIVED_COLUMN_U64_UNSORTED_SET = CARBON_UNSORTED_SET_COL_U64,
         CARBON_FIELD_DERIVED_COLUMN_U64_SORTED_SET = CARBON_SORTED_SET_COL_U64,
 
-        /* abstract derived types for column-i8 containers */
+        /** abstract derived types for column-i8 containers */
         CARBON_FIELD_DERIVED_COLUMN_I8_SORTED_MULTISET = CARBON_SORTED_MULTISET_COL_I8,
         CARBON_FIELD_DERIVED_COLUMN_I8_UNSORTED_SET = CARBON_UNSORTED_SET_COL_I8,
         CARBON_FIELD_DERIVED_COLUMN_I8_SORTED_SET = CARBON_SORTED_SET_COL_I8,
 
-        /* abstract derived types for column-i16 containers */
+        /** abstract derived types for column-i16 containers */
         CARBON_FIELD_DERIVED_COLUMN_I16_SORTED_MULTISET = CARBON_SORTED_MULTISET_COL_I16,
         CARBON_FIELD_DERIVED_COLUMN_I16_UNSORTED_SET = CARBON_UNSORTED_SET_COL_I16,
         CARBON_FIELD_DERIVED_COLUMN_I16_SORTED_SET = CARBON_SORTED_SET_COL_I16,
 
-        /* abstract derived types for column-i32 containers */
+        /** abstract derived types for column-i32 containers */
         CARBON_FIELD_DERIVED_COLUMN_I32_SORTED_MULTISET = CARBON_SORTED_MULTISET_COL_I32,
         CARBON_FIELD_DERIVED_COLUMN_I32_UNSORTED_SET = CARBON_UNSORTED_SET_COL_I32,
         CARBON_FIELD_DERIVED_COLUMN_I32_SORTED_SET = CARBON_SORTED_SET_COL_I32,
 
-        /* abstract derived types for column-i64 containers */
+        /** abstract derived types for column-i64 containers */
         CARBON_FIELD_DERIVED_COLUMN_I64_SORTED_MULTISET = CARBON_SORTED_MULTISET_COL_I64,
         CARBON_FIELD_DERIVED_COLUMN_I64_UNSORTED_SET = CARBON_UNSORTED_SET_COL_I64,
         CARBON_FIELD_DERIVED_COLUMN_I64_SORTED_SET = CARBON_SORTED_SET_COL_I64,
 
-        /* abstract derived types for column-float containers */
+        /** abstract derived types for column-float containers */
         CARBON_FIELD_DERIVED_COLUMN_FLOAT_SORTED_MULTISET = CARBON_SORTED_MULTISET_COL_FLOAT,
         CARBON_FIELD_DERIVED_COLUMN_FLOAT_UNSORTED_SET = CARBON_UNSORTED_SET_COL_FLOAT,
         CARBON_FIELD_DERIVED_COLUMN_FLOAT_SORTED_SET = CARBON_SORTED_SET_COL_FLOAT,
 
-        /* abstract derived types for column-boolean containers */
+        /** abstract derived types for column-boolean containers */
         CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_MULTISET = CARBON_SORTED_MULTISET_COL_BOOLEAN,
         CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_UNSORTED_SET = CARBON_UNSORTED_SET_COL_BOOLEAN,
         CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_SET = CARBON_SORTED_SET_COL_BOOLEAN,
 
-        /* character strings */
-        CARBON_FIELD_STRING = CARBON_MSTRING, /* UTF-8 string_buffer */
+        /** character strings */
+        CARBON_FIELD_STRING = CARBON_MSTRING, /** UTF-8 string_buffer */
 
-        /* numbers */
-        CARBON_FIELD_NUMBER_U8 = CARBON_MU8, /* 8bit unsigned integer */
-        CARBON_FIELD_NUMBER_U16 = CARBON_MU16, /* 16bit unsigned integer */
-        CARBON_FIELD_NUMBER_U32 = CARBON_MU32, /* 32bit unsigned integer */
-        CARBON_FIELD_NUMBER_U64 = CARBON_MU64, /* 64bit unsigned integer */
-        CARBON_FIELD_NUMBER_I8 = CARBON_MI8, /* 8bit signed integer */
-        CARBON_FIELD_NUMBER_I16 = CARBON_MI16, /* 16bit signed integer */
-        CARBON_FIELD_NUMBER_I32 = CARBON_MI32, /* 32bit signed integer */
-        CARBON_FIELD_NUMBER_I64 = CARBON_MI64, /* 64bit signed integer */
-        CARBON_FIELD_NUMBER_FLOAT = CARBON_MFLOAT, /* 32bit float */
+        /** numbers */
+        CARBON_FIELD_NUMBER_U8 = CARBON_MU8, /** 8bit unsigned integer */
+        CARBON_FIELD_NUMBER_U16 = CARBON_MU16, /** 16bit unsigned integer */
+        CARBON_FIELD_NUMBER_U32 = CARBON_MU32, /** 32bit unsigned integer */
+        CARBON_FIELD_NUMBER_U64 = CARBON_MU64, /** 64bit unsigned integer */
+        CARBON_FIELD_NUMBER_I8 = CARBON_MI8, /** 8bit signed integer */
+        CARBON_FIELD_NUMBER_I16 = CARBON_MI16, /** 16bit signed integer */
+        CARBON_FIELD_NUMBER_I32 = CARBON_MI32, /** 32bit signed integer */
+        CARBON_FIELD_NUMBER_I64 = CARBON_MI64, /** 64bit signed integer */
+        CARBON_FIELD_NUMBER_FLOAT = CARBON_MFLOAT, /** 32bit float */
 
-        /* binary data */
-        CARBON_FIELD_BINARY = CARBON_MBINARY, /* arbitrary binary object with known mime type */
-        CARBON_FIELD_BINARY_CUSTOM = CARBON_MCUSTOM_BINARY, /* arbitrary binary object with unknown mime type*/
+        /** binary data */
+        CARBON_FIELD_BINARY = CARBON_MBINARY, /** arbitrary binary object with known mime type */
+        CARBON_FIELD_BINARY_CUSTOM = CARBON_MCUSTOM_BINARY, /** arbitrary binary object with unknown mime type*/
 } carbon_field_type_e;
 
 typedef enum carbon_column_type {

@@ -405,14 +405,14 @@ bool carbon_field_skip_binary(memfile *file)
         u8 type_marker = *MEMFILE_READ_TYPE(file, u8);
 
         ERROR_IF(type_marker != CARBON_FIELD_BINARY, &file->err, ERR_TYPEMISMATCH);
-        /* read and skip mime type with variable-length integer type */
+        /** read and skip mime type with variable-length integer type */
         u64 mime_type = memfile_read_uintvar_stream(NULL, file);
         UNUSED(mime_type);
 
-        /* read blob length */
+        /** read blob length */
         u64 blob_len = memfile_read_uintvar_stream(NULL, file);
 
-        /* skip blob */
+        /** skip blob */
         memfile_skip(file, blob_len);
         return true;
 }
@@ -422,11 +422,11 @@ bool carbon_field_skip_custom_binary(memfile *file)
         u8 type_marker = *MEMFILE_READ_TYPE(file, u8);
 
         ERROR_IF(type_marker != CARBON_FIELD_BINARY_CUSTOM, &file->err, ERR_TYPEMISMATCH);
-        /* read custom type string_buffer length, and skip the type string_buffer */
+        /** read custom type string_buffer length, and skip the type string_buffer */
         u64 custom_type_str_len = memfile_read_uintvar_stream(NULL, file);
         memfile_skip(file, custom_type_str_len);
 
-        /* read blob length, and skip blob data */
+        /** read blob length, and skip blob data */
         u64 blob_len = memfile_read_uintvar_stream(NULL, file);
         memfile_skip(file, blob_len);
         return true;

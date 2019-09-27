@@ -182,7 +182,7 @@ bool memblock_move_ex(memblock *block, offset_t where, size_t nbytes, bool zero_
         ERROR_IF(where >= block->blockLength, &block->err, ERR_OUTOFBOUNDS);
         ERROR_IF(nbytes == 0, &block->err, ERR_ILLEGALARG);
 
-        /* resize (if needed) */
+        /** resize (if needed) */
         if (block->last_byte + nbytes > block->blockLength) {
                 size_t new_length = (block->last_byte + nbytes);
                 block->base = realloc(block->base, new_length);

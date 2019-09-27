@@ -28,16 +28,16 @@
 
 BEGIN_DECL
 
-#define PAYLOAD_SIZE 48 /* bits used for payload */
+#define PAYLOAD_SIZE 48 /** bits used for payload */
 
-/* Compound function call status and return result. Supports function err code (NOERR or some err) plus
+/** Compound function call status and return result. Supports function err code (NOERR or some err) plus
  * an optional result value, which type is encoded via the err code (ERR_RESULT_...) */
 typedef struct fn_result {
-        error_code error_code : 16; /* err code of call */
-        /* If result carries void value by ERR_NOERR, or some value by ERR_RESULT_..., the value is stored
+        error_code error_code : 16; /** err code of call */
+        /** If result carries void value by ERR_NOERR, or some value by ERR_RESULT_..., the value is stored
         * in 'result'. Note that storing a pointer in 'result' works on current x64 machines bacause 64bit pointers do not
         * use the full number of bits; i.e., only 48 bits are used to store an address n a pointer */
-        char result[48]; /* 48 bit for the result value */
+        char result[48]; /** 48 bit for the result value */
 } fn_result;
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -50,31 +50,31 @@ typedef struct fn_result {
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-/* constructs a new fn_result that encodes a successful call */
+/** constructs a new fn_result that encodes a successful call */
 #define FN_OK()                   RESULT_OK()
 
-/* constructs a new fn_result that encodes a successful call, and carries a 32bit integer (function) return value */
+/** constructs a new fn_result that encodes a successful call, and carries a 32bit integer (function) return value */
 #define FN_OK_INT(value)          RESULT_OK_INT(value)
 
-/* constructs a new fn_result that encodes a successful call, and carries a 32bit unsigned (function) return value */
+/** constructs a new fn_result that encodes a successful call, and carries a 32bit unsigned (function) return value */
 #define FN_OK_UINT(value)         RESULT_OK_UINT(value)
 
-/* constructs a new fn_result that encodes a successful call, and carries a boolean return value */
+/** constructs a new fn_result that encodes a successful call, and carries a boolean return value */
 #define FN_OK_BOOL(value)         RESULT_OK_BOOL(value)
 
-/* constructs a new fn_result that encodes a successful call, and carries a (48bit) pointer value */
+/** constructs a new fn_result that encodes a successful call, and carries a (48bit) pointer value */
 #define FN_OK_PTR(value)          RESULT_OK_PTR(value)
 
-/* constructs a new fn_result that encodes a successful call, and carries 'true' as boolean value */
+/** constructs a new fn_result that encodes a successful call, and carries 'true' as boolean value */
 #define FN_OK_TRUE()              FN_OK_BOOL(true)
 
-/* constructs a new fn_result that encodes a successful call, and carries 'false' as boolean value */
+/** constructs a new fn_result that encodes a successful call, and carries 'false' as boolean value */
 #define FN_OK_FALSE()             FN_OK_BOOL(false)
 
-/* constructs a new fn_result that encodes an unsuccessful call with err code and message */
+/** constructs a new fn_result that encodes an unsuccessful call with err code and message */
 #define FN_FAIL(code, msg)        RESULT_FAIL(code, msg)
 
-/* use this macro for the return statement inside a fn_result-returning function (outer), if a function call within
+/** use this macro for the return statement inside a fn_result-returning function (outer), if a function call within
  * outer results in a failed fn_result object, and the err information (err code, and message) should be return by
  * outer without modifying it */
 #define FN_FAIL_FORWARD()                                                 \
@@ -88,14 +88,14 @@ typedef struct fn_result {
 //  function err state resolver macro about success or fail of a function call
 // ---------------------------------------------------------------------------------------------------------------------
 
-/* checks if a fn_result 'result' encodes a successful call */
+/** checks if a fn_result 'result' encodes a successful call */
 #define FN_IS_OK(result)          RESULT_IS_OK(result)
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  function return value resolver macro for successful calls
 // ---------------------------------------------------------------------------------------------------------------------
 
-/* returns true if 'expr' returns a fn_result object that encodes success and carries a boolean value true */
+/** returns true if 'expr' returns a fn_result object that encodes success and carries a boolean value true */
 #define FN_IS_TRUE(expr)                                                                                               \
 ({                                                                                                                     \
         fn_result fn_true_result;                                                                                      \
@@ -103,23 +103,23 @@ typedef struct fn_result {
         fn_true_ret;                                                                                                   \
 })
 
-/* returns the signed 32bit integer value carried by a success function call; undefined for not successful calls */
+/** returns the signed 32bit integer value carried by a success function call; undefined for not successful calls */
 #define FN_INT(result)            __RESULT_EXTRACT_VALUE(result, iu32, RESULT_INT_VALUE)
 
-/* returns the unsigned 32bit integer value carried by a success function call; undefined for not successful calls */
+/** returns the unsigned 32bit integer value carried by a success function call; undefined for not successful calls */
 #define FN_UINT(result)           __RESULT_EXTRACT_VALUE(result, u32, RESULT_UINT_VALUE)
 
-/* returns the boolean value carried by a success function call; undefined for not successful calls */
+/** returns the boolean value carried by a success function call; undefined for not successful calls */
 #define FN_BOOL(result)           __RESULT_EXTRACT_VALUE(result, bool, RESULT_BOOL_VALUE)
 
-/* returns the pointer value carried by a success function call and cast it to T*; undefined for not successful calls */
+/** returns the pointer value carried by a success function call and cast it to T*; undefined for not successful calls */
 #define FN_PTR(result, T)         ((T *) __RESULT_EXTRACT_VALUE(result, void *, RESULT_PTR_VALUE))
 
 // ---------------------------------------------------------------------------------------------------------------------
 //  helper macro to check if a list of (up to eleven) function parameters is non-null
 // ---------------------------------------------------------------------------------------------------------------------
 
-/* constructs a new fn_result that encodes an unsuccessful call with err code 'null pointer' if one of the arguments
+/** constructs a new fn_result that encodes an unsuccessful call with err code 'null pointer' if one of the arguments
  * is a pointer to NULL */
 #define FN_FAIL_IF_NULL(...)                                                                                           \
     if (!__fn_test_nonnull(VA_ARGS_LENGTH(__VA_ARGS__), __VA_ARGS__)) {                                        \

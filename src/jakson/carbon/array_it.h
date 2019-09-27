@@ -60,7 +60,7 @@ typedef struct carbon_array_it {
         spinlock lock;
         err err;
 
-        /* in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
+        /** in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
         i64 mod_size;
         bool array_end_reached;
 
