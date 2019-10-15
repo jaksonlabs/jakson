@@ -72,6 +72,8 @@ typedef enum carbon_list_container {
     CARBON_LIST_CONTAINER_COLUMN_FLOAT = CARBON_MCOLUMN_FLOAT
 } carbon_list_container_e;
 
+bool carbon_list_container_type_by_column_type(carbon_list_container_e *out, int field_type);
+
 END_DECL
 
 #endif

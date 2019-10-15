@@ -513,6 +513,12 @@ fn_result carbon_array_it_update_type(carbon_array_it *it, carbon_list_derivable
 {
         FN_FAIL_IF_NULL(it)
 
+        carbon_field_type_e type;
+        carbon_array_it_field_type(&type, it);
+        if (!carbon_field_type_is_array_or_subtype(type)) {
+                return FN_FAIL_FORWARD();
+        }
+
         carbon_array_it_prev(it);
         memfile_save_position(&it->memfile);
 

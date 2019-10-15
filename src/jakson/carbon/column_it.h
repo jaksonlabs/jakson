@@ -40,6 +40,8 @@ typedef struct carbon_column_it {
         err err;
         carbon_field_type_e type;
 
+        carbon_list_derivable_e abstract_type;
+
         /** in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
         i64 mod_size;
 
@@ -74,6 +76,10 @@ const i64 *carbon_column_it_i64_values(u32 *nvalues, carbon_column_it *it);
 const float *carbon_column_it_float_values(u32 *nvalues, carbon_column_it *it);
 
 bool carbon_column_it_remove(carbon_column_it *it, u32 pos);
+
+fn_result ofType(bool) carbon_column_it_is_multiset(carbon_column_it *it);
+fn_result ofType(bool) carbon_column_it_is_sorted(carbon_column_it *it);
+fn_result carbon_column_it_update_type(carbon_column_it *it, carbon_list_derivable_e derivation);
 
 bool carbon_column_it_update_set_null(carbon_column_it *it, u32 pos);
 bool carbon_column_it_update_set_true(carbon_column_it *it, u32 pos);

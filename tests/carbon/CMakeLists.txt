@@ -11,59 +11,22 @@ set(
         ${LIBS}
 )
 
-add_executable(jakson-test-object-ids test-global_id.cpp)
-target_link_libraries(jakson-test-object-ids PUBLIC gtest ${TEST_LIBS} PRIVATE jakson-sources)
+macro(CreateTest arg)
+    add_executable(${arg} ${arg}.cpp)
+    target_link_libraries(${arg} PUBLIC gtest ${TEST_LIBS} PRIVATE jakson-sources)
+    ADD_DEPENDENCIES(tests ${arg})
+    add_test(${arg}  ${MAKE_DIRECTORY}/${arg})
+endmacro()
 
-add_executable(jakson-test-archive-ops test-archive-ops.cpp)
-target_link_libraries(jakson-test-archive-ops PUBLIC gtest ${TEST_LIBS} PRIVATE jakson-sources)
-
-add_executable(jakson-test-fix-map test-fix-map.cpp)
-target_link_libraries(jakson-test-fix-map PUBLIC gtest ${TEST_LIBS} PRIVATE jakson-sources)
-
-add_executable(jakson-test-archive-iter test-archive-iter.cpp)
-target_link_libraries(jakson-test-archive-iter PUBLIC gtest ${TEST_LIBS} PRIVATE jakson-sources)
-
-add_executable(jakson-test-archive-converter test-archive-converter.cpp)
-target_link_libraries(jakson-test-archive-converter PUBLIC gtest ${TEST_LIBS} PRIVATE jakson-sources)
-
-add_executable(jakson-test-varuint test-varuint.cpp)
-target_link_libraries(jakson-test-varuint PUBLIC gtest ${TEST_LIBS} PRIVATE jakson-sources)
-
-add_executable(jakson-test-carbon test-carbon.cpp)
-target_link_libraries(jakson-test-carbon PUBLIC gtest ${TEST_LIBS} PRIVATE jakson-sources)
-
-add_executable(jakson-test-mime test-mime.cpp)
-target_link_libraries(jakson-test-mime PUBLIC gtest ${TEST_LIBS} PRIVATE jakson-sources)
-
-add_executable(jakson-test-json test-json.cpp)
-target_link_libraries(jakson-test-json PUBLIC gtest ${TEST_LIBS} PRIVATE jakson-sources)
-
-add_executable(jakson-test-abstract-type-markers test-abstract-type-markers.cpp)
-target_link_libraries(jakson-test-abstract-type-markers PUBLIC gtest ${TEST_LIBS} PRIVATE jakson-sources)
-
-add_executable(jakson-test-abstract-types-arrays test-abstract-types-arrays.cpp)
-target_link_libraries(jakson-test-abstract-types-arrays PUBLIC gtest ${TEST_LIBS} PRIVATE jakson-sources)
-
-ADD_DEPENDENCIES(tests jakson-test-object-ids)
-ADD_DEPENDENCIES(tests jakson-test-archive-ops)
-ADD_DEPENDENCIES(tests jakson-test-fix-map)
-ADD_DEPENDENCIES(tests jakson-test-archive-iter)
-ADD_DEPENDENCIES(tests jakson-test-archive-converter)
-ADD_DEPENDENCIES(tests jakson-test-varuint)
-ADD_DEPENDENCIES(tests jakson-test-carbon)
-ADD_DEPENDENCIES(tests jakson-test-mime)
-ADD_DEPENDENCIES(tests jakson-test-json)
-ADD_DEPENDENCIES(tests jakson-test-abstract-type-markers)
-ADD_DEPENDENCIES(tests jakson-test-abstract-types-arrays)
-
-add_test(TestObjectIds  ${MAKE_DIRECTORY}/jakson-test-object-ids)
-add_test(TestArchiveOps ${MAKE_DIRECTORY}/jakson-test-archive-ops)
-add_test(TestFixMap ${MAKE_DIRECTORY}/jakson-test-fix-map)
-add_test(TestArchiveIter ${MAKE_DIRECTORY}/jakson-test-archive-iter)
-add_test(TestArchiveConverter ${MAKE_DIRECTORY}/jakson-test-archive-converter)
-add_test(TestVariableLengthUnsigned ${MAKE_DIRECTORY}/jakson-test-varuint)
-add_test(TestCarbonFiles ${MAKE_DIRECTORY}/jakson-test-carbon)
-add_test(TestMimeTypeEncoding ${MAKE_DIRECTORY}/jakson-test-mime)
-add_test(TestJson ${MAKE_DIRECTORY}/jakson-test-json)
-add_test(TestAbstractTypeMarkers ${MAKE_DIRECTORY}/jakson-test-abstract-type-markers)
-add_test(TestAbstractTypes ${MAKE_DIRECTORY}/jakson-test-abstract-types-arrays)
+CreateTest(test-global_id)
+CreateTest(test-archive-ops)
+CreateTest(test-fix-map)
+CreateTest(test-archive-iter)
+CreateTest(test-archive-converter)
+CreateTest(test-varuint)
+CreateTest(test-mime)
+CreateTest(test-json)
+CreateTest(test-carbon)
+CreateTest(test-abstract-type-markers)
+CreateTest(test-abstract-types-arrays)
+CreateTest(test-abstract-types-columns)

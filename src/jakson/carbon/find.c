@@ -357,7 +357,7 @@ fn_result ofType(bool) carbon_find_array_is_multiset(carbon_find *find)
                 carbon_array_it *it = FN_PTR(carbon_array_it, carbon_find_result_array(find));
                 return carbon_array_it_is_multiset(it);
         } else {
-                return FN_FAIL(ERR_TYPEMISMATCH, "find: array type update must be invoked on array or sub type");
+                return FN_FAIL(ERR_TYPEMISMATCH, "find: array type query must be invoked on array or sub type");
         }
 }
 
@@ -370,7 +370,58 @@ fn_result ofType(bool) carbon_find_array_is_sorted(carbon_find *find)
                 carbon_array_it *it = FN_PTR(carbon_array_it, carbon_find_result_array(find));
                 return carbon_array_it_is_sorted(it);
         } else {
-                return FN_FAIL(ERR_TYPEMISMATCH, "find: array type update must be invoked on array or sub type");
+                return FN_FAIL(ERR_TYPEMISMATCH, "find: array type query must be invoked on array or sub type");
+        }
+}
+
+fn_result carbon_find_update_column_type(carbon_find *find, carbon_list_derivable_e derivation)
+{
+        FN_FAIL_IF_NULL(find)
+        carbon_field_type_e type;
+        carbon_find_result_type(&type, find);
+        if (carbon_field_type_is_column_or_subtype(type)) {
+                carbon_column_it *it = FN_PTR(carbon_column_it, carbon_find_result_column(find));
+                memfile_save_position(&it->memfile);
+                memfile_seek(&it->memfile, it->column_start_offset);
+
+                carbon_derived_e derive_marker;
+                carbon_list_container_e list_container;
+                carbon_list_container_type_by_column_type(&list_container, it->type);
+                carbon_abstract_derive_list_to(&derive_marker, list_container, derivation);
+                carbon_abstract_write_derived_type(&it->memfile, derive_marker);
+
+                memfile_restore_position(&it->memfile);
+
+                return FN_OK();
+
+        } else {
+                return FN_FAIL(ERR_TYPEMISMATCH, "find: column type update must be invoked on column or sub type");
+        }
+}
+
+fn_result ofType(bool) carbon_find_column_is_multiset(carbon_find *find)
+{
+        FN_FAIL_IF_NULL(find)
+        carbon_field_type_e type;
+        carbon_find_result_type(&type, find);
+        if (carbon_field_type_is_column_or_subtype(type)) {
+                carbon_column_it *it = FN_PTR(carbon_column_it, carbon_find_result_column(find));
+                return carbon_column_it_is_multiset(it);
+        } else {
+                return FN_FAIL(ERR_TYPEMISMATCH, "find: column query must be invoked on column or sub type");
+        }
+}
+
+fn_result ofType(bool) carbon_find_column_is_sorted(carbon_find *find)
+{
+        FN_FAIL_IF_NULL(find)
+        carbon_field_type_e type;
+        carbon_find_result_type(&type, find);
+        if (carbon_field_type_is_column_or_subtype(type)) {
+                carbon_column_it *it = FN_PTR(carbon_column_it, carbon_find_result_column(find));
+                return carbon_column_it_is_sorted(it);
+        } else {
+                return FN_FAIL(ERR_TYPEMISMATCH, "find: column query must be invoked on column or sub type");
         }
 }
 

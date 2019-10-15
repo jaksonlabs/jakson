@@ -51,18 +51,17 @@ bool carbon_column_it_create(carbon_column_it *it, memfile *memfile, err *err,
 
         ERROR_IF(memfile_remain_size(&it->memfile) < sizeof(u8) + sizeof(media_type), err, ERR_CORRUPTED);
 
+        bool is_instance_of_column = FN_STATUS(carbon_abstract_is_instanceof_column(&it->memfile));
+
+        ERROR_IF_WDETAILS(!is_instance_of_column, err, ERR_ILLEGALOP,
+                          "column begin marker or sub type expected");
+
+
+        carbon_abstract_type_class_e type_class;
+        carbon_abstract_get_class(&type_class, &it->memfile);
+        carbon_abstract_class_to_list_derivable(&it->abstract_type, type_class);
+
         u8 marker = *memfile_read(&it->memfile, sizeof(u8));
-        ERROR_IF_WDETAILS(marker != CARBON_MCOLUMN_U8 &&
-                              marker != CARBON_MCOLUMN_U16 &&
-                              marker != CARBON_MCOLUMN_U32 &&
-                              marker != CARBON_MCOLUMN_U64 &&
-                              marker != CARBON_MCOLUMN_I8 &&
-                              marker != CARBON_MCOLUMN_I16 &&
-                              marker != CARBON_MCOLUMN_I32 &&
-                              marker != CARBON_MCOLUMN_I64 &&
-                              marker != CARBON_MCOLUMN_FLOAT &&
-                              marker != CARBON_MCOLUMN_BOOLEAN, err, ERR_ILLEGALOP,
-                              "column begin marker ('(') not found");
 
         carbon_field_type_e type = (carbon_field_type_e) marker;
         it->type = type;
@@ -83,6 +82,7 @@ bool carbon_column_it_clone(carbon_column_it *dst, carbon_column_it *src)
         dst->column_start_offset = src->column_start_offset;
         error_cpy(&dst->err, &src->err);
         dst->type = src->type;
+        dst->abstract_type = src->abstract_type;
         dst->mod_size = src->mod_size;
         dst->column_capacity = src->column_capacity;
         dst->column_num_elements = src->column_num_elements;
@@ -309,6 +309,44 @@ bool carbon_column_it_remove(carbon_column_it *it, u32 pos)
         memfile_seek_from_here(&it->memfile, shift);
 
         return true;
+}
+
+fn_result ofType(bool) carbon_column_it_is_multiset(carbon_column_it *it)
+{
+        FN_FAIL_IF_NULL(it)
+        carbon_abstract_type_class_e type_class;
+        carbon_abstract_list_derivable_to_class(&type_class, it->abstract_type);
+        return carbon_abstract_is_multiset(type_class);
+}
+
+fn_result ofType(bool) carbon_column_it_is_sorted(carbon_column_it *it)
+{
+        FN_FAIL_IF_NULL(it)
+        carbon_abstract_type_class_e type_class;
+        carbon_abstract_list_derivable_to_class(&type_class, it->abstract_type);
+        return carbon_abstract_is_sorted(type_class);
+}
+
+fn_result carbon_column_it_update_type(carbon_column_it *it, carbon_list_derivable_e derivation)
+{
+        FN_FAIL_IF_NULL(it)
+
+        if (!carbon_field_type_is_column_or_subtype(it->type)) {
+                return FN_FAIL_FORWARD();
+        }
+
+        memfile_save_position(&it->memfile);
+        memfile_seek(&it->memfile, it->column_start_offset);
+
+        carbon_derived_e derive_marker;
+        carbon_list_container_e container_type;
+        carbon_list_container_type_by_column_type(&container_type, it->type);
+        carbon_abstract_derive_list_to(&derive_marker, container_type, derivation);
+        carbon_abstract_write_derived_type(&it->memfile, derive_marker);
+
+        memfile_restore_position(&it->memfile);
+
+        return FN_OK();
 }
 
 bool carbon_column_it_update_set_null(carbon_column_it *it, u32 pos)
