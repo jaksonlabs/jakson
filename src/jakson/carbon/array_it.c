@@ -146,7 +146,7 @@ fn_result carbon_array_it_create(carbon_array_it *it, memfile *memfile, err *err
 
         ZERO_MEMORY(it, sizeof(carbon_array_it));
 
-        it->payload_start = payload_start;
+        it->array_begin_off = payload_start;
         it->mod_size = 0;
         it->array_end_reached = false;
         it->field_offset = 0;
@@ -172,9 +172,6 @@ fn_result carbon_array_it_create(carbon_array_it *it, memfile *memfile, err *err
 
         memfile_skip(&it->memfile, sizeof(u8));
 
-
-        it->payload_start += sizeof(u8);
-
         carbon_int_field_access_create(&it->field_access);
 
         carbon_array_it_rewind(it);
@@ -186,14 +183,14 @@ bool carbon_array_it_copy(carbon_array_it *dst, carbon_array_it *src)
 {
         ERROR_IF_NULL(dst);
         ERROR_IF_NULL(src);
-        carbon_array_it_create(dst, &src->memfile, &src->err, src->payload_start - sizeof(u8));
+        carbon_array_it_create(dst, &src->memfile, &src->err, src->array_begin_off);
         return true;
 }
 
 bool carbon_array_it_clone(carbon_array_it *dst, carbon_array_it *src)
 {
         memfile_clone(&dst->memfile, &src->memfile);
-        dst->payload_start = src->payload_start;
+        dst->array_begin_off = src->array_begin_off;
         spinlock_init(&dst->lock);
         error_cpy(&dst->err, &src->err);
         dst->mod_size = src->mod_size;
@@ -264,9 +261,9 @@ bool carbon_array_it_unlock(carbon_array_it *it)
 bool carbon_array_it_rewind(carbon_array_it *it)
 {
         ERROR_IF_NULL(it);
-        ERROR_IF(it->payload_start >= memfile_size(&it->memfile), &it->err, ERR_OUTOFBOUNDS);
+        ERROR_IF(it->array_begin_off >= memfile_size(&it->memfile), &it->err, ERR_OUTOFBOUNDS);
         carbon_int_history_clear(&it->history);
-        return memfile_seek(&it->memfile, it->payload_start);
+        return memfile_seek(&it->memfile, it->array_begin_off + sizeof(u8));
 }
 
 static void auto_adjust_pos_after_mod(carbon_array_it *it)
@@ -513,20 +510,13 @@ fn_result carbon_array_it_update_type(carbon_array_it *it, carbon_list_derivable
 {
         FN_FAIL_IF_NULL(it)
 
-        carbon_field_type_e type;
-        carbon_array_it_field_type(&type, it);
-        if (!carbon_field_type_is_array_or_subtype(type)) {
-                return FN_FAIL_FORWARD();
-        }
-
-        carbon_array_it_prev(it);
         memfile_save_position(&it->memfile);
+        memfile_seek(&it->memfile, it->array_begin_off);
 
         carbon_derived_e derive_marker;
         carbon_abstract_derive_list_to(&derive_marker, CARBON_LIST_CONTAINER_ARRAY, derivation);
         carbon_abstract_write_derived_type(&it->memfile, derive_marker);
 
         memfile_restore_position(&it->memfile);
-        carbon_array_it_next(it);
         return FN_OK();
 }

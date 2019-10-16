@@ -65,8 +65,9 @@ bool carbon_insert_binary(carbon_insert *inserter, const void *value, size_t nby
 carbon_insert *carbon_insert_object_begin(carbon_insert_object_state *out, carbon_insert *inserter, u64 object_capacity);
 bool carbon_insert_object_end(carbon_insert_object_state *state);
 
-carbon_insert *carbon_insert_map_begin(carbon_insert_object_state *out, carbon_insert *inserter, carbon_map_derivable_e derivation, u64 object_capacity);
-bool carbon_insert_map_end(carbon_insert_object_state *state);
+carbon_insert *carbon_insert_object_map_begin(carbon_insert_object_state *out, carbon_insert *inserter,
+                                              carbon_map_derivable_e derivation, u64 object_capacity);
+bool carbon_insert_object_map_end(carbon_insert_object_state *state);
 
 carbon_insert *carbon_insert_array_begin(carbon_insert_array_state *state_out, carbon_insert *inserter_in, u64 array_capacity);
 bool carbon_insert_array_end(carbon_insert_array_state *state_in);

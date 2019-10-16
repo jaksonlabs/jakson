@@ -80,6 +80,14 @@ fn_result carbon_find_update_column_type(carbon_find *find, carbon_list_derivabl
 fn_result ofType(bool) carbon_find_column_is_multiset(carbon_find *find);
 fn_result ofType(bool) carbon_find_column_is_sorted(carbon_find *find);
 
+fn_result carbon_find_update_object_type(carbon_find *find, carbon_map_derivable_e derivation);
+fn_result ofType(bool) carbon_find_object_is_multimap(carbon_find *find);
+fn_result ofType(bool) carbon_find_object_is_sorted(carbon_find *find);
+
+fn_result ofType(bool) carbon_find_multimap(carbon_find *find);
+fn_result ofType(bool) carbon_find_multiset(carbon_find *find);
+fn_result ofType(bool) carbon_find_sorted(carbon_find *find);
+
 fn_result ofType(carbon_array_it *) carbon_find_result_array(carbon_find *find);
 fn_result ofType(carbon_object_it *) carbon_find_result_object(carbon_find *find);
 fn_result ofType(carbon_column_it *) carbon_find_result_column(carbon_find *find);

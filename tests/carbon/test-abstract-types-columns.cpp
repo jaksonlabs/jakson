@@ -74,8 +74,6 @@ TEST(TestAbstractTypes, ColumnSetAbstractType) {
                 carbon_iterator_close(&it);
         }
 
-        carbon_hexdump_print(stderr, &doc);
-
         {
                 carbon_column_it *column_it;
 

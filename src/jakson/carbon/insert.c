@@ -521,12 +521,13 @@ bool carbon_insert_object_end(carbon_insert_object_state *state)
         return true;
 }
 
-carbon_insert *carbon_insert_map_begin(carbon_insert_object_state *out, carbon_insert *inserter, carbon_map_derivable_e derivation, u64 object_capacity)
+carbon_insert *carbon_insert_object_map_begin(carbon_insert_object_state *out, carbon_insert *inserter,
+                                              carbon_map_derivable_e derivation, u64 object_capacity)
 {
         return __carbon_insert_map_begin(out, inserter, derivation, object_capacity);
 }
 
-bool carbon_insert_map_end(carbon_insert_object_state *state)
+bool carbon_insert_object_map_end(carbon_insert_object_state *state)
 {
         return carbon_insert_object_end(state);
 }
@@ -885,7 +886,7 @@ static carbon_insert *__carbon_insert_prop_object_container_begin(carbon_insert_
 {
         ERROR_IF(inserter->context_type != CARBON_OBJECT, &inserter->err, ERR_UNSUPPCONTAINER);
         carbon_string_nomarker_write(&inserter->memfile, key);
-        return carbon_insert_map_begin(out, inserter, derivation, object_capacity);
+        return carbon_insert_object_map_begin(out, inserter, derivation, object_capacity);
 }
 
 carbon_insert *carbon_insert_prop_object_begin(carbon_insert_object_state *out,

@@ -187,16 +187,20 @@ TEST(TestAbstractTypes, ArraySetAbstractType) {
                 carbon_revise_iterator_open(&it, &rev_context);
 
                 carbon_array_it_next(&it);
-                carbon_array_it_update_type(&it, CARBON_LIST_SORTED_MULTISET);
+                sub_it = carbon_array_it_array_value(&it);
+                carbon_array_it_update_type(sub_it, CARBON_LIST_SORTED_MULTISET);
 
                 carbon_array_it_next(&it);
-                carbon_array_it_update_type(&it, CARBON_LIST_UNSORTED_SET);
+                sub_it = carbon_array_it_array_value(&it);
+                carbon_array_it_update_type(sub_it, CARBON_LIST_UNSORTED_SET);
 
                 carbon_array_it_next(&it);
-                carbon_array_it_update_type(&it, CARBON_LIST_SORTED_SET);
+                sub_it = carbon_array_it_array_value(&it);
+                carbon_array_it_update_type(sub_it, CARBON_LIST_SORTED_SET);
 
                 carbon_array_it_next(&it);
-                carbon_array_it_update_type(&it, CARBON_LIST_UNSORTED_MULTISET);
+                sub_it = carbon_array_it_array_value(&it);
+                carbon_array_it_update_type(sub_it, CARBON_LIST_UNSORTED_MULTISET);
 
                 carbon_revise_iterator_close(&it);
                 carbon_revise_end(&rev_context);

@@ -21,7 +21,6 @@
 
 #include <jakson/carbon/dot.h>
 #include <jakson/carbon/find.h>
-#include "find.h"
 
 static void result_from_array(carbon_find *find, carbon_array_it *it);
 
@@ -424,6 +423,96 @@ fn_result ofType(bool) carbon_find_column_is_sorted(carbon_find *find)
                 return FN_FAIL(ERR_TYPEMISMATCH, "find: column query must be invoked on column or sub type");
         }
 }
+
+fn_result carbon_find_update_object_type(carbon_find *find, carbon_map_derivable_e derivation)
+{
+        FN_FAIL_IF_NULL(find)
+        carbon_field_type_e type;
+        carbon_find_result_type(&type, find);
+        if (carbon_field_type_is_object_or_subtype(type)) {
+                carbon_object_it *it = FN_PTR(carbon_object_it, carbon_find_result_object(find));
+                memfile_save_position(&it->memfile);
+                memfile_seek(&it->memfile, it->object_start_off);
+
+                carbon_derived_e derive_marker;
+                carbon_abstract_derive_map_to(&derive_marker, derivation);
+                carbon_abstract_write_derived_type(&it->memfile, derive_marker);
+
+                memfile_restore_position(&it->memfile);
+
+                return FN_OK();
+
+        } else {
+                return FN_FAIL(ERR_TYPEMISMATCH, "find: object type update must be invoked on object or sub type");
+        }
+}
+
+fn_result ofType(bool) carbon_find_object_is_multimap(carbon_find *find)
+{
+        FN_FAIL_IF_NULL(find)
+        carbon_field_type_e type;
+        carbon_find_result_type(&type, find);
+        if (carbon_field_type_is_object_or_subtype(type)) {
+                carbon_object_it *it = FN_PTR(carbon_object_it, carbon_find_result_object(find));
+                return carbon_object_it_is_multimap(it);
+        } else {
+                return FN_FAIL(ERR_TYPEMISMATCH, "find: object query must be invoked on object or sub type");
+        }
+}
+
+fn_result ofType(bool) carbon_find_object_is_sorted(carbon_find *find)
+{
+        FN_FAIL_IF_NULL(find)
+        carbon_field_type_e type;
+        carbon_find_result_type(&type, find);
+        if (carbon_field_type_is_object_or_subtype(type)) {
+                carbon_object_it *it = FN_PTR(carbon_object_it, carbon_find_result_object(find));
+                return carbon_object_it_is_sorted(it);
+        } else {
+                return FN_FAIL(ERR_TYPEMISMATCH, "find: object query must be invoked on object or sub type");
+        }
+}
+
+fn_result ofType(bool) carbon_find_multimap(carbon_find *find)
+{
+        FN_FAIL_IF_NULL(find)
+        carbon_field_type_e type;
+        carbon_find_result_type(&type, find);
+        if (carbon_field_type_is_object_or_subtype(type)) {
+                return carbon_find_object_is_multimap(find);
+        } else {
+                return FN_OK_FALSE();
+        }
+}
+
+fn_result ofType(bool) carbon_find_multiset(carbon_find *find)
+{
+        FN_FAIL_IF_NULL(find)
+        carbon_field_type_e type;
+        carbon_find_result_type(&type, find);
+        if (carbon_field_type_is_array_or_subtype(type)) {
+                return carbon_find_array_is_multiset(find);
+        } else if (carbon_field_type_is_column_or_subtype(type)) {
+                return carbon_find_column_is_multiset(find);
+        } else {
+                return FN_OK_FALSE();
+        }
+}
+
+fn_result ofType(bool) carbon_find_sorted(carbon_find *find)
+{
+        FN_FAIL_IF_NULL(find)
+        carbon_field_type_e type;
+        carbon_find_result_type(&type, find);
+        if (carbon_field_type_is_array_or_subtype(type)) {
+                return carbon_find_array_is_sorted(find);
+        } else if (carbon_field_type_is_column_or_subtype(type)) {
+                return carbon_find_column_is_sorted(find);
+        } else {
+                return carbon_find_object_is_sorted(find);
+        }
+}
+
 
 fn_result __check_path_evaluator_has_result(carbon_find *find)
 {

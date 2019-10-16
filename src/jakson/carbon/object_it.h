@@ -34,7 +34,7 @@ typedef struct carbon_object_it {
         memfile memfile;
         err err;
 
-        offset_t object_contents_off;
+        offset_t object_contents_off, object_start_off;
         bool object_end_reached;
 
         vector ofType(offset_t) history;
@@ -50,6 +50,8 @@ typedef struct carbon_object_it {
                         field_access data;
                 } value;
         } field;
+
+        carbon_map_derivable_e abstract_type;
 
         spinlock lock;
         /** in case of modifications (updates, inserts, deletes), the number of bytes that are added resp. removed */
@@ -73,6 +75,11 @@ bool carbon_object_it_tell(offset_t *key_off, offset_t *value_off, carbon_object
 const char *carbon_object_it_prop_name(u64 *key_len, carbon_object_it *it);
 bool carbon_object_it_remove(carbon_object_it *it);
 bool carbon_object_it_prop_type(carbon_field_type_e *type, carbon_object_it *it);
+
+fn_result ofType(bool) carbon_object_it_is_multimap(carbon_object_it *it);
+fn_result ofType(bool) carbon_object_it_is_sorted(carbon_object_it *it);
+fn_result carbon_object_it_update_type(carbon_object_it *it, carbon_map_derivable_e derivation);
+
 
 bool carbon_object_it_insert_begin(carbon_insert *inserter, carbon_object_it *it);
 fn_result carbon_object_it_insert_end(carbon_insert *inserter);

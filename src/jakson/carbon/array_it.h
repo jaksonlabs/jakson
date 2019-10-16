@@ -56,7 +56,7 @@ typedef struct field_access {
 
 typedef struct carbon_array_it {
         memfile memfile;
-        offset_t payload_start;
+        offset_t array_begin_off;
         spinlock lock;
         err err;
 
