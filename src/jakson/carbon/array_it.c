@@ -375,6 +375,16 @@ bool carbon_array_it_field_type(carbon_field_type_e *type, carbon_array_it *it)
         return carbon_int_field_access_field_type(type, &it->field_access);
 }
 
+bool carbon_array_it_bool_value(bool *value, carbon_array_it *it)
+{
+        return carbon_int_field_access_bool_value(value, &it->field_access, &it->err);
+}
+
+bool carbon_array_it_is_null(bool *is_null, carbon_array_it *it)
+{
+        return carbon_int_field_access_is_null(is_null, &it->field_access);
+}
+
 bool carbon_array_it_u8_value(u8 *value, carbon_array_it *it)
 {
         return carbon_int_field_access_u8_value(value, &it->field_access, &it->err);

@@ -87,6 +87,9 @@ fn_result carbon_object_it_insert_end(carbon_insert *inserter);
 bool carbon_object_it_lock(carbon_object_it *it);
 bool carbon_object_it_unlock(carbon_object_it *it);
 
+bool carbon_object_it_bool_value(bool *is_true, carbon_object_it *it);
+bool carbon_object_it_is_null(bool *is_null, carbon_object_it *it);
+
 bool carbon_object_it_u8_value(u8 *value, carbon_object_it *it);
 bool carbon_object_it_u16_value(u16 *value, carbon_object_it *it);
 bool carbon_object_it_u32_value(u32 *value, carbon_object_it *it);

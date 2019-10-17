@@ -116,6 +116,8 @@ bool carbon_int_field_access_object_it_opened(field_access *field);
 bool carbon_int_field_access_array_it_opened(field_access *field);
 bool carbon_int_field_access_column_it_opened(field_access *field);
 bool carbon_int_field_access_field_type(carbon_field_type_e *type, field_access *field);
+bool carbon_int_field_access_bool_value(bool *value, field_access *field, err *err);
+bool carbon_int_field_access_is_null(bool *is_null, field_access *field);
 bool carbon_int_field_access_u8_value(u8 *value, field_access *field, err *err);
 bool carbon_int_field_access_u16_value(u16 *value, field_access *field, err *err);
 bool carbon_int_field_access_u32_value(u32 *value, field_access *field, err *err);

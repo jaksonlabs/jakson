@@ -648,6 +648,30 @@ bool carbon_int_field_access_field_type(carbon_field_type_e *type, field_access 
         return true;
 }
 
+bool carbon_int_field_access_bool_value(bool *value, field_access *field, err *err)
+{
+        ERROR_IF_NULL(value);
+        ERROR_IF_NULL(field);
+
+        bool is_true = field->it_field_type == CARBON_FIELD_TRUE;
+        bool is_false = field->it_field_type == CARBON_FIELD_FALSE;
+        if (LIKELY(is_true || is_false)) {
+                *value = is_true;
+                return true;
+        } else {
+                ERROR(err, ERR_TYPEMISMATCH);
+                return false;
+        }
+}
+
+bool carbon_int_field_access_is_null(bool *is_null, field_access *field)
+{
+        ERROR_IF_NULL(is_null);
+        ERROR_IF_NULL(field);
+        *is_null = field->it_field_type == CARBON_FIELD_NULL;
+        return true;
+}
+
 bool carbon_int_field_access_u8_value(u8 *value, field_access *field, err *err)
 {
         ERROR_IF_NULL(value)
