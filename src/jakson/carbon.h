@@ -77,6 +77,17 @@
 
 BEGIN_DECL
 
+/* Carbon files are built for task parallel environments where multiple readers and (potentially) a single writer
+ * operate on a single file at a certain point in time. A per-file history is managed by a sequence of revisions
+ * that result from revising an existing record. Each revision has a commit hash that identifies that particular version
+ * of the record. Revising is an atomic modification operation on a record, which may span multiple manipulations
+ * (inserts, updates, deletes) at once in one bulk. By the concept of revisions (see 'carbon_revise_begin()' and
+ * 'carbon_revision_close()') readers are never blocked by a writer because a writer modifies a copy of the record
+ * eventually swapping the old one with the revised record. However, for single-threaded environments, setting up a
+ * new revision may be to much overhead. Therefore, a revision can be patched. Carbon file patching is, in a nut shell,
+ * a revise but without data snapshotting and commit hash management. Patching allows to modify a document without
+ * creating a new revision but by altered the current revision (i.e., the commit hash remains the same). See patch.h
+ * for more. */
 typedef struct carbon {
         memblock *memblock;
         memfile memfile;
@@ -228,8 +239,22 @@ const char *carbon_to_json_extended(string_buffer *dst, carbon *doc);
 const char *carbon_to_json_compact(string_buffer *dst, carbon *doc);
 char *carbon_to_json_extended_dup(carbon *doc);
 char *carbon_to_json_compact_dup(carbon *doc);
-fn_result carbon_iterator_open(carbon_array_it *it, carbon *doc);
-fn_result carbon_iterator_close(carbon_array_it *it);
+
+/* Opens a read-only iterator for navigating though the records contents.
+ *
+ * For readers, use 'carbon_read_begin', and 'carbon_revise_begin()' for writers.
+ *
+ * In case a single record must be updated while the upfront costs for the entire revision process is not sustainable,
+ * a record might be patched using a patch iterator, see
+ *
+ *
+ * An opened iterator must be closed by calling 'carbon_read_end'. Not closing an iterator leads to undefined
+ * behavior. */
+fn_result carbon_read_begin(carbon_array_it *it, carbon *doc);
+
+/* Closes a read-only iterator, which was previously opened via 'carbon_read_begin' */
+fn_result carbon_read_end(carbon_array_it *it);
+
 bool carbon_print(FILE *file, carbon_printer_impl_e printer, carbon *doc);
 bool carbon_hexdump_print(FILE *file, carbon *doc);
 

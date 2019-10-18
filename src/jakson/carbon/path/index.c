@@ -1047,7 +1047,7 @@ static void index_build(memfile *file, carbon *doc)
 
         carbon_array_it it;
         u64 array_pos = 0;
-        carbon_iterator_open(&it, doc);
+        carbon_read_begin(&it, doc);
 
         /** build index as tree structure */
         while (carbon_array_it_next(&it)) {
@@ -1056,7 +1056,7 @@ static void index_build(memfile *file, carbon *doc)
                 array_build_index(node, &it);
                 array_pos++;
         }
-        carbon_iterator_close(&it);
+        carbon_read_end(&it);
 
         /** for debug */
         path_index_node_print_level(stdout, &root_array, 0); // TODO: Debug remove

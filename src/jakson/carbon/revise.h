@@ -55,8 +55,8 @@ fn_result carbon_revise_set_list_type(carbon_revise *context, carbon_list_deriva
 fn_result carbon_revise_iterator_open(carbon_array_it *it, carbon_revise *context);
 fn_result carbon_revise_iterator_close(carbon_array_it *it);
 
-fn_result carbon_revise_find_open(carbon_find *out, const char *dot_path, carbon_revise *context);
-fn_result carbon_revise_find_close(carbon_find *find);
+fn_result carbon_revise_find_begin(carbon_find *out, const char *dot_path, carbon_revise *context);
+fn_result carbon_revise_find_end(carbon_find *find);
 
 bool carbon_revise_remove(const char *dot_path, carbon_revise *context);
 bool carbon_revise_remove_one(const char *dot_path, carbon *rev_doc, carbon *doc);

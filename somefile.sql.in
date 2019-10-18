@@ -1179,7 +1179,7 @@ typedef struct string_pred {
 
 BUILT_IN(static bool) string_pred_validate(err *err, const string_pred *pred)
 {
-        ERROR_IF_NULL(pred);
+        DEBUG_ERROR_IF_NULL(pred);
         ERROR_IF_NOT_IMPLEMENTED(err, pred, func)
         return true;
 }
@@ -1197,8 +1197,8 @@ BUILT_IN(static bool) string_pred_eval(const string_pred *pred, size_t *idxs_mat
 
 BUILT_IN(static bool) string_pred_get_limit(i64 *limit, const string_pred *pred)
 {
-        ERROR_IF_NULL(limit);
-        ERROR_IF_NULL(pred);
+        DEBUG_ERROR_IF_NULL(limit);
+        DEBUG_ERROR_IF_NULL(pred);
         *limit = pred->limit;
         return true;
 }
@@ -1975,8 +1975,8 @@ const char *carbon_to_json_extended(string_buffer *dst, carbon *doc);
 const char *carbon_to_json_compact(string_buffer *dst, carbon *doc);
 char *carbon_to_json_extended_dup(carbon *doc);
 char *carbon_to_json_compact_dup(carbon *doc);
-bool carbon_iterator_open(carbon_array_it *it, carbon *doc);
-bool carbon_iterator_close(carbon_array_it *it);
+bool carbon_read_begin(carbon_array_it *it, carbon *doc);
+bool carbon_read_end(carbon_array_it *it);
 bool carbon_print(FILE *file, carbon_printer_impl_e printer, carbon *doc);
 bool carbon_hexdump_print(FILE *file, carbon *doc);
 
@@ -2081,7 +2081,7 @@ bool carbon_array_it_update_in_place_null(carbon_array_it *it);
 bool carbon_array_it_create(carbon_array_it *it, memfile *memfile, err *err, offset_t payload_start);
 bool carbon_array_it_copy(carbon_array_it *dst, carbon_array_it *src);
 bool carbon_array_it_clone(carbon_array_it *dst, carbon_array_it *src);
-bool carbon_array_it_readonly(carbon_array_it *it);
+bool carbon_array_it_set_mode(carbon_array_it *it);
 bool carbon_array_it_length(u64 *len, carbon_array_it *it);
 bool carbon_array_it_is_empty(carbon_array_it *it);
 
@@ -2128,7 +2128,7 @@ bool carbon_array_it_i8_value(i8 *value, carbon_array_it *it);
 bool carbon_array_it_i16_value(i16 *value, carbon_array_it *it);
 bool carbon_array_it_i32_value(i32 *value, carbon_array_it *it);
 bool carbon_array_it_i64_value(i64 *value, carbon_array_it *it);
-bool carbon_array_it_float_value(bool *is_null_in, float *value, carbon_array_it *it);
+bool carbon_array_it_float_value_nullable(bool *is_null_in, float *value, carbon_array_it *it);
 bool carbon_array_it_signed_value(bool *is_null_in, i64 *value, carbon_array_it *it);
 bool carbon_array_it_unsigned_value(bool *is_null_in, u64 *value, carbon_array_it *it);
 const char *carbon_array_it_string_value(u64 *strlen, carbon_array_it *it);
@@ -2613,8 +2613,8 @@ typedef struct carbon_find {
 
 DEFINE_ERROR_GETTER(carbon_find)
 
-bool carbon_find_open(carbon_find *out, const char *dot_path, carbon *doc);
-bool carbon_find_close(carbon_find *find);
+bool carbon_find_begin(carbon_find *out, const char *dot_path, carbon *doc);
+bool carbon_find_end(carbon_find *find);
 bool carbon_find_create(carbon_find *find, carbon_dot_path *path, carbon *doc);
 bool carbon_find_drop(carbon_find *find);
 
@@ -2909,7 +2909,7 @@ bool carbon_int_field_access_i8_value(i8 *value, field_access *field, err *err);
 bool carbon_int_field_access_i16_value(i16 *value, field_access *field, err *err);
 bool carbon_int_field_access_i32_value(i32 *value, field_access *field, err *err);
 bool carbon_int_field_access_i64_value(i64 *value, field_access *field, err *err);
-bool carbon_int_field_access_float_value(bool *is_null_in, float *value, field_access *field, err *err);
+bool carbon_int_field_access_float_value_nullable(bool *is_null_in, float *value, field_access *field, err *err);
 bool carbon_int_field_access_signed_value(bool *is_null_in, i64 *value, field_access *field, err *err);
 bool carbon_int_field_access_unsigned_value(bool *is_null_in, u64 *value, field_access *field, err *err);
 const char *carbon_int_field_access_string_value(u64 *strlen, field_access *field, err *err);
@@ -4262,8 +4262,8 @@ bool carbon_revise_key_set_string(carbon_revise *context, const char *key_value)
 bool carbon_revise_iterator_open(carbon_array_it *it, carbon_revise *context);
 bool carbon_revise_iterator_close(carbon_array_it *it);
 
-bool carbon_revise_find_open(carbon_find *out, const char *dot_path, carbon_revise *context);
-bool carbon_revise_find_close(carbon_find *find);
+bool carbon_revise_find_begin(carbon_find *out, const char *dot_path, carbon_revise *context);
+bool carbon_revise_find_end(carbon_find *find);
 
 bool carbon_revise_remove(const char *dot_path, carbon_revise *context);
 bool carbon_revise_remove_one(const char *dot_path, carbon *rev_doc, carbon *doc);
@@ -5318,8 +5318,8 @@ bool error_print_and_abort(const err *err);
 FUNC_UNUSED static bool                                                                                            \
 ##type_name##_get_error(err *err, const type *arg)                                                                \
 {                                                                                                                      \
-    ERROR_IF_NULL(err)                                                                                                 \
-    ERROR_IF_NULL(arg)                                                                                                 \
+    DEBUG_ERROR_IF_NULL(err)                                                                                                 \
+    DEBUG_ERROR_IF_NULL(arg)                                                                                                 \
     error_cpy(err, &arg->err);                                                                                         \
     return true;                                                                                                       \
 }
@@ -6794,7 +6794,7 @@ BUILT_IN(static bool)
 
 string_pred_contains_init(string_pred *pred)
 {
-        ERROR_IF_NULL(pred);
+        DEBUG_ERROR_IF_NULL(pred);
         pred->limit = QUERY_LIMIT_NONE;
         pred->func = __string_pred_contains_func;
         return true;
@@ -6851,7 +6851,7 @@ BUILT_IN(static bool)
 
 string_pred_equals_init(string_pred *pred)
 {
-        ERROR_IF_NULL(pred);
+        DEBUG_ERROR_IF_NULL(pred);
         pred->limit = QUERY_LIMIT_1;
         pred->func = __string_pred_equals_func;
         return true;
@@ -7372,7 +7372,7 @@ FUNC_UNUSED static const char *basic_type_to_system_type_str(enum archive_field_
 #define MIN(a, b)                                                                                                  \
     ((a) < (b) ? (a) : (b))
 
-#define ERROR_IF_NULL(x)                                                                                               \
+#define DEBUG_ERROR_IF_NULL(x)                                                                                               \
 {                                                                                                                      \
     if (!(x)) {                                                                                                        \
         err err;                                                                                                \
@@ -7667,7 +7667,7 @@ DEFINE_GET_ERROR_FUNCTION(str_hash, str_hash, table);
  */
 inline static int str_hash_drop(str_hash *str_hash)
 {
-        ERROR_IF_NULL(str_hash);
+        DEBUG_ERROR_IF_NULL(str_hash);
         JAK_ASSERT(str_hash->drop);
         return str_hash->drop(str_hash);
 }
@@ -7680,7 +7680,7 @@ inline static int str_hash_drop(str_hash *str_hash)
  */
 inline static bool str_hash_reset_counters(str_hash *str_hash)
 {
-        ERROR_IF_NULL(str_hash);
+        DEBUG_ERROR_IF_NULL(str_hash);
         memset(&str_hash->counters, 0, sizeof(str_hash_counters));
         return true;
 }
@@ -7693,8 +7693,8 @@ inline static bool str_hash_reset_counters(str_hash *str_hash)
  */
 inline static int str_hash_get_counters(str_hash_counters *out, const str_hash *str_hash)
 {
-        ERROR_IF_NULL(str_hash);
-        ERROR_IF_NULL(out);
+        DEBUG_ERROR_IF_NULL(str_hash);
+        DEBUG_ERROR_IF_NULL(out);
         *out = str_hash->counters;
         return true;
 }
@@ -7712,9 +7712,9 @@ inline static int str_hash_get_counters(str_hash_counters *out, const str_hash *
  */
 inline static int str_hash_put_safe(str_hash *str_hash, char *const *keys, const archive_field_sid_t *values, size_t npairs)
 {
-        ERROR_IF_NULL(str_hash);
-        ERROR_IF_NULL(keys);
-        ERROR_IF_NULL(values);
+        DEBUG_ERROR_IF_NULL(str_hash);
+        DEBUG_ERROR_IF_NULL(keys);
+        DEBUG_ERROR_IF_NULL(values);
         JAK_ASSERT(str_hash->put_bulk_safe);
         return str_hash->put_bulk_safe(str_hash, keys, values, npairs);
 }
@@ -7736,9 +7736,9 @@ inline static int str_hash_put_safe(str_hash *str_hash, char *const *keys, const
  */
 inline static int str_hash_put_bulk_fast(str_hash *str_hash, char *const *keys, const archive_field_sid_t *values, size_t npairs)
 {
-        ERROR_IF_NULL(str_hash);
-        ERROR_IF_NULL(keys);
-        ERROR_IF_NULL(values);
+        DEBUG_ERROR_IF_NULL(str_hash);
+        DEBUG_ERROR_IF_NULL(keys);
+        DEBUG_ERROR_IF_NULL(values);
         JAK_ASSERT(str_hash->put_bulk_fast);
         return str_hash->put_bulk_fast(str_hash, keys, values, npairs);
 }
@@ -7748,8 +7748,8 @@ inline static int str_hash_put_bulk_fast(str_hash *str_hash, char *const *keys, 
  */
 inline static int str_hash_put_exact(str_hash *str_hash, const char *key, archive_field_sid_t value)
 {
-        ERROR_IF_NULL(str_hash);
-        ERROR_IF_NULL(key);
+        DEBUG_ERROR_IF_NULL(str_hash);
+        DEBUG_ERROR_IF_NULL(key);
         JAK_ASSERT(str_hash->put_exact_safe);
         return str_hash->put_exact_safe(str_hash, key, value);
 }
@@ -7759,8 +7759,8 @@ inline static int str_hash_put_exact(str_hash *str_hash, const char *key, archiv
  */
 inline static int str_hash_put_exact_fast(str_hash *str_hash, const char *key, archive_field_sid_t value)
 {
-        ERROR_IF_NULL(str_hash);
-        ERROR_IF_NULL(key);
+        DEBUG_ERROR_IF_NULL(str_hash);
+        DEBUG_ERROR_IF_NULL(key);
         JAK_ASSERT(str_hash->put_exact_fast);
         return str_hash->put_exact_fast(str_hash, key, value);
 }
@@ -7794,11 +7794,11 @@ inline static int str_hash_put_exact_fast(str_hash *str_hash, const char *key, a
  */
 inline static int str_hash_get_bulk_safe(archive_field_sid_t **out, bool **found_mask, size_t *num_not_found, str_hash *str_hash, char *const *keys, size_t nkeys)
 {
-        ERROR_IF_NULL(out);
-        ERROR_IF_NULL(found_mask);
-        ERROR_IF_NULL(num_not_found);
-        ERROR_IF_NULL(str_hash);
-        ERROR_IF_NULL(keys);
+        DEBUG_ERROR_IF_NULL(out);
+        DEBUG_ERROR_IF_NULL(found_mask);
+        DEBUG_ERROR_IF_NULL(num_not_found);
+        DEBUG_ERROR_IF_NULL(str_hash);
+        DEBUG_ERROR_IF_NULL(keys);
         JAK_ASSERT(str_hash->get_bulk_safe);
         int result = str_hash->get_bulk_safe(str_hash, out, found_mask, num_not_found, keys, nkeys);
         JAK_ASSERT (out != NULL);
@@ -7808,10 +7808,10 @@ inline static int str_hash_get_bulk_safe(archive_field_sid_t **out, bool **found
 
 inline static int str_hash_get_bulk_safe_exact(archive_field_sid_t *out, bool *found, str_hash *str_hash, const char *key)
 {
-        ERROR_IF_NULL(out);
-        ERROR_IF_NULL(found);
-        ERROR_IF_NULL(str_hash);
-        ERROR_IF_NULL(key);
+        DEBUG_ERROR_IF_NULL(out);
+        DEBUG_ERROR_IF_NULL(found);
+        DEBUG_ERROR_IF_NULL(str_hash);
+        DEBUG_ERROR_IF_NULL(key);
         JAK_ASSERT(str_hash->get_exact_safe);
         int result = str_hash->get_exact_safe(str_hash, out, found, key);
         JAK_ASSERT (out != NULL);
@@ -7836,9 +7836,9 @@ inline static int str_hash_get_bulk_safe_exact(archive_field_sid_t *out, bool *f
  */
 inline static int str_hash_get_bulk_fast(archive_field_sid_t **out, str_hash *str_hash, char *const *keys, size_t nkeys)
 {
-        ERROR_IF_NULL(out);
-        ERROR_IF_NULL(str_hash);
-        ERROR_IF_NULL(keys);
+        DEBUG_ERROR_IF_NULL(out);
+        DEBUG_ERROR_IF_NULL(str_hash);
+        DEBUG_ERROR_IF_NULL(keys);
         JAK_ASSERT(str_hash->get_fast);
         return str_hash->get_fast(str_hash, out, keys, nkeys);
 }
@@ -7860,8 +7860,8 @@ inline static int str_hash_get_bulk_fast(archive_field_sid_t **out, str_hash *st
  */
 inline static int str_hash_update_fast(str_hash *str_hash, const archive_field_sid_t *values, char *const *keys, size_t nkeys)
 {
-        ERROR_IF_NULL(str_hash);
-        ERROR_IF_NULL(keys);
+        DEBUG_ERROR_IF_NULL(str_hash);
+        DEBUG_ERROR_IF_NULL(keys);
         JAK_ASSERT(str_hash->update_key_fast);
         return str_hash->update_key_fast(str_hash, values, keys, nkeys);
 }
@@ -7876,8 +7876,8 @@ inline static int str_hash_update_fast(str_hash *str_hash, const archive_field_s
  */
 inline static int str_hash_remove(str_hash *str_hash, char *const *keys, size_t nkeys)
 {
-        ERROR_IF_NULL(str_hash);
-        ERROR_IF_NULL(keys);
+        DEBUG_ERROR_IF_NULL(str_hash);
+        DEBUG_ERROR_IF_NULL(keys);
         JAK_ASSERT(str_hash->remove);
         return str_hash->remove(str_hash, keys, nkeys);
 }
@@ -7891,8 +7891,8 @@ inline static int str_hash_remove(str_hash *str_hash, char *const *keys, size_t 
  */
 inline static int str_hash_free(void *ptr, str_hash *str_hash)
 {
-        ERROR_IF_NULL(ptr);
-        ERROR_IF_NULL(str_hash);
+        DEBUG_ERROR_IF_NULL(ptr);
+        DEBUG_ERROR_IF_NULL(str_hash);
         JAK_ASSERT(str_hash->free);
         return str_hash->free(str_hash, ptr);
 }
@@ -7905,7 +7905,7 @@ inline static int str_hash_free(void *ptr, str_hash *str_hash)
  */
 inline static int str_hash_counters_init(str_hash_counters *counters)
 {
-        ERROR_IF_NULL(counters);
+        DEBUG_ERROR_IF_NULL(counters);
         memset(counters, 0, sizeof(str_hash_counters));
         return true;
 }
@@ -7919,8 +7919,8 @@ inline static int str_hash_counters_init(str_hash_counters *counters)
  */
 inline static int str_hash_counters_add(str_hash_counters *dst_lhs, const str_hash_counters *rhs)
 {
-        ERROR_IF_NULL(dst_lhs);
-        ERROR_IF_NULL(rhs);
+        DEBUG_ERROR_IF_NULL(dst_lhs);
+        DEBUG_ERROR_IF_NULL(rhs);
         dst_lhs->num_bucket_search_miss += rhs->num_bucket_search_miss;
         dst_lhs->num_bucket_search_hit += rhs->num_bucket_search_hit;
         dst_lhs->num_bucket_cache_search_hit += rhs->num_bucket_cache_search_hit;
@@ -8170,7 +8170,7 @@ typedef struct string_dict {
  */
 static BUILT_IN(bool) string_dict_drop(string_dict *dic)
 {
-        ERROR_IF_NULL(dic);
+        DEBUG_ERROR_IF_NULL(dic);
         JAK_ASSERT(dic->drop);
         return dic->drop(dic);
 }
@@ -8178,50 +8178,50 @@ static BUILT_IN(bool) string_dict_drop(string_dict *dic)
 static BUILT_IN(bool)
 string_dict_insert(string_dict *dic, archive_field_sid_t **out, char *const *strings, size_t nstrings, size_t nthreads)
 {
-        ERROR_IF_NULL(dic);
-        ERROR_IF_NULL(strings);
+        DEBUG_ERROR_IF_NULL(dic);
+        DEBUG_ERROR_IF_NULL(strings);
         JAK_ASSERT(dic->insert);
         return dic->insert(dic, out, strings, nstrings, nthreads);
 }
 
 static BUILT_IN(bool)  string_dict_reset_counters(string_dict *dic)
 {
-        ERROR_IF_NULL(dic);
+        DEBUG_ERROR_IF_NULL(dic);
         JAK_ASSERT(dic->resetCounters);
         return dic->resetCounters(dic);
 }
 
 static BUILT_IN(bool)  string_dict_get_counters(str_hash_counters *counters, string_dict *dic)
 {
-        ERROR_IF_NULL(dic);
+        DEBUG_ERROR_IF_NULL(dic);
         JAK_ASSERT(dic->counters);
         return dic->counters(dic, counters);
 }
 
 static BUILT_IN(bool)  string_dict_remove(string_dict *dic, archive_field_sid_t *strings, size_t num_strings)
 {
-        ERROR_IF_NULL(dic);
-        ERROR_IF_NULL(strings);
+        DEBUG_ERROR_IF_NULL(dic);
+        DEBUG_ERROR_IF_NULL(strings);
         JAK_ASSERT(dic->remove);
         return dic->remove(dic, strings, num_strings);
 }
 
 static BUILT_IN(bool) string_dict_locate_safe(archive_field_sid_t **out, bool **found_mask, size_t *num_not_found, string_dict *dic, char *const *keys, size_t num_keys)
 {
-        ERROR_IF_NULL(out);
-        ERROR_IF_NULL(found_mask);
-        ERROR_IF_NULL(num_not_found);
-        ERROR_IF_NULL(dic);
-        ERROR_IF_NULL(keys);
+        DEBUG_ERROR_IF_NULL(out);
+        DEBUG_ERROR_IF_NULL(found_mask);
+        DEBUG_ERROR_IF_NULL(num_not_found);
+        DEBUG_ERROR_IF_NULL(dic);
+        DEBUG_ERROR_IF_NULL(keys);
         JAK_ASSERT(dic->locate_safe);
         return dic->locate_safe(dic, out, found_mask, num_not_found, keys, num_keys);
 }
 
 static BUILT_IN(bool) string_dict_locate_fast(archive_field_sid_t **out, string_dict *dic, char *const *keys, size_t nkeys)
 {
-        ERROR_IF_NULL(out);
-        ERROR_IF_NULL(dic);
-        ERROR_IF_NULL(keys);
+        DEBUG_ERROR_IF_NULL(out);
+        DEBUG_ERROR_IF_NULL(dic);
+        DEBUG_ERROR_IF_NULL(keys);
         JAK_ASSERT(dic->locate_fast);
         return dic->locate_fast(dic, out, keys, nkeys);
 }
@@ -8233,7 +8233,7 @@ static BUILT_IN(char **)string_dict_extract(string_dict *dic, const archive_fiel
 
 static BUILT_IN(bool) string_dict_free(string_dict *dic, void *ptr)
 {
-        ERROR_IF_NULL(dic);
+        DEBUG_ERROR_IF_NULL(dic);
         if (ptr) {
                 JAK_ASSERT(dic->free);
                 return dic->free(dic, ptr);
@@ -8244,17 +8244,17 @@ static BUILT_IN(bool) string_dict_free(string_dict *dic, void *ptr)
 
 static BUILT_IN(bool) string_dict_num_distinct(size_t *num, string_dict *dic)
 {
-        ERROR_IF_NULL(num);
-        ERROR_IF_NULL(dic);
+        DEBUG_ERROR_IF_NULL(num);
+        DEBUG_ERROR_IF_NULL(dic);
         JAK_ASSERT(dic->num_distinct);
         return dic->num_distinct(dic, num);
 }
 
 static BUILT_IN(bool) string_dict_get_contents(vector ofType (char *) *strings, vector ofType(archive_field_sid_t) *string_ids, string_dict *dic)
 {
-        ERROR_IF_NULL(strings)
-        ERROR_IF_NULL(string_ids)
-        ERROR_IF_NULL(dic);
+        DEBUG_ERROR_IF_NULL(strings)
+        DEBUG_ERROR_IF_NULL(string_ids)
+        DEBUG_ERROR_IF_NULL(dic);
         JAK_ASSERT(dic->get_contents);
         return dic->get_contents(dic, strings, string_ids);
 }

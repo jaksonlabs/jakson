@@ -20,7 +20,7 @@ TEST(CarbonTest, CreateCarbon) {
 
         status = carbon_key_unsigned_value(&oid, &doc);
         EXPECT_TRUE(status);
-        EXPECT_EQ(oid, 0U);
+        EXPECT_NE(oid, 0U);
 
         status = carbon_commit_hash(&rev, &doc);
         EXPECT_TRUE(status);
@@ -198,7 +198,7 @@ TEST(CarbonTest, ModifyCarbonObjectId) {
         carbon_create_empty(&doc, CARBON_LIST_UNSORTED_MULTISET, CARBON_KEY_AUTOKEY);
 
         carbon_key_unsigned_value(&oid, &doc);
-        EXPECT_EQ(oid, 0U);
+        EXPECT_NE(oid, 0U);
 
         carbon_commit_hash(&commit_hash_old, &doc);
 
@@ -1698,7 +1698,7 @@ TEST(CarbonTest, CarbonFind) {
         carbon_revise_end(&revise);
 
         {
-                carbon_find_open(&finder, "0", &rev_doc);
+                carbon_find_begin(&finder, "0", &rev_doc);
 
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&finder)));
 
@@ -1708,11 +1708,11 @@ TEST(CarbonTest, CarbonFind) {
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, (u64) 'a');
 
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1", &rev_doc);
+                carbon_find_begin(&finder, "1", &rev_doc);
 
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&finder)));
 
@@ -1722,11 +1722,11 @@ TEST(CarbonTest, CarbonFind) {
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, (u64) 'b');
 
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "2", &rev_doc);
+                carbon_find_begin(&finder, "2", &rev_doc);
 
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&finder)));
 
@@ -1736,15 +1736,15 @@ TEST(CarbonTest, CarbonFind) {
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, (u64) 'c');
 
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "3", &rev_doc);
+                carbon_find_begin(&finder, "3", &rev_doc);
 
                 ASSERT_FALSE(FN_STATUS(carbon_find_has_result(&finder)));
 
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         // carbon_print(stdout, &rev_doc);
@@ -1800,27 +1800,27 @@ TEST(CarbonTest, CarbonFindTypes) {
         //carbon_print(stdout, &rev_doc);
 
         {
-                carbon_find_open(&finder, "0", &rev_doc);
+                carbon_find_begin(&finder, "0", &rev_doc);
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&finder)));
                 carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, CARBON_FIELD_NUMBER_U64);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 4223U);
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1", &rev_doc);
+                carbon_find_begin(&finder, "1", &rev_doc);
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&finder)));
                 carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, CARBON_FIELD_ARRAY_UNSORTED_MULTISET);
                 carbon_array_it *retval = FN_GET_PTR(carbon_array_it, carbon_find_result_array(&finder));
                 ASSERT_TRUE(retval != NULL);
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.0", &rev_doc);
+                carbon_find_begin(&finder, "1.0", &rev_doc);
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&finder)));
                 carbon_find_result_type(&type, &finder);
                 ASSERT_TRUE(type == CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET ||
@@ -1835,68 +1835,68 @@ TEST(CarbonTest, CarbonFindTypes) {
                         type == CARBON_FIELD_COLUMN_BOOLEAN_UNSORTED_MULTISET);
                 carbon_column_it *retval = FN_GET_PTR(carbon_column_it, carbon_find_result_column(&finder));
                 ASSERT_TRUE(retval != NULL);
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.0.0", &rev_doc);
+                carbon_find_begin(&finder, "1.0.0", &rev_doc);
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&finder)));
                 carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, CARBON_FIELD_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 88U);
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.0.1", &rev_doc);
+                carbon_find_begin(&finder, "1.0.1", &rev_doc);
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&finder)));
                 carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, CARBON_FIELD_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 89U);
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.0.2", &rev_doc);
+                carbon_find_begin(&finder, "1.0.2", &rev_doc);
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&finder)));
                 carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, CARBON_FIELD_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 90U);
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.0.3", &rev_doc);
+                carbon_find_begin(&finder, "1.0.3", &rev_doc);
                 ASSERT_FALSE(FN_STATUS(carbon_find_has_result(&finder)));
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.1", &rev_doc);
+                carbon_find_begin(&finder, "1.1", &rev_doc);
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&finder)));
                 carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, CARBON_FIELD_ARRAY_UNSORTED_MULTISET);
                 carbon_array_it *retval = FN_GET_PTR(carbon_array_it, carbon_find_result_array(&finder));
                 ASSERT_TRUE(retval != NULL);
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.1.0", &rev_doc);
+                carbon_find_begin(&finder, "1.1.0", &rev_doc);
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&finder)));
                 carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, CARBON_FIELD_STRING);
                 u64 str_len;
                 const char *retval = FN_GET_PTR(const char, carbon_find_result_string(&str_len, &finder));
                 ASSERT_TRUE(strncmp(retval, "Hello", str_len) == 0);
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.1.1", &rev_doc);
+                carbon_find_begin(&finder, "1.1.1", &rev_doc);
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&finder)));
                 carbon_find_result_type(&type, &finder);
                 ASSERT_TRUE(type == CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET ||
@@ -1911,83 +1911,83 @@ TEST(CarbonTest, CarbonFindTypes) {
                         type == CARBON_FIELD_COLUMN_BOOLEAN_UNSORTED_MULTISET);
                 carbon_column_it *retval = FN_GET_PTR(carbon_column_it, carbon_find_result_column(&finder));
                 ASSERT_TRUE(retval != NULL);
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.1.1.0", &rev_doc);
+                carbon_find_begin(&finder, "1.1.1.0", &rev_doc);
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&finder)));
                 carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, CARBON_FIELD_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 65U);
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.1.1.1", &rev_doc);
+                carbon_find_begin(&finder, "1.1.1.1", &rev_doc);
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&finder)));
                 carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, CARBON_FIELD_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 66U);
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.1.1.2", &rev_doc);
+                carbon_find_begin(&finder, "1.1.1.2", &rev_doc);
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&finder)));
                 carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, CARBON_FIELD_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 67U);
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.1.1.3", &rev_doc);
+                carbon_find_begin(&finder, "1.1.1.3", &rev_doc);
                 ASSERT_FALSE(FN_STATUS(carbon_find_has_result(&finder)));
         }
 
         {
-                carbon_find_open(&finder, "1.1.2", &rev_doc);
+                carbon_find_begin(&finder, "1.1.2", &rev_doc);
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&finder)));
                 carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, CARBON_FIELD_STRING);
                 u64 str_len;
                 const char *retval = FN_GET_PTR(const char, carbon_find_result_string(&str_len, &finder));
                 ASSERT_TRUE(strncmp(retval, "World", str_len) == 0);
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.1.3", &rev_doc);
+                carbon_find_begin(&finder, "1.1.3", &rev_doc);
                 ASSERT_FALSE(FN_STATUS(carbon_find_has_result(&finder)));
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.2", &rev_doc);
+                carbon_find_begin(&finder, "1.2", &rev_doc);
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&finder)));
                 carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, CARBON_FIELD_NUMBER_U8);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 1U);
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.3", &rev_doc);
+                carbon_find_begin(&finder, "1.3", &rev_doc);
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&finder)));
                 carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, CARBON_FIELD_NUMBER_U8);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 1U);
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.4", &rev_doc);
+                carbon_find_begin(&finder, "1.4", &rev_doc);
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&finder)));
                 carbon_find_result_type(&type, &finder);
                 ASSERT_TRUE(type == CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET ||
@@ -2002,59 +2002,59 @@ TEST(CarbonTest, CarbonFindTypes) {
                         type == CARBON_FIELD_COLUMN_BOOLEAN_UNSORTED_MULTISET);
                 carbon_column_it *retval = FN_GET_PTR(carbon_column_it, carbon_find_result_column(&finder));
                 ASSERT_TRUE(retval != NULL);
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.4.0", &rev_doc);
+                carbon_find_begin(&finder, "1.4.0", &rev_doc);
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&finder)));
                 carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, CARBON_FIELD_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 23U);
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.4.1", &rev_doc);
+                carbon_find_begin(&finder, "1.4.1", &rev_doc);
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&finder)));
                 carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, CARBON_FIELD_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 24U);
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.4.2", &rev_doc);
+                carbon_find_begin(&finder, "1.4.2", &rev_doc);
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&finder)));
                 carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, CARBON_FIELD_NUMBER_U32);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 25U);
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.4.3", &rev_doc);
+                carbon_find_begin(&finder, "1.4.3", &rev_doc);
                 ASSERT_FALSE(FN_STATUS(carbon_find_has_result(&finder)));
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.5", &rev_doc);
+                carbon_find_begin(&finder, "1.5", &rev_doc);
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&finder)));
                 carbon_find_result_type(&type, &finder);
                 ASSERT_EQ(type, CARBON_FIELD_NUMBER_U8);
                 carbon_find_result_unsigned(&result_unsigned, &finder);
                 ASSERT_EQ(result_unsigned, 1U);
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         {
-                carbon_find_open(&finder, "1.6", &rev_doc);
+                carbon_find_begin(&finder, "1.6", &rev_doc);
                 ASSERT_FALSE(FN_STATUS(carbon_find_has_result(&finder)));
-                carbon_find_close(&finder);
+                carbon_find_end(&finder);
         }
 
         carbon_insert_drop(&inserter);
@@ -2217,28 +2217,28 @@ TEST(CarbonTest, CarbonUpdateMixedFixedTypesSimple)
         i64 resulti64;
         float resultfloat;
 
-        carbon_find_open(&find, "0", &rev_doc2);
+        carbon_find_begin(&find, "0", &rev_doc2);
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         carbon_find_result_type(&result_type, &find);
         ASSERT_EQ(result_type, CARBON_FIELD_NUMBER_U8);
         carbon_find_result_unsigned(&result, &find);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         ASSERT_EQ(result, 1U);
 
-        carbon_find_open(&find, "1", &rev_doc2);
+        carbon_find_begin(&find, "1", &rev_doc2);
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         carbon_find_result_type(&result_type, &find);
         ASSERT_EQ(result_type, CARBON_FIELD_NUMBER_I64);
         carbon_find_result_signed(&resulti64, &find);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         ASSERT_EQ(resulti64, 1024U);
 
-        carbon_find_open(&find, "2", &rev_doc2);
+        carbon_find_begin(&find, "2", &rev_doc2);
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         carbon_find_result_type(&result_type, &find);
         ASSERT_EQ(result_type, CARBON_FIELD_NUMBER_FLOAT);
         carbon_find_result_float(&resultfloat, &find);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         ASSERT_GE(resultfloat, 22.9f);
         ASSERT_LE(resultfloat, 24.0f);
 
@@ -7714,7 +7714,7 @@ TEST(CarbonTest, CarbonFromJsonColumnNumber)
 
         carbon_array_it it;
         carbon_field_type_e field_type;
-        carbon_iterator_open(&it, &doc);
+        carbon_read_begin(&it, &doc);
         ASSERT_TRUE(carbon_array_it_next(&it));
         carbon_array_it_field_type(&field_type, &it);
         ASSERT_TRUE(field_type == CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP);
@@ -7724,7 +7724,7 @@ TEST(CarbonTest, CarbonFromJsonColumnNumber)
         ASSERT_TRUE(carbon_field_type_is_column_or_subtype(field_type));
         ASSERT_TRUE(field_type == CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET);
         carbon_object_it_drop(oit);
-        carbon_iterator_close(&it);
+        carbon_read_end(&it);
 
         json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{\"x\": [1, 2, 3]}}'
         json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '[1, 2, 3]'
@@ -7755,7 +7755,7 @@ TEST(CarbonTest, CarbonFromJsonColumnNullableNumber)
 
         carbon_array_it it;
         carbon_field_type_e field_type;
-        carbon_iterator_open(&it, &doc);
+        carbon_read_begin(&it, &doc);
         ASSERT_TRUE(carbon_array_it_next(&it));
         carbon_array_it_field_type(&field_type, &it);
         ASSERT_TRUE(field_type == CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP);
@@ -7765,7 +7765,7 @@ TEST(CarbonTest, CarbonFromJsonColumnNullableNumber)
         ASSERT_TRUE(carbon_field_type_is_column_or_subtype(field_type));
         ASSERT_TRUE(field_type == CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET);
         carbon_object_it_drop(oit);
-        carbon_iterator_close(&it);
+        carbon_read_end(&it);
 
         json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [{"x": [1, null, 3]}]}'
         json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '{"x": [1, null, 3]}'
@@ -7797,11 +7797,11 @@ TEST(CarbonTest, CarbonFromJsonNonColumn)
 
         carbon_array_it it;
         carbon_field_type_e field_type;
-        carbon_iterator_open(&it, &doc);
+        carbon_read_begin(&it, &doc);
         ASSERT_TRUE(carbon_array_it_next(&it));
         carbon_array_it_field_type(&field_type, &it);
         ASSERT_TRUE(carbon_field_type_is_number(field_type));
-        carbon_iterator_close(&it);
+        carbon_read_end(&it);
 
         json_out_extended = carbon_to_json_extended_dup(&doc);  // shall be '{"meta": {"key": {"type": "nokey", "value": null}, "rev": 0}, "doc": [1, null, 3, \"a\"]}'
         json_out_compact = carbon_to_json_compact_dup(&doc);    // shall be '[1, null, 3, \"a\"]'
@@ -7979,132 +7979,132 @@ TEST(CarbonTest, CarbonResolveDotPathForObjects)
         const char *json_in = "{\"a\": 1, \"b\": {\"c\": [1,2,3], \"d\": [\"Hello\", \"World\"], \"e\": [4], \"f\": [\"!\"], \"the key\": \"x\"}}";
         carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
 
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0", &doc));
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         ASSERT_TRUE(FN_STATUS(carbon_find_result_type(&result_type, &find)));
         ASSERT_EQ(result_type, CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP);
-        ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+        ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
-        ASSERT_TRUE(carbon_find_open(&find, "1", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "1", &doc));
         ASSERT_FALSE(FN_STATUS(carbon_find_has_result(&find)));
-        ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+        ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.a", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0.a", &doc));
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         ASSERT_TRUE(FN_STATUS(carbon_find_result_type(&result_type, &find)));
         ASSERT_EQ(result_type, CARBON_FIELD_NUMBER_U8);
-        ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+        ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0.b", &doc));
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         ASSERT_TRUE(FN_STATUS(carbon_find_result_type(&result_type, &find)));
         ASSERT_EQ(result_type, CARBON_FIELD_OBJECT_UNSORTED_MULTIMAP);
-        ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+        ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.c", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0.c", &doc));
         ASSERT_FALSE(FN_STATUS(carbon_find_has_result(&find)));
-        ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+        ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.c", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0.b.c", &doc));
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         ASSERT_TRUE(FN_STATUS(carbon_find_result_type(&result_type, &find)));
         ASSERT_EQ(result_type, CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET);
-        ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+        ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.c.0", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0.b.c.0", &doc));
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         ASSERT_TRUE(FN_STATUS(carbon_find_result_type(&result_type, &find)));
         ASSERT_EQ(result_type, CARBON_FIELD_NUMBER_U8);
         ASSERT_TRUE(FN_STATUS(carbon_find_result_unsigned(&number, &find)));
         ASSERT_EQ(number, 1U);
-        ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+        ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.c.1", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0.b.c.1", &doc));
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         ASSERT_TRUE(FN_STATUS(carbon_find_result_type(&result_type, &find)));
         ASSERT_EQ(result_type, CARBON_FIELD_NUMBER_U8);
         ASSERT_TRUE(FN_STATUS(carbon_find_result_unsigned(&number, &find)));
         ASSERT_EQ(number, 2U);
-        ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+        ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.c.2", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0.b.c.2", &doc));
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         ASSERT_TRUE(FN_STATUS(carbon_find_result_type(&result_type, &find)));
         ASSERT_EQ(result_type, CARBON_FIELD_NUMBER_U8);
         ASSERT_TRUE(FN_STATUS(carbon_find_result_unsigned(&number, &find)));
         ASSERT_EQ(number, 3U);
-        ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+        ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.c.3", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0.b.c.3", &doc));
         ASSERT_FALSE(FN_STATUS(carbon_find_has_result(&find)));
-        ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+        ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.d", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0.b.d", &doc));
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         ASSERT_TRUE(FN_STATUS(carbon_find_result_type(&result_type, &find)));
         ASSERT_EQ(result_type, CARBON_FIELD_ARRAY_UNSORTED_MULTISET);
-        ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+        ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.d.0", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0.b.d.0", &doc));
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         ASSERT_TRUE(FN_STATUS(carbon_find_result_type(&result_type, &find)));
         ASSERT_EQ(result_type, CARBON_FIELD_STRING);
         ASSERT_TRUE(strncmp(FN_GET_PTR(const char, carbon_find_result_string(&number, &find)), "Hello", number) == 0);
-        ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+        ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.d.1", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0.b.d.1", &doc));
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         ASSERT_TRUE(FN_STATUS(carbon_find_result_type(&result_type, &find)));
         ASSERT_EQ(result_type, CARBON_FIELD_STRING);
         ASSERT_TRUE(strncmp(FN_GET_PTR(const char, carbon_find_result_string(&number, &find)), "World", number) == 0);
-        ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+        ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.d.2", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0.b.d.2", &doc));
         ASSERT_FALSE(FN_STATUS(carbon_find_has_result(&find)));
-        ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+        ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.e", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0.b.e", &doc));
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         ASSERT_TRUE(FN_STATUS(carbon_find_result_type(&result_type, &find)));
         ASSERT_EQ(result_type, CARBON_FIELD_COLUMN_U8_UNSORTED_MULTISET);
-        ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+        ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.e.0", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0.b.e.0", &doc));
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         ASSERT_TRUE(FN_STATUS(carbon_find_result_type(&result_type, &find)));
         ASSERT_EQ(result_type, CARBON_FIELD_NUMBER_U8);
         ASSERT_TRUE(FN_STATUS(carbon_find_result_unsigned(&number, &find)));
         ASSERT_EQ(number, 4U);
-        ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+        ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.e.1", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0.b.e.1", &doc));
         ASSERT_FALSE(FN_STATUS(carbon_find_has_result(&find)));
-        ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+        ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.f", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0.b.f", &doc));
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         ASSERT_TRUE(FN_STATUS(carbon_find_result_type(&result_type, &find)));
         ASSERT_EQ(result_type, CARBON_FIELD_ARRAY_UNSORTED_MULTISET);
-        ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+        ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.f.0", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0.b.f.0", &doc));
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         ASSERT_TRUE(FN_STATUS(carbon_find_result_type(&result_type, &find)));
         ASSERT_EQ(result_type, CARBON_FIELD_STRING);
 
         ASSERT_TRUE(strncmp(FN_GET_PTR(const char, carbon_find_result_string(&number, &find)), "!", number) == 0);
-        ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+        ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.f.1", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0.b.f.1", &doc));
         ASSERT_FALSE(FN_STATUS(carbon_find_has_result(&find)));
-        ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+        ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.b.\"the key\"", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0.b.\"the key\"", &doc));
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         ASSERT_TRUE(FN_STATUS(carbon_find_result_type(&result_type, &find)));
         ASSERT_EQ(result_type, CARBON_FIELD_STRING);
         ASSERT_TRUE(strncmp(FN_GET_PTR(const char, carbon_find_result_string(&number, &find)), "x", number) == 0);
-        ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+        ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
         carbon_drop(&doc);
 }
@@ -8148,87 +8148,87 @@ TEST(CarbonTest, CarbonResolveDotPathForObjectsBench)
         for (u32 i = 0; i < max; i++) {
                 ASSERT_TRUE(FN_STATUS(carbon_find_create(&find, &path1, &doc)));
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
-                ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+                ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
                 ASSERT_TRUE(FN_STATUS(carbon_find_create(&find, &path2, &doc)));
                 ASSERT_FALSE(FN_STATUS(carbon_find_has_result(&find)));
-                ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+                ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
                 ASSERT_TRUE(FN_STATUS(carbon_find_create(&find, &path3, &doc)));
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
-                ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+                ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
                 ASSERT_TRUE(FN_STATUS(carbon_find_create(&find, &path4, &doc)));
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
-                ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+                ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
                 ASSERT_TRUE(FN_STATUS(carbon_find_create(&find, &path5, &doc)));
                 ASSERT_FALSE(FN_STATUS(carbon_find_has_result(&find)));
-                ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+                ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
                 ASSERT_TRUE(FN_STATUS(carbon_find_create(&find, &path6, &doc)));
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
-                ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+                ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
                 ASSERT_TRUE(FN_STATUS(carbon_find_create(&find, &path7, &doc)));
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
-                ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+                ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
                 ASSERT_TRUE(FN_STATUS(carbon_find_create(&find, &path8, &doc)));
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
-                ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+                ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
                 ASSERT_TRUE(FN_STATUS(carbon_find_create(&find, &path9, &doc)));
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
-                ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+                ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
                 ASSERT_TRUE(FN_STATUS(carbon_find_create(&find, &path10, &doc)));
                 ASSERT_FALSE(FN_STATUS(carbon_find_has_result(&find)));
-                ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+                ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
                 ASSERT_TRUE(FN_STATUS(carbon_find_create(&find, &path11, &doc)));
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
-                ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+                ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
                 ASSERT_TRUE(FN_STATUS(carbon_find_create(&find, &path12, &doc)));
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
-                ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+                ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
                 ASSERT_TRUE(FN_STATUS(carbon_find_create(&find, &path13, &doc)));
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
-                ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+                ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
                 ASSERT_TRUE(FN_STATUS(carbon_find_create(&find, &path14, &doc)));
                 ASSERT_FALSE(FN_STATUS(carbon_find_has_result(&find)));
-                ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+                ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
                 ASSERT_TRUE(FN_STATUS(carbon_find_create(&find, &path15, &doc)));
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
-                ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+                ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
                 ASSERT_TRUE(FN_STATUS(carbon_find_create(&find, &path16, &doc)));
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
-                ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+                ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
                 ASSERT_TRUE(FN_STATUS(carbon_find_create(&find, &path17, &doc)));
                 ASSERT_FALSE(FN_STATUS(carbon_find_has_result(&find)));
-                ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+                ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
                 ASSERT_TRUE(FN_STATUS(carbon_find_create(&find, &path18, &doc)));
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
-                ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+                ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
                 ASSERT_TRUE(FN_STATUS(carbon_find_create(&find, &path19, &doc)));
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
-                ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+                ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
                 ASSERT_TRUE(FN_STATUS(carbon_find_create(&find, &path20, &doc)));
                 ASSERT_FALSE(FN_STATUS(carbon_find_has_result(&find)));
-                ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+                ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
 
                 ASSERT_TRUE(FN_STATUS(carbon_find_create(&find, &path21, &doc)));
                 ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
-                ASSERT_TRUE(FN_STATUS(carbon_find_close(&find)));
+                ASSERT_TRUE(FN_STATUS(carbon_find_end(&find)));
         }
         timestamp t2 = wallclock();
         printf("%.2fmsec/opp, %.4f ops/sec\n", (t2-t1)/(float)max/21.0f, 1.0f/((t2-t1)/(float)max/(21*1000.0f)));
@@ -8270,18 +8270,18 @@ TEST(CarbonTest, CarbonFromJsonShortenedDotPath)
 
         /* without shortened dot path rule, the json object as given is embedded in an record container (aka array)
          * such that the object must be referenced by its index in the record container (i.e., 0) */
-        carbon_find_open(&find, "0.x", &doc);
+        carbon_find_begin(&find, "0.x", &doc);
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         carbon_find_result_type(&result_type, &find);
         ASSERT_EQ(result_type, CARBON_FIELD_STRING);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
 
         /* with shortened dot path rule, the json object can be referenced without providing its index in the record */
-        carbon_find_open(&find, "x", &doc);
+        carbon_find_begin(&find, "x", &doc);
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         carbon_find_result_type(&result_type, &find);
         ASSERT_EQ(result_type, CARBON_FIELD_STRING);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
 
         carbon_drop(&doc);
 
@@ -8289,30 +8289,30 @@ TEST(CarbonTest, CarbonFromJsonShortenedDotPath)
         carbon_from_json(&doc, json_in, CARBON_KEY_NOKEY, NULL, &err);
 
         /* The shortened dot path rule does not apply here since the user input is an array  */
-        carbon_find_open(&find, "0.x", &doc);
+        carbon_find_begin(&find, "0.x", &doc);
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         carbon_find_result_type(&result_type, &find);
         ASSERT_EQ(result_type, CARBON_FIELD_STRING);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
 
-        carbon_find_open(&find, "1.x", &doc);
+        carbon_find_begin(&find, "1.x", &doc);
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         carbon_find_result_type(&result_type, &find);
         ASSERT_EQ(result_type, CARBON_FIELD_ARRAY_UNSORTED_MULTISET);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
 
-        carbon_find_open(&find, "x", &doc);
+        carbon_find_begin(&find, "x", &doc);
         ASSERT_FALSE(FN_STATUS(carbon_find_has_result(&find)));
-        carbon_find_close(&find);
+        carbon_find_end(&find);
 
         /* The shortened dot path rule does also never apply outside the record container  */
-        carbon_find_open(&find, "1.x.0.z", &doc);
+        carbon_find_begin(&find, "1.x.0.z", &doc);
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
-        carbon_find_close(&find);
+        carbon_find_end(&find);
 
-        carbon_find_open(&find, "1.x.z", &doc);
+        carbon_find_begin(&find, "1.x.z", &doc);
         ASSERT_FALSE(FN_STATUS(carbon_find_has_result(&find)));
-        carbon_find_close(&find);
+        carbon_find_end(&find);
 
         carbon_drop(&doc);
 }
@@ -8325,154 +8325,154 @@ TEST(CarbonTest, CarbonFindPrint)
         char *result;
 
         carbon_from_json(&doc, "8", CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "8") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
         carbon_drop(&doc);
 
         carbon_from_json(&doc, "-8", CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "-8") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
         carbon_drop(&doc);
 
         carbon_from_json(&doc, "\"A\"", CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "\"A\"") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
         carbon_drop(&doc);
 
         carbon_from_json(&doc, "32.4", CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "32.40") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
         carbon_drop(&doc);
 
         carbon_from_json(&doc, "null", CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "null") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
         carbon_drop(&doc);
 
         carbon_from_json(&doc, "true", CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "true") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
         carbon_drop(&doc);
 
         carbon_from_json(&doc, "false", CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "false") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
         carbon_drop(&doc);
 
         carbon_from_json(&doc, "[1, 2, 3, null]", CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "1") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
         carbon_drop(&doc);
 
         carbon_from_json(&doc, "[1, 2, 3, null]", CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "1", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "1", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "2") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
         carbon_drop(&doc);
 
         carbon_from_json(&doc, "[1, 2, 3, null]", CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "2", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "2", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "3") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
         carbon_drop(&doc);
 
         carbon_from_json(&doc, "[1, 2, 3, null]", CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "3", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "3", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "null") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
         carbon_drop(&doc);
 
         carbon_from_json(&doc, "[1, 2, 3, null]", CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "4", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "4", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "_nil") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
         carbon_drop(&doc);
 
         carbon_from_json(&doc, "[\"A\", \"B\", \"C\", null]", CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "\"A\"") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
         carbon_drop(&doc);
 
         carbon_from_json(&doc, "[\"A\", \"B\", \"C\", null]", CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "1", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "1", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "\"B\"") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
         carbon_drop(&doc);
 
         carbon_from_json(&doc, "[\"A\", \"B\", \"C\", null]", CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "2", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "2", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "\"C\"") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
         carbon_drop(&doc);
 
         carbon_from_json(&doc, "[\"A\", \"B\", \"C\", null]", CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "3", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "3", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "null") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
         carbon_drop(&doc);
 
         carbon_from_json(&doc, "\"Hello, World!\"", CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "\"Hello, World!\"") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
         carbon_drop(&doc);
 
         carbon_from_json(&doc, "{}", CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "{}") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
         carbon_drop(&doc);
 
         carbon_from_json(&doc, "[]", CARBON_KEY_NOKEY, NULL, &err);
-        ASSERT_TRUE(carbon_find_open(&find, "0", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "_nil") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
         carbon_drop(&doc);
 
@@ -8511,125 +8511,125 @@ TEST(CarbonTest, CarbonFindPrint)
 
         carbon_from_json(&doc, complex, CARBON_KEY_NOKEY, NULL, &err);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "m", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
 
         ASSERT_TRUE(strcmp(result, "{\"n\": 8, \"o\": -8, \"p\": \"A\", \"q\": 32.40, \"r\": null, \"s\": true, \"t\": false, \"u\": [1, 2, 3, null], \"v\": [\"A\", \"B\", null], \"w\": \"Hello, World!\", \"x\": {\"a\": null}, \"y\": [], \"z\": {}}") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.n", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "m.n", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "8") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.o", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "m.o", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "-8") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.p", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "m.p", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "\"A\"") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.q", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "m.q", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "32.40") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.r", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "m.r", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "null") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.s", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "m.s", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "true") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.t", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "m.t", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "false") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.u", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "m.u", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "[1, 2, 3, null]") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.u.0", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "m.u.0", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "1") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.u.1", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "m.u.1", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "2") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.u.2", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "m.u.2", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "3") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.u.3", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "m.u.3", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "null") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.u.4", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "m.u.4", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "_nil") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.v", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "m.v", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "[\"A\", \"B\", null]") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.w", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "m.w", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "\"Hello, World!\"") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.x", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "m.x", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "{\"a\": null}") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.x.a", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "m.x.a", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "null") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.y", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "m.y", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "[]") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
 
-        ASSERT_TRUE(carbon_find_open(&find, "m.z", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "m.z", &doc));
         result = FN_GET_PTR(char, carbon_find_result_to_json_compact_dup(&find));
         ASSERT_TRUE(strcmp(result, "{}") == 0);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         free(result);
         
         carbon_drop(&doc);
@@ -8649,29 +8649,29 @@ TEST(CarbonTest, CarbonFindPrintExamples)
 
         printf("input: '%s'\n", json);
 
-        carbon_find_open(&find, "x", &doc);
+        carbon_find_begin(&find, "x", &doc);
         printf("x\t\t\t->\t%s\n", FN_GET_PTR(char, carbon_find_result_to_json_compact(&result, &find)));
-        carbon_find_close(&find);
+        carbon_find_end(&find);
 
-        carbon_find_open(&find, "x.y", &doc);
+        carbon_find_begin(&find, "x.y", &doc);
         printf("x.y\t\t\t->\t%s\n", FN_GET_PTR(char, carbon_find_result_to_json_compact(&result, &find)));
-        carbon_find_close(&find);
+        carbon_find_end(&find);
 
-        carbon_find_open(&find, "x.z", &doc);
+        carbon_find_begin(&find, "x.z", &doc);
         printf("x.z\t\t\t->\t%s\n", FN_GET_PTR(char, carbon_find_result_to_json_compact(&result, &find)));
-        carbon_find_close(&find);
+        carbon_find_end(&find);
 
-        carbon_find_open(&find, "x.y.z", &doc);
+        carbon_find_begin(&find, "x.y.z", &doc);
         printf("x.y.z\t\t->\t%s\n", FN_GET_PTR(char, carbon_find_result_to_json_compact(&result, &find)));
-        carbon_find_close(&find);
+        carbon_find_end(&find);
 
-        carbon_find_open(&find, "x.y.0.z", &doc);
+        carbon_find_begin(&find, "x.y.0.z", &doc);
         printf("x.y.0.z\t\t->\t%s\n", FN_GET_PTR(char, carbon_find_result_to_json_compact(&result, &find)));
-        carbon_find_close(&find);
+        carbon_find_end(&find);
 
-        carbon_find_open(&find, "x.y.1.z", &doc);
+        carbon_find_begin(&find, "x.y.1.z", &doc);
         printf("x.y.0.z\t\t->\t%s\n", FN_GET_PTR(char, carbon_find_result_to_json_compact(&result, &find)));
-        carbon_find_close(&find);
+        carbon_find_end(&find);
 
         string_buffer_drop(&result);
         carbon_drop(&doc);
@@ -8686,29 +8686,29 @@ TEST(CarbonTest, ParseBooleanArray) {
 
         carbon_from_json(&doc, json, CARBON_KEY_NOKEY, NULL, &err);
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.col", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0.col", &doc));
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         carbon_find_result_type(&type, &find);
         ASSERT_EQ(type, CARBON_FIELD_COLUMN_BOOLEAN_UNSORTED_MULTISET);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.col.0", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0.col.0", &doc));
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         carbon_find_result_type(&type, &find);
         ASSERT_EQ(type, CARBON_FIELD_TRUE);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.col.1", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0.col.1", &doc));
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         carbon_find_result_type(&type, &find);
         ASSERT_EQ(type, CARBON_FIELD_NULL);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
 
-        ASSERT_TRUE(carbon_find_open(&find, "0.col.2", &doc));
+        ASSERT_TRUE(carbon_find_begin(&find, "0.col.2", &doc));
         ASSERT_TRUE(FN_STATUS(carbon_find_has_result(&find)));
         carbon_find_result_type(&type, &find);
         ASSERT_EQ(type, CARBON_FIELD_FALSE);
-        carbon_find_close(&find);
+        carbon_find_end(&find);
 
         carbon_drop(&doc);
 }

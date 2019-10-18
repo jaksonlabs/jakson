@@ -188,7 +188,7 @@ fn_result carbon_revise_iterator_close(carbon_array_it *it)
         return carbon_array_it_drop(it);
 }
 
-fn_result carbon_revise_find_open(carbon_find *out, const char *dot_path, carbon_revise *context)
+fn_result carbon_revise_find_begin(carbon_find *out, const char *dot_path, carbon_revise *context)
 {
         FN_FAIL_IF_NULL(out, dot_path, context)
         carbon_dot_path path;
@@ -198,7 +198,7 @@ fn_result carbon_revise_find_open(carbon_find *out, const char *dot_path, carbon
         return status;
 }
 
-fn_result carbon_revise_find_close(carbon_find *find)
+fn_result carbon_revise_find_end(carbon_find *find)
 {
         FN_FAIL_IF_NULL(find)
         return carbon_find_drop(find);

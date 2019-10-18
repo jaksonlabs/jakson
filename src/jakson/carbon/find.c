@@ -29,7 +29,7 @@ static void result_from_object(carbon_find *find, carbon_object_it *it);
 static inline bool
 result_from_column(carbon_find *find, u32 requested_idx, carbon_column_it *it);
 
-bool carbon_find_open(carbon_find *out, const char *dot_path, carbon *doc)
+bool carbon_find_begin(carbon_find *out, const char *dot_path, carbon *doc)
 {
         ERROR_IF_NULL(out)
         ERROR_IF_NULL(dot_path)
@@ -41,7 +41,7 @@ bool carbon_find_open(carbon_find *out, const char *dot_path, carbon *doc)
         return true;
 }
 
-fn_result carbon_find_close(carbon_find *find)
+fn_result carbon_find_end(carbon_find *find)
 {
         FN_FAIL_IF_NULL(find)
         if (FN_BOOL(carbon_find_has_result(find))) {

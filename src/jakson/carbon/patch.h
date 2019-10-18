@@ -14,3 +14,28 @@
  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
+#ifndef HAD_CARBON_PATCH_H
+#define HAD_CARBON_PATCH_H
+
+#include <jakson/stdinc.h>
+
+BEGIN_DECL
+
+typedef struct carbon carbon;
+typedef struct carbon_array_it carbon_array_it;
+typedef struct carbon_find carbon_find;
+
+/* Opens a read-write enabled iterator for patching a record revision without creating a new one. */
+fn_result carbon_patch_begin(carbon_array_it *it, carbon *doc);
+
+/* Closes a read-write ennabled iterator , which was previously opened via 'carbon_patch_end' */
+fn_result carbon_patch_end(carbon_array_it *it);
+
+bool carbon_patch_find_begin(carbon_find *out, const char *dot_path, carbon *doc);
+
+fn_result carbon_patch_find_end(carbon_find *find);
+
+END_DECL
+
+#endif

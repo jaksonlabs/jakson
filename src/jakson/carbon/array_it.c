@@ -202,10 +202,10 @@ bool carbon_array_it_clone(carbon_array_it *dst, carbon_array_it *src)
         return true;
 }
 
-bool carbon_array_it_readonly(carbon_array_it *it)
+bool carbon_array_it_set_mode(carbon_array_it *it, access_mode_e mode)
 {
         ERROR_IF_NULL(it);
-        it->memfile.mode = READ_ONLY;
+        it->memfile.mode = mode;
         return true;
 }
 

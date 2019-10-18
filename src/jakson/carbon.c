@@ -37,6 +37,7 @@
 #include <jakson/carbon/string.h>
 #include <jakson/carbon/key.h>
 #include <jakson/carbon/commit.h>
+#include <jakson/carbon/patch.h>
 #include <jakson/carbon/printers/compact.h>
 #include <jakson/carbon/printers/extended.h>
 
@@ -322,9 +323,9 @@ fn_result ofType(bool) carbon_is_multiset(carbon *doc)
         FN_FAIL_IF_NULL(doc)
 
         carbon_array_it it;
-        carbon_iterator_open(&it, doc);
+        carbon_read_begin(&it, doc);
         fn_result ofType(bool) ret = carbon_array_it_is_multiset(&it);
-        carbon_iterator_close(&it);
+        carbon_read_end(&it);
 
         return FN_IS_OK(ret) ? ret : FN_FAIL_FORWARD();
 }
@@ -334,9 +335,9 @@ fn_result ofType(bool) carbon_is_sorted(carbon *doc)
         FN_FAIL_IF_NULL(doc)
 
         carbon_array_it it;
-        carbon_iterator_open(&it, doc);
+        carbon_read_begin(&it, doc);
         fn_result ofType(bool) ret = carbon_array_it_is_sorted(&it);
-        carbon_iterator_close(&it);
+        carbon_read_end(&it);
 
         return FN_IS_OK(ret) ? ret : FN_FAIL_FORWARD();
 }
@@ -382,7 +383,7 @@ bool carbon_to_str(string_buffer *dst, carbon_printer_impl_e printer, carbon *do
         carbon_printer_payload_begin(&p, &b);
 
         carbon_array_it it;
-        carbon_iterator_open(&it, doc);
+        carbon_read_begin(&it, doc);
 
         carbon_printer_print_array(&it, &p, &b, true);
         carbon_array_it_drop(&it);
@@ -432,19 +433,16 @@ char *carbon_to_json_compact_dup(carbon *doc)
         return result;
 }
 
-fn_result carbon_iterator_open(carbon_array_it *it, carbon *doc)
+fn_result carbon_read_begin(carbon_array_it *it, carbon *doc)
 {
-        FN_FAIL_IF_NULL(it, doc);
-        offset_t payload_start = carbon_int_payload_after_header(doc);
-        carbon_array_it_create(it, &doc->memfile, &doc->err, payload_start);
-        carbon_array_it_readonly(it);
-        return FN_OK();
+        fn_result ret = carbon_patch_begin(it, doc);
+        carbon_array_it_set_mode(it, READ_ONLY);
+        return ret;
 }
 
-fn_result carbon_iterator_close(carbon_array_it *it)
+fn_result carbon_read_end(carbon_array_it *it)
 {
-        FN_FAIL_IF_NULL(it);
-        return carbon_array_it_drop(it);
+        return carbon_patch_end(it);
 }
 
 bool carbon_print(FILE *file, carbon_printer_impl_e printer, carbon *doc)

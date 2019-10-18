@@ -96,7 +96,7 @@ bool carbon_array_it_update_in_place_null(carbon_array_it *it);
 fn_result carbon_array_it_create(carbon_array_it *it, memfile *memfile, err *err, offset_t payload_start);
 bool carbon_array_it_copy(carbon_array_it *dst, carbon_array_it *src);
 bool carbon_array_it_clone(carbon_array_it *dst, carbon_array_it *src);
-bool carbon_array_it_readonly(carbon_array_it *it);
+bool carbon_array_it_set_mode(carbon_array_it *it, access_mode_e mode);
 bool carbon_array_it_length(u64 *len, carbon_array_it *it);
 bool carbon_array_it_is_empty(carbon_array_it *it);
 

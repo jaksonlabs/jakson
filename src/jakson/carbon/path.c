@@ -35,9 +35,9 @@ fn_result carbon_path_evaluator_begin(carbon_path_evaluator *eval, carbon_dot_pa
         ZERO_MEMORY(eval, sizeof(carbon_path_evaluator));
         eval->doc = doc;
         error_init(&eval->err);
-        FN_FAIL_FORWARD_IF_NOT_OK(carbon_iterator_open(&eval->root_it, eval->doc));
+        FN_FAIL_FORWARD_IF_NOT_OK(carbon_read_begin(&eval->root_it, eval->doc));
         eval->status = traverse_array(eval, path, 0, &eval->root_it, true);
-        FN_FAIL_FORWARD_IF_NOT_OK(carbon_iterator_close(&eval->root_it));
+        FN_FAIL_FORWARD_IF_NOT_OK(carbon_read_end(&eval->root_it));
         return FN_OK();
 }
 
@@ -50,7 +50,7 @@ fn_result carbon_path_evaluator_begin_mutable(carbon_path_evaluator *eval, const
         error_init(&eval->err);
         FN_FAIL_FORWARD_IF_NOT_OK(carbon_revise_iterator_open(&eval->root_it, context));
         eval->status = traverse_array(eval, path, 0, &eval->root_it, true);
-        FN_FAIL_FORWARD_IF_NOT_OK(carbon_iterator_close(&eval->root_it));
+        FN_FAIL_FORWARD_IF_NOT_OK(carbon_read_end(&eval->root_it));
         return FN_OK();
 }
 
@@ -88,8 +88,8 @@ bool carbon_path_evaluator_end(carbon_path_evaluator *state)
 bool carbon_path_exists(carbon *doc, const char *path)
 {
         carbon_find find;
-        bool result = carbon_find_open(&find, path, doc);
-        carbon_find_close(&find);
+        bool result = carbon_find_begin(&find, path, doc);
+        carbon_find_end(&find);
         return result;
 }
 
@@ -99,12 +99,12 @@ bool carbon_path_is_array(carbon *doc, const char *path)
         carbon_field_type_e field_type;
         bool result = false;
 
-        if (carbon_find_open(&find, path, doc)) {
+        if (carbon_find_begin(&find, path, doc)) {
                 carbon_find_result_type(&field_type, &find);
                 result = carbon_field_type_is_array_or_subtype(field_type);
         }
 
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         return result;
 }
 
@@ -114,12 +114,12 @@ bool carbon_path_is_column(carbon *doc, const char *path)
         carbon_field_type_e field_type;
         bool result = false;
 
-        if (carbon_find_open(&find, path, doc)) {
+        if (carbon_find_begin(&find, path, doc)) {
                 carbon_find_result_type(&field_type, &find);
                 result = carbon_field_type_is_column_or_subtype(field_type);
         }
 
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         return result;
 }
 
@@ -129,12 +129,12 @@ bool carbon_path_is_object(carbon *doc, const char *path)
         carbon_field_type_e field_type;
         bool result = false;
 
-        if (carbon_find_open(&find, path, doc)) {
+        if (carbon_find_begin(&find, path, doc)) {
                 carbon_find_result_type(&field_type, &find);
                 result = carbon_field_type_is_object_or_subtype(field_type);
         }
 
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         return result;
 }
 
@@ -150,12 +150,12 @@ bool carbon_path_is_null(carbon *doc, const char *path)
         carbon_field_type_e field_type;
         bool result = false;
 
-        if (carbon_find_open(&find, path, doc)) {
+        if (carbon_find_begin(&find, path, doc)) {
                 carbon_find_result_type(&field_type, &find);
                 result = carbon_field_type_is_null(field_type);
         }
 
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         return result;
 }
 
@@ -165,12 +165,12 @@ bool carbon_path_is_number(carbon *doc, const char *path)
         carbon_field_type_e field_type;
         bool result = false;
 
-        if (carbon_find_open(&find, path, doc)) {
+        if (carbon_find_begin(&find, path, doc)) {
                 carbon_find_result_type(&field_type, &find);
                 result = carbon_field_type_is_number(field_type);
         }
 
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         return result;
 }
 
@@ -180,12 +180,12 @@ bool carbon_path_is_boolean(carbon *doc, const char *path)
         carbon_field_type_e field_type;
         bool result = false;
 
-        if (carbon_find_open(&find, path, doc)) {
+        if (carbon_find_begin(&find, path, doc)) {
                 carbon_find_result_type(&field_type, &find);
                 result = carbon_field_type_is_boolean(field_type);
         }
 
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         return result;
 }
 
@@ -195,12 +195,12 @@ bool carbon_path_is_string(carbon *doc, const char *path)
         carbon_field_type_e field_type;
         bool result = false;
 
-        if (carbon_find_open(&find, path, doc)) {
+        if (carbon_find_begin(&find, path, doc)) {
                 carbon_find_result_type(&field_type, &find);
                 result = carbon_field_type_is_string(field_type);
         }
 
-        carbon_find_close(&find);
+        carbon_find_end(&find);
         return result;
 }
 

@@ -17,6 +17,7 @@
 
 #include <jakson/carbon/key.h>
 #include <jakson/carbon/string.h>
+#include <jakson/stdx/unique_id.h>
 
 static void write_nokey(memfile *file)
 {
@@ -27,7 +28,8 @@ static void write_nokey(memfile *file)
 static void write_autokey(memfile *file)
 {
         u8 marker = CARBON_MAUTOKEY;
-        unique_id_t key = 0;
+        unique_id_t key;
+        unique_id_create(&key);
         memfile_write(file, &marker, sizeof(u8));
         memfile_write(file, &key, sizeof(unique_id_t));
 }
