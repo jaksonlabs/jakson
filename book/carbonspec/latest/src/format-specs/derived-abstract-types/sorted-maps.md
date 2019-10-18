@@ -20,7 +20,7 @@
 
 ### Carbon Encoding
 
-A (compacted) Carbon `sorted-map` for the JSON snippet from above, encoding the JSON object with the base type `object` holding two string_buffer properties (assuming `"a":"c"` was added after `"a":"b"`).
+A (compacted) Carbon `sorted-map` for the JSON snippet from above, encoding the JSON object with the base type `object` holding two string properties (assuming `"a":"c"` was added after `"a":"b"`).
 
 ```
 [#] 

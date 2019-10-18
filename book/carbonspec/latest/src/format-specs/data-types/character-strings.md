@@ -2,19 +2,19 @@
 
 Carbon Type     | Description                                         | Size      | *null*-Value | Marker 
 ----------------|-----------------------------------------------------|-----------|--------------|--------
-`string_buffer`        | a (Pascal) character string_buffer of `n` characters | `n` bytes | `null`       | `[s]`
+`string`        | a (Pascal) character string of `n` characters | `n` bytes | `null`       | `[s]`
 
 
 ## Encoding as Field Value
 
 ```
-[s](n) <character-string_buffer>
+[s](n) <character-string>
 ```
 
 
 Description                             | Size          | Marker          | Payload
 ----------------------------------------|---------------|-----------------|-------------------------------------------------
- a `n`-char string_buffer  | 1 + `l` + `n` bytes | `[s]` (string_buffer)  | `(n)` length (`l` byte), `n` chars
+ a `n`-char string  | 1 + `l` + `n` bytes | `[s]` (string)  | `(n)` length (`l` byte), `n` chars
  
 
 ### Example
@@ -24,7 +24,7 @@ JSON snippet
 ["Hello", "World", "!"]
 ```
 
-A (compacted) Carbon file, which encodes the JSON array as `array` of character-string_buffer values.
+A (compacted) Carbon file, which encodes the JSON array as `array` of character-string values.
 
 ```
 [[] [s](5)[Hello] [s](5)[World] [s](1)[!] []]

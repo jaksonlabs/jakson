@@ -34,7 +34,7 @@
 			- [MALLOC](fundamentals/types-and-macros/memory-managament-macros/malloc.md)
 			- [ZERO_MEMORY](fundamentals/types-and-macros/memory-managament-macros/zero-memory.md)
 		- [Error and Status Macros](fundamentals/types-and-macros/err-and-status-macros.md)
-			- [ERROR_IF_NULL](fundamentals/types-and-macros/err-and-status-macros/err-if-null.md)
+			- [DEBUG_ERROR_IF_NULL](fundamentals/types-and-macros/err-and-status-macros/err-if-null.md)
 			- [CHECK_SUCCESS](fundamentals/types-and-macros/err-and-status-macros/check-success.md)
 			- [SUCCESS_OR_JUMP](fundamentals/types-and-macros/err-and-status-macros/success-or-jump.md)
 			- [ERROR_IF_NOT_IMPLEMENTED](fundamentals/types-and-macros/err-and-status-macros/err-if-not-implemented.md)

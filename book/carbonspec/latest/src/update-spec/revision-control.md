@@ -74,9 +74,9 @@ for (size_t i = 0; i < key_size; i++){
 
 ## Stringified Commit Hash
 
-The base 16 (hex) value string_buffer of a commit hash value with exactly 16 letters without any leading prefix.
+The base 16 (hex) value string of a commit hash value with exactly 16 letters without any leading prefix.
 
-Example base 10 commit hash `2072006001577230657` is printed to string_buffer as `1cc13e7b007d0141`.
+Example base 10 commit hash `2072006001577230657` is printed to string as `1cc13e7b007d0141`.
 
 ## Initial Commit Hash
 

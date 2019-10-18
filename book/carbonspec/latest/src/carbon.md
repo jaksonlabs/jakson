@@ -2,7 +2,7 @@
 
 > **This specification document is work-in-progress**. 
 
-> You see the latest version in the `master` branch, as of 20th September 2019.
+> You see the latest version in the `develop` branch, as of 18th October 2019.
 
 ## License
 

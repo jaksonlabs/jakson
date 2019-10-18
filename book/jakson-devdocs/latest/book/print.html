@@ -1,0 +1,1436 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Jakson Developer Documentation</title>
+        
+        <meta name="robots" content="noindex" />
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body class="light">
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            document.body.className = theme;
+            document.querySelector('html').className = theme + ' js';
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="affix"><a href="documentation.html">Jakson Developer Documentation</a></li><li class="affix"><a href="structure.html">Project Structure</a></li><li><a href="fundamentals.html"><strong aria-hidden="true">1.</strong> Fundamentals</a></li><li><ol class="section"><li><a href="fundamentals/code-style.html"><strong aria-hidden="true">1.1.</strong> Code Style Convention</a></li><li><a href="fundamentals/err-handling.html"><strong aria-hidden="true">1.2.</strong> Error Handling</a></li><li><ol class="section"><li><a href="fundamentals/err-handling/status-and-err-codes.html"><strong aria-hidden="true">1.2.1.</strong> Status and Error Codes</a></li><li><a href="fundamentals/err-handling/err-throwing-macros.html"><strong aria-hidden="true">1.2.2.</strong> Error Throwing Macros</a></li><li><ol class="section"><li><a href="fundamentals/err-handling/err-throwing-macros/err.html"><strong aria-hidden="true">1.2.2.1.</strong> ERROR</a></li><li><a href="fundamentals/err-handling/err-throwing-macros/err-no-abort.html"><strong aria-hidden="true">1.2.2.2.</strong> ERROR_NO_ABORT</a></li><li><a href="fundamentals/err-handling/err-throwing-macros/err-wdetails.html"><strong aria-hidden="true">1.2.2.3.</strong> ERROR_WDETAILS</a></li></ol></li><li><a href="fundamentals/err-handling/conditional-err-macros.html"><strong aria-hidden="true">1.2.3.</strong> Conditional Error Macros</a></li><li><ol class="section"><li><a href="fundamentals/err-handling/conditional-err-macros/if.html"><strong aria-hidden="true">1.2.3.1.</strong> ERROR_IF</a></li><li><a href="fundamentals/err-handling/conditional-err-macros/if_and_return.html"><strong aria-hidden="true">1.2.3.2.</strong> ERROR_IF_AND_RETURN</a></li><li><a href="fundamentals/err-handling/conditional-err-macros/if_wdetails.html"><strong aria-hidden="true">1.2.3.3.</strong> ERROR_IF_WDETAILS</a></li></ol></li><li><a href="fundamentals/err-handling/err-printing-macros.html"><strong aria-hidden="true">1.2.4.</strong> Error Printing Macros</a></li><li><ol class="section"><li><a href="fundamentals/err-handling/err-printing-macros/print.html"><strong aria-hidden="true">1.2.4.1.</strong> ERROR_PRINT</a></li><li><a href="fundamentals/err-handling/err-printing-macros/print-and-die.html"><strong aria-hidden="true">1.2.4.2.</strong> ERROR_PRINT_AND_DIE</a></li><li><a href="fundamentals/err-handling/err-printing-macros/print-and-die-if.html"><strong aria-hidden="true">1.2.4.3.</strong> ERROR_PRINT_AND_DIE_IF</a></li><li><a href="fundamentals/err-handling/err-printing-macros/print-if.html"><strong aria-hidden="true">1.2.4.4.</strong> ERROR_PRINT_IF</a></li></ol></li><li><a href="fundamentals/err-handling/err-test-macros.html"><strong aria-hidden="true">1.2.5.</strong> Error Test Macros</a></li><li><ol class="section"><li><a href="fundamentals/err-handling/err-test-macros/occured.html"><strong aria-hidden="true">1.2.5.1.</strong> ERROR_OCCURRED</a></li><li><a href="fundamentals/err-handling/err-test-macros/success-else-return.html"><strong aria-hidden="true">1.2.5.2.</strong> SUCCESS_ELSE_RETURN</a></li><li><a href="fundamentals/err-handling/err-test-macros/success-else-null.html"><strong aria-hidden="true">1.2.5.3.</strong> SUCCESS_ELSE_NULL</a></li><li><a href="fundamentals/err-handling/err-test-macros/success-else-fail.html"><strong aria-hidden="true">1.2.5.4.</strong> SUCCESS_ELSE_FAIL</a></li></ol></li><li><a href="fundamentals/err-handling/module-err-functions.html"><strong aria-hidden="true">1.2.6.</strong> Module Error Functions</a></li><li><ol class="section"><li><a href="fundamentals/err-handling/module-err-functions/define-err-getter.html"><strong aria-hidden="true">1.2.6.1.</strong> DEFINE_ERROR_GETTER</a></li></ol></li><li><a href="fundamentals/err-handling/debug-and-release.html"><strong aria-hidden="true">1.2.7.</strong> Debug and Release</a></li></ol></li><li><a href="fundamentals/types-and-macros.html"><strong aria-hidden="true">1.3.</strong> Types and Macros</a></li><li><ol class="section"><li><a href="fundamentals/types-and-macros/memory-managament-macros.html"><strong aria-hidden="true">1.3.1.</strong> Memory Managament Macros</a></li><li><ol class="section"><li><a href="fundamentals/types-and-macros/memory-managament-macros/malloc.html"><strong aria-hidden="true">1.3.1.1.</strong> MALLOC</a></li><li><a href="fundamentals/types-and-macros/memory-managament-macros/zero-memory.html"><strong aria-hidden="true">1.3.1.2.</strong> ZERO_MEMORY</a></li></ol></li><li><a href="fundamentals/types-and-macros/err-and-status-macros.html"><strong aria-hidden="true">1.3.2.</strong> Error and Status Macros</a></li><li><ol class="section"><li><a href="fundamentals/types-and-macros/err-and-status-macros/err-if-null.html"><strong aria-hidden="true">1.3.2.1.</strong> DEBUG_ERROR_IF_NULL</a></li><li><a href="fundamentals/types-and-macros/err-and-status-macros/check-success.html"><strong aria-hidden="true">1.3.2.2.</strong> CHECK_SUCCESS</a></li><li><a href="fundamentals/types-and-macros/err-and-status-macros/success-or-jump.html"><strong aria-hidden="true">1.3.2.3.</strong> SUCCESS_OR_JUMP</a></li><li><a href="fundamentals/types-and-macros/err-and-status-macros/err-if-not-implemented.html"><strong aria-hidden="true">1.3.2.4.</strong> ERROR_IF_NOT_IMPLEMENTED</a></li></ol></li><li><a href="fundamentals/types-and-macros/branch-prediction-macros.html"><strong aria-hidden="true">1.3.3.</strong> Branch-Prediction Macros</a></li><li><ol class="section"><li><a href="fundamentals/types-and-macros/branch-prediction-macros/likely.html"><strong aria-hidden="true">1.3.3.1.</strong> LIKELY</a></li><li><a href="fundamentals/types-and-macros/branch-prediction-macros/unlikely.html"><strong aria-hidden="true">1.3.3.2.</strong> UNLIKELY</a></li></ol></li><li><a href="fundamentals/types-and-macros/data-prefetching-macros.html"><strong aria-hidden="true">1.3.4.</strong> Data Prefetching Macros</a></li><li><ol class="section"><li><a href="fundamentals/types-and-macros/data-prefetching-macros/prefetch-read.html"><strong aria-hidden="true">1.3.4.1.</strong> PREFETCH_READ</a></li><li><a href="fundamentals/types-and-macros/data-prefetching-macros/prefetch-write.html"><strong aria-hidden="true">1.3.4.2.</strong> PREFETCH_WRITE</a></li></ol></li><li><a href="fundamentals/types-and-macros/bit-field-macros.html"><strong aria-hidden="true">1.3.5.</strong> Bit-Field Macros</a></li><li><ol class="section"><li><a href="fundamentals/types-and-macros/bit-field-macros/bit-num-of.html"><strong aria-hidden="true">1.3.5.1.</strong> BIT_NUM_OF</a></li><li><a href="fundamentals/types-and-macros/bit-field-macros/set-bit.html"><strong aria-hidden="true">1.3.5.2.</strong> SET_BIT</a></li><li><a href="fundamentals/types-and-macros/bit-field-macros/set-bits.html"><strong aria-hidden="true">1.3.5.3.</strong> SET_BITS</a></li><li><a href="fundamentals/types-and-macros/bit-field-macros/unset-bits.html"><strong aria-hidden="true">1.3.5.4.</strong> UNSET_BITS</a></li><li><a href="fundamentals/types-and-macros/bit-field-macros/are-bits-set.html"><strong aria-hidden="true">1.3.5.5.</strong> ARE_BITS_SET</a></li></ol></li><li><a href="fundamentals/types-and-macros/ultility-macros.html"><strong aria-hidden="true">1.3.6.</strong> Utility Macros</a></li><li><ol class="section"><li><a href="fundamentals/types-and-macros/ultility-macros/array-length.html"><strong aria-hidden="true">1.3.6.1.</strong> ARRAY_LENGTH</a></li><li><a href="fundamentals/types-and-macros/ultility-macros/not-implemented.html"><strong aria-hidden="true">1.3.6.2.</strong> NOT_IMPLEMENTED</a></li><li><a href="fundamentals/types-and-macros/ultility-macros/declare-and-init.html"><strong aria-hidden="true">1.3.6.3.</strong> DECLARE_AND_INIT</a></li><li><a href="fundamentals/types-and-macros/ultility-macros/unused.html"><strong aria-hidden="true">1.3.6.4.</strong> UNUSED</a></li><li><a href="fundamentals/types-and-macros/ultility-macros/built-in.html"><strong aria-hidden="true">1.3.6.5.</strong> BUILT_IN</a></li><li><a href="fundamentals/types-and-macros/ultility-macros/optional.html"><strong aria-hidden="true">1.3.6.6.</strong> OPTIONAL</a></li><li><a href="fundamentals/types-and-macros/ultility-macros/optional-set.html"><strong aria-hidden="true">1.3.6.7.</strong> OPTIONAL_SET</a></li><li><a href="fundamentals/types-and-macros/ultility-macros/optional-set-or-else.html"><strong aria-hidden="true">1.3.6.8.</strong> OPTIONAL_SET_OR_ELSE</a></li><li><a href="fundamentals/types-and-macros/ultility-macros/optional-call.html"><strong aria-hidden="true">1.3.6.9.</strong> OPTIONAL_CALL</a></li><li><a href="fundamentals/types-and-macros/ultility-macros/min-max.html"><strong aria-hidden="true">1.3.6.10.</strong> MIN and MAX</a></li></ol></li><li><a href="fundamentals/types-and-macros/console-macros.html"><strong aria-hidden="true">1.3.7.</strong> Console Macros</a></li><li><ol class="section"><li><a href="fundamentals/types-and-macros/console-macros/write.html"><strong aria-hidden="true">1.3.7.1.</strong> CONSOLE_WRITE</a></li><li><a href="fundamentals/types-and-macros/console-macros/write-endl.html"><strong aria-hidden="true">1.3.7.2.</strong> CONSOLE_WRITE_ENDL</a></li><li><a href="fundamentals/types-and-macros/console-macros/write-cont.html"><strong aria-hidden="true">1.3.7.3.</strong> CONSOLE_WRITE_CONT</a></li><li><a href="fundamentals/types-and-macros/console-macros/writeln.html"><strong aria-hidden="true">1.3.7.4.</strong> CONSOLE_WRITELN</a></li><li><a href="fundamentals/types-and-macros/console-macros/output-on.html"><strong aria-hidden="true">1.3.7.5.</strong> CONSOLE_OUTPUT_ON</a></li><li><a href="fundamentals/types-and-macros/console-macros/output-off.html"><strong aria-hidden="true">1.3.7.6.</strong> CONSOLE_OUTPUT_OFF</a></li></ol></li><li><a href="fundamentals/types-and-macros/diagnostic-macros.html"><strong aria-hidden="true">1.3.8.</strong> Diagnostic Macros</a></li><li><ol class="section"><li><a href="fundamentals/types-and-macros/diagnostic-macros/assert.html"><strong aria-hidden="true">1.3.8.1.</strong> JAK_ASSERT</a></li><li><a href="fundamentals/types-and-macros/diagnostic-macros/log-trace.html"><strong aria-hidden="true">1.3.8.2.</strong> LOG_TRACE</a></li><li><a href="fundamentals/types-and-macros/diagnostic-macros/log-info.html"><strong aria-hidden="true">1.3.8.3.</strong> LOG_INFO</a></li><li><a href="fundamentals/types-and-macros/diagnostic-macros/log-debug.html"><strong aria-hidden="true">1.3.8.4.</strong> LOG_DEBUG</a></li><li><a href="fundamentals/types-and-macros/diagnostic-macros/log-warn.html"><strong aria-hidden="true">1.3.8.5.</strong> LOG_WARN</a></li></ol></li></ol></li><li><a href="fundamentals/flat-memory-objects.html"><strong aria-hidden="true">1.4.</strong> Flat Memory Objects</a></li><li><ol class="section"><li><a href="fundamentals/flat-memory-objects/memory-blocks.html"><strong aria-hidden="true">1.4.1.</strong> Memory Blocks</a></li><li><a href="fundamentals/flat-memory-objects/memory-files.html"><strong aria-hidden="true">1.4.2.</strong> Memory Files</a></li></ol></li><li><a href="fundamentals/standard-data-structures.html"><strong aria-hidden="true">1.5.</strong> Standard Data Structures</a></li><li><ol class="section"><li><a href="fundamentals/standard-data-structures/vectos.html"><strong aria-hidden="true">1.5.1.</strong> Vectors</a></li><li><a href="fundamentals/standard-data-structures/bloom-filters.html"><strong aria-hidden="true">1.5.2.</strong> Bloom Filters</a></li><li><a href="fundamentals/standard-data-structures/bitmaps.html"><strong aria-hidden="true">1.5.3.</strong> Bitmaps</a></li><li><a href="fundamentals/standard-data-structures/hash-tables.html"><strong aria-hidden="true">1.5.4.</strong> Hash Tables</a></li><li><a href="fundamentals/standard-data-structures/hash-sets.html"><strong aria-hidden="true">1.5.5.</strong> Hash Sets</a></li><li><a href="fundamentals/standard-data-structures/priority-queues.html"><strong aria-hidden="true">1.5.6.</strong> Priority Queues</a></li><li><a href="fundamentals/standard-data-structures/string_buffer-dictionaries.html"><strong aria-hidden="true">1.5.7.</strong> String Dictionaries</a></li><li><ol class="section"><li><a href="fundamentals/standard-data-structures/string_buffer-dictionaries/synchronous-dictionaries.html"><strong aria-hidden="true">1.5.7.1.</strong> Synchronous Dictionaries</a></li><li><a href="fundamentals/standard-data-structures/string_buffer-dictionaries/asynchronous-dictionaries.html"><strong aria-hidden="true">1.5.7.2.</strong> Asynchronous Dictionaries</a></li></ol></li></ol></li><li><a href="fundamentals/advanced-types-and-structures.html"><strong aria-hidden="true">1.6.</strong> Advanced Types and Structures</a></li><li><ol class="section"><li><a href="fundamentals/advanced-types-and-structures/variable-length-integers.html"><strong aria-hidden="true">1.6.1.</strong> Variable-Length Integers</a></li><li><ol class="section"><li><a href="fundamentals/advanced-types-and-structures/variable-length-integers/byte-stream-encoded.html"><strong aria-hidden="true">1.6.1.1.</strong> Byte-Stream Encoded</a></li><li><a href="fundamentals/advanced-types-and-structures/marker-encoded.html"><strong aria-hidden="true">1.6.1.2.</strong> Marker Encoded</a></li></ol></li><li><a href="fundamentals/advanced-types-and-structures/flat-memory-columns.html"><strong aria-hidden="true">1.6.2.</strong> Flat Memory Columns</a></li><li><a href="fundamentals/advanced-types-and-structures/unique-identifiers.html"><strong aria-hidden="true">1.6.3.</strong> Unique Identifiers</a></li></ol></li><li><a href="fundamentals/hash-functions.html"><strong aria-hidden="true">1.7.</strong> Hash Functions</a></li><li><a href="fundamentals/utilities.html"><strong aria-hidden="true">1.8.</strong> Utilities</a></li><li><ol class="section"><li><a href="fundamentals/utilities/string_buffer-builders.html"><strong aria-hidden="true">1.8.1.</strong> String Builders</a></li><li><a href="fundamentals/utilities/string_buffer-utilities.html"><strong aria-hidden="true">1.8.2.</strong> String Utilities</a></li><li><a href="fundamentals/utilities/number-utilitites.html"><strong aria-hidden="true">1.8.3.</strong> Number Utilities</a></li><li><a href="fundamentals/utilities/data-and-time.html"><strong aria-hidden="true">1.8.4.</strong> Date and Time</a></li><li><a href="fundamentals/utilities/type-conversion.html"><strong aria-hidden="true">1.8.5.</strong> Type Conversions</a></li><li><a href="fundamentals/utilities/sorting.html"><strong aria-hidden="true">1.8.6.</strong> Sorting</a></li><li><a href="fundamentals/utilities/hexdumps.html"><strong aria-hidden="true">1.8.7.</strong> Hexdumps</a></li></ol></li></ol></li><li><a href="carbon-api.html"><strong aria-hidden="true">2.</strong> Carbon API</a></li><li><ol class="section"><li><a href="carbon-api/carbon-overview.html"><strong aria-hidden="true">2.1.</strong> Carbon Overview</a></li><li><a href="carbon-api/project-setup.html"><strong aria-hidden="true">2.2.</strong> Project Setup</a></li><li><a href="carbon-api/construct-carbon-records.html"><strong aria-hidden="true">2.3.</strong> Carbon Records</a></li><li><ol class="section"><li><a href="carbon-api/construct-carbon-records/from-json.html"><strong aria-hidden="true">2.3.1.</strong> From JSON</a></li><li><a href="carbon-api/construct-carbon-records/manual-construction.html"><strong aria-hidden="true">2.3.2.</strong> Manual Construction</a></li><li><ol class="section"><li><a href="carbon-api/construct-carbon-records/manual-construction/arrays.html"><strong aria-hidden="true">2.3.2.1.</strong> Insertions into Arrays</a></li><li><a href="carbon-api/construct-carbon-records/manual-construction/objects.html"><strong aria-hidden="true">2.3.2.2.</strong> Insertions into Objects</a></li><li><a href="carbon-api/construct-carbon-records/manual-construction/columns.html"><strong aria-hidden="true">2.3.2.3.</strong> Insertions into Columns</a></li><li><a href="carbon-api/construct-carbon-records/manual-construction/nesting.html"><strong aria-hidden="true">2.3.2.4.</strong> Nesting</a></li></ol></li><li><a href="carbon-api/construct-carbon-records/from-byte-streams.html"><strong aria-hidden="true">2.3.3.</strong> From Byte Streams</a></li></ol></li><li><a href="carbon-api/browse-contents.html"><strong aria-hidden="true">2.4.</strong> Browse Contents</a></li><li><ol class="section"><li><a href="carbon-api/browse-contents/array-iterators.html"><strong aria-hidden="true">2.4.1.</strong> Array Iterators</a></li><li><a href="carbon-api/browse-contents/object-iterators.html"><strong aria-hidden="true">2.4.2.</strong> Object Iterators</a></li><li><a href="carbon-api/browse-contents/column-iterators.html"><strong aria-hidden="true">2.4.3.</strong> Column Iterators</a></li><li><a href="carbon-api/browse-contents/value-types.html"><strong aria-hidden="true">2.4.4.</strong> Value Types</a></li><li><ol class="section"><li><a href="carbon-api/browse-contents/value-types/field-types.html"><strong aria-hidden="true">2.4.4.1.</strong> Field Types</a></li><li><a href="carbon-api/browse-contents/value-types/null-encoding.html"><strong aria-hidden="true">2.4.4.2.</strong> Null Encoding</a></li></ol></li><li><a href="carbon-api/browse-contents/type-abstractions.html"><strong aria-hidden="true">2.4.5.</strong> Type Abstractions</a></li><li><ol class="section"><li><a href="carbon-api/browse-contents/type-abstractions/field-classes.html"><strong aria-hidden="true">2.4.5.1.</strong> Field Classes</a></li><li><a href="carbon-api/browse-contents/type-abstractions/constant-types.html"><strong aria-hidden="true">2.4.5.2.</strong> Constant Types</a></li><li><a href="carbon-api/browse-contents/type-abstractions/number-types.html"><strong aria-hidden="true">2.4.5.3.</strong> Number Types</a></li><li><a href="carbon-api/browse-contents/type-abstractions/signed-and-unsigned-types.html"><strong aria-hidden="true">2.4.5.4.</strong> Signed and Unsigned Types</a></li><li><a href="carbon-api/browse-contents/type-abstractions/traversable-types.html"><strong aria-hidden="true">2.4.5.5.</strong> Traversable Types</a></li></ol></li></ol></li><li><a href="carbon-api/find-contents.html"><strong aria-hidden="true">2.5.</strong> Find Contents</a></li><li><ol class="section"><li><a href="carbon-api/find-contents/path-index.html"><strong aria-hidden="true">2.5.1.</strong> Path Index</a></li></ol></li><li><a href="carbon-api/modify-contents.html"><strong aria-hidden="true">2.6.</strong> Modify Carbon Records</a></li><li><ol class="section"><li><a href="carbon-api/modify-contents/record-revision.html"><strong aria-hidden="true">2.6.1.</strong> Record Revisions</a></li><li><a href="carbon-api/modify-contents/insertion-operations.html"><strong aria-hidden="true">2.6.2.</strong> Insert Operations</a></li><li><ol class="section"><li><a href="carbon-api/modify-contents/insertion-operations/field-insertions.html"><strong aria-hidden="true">2.6.2.1.</strong> Field Insertions</a></li><li><a href="carbon-api/modify-contents/insertion-operations/property-insertions.html"><strong aria-hidden="true">2.6.2.2.</strong> Property Insertions</a></li></ol></li><li><a href="carbon-api/modify-contents/update-operations.html"><strong aria-hidden="true">2.6.3.</strong> Updates Operations</a></li><li><ol class="section"><li><a href="carbon-api/modify-contents/update-operations/field-updates.html"><strong aria-hidden="true">2.6.3.1.</strong> Field Updates</a></li><li><a href="carbon-api/modify-contents/update-operations/property-updates.html"><strong aria-hidden="true">2.6.3.2.</strong> Property Updates</a></li></ol></li><li><a href="carbon-api/modify-contents/delete-operations.html"><strong aria-hidden="true">2.6.4.</strong> Deletes Operations</a></li><li><ol class="section"><li><a href="carbon-api/modify-contents/delete-operations/field-deletes.html"><strong aria-hidden="true">2.6.4.1.</strong> Field Deletes</a></li><li><a href="carbon-api/modify-contents/delete-operations/property-deletes.html"><strong aria-hidden="true">2.6.4.2.</strong> Property Deletes</a></li></ol></li></ol></li><li><a href="carbon-api/record-identification.html"><strong aria-hidden="true">2.7.</strong> Record Identification</a></li><li><ol class="section"><li><a href="carbon-api/record-identification/non-identifiable-records.html"><strong aria-hidden="true">2.7.1.</strong> Non-Identifiable Records</a></li><li><a href="carbon-api/record-identification/identifiable-records.html"><strong aria-hidden="true">2.7.2.</strong> Identifiable Records</a></li><li><ol class="section"><li><a href="carbon-api/record-identification/identifiable-records/auto-generated-keys.html"><strong aria-hidden="true">2.7.2.1.</strong> Auto-Generated Keys</a></li><li><a href="carbon-api/record-identification/identifiable-records/user-defined-keys.html"><strong aria-hidden="true">2.7.2.2.</strong> User-Defined Keys</a></li><li><ol class="section"><li><a href="carbon-api/record-identification/identifiable-records/user-defined-keys/numeric-keys.html"><strong aria-hidden="true">2.7.2.2.1.</strong> Numeric Keys</a></li><li><a href="carbon-api/record-identification/identifiable-records/user-defined-keys/character-string_buffer-keys-md.html"><strong aria-hidden="true">2.7.2.2.2.</strong> Character String Keys</a></li></ol></li></ol></li></ol></li><li><a href="carbon-api/record-optimization.html"><strong aria-hidden="true">2.8.</strong> Record Optimization</a></li><li><ol class="section"><li><a href="carbon-api/record-optimization/containers-and-memory.html"><strong aria-hidden="true">2.8.1.</strong> Containers and Memory Management</a></li></ol></li><li><a href="carbon-api/conversion-to-json.html"><strong aria-hidden="true">2.9.</strong> Conversion to JSON</a></li><li><ol class="section"><li><a href="carbon-api/conversion-to-json/compact-json-printer.html"><strong aria-hidden="true">2.9.1.</strong> Compact JSON Printer</a></li><li><a href="carbon-api/conversion-to-json/extended-json-printer.html"><strong aria-hidden="true">2.9.2.</strong> Extended JSON Printer</a></li></ol></li><li><a href="carbon-api/advanced-topics.html"><strong aria-hidden="true">2.10.</strong> Advanced Topics</a></li><li><ol class="section"><li><a href="carbon-api/advanced-topics/json-parsing.html"><strong aria-hidden="true">2.10.1.</strong> JSON Parsing</a></li><li><a href="carbon-api/advanced-topics/dot-notated-paths.html"><strong aria-hidden="true">2.10.2.</strong> Dot-Notated Paths</a></li><li><ol class="section"><li><a href="carbon-api/advanced-topics/dot-notated-paths/dot-path-objects.html"><strong aria-hidden="true">2.10.2.1.</strong> Dot Path Objects</a></li><li><a href="carbon-api/advanced-topics/dot-notated-paths/dot-path-index.html"><strong aria-hidden="true">2.10.2.2.</strong> Dot Path Index</a></li><li><a href="carbon-api/advanced-topics/dot-notated-paths/dot-path-evaluators.html"><strong aria-hidden="true">2.10.2.3.</strong> Dot Path Evaluators</a></li></ol></li><li><a href="carbon-api/advanced-topics/character-strings.html"><strong aria-hidden="true">2.10.3.</strong> Character Strings</a></li><li><a href="carbon-api/advanced-topics/user-defined-types.html"><strong aria-hidden="true">2.10.4.</strong> User-Defined Types</a></li></ol></li></ol></li><li><a href="multi-threading.html"><strong aria-hidden="true">3.</strong> Multi-Threading</a></li><li><ol class="section"><li><a href="multi-threading/spinlocks.html"><strong aria-hidden="true">3.1.</strong> Spinlocks</a></li><li><a href="multi-threading/thread-pools.html"><strong aria-hidden="true">3.2.</strong> Thread Pools</a></li><li><a href="multi-threading/data-parallelism-framework.html"><strong aria-hidden="true">3.3.</strong> Data Parallelism Framework</a></li><li><ol class="section"><li><a href="multi-threading/data-parallelism-framework/parallel-for.html"><strong aria-hidden="true">3.3.1.</strong> Parallel For</a></li><li><a href="multi-threading/data-parallelism-framework/parallel-map.html"><strong aria-hidden="true">3.3.2.</strong> Parallel Map</a></li><li><a href="multi-threading/data-parallelism-framework/parallel-gather.html"><strong aria-hidden="true">3.3.3.</strong> Parallel Gather</a></li><li><a href="multi-threading/data-parallelism-framework/parallel-scatter.html"><strong aria-hidden="true">3.3.4.</strong> Parallel Scatter</a></li><li><a href="multi-threading/data-parallelism-framework/parallel-shuffle.html"><strong aria-hidden="true">3.3.5.</strong> Parallel Shuffle</a></li><li><a href="multi-threading/data-parallelism-framework/parallel-filter.html"><strong aria-hidden="true">3.3.6.</strong> Parallel Filter</a></li><li><ol class="section"><li><a href="multi-threading/data-parallelism-framework/parallel-filter/early-filters.html"><strong aria-hidden="true">3.3.6.1.</strong> Early Filters</a></li><li><a href="multi-threading/data-parallelism-framework/parallel-filter/late-filters.html"><strong aria-hidden="true">3.3.6.2.</strong> Late Filters</a></li></ol></li></ol></li></ol></li><li><a href="jakson-cross-platform.html">Cross-Platform Notices</a></li><li class="affix"><a href="feedback.html">Feedback and Contributions</a></li><li class="affix"><a href="thanks.html">Thanks To</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar" class="menu-bar">
+                    <div id="menu-bar-sticky-container">
+                        <div class="left-buttons">
+                            <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                                <i class="fa fa-paint-brush"></i>
+                            </button>
+                            <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                                <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                            </ul>
+                            
+                            <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                                <i class="fa fa-search"></i>
+                            </button>
+                            
+                        </div>
+
+                        <h1 class="menu-title">Jakson Developer Documentation</h1>
+
+                        <div class="right-buttons">
+                            <a href="print.html" title="Print this book" aria-label="Print this book">
+                                <i id="print-button" class="fa fa-print"></i>
+                            </a>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1><a class="header" href="#jakson-developer-documentation" id="jakson-developer-documentation">Jakson Developer Documentation</a></h1>
+<p><em>By Marcus Pinnecke, with contributions from the Jakson community</em></p>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<blockquote>
+<p>You see the latest version as of 20th September 2019.</p>
+</blockquote>
+<p>Welcome to the <em>Jakson Developer Documentation</em>, which will help you to get started with the Jakson project at source level!. This document aims to provide a good starting point for new developers, and a reference for developers already active in the project. </p>
+<p style="text-align: center;">
+  <img src="jakson-logo-200x200.png" width="200px" />
+</p>
+<p>This documentations covers the majority of Jaksons core data structures and function, the projects organization, design decisions made for particular scenarios, and some hints in the general usage. In particular, this documentation is structured as folows:</p>
+<ul>
+<li>
+<p><a href="fundamentals.html">Chapter 1</a>, <em>Fundamentals</em>, covers code style and system-wide fundamental structures. In particular, the chapter contains the err system used in Jakson, macros for err handling, memory managment, branch-prediction, data-prefetching, bit manipulations, diagnostics, and general utilities. In addition, this chapter describes memory blocks and memory files as Jaksons core abstractions for building highly cache-efficent complex objects in dynamic memory (called <em>flat objects</em>). Afterwards, the standard library for common data structures, such as vectors or bitmaps, and the extended library for data structures, such as variable-length encoded integers or flat columns, is covered. The chapters closes with an overview on built-in hash functions, and ulitiy modules including the convenience string_buffer-buffer type and low-level hexdumping of memory areas.</p>
+</li>
+<li>
+<p><a href="carbon-api.html">Chapter 2</a>, <em>Carbon API</em>, covers the application programming interface (API) to Jakson implementation of the <a href="http://www.carbonspec.org">Columnar Binary JSON (Carbon) specification</a>, and how this API is used inside Jakson and third-party projects. This API description includes construction of Carbon records by hand, from existing raw data, or by parsing from JSON. Here, the meaning and usage of different primary-key types is explained. Further, the chapter covers how data  records are queried by using an three-kind iterator model or by using a specialized find method that accepts dot-notated paths as character strings. Next, field typing, type handling, object property handling and abstractions are described. Afterwards, the record update policy and functionality is explained, which includes functions and semantics for insertions, deletions, and updates. A dedication section is about optimization strategies in Carbon, which center around the importance and meanings of around several areas of (optional) reserved memory inside records. Finally, this chapters describes different formatting options for Carbon files, such as conversion to plain-text JSON with or without Carbon-related meta data, and advanced topics including best practise on lower-level data structure for dot-notated paths, character strings and user defined types.</p>
+</li>
+<li>
+<p><a href="multi-threading.html">Chapter 3</a>, <em>Multi-Threading</em>, is about data structures built-in Jakson for both task and data parallel task execution. This include a brief description of Jaksons lightweight spinlock implementation, and the management of pooled parallel worker. A larger section is about the generic data parallelism framework, which contains functional-style primitives, including a parallel <em>for</em> function, a <em>map</em> operations, both <em>gather</em> and <em>scatter</em>, and a parallel <em>shuffle</em> operation. The framework additionally includes an optimized <em>filter</em> function that comes in two forms, a early and a late materializing flavor.</p>
+</li>
+</ul>
+<h2><a class="header" href="#license" id="license">License</a></h2>
+<p>This developer documentation, all the example source code, is released under the <a href="https://github.com/jaksonlabs/jakson/blob/master/LICENSE">MIT Licsense</a>.</p>
+<h1><a class="header" href="#project-structure" id="project-structure">Project Structure</a></h1>
+<h1><a class="header" href="#fundamentals" id="fundamentals">Fundamentals</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#code-style-convention" id="code-style-convention">Code Style Convention</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#error-handling" id="error-handling">Error Handling</a></h1>
+<h1><a class="header" href="#status-and-error-codes" id="status-and-error-codes">Status and Error Codes</a></h1>
+<h1><a class="header" href="#error-throwing-macros" id="error-throwing-macros">Error Throwing Macros</a></h1>
+<h1><a class="header" href="#error" id="error">ERROR</a></h1>
+<h1><a class="header" href="#error_no_abort" id="error_no_abort">ERROR_NO_ABORT</a></h1>
+<h1><a class="header" href="#error_wdetails" id="error_wdetails">ERROR_WDETAILS</a></h1>
+<h1><a class="header" href="#conditional-error-macros" id="conditional-error-macros">Conditional Error Macros</a></h1>
+<h1><a class="header" href="#error_if" id="error_if">ERROR_IF</a></h1>
+<h1><a class="header" href="#error_if_and_return" id="error_if_and_return">ERROR_IF_AND_RETURN</a></h1>
+<h1><a class="header" href="#error_if_wdetails" id="error_if_wdetails">ERROR_IF_WDETAILS</a></h1>
+<h1><a class="header" href="#error-printing-macros" id="error-printing-macros">Error Printing Macros</a></h1>
+<h1><a class="header" href="#error_print" id="error_print">ERROR_PRINT</a></h1>
+<h1><a class="header" href="#error_print_and_die" id="error_print_and_die">ERROR_PRINT_AND_DIE</a></h1>
+<h1><a class="header" href="#error_print_and_die_if" id="error_print_and_die_if">ERROR_PRINT_AND_DIE_IF</a></h1>
+<h1><a class="header" href="#error_print_if" id="error_print_if">ERROR_PRINT_IF</a></h1>
+<h1><a class="header" href="#error-test-macros" id="error-test-macros">Error Test Macros</a></h1>
+<h1><a class="header" href="#error_occurred" id="error_occurred">ERROR_OCCURRED</a></h1>
+<h1><a class="header" href="#success_else_return" id="success_else_return">SUCCESS_ELSE_RETURN</a></h1>
+<h1><a class="header" href="#success_else_null" id="success_else_null">SUCCESS_ELSE_NULL</a></h1>
+<h1><a class="header" href="#success_else_fail" id="success_else_fail">SUCCESS_ELSE_FAIL</a></h1>
+<h1><a class="header" href="#module-error-functions" id="module-error-functions">Module Error Functions</a></h1>
+<h1><a class="header" href="#define_error_getter" id="define_error_getter">DEFINE_ERROR_GETTER</a></h1>
+<h1><a class="header" href="#debug-and-release" id="debug-and-release">Debug and Release</a></h1>
+<h1><a class="header" href="#types-and-macros" id="types-and-macros">Types and Macros</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#memory-managament-macros" id="memory-managament-macros">Memory Managament Macros</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#malloc" id="malloc">MALLOC</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#zero_memory" id="zero_memory">ZERO_MEMORY</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#error-and-status-macros" id="error-and-status-macros">Error and Status Macros</a></h1>
+<h1><a class="header" href="#error_if_null" id="error_if_null">DEBUG_ERROR_IF_NULL</a></h1>
+<h1><a class="header" href="#check_success" id="check_success">CHECK_SUCCESS</a></h1>
+<h1><a class="header" href="#success_or_jump" id="success_or_jump">SUCCESS_OR_JUMP</a></h1>
+<h1><a class="header" href="#error_if_not_implemented" id="error_if_not_implemented">ERROR_IF_NOT_IMPLEMENTED</a></h1>
+<h1><a class="header" href="#branch-prediction-macros" id="branch-prediction-macros">Branch-Prediction Macros</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#likely" id="likely">LIKELY</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#unlikely" id="unlikely">UNLIKELY</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#data-prefetching-macros" id="data-prefetching-macros">Data Prefetching Macros</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#prefetch_read" id="prefetch_read">PREFETCH_READ</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#prefetch_write" id="prefetch_write">PREFETCH_WRITE</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#bit-field-macros" id="bit-field-macros">Bit-Field Macros</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#bit_num_of" id="bit_num_of">BIT_NUM_OF</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#set_bit" id="set_bit">SET_BIT</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#set_bits" id="set_bits">SET_BITS</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#unset_bits" id="unset_bits">UNSET_BITS</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#are_bits_set" id="are_bits_set">ARE_BITS_SET</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#utility-macros" id="utility-macros">Utility Macros</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#array_length" id="array_length">ARRAY_LENGTH</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#not_implemented" id="not_implemented">NOT_IMPLEMENTED</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#declare_and_init" id="declare_and_init">DECLARE_AND_INIT</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#unused" id="unused">UNUSED</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#built_in" id="built_in">BUILT_IN</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#optional" id="optional">OPTIONAL</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#optional_set" id="optional_set">OPTIONAL_SET</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#optional_set_or_else" id="optional_set_or_else">OPTIONAL_SET_OR_ELSE</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#optional_call" id="optional_call">OPTIONAL_CALL</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#min-and-max" id="min-and-max">MIN and MAX</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#console-macros" id="console-macros">Console Macros</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#console_write" id="console_write">CONSOLE_WRITE</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#console_write_endl" id="console_write_endl">CONSOLE_WRITE_ENDL</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#console_write_cont" id="console_write_cont">CONSOLE_WRITE_CONT</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#console_writeln" id="console_writeln">CONSOLE_WRITELN</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#console_output_on" id="console_output_on">CONSOLE_OUTPUT_ON</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#console_output_off" id="console_output_off">CONSOLE_OUTPUT_OFF</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#diagnostic-macros" id="diagnostic-macros">Diagnostic Macros</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#jak_assert" id="jak_assert">JAK_ASSERT</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#log_trace" id="log_trace">LOG_TRACE</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#log_info" id="log_info">LOG_INFO</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#log_debug" id="log_debug">LOG_DEBUG</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#log_warn" id="log_warn">LOG_WARN</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#flat-memory-objects" id="flat-memory-objects">Flat Memory Objects</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#memory-blocks" id="memory-blocks">Memory Blocks</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#memory-files" id="memory-files">Memory Files</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#standard-data-structures" id="standard-data-structures">Standard Data Structures</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#vectors" id="vectors">Vectors</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#bloom-filters" id="bloom-filters">Bloom Filters</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#bitmaps" id="bitmaps">Bitmaps</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#hash-tables" id="hash-tables">Hash Tables</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#hash-sets" id="hash-sets">Hash Sets</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#priority-queues" id="priority-queues">Priority Queues</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#string-dictionaries" id="string-dictionaries">String Dictionaries</a></h1>
+<h1><a class="header" href="#synchronous-dictionaries" id="synchronous-dictionaries">Synchronous Dictionaries</a></h1>
+<h1><a class="header" href="#asynchronous-dictionaries" id="asynchronous-dictionaries">Asynchronous Dictionaries</a></h1>
+<h1><a class="header" href="#advanced-types-and-structures" id="advanced-types-and-structures">Advanced Types and Structures</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#variable-length-integers" id="variable-length-integers">Variable-Length Integers</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#byte-stream-encoded" id="byte-stream-encoded">Byte-Stream Encoded</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#marker-encoded" id="marker-encoded">Marker Encoded</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#flat-memory-columns" id="flat-memory-columns">Flat Memory Columns</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#unique-identifiers" id="unique-identifiers">Unique Identifiers</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#hash-functions" id="hash-functions">Hash Functions</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#utilities" id="utilities">Utilities</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#string-builders" id="string-builders">String Builders</a></h1>
+<h1><a class="header" href="#string-utilities" id="string-utilities">String Utilities</a></h1>
+<h1><a class="header" href="#number-utilities" id="number-utilities">Number Utilities</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#date-and-time" id="date-and-time">Date and Time</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#type-conversions" id="type-conversions">Type Conversions</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#sorting" id="sorting">Sorting</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#hexdumps" id="hexdumps">Hexdumps</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#carbon-api" id="carbon-api">Carbon API</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<blockquote>
+<p>You see the latest version in the <code>master</code> branch, as of 16th September 2019.</p>
+</blockquote>
+<p>A core feature in Jakson is its way to organize, store, and access self-describing (&quot;semi-structured&quot;) data. For that purpose, Jakson contains an implementation of the <a href="http://www.carbonspec.org">Columnar Binary JSON (Carbon) specification</a> in its core. </p>
+<p>The Jakson Carbon API builds, parses, and queries Carbon files with full compatibility to <a href="http://www.carbonspec.org">Columnar Binary JSON (Carbon) specification</a>, and the expressiveness of <a href="https://tools.ietf.org/html/rfc8259">JSON (RFC 8259)</a>. </p>
+<p>This chapter is about the Carbon implementation inside Jakson, and how its API is used for Jakson or any third party project. In particular, this chapter contains the following content:</p>
+<ul>
+<li><a href="carbon-api/carbon-overview.html">Section 1</a>, <em>Carbon Overview</em>, summarizes the properties of the record format Carbon</li>
+<li><a href="carbon-api/project-setup.html">Section 2</a>, <em>Project Setup</em>, provides a step-by-step tutorial on how to get the Carbon API running for both Jakson and third-party project</li>
+<li><a href="carbon-api/construct-carbon-records.html">Section 4</a>, <em>Carbon Records</em>, is about Carbon records, container types, and construction of these by several ways, including parsing from Json and manual construction</li>
+<li><a href="carbon-api/browse-contents.html">Section 5</a>, <em>Browse Contents</em>, explains value types and classes, and shows the usage of array, object and column iterators and how they are used to navigate through a record</li>
+<li><a href="carbon-api/find-contents.html">Section 6</a>, <em>Find Contents</em>, centers around fetching values and containers if the particular path (expressed as dot-notated path) is known</li>
+<li><a href="carbon-api/modify-contents.html">Section 7</a>, <em>Modify Carbon Records</em>, gives an overview on the revision concept of Carbon records and their usage, as well as shows tutorials on updating, inserting, and deletion of fields and properties in Carbon Records</li>
+<li><a href="carbon-api/record-identification.html">Section 8</a>, <em>Record Identification</em>, deals with the API to specify and query an records identity, which is control on a (user-defined or auto-generated) record-local primary key</li>
+<li><a href="carbon-api/record-optimization.html">Section 9</a>, <em>Record Optimization</em>, goes into details of optimization flags for Carbon records, which are about handling of (reserved, optional) memory capacities in Carbon Records, or about index creation</li>
+<li><a href="carbon-api/conversion-to-json.html">Section 10</a>, <em>Conversion to JSON</em>, explains how to use Carbon formatters to print a records into a certain format, such as JSON with or without additional meta data</li>
+<li><a href="carbon-api/advanced-topics.html">Section 11</a>, <em>Advanced Topics</em>, considers lower-level operations related to JSON parsing, and dot-path object construction, character strings and user-defined data types</li>
+</ul>
+<p>Please note that the Carbon implementation is improved from version to version. It may be the case that you find inconsitency, although we try our best to keep the documentation and sources in sync. In case of any weird or out-dated content, please <a href="mailto:pinnecke@ovgu.de">contact the project owner</a>.</p>
+<h2><a class="header" href="#license-1" id="license-1">License</a></h2>
+<p>This developer documentation, all the example source code, is released under the <a href="https://github.com/jaksonlabs/jakson/blob/master/LICENSE">MIT Licsense</a>.</p>
+<h1><a class="header" href="#carbon-overview" id="carbon-overview">Carbon Overview</a></h1>
+<p>Carbon is a binary data format built to encode full-compatible JSON-standard self-describing data in a space-efficient, traversable manner. </p>
+<h2><a class="header" href="#example-encoding" id="example-encoding">Example Encoding</a></h2>
+<p>To have a brief look at how Carbon stores JSON documents, consider the following example:</p>
+<p><strong>JSON Document</strong></p>
+<pre><code class="language-json">{
+   &quot;title&quot;:&quot;Back to the Future&quot;,
+   &quot;sub-title&quot;:null,
+   &quot;year&quot;:1985,
+   &quot;imdb-rating&quot;:8.5,
+   &quot;keywords&quot;:[
+      &quot;time travel&quot;,
+      &quot;delorean&quot;,
+      &quot;comedy&quot;
+   ],
+   &quot;release-dates&quot;:[
+      1985, 1986, 1987,
+      1992, 2008, 2010,
+      2012, 2015, 2016
+   ]
+}
+</code></pre>
+<p>Using the Carbon encoding, the JSON document from above is binary-encoded as follows:</p>
+<p><strong>Carbon Record</strong></p>
+<pre><code>[nokey]
+[[]
+	[{]
+	   (5)[title] [s](18)[Back to the Future]
+	   (9)[sub-title] [n]
+	   (4)[year] [d][1985]
+	   (11)[imdb-rating] [r][8.5]
+	   (8)[keywords] [[] 
+	         [s](11)[time travel] 
+	         [s](8)[delorean]       
+	         [s](6)[comedy]            
+	      []]
+	   (13)[release-dates] [2](9)(9)
+	         [1985] [1986] [1987]
+	         [1992] [2008] [2010]
+	         [2012] [2015] [2016]
+	[}]         
+[]]
+</code></pre>
+<p><strong>Encoding Interpretation</strong></p>
+<p>Here, a fixed-sized memory area is denoted with <code>[...]</code>, and variable-length memory areas are written as <code>(...)</code>. </p>
+<p>In short, the document from above is encoded as an intermediate record without any record identification (cf., <code>nokey</code>), that contains of exactly one element (cf., <code>[[] ... []]</code>). This element is one object (cf., <code>[{] ... [}]</code>) with six properties. </p>
+<p>The first property has a key of 5 characters (cf., <code>(5)</code>), which is variable-length encoded using 1B, named <code>title</code>. The value for that property is a string_buffer (cf. <code>[s]</code>) of the eighteen <code>(18)</code> character string_buffer <code>Back to the Future</code>. In addition to that, <code>sub-title</code> is a null field (cf. <code>[n]</code>), <code>year</code> is a fixed-length unsigned 2B integer property with value <code>1985</code>, and <code>imdb-rating</code> is a 4B floating point property. </p>
+<p>Further,  properties called <code>keywords</code> and <code>release-dates</code> are contained, which are both list types. The first is a list type for variable-length, potentially nesting data types (called <em>array</em>) while the second is a list type for fixed-length number types (called <em>column</em>). The array <code>keywords</code> consists of three string_buffer fields, and the <code>release-dates</code> column contains nine element slots (cf. second <code>[9]</code>) where all these slots are in use (cf. first <code>[9]</code>) over a fixed-number type of unsigned 2B integers (a <code>column-u16</code> type, cf. <code>[2]</code>). The contained nine values are then listed after the column header in one continuous memory area of nine 2B elements.</p>
+<p><strong>Relationship to UBJSON</strong></p>
+<p>Carbon uses a marker-based encoding that is heavily inspired by <a href="http://www.ubjson.org">UBJSON</a> but uses variable-length encoding for any fixed-sized integer type, introduces trinary-logic for columns (aka fixed-type arrays), adds record identifcation and more. </p>
+<p>For ease of readability, the usage of indexes is not shown in the example from above. To have a more distinct comparison to <a href="http://www.ubjson.org">UBJSON</a>, read the <a href="http://www.carbonspec.org">Columnar Binary JSON (Carbon) specification</a>.</p>
+<h2><a class="header" href="#brief-comparison-to-alternatives" id="brief-comparison-to-alternatives">Brief Comparison to Alternatives</a></h2>
+<p>Carbon is similar to MongoDB's <a href="carbon-api/www.bsonspec.org">BSON</a> w.r.t. its purpose, but is more similar to <a href="carbon-api/www.ubjson.org">UBJSON</a> in its fundamental structure. However, in contrast to UBJSON, Carbon is designed for application in database systems rather than for data exchange between processes. As a consequence, Carbon includes a rich and well-defined set of update-in-place rules, and record identification semantics, and multi-version concurrency control. </p>
+<p>In direct comparison to both UBJON and <a href="carbon-api/www.bsonspec.org">BSON</a>, Carbon produces binary files with a smaller memory footprint [<strong>CLAIM MUST BE SUPPORTED</strong>] while at the same time allows traversals at least as fast as the fastest of both [<strong>CLAIM MUST BE SUPPORTED</strong>]. Like BSON, Carbon allows to query for data using an iterator-based access model, and dot-notated path expressions. </p>
+<p>In addition to <a href="carbon-api/www.bsonspec.org">BSON</a>, Carbon further allows to add a specialized index, the path index, to support record-level dot-notated path evaluations. </p>
+<p>Similar to <a href="carbon-api/www.bsonspec.org">BSON</a> and UBJSON, Carbon produces a binary-encoded record that can be freely moved in memory without the need for pointer swizzling or pointer updates. </p>
+<h3><a class="header" href="#columns-vs-ubjsons-optimized-arrays" id="columns-vs-ubjsons-optimized-arrays">Columns vs. UBJSONs Optimized Arrays</a></h3>
+<p>A column container of Carbon is similar to <a href="http://ubjson.org/type-reference/container-types/#optimized-format-example-array">optimzed fixed-type &amp; count arrays</a> in <a href="http://www.ubjson.org">UBJSON</a> but has some significant differences. </p>
+<p>A column is optimized for write-heavy operations, trinary logic, a small memory footprint, and allows abstract typing. In direct comparison to <a href="http://www.ubjson.org">UBJSON</a>, the following difference becomes clear:</p>
+<ul>
+<li>
+<p><em>Encoding for Write-Heavy Operations</em>. Optimization for write-heavy operations in columns is achieved by providing both, a capacity counter and an element counter. This enables sufficient memory managment for <a href="carbon-api/record-optimization/containers-and-memory.html">overflow situtations</a>, and <a href="carbon-api/record-optimization.html">size optimizations</a> in general. </p>
+</li>
+<li>
+<p><em>Support of Trinary Logic</em>. A <a href="http://www.ubjson.org">UBJSON</a> fixed-size array cannot intermix <em>null</em> values with number or boolean values. Since trinary logic is essential for database query predicates, column explictly allow intermixing <em>null</em> by encoding <em>null</em> as a distinct, reserved value of the element type domain. In <a href="http://www.ubjson.org">UBJSON</a> special values, such as <em>null</em>, are always stored as their marker (e.g., <code>[n]</code> for <em>null</em>) and never double encoded as a value inside a list, as in Carbon. However, <a href="http://www.ubjson.org">UBJSON</a> supports small memory footprint encoding of <em>null</em> value repetitions for <em>null</em>-value-only arrays of a particular length. This corner case is not supported by carbon containers, though.</p>
+</li>
+<li>
+<p><em>Smaller Memory Footprint</em>. Finally, the encoding used for columns requires slightly less memory than fixed-size array of <a href="http://www.ubjson.org">UBJSON</a>, since column uses variable-length encoded counters, and does neighter require a dedicated optimization flag to mark an array as optimized, nor requires a dedicated marker to determine the elements type in arrays. The latter is achieved by providing effctively ten different built-in column types in Carbon rather than one generic that encodes the contained element type.</p>
+</li>
+</ul>
+<h3><a class="header" href="#container-semantics" id="container-semantics">Container Semantics</a></h3>
+<p>Carbon supports two base storage types, <em>unsorted lists</em> (via arrays and columns), and <em>unsorted multi maps</em> (via objects). Using these two storage types, elements of more special abstract types (such as sorted sets, or sorted maps) can be stored in a Carbon record. Carbon ensures preserving of the semantic of a particular  special abstract type by <em>abstract typing</em>, which is an annotation several guarantees and properties to a container. Carbon records do not actually implement special abstract types, but allow to query whetever a particular guarantee is broken or not. </p>
+<p>Neither <a href="http://www.ubjson.org">UBJSON</a> nor <a href="carbon-api/www.bsonspec.org">BSON</a> support that kind semantic annotation. The closest to abstract typing, in the sense of providing an additional layer of semantic above some sequence of elements, is <a href="https://redis.io">REDIS</a>, which, however, supports only a subset of Carbons special abstract types: <em>unsorted maps</em>, <em>stacks</em> and <em>queues</em>, <em>unsorted sets</em>, and <em>multi sets</em>.</p>
+<p>A more detailed view on the actual encoding of carbon columns can be found in the <a href="hhtp://www.carbonspec.org">Columnar Binary JSON (Carbon) specification</a>.</p>
+<h3><a class="header" href="#user-defined-data-type" id="user-defined-data-type">User-Defined Data Type</a></h3>
+<p>Similar to both <a href="http://www.ubjson.org">UBJSON</a> and <a href="carbon-api/www.bsonspec.org">BSON</a>, binary strings can be stored in Carbon records either as fields in arrays or values in objects. </p>
+<p>For instance, when storing a PNG-formatted image inside an array, <a href="http://www.ubjson.org">UBJSON</a> and <a href="carbon-api/www.bsonspec.org">BSON</a> store the raw binary string_buffer as-is without any further information. How, if, and where the actual data type is stored in a <a href="carbon-api/www.bsonspec.org">BSON</a> file or <a href="http://www.ubjson.org">UBJSON</a> file is delegated to the user. </p>
+<p>In contrast to both alternatives, Carbon has a well-defined process for that, which bundles type information directly to the user-defined binary string_buffer in an space-efficient way. In a nutshell, a binary string_buffer is stored as a tuple containing a type annotation and the raw binary string_buffer. The type annotation is either one constant integer that represents the Internet Media Type (<em>MIME</em> type), or a character string_buffer in case of an user-defined data type if the MIME type is unknown.</p>
+<p>The benefit of allowing user-defined data types and storing the type information near the raw binary string_buffer is, that a system using Carbon is able to be extended towards support of particular user-defined types which are not natively supported by the system, such as image types, audio types, or mathematical types, such as matrices.</p>
+<h2><a class="header" href="#more-details" id="more-details">More Details</a></h2>
+<p>If your are interested in more details on an implementation-independent level, or want to have more sharp details on the encoding differences of Carbon compared to alternatives, have a look at the <a href="http://www.carbonspec.org">Columnar Binary JSON (Carbon) specification</a>.</p>
+<h1><a class="header" href="#project-setup" id="project-setup">Project Setup</a></h1>
+<p>The Carbon API is part of Jakson source code, but can be accessed in a library fashion. </p>
+<h2><a class="header" href="#get-the-sources" id="get-the-sources">Get the Sources</a></h2>
+<p>The starting point is to get the Jakson sources. Typically, this is done by cloning a stable version of Jaksons public git repository hosted at GitHub:</p>
+<pre><code class="language-bash">$ git clone https://github.com/jaksonlabs/jakson.git
+</code></pre>
+<h3><a class="header" href="#modules-versus-amalgamation" id="modules-versus-amalgamation">Modules versus Amalgamation</a></h3>
+<p>Depending on the configuration, the Carbon API can be fine-grained accessed via its modules (see <em>Structure</em> below), or accessed as single translation unit if <em>source amalgamation</em> is used (see <em>Source Amalgamation</em> below). </p>
+<h3><a class="header" href="#jakson-project-versus-third-party" id="jakson-project-versus-third-party">Jakson Project versus Third-Party</a></h3>
+<p>Since the Jakson core is build in a library fashon and modularized, Jakson (including Carbon) can be used by third-party projects. </p>
+<h4><a class="header" href="#inside-jakson" id="inside-jakson">Inside Jakson</a></h4>
+<p>Inside the Jakson project, the Carbon API is accessible from any point where the following header is included:</p>
+<pre><code class="language-c">#include &lt;jakson/jakson.h&gt;
+</code></pre>
+<blockquote>
+<p>For development, it is recommended to turn source amalgamation off because some IDEs will not recognize files in <code>src/</code> as part of the project otherwise. </p>
+</blockquote>
+<p>To turn off amalgamation, type <code>$ cmake  -DUSE_AMALGAMATION=OFF .</code>, and <code>$ cmake  -DUSE_AMALGAMATION=ON .</code> to enable amalgamation. In any case, the header <code>jakson/jakson.h</code> is sufficient to access all modules of Jakson.</p>
+<h4><a class="header" href="#third-party" id="third-party">Third-Party</a></h4>
+<p>For third-party projects, Carbon is used by one of two ways, adding the entire Jakson project as single-unit library, or by cherry-picking modules.</p>
+<h5><a class="header" href="#jakson-as-single-unit-library" id="jakson-as-single-unit-library">Jakson as Single-Unit Library</a></h5>
+<p>For third-party projects, it is recommended to configure Jakson as a single translation unit using source amalgamation, and to add the resulting two files, <code>jakson.h</code> and <code>jakson.c</code>, to the third-party project inclusion list. In this way, Jakson is used as a single-component library, and can be treated like this by third-party. To access the Carbon API, just include the header <code>jakson.h</code>.</p>
+<h5><a class="header" href="#cherry-picking-modules" id="cherry-picking-modules">Cherry-Picking Modules</a></h5>
+<blockquote>
+<p><strong>Not Recommended</strong>. Although it is possible for third-party projects to use particular Carbon modules by directly cherry-picking required modules, it is not recommended due to a non-trivial dependency graph between Carbon API modules and other modules outside the Carbon sub-system (e.g., err handling facilities). </p>
+</blockquote>
+<p>In a scenario where cherry-picking of modules is intended, including <code>jakson.h</code> is not sufficient if the desired effect is to exclude particular modules. Rather than just including <code>jakson.h</code> as a single translation unit, required module header files (including their transitive dependencies) must be included manually. For these cases it must be considered, that source amalgamation is explicitly not used and therefore runtime performance potential (due to exhaustive compiler optimization inside one huge tanslation unit) is left unexploited. </p>
+<p>Hence, cherry-picking modules must be done with the intention of decreasing the resulting binary size rather than (runtime) performance optimization.</p>
+<h2><a class="header" href="#structure" id="structure">Structure</a></h2>
+<p>Public functionality that belongs to Carbon in Jakson is prefixed with <code>carbon</code>, such as <code>carbon.h</code> or <code>carbon_find.h</code>, and located in Jaksons source directoy <code>src/</code>. </p>
+<p>Like other components of Jakson, the Carbon implementation is modularized. </p>
+<p>These modules are</p>
+<ul>
+<li><code>carbon</code>, the main entry point for Carbon records, which contains functionality to create, load, and store carbon records, open iterators, open atomic modification operations, accessing and modifying primary keys, and printing Carbon records</li>
+<li><code>carbon_array_it</code>, provides iterator facilities over array containers in Carbon records, arrays, fields, and for values of properties inside objects, including iterator state information, element access, low-level data access, and modification operations</li>
+<li><code>carbon_column_it</code>, provides iterator facilities over column containers in fields or values of properties inside objects, including iterator state information, bulk element access, low-level data access, and modification operations</li>
+<li><code>carbon_object_it</code>, provides iterator facilities over object containers in Carbon records, arrays, fields, and for values of properties inside objects, including iterator state information, key and value type information and access, low-level data access, and modification operations</li>
+<li><code>carbon_commit</code>, is about low-level functionality related to commit revision hashs for Carbon record, including functions to create, skip, read, and update these commit hash stored in memory files</li>
+<li><code>carbon_dot</code>, is the module that implements dot-notated path objects, including manual creation, accessing, and parsing from user-defined character strings</li>
+<li><code>carbon_field</code>, provides field type information, abstraction, stringification, property querying, and low-level memory files based functions for constants, containers, character strings, numbers, and binary data of user-defined types for fields, property values, and, where possible, for columns</li>
+<li><code>carbon_find</code>, implements a exact query to a field, a property, or an object given a dot-notated path, and includes functions to query for the result type (if any), and safe data access </li>
+<li><code>carbon_insert</code>, is the module responsible for atomic data insertions to containers (arrays, columns, and objects), providing functions to insert fixed- and variable-length data, and nesting facilities</li>
+<li><code>carbon_key</code>, provides functionalities to create, skip, read, write and update Carbon record primary keys on the low-level memory files abstraction layer</li>
+<li><code>carbon_media</code>, is the module for media-type information of user-defined binary strings with functionalities to encode and decode pre-defined types (i.e., a subset of MIME typing) for embedded binary data</li>
+<li><code>carbon_path</code>, is the concrete evaluator for <em>find</em> operations on dot-notated paths, internally evaluating a path via (array, column, or object) iterators, or by the use of a special (optional) path index above a Carbon record</li>
+<li><code>carbon_path_index</code>, is the module realizing a path index, which focuses on query performance by statefull random access iteration and efficient string_buffer comparison to the cost of an increased memory footprint and loss of (binary) readability, in order to speedup <em>find</em> operations on a single Carbon record by indexing a records structure to exactly the form a path evaluation is done</li>
+<li><code>carbon_printers</code>, is the conversion framework for Carbon record at a fine-grained level by exposing an &quot;interface&quot; to a printer comonent to enable printing of records in any user-defined way, including access to built-in printers for JSON with and without additional meta data, such as primary key information</li>
+<li><code>carbon_revise</code>, is the module responsible for (abortable) atomic update operations (called <em>revisions</em>) on Carbon records by providing write-access to a Carbon records low-level memory file, primary key modifications, write-enabled iterator access, remove operations, and low-level Carbon record optimization functions to remove potentially existing memory reserves in a Carbon file</li>
+<li><code>carbon_string</code>, is a low-level module for reading, writing, update, skip of strings in the low-level memory file of a Carbon record for several encoding types (e.g., with or without preceeding type marker)</li>
+<li><code>carbon_update</code>, provides facilities to perform in-place update with potentially type-rewriting for fields, containers, and properties in an atomic manner</li>
+</ul>
+<p>In addition to the modules from above, the module <code>carbon_int</code> contains internal structures and functions, such as iterator state manipulations or low-level field access, that are typically not called by user-code.</p>
+<h2><a class="header" href="#source-amalgamation" id="source-amalgamation">Source Amalgamation</a></h2>
+<p>Source amalgamation is a technique that combines all source file of into one translation unit to improve runtime performance by enhance compiler optimizations. You find source amalgamation in database system SQLite, the JavaScript interpreter Duktape, and others. </p>
+<p>The downside of source amalgamation is more cumbersome debugging because a typical debugger is not optimized for such large source files. </p>
+<h4><a class="header" href="#inside-jakson-1" id="inside-jakson-1">Inside Jakson</a></h4>
+<p>Whether amalgamation is turned on or off is not relevant for development purposes inside the Jakson project, since the projekt has an abstraction for its sources with or without enabled amalgamation. This abstraction works over inclusion of the header <code>jakson/jakson.h</code> which either includes all other module headers in case amalgamation is turned off, or is the amalgamation header itself.</p>
+<p>With the exception of debugging and diagnostics, the effect of amalgamation in the Jakson project is mainly visible during performance tests, where amalgamation leads to a runtime performance increase of up to 40% compared to the same code where amalgamation is disabled.</p>
+<h4><a class="header" href="#third-party-1" id="third-party-1">Third-Party</a></h4>
+<p>For third-party projects, amalgamation is optional but the recommended process to include Carbon functionality. To create the source amalgamation of Jakson, run the following code after cloning the git respository and checking out a particular branch:</p>
+<pre><code class="language-bash">$ cmake  -DUSE_AMALGAMATION=ON .
+</code></pre>
+<p>With this command, source amalgamation is executed without running any compilation to it. The resulting single-translation module <code>jakson</code> is created, and stored in <code>include/jakson</code>. In the third-party project, <code>jakson.h</code> must be added to the (library) inclusion list, and <code>jakson.c</code> to the source list.</p>
+<h2><a class="header" href="#accessing-carbon-functionality" id="accessing-carbon-functionality">Accessing Carbon Functionality</a></h2>
+<p>Independent of whether the Carbon API is accessed inside the Jakson project, or externally by third-party, inclusion of the single header <code>jakson/jakson.h</code> provides access to the entire functionality.</p>
+<pre><code class="language-c">// bin/examples-hello-carbon
+
+#include &lt;stdio.h&gt;
+#include &lt;jakson/jakson.h&gt;
+
+int main (void)
+{
+    carbon_new context;
+    carbon record;
+    carbon_insert *ins;
+    char *as_json;
+
+    ins = carbon_create_begin(&amp;context, &amp;record, 
+    		CARBON_KEY_NOKEY, CARBON_KEEP);
+    carbon_insert_string(ins, &quot;Hello&quot;);
+    carbon_insert_string(ins, &quot;Carbon!&quot;);
+    carbon_create_end(&amp;context);
+
+    as_json = carbon_to_json_compact_dup(&amp;record);
+
+    printf (&quot;%s\n&quot;, as_json);
+
+    carbon_drop(&amp;record);
+    free(as_json);
+
+    return 0;
+}
+
+</code></pre>
+<p>The example from above prints <code>[&quot;Hello&quot;, &quot;Carbon!&quot;]</code> to standard out.</p>
+<h2><a class="header" href="#code-listings" id="code-listings">Code Listings</a></h2>
+<p>The following pages drive into particular use-cases and tutorials for the Carbon API. Each non-trivial example is supported by a source code example, which are additionally located in <code>examples/carbon-api/</code> in the Jakson repository.</p>
+<p>To build these examples, type the following in the project root</p>
+<pre><code class="language-bash">$ cmake . &amp;&amp; make examples
+</code></pre>
+<p>Afterwards, all examples executables are located in <code>bin</code> and prefixed with <code>example-</code>.</p>
+<h1><a class="header" href="#carbon-records" id="carbon-records">Carbon Records</a></h1>
+<p>Carbon records are implemented by the <code>carbon</code> structured defined in <code>src/carbon.h</code>. </p>
+<p>In a nutshell, Carbon records are a memory file (<code>memfile</code>), the memory block (<code>memblock</code>) to which this memory file writes and reads, an err and status structure (<code>err</code>), and some internal variables for book-keeping. A Carbon record is a flat object that is encoded according to the <a href="http://www.carbonspec.org">Columnar Binary JSON (Carbon) specification</a> by using functionality of the contained memory file to read and write safly in one continuous memory area managned by the memory block.</p>
+<p>Modification on Carbon records (including their creation) are atomic operations that may consists of several sub operations, such as insertion or a particular property. Each atomic modification is managed by a record-local revision context (<code>carbon_revise</code>), which is wrapped by a special context (<code>carbon_new</code>) for creation of new Carbon records.</p>
+<h2><a class="header" href="#abstract-types-and-containers" id="abstract-types-and-containers">Abstract Types and Containers</a></h2>
+<p>Carbon supports two abstract types, <em>lists</em>  and <em>maps</em>, and three container types <em>arrays</em>, <em>columns</em>, and <em>objects</em>. Container types are abstract type implementations to store sequences of values, or value pairs. Using these container type as storage backend, more advanced abstract types can be annotated (see below).</p>
+<p>Both, array containers and column containers, belong to the abstract <em>list</em> (more specifically, to an <em>unsorted list</em>) type, while an object container belongs to the abstract <em>map</em> (more specifically, to an <em>unsorted multi map</em>) type. </p>
+<p>A record in Carbon is a list implemented as array container plus some version information and identification. </p>
+<h3><a class="header" href="#unsorted-lists" id="unsorted-lists">Unsorted Lists</a></h3>
+<p>List types are used to store a a finite sequence of elements and may contain duplicates. List elements have a particular (user-defined) order on both the logical as well as the pyhsical level. A list is of variable size, which is determined by the type and size of its elements. Both list types are dynamically re-sizable at runtime. </p>
+<p>Carbon supports two list types as physical storage:</p>
+<ul>
+<li>
+<p><strong>Arrays</strong> support any Carbon type (even mixed inside the same array) and are optimized for generality. Each element is identified by a marker-based encoding by its own. Enumerating array elements is supported by forward (and backward) iterators but not for random access iterators, since the position (i.e., the offset) of a particular element is not known in advance.</p>
+</li>
+<li>
+<p><strong>Columns</strong> are specialized array containers that are limited to fixed-length number types, and the boolean type (potentially intermixed with <em>null</em> values). In contrast to array containers and object containers, column containers have a fixed size, which is  computed by the number of contained elements and the element type that is shared across all contained elements. Hence, a per-element encoding is not required and random access iteration is supported, since the position (i.e., the offset) of a particular element is known in advance.</p>
+</li>
+</ul>
+<p>The concrete type <em>array</em> corresponde to <a href="https://tools.ietf.org/html/rfc8259">JSON arrays</a>, effectively encoding it in a reasonable binary form, though. Columns are a subset of the arrays w.r.t. to the capability of that they can contain. This restriction enables a more specialized encoding. </p>
+<h3><a class="header" href="#unsorted-multi-maps" id="unsorted-multi-maps">Unsorted Multi Maps</a></h3>
+<p>A map is a finite sequence of key-value pairs (called properties). Properties are unique in context of their parent object w.r.t. to their key name, i.e., no two properties with the same key shall exist in the same object. Properties inside objects have no particular order on the logical level, and a particular order at the pyhsical level. Like lists, maps have a variable size, which is determined by the type and size of its properties.</p>
+<ul>
+<li><strong>Objects</strong> are key-value maps containing key-value pairs where the key is a (variable-length) string_buffer, and the value is of any Carbon type. </li>
+</ul>
+<p>The concrete type <em>object</em> corresponde to an <a href="https://tools.ietf.org/html/rfc8259">JSON object</a>, effectively encoding it in a reasonable binary form. </p>
+<h3><a class="header" href="#specialized-abstract-types" id="specialized-abstract-types">Specialized Abstract Types</a></h3>
+<p>Both list types are used as storage backend for more advanced abstract types, such as <em>sets</em> and <em>stacks</em>. Carbon supports the annotation of lists to mark them as a special abstract types. How this special abstract type are implemented concretely, is not defined by the <a href="hhtp://www.carbonspec.org">Columnar Binary JSON (Carbon) specification</a>, though. In simpler words, a list can be marked as set, and Carbon ensures that this semantic information not gets lost, but checking type-specific properties (such as uniqueness, or order) is not performed by Carbon. Whether a property is broken, can be queried, though. </p>
+<p>In addition to the built-in <strong>unsorted lists</strong> (i.e., array and column containers), and <strong>unsorted multi maps</strong> (i.e., object containers), the following specialized abstract types annotations are supported by Carbon:</p>
+<ul>
+<li>
+<p><strong>Sorted Lists</strong>. Sorted array/column containers, potentially with duplicates.</p>
+</li>
+<li>
+<p><strong>Unsorted Sets</strong>. Duplicate-free array/column containers without particular order.</p>
+</li>
+<li>
+<p><strong>Sorted Sets</strong>. Sorted, duplicate-free array/column.</p>
+</li>
+<li>
+<p><strong>Queues (FIFO)</strong>. Unsorted array/column containers, potentially with duplicates.</p>
+</li>
+<li>
+<p><strong>Unsorted Maps</strong>. Object containers without particular order and unique keys.</p>
+</li>
+<li>
+<p><strong>Sorted Maps</strong>. Key-based alphanumeric sorted object with unique keys.</p>
+</li>
+<li>
+<p><strong>Sorted Multi Map</strong>. Key-based alphanumeric sorted object with duplicate keys.</p>
+</li>
+</ul>
+<p>Please not that unsorted lists (array and column container) act like a stack (LIFO data structure) directly. A queue (FIFO data structure) is an unsorted list with application-dependent behavior.</p>
+<h2><a class="header" href="#constructions" id="constructions">Constructions</a></h2>
+<p>The Carbon API provides three ways for construction of new Carbon records:</p>
+<ol>
+<li><a href="carbon-api/construct-carbon-records/from-json.html">Parsing a JSON plain-text into a new Carbon record</a></li>
+<li><a href="carbon-api/construct-carbon-records/manual-construction.html">Manual construction of a Carbon record by API functions</a></li>
+</ol>
+<p>In addition, the third way is <a href="carbon-api/construct-carbon-records/from-byte-streams.html">reconstruction of a Carbon record by a byte stream</a>.</p>
+<p>For the first two ways, a <a href="carbon-api/record-identification.html">record identification type</a>, and an <a href="carbon-api/record-optimization.html">record optimization flag</a> must be specified. </p>
+<p>The <a href="carbon-api/record-identification.html">record identification type</a> determines what kind of primary key is used for the new record. For ease of understanding, all records that are created in the following pages will have no primary key at all (controlled by the key type <code>CARBON_KEY_NOKEY</code>). What this means and how to use alternatives is covered in the <a href="carbon-api/record-identification.html">Section about Record Identification</a>. </p>
+<p>The <a href="carbon-api/record-optimization.html">record optimization flag</a> controls what to do with reserved memory for nested vector-like structures <code>&lt;data&gt; &lt;reserved&gt;</code> and the tail buffer <code>&lt;reserved&gt;</code> beyond the carbon record <code>&lt;carbon-record&gt; &lt;reserved&gt;</code>. For ease of understanding, all records in the following pages will be left unoptimized (controlled by the flag <code>CARBON_KEEP</code>). More details on alternatives and when to use these, is described in the <a href="carbon-api/record-optimization.html">Section about Record Optimization</a></p>
+<p>The next pages give a tutorial on each construction way. </p>
+<p>Let's start with parsing JSON files into Carbon records.</p>
+<h1><a class="header" href="#from-json" id="from-json">From JSON</a></h1>
+<p>New Carbon records are created from a valid <a href="https://tools.ietf.org/html/rfc8259">JSON</a> plain-text strings by calling <code>carbon_from_json</code> defined in <code>carbon.h</code>.</p>
+<pre><code class="language-c">// bin/examples-from-json
+
+#include &lt;stdio.h&gt;
+#include &lt;jakson/jakson.h&gt;
+
+int main (void)
+{
+    carbon record;
+    err err;
+    char *as_json;
+
+    carbon_from_json(&amp;record, &quot;{\&quot;msg\&quot;: \&quot;Hello from JSON\&quot;}&quot;, 
+    	CARBON_KEY_NOKEY, NULL, &amp;err);
+
+    as_json = carbon_to_json_compact_dup(&amp;record);
+
+    printf (&quot;%s\n&quot;, as_json);
+
+    carbon_drop(&amp;record);
+    free(as_json);
+
+    return 0;
+}
+</code></pre>
+<p>In the above example, <code>carbon_from_json</code> is called to construct a new record <code>record</code> that lives on the stack, given the <a href="https://tools.ietf.org/html/rfc8259">JSON</a> string_buffer <code>&quot;{&quot;msg&quot;: &quot;Hello from JSON&quot;}&quot;</code>. The record is for intermediate use, and therefore no primary key is used (<code>CARBON_KEY_NOKEY</code> and <code>NULL</code> as next parameter). In case of any problem (such as parsing issues), <code>carbon_from_json</code> will return <code>false</code> and will store a proper err state in <code>err</code>. Afterwards, the record is printed to standard out, and some cleanup is performed.</p>
+<h1><a class="header" href="#manual-construction" id="manual-construction">Manual Construction</a></h1>
+<p>New Carbon records are created manually by calling <code>carbon_create_begin</code> and <code>carbon_create_end</code>, both defined in <code>carbon.h</code>.</p>
+<h2><a class="header" href="#empty-record-creation" id="empty-record-creation">Empty Record Creation</a></h2>
+<pre><code class="language-c">// bin/examples-manual-construction
+
+#include &lt;stdio.h&gt;
+#include &lt;jakson/jakson.h&gt;
+
+int main (void)
+{
+    carbon_new context;
+    carbon record;
+    char *as_json;
+
+    carbon_create_begin(&amp;context, &amp;record, 
+    	CARBON_KEY_NOKEY, CARBON_KEEP);
+    carbon_create_end(&amp;context);
+
+    as_json = carbon_to_json_compact_dup(&amp;record);
+
+    printf (&quot;%s\n&quot;, as_json);
+
+    carbon_drop(&amp;record);
+    free(as_json);
+
+    return 0;
+}
+</code></pre>
+<p>In the above example, an empty record <code>{}</code> is created by calling <code>carbon_create_begin</code> for a new record <code>record</code> to the construction context <code>context</code>, where the resulting record is for intermediate use without any primary key (<code>CARBON_KEY_NOKEY</code>) and no applied optimizations to reserved memory areas in the resulting record (<code>CARBON_KEEP</code>). Afterwards the record is printed to standard out, and some cleanup operations are performed.</p>
+<p>As mentioned earlier, modifications (including constructions) are atomic operations. In case of constructions, any insertion of values must belong to the construction context <code>carbon_new</code> and be enclosed by <code>carbon_create_begin</code> and <code>carbon_create_end</code>. If a record must be modified <em>after</em> creation (e.g., by insertion of new fields), a new revision context (<code>revise</code>) must be created. In the typical case of construction of non-empty records, it is recommended to use the revision context that is part of the construction context <code>carbon_new</code> to avoid unnecessary call overhead. </p>
+<h2><a class="header" href="#non-empty-record-creation" id="non-empty-record-creation">Non-Empty Record Creation</a></h2>
+<p>Let's create a non-empty record. For this purpose, the return result of <code>carbon_create_begin</code> is used, which is an insertion context (<code>carbon_insert</code>) that belongs to the construction context <code>carbon_new</code>. Such an insertion context is used to add elements to containers, i.e., elements to arrays or columns, and properties to objects.</p>
+<pre><code class="language-c">// bin/examples-manual-construction-non-empty
+
+#include &lt;stdio.h&gt;
+#include &lt;jakson/jakson.h&gt;
+
+int main (void)
+{
+    carbon_new context;
+    carbon record;
+    carbon_insert *ins;
+    char *as_json;
+
+    ins = carbon_create_begin(&amp;context, &amp;record, 
+    	CARBON_KEY_NOKEY, CARBON_KEEP);
+    
+    carbon_insert_string(ins, &quot;Hello, Carbon!&quot;);
+    carbon_insert_unsigned(ins, 42);
+    carbon_insert_null(ins);
+    
+    carbon_create_end(&amp;context);
+
+    as_json = carbon_to_json_compact_dup(&amp;record);
+
+    printf (&quot;%s\n&quot;, as_json);
+
+    carbon_drop(&amp;record);
+    free(as_json);
+
+    return 0;
+}
+</code></pre>
+<p>To have a full compatibility to <a href="https://tools.ietf.org/html/rfc8259">JSON RFC 8259</a> and to avoid array encoding as objects, like <a href="carbon-api/construct-carbon-records/www.bsonspec.org">BSON</a> does, a Carbon records most outer container is an array, and <code>carbon_create_begin</code> returns an insertion context <code>ins</code> for exactly that array. The benefit of this procedure is a very consistent workflow with insertion contextes and code structure in general. The drawback is that for single-object-only records, internally two bytes are wasted (namely the markers <code>[</code> and <code>]</code> that make up a record).</p>
+<p>Consequentially, the example from above will result in the JSON file <code>[&quot;Hello, Carbon!&quot;, 42, null]</code> that is printed to standard out.</p>
+<blockquote>
+<p><strong>Empty records are empty JSON objects</strong>. In the first example, an empty record was created and the resulting JSON string_buffer was <code>{}</code> rather than <code>[]</code>. Although the latter is correct in terms of internal encoding, the first is the correct resulting string_buffer for empty records. This is due to a design decision that reflect the common sense of an empty JSON as an empty document rather than an empty array. In cases where this behavior does not match the applications requirements, a modified <a href="carbon-api/construct-carbon-records/../conversion-to-json.html">JSON printer</a> is a good solution.</p>
+</blockquote>
+<h2><a class="header" href="#insertion-contextes" id="insertion-contextes">Insertion Contextes</a></h2>
+<p>An insertion context <code>carbon_insert</code>, defined in <code>carbon_insert.h</code>, is the central context for insertion of values of any kind. Which value type can be inserted depends on the insertion context container context, though. </p>
+<h3><a class="header" href="#revision-contextes" id="revision-contextes">Revision Contextes</a></h3>
+<p>Each container (i.e., arrays, columns, and objects) allows getting a new insertion context for modifications <em>if</em> the caller has <em>write</em> access to the Carbon record at hand. For existing records, a <em>write</em> access must be aquired first. Such record modifications require a revision context (<code>carbon_revise</code>, defined in <code>carbon_revise.h</code>), and are described in the <a href="carbon-api/construct-carbon-records/../modify-contents.html">Section about Carbon record modification</a>. For construction operations, <em>write</em> access is always the case, since any construction context <code>carbon_new</code> has its own revision context <code>carbon_revise</code> built-in. </p>
+<p>If only <em>read</em> access is availble to a record, any call to the insertion context will fail.</p>
+<h3><a class="header" href="#container-dependency" id="container-dependency">Container-Dependency</a></h3>
+<p>Depending on the container in which the insertion context was create, that insertion context allows a particular set of insertion functions to be called. </p>
+<p>As rule of thumb, all insertion operations that do <em>not</em> insert a property (i.e., a key-value pair that is exclusive for object containers) are available for array containers. The reason is that array containers are the most flexible container, capable of containing all field types including any other container. </p>
+<p>The same holds for values of properties inside object containers, but an insertion context that belongs to an object cannot insert pure-fields without any key. </p>
+<p>The most efficient, yet most restricted, container, columns, are only capable of insertion operations of fields that are fixed-length numbers (integers, and floats), boolean values, and nulls. Any other insertion call to columns (especially insertion of (character/binary) strings, arrays, columns, and objects) will be rejected.</p>
+<p>The <a href="http://www.carbonspec.org">Columnar Binary JSON (Carbon) specification</a> provides a good overview about type support of indvidual containers.</p>
+<p>In the next pages, insertion contextes for each container type of a Carbon record is covered.</p>
+<h1><a class="header" href="#insertions-into-arrays" id="insertions-into-arrays">Insertions into Arrays</a></h1>
+<p>Fields in array containers are added with an insertion context <code>carbon_insert</code>, defined in <code>carbon_insert.h</code>. An insertion context results either from a library function call, or is manually constructed.</p>
+<p><strong>Library Functions</strong>. Insertion contextes for array containers result</p>
+<ul>
+<li>from record creation by calling <code>carbon_create_begin</code>, defined in <code>carbon.h</code>, or</li>
+<li>when an another insertion context from another array is requested to add a new (nested) array as a field by calling <code>carbon_insert_array_begin</code>, defined in <code>carbon_insert.h</code>, or </li>
+<li>when an another insertion from an object context is requested to add a new array container as value for a property by calling <code>carbon_insert_prop_array_begin</code>, defined in <code>carbon_insert.h</code> </li>
+<li>when any field is updated (and potentially re-written) as an array container by calling <code>carbon_update_set_array_begin</code>, defined in <code>carbon_update.h</code>.</li>
+</ul>
+<p><strong>Manual Construction</strong>. Another possibility is to construct insertion contextes manually, by calling <code>carbon_int_insert_create_for_array</code>, but this function is for internal usage and ist not typically called from client code.</p>
+<h2><a class="header" href="#example" id="example">Example</a></h2>
+<p>In the following example, a new record (which is a wrapper for an array container) is created, and the insertion context <code>ins</code> as result of the call to <code>carbon_create_begin</code> is used to add some elements to the record (array) container. One of these elements is a nested array container, which insertion over <code>ins</code> results in a new insertion context <code>nested_ins</code> that is bound to the nested array.</p>
+<pre><code class="language-c">// bin/examples-manual-construction-arrays
+
+#include &lt;stdio.h&gt;
+#include &lt;jakson/jakson.h&gt;
+
+int main (void)
+{
+    carbon_new context;
+    carbon record;
+    carbon_insert *ins, *nested_ins;
+    carbon_insert_array_state state;
+    char *as_json;
+
+    ins = carbon_create_begin(&amp;context, &amp;record, 
+    	CARBON_KEY_NOKEY, CARBON_KEEP);
+
+    carbon_insert_string(ins, &quot;Hello&quot;);
+    nested_ins = carbon_insert_array_begin(&amp;state, ins, 1024);
+        carbon_insert_string(nested_ins, &quot;you&quot;);
+        carbon_insert_string(nested_ins, &quot;nested&quot;) ;
+    carbon_insert_array_end(&amp;state);
+    carbon_insert_string(ins, &quot;array!&quot;);
+
+    carbon_create_end(&amp;context);
+
+    as_json = carbon_to_json_compact_dup(&amp;record);
+
+    printf (&quot;%s\n&quot;, as_json);
+
+    carbon_drop(&amp;record);
+    free(as_json);
+
+    return 0;
+}
+</code></pre>
+<p>In the above example, at first and at last, two strings (<code>Hello</code> and <code>array!</code>) are added, between them a nested array is added inside an (atomic) array insertion block beginning with <code>carbon_insert_array_begin</code> and ending with <code>carbon_insert_array_end</code> to insert a nested array containing of two strings <code>you</code> and <code>nested</code>. The begin of this block requires a state object (<code>state</code>) that is used to adjust the parent memory file position when calling <code>carbon_insert_array_end</code>, the parent insertion context (here <code>ins</code>) itself, and a non-zero integer (here <code>1024</code>) that defines the capacity in number of bytes of the new-to-add array. Assuming this capacity would be <code>1</code>, the array container would look like <code>[[]0[]]</code>, when the insertion block would be immediatly ended, and could be optimized to <code>[[][]]</code> when calling a proper <a href="carbon-api/construct-carbon-records/manual-construction/../../record-optimization.html">record optimization</a>.</p>
+<p>Afterwards the resulting record is printed to standard out, resulting in the following JSON string_buffer:</p>
+<pre><code class="language-json">[
+   &quot;Hello&quot;,
+   [
+      &quot;you&quot;,
+      &quot;nested&quot;
+   ],
+   &quot;array!&quot;
+]
+</code></pre>
+<p>Finally, some cleanup operations are performed.</p>
+<h2><a class="header" href="#function-overview-for-array-container-insertion-contextes" id="function-overview-for-array-container-insertion-contextes">Function Overview for Array-Container Insertion Contextes</a></h2>
+<p>Array and object containers are the most flexible container, capable of containing all field types including any other container. Since a Carbon record is in its core a versioned array container, elements can be added directly to a record as part of the record array container.</p>
+<p>The following functions of an insertion context <code>carbon_insert</code> are allowed to called (all defined in <code>carbon_insert.h</code>:</p>
+<table><thead><tr><th>Function</th><th>What is inserted</th></tr></thead><tbody>
+<tr><td><code>carbon_insert_null</code></td><td>a <code>null</code> constant</td></tr>
+<tr><td><code>carbon_insert_true</code></td><td>a <code>true</code> constant</td></tr>
+<tr><td><code>carbon_insert_false</code></td><td>a <code>false</code> constant</td></tr>
+<tr><td><code>carbon_insert_u8</code></td><td>an <code>u8</code> integer</td></tr>
+<tr><td><code>carbon_insert_u16</code></td><td>an <code>u16</code> integer</td></tr>
+<tr><td><code>carbon_insert_u32</code></td><td>an <code>u32</code> integer</td></tr>
+<tr><td><code>carbon_insert_u64</code></td><td>an <code>u64</code> integer</td></tr>
+<tr><td><code>carbon_insert_i8</code></td><td>an <code>i8</code> integer</td></tr>
+<tr><td><code>carbon_insert_i16</code></td><td>an <code>i16</code> integer</td></tr>
+<tr><td><code>carbon_insert_i32</code></td><td>an <code>i32</code> integer</td></tr>
+<tr><td><code>carbon_insert_i64</code></td><td>an <code>i64</code> integer</td></tr>
+<tr><td><code>carbon_insert_float</code></td><td>a <code>float32</code> number</td></tr>
+<tr><td><code>carbon_insert_string</code></td><td>a string_buffer of <code>n</code> character</td></tr>
+<tr><td><code>carbon_insert_nchar</code></td><td>a prefix string_buffer of <code>n</code> character</td></tr>
+<tr><td><code>carbon_insert_binary</code></td><td>a user-defined binary string_buffer</td></tr>
+<tr><td><code>carbon_insert_object_{begin,end}</code></td><td>an object container</td></tr>
+<tr><td><code>carbon_insert_array_{begin,end}</code></td><td>an array container</td></tr>
+<tr><td><code>carbon_insert_column_{begin,end}</code></td><td>a column container</td></tr>
+</tbody></table>
+<p>For convenience, the library provides two functions <code>carbon_insert_unsigned</code> and <code>carbon_insert_signed</code>, which internally call the best fitting <code>carbon_insert_u...</code> resp. <code>carbon_insert_i...</code> function for an input integer <code>x</code>. A function is best fitting in this context, if the functions encoding type requires the minimum amount of bytes to store <code>x</code>. For instance, <code>carbon_insert_unsigned</code> called for <code>42</code> will internally call <code>carbon_insert_u8</code>, but <code>carbon_insert_u16</code> if the input is <code>4242</code>. However, both <code>carbon_insert_unsigned</code> and <code>carbon_insert_signed</code> require some effort to figure out which particular function to call. Therefore, whenever possible, use the function from the table above rather than these two convenience functions.</p>
+<p>For more information on the internal encoding of arrays and their elements, see the <a href="http://www.carbonspec.org">Columnar Binary JSON (Carbon) specification</a>.</p>
+<h1><a class="header" href="#insertions-into-objects" id="insertions-into-objects">Insertions into Objects</a></h1>
+<p>Key-value pairs (called properties) in object containers are added with an insertion context <code>carbon_insert</code>, defined in <code>carbon_insert.h</code>. An insertion context results either from a library function call, or is manually constructed.</p>
+<p><strong>Library Functions</strong>. Insertion contextes for object containers result from </p>
+<ul>
+<li>another insertion context from an array that is requested to add a new object as a field by calling <code>carbon_insert_object_begin</code>, defined in <code>carbon_insert.h</code>, or </li>
+<li>when an another insertion from an object context is requested to add a new object container as value for a property by calling <code>carbon_insert_prop_object_begin</code>, defined in <code>carbon_insert.h</code>, or </li>
+<li>when any field is updated (and potentially re-written) as an object container by calling <code>carbon_update_set_object_begin</code>, defined in <code>carbon_update.h</code>.</li>
+</ul>
+<p><strong>Manual Construction</strong>. Another possibility is to construct insertion contextes manually, by calling <code>carbon_int_insert_create_for_object</code>, but this function is for internal usage and ist not typically called from client code.</p>
+<blockquote>
+<p><strong>Note</strong>. Carbon does not support object containers as outer-most container (i.e., records are versioned array containers). Therefore, an object container must live in an array container (either a nested one, or the record itself), or is a value of a property of another object.</p>
+</blockquote>
+<h2><a class="header" href="#example-1" id="example-1">Example</a></h2>
+<p>In the following example, a new record is created that returns an insertion context <code>ins</code>. This insertion context is used to add a single object. By adding this single object, a nested insertion context <code>nested_ins</code>, which is bound to that object, is used to add some properties to the single object. These properties are a string_buffer property, and an object property. The insertion of the latter results in another insertion context, <code>as_prop_state</code>, that is used to add a property to that object property. </p>
+<pre><code class="language-c">// bin/examples-manual-construction-objects
+
+#include &lt;stdio.h&gt;
+#include &lt;jakson/jakson.h&gt;
+
+int main (void)
+{
+    carbon_new context;
+    carbon record;
+    carbon_insert *ins, *nested_ins, *prop_ins;
+    carbon_insert_object_state state, as_prop_state;
+    char *as_json;
+
+    ins = carbon_create_begin(&amp;context, &amp;record, 
+    	CARBON_KEY_NOKEY, CARBON_KEEP);
+
+    nested_ins = carbon_insert_object_begin(&amp;state, ins, 1024);
+        carbon_insert_prop_string(nested_ins, &quot;key&quot;, &quot;value&quot;);
+        prop_ins = carbon_insert_prop_object_begin(&amp;as_prop_state, 
+        	nested_ins, &quot;as prop&quot;, 1024);
+        carbon_insert_prop_string(prop_ins, &quot;hello&quot;, &quot;object!&quot;);
+        carbon_insert_object_end(&amp;as_prop_state);
+
+    carbon_insert_object_end(&amp;state);
+
+    carbon_create_end(&amp;context);
+
+    as_json = carbon_to_json_compact_dup(&amp;record);
+
+    printf (&quot;%s\n&quot;, as_json);
+
+    carbon_drop(&amp;record);
+    free(as_json);
+
+    return 0;
+}
+</code></pre>
+<p>In the example from above, one object is added to the record via the insertion context <code>ins</code> that results from the record creation. The context <code>ins</code> is bound to the array container inside the record. To this array container, a single object is added by opening an (atomic) insertion block beginning with <code>carbon_insert_object_begin</code> and ending with <code>carbon_insert_object_end</code>. The begin requires a state object <code>state</code>, which is required to adjust the parent memory file position when calling <code>carbon_insert_object_end</code>. The begin takes a non-zero integer (here <code>1024</code>) as capacity for the object in number of bytes of the new-to-add object. Assuming this capacity would be <code>1</code>, the object container would look like <code>[{]0[}]</code>, when the insertion block would be immediatly ended, and could be optimized to <code>[{][}]</code> when calling a proper <a href="carbon-api/construct-carbon-records/manual-construction/../../record-optimization.html">record optimization</a>. However, the result of a call to <code>carbon_insert_object_begin</code> returns an insertion context, <code>nested_ins</code> that is bound to an object container, which is used to add two properties (<code>key</code> and <code>as prop</code>). While the first is a string_buffer property with value <code>value</code>, the second is an object property, that must be created with another (atomic) insertion block like the parent object. The resulting insertion context, <code>prop_ins</code> that is bound to the object container for the value of the property with key <code>as prop</code>, is used to add another string_buffer property with key <code>hello</code>
+and value <code>object!</code>.</p>
+<p>Afterwards the resulting record is printed to standard out, resulting in the following JSON string_buffer:</p>
+<pre><code class="language-json">{
+   &quot;key&quot;:&quot;value&quot;,
+   &quot;as prop&quot;:{
+      &quot;hello&quot;:&quot;object!&quot;
+   }
+}
+</code></pre>
+<p>Finally, some cleanup operations are performed.</p>
+<h2><a class="header" href="#function-overview-for-object-container-insertion-contextes" id="function-overview-for-object-container-insertion-contextes">Function Overview for Object-Container Insertion Contextes</a></h2>
+<p>Array and object containers are the most flexible container, capable of containing all field types including any other container. Since a Carbon record is in its core a versioned array container, object containers cannot be the record itself without beeinng an element of that array container. In simpler words, if a record contains of just a single object, then the corresponding object container is the first element in the record array container. </p>
+<blockquote>
+<p><strong>Single Objects as Records</strong>. From a callers perspective, a record with only one contained object in the record array container (i.e., the record looks like <code>[[][{]...[}][]]</code>) is treat by the API as it would be a single object container (i.e., the record behaves like <code>[{]...[}]</code>). This becomes obvious when evaluating dot-notated paths with <a href="carbon-api/construct-carbon-records/manual-construction/../../find-contents.html">find</a>. Assume a record with a single object <code>{ &quot;x&quot;:&quot;y&quot; }</code>, <a href="carbon-api/construct-carbon-records/manual-construction/../../find-contents.html">find</a> called for a path <code>x</code> will return <code>&quot;y&quot;</code>. Actually, the path <code>x</code> a convenient shortcut for <code>0.x</code> since the single object is stored internally as <code>[{ &quot;x&quot;:&quot;y&quot; }]</code>.</p>
+</blockquote>
+<p>The following functions of an insertion context <code>carbon_insert</code> are allowed to called (all defined in <code>carbon_insert.h</code>:</p>
+<table><thead><tr><th>Function</th><th>What is inserted</th></tr></thead><tbody>
+<tr><td><code>carbon_insert_prop_null</code></td><td>a <code>null</code> constant</td></tr>
+<tr><td><code>carbon_insert_prop_true</code></td><td>a <code>true</code> constant</td></tr>
+<tr><td><code>carbon_insert_prop_false</code></td><td>a <code>false</code> constant</td></tr>
+<tr><td><code>carbon_insert_prop_u8</code></td><td>an <code>u8</code> integer</td></tr>
+<tr><td><code>carbon_insert_prop_u16</code></td><td>an <code>u16</code> integer</td></tr>
+<tr><td><code>carbon_insert_prop_u32</code></td><td>an <code>u32</code> integer</td></tr>
+<tr><td><code>carbon_insert_prop_u64</code></td><td>an <code>u64</code> integer</td></tr>
+<tr><td><code>carbon_insert_prop_i8</code></td><td>an <code>i8</code> integer</td></tr>
+<tr><td><code>carbon_insert_prop_i16</code></td><td>an <code>i16</code> integer</td></tr>
+<tr><td><code>carbon_insert_prop_i32</code></td><td>an <code>i32</code> integer</td></tr>
+<tr><td><code>carbon_insert_prop_i64</code></td><td>an <code>i64</code> integer</td></tr>
+<tr><td><code>carbon_insert_prop_float</code></td><td>a <code>float32</code> number</td></tr>
+<tr><td><code>carbon_insert_prop_string</code></td><td>a string_buffer of <code>n</code> character</td></tr>
+<tr><td><code>carbon_insert_prop_nchar</code></td><td>a prefix string_buffer of <code>n</code> character</td></tr>
+<tr><td><code>carbon_insert_prop_binary</code></td><td>a user-defined binary string_buffer</td></tr>
+<tr><td><code>carbon_insert_prop_object_{begin,end}</code></td><td>an object container</td></tr>
+<tr><td><code>carbon_insert_prop_array_{begin,end}</code></td><td>an array container</td></tr>
+<tr><td><code>carbon_insert_prop_column_{begin,end}</code></td><td>a column container</td></tr>
+</tbody></table>
+<p>For convenience, the library provides two functions <code>carbon_insert_prop_unsigned</code> and <code>carbon_insert_prop_signed</code>, which internally call the best fitting <code>carbon_insert_prop_u...</code> resp. <code>carbon_insert_prop_i...</code> function for an input integer <code>x</code>. A function is best fitting in this context, if the functions encoding type requires the minimum amount of bytes to store <code>x</code>. For instance, <code>carbon_insert_prop_unsigned</code> called for <code>42</code> will internally call <code>carbon_insert_u8</code>, but <code>carbon_insert_prop_u16</code> if the input is <code>4242</code>. However, both <code>carbon_insert_prop_unsigned</code> and <code>carbon_insert_prop_signed</code> require some effort to figure out which particular function to call. Therefore, whenever possible, use the function from the table above rather than these two convenience functions.</p>
+<h1><a class="header" href="#insertions-into-columns" id="insertions-into-columns">Insertions into Columns</a></h1>
+<p>A column container is a specialized container that is only capable of containing fixed-size number types and boolean values (both potentially intermixed with <em>null</em> values). Neither nested arrays, nor column containers, nor  objects, nor strings can be elements of a column. The reason is that none of these types has a size that is known just by their type. A fixed size is required for column element types since a column is specialized for random access to its elements. Whenever possible, column containers should be prefered over array containers.</p>
+<p>Elements in column containers are added with an insertion context <code>carbon_insert</code>, defined in <code>carbon_insert.h</code>. An insertion context results either from a library function call, or is manually constructed.</p>
+<p><strong>Library Functions</strong>. Insertion contextes for column containers result from</p>
+<ul>
+<li>another insertion context from an array is requested to add a new (nested) column as a field by calling <code>carbon_insert_column_begin</code>, defined in <code>carbon_insert.h</code>, or </li>
+<li>when an another insertion from an object context is requested to add a new column container as value for a property by calling <code>carbon_insert_prop_column_begin</code>, defined in <code>carbon_insert.h</code> </li>
+<li>when any field is updated (and potentially re-written) as an column container by calling <code>carbon_update_set_column_begin</code>, defined in <code>carbon_update.h</code>.</li>
+</ul>
+<p><strong>Manual Construction</strong>. Another possibility is to construct insertion contextes manually, by calling <code>carbon_int_insert_create_for_column</code>, but this function is for internal usage and ist not typically called from client code.</p>
+<blockquote>
+<p><strong>Note</strong>. Carbon does not support column containers as outer-most container (i.e., records are versioned array containers). Therefore, a column container must live in an array container (either a nested one, or the record itself), or is a value of a property of another object.</p>
+</blockquote>
+<h2><a class="header" href="#example-2" id="example-2">Example</a></h2>
+<p>In the following example, a new record (which is a wrapper for an array container) is created, and the insertion context <code>ins</code> as result of the call to <code>carbon_create_begin</code> is used to add a new column container for unsigned 32bit integers. One of these elements is a <em>null</em> value. </p>
+<pre><code class="language-c">// bin/examples-manual-construction-columns
+
+#include &lt;stdio.h&gt;
+#include &lt;jakson/jakson.h&gt;
+
+int main (void)
+{
+    carbon_new context;
+    carbon record;
+    carbon_insert *ins, *nested_ins;
+    carbon_insert_column_state state;
+    char *as_json;
+
+    ins = carbon_create_begin(&amp;context, &amp;record, 
+    	CARBON_KEY_NOKEY, CARBON_KEEP);
+
+    nested_ins = carbon_insert_column_begin(&amp;state, ins, 
+    	CARBON_COLUMN_TYPE_U32, 1024);
+
+        carbon_insert_u32(nested_ins, 23);
+        carbon_insert_null(nested_ins);
+        carbon_insert_u32(nested_ins, 42);
+    
+    carbon_insert_column_end(&amp;state);
+
+    carbon_create_end(&amp;context);
+
+    as_json = carbon_to_json_compact_dup(&amp;record);
+
+    printf (&quot;%s\n&quot;, as_json);
+
+    carbon_drop(&amp;record);
+    free(as_json);
+
+    return 0;
+}
+</code></pre>
+<p>In the above example, a column container is created as single element to the record array container. This creation is an (atomic) column insertion block beginning with <code>carbon_insert_column_begin</code> and ending with <code>carbon_insert_column_end</code> to insert the column in <code>ins</code>. A call to the begin requires a state object (<code>state</code>) that is used to adjust the parent memory file position when calling <code>carbon_insert_column_end</code>, a <em>column type</em> (here <code>CARBON_COLUMN_TYPE_U32</code>, see below), and a non-zero integer (here <code>1024</code>) that defines the capacity in number of bytes of the new-to-add column. Potentially reserved but unused memory for that capacity is optimized when calling a proper <a href="carbon-api/construct-carbon-records/manual-construction/../../record-optimization.html">record optimization function</a>. The result of that block beginning function returns an insertion context (<code>nested_ins</code>) that is bound to the new-to-add column container. This insertion context is used to add two unsigned integers (<code>23</code> and <code>42</code>), and between them a <em>null</em> value. </p>
+<p>Afterwards the resulting record is printed to standard out, resulting in the following JSON string_buffer:</p>
+<pre><code class="language-json">[
+   23,
+   null,
+   42
+]
+</code></pre>
+<p>Finally, some cleanup operations are performed.</p>
+<h2><a class="header" href="#specialized-encoding" id="specialized-encoding">Specialized Encoding</a></h2>
+<p>As mentioned before, a column container is a restricted yet more specialized and faster list container.</p>
+<h3><a class="header" href="#null-values" id="null-values">Null Values</a></h3>
+<p>The <em>null</em> value is a dedicated type-dependent value from the type domain that is reserved to encode absence of data. </p>
+<h2><a class="header" href="#function-overview-for-array-container-insertion-contextes-1" id="function-overview-for-array-container-insertion-contextes-1">Function Overview for Array-Container Insertion Contextes</a></h2>
+<p>Array and object containers are the most flexible container, capable of containing all field types including any other container. Since a Carbon record is in its core a versioned array container, elements can be added directly to a record as part of the record array container.</p>
+<p>The following functions of an insertion context <code>carbon_insert</code> are allowed to called (all defined in <code>carbon_insert.h</code>:</p>
+<table><thead><tr><th>Function</th><th>What is inserted</th></tr></thead><tbody>
+<tr><td><code>carbon_insert_null</code></td><td>a <code>null</code> constant</td></tr>
+<tr><td><code>carbon_insert_true</code></td><td>a <code>true</code> constant</td></tr>
+<tr><td><code>carbon_insert_false</code></td><td>a <code>false</code> constant</td></tr>
+<tr><td><code>carbon_insert_u8</code></td><td>an <code>u8</code> integer</td></tr>
+<tr><td><code>carbon_insert_u16</code></td><td>an <code>u16</code> integer</td></tr>
+<tr><td><code>carbon_insert_u32</code></td><td>an <code>u32</code> integer</td></tr>
+<tr><td><code>carbon_insert_u64</code></td><td>an <code>u64</code> integer</td></tr>
+<tr><td><code>carbon_insert_i8</code></td><td>an <code>i8</code> integer</td></tr>
+<tr><td><code>carbon_insert_i16</code></td><td>an <code>i16</code> integer</td></tr>
+<tr><td><code>carbon_insert_i32</code></td><td>an <code>i32</code> integer</td></tr>
+<tr><td><code>carbon_insert_i64</code></td><td>an <code>i64</code> integer</td></tr>
+<tr><td><code>carbon_insert_float</code></td><td>a <code>float32</code> number</td></tr>
+<tr><td><code>carbon_insert_string</code></td><td>a string_buffer of <code>n</code> character</td></tr>
+<tr><td><code>carbon_insert_nchar</code></td><td>a prefix string_buffer of <code>n</code> character</td></tr>
+<tr><td><code>carbon_insert_binary</code></td><td>a user-defined binary string_buffer</td></tr>
+<tr><td><code>carbon_insert_object_{begin,end}</code></td><td>an object container</td></tr>
+<tr><td><code>carbon_insert_array_{begin,end}</code></td><td>an array container</td></tr>
+<tr><td><code>carbon_insert_column_{begin,end}</code></td><td>a column container</td></tr>
+</tbody></table>
+<p>For convenience, the library provides two functions <code>carbon_insert_unsigned</code> and <code>carbon_insert_signed</code>, which internally call the best fitting <code>carbon_insert_u...</code> resp. <code>carbon_insert_i...</code> function for an input integer <code>x</code>. A function is best fitting in this context, if the functions encoding type requires the minimum amount of bytes to store <code>x</code>. For instance, <code>carbon_insert_unsigned</code> called for <code>42</code> will internally call <code>carbon_insert_u8</code>, but <code>carbon_insert_u16</code> if the input is <code>4242</code>. However, both <code>carbon_insert_unsigned</code> and <code>carbon_insert_signed</code> require some effort to figure out which particular function to call. Therefore, whenever possible, use the function from the table above rather than these two convenience functions.</p>
+<p>For more information on the internal encoding of arrays and their elements, see the <a href="http://www.carbonspec.org">Columnar Binary JSON (Carbon) specification</a>.</p>
+<h1><a class="header" href="#nesting" id="nesting">Nesting</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#from-byte-streams" id="from-byte-streams">From Byte Streams</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#browse-contents" id="browse-contents">Browse Contents</a></h1>
+<p>To have a full compatibility with the <a href="https://tools.ietf.org/html/rfc8259">JSON RFC 8259</a> and to allow  consistent data access with less special cases, a Carbon record is always a (versioned) multiset according to the <a href="http://www.carbonspec.org">Columnar Binary JSON Specification</a> . This multiset may contain arbitary constant values (such as unsigned 32bit integers, or nulls) and other (potentially nested) set or map data structures in a user-defined order. </p>
+<h2><a class="header" href="#data-access" id="data-access">Data Access</a></h2>
+<p>This library gives access to nested data in two ways:</p>
+<ul>
+<li><strong>Iteration</strong>. Data stored in <em>set</em> data structures is accessed by <code>array_it</code> bi-directional iterators and <code>column_it</code> random-acess iterators, and data stored in <em>map</em> data structures is acces by <code>object_it</code> bi-directional iterators. <em>Values</em> stored in these structures are accessed with function provided by an container-specific iterator. <em>Keys</em> are character strings that can be accessed alongside their <em>values</em> with <code>object_it</code> in a similar fashion</li>
+<li><strong>Lookup</strong>. In case the path to a specific value or container (map/set) is known, this library supports user-defined dot-notated paths to access values, or iterators to containers (<code>array_it</code>, <code>column_it</code>, and <code>object_it</code>). Paths are organized by <code>carbon_dot_path</code> structures and optionally parsed from a user-defined character string.</li>
+</ul>
+<h2><a class="header" href="#mutable-access" id="mutable-access">Mutable Access</a></h2>
+<h1><a class="header" href="#array-iterators" id="array-iterators">Array Iterators</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#object-iterators" id="object-iterators">Object Iterators</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#column-iterators" id="column-iterators">Column Iterators</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#value-types" id="value-types">Value Types</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#field-types" id="field-types">Field Types</a></h1>
+<h1><a class="header" href="#null-encoding" id="null-encoding">Null Encoding</a></h1>
+<h1><a class="header" href="#type-abstractions" id="type-abstractions">Type Abstractions</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#field-classes" id="field-classes">Field Classes</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#constant-types" id="constant-types">Constant Types</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#number-types" id="number-types">Number Types</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#signed-and-unsigned-types" id="signed-and-unsigned-types">Signed and Unsigned Types</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#traversable-types" id="traversable-types">Traversable Types</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#find-contents" id="find-contents">Find Contents</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#path-index" id="path-index">Path Index</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#modify-carbon-records" id="modify-carbon-records">Modify Carbon Records</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#record-revisions" id="record-revisions">Record Revisions</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#insert-operations" id="insert-operations">Insert Operations</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#field-insertions" id="field-insertions">Field Insertions</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#property-insertions" id="property-insertions">Property Insertions</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#updates-operations" id="updates-operations">Updates Operations</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#field-updates" id="field-updates">Field Updates</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#property-updates" id="property-updates">Property Updates</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#deletes-operations" id="deletes-operations">Deletes Operations</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#field-deletes" id="field-deletes">Field Deletes</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#property-deletes" id="property-deletes">Property Deletes</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#record-identification" id="record-identification">Record Identification</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#non-identifiable-records" id="non-identifiable-records">Non-Identifiable Records</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#identifiable-records" id="identifiable-records">Identifiable Records</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#auto-generated-keys" id="auto-generated-keys">Auto-Generated Keys</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#user-defined-keys" id="user-defined-keys">User-Defined Keys</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#numeric-keys" id="numeric-keys">Numeric Keys</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#character-string-keys" id="character-string-keys">Character String Keys</a></h1>
+<h1><a class="header" href="#record-optimization" id="record-optimization">Record Optimization</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<ul>
+<li><a href="carbon-api/record-optimization/containers-and-memory.html">Section 1</a>, <em>Container and Memory Management</em>, characterizes container types, gives the fundamental concepts of the layout of records and containers in memory, and explains what happens during modification and memory reallocations are triggered.</li>
+</ul>
+<h1><a class="header" href="#containers-and-memory-management" id="containers-and-memory-management">Containers and Memory Management</a></h1>
+<p>In its core, a Carbon record is a set of nested vector-like structures <code>&lt;data&gt; &lt;reserved&gt;</code> where one memory area slice contains some data (<code>&lt;data&gt;</code>) which is typically followed by a (potentially empty) sequence of zero-valued bytes making up capacities (<code>&lt;reserved&gt;</code>). These capacities are used to hold some (unused) bytes in reserve in order to avoid to-often reallocation when constructing or modifying records. Especially, the entire Carbon record itself follows this approach (i.e., a Carbon file looks like <code>&lt;carbon-record&gt; &lt;reserved&gt;</code>), where the reserved memory beyond the <code>&lt;carbon-record&gt;</code> is called the <em>tail buffer</em>. The tail buffer is used as every other reserved piece of memory, namely to buffer growth of data, but in addition is also used as temporary (already allocated) buffer in the heap. If possible, the tail buffer is used as intermediate space for re-writing purposes. A client typically does neither notice these reserved memories (with exception of the binary size), nor access these buffers directly. However, this reserved memory is target of several optimization options, as later shown in the <a href="carbon-api/record-optimization/record-optimization.html">Section about Record Optimization</a>.</p>
+<h2><a class="header" href="#memory-management" id="memory-management">Memory Management</a></h2>
+<p>A container in memory is a range of bytes starting with some marker (say <code>[{]</code>) and ending at some point, either with an end marker (say <code>[}]</code>) or without an end marker if the container is fixed sized (i.e., the container is a column). Any container requests for a <em>capacity</em> during contstruction, that determines the <code>&lt;reserved&gt;</code> number of bytes for that container. </p>
+<h3><a class="header" href="#capacity-management-in-containers" id="capacity-management-in-containers">Capacity Management in Containers</a></h3>
+<p>For memory areas that form a single container where <code>[{]</code> and <code>[}]</code> do not follow directly after each other (i.e., the container is empty and has no reserved memory), there the container looks like the following in memory:</p>
+<pre><code>     
+     [{] xx...x 00...0 [}]
+         |      |
+         |      └ &lt;reserved&gt; 
+         └ &lt;data&gt;                
+
+</code></pre>
+<p>The capacity <code>&lt;reserved&gt;</code> shrinks from left to right if the <code>&lt;data&gt;</code> area grows towards <code>[}]</code>. </p>
+<p><strong>Overflow</strong>: In case <code>&lt;reserved&gt;</code> is exhausted for growing <code>&lt;data&gt;</code>, additional space is required to store <code>&lt;data&gt;</code> without overwritting <code>[}]</code>. The number of bytes that cannot be written directly without overwritting <code>[}]</code> is called the overflow number <em>k</em>. Even if <em>k</em> is large, this does <em>not</em> necessarily require a reallocation of the underlying memory block, because of the records tail buffer. To understand, when an overflow triggers an reallocation the capactiy management for records must be understood.</p>
+<h3><a class="header" href="#capacity-management-for-records" id="capacity-management-for-records">Capacity Management for Records</a></h3>
+<p>To understand when a reallocation of the memory block is required, and when just a memory move is performed when modifying containers of the record, the record layout in the memory block must be considered. For ease of understanding say the record starts with <code>[&lt;]</code> and ends with <code>[&gt;]</code>. </p>
+<p>For abstraction, assume that all containers (including markers, <code>&lt;data&gt;</code>, and  <code>&lt;reserved&gt;</code>) in a record are represented by continuous memory range <code>&lt;containers&gt;</code>, and that the memory area managed by the memory block starts at <code>[B]</code> and ends at <code>C</code>. Then the record looks like the following in memory:</p>
+<pre><code>     
+     [B] [&lt;] xx...x [&gt;] 00...0 [E]
+             |          └ &lt;buffer&gt;
+             |
+             └ &lt;data&gt;                
+
+</code></pre>
+<p>In case of an overflow of size <em>k</em> inside one container in <code>&lt;containers&gt;</code>, <code>&lt;containers&gt;</code> is enlarged by <em>k</em> bytes towords <code>[E]</code> by splitting <code>&lt;containers&gt;</code> at the overflow point in a <code>&lt;head&gt;</code> and <code>&lt;tail&gt;</code> part, and by moving <code>&lt;tail&gt;</code> <em>k</em> byte towards <code>[E]</code>, effectively shrinking the records tail buffer <code>&lt;buffer&gt;</code> left to right. This procedure is possible and solves the overflow situtation <em>without</em> reallocation of the underyling memory block, as long as the tail buffer <code>&lt;buffer&gt;</code> in the memory block exists. If <code>&lt;buffer&gt;</code> is exhausted, the memory block must be reallocated, which leads to a new tail buffer of a particular size. </p>
+<blockquote>
+<p><em>Note</em>: A Carbon record structure <code>carbon</code> can live on both the stack and the heap, but the underlying memory block, which is used to encode the actual record, always lives on the heap. Even in cases of reallocation, the API client must not care about pointer management.</p>
+</blockquote>
+<h3><a class="header" href="#capacity-optimization" id="capacity-optimization">Capacity Optimization</a></h3>
+<p>Both the <code>&lt;reserved&gt;</code> memory area in each container, and the tail buffer <code>&lt;buffer&gt;</code> may be removed by specifying a <a href="carbon-api/record-optimization/carbon-api/record-optimization.html">optimization post-processing step</a>, which can be triggered by defining optimization flags unequal to <code>CARBON_KEEP</code>, or by manually calling <code>carbon_revise_shrink</code> resp. <code>carbon_revise_pack</code>  (both defined in <code>carbon_revise.h</code>).</p>
+<h1><a class="header" href="#conversion-to-json" id="conversion-to-json">Conversion to JSON</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#compact-json-printer" id="compact-json-printer">Compact JSON Printer</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#extended-json-printer" id="extended-json-printer">Extended JSON Printer</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#advanced-topics" id="advanced-topics">Advanced Topics</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#json-parsing" id="json-parsing">JSON Parsing</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#dot-notated-paths" id="dot-notated-paths">Dot-Notated Paths</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#dot-path-objects" id="dot-path-objects">Dot Path Objects</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#dot-path-index" id="dot-path-index">Dot Path Index</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#dot-path-evaluators" id="dot-path-evaluators">Dot Path Evaluators</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#character-strings" id="character-strings">Character Strings</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#user-defined-types" id="user-defined-types">User-Defined Types</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#multi-threading" id="multi-threading">Multi-Threading</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#spinlocks" id="spinlocks">Spinlocks</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#thread-pools" id="thread-pools">Thread Pools</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#data-parallelism-framework" id="data-parallelism-framework">Data Parallelism Framework</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#parallel-for" id="parallel-for">Parallel For</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#parallel-map" id="parallel-map">Parallel Map</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#parallel-gather" id="parallel-gather">Parallel Gather</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#parallel-scatter" id="parallel-scatter">Parallel Scatter</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#parallel-shuffle" id="parallel-shuffle">Parallel Shuffle</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#parallel-filter" id="parallel-filter">Parallel Filter</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#early-filters" id="early-filters">Early Filters</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#late-filters" id="late-filters">Late Filters</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#cross-platform-notices" id="cross-platform-notices">Cross-Platform Notices</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#feedback-and-contributions" id="feedback-and-contributions">Feedback and Contributions</a></h1>
+<h1><a class="header" href="#thanks-to" id="thanks-to">Thanks To</a></h1>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+        
+        <script type="text/javascript">
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+        
+        
+
+    </body>
+</html>

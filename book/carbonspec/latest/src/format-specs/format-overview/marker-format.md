@@ -24,9 +24,9 @@ Marker  | Carbon Type      | Descriptions
 `[I]`   | `u32`            | a signed 32-bit integer field
 `[L]`   | `u64`            | a signed 64-bit integer field
 `[r]`   | `float`          | a single-precision floating number field
-`[s]`   | `string_buffer`         | a character string_buffer field
-`[b]`   | `binary`         | a binary string_buffer field with known MIME type
-`[x]`   | `custom binary`  | a binary string_buffer field with user-defined type
+`[s]`   | `string`         | a character string field
+`[b]`   | `binary`         | a binary string field with known MIME type
+`[x]`   | `custom binary`  | a binary string field with user-defined type
 `[n]`   | `null`           | absence of data
 
 <span class="caption">Figure MF-1: Data Type Markers</span>
@@ -129,7 +129,7 @@ Marker  | Carbon Type      | Descriptions
 `[*]`   | `autokey`        | record identifier is auto-generated a `u64` value
 `[+]`   | `ukey`           | record identifier is user-defined a `u64` value 
 `[-]`   | `ikey`           | record identifier is user-defined a `i64` value 
-`[!]`   | `ikey`           | record identifier is user-defined a `string_buffer` value 
+`[!]`   | `ikey`           | record identifier is user-defined a `string` value 
 
 <span class="caption">Figure MF-3: Record Identifier Type Markers</span>
 

@@ -19,7 +19,7 @@ a value where there is some uncertainty about its actual path.
 In a nutshell, dot path expressions allow the following capabilities beyond the dot notation:
 - ...
 - Clear difference whether a path results in value that is annotated as not present (i.e., a `null` is returned), and
-  a path that does not resolve to any value (i.e., a `nil` is returned)
+  a path that does not resolve to any value (i.e., a `undef` is returned)
 
 ## Comparison to JSON/SQL Path Expressions
 
@@ -33,11 +33,11 @@ JSON/SQL Path Expressions is part of the SQL:2016 Standard and allows
 dot-path-unit           ::= path-expression ('.' path-expression)*
 path-expression         ::= array-accessor | property-accessor 
 array-accessor          ::= [0] | [1-9][0-9]* 
-property-accessor       ::= field-name | '"' string_buffer '"' | key-predicate
+property-accessor       ::= field-name | '"' string '"' | key-predicate
 key-predicate           ::= '$' function-name '(' function-parameter-list ')'
 field-name              ::= [a-zA-Z]('\"' | [a-zA-Z0-9])*
 function-name           ::= [a-zA-Z][a-zA-Z0-9]*
-function-parameter-list ::= non-strict-json-string_buffer
+function-parameter-list ::= non-strict-json-string
 ```
 
 
@@ -116,7 +116,7 @@ Result (Json)
 [
     {
     	"value": "Back to the Future",
-    	"type": "string_buffer",
+    	"type": "string",
     	"path": "title"
     },
     {
@@ -205,7 +205,7 @@ Result (Json)
 [
     {
     	"value": "Back to the Future Part II",
-    	"type": "string_buffer",
+    	"type": "string",
     	"path": "1.title"
     }
 ]
@@ -220,7 +220,7 @@ See Section [Dot Path Functions](traversals-queries/path-functions.md).
 
 ### Unresolvable Paths
 
-If a (synatic correct) path does not resolve to a value, the value `nil` is returned. This applies to paths that do not point to a value, 
+If a (synatic correct) path does not resolve to a value, the value `undef` is returned. This applies to paths that do not point to a value, 
 or paths that cannot be fully traversed since a non-container type occurs during the path evaluation.
 
 Input Json
@@ -231,8 +231,8 @@ Input Json
 }
 ```
 
-The dot path expression `y` will return `nil` since there is no key named `"y"` in the input Json.
-The dot path expression `z.1.5` will return `nil` since the path evaluation must be aborted with `z.1` since the element `2` is not a traversable container.
+The dot path expression `y` will return `undef` since there is no key named `"y"` in the input Json.
+The dot path expression `z.1.5` will return `undef` since the path evaluation must be aborted with `z.1` since the element `2` is not a traversable container.
 
 ### Note
 
@@ -253,7 +253,7 @@ JSON snippet
 [{ "x": "y" }]
 ```
 
-the dot path expression `0.x` will result in `"y"` as expected, but the dot path expression `x` will result in a carbon `nil`. The
+the dot path expression `0.x` will result in `"y"` as expected, but the dot path expression `x` will result in a carbon `undef`. The
 reason for that is to guarantee container semantics as given by the user input. 
 
 JSON snippet

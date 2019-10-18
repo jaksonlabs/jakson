@@ -23,7 +23,7 @@ The abstract base type **unsorted multi map** (`unsorted_multimap`) is a sequenc
 
 ### Encoding with Base Type `object`
 
-A (compacted) Carbon `unsorted-multimap` for the JSON snippet from above, encoding the JSON object with the base type `object` holding four string_buffer properties.
+A (compacted) Carbon `unsorted-multimap` for the JSON snippet from above, encoding the JSON object with the base type `object` holding four string properties.
 
 ```
 [{] 

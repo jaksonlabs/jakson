@@ -13,7 +13,7 @@ Carbon Type    | Description                          | Size                | *n
 
 ## Empty Records
 
-Json string_buffer input
+Json string input
 ```json
 { }
 ```
@@ -25,7 +25,7 @@ Resulting `record`
 ```
 
 An empty `record` is a (potentially) identifable, (potentially) versioned and empty `array`. However, for compatbility with Json input semantics,
-an empty `record` is treated like an empty object. Since a Json input string_buffer `[ ]` that describes an empty array, results also in an empty `record`,
+an empty `record` is treated like an empty object. Since a Json input string `[ ]` that describes an empty array, results also in an empty `record`,
 one must keep this special treatment in mind.
 
 

@@ -9,11 +9,11 @@ year:  1985
 
 ```
 
-A Lax ("non-strict") JSON string_buffer is a valid JSON string_buffer that additionally allows the following:
+A Lax ("non-strict") JSON string is a valid JSON string that additionally allows the following:
 
-- **Optional Key Enquoting**. For key names that only contain of alphanumeric characters without leading numbers and no spaces, double quoting can be omitted (i.e., `{ x: "y" }` is a valid non-strict Json string_buffer)
+- **Optional Key Enquoting**. For key names that only contain of alphanumeric characters without leading numbers and no spaces, double quoting can be omitted (i.e., `{ x: "y" }` is a valid non-strict Json string)
 
-- **Optional Value Enquoting**. For string_buffer values that only contain of alphanumeric characters, underscore, without leading numbers and no spaces, double quoting can be omitted (i.e., `{ "x": my_value }` is a valid non-strict Json string_buffer)
+- **Optional Value Enquoting**. For string values that only contain of alphanumeric characters, underscore, without leading numbers and no spaces, double quoting can be omitted (i.e., `{ "x": my_value }` is a valid non-strict Json string)
 
 - **Optional Object Scoping**. The object block symbols `{` and `}` can be omitted for the outermost object that is not contained in an array (i.e., `"x": "y"` is a valid non-strict Json object)
 

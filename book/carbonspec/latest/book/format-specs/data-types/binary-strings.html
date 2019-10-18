@@ -1,0 +1,970 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Binary Strings - The Columnar Binary JSON Specification</title>
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+        <link rel="stylesheet" href="../../theme/slim.css">
+        
+
+        
+    </head>
+    <body class="light">
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../../";
+            var default_theme = "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            document.body.className = theme;
+            document.querySelector('html').className = theme + ' js';
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="affix"><a href="../../carbon.html">Columnar Binary JSON</a></li><li class="affix"><a href="../../introduction.html">Introduction</a></li><li><a href="../../getting-started.html"><strong aria-hidden="true">1.</strong> Getting Started</a></li><li><ol class="section"><li><a href="../../getting-started/motivation.html"><strong aria-hidden="true">1.1.</strong> Motivation</a></li><li><a href="../../getting-started/example.html"><strong aria-hidden="true">1.2.</strong> Example</a></li><li><a href="../../getting-started/comparison.html"><strong aria-hidden="true">1.3.</strong> Comparison</a></li></ol></li><li><a href="../../format-spec.html"><strong aria-hidden="true">2.</strong> Carbon File Specification</a></li><li><ol class="section"><li><a href="../../format-specs/design-goals.html"><strong aria-hidden="true">2.1.</strong> Design Goals</a></li><li><a href="../../format-specs/notation.html"><strong aria-hidden="true">2.2.</strong> Notation</a></li><li><a href="../../format-specs/alternatives.html"><strong aria-hidden="true">2.3.</strong> Alternatives</a></li><li><ol class="section"><li><a href="../../format-specs/alternatives/bson.html"><strong aria-hidden="true">2.3.1.</strong> Binary JSON</a></li><li><a href="../../format-specs/alternatives/ubjson.html"><strong aria-hidden="true">2.3.2.</strong> Universal Binary JSON</a></li></ol></li><li><a href="../../format-specs/format-overview.html"><strong aria-hidden="true">2.4.</strong> Format Overview</a></li><li><ol class="section"><li><a href="../../format-specs/format-overview/marker-format.html"><strong aria-hidden="true">2.4.1.</strong> Marker Format</a></li><li><a href="../../format-specs/format-overview/varuints.html"><strong aria-hidden="true">2.4.2.</strong> Variable-Length Integers</a></li><li><a href="../../format-specs/format-overview/padding-spaces.html"><strong aria-hidden="true">2.4.3.</strong> Compacting and Padding</a></li><li><a href="../../format-specs/format-overview/bnf-syntax.html"><strong aria-hidden="true">2.4.4.</strong> BNF Syntax</a></li></ol></li><li><a href="../../format-specs/identification.html"><strong aria-hidden="true">2.5.</strong> Identification</a></li><li><ol class="section"><li><a href="../../format-specs/identification/user-def-keys.html"><strong aria-hidden="true">2.5.1.</strong> User-Defined Keys</a></li><li><a href="../../format-specs/identification/sys-def-keys.html"><strong aria-hidden="true">2.5.2.</strong> System-Defined Keys</a></li></ol></li><li><a href="../../format-specs/data-types.html"><strong aria-hidden="true">2.6.</strong> Data Types</a></li><li><ol class="section"><li><a href="../../format-specs/data-types/booleans.html"><strong aria-hidden="true">2.6.1.</strong> Booleans</a></li><li><a href="../../format-specs/data-types/integers.html"><strong aria-hidden="true">2.6.2.</strong> Integer Numbers</a></li><li><a href="../../format-specs/data-types/floating.html"><strong aria-hidden="true">2.6.3.</strong> Floating Numbers</a></li><li><a href="../../format-specs/data-types/character-strings.html"><strong aria-hidden="true">2.6.4.</strong> Character Strings</a></li><li><a href="../../format-specs/data-types/binary-strings.html" class="active"><strong aria-hidden="true">2.6.5.</strong> Binary Strings</a></li><li><a href="../../format-specs/data-types/nulls.html"><strong aria-hidden="true">2.6.6.</strong> Nulls</a></li><li><a href="../../format-specs/data-types/undefs.html"><strong aria-hidden="true">2.6.7.</strong> Undefs</a></li></ol></li><li><a href="../../format-specs/container-types.html"><strong aria-hidden="true">2.7.</strong> Container Types</a></li><li><ol class="section"><li><a href="../../format-specs/container-types/arrays.html"><strong aria-hidden="true">2.7.1.</strong> Arrays</a></li><li><a href="../../format-specs/container-types/columns.html"><strong aria-hidden="true">2.7.2.</strong> Columns</a></li><li><a href="../../format-specs/container-types/objects.html"><strong aria-hidden="true">2.7.3.</strong> Objects</a></li></ol></li><li><a href="../../format-specs/abstract-types.html"><strong aria-hidden="true">2.8.</strong> Abstract Types</a></li><li><ol class="section"><li><a href="../../format-specs/abstract-base-types.html"><strong aria-hidden="true">2.8.1.</strong> Abstract Base Types</a></li><li><ol class="section"><li><a href="../../format-specs/abstract-base-types/unsorted-multi-sets.html"><strong aria-hidden="true">2.8.1.1.</strong> Unsorted Multi Sets</a></li><li><a href="../../format-specs/abstract-base-types/unsorted-multi-maps.html"><strong aria-hidden="true">2.8.1.2.</strong> Unsorted Multi Maps</a></li></ol></li><li><a href="../../format-specs/derived-abstract-types.html"><strong aria-hidden="true">2.8.2.</strong> Derived Abstract Types</a></li><li><ol class="section"><li><a href="../../format-specs/derived-abstract-types/sorted-multi-sets.html"><strong aria-hidden="true">2.8.2.1.</strong> Sorted Multi Sets</a></li><li><a href="../../format-specs/derived-abstract-types/unsorted-sets.html"><strong aria-hidden="true">2.8.2.2.</strong> Unsorted Sets</a></li><li><a href="../../format-specs/derived-abstract-types/sorted-sets.html"><strong aria-hidden="true">2.8.2.3.</strong> Sorted Sets</a></li><li><a href="../../format-specs/derived-abstract-types/sorted-maps.html"><strong aria-hidden="true">2.8.2.4.</strong> Sorted Maps</a></li><li><a href="../../format-specs/derived-abstract-types/sorted-multi-maps.html"><strong aria-hidden="true">2.8.2.5.</strong> Sorted Multi Maps</a></li><li><a href="../../format-specs/derived-abstract-types/unsorted-maps.html"><strong aria-hidden="true">2.8.2.6.</strong> Unsorted Maps</a></li></ol></li></ol></li><li><a href="../../update-spec.html"><strong aria-hidden="true">2.9.</strong> Update Specification</a></li><li><ol class="section"><li><a href="../../update-spec/revision-control.html"><strong aria-hidden="true">2.9.1.</strong> Revisions</a></li><li><a href="../../update-spec/patches.html"><strong aria-hidden="true">2.9.2.</strong> Patches</a></li><li><a href="../../update-spec/atomic-ops.html"><strong aria-hidden="true">2.9.3.</strong> Atomic Operations</a></li><li><a href="../../update-spec/insert-ops.html"><strong aria-hidden="true">2.9.4.</strong> Insert Operations</a></li><li><a href="../../update-spec/update-ops.html"><strong aria-hidden="true">2.9.5.</strong> In-Place Updates</a></li><li><a href="../../update-spec/delete-ops.html"><strong aria-hidden="true">2.9.6.</strong> Delete Operations</a></li></ol></li><li><a href="../../traversals-queries.html"><strong aria-hidden="true">2.10.</strong> Querying for Values</a></li><li><ol class="section"><li><a href="../../traversals-queries/dot-path-expressions.html"><strong aria-hidden="true">2.10.1.</strong> Dot Path Expressions</a></li><li><a href="../../traversals-queries/path-functions.html"><strong aria-hidden="true">2.10.2.</strong> Dot Path Functions</a></li></ol></li><li><a href="../../formatting.html"><strong aria-hidden="true">2.11.</strong> Formatting</a></li><li><ol class="section"><li><a href="../../formatting/json.html"><strong aria-hidden="true">2.11.1.</strong> JSON Formatting</a></li><li><a href="../../formatting/lax-json.html"><strong aria-hidden="true">2.11.2.</strong> Lax JSON</a></li></ol></li><li><a href="../../format-specs/mime-types.html"><strong aria-hidden="true">2.12.</strong> MIME Type and Extension</a></li><li><a href="../../dev-ressources.html"><strong aria-hidden="true">2.13.</strong> Developer Resources</a></li><li><ol class="section"><li><a href="../../dev-ressources/libraries.html"><strong aria-hidden="true">2.13.1.</strong> Libraries</a></li><li><a href="../../dev-ressources/best-practise.html"><strong aria-hidden="true">2.13.2.</strong> Best Practise</a></li><li><a href="../../dev-ressources/example-files.html"><strong aria-hidden="true">2.13.3.</strong> Example Files</a></li></ol></li><li><a href="../../libcarbon.html"><strong aria-hidden="true">2.14.</strong> Carbon Files in Libcarbon</a></li></ol></li><li><a href="../../archive-spec.html"><strong aria-hidden="true">3.</strong> Carbon Archive Specification</a></li><li class="affix"><a href="../../feedback.html">Feedback and Contributions</a></li><li class="affix"><a href="../../thanks.html">Thanks To</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar" class="menu-bar">
+                    <div id="menu-bar-sticky-container">
+                        <div class="left-buttons">
+                            <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                                <i class="fa fa-paint-brush"></i>
+                            </button>
+                            <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                                <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                            </ul>
+                            
+                            <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                                <i class="fa fa-search"></i>
+                            </button>
+                            
+                        </div>
+
+                        <h1 class="menu-title">The Columnar Binary JSON Specification</h1>
+
+                        <div class="right-buttons">
+                            <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                                <i id="print-button" class="fa fa-print"></i>
+                            </a>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1><a class="header" href="#binary-strings" id="binary-strings">Binary Strings</a></h1>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>binary</code></td><td>binary of <code>n</code> bytes (MIME typed)</td><td><code>n</code> + 2<sup>+</sup> bytes</td><td><code>null</code></td><td><code>[b]</code></td></tr>
+<tr><td><code>custom binary</code></td><td>binary of <code>n</code> bytes (custom type)</td><td><code>n</code> + 3<sup>+</sup> bytes</td><td><code>null</code></td><td><code>[x]</code></td></tr>
+</tbody></table>
+<h2><a class="header" href="#encoding-as-field-value" id="encoding-as-field-value">Encoding As Field Value</a></h2>
+<h3><a class="header" href="#with-known-mime-types" id="with-known-mime-types">With Known MIME Types</a></h3>
+<pre><code>[b](mime-type-id)(str-len) &lt;binary&gt;
+</code></pre>
+<table><thead><tr><th>Description</th><th>Size (in Byte)</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
+<tr><td>binary of <code>n</code> bytes</td><td>1 + <code>k</code> + <code>l</code> + <code>n</code></td><td><code>[b]</code> (<code>binary</code>)</td><td><em>see below</em></td></tr>
+</tbody></table>
+<table><thead><tr><th>Payload</th><th>Description</th><th>Encoding Type</th><th>Size</th></tr></thead><tbody>
+<tr><td><code>(mime-type-id)</code></td><td>MIME Type Id (see below)</td><td>variable-length integer</td><td><code>k</code> byte</td></tr>
+<tr><td><code>(str-len)</code></td><td>binary string length in bytes</td><td>variable-length integer</td><td><code>l</code> byte</td></tr>
+<tr><td><code>&lt;binary&gt;</code></td><td>the binary string itself</td><td>fixed-sized binary string</td><td><code>n</code> byte</td></tr>
+</tbody></table>
+<h2><a class="header" href="#example" id="example">Example</a></h2>
+<p>snippet</p>
+<pre><code>MIME Type:	text/html
+Content:	&lt;html&gt;&lt;body&gt;&lt;p&gt;Hello, World!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+</code></pre>
+<p>A (compacted) Carbon file, which encodes the HTML code as <code>binary</code>.</p>
+<pre><code>[b](219)(46) [&lt;html&gt;&lt;body&gt;&lt;p&gt;Hello, World!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;]
+</code></pre>
+<h3><a class="header" href="#with-unknown-mime-types" id="with-unknown-mime-types">With Unknown MIME Types</a></h3>
+<pre><code>[x](type-str-len)&lt;type-str&gt;(str-len) &lt;binary-string&gt;
+</code></pre>
+<table><thead><tr><th>Description</th><th>Size (in Byte)</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
+<tr><td>binary of <code>n</code> bytes</td><td>1 + <code>p</code> + <code>q</code> + <code>l</code> + <code>n</code></td><td><code>[x]</code> (<code>custom binary</code>)</td><td><em>see below</em></td></tr>
+</tbody></table>
+<table><thead><tr><th>Payload</th><th>Description</th><th>Encoding Type</th><th>Size</th></tr></thead><tbody>
+<tr><td><code>(type-str-len)</code></td><td>used-def type string length</td><td>variable-length integer</td><td><code>k</code> byte</td></tr>
+<tr><td><code>&lt;type-str&gt;</code></td><td>the user-def type string itself</td><td>fixed-sized string</td><td><code>q</code> byte</td></tr>
+<tr><td><code>(str-len)</code></td><td>binary string length in bytes</td><td>variable-length integer</td><td><code>l</code> byte</td></tr>
+<tr><td><code>&lt;binary&gt;</code></td><td>the binary string itself</td><td>fixed-sized binary string</td><td><code>n</code> byte</td></tr>
+</tbody></table>
+<h2><a class="header" href="#example-1" id="example-1">Example</a></h2>
+<p>snippet</p>
+<pre><code>Type Name:      custom-type
+Content:        c3RpbGwgYSBzZWNyZXQ=
+</code></pre>
+<p>A (compacted) Carbon file, which encodes the HTML code as <code>binary</code>.</p>
+<pre><code>[x](11)[custom-type](20) [c3RpbGwgYSBzZWNyZXQ=]
+</code></pre>
+<h3><a class="header" href="#parsing-from-json" id="parsing-from-json">Parsing from JSON</a></h3>
+<p>JSON does not support the definition of <code>binary</code> or <code>custom binary</code> types as used in Carbon. To enable conversion from JSON that describes (<code>custom</code>) <code>binary</code> Carbon types, the follow convention is used. </p>
+<p>A binary is encoded in JSON using an JSON object with exactly the following string properties:</p>
+<ul>
+<li><code>type</code> store a (custom) type description</li>
+<li><code>encoding</code> stores the value <code>base64</code></li>
+<li><code>binary-string</code> stores a base64-encoded binary value</li>
+</ul>
+<p>A particular order of these properties inside the object is not required. Once an object satisfying the definition from above was found, the object is replaced with a (<code>custom</code>) <code>binary</code> type (called <em>auto-conversion</em>). If the string <code>type</code> matches a built-in MIME type (see blow) by character equality, and the auto-conversion option is <em>not</em> turned off, a <code>binary</code> type with the described contents is created. Otherwise a <code>custom binary</code> is created.</p>
+<p>Libaries implementing the Carbon specification <strong>must</strong> provide an option to turn off auto-conversion, such that there is a possibility to still store an object satisfying the definition from above without converting its content to a (<code>custom</code>) (<code>binary</code>) type.</p>
+<p>JSON snippet</p>
+<pre><code class="language-json">{
+   &quot;type&quot;:&quot;text/html&quot;,
+   &quot;encoding&quot;:&quot;base64&quot;,
+   &quot;binary-string&quot;:&quot;PGh0bWw+PGJvZHk+PHA+SGVsbG8sIFdvcmxkITwvcD48L2JvZHk+PC9odG1sPgAA&quot;
+}
+</code></pre>
+<p>Carbon file snippet</p>
+<pre><code>[b](219)(46) [&lt;html&gt;&lt;body&gt;&lt;p&gt;Hello, World!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;]
+</code></pre>
+<p>Vice versa, a Carbon file converted into a JSON string using the standard JSON formatter will produce the JSON snippet from above for the Carbon file snippet from above.</p>
+<blockquote>
+<p><strong>TODO:</strong> Not yet implemented</p>
+</blockquote>
+<h2><a class="header" href="#encoding-as-column-value" id="encoding-as-column-value">Encoding As Column Value</a></h2>
+<p>Binary strings are not supported for column containers.</p>
+<h2><a class="header" href="#mime-type-ids" id="mime-type-ids">MIME Type Ids</a></h2>
+<blockquote>
+<p><strong>Note:</strong> To the point of this writing, the MIME type to identifier mapping is done via alphanumeric ordering of MIME type strings for improved lookup performance given a particular mime type string. In a future specification version, the order may change to reflect likelihood of certain type strings. With simpler words, to minimmize the variable number of bytes used to encode a MIME type id, more often used mime type strings will be assigned to a lower MIME type id compared to less-frequent used mime types.</p>
+</blockquote>
+<table><thead><tr><th>MIME Type</th><th>File Extension</th><th>MIME Type Id</th></tr></thead><tbody>
+<tr><td>application/vnd.lotus-1-2-3</td><td>123</td><td>0</td></tr>
+<tr><td>text/vnd.in3d.3dml</td><td>3dml</td><td>1</td></tr>
+<tr><td>video/3gpp2</td><td>3g2</td><td>2</td></tr>
+<tr><td>video/3gpp</td><td>3gp</td><td>3</td></tr>
+<tr><td>application/x-7z-compressed</td><td>7z</td><td>4</td></tr>
+<tr><td>application/x-authorware-bin</td><td>aab</td><td>5</td></tr>
+<tr><td>audio/x-aac</td><td>aac</td><td>6</td></tr>
+<tr><td>application/x-authorware-map</td><td>aam</td><td>7</td></tr>
+<tr><td>application/x-authorware-seg</td><td>aas</td><td>8</td></tr>
+<tr><td>application/x-abiword</td><td>abw</td><td>9</td></tr>
+<tr><td>application/pkix-attr-cert</td><td>ac</td><td>10</td></tr>
+<tr><td>application/vnd.americandynamics.acc</td><td>acc</td><td>11</td></tr>
+<tr><td>application/x-ace-compressed</td><td>ace</td><td>12</td></tr>
+<tr><td>application/vnd.acucobol</td><td>acu</td><td>13</td></tr>
+<tr><td>audio/adpcm</td><td>adp</td><td>14</td></tr>
+<tr><td>application/vnd.audiograph</td><td>aep</td><td>15</td></tr>
+<tr><td>application/vnd.ibm.modcap</td><td>afp</td><td>16</td></tr>
+<tr><td>application/vnd.ahead.space</td><td>ahead</td><td>17</td></tr>
+<tr><td>application/postscript</td><td>ai</td><td>18</td></tr>
+<tr><td>audio/x-aiff</td><td>aif</td><td>19</td></tr>
+<tr><td>application/vnd.adobe.air-application-installer-package+zip</td><td>air</td><td>20</td></tr>
+<tr><td>application/vnd.dvb.ait</td><td>ait</td><td>21</td></tr>
+<tr><td>application/vnd.amiga.ami</td><td>ami</td><td>22</td></tr>
+<tr><td>application/vnd.android.package-archive</td><td>apk</td><td>23</td></tr>
+<tr><td>application/x-ms-application</td><td>application</td><td>24</td></tr>
+<tr><td>application/vnd.lotus-approach</td><td>apr</td><td>25</td></tr>
+<tr><td>video/x-ms-asf</td><td>asf</td><td>26</td></tr>
+<tr><td>application/vnd.accpac.simply.aso</td><td>aso</td><td>27</td></tr>
+<tr><td>application/vnd.acucorp</td><td>atc</td><td>28</td></tr>
+<tr><td>application/atom+xml</td><td>atom</td><td>29</td></tr>
+<tr><td>application/atomcat+xml</td><td>atomcat</td><td>30</td></tr>
+<tr><td>application/atomsvc+xml</td><td>atomsvc</td><td>31</td></tr>
+<tr><td>application/vnd.antix.game-component</td><td>atx</td><td>32</td></tr>
+<tr><td>audio/basic</td><td>au</td><td>33</td></tr>
+<tr><td>video/x-msvideo</td><td>avi</td><td>34</td></tr>
+<tr><td>application/applixware</td><td>aw</td><td>35</td></tr>
+<tr><td>application/vnd.airzip.filesecure.azf</td><td>azf</td><td>36</td></tr>
+<tr><td>application/vnd.airzip.filesecure.azs</td><td>azs</td><td>37</td></tr>
+<tr><td>application/vnd.amazon.ebook</td><td>azw</td><td>38</td></tr>
+<tr><td>application/x-bcpio</td><td>bcpio</td><td>39</td></tr>
+<tr><td>application/x-font-bdf</td><td>bdf</td><td>40</td></tr>
+<tr><td>application/vnd.syncml.dm+wbxml</td><td>bdm</td><td>41</td></tr>
+<tr><td>application/vnd.realvnc.bed</td><td>bed</td><td>42</td></tr>
+<tr><td>application/vnd.fujitsu.oasysprs</td><td>bh2</td><td>43</td></tr>
+<tr><td>application/octet-stream</td><td>bin</td><td>44</td></tr>
+<tr><td>application/vnd.bmi</td><td>bmi</td><td>45</td></tr>
+<tr><td>image/bmp</td><td>bmp</td><td>46</td></tr>
+<tr><td>application/vnd.previewsystems.box</td><td>box</td><td>47</td></tr>
+<tr><td>image/prs.btif</td><td>btif</td><td>48</td></tr>
+<tr><td>application/x-bzip</td><td>bz</td><td>49</td></tr>
+<tr><td>application/x-bzip2</td><td>bz2</td><td>50</td></tr>
+<tr><td>text/x-c</td><td>c</td><td>51</td></tr>
+<tr><td>application/vnd.cluetrust.cartomobile-config</td><td>c11amc</td><td>52</td></tr>
+<tr><td>application/vnd.cluetrust.cartomobile-config-pkg</td><td>c11amz</td><td>53</td></tr>
+<tr><td>application/vnd.clonk.c4group</td><td>c4g</td><td>54</td></tr>
+<tr><td>application/vnd.ms-cab-compressed</td><td>cab</td><td>55</td></tr>
+<tr><td>application/vnd.curl.car</td><td>car</td><td>56</td></tr>
+<tr><td>application/vnd.ms-pki.seccat</td><td>cat</td><td>57</td></tr>
+<tr><td>application/vnd.contact.cmsg</td><td>cdbcmsg</td><td>58</td></tr>
+<tr><td>application/vnd.mediastation.cdkey</td><td>cdkey</td><td>59</td></tr>
+<tr><td>application/cdmi-capability</td><td>cdmia</td><td>60</td></tr>
+<tr><td>application/cdmi-container</td><td>cdmic</td><td>61</td></tr>
+<tr><td>application/cdmi-domain</td><td>cdmid</td><td>62</td></tr>
+<tr><td>application/cdmi-object</td><td>cdmio</td><td>63</td></tr>
+<tr><td>application/cdmi-queue</td><td>cdmiq</td><td>64</td></tr>
+<tr><td>chemical/x-cdx</td><td>cdx</td><td>65</td></tr>
+<tr><td>application/vnd.chemdraw+xml</td><td>cdxml</td><td>66</td></tr>
+<tr><td>application/vnd.cinderella</td><td>cdy</td><td>67</td></tr>
+<tr><td>application/pkix-cert</td><td>cer</td><td>68</td></tr>
+<tr><td>image/cgm</td><td>cgm</td><td>69</td></tr>
+<tr><td>application/x-chat</td><td>chat</td><td>70</td></tr>
+<tr><td>application/vnd.ms-htmlhelp</td><td>chm</td><td>71</td></tr>
+<tr><td>application/vnd.kde.kchart</td><td>chrt</td><td>72</td></tr>
+<tr><td>chemical/x-cif</td><td>cif</td><td>73</td></tr>
+<tr><td>application/vnd.anser-web-certificate-issue-initiation</td><td>cii</td><td>74</td></tr>
+<tr><td>application/vnd.ms-artgalry</td><td>cil</td><td>75</td></tr>
+<tr><td>application/vnd.claymore</td><td>cla</td><td>76</td></tr>
+<tr><td>application/java-vm</td><td>class</td><td>77</td></tr>
+<tr><td>application/vnd.crick.clicker.keyboard</td><td>clkk</td><td>78</td></tr>
+<tr><td>application/vnd.crick.clicker.palette</td><td>clkp</td><td>79</td></tr>
+<tr><td>application/vnd.crick.clicker.template</td><td>clkt</td><td>80</td></tr>
+<tr><td>application/vnd.crick.clicker.wordbank</td><td>clkw</td><td>81</td></tr>
+<tr><td>application/vnd.crick.clicker</td><td>clkx</td><td>82</td></tr>
+<tr><td>application/x-msclip</td><td>clp</td><td>83</td></tr>
+<tr><td>application/vnd.cosmocaller</td><td>cmc</td><td>84</td></tr>
+<tr><td>chemical/x-cmdf</td><td>cmdf</td><td>85</td></tr>
+<tr><td>chemical/x-cml</td><td>cml</td><td>86</td></tr>
+<tr><td>application/vnd.yellowriver-custom-menu</td><td>cmp</td><td>87</td></tr>
+<tr><td>image/x-cmx</td><td>cmx</td><td>88</td></tr>
+<tr><td>application/vnd.rim.cod</td><td>cod</td><td>89</td></tr>
+<tr><td>application/x-cpio</td><td>cpio</td><td>90</td></tr>
+<tr><td>application/mac-compactpro</td><td>cpt</td><td>91</td></tr>
+<tr><td>application/x-mscardfile</td><td>crd</td><td>92</td></tr>
+<tr><td>application/pkix-crl</td><td>crl</td><td>93</td></tr>
+<tr><td>application/vnd.rig.cryptonote</td><td>cryptonote</td><td>94</td></tr>
+<tr><td>application/x-csh</td><td>csh</td><td>95</td></tr>
+<tr><td>chemical/x-csml</td><td>csml</td><td>96</td></tr>
+<tr><td>application/vnd.commonspace</td><td>csp</td><td>97</td></tr>
+<tr><td>text/css</td><td>css</td><td>98</td></tr>
+<tr><td>text/csv</td><td>csv</td><td>99</td></tr>
+<tr><td>application/cu-seeme</td><td>cu</td><td>100</td></tr>
+<tr><td>text/vnd.curl</td><td>curl</td><td>101</td></tr>
+<tr><td>application/prs.cww</td><td>cww</td><td>102</td></tr>
+<tr><td>model/vnd.collada+xml</td><td>dae</td><td>103</td></tr>
+<tr><td>application/vnd.mobius.daf</td><td>daf</td><td>104</td></tr>
+<tr><td>application/davmount+xml</td><td>davmount</td><td>105</td></tr>
+<tr><td>text/vnd.curl.dcurl</td><td>dcurl</td><td>106</td></tr>
+<tr><td>application/vnd.oma.dd2+xml</td><td>dd2</td><td>107</td></tr>
+<tr><td>application/vnd.fujixerox.ddd</td><td>ddd</td><td>108</td></tr>
+<tr><td>application/x-debian-package</td><td>deb</td><td>109</td></tr>
+<tr><td>application/x-x509-ca-cert</td><td>der</td><td>110</td></tr>
+<tr><td>application/vnd.dreamfactory</td><td>dfac</td><td>111</td></tr>
+<tr><td>application/x-director</td><td>dir</td><td>112</td></tr>
+<tr><td>application/vnd.mobius.dis</td><td>dis</td><td>113</td></tr>
+<tr><td>image/vnd.djvu</td><td>djvu</td><td>114</td></tr>
+<tr><td>application/x-apple-diskimage</td><td>dmg</td><td>115</td></tr>
+<tr><td>application/vnd.dna</td><td>dna</td><td>116</td></tr>
+<tr><td>application/msword</td><td>doc</td><td>117</td></tr>
+<tr><td>application/vnd.ms-word.document.macroenabled.12</td><td>docm</td><td>118</td></tr>
+<tr><td>application/vnd.openxmlformats-officedocument.wordprocessingml.document</td><td>docx</td><td>119</td></tr>
+<tr><td>application/vnd.ms-word.template.macroenabled.12</td><td>dotm</td><td>120</td></tr>
+<tr><td>application/vnd.openxmlformats-officedocument.wordprocessingml.template</td><td>dotx</td><td>121</td></tr>
+<tr><td>application/vnd.osgi.dp</td><td>dp</td><td>122</td></tr>
+<tr><td>application/vnd.dpgraph</td><td>dpg</td><td>123</td></tr>
+<tr><td>audio/vnd.dra</td><td>dra</td><td>124</td></tr>
+<tr><td>text/prs.lines.tag</td><td>dsc</td><td>125</td></tr>
+<tr><td>application/dssc+der</td><td>dssc</td><td>126</td></tr>
+<tr><td>application/x-dtbook+xml</td><td>dtb</td><td>127</td></tr>
+<tr><td>application/xml-dtd</td><td>dtd</td><td>128</td></tr>
+<tr><td>audio/vnd.dts</td><td>dts</td><td>129</td></tr>
+<tr><td>audio/vnd.dts.hd</td><td>dtshd</td><td>130</td></tr>
+<tr><td>application/x-dvi</td><td>dvi</td><td>131</td></tr>
+<tr><td>model/vnd.dwf</td><td>dwf</td><td>132</td></tr>
+<tr><td>image/vnd.dwg</td><td>dwg</td><td>133</td></tr>
+<tr><td>image/vnd.dxf</td><td>dxf</td><td>134</td></tr>
+<tr><td>application/vnd.spotfire.dxp</td><td>dxp</td><td>135</td></tr>
+<tr><td>audio/vnd.nuera.ecelp4800</td><td>ecelp4800</td><td>136</td></tr>
+<tr><td>audio/vnd.nuera.ecelp7470</td><td>ecelp7470</td><td>137</td></tr>
+<tr><td>audio/vnd.nuera.ecelp9600</td><td>ecelp9600</td><td>138</td></tr>
+<tr><td>application/vnd.novadigm.edm</td><td>edm</td><td>139</td></tr>
+<tr><td>application/vnd.novadigm.edx</td><td>edx</td><td>140</td></tr>
+<tr><td>application/vnd.picsel</td><td>efif</td><td>141</td></tr>
+<tr><td>application/vnd.pg.osasli</td><td>ei6</td><td>142</td></tr>
+<tr><td>message/rfc822</td><td>eml</td><td>143</td></tr>
+<tr><td>application/emma+xml</td><td>emma</td><td>144</td></tr>
+<tr><td>audio/vnd.digital-winds</td><td>eol</td><td>145</td></tr>
+<tr><td>application/vnd.ms-fontobject</td><td>eot</td><td>146</td></tr>
+<tr><td>application/epub+zip</td><td>epub</td><td>147</td></tr>
+<tr><td>application/ecmascript</td><td>es</td><td>148</td></tr>
+<tr><td>application/vnd.eszigno3+xml</td><td>es3</td><td>149</td></tr>
+<tr><td>application/vnd.epson.esf</td><td>esf</td><td>150</td></tr>
+<tr><td>text/x-setext</td><td>etx</td><td>151</td></tr>
+<tr><td>application/x-msdownload</td><td>exe</td><td>152</td></tr>
+<tr><td>application/exi</td><td>exi</td><td>153</td></tr>
+<tr><td>application/vnd.novadigm.ext</td><td>ext</td><td>154</td></tr>
+<tr><td>application/vnd.ezpix-album</td><td>ez2</td><td>155</td></tr>
+<tr><td>application/vnd.ezpix-package</td><td>ez3</td><td>156</td></tr>
+<tr><td>text/x-fortran</td><td>f</td><td>157</td></tr>
+<tr><td>video/x-f4v</td><td>f4v</td><td>158</td></tr>
+<tr><td>image/vnd.fastbidsheet</td><td>fbs</td><td>159</td></tr>
+<tr><td>application/vnd.isac.fcs</td><td>fcs</td><td>160</td></tr>
+<tr><td>application/vnd.fdf</td><td>fdf</td><td>161</td></tr>
+<tr><td>application/vnd.denovo.fcselayout-link</td><td>fe_launch</td><td>162</td></tr>
+<tr><td>application/vnd.fujitsu.oasysgp</td><td>fg5</td><td>163</td></tr>
+<tr><td>image/x-freehand</td><td>fh</td><td>164</td></tr>
+<tr><td>application/x-xfig</td><td>fig</td><td>165</td></tr>
+<tr><td>video/x-fli</td><td>fli</td><td>166</td></tr>
+<tr><td>application/vnd.micrografx.flo</td><td>flo</td><td>167</td></tr>
+<tr><td>video/x-flv</td><td>flv</td><td>168</td></tr>
+<tr><td>application/vnd.kde.kivio</td><td>flw</td><td>169</td></tr>
+<tr><td>text/vnd.fmi.flexstor</td><td>flx</td><td>170</td></tr>
+<tr><td>text/vnd.fly</td><td>fly</td><td>171</td></tr>
+<tr><td>application/vnd.framemaker</td><td>fm</td><td>172</td></tr>
+<tr><td>application/vnd.frogans.fnc</td><td>fnc</td><td>173</td></tr>
+<tr><td>image/vnd.fpx</td><td>fpx</td><td>174</td></tr>
+<tr><td>application/vnd.fsc.weblaunch</td><td>fsc</td><td>175</td></tr>
+<tr><td>image/vnd.fst</td><td>fst</td><td>176</td></tr>
+<tr><td>application/vnd.fluxtime.clip</td><td>ftc</td><td>177</td></tr>
+<tr><td>application/vnd.anser-web-funds-transfer-initiation</td><td>fti</td><td>178</td></tr>
+<tr><td>video/vnd.fvt</td><td>fvt</td><td>179</td></tr>
+<tr><td>application/vnd.adobe.fxp</td><td>fxp</td><td>180</td></tr>
+<tr><td>application/vnd.fuzzysheet</td><td>fzs</td><td>181</td></tr>
+<tr><td>application/vnd.geoplan</td><td>g2w</td><td>182</td></tr>
+<tr><td>image/g3fax</td><td>g3</td><td>183</td></tr>
+<tr><td>application/vnd.geospace</td><td>g3w</td><td>184</td></tr>
+<tr><td>application/vnd.groove-account</td><td>gac</td><td>185</td></tr>
+<tr><td>model/vnd.gdl</td><td>gdl</td><td>186</td></tr>
+<tr><td>application/vnd.dynageo</td><td>geo</td><td>187</td></tr>
+<tr><td>application/vnd.geometry-explorer</td><td>gex</td><td>188</td></tr>
+<tr><td>application/vnd.geogebra.file</td><td>ggb</td><td>189</td></tr>
+<tr><td>application/vnd.geogebra.tool</td><td>ggt</td><td>190</td></tr>
+<tr><td>application/vnd.groove-help</td><td>ghf</td><td>191</td></tr>
+<tr><td>image/gif</td><td>gif</td><td>192</td></tr>
+<tr><td>application/vnd.groove-identity-message</td><td>gim</td><td>193</td></tr>
+<tr><td>application/vnd.gmx</td><td>gmx</td><td>194</td></tr>
+<tr><td>application/x-gnumeric</td><td>gnumeric</td><td>195</td></tr>
+<tr><td>application/vnd.flographit</td><td>gph</td><td>196</td></tr>
+<tr><td>application/vnd.grafeq</td><td>gqf</td><td>197</td></tr>
+<tr><td>application/srgs</td><td>gram</td><td>198</td></tr>
+<tr><td>application/vnd.groove-injector</td><td>grv</td><td>199</td></tr>
+<tr><td>application/srgs+xml</td><td>grxml</td><td>200</td></tr>
+<tr><td>application/x-font-ghostscript</td><td>gsf</td><td>201</td></tr>
+<tr><td>application/x-gtar</td><td>gtar</td><td>202</td></tr>
+<tr><td>application/vnd.groove-tool-message</td><td>gtm</td><td>203</td></tr>
+<tr><td>model/vnd.gtw</td><td>gtw</td><td>204</td></tr>
+<tr><td>text/vnd.graphviz</td><td>gv</td><td>205</td></tr>
+<tr><td>application/vnd.geonext</td><td>gxt</td><td>206</td></tr>
+<tr><td>video/h261</td><td>h261</td><td>207</td></tr>
+<tr><td>video/h263</td><td>h263</td><td>208</td></tr>
+<tr><td>video/h264</td><td>h264</td><td>209</td></tr>
+<tr><td>application/vnd.hal+xml</td><td>hal</td><td>210</td></tr>
+<tr><td>application/vnd.hbci</td><td>hbci</td><td>211</td></tr>
+<tr><td>application/x-hdf</td><td>hdf</td><td>212</td></tr>
+<tr><td>application/winhlp</td><td>hlp</td><td>213</td></tr>
+<tr><td>application/vnd.hp-hpgl</td><td>hpgl</td><td>214</td></tr>
+<tr><td>application/vnd.hp-hpid</td><td>hpid</td><td>215</td></tr>
+<tr><td>application/vnd.hp-hps</td><td>hps</td><td>216</td></tr>
+<tr><td>application/mac-binhex40</td><td>hqx</td><td>217</td></tr>
+<tr><td>application/vnd.kenameaapp</td><td>htke</td><td>218</td></tr>
+<tr><td>text/html</td><td>html</td><td>219</td></tr>
+<tr><td>application/vnd.yamaha.hv-dic</td><td>hvd</td><td>220</td></tr>
+<tr><td>application/vnd.yamaha.hv-voice</td><td>hvp</td><td>221</td></tr>
+<tr><td>application/vnd.yamaha.hv-script</td><td>hvs</td><td>222</td></tr>
+<tr><td>application/vnd.intergeo</td><td>i2g</td><td>223</td></tr>
+<tr><td>application/vnd.iccprofile</td><td>icc</td><td>224</td></tr>
+<tr><td>x-conference/x-cooltalk</td><td>ice</td><td>225</td></tr>
+<tr><td>image/x-icon</td><td>ico</td><td>226</td></tr>
+<tr><td>text/calendar</td><td>ics</td><td>227</td></tr>
+<tr><td>image/ief</td><td>ief</td><td>228</td></tr>
+<tr><td>application/vnd.shana.informed.formdata</td><td>ifm</td><td>229</td></tr>
+<tr><td>application/vnd.igloader</td><td>igl</td><td>230</td></tr>
+<tr><td>application/vnd.insors.igm</td><td>igm</td><td>231</td></tr>
+<tr><td>model/iges</td><td>igs</td><td>232</td></tr>
+<tr><td>application/vnd.micrografx.igx</td><td>igx</td><td>233</td></tr>
+<tr><td>application/vnd.shana.informed.interchange</td><td>iif</td><td>234</td></tr>
+<tr><td>application/vnd.accpac.simply.imp</td><td>imp</td><td>235</td></tr>
+<tr><td>application/vnd.ms-ims</td><td>ims</td><td>236</td></tr>
+<tr><td>application/ipfix</td><td>ipfix</td><td>237</td></tr>
+<tr><td>application/vnd.shana.informed.package</td><td>ipk</td><td>238</td></tr>
+<tr><td>application/vnd.ibm.rights-management</td><td>irm</td><td>239</td></tr>
+<tr><td>application/vnd.irepository.package+xml</td><td>irp</td><td>240</td></tr>
+<tr><td>application/vnd.shana.informed.formtemplate</td><td>itp</td><td>241</td></tr>
+<tr><td>application/vnd.immervision-ivp</td><td>ivp</td><td>242</td></tr>
+<tr><td>application/vnd.immervision-ivu</td><td>ivu</td><td>243</td></tr>
+<tr><td>text/vnd.sun.j2me.app-descriptor</td><td>jad</td><td>244</td></tr>
+<tr><td>application/vnd.jam</td><td>jam</td><td>245</td></tr>
+<tr><td>application/java-archive</td><td>jar</td><td>246</td></tr>
+<tr><td>text/x-java-source</td><td>java</td><td>247</td></tr>
+<tr><td>application/vnd.jisp</td><td>jisp</td><td>248</td></tr>
+<tr><td>application/vnd.hp-jlyt</td><td>jlt</td><td>249</td></tr>
+<tr><td>application/x-java-jnlp-file</td><td>jnlp</td><td>250</td></tr>
+<tr><td>application/vnd.joost.joda-archive</td><td>joda</td><td>251</td></tr>
+<tr><td>image/jpeg</td><td>jpeg</td><td>252</td></tr>
+<tr><td>video/jpeg</td><td>jpgv</td><td>253</td></tr>
+<tr><td>video/jpm</td><td>jpm</td><td>254</td></tr>
+<tr><td>application/javascript</td><td>js</td><td>255</td></tr>
+<tr><td>application/json</td><td>json</td><td>256</td></tr>
+<tr><td>application/vnd.kde.karbon</td><td>karbon</td><td>257</td></tr>
+<tr><td>application/vnd.kde.kformula</td><td>kfo</td><td>258</td></tr>
+<tr><td>application/vnd.kidspiration</td><td>kia</td><td>259</td></tr>
+<tr><td>application/vnd.google-earth.kml+xml</td><td>kml</td><td>260</td></tr>
+<tr><td>application/vnd.google-earth.kmz</td><td>kmz</td><td>261</td></tr>
+<tr><td>application/vnd.kinar</td><td>kne</td><td>262</td></tr>
+<tr><td>application/vnd.kde.kontour</td><td>kon</td><td>263</td></tr>
+<tr><td>application/vnd.kde.kpresenter</td><td>kpr</td><td>264</td></tr>
+<tr><td>application/vnd.kde.kspread</td><td>ksp</td><td>265</td></tr>
+<tr><td>image/ktx</td><td>ktx</td><td>266</td></tr>
+<tr><td>application/vnd.kahootz</td><td>ktz</td><td>267</td></tr>
+<tr><td>application/vnd.kde.kword</td><td>kwd</td><td>268</td></tr>
+<tr><td>application/vnd.las.las+xml</td><td>lasxml</td><td>269</td></tr>
+<tr><td>application/x-latex</td><td>latex</td><td>270</td></tr>
+<tr><td>application/vnd.llamagraphics.life-balance.desktop</td><td>lbd</td><td>271</td></tr>
+<tr><td>application/vnd.llamagraphics.life-balance.exchange+xml</td><td>lbe</td><td>272</td></tr>
+<tr><td>application/vnd.hhe.lesson-player</td><td>les</td><td>273</td></tr>
+<tr><td>application/vnd.route66.link66+xml</td><td>link66</td><td>274</td></tr>
+<tr><td>application/vnd.ms-lrm</td><td>lrm</td><td>275</td></tr>
+<tr><td>application/vnd.frogans.ltf</td><td>ltf</td><td>276</td></tr>
+<tr><td>audio/vnd.lucent.voice</td><td>lvp</td><td>277</td></tr>
+<tr><td>application/vnd.lotus-wordpro</td><td>lwp</td><td>278</td></tr>
+<tr><td>application/mp21</td><td>m21</td><td>279</td></tr>
+<tr><td>audio/x-mpegurl</td><td>m3u</td><td>280</td></tr>
+<tr><td>application/vnd.apple.mpegurl</td><td>m3u8</td><td>281</td></tr>
+<tr><td>video/x-m4v</td><td>m4v</td><td>282</td></tr>
+<tr><td>application/mathematica</td><td>ma</td><td>283</td></tr>
+<tr><td>application/mads+xml</td><td>mads</td><td>284</td></tr>
+<tr><td>application/vnd.ecowin.chart</td><td>mag</td><td>285</td></tr>
+<tr><td>application/mathml+xml</td><td>mathml</td><td>286</td></tr>
+<tr><td>application/vnd.mobius.mbk</td><td>mbk</td><td>287</td></tr>
+<tr><td>application/mbox</td><td>mbox</td><td>288</td></tr>
+<tr><td>application/vnd.medcalcdata</td><td>mc1</td><td>289</td></tr>
+<tr><td>application/vnd.mcd</td><td>mcd</td><td>290</td></tr>
+<tr><td>text/vnd.curl.mcurl</td><td>mcurl</td><td>291</td></tr>
+<tr><td>application/x-msaccess</td><td>mdb</td><td>292</td></tr>
+<tr><td>image/vnd.ms-modi</td><td>mdi</td><td>293</td></tr>
+<tr><td>application/metalink4+xml</td><td>meta4</td><td>294</td></tr>
+<tr><td>application/mets+xml</td><td>mets</td><td>295</td></tr>
+<tr><td>application/vnd.mfmp</td><td>mfm</td><td>296</td></tr>
+<tr><td>application/vnd.osgeo.mapguide.package</td><td>mgp</td><td>297</td></tr>
+<tr><td>application/vnd.proteus.magazine</td><td>mgz</td><td>298</td></tr>
+<tr><td>audio/midi</td><td>mid</td><td>299</td></tr>
+<tr><td>application/vnd.mif</td><td>mif</td><td>300</td></tr>
+<tr><td>video/mj2</td><td>mj2</td><td>301</td></tr>
+<tr><td>application/vnd.dolby.mlp</td><td>mlp</td><td>302</td></tr>
+<tr><td>application/vnd.chipnuts.karaoke-mmd</td><td>mmd</td><td>303</td></tr>
+<tr><td>application/vnd.smaf</td><td>mmf</td><td>304</td></tr>
+<tr><td>image/vnd.fujixerox.edmics-mmr</td><td>mmr</td><td>305</td></tr>
+<tr><td>application/x-msmoney</td><td>mny</td><td>306</td></tr>
+<tr><td>application/mods+xml</td><td>mods</td><td>307</td></tr>
+<tr><td>video/x-sgi-movie</td><td>movie</td><td>308</td></tr>
+<tr><td>application/mp4</td><td>mp4</td><td>309</td></tr>
+<tr><td>application/vnd.mophun.certificate</td><td>mpc</td><td>310</td></tr>
+<tr><td>video/mpeg</td><td>mpeg</td><td>311</td></tr>
+<tr><td>audio/mpeg</td><td>mpga</td><td>312</td></tr>
+<tr><td>application/vnd.apple.installer+xml</td><td>mpkg</td><td>313</td></tr>
+<tr><td>application/vnd.blueice.multipass</td><td>mpm</td><td>314</td></tr>
+<tr><td>application/vnd.mophun.application</td><td>mpn</td><td>315</td></tr>
+<tr><td>application/vnd.ms-project</td><td>mpp</td><td>316</td></tr>
+<tr><td>application/vnd.ibm.minipay</td><td>mpy</td><td>317</td></tr>
+<tr><td>application/vnd.mobius.mqy</td><td>mqy</td><td>318</td></tr>
+<tr><td>application/marc</td><td>mrc</td><td>319</td></tr>
+<tr><td>application/marcxml+xml</td><td>mrcx</td><td>320</td></tr>
+<tr><td>application/mediaservercontrol+xml</td><td>mscml</td><td>321</td></tr>
+<tr><td>application/vnd.mseq</td><td>mseq</td><td>322</td></tr>
+<tr><td>application/vnd.epson.msf</td><td>msf</td><td>323</td></tr>
+<tr><td>model/mesh</td><td>msh</td><td>324</td></tr>
+<tr><td>application/vnd.mobius.msl</td><td>msl</td><td>325</td></tr>
+<tr><td>application/vnd.muvee.style</td><td>msty</td><td>326</td></tr>
+<tr><td>model/vnd.mts</td><td>mts</td><td>327</td></tr>
+<tr><td>application/vnd.musician</td><td>mus</td><td>328</td></tr>
+<tr><td>application/vnd.recordare.musicxml+xml</td><td>musicxml</td><td>329</td></tr>
+<tr><td>application/x-msmediaview</td><td>mvb</td><td>330</td></tr>
+<tr><td>application/vnd.mfer</td><td>mwf</td><td>331</td></tr>
+<tr><td>application/mxf</td><td>mxf</td><td>332</td></tr>
+<tr><td>application/vnd.recordare.musicxml</td><td>mxl</td><td>333</td></tr>
+<tr><td>application/xv+xml</td><td>mxml</td><td>334</td></tr>
+<tr><td>application/vnd.triscape.mxs</td><td>mxs</td><td>335</td></tr>
+<tr><td>video/vnd.mpegurl</td><td>mxu</td><td>336</td></tr>
+<tr><td>application/vnd.nokia.n-gage.symbian.install</td><td>n-gage</td><td>337</td></tr>
+<tr><td>text/n3</td><td>n3</td><td>338</td></tr>
+<tr><td>application/vnd.wolfram.player</td><td>nbp</td><td>339</td></tr>
+<tr><td>application/x-netcdf</td><td>nc</td><td>340</td></tr>
+<tr><td>application/x-dtbncx+xml</td><td>ncx</td><td>341</td></tr>
+<tr><td>application/vnd.nokia.n-gage.data</td><td>ngdat</td><td>342</td></tr>
+<tr><td>application/vnd.neurolanguage.nlu</td><td>nlu</td><td>343</td></tr>
+<tr><td>application/vnd.enliven</td><td>nml</td><td>344</td></tr>
+<tr><td>application/vnd.noblenet-directory</td><td>nnd</td><td>345</td></tr>
+<tr><td>application/vnd.noblenet-sealer</td><td>nns</td><td>346</td></tr>
+<tr><td>application/vnd.noblenet-web</td><td>nnw</td><td>347</td></tr>
+<tr><td>image/vnd.net-fpx</td><td>npx</td><td>348</td></tr>
+<tr><td>application/vnd.lotus-notes</td><td>nsf</td><td>349</td></tr>
+<tr><td>application/vnd.fujitsu.oasys2</td><td>oa2</td><td>350</td></tr>
+<tr><td>application/vnd.fujitsu.oasys3</td><td>oa3</td><td>351</td></tr>
+<tr><td>application/vnd.fujitsu.oasys</td><td>oas</td><td>352</td></tr>
+<tr><td>application/x-msbinder</td><td>obd</td><td>353</td></tr>
+<tr><td>application/oda</td><td>oda</td><td>354</td></tr>
+<tr><td>application/vnd.oasis.opendocument.database</td><td>odb</td><td>355</td></tr>
+<tr><td>application/vnd.oasis.opendocument.chart</td><td>odc</td><td>356</td></tr>
+<tr><td>application/vnd.oasis.opendocument.formula</td><td>odf</td><td>357</td></tr>
+<tr><td>application/vnd.oasis.opendocument.formula-template</td><td>odft</td><td>358</td></tr>
+<tr><td>application/vnd.oasis.opendocument.graphics</td><td>odg</td><td>359</td></tr>
+<tr><td>application/vnd.oasis.opendocument.image</td><td>odi</td><td>360</td></tr>
+<tr><td>application/vnd.oasis.opendocument.text-master</td><td>odm</td><td>361</td></tr>
+<tr><td>application/vnd.oasis.opendocument.presentation</td><td>odp</td><td>362</td></tr>
+<tr><td>application/vnd.oasis.opendocument.spreadsheet</td><td>ods</td><td>363</td></tr>
+<tr><td>application/vnd.oasis.opendocument.text</td><td>odt</td><td>364</td></tr>
+<tr><td>audio/ogg</td><td>oga</td><td>365</td></tr>
+<tr><td>video/ogg</td><td>ogv</td><td>366</td></tr>
+<tr><td>application/ogg</td><td>ogx</td><td>367</td></tr>
+<tr><td>application/onenote</td><td>onetoc</td><td>368</td></tr>
+<tr><td>application/oebps-package+xml</td><td>opf</td><td>369</td></tr>
+<tr><td>application/vnd.lotus-organizer</td><td>org</td><td>370</td></tr>
+<tr><td>application/vnd.yamaha.openscoreformat</td><td>osf</td><td>371</td></tr>
+<tr><td>application/vnd.yamaha.openscoreformat.osfpvg+xml</td><td>osfpvg</td><td>372</td></tr>
+<tr><td>application/vnd.oasis.opendocument.chart-template</td><td>otc</td><td>373</td></tr>
+<tr><td>application/x-font-otf</td><td>otf</td><td>374</td></tr>
+<tr><td>application/vnd.oasis.opendocument.graphics-template</td><td>otg</td><td>375</td></tr>
+<tr><td>application/vnd.oasis.opendocument.text-web</td><td>oth</td><td>376</td></tr>
+<tr><td>application/vnd.oasis.opendocument.image-template</td><td>oti</td><td>377</td></tr>
+<tr><td>application/vnd.oasis.opendocument.presentation-template</td><td>otp</td><td>378</td></tr>
+<tr><td>application/vnd.oasis.opendocument.spreadsheet-template</td><td>ots</td><td>379</td></tr>
+<tr><td>application/vnd.oasis.opendocument.text-template</td><td>ott</td><td>380</td></tr>
+<tr><td>application/vnd.openofficeorg.extension</td><td>oxt</td><td>381</td></tr>
+<tr><td>text/x-pascal</td><td>p</td><td>382</td></tr>
+<tr><td>application/pkcs10</td><td>p10</td><td>383</td></tr>
+<tr><td>application/x-pkcs12</td><td>p12</td><td>384</td></tr>
+<tr><td>application/x-pkcs7-certificates</td><td>p7b</td><td>385</td></tr>
+<tr><td>application/pkcs7-mime</td><td>p7m</td><td>386</td></tr>
+<tr><td>application/x-pkcs7-certreqresp</td><td>p7r</td><td>387</td></tr>
+<tr><td>application/pkcs7-signature</td><td>p7s</td><td>388</td></tr>
+<tr><td>application/pkcs8</td><td>p8</td><td>389</td></tr>
+<tr><td>text/plain-bas</td><td>par</td><td>390</td></tr>
+<tr><td>application/vnd.pawaafile</td><td>paw</td><td>391</td></tr>
+<tr><td>application/vnd.powerbuilder6</td><td>pbd</td><td>392</td></tr>
+<tr><td>image/x-portable-bitmap</td><td>pbm</td><td>393</td></tr>
+<tr><td>application/x-font-pcf</td><td>pcf</td><td>394</td></tr>
+<tr><td>application/vnd.hp-pcl</td><td>pcl</td><td>395</td></tr>
+<tr><td>application/vnd.hp-pclxl</td><td>pclxl</td><td>396</td></tr>
+<tr><td>application/vnd.curl.pcurl</td><td>pcurl</td><td>397</td></tr>
+<tr><td>image/x-pcx</td><td>pcx</td><td>398</td></tr>
+<tr><td>application/vnd.palm</td><td>pdb</td><td>399</td></tr>
+<tr><td>application/pdf</td><td>pdf</td><td>400</td></tr>
+<tr><td>application/x-font-type1</td><td>pfa</td><td>401</td></tr>
+<tr><td>application/font-tdpfr</td><td>pfr</td><td>402</td></tr>
+<tr><td>image/x-portable-graymap</td><td>pgm</td><td>403</td></tr>
+<tr><td>application/x-chess-pgn</td><td>pgn</td><td>404</td></tr>
+<tr><td>application/pgp-encrypted</td><td>pgp</td><td>405</td></tr>
+<tr><td>image/x-pict</td><td>pic</td><td>406</td></tr>
+<tr><td>image/pjpeg</td><td>pjpeg</td><td>407</td></tr>
+<tr><td>application/pkixcmp</td><td>pki</td><td>408</td></tr>
+<tr><td>application/pkix-pkipath</td><td>pkipath</td><td>409</td></tr>
+<tr><td>application/vnd.3gpp.pic-bw-large</td><td>plb</td><td>410</td></tr>
+<tr><td>application/vnd.mobius.plc</td><td>plc</td><td>411</td></tr>
+<tr><td>application/vnd.pocketlearn</td><td>plf</td><td>412</td></tr>
+<tr><td>application/pls+xml</td><td>pls</td><td>413</td></tr>
+<tr><td>application/vnd.ctc-posml</td><td>pml</td><td>414</td></tr>
+<tr><td>image/png</td><td>png</td><td>415</td></tr>
+<tr><td>image/x-portable-anymap</td><td>pnm</td><td>416</td></tr>
+<tr><td>application/vnd.macports.portpkg</td><td>portpkg</td><td>417</td></tr>
+<tr><td>application/vnd.ms-powerpoint.template.macroenabled.12</td><td>potm</td><td>418</td></tr>
+<tr><td>application/vnd.openxmlformats-officedocument.presentationml.template</td><td>potx</td><td>419</td></tr>
+<tr><td>application/vnd.ms-powerpoint.addin.macroenabled.12</td><td>ppam</td><td>420</td></tr>
+<tr><td>application/vnd.cups-ppd</td><td>ppd</td><td>421</td></tr>
+<tr><td>image/x-portable-pixmap</td><td>ppm</td><td>422</td></tr>
+<tr><td>application/vnd.ms-powerpoint.slideshow.macroenabled.12</td><td>ppsm</td><td>423</td></tr>
+<tr><td>application/vnd.openxmlformats-officedocument.presentationml.slideshow</td><td>ppsx</td><td>424</td></tr>
+<tr><td>application/vnd.ms-powerpoint</td><td>ppt</td><td>425</td></tr>
+<tr><td>application/vnd.ms-powerpoint.presentation.macroenabled.12</td><td>pptm</td><td>426</td></tr>
+<tr><td>application/vnd.openxmlformats-officedocument.presentationml.presentation</td><td>pptx</td><td>427</td></tr>
+<tr><td>application/x-mobipocket-ebook</td><td>prc</td><td>428</td></tr>
+<tr><td>application/vnd.lotus-freelance</td><td>pre</td><td>429</td></tr>
+<tr><td>application/pics-rules</td><td>prf</td><td>430</td></tr>
+<tr><td>application/vnd.3gpp.pic-bw-small</td><td>psb</td><td>431</td></tr>
+<tr><td>image/vnd.adobe.photoshop</td><td>psd</td><td>432</td></tr>
+<tr><td>application/x-font-linux-psf</td><td>psf</td><td>433</td></tr>
+<tr><td>application/pskc+xml</td><td>pskcxml</td><td>434</td></tr>
+<tr><td>application/vnd.pvi.ptid1</td><td>ptid</td><td>435</td></tr>
+<tr><td>application/x-mspublisher</td><td>pub</td><td>436</td></tr>
+<tr><td>application/vnd.3gpp.pic-bw-var</td><td>pvb</td><td>437</td></tr>
+<tr><td>application/vnd.3m.post-it-notes</td><td>pwn</td><td>438</td></tr>
+<tr><td>audio/vnd.ms-playready.media.pya</td><td>pya</td><td>439</td></tr>
+<tr><td>video/vnd.ms-playready.media.pyv</td><td>pyv</td><td>440</td></tr>
+<tr><td>application/vnd.epson.quickanime</td><td>qam</td><td>441</td></tr>
+<tr><td>application/vnd.intu.qbo</td><td>qbo</td><td>442</td></tr>
+<tr><td>application/vnd.intu.qfx</td><td>qfx</td><td>443</td></tr>
+<tr><td>application/vnd.publishare-delta-tree</td><td>qps</td><td>444</td></tr>
+<tr><td>video/quicktime</td><td>qt</td><td>445</td></tr>
+<tr><td>application/vnd.quark.quarkxpress</td><td>qxd</td><td>446</td></tr>
+<tr><td>audio/x-pn-realaudio</td><td>ram</td><td>447</td></tr>
+<tr><td>application/x-rar-compressed</td><td>rar</td><td>448</td></tr>
+<tr><td>image/x-cmu-raster</td><td>ras</td><td>449</td></tr>
+<tr><td>application/vnd.ipunplugged.rcprofile</td><td>rcprofile</td><td>450</td></tr>
+<tr><td>application/rdf+xml</td><td>rdf</td><td>451</td></tr>
+<tr><td>application/vnd.data-vision.rdz</td><td>rdz</td><td>452</td></tr>
+<tr><td>application/vnd.businessobjects</td><td>rep</td><td>453</td></tr>
+<tr><td>application/x-dtbresource+xml</td><td>res</td><td>454</td></tr>
+<tr><td>image/x-rgb</td><td>rgb</td><td>455</td></tr>
+<tr><td>application/reginfo+xml</td><td>rif</td><td>456</td></tr>
+<tr><td>audio/vnd.rip</td><td>rip</td><td>457</td></tr>
+<tr><td>application/resource-lists+xml</td><td>rl</td><td>458</td></tr>
+<tr><td>image/vnd.fujixerox.edmics-rlc</td><td>rlc</td><td>459</td></tr>
+<tr><td>application/resource-lists-diff+xml</td><td>rld</td><td>460</td></tr>
+<tr><td>application/vnd.rn-realmedia</td><td>rm</td><td>461</td></tr>
+<tr><td>audio/x-pn-realaudio-plugin</td><td>rmp</td><td>462</td></tr>
+<tr><td>application/vnd.jcp.javame.midlet-rms</td><td>rms</td><td>463</td></tr>
+<tr><td>application/relax-ng-compact-syntax</td><td>rnc</td><td>464</td></tr>
+<tr><td>application/vnd.cloanto.rp9</td><td>rp9</td><td>465</td></tr>
+<tr><td>application/vnd.nokia.radio-presets</td><td>rpss</td><td>466</td></tr>
+<tr><td>application/vnd.nokia.radio-preset</td><td>rpst</td><td>467</td></tr>
+<tr><td>application/sparql-query</td><td>rq</td><td>468</td></tr>
+<tr><td>application/rls-services+xml</td><td>rs</td><td>469</td></tr>
+<tr><td>application/rsd+xml</td><td>rsd</td><td>470</td></tr>
+<tr><td>application/rss+xml</td><td>rss</td><td>471</td></tr>
+<tr><td>application/rtf</td><td>rtf</td><td>472</td></tr>
+<tr><td>text/richtext</td><td>rtx</td><td>473</td></tr>
+<tr><td>text/x-asm</td><td>s</td><td>474</td></tr>
+<tr><td>application/vnd.yamaha.smaf-audio</td><td>saf</td><td>475</td></tr>
+<tr><td>application/sbml+xml</td><td>sbml</td><td>476</td></tr>
+<tr><td>application/vnd.ibm.secure-container</td><td>sc</td><td>477</td></tr>
+<tr><td>application/x-msschedule</td><td>scd</td><td>478</td></tr>
+<tr><td>application/vnd.lotus-screencam</td><td>scm</td><td>479</td></tr>
+<tr><td>application/scvp-cv-request</td><td>scq</td><td>480</td></tr>
+<tr><td>application/scvp-cv-response</td><td>scs</td><td>481</td></tr>
+<tr><td>text/vnd.curl.scurl</td><td>scurl</td><td>482</td></tr>
+<tr><td>application/vnd.stardivision.draw</td><td>sda</td><td>483</td></tr>
+<tr><td>application/vnd.stardivision.calc</td><td>sdc</td><td>484</td></tr>
+<tr><td>application/vnd.stardivision.impress</td><td>sdd</td><td>485</td></tr>
+<tr><td>application/vnd.solent.sdkm+xml</td><td>sdkm</td><td>486</td></tr>
+<tr><td>application/sdp</td><td>sdp</td><td>487</td></tr>
+<tr><td>application/vnd.stardivision.writer</td><td>sdw</td><td>488</td></tr>
+<tr><td>application/vnd.seemail</td><td>see</td><td>489</td></tr>
+<tr><td>application/vnd.fdsn.seed</td><td>seed</td><td>490</td></tr>
+<tr><td>application/vnd.sema</td><td>sema</td><td>491</td></tr>
+<tr><td>application/vnd.semd</td><td>semd</td><td>492</td></tr>
+<tr><td>application/vnd.semf</td><td>semf</td><td>493</td></tr>
+<tr><td>application/java-serialized-object</td><td>ser</td><td>494</td></tr>
+<tr><td>application/set-payment-initiation</td><td>setpay</td><td>495</td></tr>
+<tr><td>application/set-registration-initiation</td><td>setreg</td><td>496</td></tr>
+<tr><td>application/vnd.hydrostatix.sof-data</td><td>sfd-hdstx</td><td>497</td></tr>
+<tr><td>application/vnd.spotfire.sfs</td><td>sfs</td><td>498</td></tr>
+<tr><td>application/vnd.stardivision.writer-global</td><td>sgl</td><td>499</td></tr>
+<tr><td>text/sgml</td><td>sgml</td><td>500</td></tr>
+<tr><td>application/x-sh</td><td>sh</td><td>501</td></tr>
+<tr><td>application/x-shar</td><td>shar</td><td>502</td></tr>
+<tr><td>application/shf+xml</td><td>shf</td><td>503</td></tr>
+<tr><td>application/vnd.symbian.install</td><td>sis</td><td>504</td></tr>
+<tr><td>application/x-stuffit</td><td>sit</td><td>505</td></tr>
+<tr><td>application/x-stuffitx</td><td>sitx</td><td>506</td></tr>
+<tr><td>application/vnd.koan</td><td>skp</td><td>507</td></tr>
+<tr><td>application/vnd.ms-powerpoint.slide.macroenabled.12</td><td>sldm</td><td>508</td></tr>
+<tr><td>application/vnd.openxmlformats-officedocument.presentationml.slide</td><td>sldx</td><td>509</td></tr>
+<tr><td>application/vnd.epson.salt</td><td>slt</td><td>510</td></tr>
+<tr><td>application/vnd.stepmania.stepchart</td><td>sm</td><td>511</td></tr>
+<tr><td>application/vnd.stardivision.math</td><td>smf</td><td>512</td></tr>
+<tr><td>application/smil+xml</td><td>smi</td><td>513</td></tr>
+<tr><td>application/x-font-snf</td><td>snf</td><td>514</td></tr>
+<tr><td>application/vnd.yamaha.smaf-phrase</td><td>spf</td><td>515</td></tr>
+<tr><td>application/x-futuresplash</td><td>spl</td><td>516</td></tr>
+<tr><td>text/vnd.in3d.spot</td><td>spot</td><td>517</td></tr>
+<tr><td>application/scvp-vp-response</td><td>spp</td><td>518</td></tr>
+<tr><td>application/scvp-vp-request</td><td>spq</td><td>519</td></tr>
+<tr><td>application/x-wais-source</td><td>src</td><td>520</td></tr>
+<tr><td>application/sru+xml</td><td>sru</td><td>521</td></tr>
+<tr><td>application/sparql-results+xml</td><td>srx</td><td>522</td></tr>
+<tr><td>application/vnd.kodak-descriptor</td><td>sse</td><td>523</td></tr>
+<tr><td>application/vnd.epson.ssf</td><td>ssf</td><td>524</td></tr>
+<tr><td>application/ssml+xml</td><td>ssml</td><td>525</td></tr>
+<tr><td>application/vnd.sailingtracker.track</td><td>st</td><td>526</td></tr>
+<tr><td>application/vnd.sun.xml.calc.template</td><td>stc</td><td>527</td></tr>
+<tr><td>application/vnd.sun.xml.draw.template</td><td>std</td><td>528</td></tr>
+<tr><td>application/vnd.wt.stf</td><td>stf</td><td>529</td></tr>
+<tr><td>application/vnd.sun.xml.impress.template</td><td>sti</td><td>530</td></tr>
+<tr><td>application/hyperstudio</td><td>stk</td><td>531</td></tr>
+<tr><td>application/vnd.ms-pki.stl</td><td>stl</td><td>532</td></tr>
+<tr><td>application/vnd.pg.format</td><td>str</td><td>533</td></tr>
+<tr><td>application/vnd.sun.xml.writer.template</td><td>stw</td><td>534</td></tr>
+<tr><td>image/vnd.dvb.subtitle</td><td>sub</td><td>535</td></tr>
+<tr><td>application/vnd.sus-calendar</td><td>sus</td><td>536</td></tr>
+<tr><td>application/x-sv4cpio</td><td>sv4cpio</td><td>537</td></tr>
+<tr><td>application/x-sv4crc</td><td>sv4crc</td><td>538</td></tr>
+<tr><td>application/vnd.dvb.service</td><td>svc</td><td>539</td></tr>
+<tr><td>application/vnd.svd</td><td>svd</td><td>540</td></tr>
+<tr><td>image/svg+xml</td><td>svg</td><td>541</td></tr>
+<tr><td>application/x-shockwave-flash</td><td>swf</td><td>542</td></tr>
+<tr><td>application/vnd.aristanetworks.swi</td><td>swi</td><td>543</td></tr>
+<tr><td>application/vnd.sun.xml.calc</td><td>sxc</td><td>544</td></tr>
+<tr><td>application/vnd.sun.xml.draw</td><td>sxd</td><td>545</td></tr>
+<tr><td>application/vnd.sun.xml.writer.global</td><td>sxg</td><td>546</td></tr>
+<tr><td>application/vnd.sun.xml.impress</td><td>sxi</td><td>547</td></tr>
+<tr><td>application/vnd.sun.xml.math</td><td>sxm</td><td>548</td></tr>
+<tr><td>application/vnd.sun.xml.writer</td><td>sxw</td><td>549</td></tr>
+<tr><td>text/troff</td><td>t</td><td>550</td></tr>
+<tr><td>application/vnd.tao.intent-module-archive</td><td>tao</td><td>551</td></tr>
+<tr><td>application/x-tar</td><td>tar</td><td>552</td></tr>
+<tr><td>application/vnd.3gpp2.tcap</td><td>tcap</td><td>553</td></tr>
+<tr><td>application/x-tcl</td><td>tcl</td><td>554</td></tr>
+<tr><td>application/vnd.smart.teacher</td><td>teacher</td><td>555</td></tr>
+<tr><td>application/tei+xml</td><td>tei</td><td>556</td></tr>
+<tr><td>application/x-tex</td><td>tex</td><td>557</td></tr>
+<tr><td>application/x-texinfo</td><td>texinfo</td><td>558</td></tr>
+<tr><td>application/thraud+xml</td><td>tfi</td><td>559</td></tr>
+<tr><td>application/x-tex-tfm</td><td>tfm</td><td>560</td></tr>
+<tr><td>application/vnd.ms-officetheme</td><td>thmx</td><td>561</td></tr>
+<tr><td>image/tiff</td><td>tiff</td><td>562</td></tr>
+<tr><td>application/vnd.tmobile-livetv</td><td>tmo</td><td>563</td></tr>
+<tr><td>application/x-bittorrent</td><td>torrent</td><td>564</td></tr>
+<tr><td>application/vnd.groove-tool-template</td><td>tpl</td><td>565</td></tr>
+<tr><td>application/vnd.trid.tpt</td><td>tpt</td><td>566</td></tr>
+<tr><td>application/vnd.trueapp</td><td>tra</td><td>567</td></tr>
+<tr><td>application/x-msterminal</td><td>trm</td><td>568</td></tr>
+<tr><td>application/timestamped-data</td><td>tsd</td><td>569</td></tr>
+<tr><td>text/tab-separated-values</td><td>tsv</td><td>570</td></tr>
+<tr><td>application/x-font-ttf</td><td>ttf</td><td>571</td></tr>
+<tr><td>text/turtle</td><td>ttl</td><td>572</td></tr>
+<tr><td>application/vnd.simtech-mindmapper</td><td>twd</td><td>573</td></tr>
+<tr><td>application/vnd.genomatix.tuxedo</td><td>txd</td><td>574</td></tr>
+<tr><td>application/vnd.mobius.txf</td><td>txf</td><td>575</td></tr>
+<tr><td>text/plain</td><td>txt</td><td>576</td></tr>
+<tr><td>application/vnd.ufdl</td><td>ufd</td><td>577</td></tr>
+<tr><td>application/vnd.umajin</td><td>umj</td><td>578</td></tr>
+<tr><td>application/vnd.unity</td><td>unityweb</td><td>579</td></tr>
+<tr><td>application/vnd.uoml+xml</td><td>uoml</td><td>580</td></tr>
+<tr><td>text/uri-list</td><td>uri</td><td>581</td></tr>
+<tr><td>application/x-ustar</td><td>ustar</td><td>582</td></tr>
+<tr><td>application/vnd.uiq.theme</td><td>utz</td><td>583</td></tr>
+<tr><td>text/x-uuencode</td><td>uu</td><td>584</td></tr>
+<tr><td>audio/vnd.dece.audio</td><td>uva</td><td>585</td></tr>
+<tr><td>video/vnd.dece.hd</td><td>uvh</td><td>586</td></tr>
+<tr><td>image/vnd.dece.graphic</td><td>uvi</td><td>587</td></tr>
+<tr><td>video/vnd.dece.mobile</td><td>uvm</td><td>588</td></tr>
+<tr><td>video/vnd.dece.pd</td><td>uvp</td><td>589</td></tr>
+<tr><td>video/vnd.dece.sd</td><td>uvs</td><td>590</td></tr>
+<tr><td>video/vnd.uvvu.mp4</td><td>uvu</td><td>591</td></tr>
+<tr><td>video/vnd.dece.video</td><td>uvv</td><td>592</td></tr>
+<tr><td>application/x-cdlink</td><td>vcd</td><td>593</td></tr>
+<tr><td>text/x-vcard</td><td>vcf</td><td>594</td></tr>
+<tr><td>application/vnd.groove-vcard</td><td>vcg</td><td>595</td></tr>
+<tr><td>text/x-vcalendar</td><td>vcs</td><td>596</td></tr>
+<tr><td>application/vnd.vcx</td><td>vcx</td><td>597</td></tr>
+<tr><td>application/vnd.visionary</td><td>vis</td><td>598</td></tr>
+<tr><td>video/vnd.vivo</td><td>viv</td><td>599</td></tr>
+<tr><td>application/vnd.visio</td><td>vsd</td><td>600</td></tr>
+<tr><td>application/vnd.visio2013</td><td>vsdx</td><td>601</td></tr>
+<tr><td>application/vnd.vsf</td><td>vsf</td><td>602</td></tr>
+<tr><td>model/vnd.vtu</td><td>vtu</td><td>603</td></tr>
+<tr><td>application/voicexml+xml</td><td>vxml</td><td>604</td></tr>
+<tr><td>application/x-doom</td><td>wad</td><td>605</td></tr>
+<tr><td>audio/x-wav</td><td>wav</td><td>606</td></tr>
+<tr><td>audio/x-ms-wax</td><td>wax</td><td>607</td></tr>
+<tr><td>image/vnd.wap.wbmp</td><td>wbmp</td><td>608</td></tr>
+<tr><td>application/vnd.criticaltools.wbs+xml</td><td>wbs</td><td>609</td></tr>
+<tr><td>application/vnd.wap.wbxml</td><td>wbxml</td><td>610</td></tr>
+<tr><td>audio/webm</td><td>weba</td><td>611</td></tr>
+<tr><td>video/webm</td><td>webm</td><td>612</td></tr>
+<tr><td>image/webp</td><td>webp</td><td>613</td></tr>
+<tr><td>application/vnd.pmi.widget</td><td>wg</td><td>614</td></tr>
+<tr><td>application/widget</td><td>wgt</td><td>615</td></tr>
+<tr><td>video/x-ms-wm</td><td>wm</td><td>616</td></tr>
+<tr><td>audio/x-ms-wma</td><td>wma</td><td>617</td></tr>
+<tr><td>application/x-ms-wmd</td><td>wmd</td><td>618</td></tr>
+<tr><td>application/x-msmetafile</td><td>wmf</td><td>619</td></tr>
+<tr><td>text/vnd.wap.wml</td><td>wml</td><td>620</td></tr>
+<tr><td>application/vnd.wap.wmlc</td><td>wmlc</td><td>621</td></tr>
+<tr><td>text/vnd.wap.wmlscript</td><td>wmls</td><td>622</td></tr>
+<tr><td>application/vnd.wap.wmlscriptc</td><td>wmlsc</td><td>623</td></tr>
+<tr><td>video/x-ms-wmv</td><td>wmv</td><td>624</td></tr>
+<tr><td>video/x-ms-wmx</td><td>wmx</td><td>625</td></tr>
+<tr><td>application/x-ms-wmz</td><td>wmz</td><td>626</td></tr>
+<tr><td>application/x-font-woff</td><td>woff</td><td>627</td></tr>
+<tr><td>application/vnd.wordperfect</td><td>wpd</td><td>628</td></tr>
+<tr><td>application/vnd.ms-wpl</td><td>wpl</td><td>629</td></tr>
+<tr><td>application/vnd.ms-works</td><td>wps</td><td>630</td></tr>
+<tr><td>application/vnd.wqd</td><td>wqd</td><td>631</td></tr>
+<tr><td>application/x-mswrite</td><td>wri</td><td>632</td></tr>
+<tr><td>model/vrml</td><td>wrl</td><td>633</td></tr>
+<tr><td>application/wsdl+xml</td><td>wsdl</td><td>634</td></tr>
+<tr><td>application/wspolicy+xml</td><td>wspolicy</td><td>635</td></tr>
+<tr><td>application/vnd.webturbo</td><td>wtb</td><td>636</td></tr>
+<tr><td>video/x-ms-wvx</td><td>wvx</td><td>637</td></tr>
+<tr><td>application/vnd.hzn-3d-crossword</td><td>x3d</td><td>638</td></tr>
+<tr><td>application/x-silverlight-app</td><td>xap</td><td>639</td></tr>
+<tr><td>application/vnd.xara</td><td>xar</td><td>640</td></tr>
+<tr><td>application/x-ms-xbap</td><td>xbap</td><td>641</td></tr>
+<tr><td>application/vnd.fujixerox.docuworks.binder</td><td>xbd</td><td>642</td></tr>
+<tr><td>image/x-xbitmap</td><td>xbm</td><td>643</td></tr>
+<tr><td>application/xcap-diff+xml</td><td>xdf</td><td>644</td></tr>
+<tr><td>application/vnd.syncml.dm+xml</td><td>xdm</td><td>645</td></tr>
+<tr><td>application/vnd.adobe.xdp+xml</td><td>xdp</td><td>646</td></tr>
+<tr><td>application/dssc+xml</td><td>xdssc</td><td>647</td></tr>
+<tr><td>application/vnd.fujixerox.docuworks</td><td>xdw</td><td>648</td></tr>
+<tr><td>application/xenc+xml</td><td>xenc</td><td>649</td></tr>
+<tr><td>application/patch-ops-err+xml</td><td>xer</td><td>650</td></tr>
+<tr><td>application/vnd.adobe.xfdf</td><td>xfdf</td><td>651</td></tr>
+<tr><td>application/vnd.xfdl</td><td>xfdl</td><td>652</td></tr>
+<tr><td>application/xhtml+xml</td><td>xhtml</td><td>653</td></tr>
+<tr><td>image/vnd.xiff</td><td>xif</td><td>654</td></tr>
+<tr><td>application/vnd.ms-excel.addin.macroenabled.12</td><td>xlam</td><td>655</td></tr>
+<tr><td>application/vnd.ms-excel</td><td>xls</td><td>656</td></tr>
+<tr><td>application/vnd.ms-excel.sheet.binary.macroenabled.12</td><td>xlsb</td><td>657</td></tr>
+<tr><td>application/vnd.ms-excel.sheet.macroenabled.12</td><td>xlsm</td><td>658</td></tr>
+<tr><td>application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</td><td>xlsx</td><td>659</td></tr>
+<tr><td>application/vnd.ms-excel.template.macroenabled.12</td><td>xltm</td><td>660</td></tr>
+<tr><td>application/vnd.openxmlformats-officedocument.spreadsheetml.template</td><td>xltx</td><td>661</td></tr>
+<tr><td>application/xml</td><td>xml</td><td>662</td></tr>
+<tr><td>application/vnd.olpc-sugar</td><td>xo</td><td>663</td></tr>
+<tr><td>application/xop+xml</td><td>xop</td><td>664</td></tr>
+<tr><td>application/x-xpinstall</td><td>xpi</td><td>665</td></tr>
+<tr><td>image/x-xpixmap</td><td>xpm</td><td>666</td></tr>
+<tr><td>application/vnd.is-xpr</td><td>xpr</td><td>667</td></tr>
+<tr><td>application/vnd.ms-xpsdocument</td><td>xps</td><td>668</td></tr>
+<tr><td>application/vnd.intercon.formnet</td><td>xpw</td><td>669</td></tr>
+<tr><td>application/xslt+xml</td><td>xslt</td><td>670</td></tr>
+<tr><td>application/vnd.syncml+xml</td><td>xsm</td><td>671</td></tr>
+<tr><td>application/xspf+xml</td><td>xspf</td><td>672</td></tr>
+<tr><td>application/vnd.mozilla.xul+xml</td><td>xul</td><td>673</td></tr>
+<tr><td>image/x-xwindowdump</td><td>xwd</td><td>674</td></tr>
+<tr><td>chemical/x-xyz</td><td>xyz</td><td>675</td></tr>
+<tr><td>text/yaml</td><td>yaml</td><td>676</td></tr>
+<tr><td>application/yang</td><td>yang</td><td>677</td></tr>
+<tr><td>application/yin+xml</td><td>yin</td><td>678</td></tr>
+<tr><td>application/vnd.zzazz.deck+xml</td><td>zaz</td><td>679</td></tr>
+<tr><td>application/zip</td><td>zip</td><td>680</td></tr>
+<tr><td>application/vnd.zul</td><td>zir</td><td>681</td></tr>
+<tr><td>application/vnd.handheld-entertainment+xml</td><td>zmm</td><td>682</td></tr>
+</tbody></table>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../../format-specs/data-types/character-strings.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+                            <a rel="next" href="../../format-specs/data-types/nulls.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a href="../../format-specs/data-types/character-strings.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a href="../../format-specs/data-types/nulls.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script src="../../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="../../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>

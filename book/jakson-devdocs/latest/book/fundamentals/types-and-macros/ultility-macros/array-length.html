@@ -1,0 +1,212 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>ARRAY_LENGTH - Jakson Developer Documentation</title>
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="../../../favicon.png">
+        <link rel="stylesheet" href="../../../css/variables.css">
+        <link rel="stylesheet" href="../../../css/general.css">
+        <link rel="stylesheet" href="../../../css/chrome.css">
+        <link rel="stylesheet" href="../../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../../FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../../highlight.css">
+        <link rel="stylesheet" href="../../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body class="light">
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../../../";
+            var default_theme = "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            document.body.className = theme;
+            document.querySelector('html').className = theme + ' js';
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="affix"><a href="../../../documentation.html">Jakson Developer Documentation</a></li><li class="affix"><a href="../../../structure.html">Project Structure</a></li><li><a href="../../../fundamentals.html"><strong aria-hidden="true">1.</strong> Fundamentals</a></li><li><ol class="section"><li><a href="../../../fundamentals/code-style.html"><strong aria-hidden="true">1.1.</strong> Code Style Convention</a></li><li><a href="../../../fundamentals/err-handling.html"><strong aria-hidden="true">1.2.</strong> Error Handling</a></li><li><ol class="section"><li><a href="../../../fundamentals/err-handling/status-and-err-codes.html"><strong aria-hidden="true">1.2.1.</strong> Status and Error Codes</a></li><li><a href="../../../fundamentals/err-handling/err-throwing-macros.html"><strong aria-hidden="true">1.2.2.</strong> Error Throwing Macros</a></li><li><ol class="section"><li><a href="../../../fundamentals/err-handling/err-throwing-macros/err.html"><strong aria-hidden="true">1.2.2.1.</strong> ERROR</a></li><li><a href="../../../fundamentals/err-handling/err-throwing-macros/err-no-abort.html"><strong aria-hidden="true">1.2.2.2.</strong> ERROR_NO_ABORT</a></li><li><a href="../../../fundamentals/err-handling/err-throwing-macros/err-wdetails.html"><strong aria-hidden="true">1.2.2.3.</strong> ERROR_WDETAILS</a></li></ol></li><li><a href="../../../fundamentals/err-handling/conditional-err-macros.html"><strong aria-hidden="true">1.2.3.</strong> Conditional Error Macros</a></li><li><ol class="section"><li><a href="../../../fundamentals/err-handling/conditional-err-macros/if.html"><strong aria-hidden="true">1.2.3.1.</strong> ERROR_IF</a></li><li><a href="../../../fundamentals/err-handling/conditional-err-macros/if_and_return.html"><strong aria-hidden="true">1.2.3.2.</strong> ERROR_IF_AND_RETURN</a></li><li><a href="../../../fundamentals/err-handling/conditional-err-macros/if_wdetails.html"><strong aria-hidden="true">1.2.3.3.</strong> ERROR_IF_WDETAILS</a></li></ol></li><li><a href="../../../fundamentals/err-handling/err-printing-macros.html"><strong aria-hidden="true">1.2.4.</strong> Error Printing Macros</a></li><li><ol class="section"><li><a href="../../../fundamentals/err-handling/err-printing-macros/print.html"><strong aria-hidden="true">1.2.4.1.</strong> ERROR_PRINT</a></li><li><a href="../../../fundamentals/err-handling/err-printing-macros/print-and-die.html"><strong aria-hidden="true">1.2.4.2.</strong> ERROR_PRINT_AND_DIE</a></li><li><a href="../../../fundamentals/err-handling/err-printing-macros/print-and-die-if.html"><strong aria-hidden="true">1.2.4.3.</strong> ERROR_PRINT_AND_DIE_IF</a></li><li><a href="../../../fundamentals/err-handling/err-printing-macros/print-if.html"><strong aria-hidden="true">1.2.4.4.</strong> ERROR_PRINT_IF</a></li></ol></li><li><a href="../../../fundamentals/err-handling/err-test-macros.html"><strong aria-hidden="true">1.2.5.</strong> Error Test Macros</a></li><li><ol class="section"><li><a href="../../../fundamentals/err-handling/err-test-macros/occured.html"><strong aria-hidden="true">1.2.5.1.</strong> ERROR_OCCURRED</a></li><li><a href="../../../fundamentals/err-handling/err-test-macros/success-else-return.html"><strong aria-hidden="true">1.2.5.2.</strong> SUCCESS_ELSE_RETURN</a></li><li><a href="../../../fundamentals/err-handling/err-test-macros/success-else-null.html"><strong aria-hidden="true">1.2.5.3.</strong> SUCCESS_ELSE_NULL</a></li><li><a href="../../../fundamentals/err-handling/err-test-macros/success-else-fail.html"><strong aria-hidden="true">1.2.5.4.</strong> SUCCESS_ELSE_FAIL</a></li></ol></li><li><a href="../../../fundamentals/err-handling/module-err-functions.html"><strong aria-hidden="true">1.2.6.</strong> Module Error Functions</a></li><li><ol class="section"><li><a href="../../../fundamentals/err-handling/module-err-functions/define-err-getter.html"><strong aria-hidden="true">1.2.6.1.</strong> DEFINE_ERROR_GETTER</a></li></ol></li><li><a href="../../../fundamentals/err-handling/debug-and-release.html"><strong aria-hidden="true">1.2.7.</strong> Debug and Release</a></li></ol></li><li><a href="../../../fundamentals/types-and-macros.html"><strong aria-hidden="true">1.3.</strong> Types and Macros</a></li><li><ol class="section"><li><a href="../../../fundamentals/types-and-macros/memory-managament-macros.html"><strong aria-hidden="true">1.3.1.</strong> Memory Managament Macros</a></li><li><ol class="section"><li><a href="../../../fundamentals/types-and-macros/memory-managament-macros/malloc.html"><strong aria-hidden="true">1.3.1.1.</strong> MALLOC</a></li><li><a href="../../../fundamentals/types-and-macros/memory-managament-macros/zero-memory.html"><strong aria-hidden="true">1.3.1.2.</strong> ZERO_MEMORY</a></li></ol></li><li><a href="../../../fundamentals/types-and-macros/err-and-status-macros.html"><strong aria-hidden="true">1.3.2.</strong> Error and Status Macros</a></li><li><ol class="section"><li><a href="../../../fundamentals/types-and-macros/err-and-status-macros/err-if-null.html"><strong aria-hidden="true">1.3.2.1.</strong> DEBUG_ERROR_IF_NULL</a></li><li><a href="../../../fundamentals/types-and-macros/err-and-status-macros/check-success.html"><strong aria-hidden="true">1.3.2.2.</strong> CHECK_SUCCESS</a></li><li><a href="../../../fundamentals/types-and-macros/err-and-status-macros/success-or-jump.html"><strong aria-hidden="true">1.3.2.3.</strong> SUCCESS_OR_JUMP</a></li><li><a href="../../../fundamentals/types-and-macros/err-and-status-macros/err-if-not-implemented.html"><strong aria-hidden="true">1.3.2.4.</strong> ERROR_IF_NOT_IMPLEMENTED</a></li></ol></li><li><a href="../../../fundamentals/types-and-macros/branch-prediction-macros.html"><strong aria-hidden="true">1.3.3.</strong> Branch-Prediction Macros</a></li><li><ol class="section"><li><a href="../../../fundamentals/types-and-macros/branch-prediction-macros/likely.html"><strong aria-hidden="true">1.3.3.1.</strong> LIKELY</a></li><li><a href="../../../fundamentals/types-and-macros/branch-prediction-macros/unlikely.html"><strong aria-hidden="true">1.3.3.2.</strong> UNLIKELY</a></li></ol></li><li><a href="../../../fundamentals/types-and-macros/data-prefetching-macros.html"><strong aria-hidden="true">1.3.4.</strong> Data Prefetching Macros</a></li><li><ol class="section"><li><a href="../../../fundamentals/types-and-macros/data-prefetching-macros/prefetch-read.html"><strong aria-hidden="true">1.3.4.1.</strong> PREFETCH_READ</a></li><li><a href="../../../fundamentals/types-and-macros/data-prefetching-macros/prefetch-write.html"><strong aria-hidden="true">1.3.4.2.</strong> PREFETCH_WRITE</a></li></ol></li><li><a href="../../../fundamentals/types-and-macros/bit-field-macros.html"><strong aria-hidden="true">1.3.5.</strong> Bit-Field Macros</a></li><li><ol class="section"><li><a href="../../../fundamentals/types-and-macros/bit-field-macros/bit-num-of.html"><strong aria-hidden="true">1.3.5.1.</strong> BIT_NUM_OF</a></li><li><a href="../../../fundamentals/types-and-macros/bit-field-macros/set-bit.html"><strong aria-hidden="true">1.3.5.2.</strong> SET_BIT</a></li><li><a href="../../../fundamentals/types-and-macros/bit-field-macros/set-bits.html"><strong aria-hidden="true">1.3.5.3.</strong> SET_BITS</a></li><li><a href="../../../fundamentals/types-and-macros/bit-field-macros/unset-bits.html"><strong aria-hidden="true">1.3.5.4.</strong> UNSET_BITS</a></li><li><a href="../../../fundamentals/types-and-macros/bit-field-macros/are-bits-set.html"><strong aria-hidden="true">1.3.5.5.</strong> ARE_BITS_SET</a></li></ol></li><li><a href="../../../fundamentals/types-and-macros/ultility-macros.html"><strong aria-hidden="true">1.3.6.</strong> Utility Macros</a></li><li><ol class="section"><li><a href="../../../fundamentals/types-and-macros/ultility-macros/array-length.html" class="active"><strong aria-hidden="true">1.3.6.1.</strong> ARRAY_LENGTH</a></li><li><a href="../../../fundamentals/types-and-macros/ultility-macros/not-implemented.html"><strong aria-hidden="true">1.3.6.2.</strong> NOT_IMPLEMENTED</a></li><li><a href="../../../fundamentals/types-and-macros/ultility-macros/declare-and-init.html"><strong aria-hidden="true">1.3.6.3.</strong> DECLARE_AND_INIT</a></li><li><a href="../../../fundamentals/types-and-macros/ultility-macros/unused.html"><strong aria-hidden="true">1.3.6.4.</strong> UNUSED</a></li><li><a href="../../../fundamentals/types-and-macros/ultility-macros/built-in.html"><strong aria-hidden="true">1.3.6.5.</strong> BUILT_IN</a></li><li><a href="../../../fundamentals/types-and-macros/ultility-macros/optional.html"><strong aria-hidden="true">1.3.6.6.</strong> OPTIONAL</a></li><li><a href="../../../fundamentals/types-and-macros/ultility-macros/optional-set.html"><strong aria-hidden="true">1.3.6.7.</strong> OPTIONAL_SET</a></li><li><a href="../../../fundamentals/types-and-macros/ultility-macros/optional-set-or-else.html"><strong aria-hidden="true">1.3.6.8.</strong> OPTIONAL_SET_OR_ELSE</a></li><li><a href="../../../fundamentals/types-and-macros/ultility-macros/optional-call.html"><strong aria-hidden="true">1.3.6.9.</strong> OPTIONAL_CALL</a></li><li><a href="../../../fundamentals/types-and-macros/ultility-macros/min-max.html"><strong aria-hidden="true">1.3.6.10.</strong> MIN and MAX</a></li></ol></li><li><a href="../../../fundamentals/types-and-macros/console-macros.html"><strong aria-hidden="true">1.3.7.</strong> Console Macros</a></li><li><ol class="section"><li><a href="../../../fundamentals/types-and-macros/console-macros/write.html"><strong aria-hidden="true">1.3.7.1.</strong> CONSOLE_WRITE</a></li><li><a href="../../../fundamentals/types-and-macros/console-macros/write-endl.html"><strong aria-hidden="true">1.3.7.2.</strong> CONSOLE_WRITE_ENDL</a></li><li><a href="../../../fundamentals/types-and-macros/console-macros/write-cont.html"><strong aria-hidden="true">1.3.7.3.</strong> CONSOLE_WRITE_CONT</a></li><li><a href="../../../fundamentals/types-and-macros/console-macros/writeln.html"><strong aria-hidden="true">1.3.7.4.</strong> CONSOLE_WRITELN</a></li><li><a href="../../../fundamentals/types-and-macros/console-macros/output-on.html"><strong aria-hidden="true">1.3.7.5.</strong> CONSOLE_OUTPUT_ON</a></li><li><a href="../../../fundamentals/types-and-macros/console-macros/output-off.html"><strong aria-hidden="true">1.3.7.6.</strong> CONSOLE_OUTPUT_OFF</a></li></ol></li><li><a href="../../../fundamentals/types-and-macros/diagnostic-macros.html"><strong aria-hidden="true">1.3.8.</strong> Diagnostic Macros</a></li><li><ol class="section"><li><a href="../../../fundamentals/types-and-macros/diagnostic-macros/assert.html"><strong aria-hidden="true">1.3.8.1.</strong> JAK_ASSERT</a></li><li><a href="../../../fundamentals/types-and-macros/diagnostic-macros/log-trace.html"><strong aria-hidden="true">1.3.8.2.</strong> LOG_TRACE</a></li><li><a href="../../../fundamentals/types-and-macros/diagnostic-macros/log-info.html"><strong aria-hidden="true">1.3.8.3.</strong> LOG_INFO</a></li><li><a href="../../../fundamentals/types-and-macros/diagnostic-macros/log-debug.html"><strong aria-hidden="true">1.3.8.4.</strong> LOG_DEBUG</a></li><li><a href="../../../fundamentals/types-and-macros/diagnostic-macros/log-warn.html"><strong aria-hidden="true">1.3.8.5.</strong> LOG_WARN</a></li></ol></li></ol></li><li><a href="../../../fundamentals/flat-memory-objects.html"><strong aria-hidden="true">1.4.</strong> Flat Memory Objects</a></li><li><ol class="section"><li><a href="../../../fundamentals/flat-memory-objects/memory-blocks.html"><strong aria-hidden="true">1.4.1.</strong> Memory Blocks</a></li><li><a href="../../../fundamentals/flat-memory-objects/memory-files.html"><strong aria-hidden="true">1.4.2.</strong> Memory Files</a></li></ol></li><li><a href="../../../fundamentals/standard-data-structures.html"><strong aria-hidden="true">1.5.</strong> Standard Data Structures</a></li><li><ol class="section"><li><a href="../../../fundamentals/standard-data-structures/vectos.html"><strong aria-hidden="true">1.5.1.</strong> Vectors</a></li><li><a href="../../../fundamentals/standard-data-structures/bloom-filters.html"><strong aria-hidden="true">1.5.2.</strong> Bloom Filters</a></li><li><a href="../../../fundamentals/standard-data-structures/bitmaps.html"><strong aria-hidden="true">1.5.3.</strong> Bitmaps</a></li><li><a href="../../../fundamentals/standard-data-structures/hash-tables.html"><strong aria-hidden="true">1.5.4.</strong> Hash Tables</a></li><li><a href="../../../fundamentals/standard-data-structures/hash-sets.html"><strong aria-hidden="true">1.5.5.</strong> Hash Sets</a></li><li><a href="../../../fundamentals/standard-data-structures/priority-queues.html"><strong aria-hidden="true">1.5.6.</strong> Priority Queues</a></li><li><a href="../../../fundamentals/standard-data-structures/string_buffer-dictionaries.html"><strong aria-hidden="true">1.5.7.</strong> String Dictionaries</a></li><li><ol class="section"><li><a href="../../../fundamentals/standard-data-structures/string_buffer-dictionaries/synchronous-dictionaries.html"><strong aria-hidden="true">1.5.7.1.</strong> Synchronous Dictionaries</a></li><li><a href="../../../fundamentals/standard-data-structures/string_buffer-dictionaries/asynchronous-dictionaries.html"><strong aria-hidden="true">1.5.7.2.</strong> Asynchronous Dictionaries</a></li></ol></li></ol></li><li><a href="../../../fundamentals/advanced-types-and-structures.html"><strong aria-hidden="true">1.6.</strong> Advanced Types and Structures</a></li><li><ol class="section"><li><a href="../../../fundamentals/advanced-types-and-structures/variable-length-integers.html"><strong aria-hidden="true">1.6.1.</strong> Variable-Length Integers</a></li><li><ol class="section"><li><a href="../../../fundamentals/advanced-types-and-structures/variable-length-integers/byte-stream-encoded.html"><strong aria-hidden="true">1.6.1.1.</strong> Byte-Stream Encoded</a></li><li><a href="../../../fundamentals/advanced-types-and-structures/marker-encoded.html"><strong aria-hidden="true">1.6.1.2.</strong> Marker Encoded</a></li></ol></li><li><a href="../../../fundamentals/advanced-types-and-structures/flat-memory-columns.html"><strong aria-hidden="true">1.6.2.</strong> Flat Memory Columns</a></li><li><a href="../../../fundamentals/advanced-types-and-structures/unique-identifiers.html"><strong aria-hidden="true">1.6.3.</strong> Unique Identifiers</a></li></ol></li><li><a href="../../../fundamentals/hash-functions.html"><strong aria-hidden="true">1.7.</strong> Hash Functions</a></li><li><a href="../../../fundamentals/utilities.html"><strong aria-hidden="true">1.8.</strong> Utilities</a></li><li><ol class="section"><li><a href="../../../fundamentals/utilities/string_buffer-builders.html"><strong aria-hidden="true">1.8.1.</strong> String Builders</a></li><li><a href="../../../fundamentals/utilities/string_buffer-utilities.html"><strong aria-hidden="true">1.8.2.</strong> String Utilities</a></li><li><a href="../../../fundamentals/utilities/number-utilitites.html"><strong aria-hidden="true">1.8.3.</strong> Number Utilities</a></li><li><a href="../../../fundamentals/utilities/data-and-time.html"><strong aria-hidden="true">1.8.4.</strong> Date and Time</a></li><li><a href="../../../fundamentals/utilities/type-conversion.html"><strong aria-hidden="true">1.8.5.</strong> Type Conversions</a></li><li><a href="../../../fundamentals/utilities/sorting.html"><strong aria-hidden="true">1.8.6.</strong> Sorting</a></li><li><a href="../../../fundamentals/utilities/hexdumps.html"><strong aria-hidden="true">1.8.7.</strong> Hexdumps</a></li></ol></li></ol></li><li><a href="../../../carbon-api.html"><strong aria-hidden="true">2.</strong> Carbon API</a></li><li><ol class="section"><li><a href="../../../carbon-api/carbon-overview.html"><strong aria-hidden="true">2.1.</strong> Carbon Overview</a></li><li><a href="../../../carbon-api/project-setup.html"><strong aria-hidden="true">2.2.</strong> Project Setup</a></li><li><a href="../../../carbon-api/construct-carbon-records.html"><strong aria-hidden="true">2.3.</strong> Carbon Records</a></li><li><ol class="section"><li><a href="../../../carbon-api/construct-carbon-records/from-json.html"><strong aria-hidden="true">2.3.1.</strong> From JSON</a></li><li><a href="../../../carbon-api/construct-carbon-records/manual-construction.html"><strong aria-hidden="true">2.3.2.</strong> Manual Construction</a></li><li><ol class="section"><li><a href="../../../carbon-api/construct-carbon-records/manual-construction/arrays.html"><strong aria-hidden="true">2.3.2.1.</strong> Insertions into Arrays</a></li><li><a href="../../../carbon-api/construct-carbon-records/manual-construction/objects.html"><strong aria-hidden="true">2.3.2.2.</strong> Insertions into Objects</a></li><li><a href="../../../carbon-api/construct-carbon-records/manual-construction/columns.html"><strong aria-hidden="true">2.3.2.3.</strong> Insertions into Columns</a></li><li><a href="../../../carbon-api/construct-carbon-records/manual-construction/nesting.html"><strong aria-hidden="true">2.3.2.4.</strong> Nesting</a></li></ol></li><li><a href="../../../carbon-api/construct-carbon-records/from-byte-streams.html"><strong aria-hidden="true">2.3.3.</strong> From Byte Streams</a></li></ol></li><li><a href="../../../carbon-api/browse-contents.html"><strong aria-hidden="true">2.4.</strong> Browse Contents</a></li><li><ol class="section"><li><a href="../../../carbon-api/browse-contents/array-iterators.html"><strong aria-hidden="true">2.4.1.</strong> Array Iterators</a></li><li><a href="../../../carbon-api/browse-contents/object-iterators.html"><strong aria-hidden="true">2.4.2.</strong> Object Iterators</a></li><li><a href="../../../carbon-api/browse-contents/column-iterators.html"><strong aria-hidden="true">2.4.3.</strong> Column Iterators</a></li><li><a href="../../../carbon-api/browse-contents/value-types.html"><strong aria-hidden="true">2.4.4.</strong> Value Types</a></li><li><ol class="section"><li><a href="../../../carbon-api/browse-contents/value-types/field-types.html"><strong aria-hidden="true">2.4.4.1.</strong> Field Types</a></li><li><a href="../../../carbon-api/browse-contents/value-types/null-encoding.html"><strong aria-hidden="true">2.4.4.2.</strong> Null Encoding</a></li></ol></li><li><a href="../../../carbon-api/browse-contents/type-abstractions.html"><strong aria-hidden="true">2.4.5.</strong> Type Abstractions</a></li><li><ol class="section"><li><a href="../../../carbon-api/browse-contents/type-abstractions/field-classes.html"><strong aria-hidden="true">2.4.5.1.</strong> Field Classes</a></li><li><a href="../../../carbon-api/browse-contents/type-abstractions/constant-types.html"><strong aria-hidden="true">2.4.5.2.</strong> Constant Types</a></li><li><a href="../../../carbon-api/browse-contents/type-abstractions/number-types.html"><strong aria-hidden="true">2.4.5.3.</strong> Number Types</a></li><li><a href="../../../carbon-api/browse-contents/type-abstractions/signed-and-unsigned-types.html"><strong aria-hidden="true">2.4.5.4.</strong> Signed and Unsigned Types</a></li><li><a href="../../../carbon-api/browse-contents/type-abstractions/traversable-types.html"><strong aria-hidden="true">2.4.5.5.</strong> Traversable Types</a></li></ol></li></ol></li><li><a href="../../../carbon-api/find-contents.html"><strong aria-hidden="true">2.5.</strong> Find Contents</a></li><li><ol class="section"><li><a href="../../../carbon-api/find-contents/path-index.html"><strong aria-hidden="true">2.5.1.</strong> Path Index</a></li></ol></li><li><a href="../../../carbon-api/modify-contents.html"><strong aria-hidden="true">2.6.</strong> Modify Carbon Records</a></li><li><ol class="section"><li><a href="../../../carbon-api/modify-contents/record-revision.html"><strong aria-hidden="true">2.6.1.</strong> Record Revisions</a></li><li><a href="../../../carbon-api/modify-contents/insertion-operations.html"><strong aria-hidden="true">2.6.2.</strong> Insert Operations</a></li><li><ol class="section"><li><a href="../../../carbon-api/modify-contents/insertion-operations/field-insertions.html"><strong aria-hidden="true">2.6.2.1.</strong> Field Insertions</a></li><li><a href="../../../carbon-api/modify-contents/insertion-operations/property-insertions.html"><strong aria-hidden="true">2.6.2.2.</strong> Property Insertions</a></li></ol></li><li><a href="../../../carbon-api/modify-contents/update-operations.html"><strong aria-hidden="true">2.6.3.</strong> Updates Operations</a></li><li><ol class="section"><li><a href="../../../carbon-api/modify-contents/update-operations/field-updates.html"><strong aria-hidden="true">2.6.3.1.</strong> Field Updates</a></li><li><a href="../../../carbon-api/modify-contents/update-operations/property-updates.html"><strong aria-hidden="true">2.6.3.2.</strong> Property Updates</a></li></ol></li><li><a href="../../../carbon-api/modify-contents/delete-operations.html"><strong aria-hidden="true">2.6.4.</strong> Deletes Operations</a></li><li><ol class="section"><li><a href="../../../carbon-api/modify-contents/delete-operations/field-deletes.html"><strong aria-hidden="true">2.6.4.1.</strong> Field Deletes</a></li><li><a href="../../../carbon-api/modify-contents/delete-operations/property-deletes.html"><strong aria-hidden="true">2.6.4.2.</strong> Property Deletes</a></li></ol></li></ol></li><li><a href="../../../carbon-api/record-identification.html"><strong aria-hidden="true">2.7.</strong> Record Identification</a></li><li><ol class="section"><li><a href="../../../carbon-api/record-identification/non-identifiable-records.html"><strong aria-hidden="true">2.7.1.</strong> Non-Identifiable Records</a></li><li><a href="../../../carbon-api/record-identification/identifiable-records.html"><strong aria-hidden="true">2.7.2.</strong> Identifiable Records</a></li><li><ol class="section"><li><a href="../../../carbon-api/record-identification/identifiable-records/auto-generated-keys.html"><strong aria-hidden="true">2.7.2.1.</strong> Auto-Generated Keys</a></li><li><a href="../../../carbon-api/record-identification/identifiable-records/user-defined-keys.html"><strong aria-hidden="true">2.7.2.2.</strong> User-Defined Keys</a></li><li><ol class="section"><li><a href="../../../carbon-api/record-identification/identifiable-records/user-defined-keys/numeric-keys.html"><strong aria-hidden="true">2.7.2.2.1.</strong> Numeric Keys</a></li><li><a href="../../../carbon-api/record-identification/identifiable-records/user-defined-keys/character-string_buffer-keys-md.html"><strong aria-hidden="true">2.7.2.2.2.</strong> Character String Keys</a></li></ol></li></ol></li></ol></li><li><a href="../../../carbon-api/record-optimization.html"><strong aria-hidden="true">2.8.</strong> Record Optimization</a></li><li><ol class="section"><li><a href="../../../carbon-api/record-optimization/containers-and-memory.html"><strong aria-hidden="true">2.8.1.</strong> Containers and Memory Management</a></li></ol></li><li><a href="../../../carbon-api/conversion-to-json.html"><strong aria-hidden="true">2.9.</strong> Conversion to JSON</a></li><li><ol class="section"><li><a href="../../../carbon-api/conversion-to-json/compact-json-printer.html"><strong aria-hidden="true">2.9.1.</strong> Compact JSON Printer</a></li><li><a href="../../../carbon-api/conversion-to-json/extended-json-printer.html"><strong aria-hidden="true">2.9.2.</strong> Extended JSON Printer</a></li></ol></li><li><a href="../../../carbon-api/advanced-topics.html"><strong aria-hidden="true">2.10.</strong> Advanced Topics</a></li><li><ol class="section"><li><a href="../../../carbon-api/advanced-topics/json-parsing.html"><strong aria-hidden="true">2.10.1.</strong> JSON Parsing</a></li><li><a href="../../../carbon-api/advanced-topics/dot-notated-paths.html"><strong aria-hidden="true">2.10.2.</strong> Dot-Notated Paths</a></li><li><ol class="section"><li><a href="../../../carbon-api/advanced-topics/dot-notated-paths/dot-path-objects.html"><strong aria-hidden="true">2.10.2.1.</strong> Dot Path Objects</a></li><li><a href="../../../carbon-api/advanced-topics/dot-notated-paths/dot-path-index.html"><strong aria-hidden="true">2.10.2.2.</strong> Dot Path Index</a></li><li><a href="../../../carbon-api/advanced-topics/dot-notated-paths/dot-path-evaluators.html"><strong aria-hidden="true">2.10.2.3.</strong> Dot Path Evaluators</a></li></ol></li><li><a href="../../../carbon-api/advanced-topics/character-strings.html"><strong aria-hidden="true">2.10.3.</strong> Character Strings</a></li><li><a href="../../../carbon-api/advanced-topics/user-defined-types.html"><strong aria-hidden="true">2.10.4.</strong> User-Defined Types</a></li></ol></li></ol></li><li><a href="../../../multi-threading.html"><strong aria-hidden="true">3.</strong> Multi-Threading</a></li><li><ol class="section"><li><a href="../../../multi-threading/spinlocks.html"><strong aria-hidden="true">3.1.</strong> Spinlocks</a></li><li><a href="../../../multi-threading/thread-pools.html"><strong aria-hidden="true">3.2.</strong> Thread Pools</a></li><li><a href="../../../multi-threading/data-parallelism-framework.html"><strong aria-hidden="true">3.3.</strong> Data Parallelism Framework</a></li><li><ol class="section"><li><a href="../../../multi-threading/data-parallelism-framework/parallel-for.html"><strong aria-hidden="true">3.3.1.</strong> Parallel For</a></li><li><a href="../../../multi-threading/data-parallelism-framework/parallel-map.html"><strong aria-hidden="true">3.3.2.</strong> Parallel Map</a></li><li><a href="../../../multi-threading/data-parallelism-framework/parallel-gather.html"><strong aria-hidden="true">3.3.3.</strong> Parallel Gather</a></li><li><a href="../../../multi-threading/data-parallelism-framework/parallel-scatter.html"><strong aria-hidden="true">3.3.4.</strong> Parallel Scatter</a></li><li><a href="../../../multi-threading/data-parallelism-framework/parallel-shuffle.html"><strong aria-hidden="true">3.3.5.</strong> Parallel Shuffle</a></li><li><a href="../../../multi-threading/data-parallelism-framework/parallel-filter.html"><strong aria-hidden="true">3.3.6.</strong> Parallel Filter</a></li><li><ol class="section"><li><a href="../../../multi-threading/data-parallelism-framework/parallel-filter/early-filters.html"><strong aria-hidden="true">3.3.6.1.</strong> Early Filters</a></li><li><a href="../../../multi-threading/data-parallelism-framework/parallel-filter/late-filters.html"><strong aria-hidden="true">3.3.6.2.</strong> Late Filters</a></li></ol></li></ol></li></ol></li><li><a href="../../../jakson-cross-platform.html">Cross-Platform Notices</a></li><li class="affix"><a href="../../../feedback.html">Feedback and Contributions</a></li><li class="affix"><a href="../../../thanks.html">Thanks To</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar" class="menu-bar">
+                    <div id="menu-bar-sticky-container">
+                        <div class="left-buttons">
+                            <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                                <i class="fa fa-paint-brush"></i>
+                            </button>
+                            <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                                <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                            </ul>
+                            
+                            <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                                <i class="fa fa-search"></i>
+                            </button>
+                            
+                        </div>
+
+                        <h1 class="menu-title">Jakson Developer Documentation</h1>
+
+                        <div class="right-buttons">
+                            <a href="../../../print.html" title="Print this book" aria-label="Print this book">
+                                <i id="print-button" class="fa fa-print"></i>
+                            </a>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1><a class="header" href="#array_length" id="array_length">ARRAY_LENGTH</a></h1>
+<blockquote>
+<p><strong>This document is work-in-progress</strong>. </p>
+</blockquote>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../../../fundamentals/types-and-macros/ultility-macros.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+                            <a rel="next" href="../../../fundamentals/types-and-macros/ultility-macros/not-implemented.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a href="../../../fundamentals/types-and-macros/ultility-macros.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a href="../../../fundamentals/types-and-macros/ultility-macros/not-implemented.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script src="../../../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../../../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../../../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="../../../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../../../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../../../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>

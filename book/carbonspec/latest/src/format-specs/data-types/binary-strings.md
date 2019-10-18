@@ -21,8 +21,8 @@ Description          | Size (in Byte)      | Marker         | Payload
 Payload			   | Description                     | Encoding Type             | Size
 -------------------|---------------------------------|---------------------------|---------
 `(mime-type-id)`   | MIME Type Id (see below)        | variable-length integer   | `k` byte
-`(str-len)`        | binary string_buffer length in bytes   | variable-length integer   | `l` byte
- `<binary>` | the binary string_buffer itself        | fixed-sized binary string_buffer | `n` byte
+`(str-len)`        | binary string length in bytes   | variable-length integer   | `l` byte
+ `<binary>` | the binary string itself        | fixed-sized binary string | `n` byte
 
 ## Example
 
@@ -41,7 +41,7 @@ A (compacted) Carbon file, which encodes the HTML code as `binary`.
 ### With Unknown MIME Types
 
 ```
-[x](type-str-len)<type-str>(str-len) <binary-string_buffer>
+[x](type-str-len)<type-str>(str-len) <binary-string>
 ```
 
  Description          | Size (in Byte)            | Marker         | Payload
@@ -50,10 +50,10 @@ A (compacted) Carbon file, which encodes the HTML code as `binary`.
 
 Payload			         | Description                             | Encoding Type                | Size
 -------------------------|-----------------------------------------|------------------------------|---------
-`(type-str-len)` | used-def type string_buffer length | variable-length integer      | `k` byte
-`<type-str>`     | the user-def type string_buffer itself     | fixed-sized string_buffer | `q` byte
-`(str-len)`              | binary string_buffer length in bytes           | variable-length integer      | `l` byte
- `<binary>`       | the binary string_buffer itself                | fixed-sized binary string_buffer    | `n` byte
+`(type-str-len)` | used-def type string length | variable-length integer      | `k` byte
+`<type-str>`     | the user-def type string itself     | fixed-sized string | `q` byte
+`(str-len)`              | binary string length in bytes           | variable-length integer      | `l` byte
+ `<binary>`       | the binary string itself                | fixed-sized binary string    | `n` byte
  
 
 ## Example
@@ -74,13 +74,13 @@ A (compacted) Carbon file, which encodes the HTML code as `binary`.
 
 JSON does not support the definition of `binary` or `custom binary` types as used in Carbon. To enable conversion from JSON that describes (`custom`) `binary` Carbon types, the follow convention is used. 
 
-A binary is encoded in JSON using an JSON object with exactly the following string_buffer properties:
+A binary is encoded in JSON using an JSON object with exactly the following string properties:
 
 - `type` store a (custom) type description
 - `encoding` stores the value `base64`
-- `binary-string_buffer` stores a base64-encoded binary value
+- `binary-string` stores a base64-encoded binary value
 
-A particular order of these properties inside the object is not required. Once an object satisfying the definition from above was found, the object is replaced with a (`custom`) `binary` type (called *auto-conversion*). If the string_buffer `type` matches a built-in MIME type (see blow) by character equality, and the auto-conversion option is *not* turned off, a `binary` type with the described contents is created. Otherwise a `custom binary` is created.
+A particular order of these properties inside the object is not required. Once an object satisfying the definition from above was found, the object is replaced with a (`custom`) `binary` type (called *auto-conversion*). If the string `type` matches a built-in MIME type (see blow) by character equality, and the auto-conversion option is *not* turned off, a `binary` type with the described contents is created. Otherwise a `custom binary` is created.
 
 Libaries implementing the Carbon specification **must** provide an option to turn off auto-conversion, such that there is a possibility to still store an object satisfying the definition from above without converting its content to a (`custom`) (`binary`) type.
 
@@ -90,7 +90,7 @@ JSON snippet
 {
    "type":"text/html",
    "encoding":"base64",
-   "binary-string_buffer":"PGh0bWw+PGJvZHk+PHA+SGVsbG8sIFdvcmxkITwvcD48L2JvZHk+PC9odG1sPgAA"
+   "binary-string":"PGh0bWw+PGJvZHk+PHA+SGVsbG8sIFdvcmxkITwvcD48L2JvZHk+PC9odG1sPgAA"
 }
 ```
 
@@ -99,7 +99,7 @@ Carbon file snippet
 [b](219)(46) [<html><body><p>Hello, World!</p></body></html>]
 ```
 
-Vice versa, a Carbon file converted into a JSON string_buffer using the standard JSON formatter will produce the JSON snippet from above for the Carbon file snippet from above.
+Vice versa, a Carbon file converted into a JSON string using the standard JSON formatter will produce the JSON snippet from above for the Carbon file snippet from above.
 
 > **TODO:** Not yet implemented
 
@@ -114,7 +114,7 @@ Binary strings are not supported for column containers.
 ## MIME Type Ids
 
 
-> **Note:** To the point of this writing, the MIME type to identifier mapping is done via alphanumeric ordering of MIME type strings for improved lookup performance given a particular mime type string_buffer. In a future specification version, the order may change to reflect likelihood of certain type strings. With simpler words, to minimmize the variable number of bytes used to encode a MIME type id, more often used mime type strings will be assigned to a lower MIME type id compared to less-frequent used mime types.  
+> **Note:** To the point of this writing, the MIME type to identifier mapping is done via alphanumeric ordering of MIME type strings for improved lookup performance given a particular mime type string. In a future specification version, the order may change to reflect likelihood of certain type strings. With simpler words, to minimmize the variable number of bytes used to encode a MIME type id, more often used mime type strings will be assigned to a lower MIME type id compared to less-frequent used mime types.  
 
 
 

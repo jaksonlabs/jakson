@@ -153,7 +153,7 @@ Path Index (formatted as Json)
                            {
                               "type":"key",
                               "record-reference":{
-                                 "container":"string_buffer",
+                                 "container":"string",
                                  "offset":"0x15"
                               },
                               "key":"0x11"

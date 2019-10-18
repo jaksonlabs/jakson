@@ -1,0 +1,2373 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>The Columnar Binary JSON Specification</title>
+        
+        <meta name="robots" content="noindex" />
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+        <link rel="stylesheet" href="theme/slim.css">
+        
+
+        
+    </head>
+    <body class="light">
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            document.body.className = theme;
+            document.querySelector('html').className = theme + ' js';
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="affix"><a href="carbon.html">Columnar Binary JSON</a></li><li class="affix"><a href="introduction.html">Introduction</a></li><li><a href="getting-started.html"><strong aria-hidden="true">1.</strong> Getting Started</a></li><li><ol class="section"><li><a href="getting-started/motivation.html"><strong aria-hidden="true">1.1.</strong> Motivation</a></li><li><a href="getting-started/example.html"><strong aria-hidden="true">1.2.</strong> Example</a></li><li><a href="getting-started/comparison.html"><strong aria-hidden="true">1.3.</strong> Comparison</a></li></ol></li><li><a href="format-spec.html"><strong aria-hidden="true">2.</strong> Carbon File Specification</a></li><li><ol class="section"><li><a href="format-specs/design-goals.html"><strong aria-hidden="true">2.1.</strong> Design Goals</a></li><li><a href="format-specs/notation.html"><strong aria-hidden="true">2.2.</strong> Notation</a></li><li><a href="format-specs/alternatives.html"><strong aria-hidden="true">2.3.</strong> Alternatives</a></li><li><ol class="section"><li><a href="format-specs/alternatives/bson.html"><strong aria-hidden="true">2.3.1.</strong> Binary JSON</a></li><li><a href="format-specs/alternatives/ubjson.html"><strong aria-hidden="true">2.3.2.</strong> Universal Binary JSON</a></li></ol></li><li><a href="format-specs/format-overview.html"><strong aria-hidden="true">2.4.</strong> Format Overview</a></li><li><ol class="section"><li><a href="format-specs/format-overview/marker-format.html"><strong aria-hidden="true">2.4.1.</strong> Marker Format</a></li><li><a href="format-specs/format-overview/varuints.html"><strong aria-hidden="true">2.4.2.</strong> Variable-Length Integers</a></li><li><a href="format-specs/format-overview/padding-spaces.html"><strong aria-hidden="true">2.4.3.</strong> Compacting and Padding</a></li><li><a href="format-specs/format-overview/bnf-syntax.html"><strong aria-hidden="true">2.4.4.</strong> BNF Syntax</a></li></ol></li><li><a href="format-specs/identification.html"><strong aria-hidden="true">2.5.</strong> Identification</a></li><li><ol class="section"><li><a href="format-specs/identification/user-def-keys.html"><strong aria-hidden="true">2.5.1.</strong> User-Defined Keys</a></li><li><a href="format-specs/identification/sys-def-keys.html"><strong aria-hidden="true">2.5.2.</strong> System-Defined Keys</a></li></ol></li><li><a href="format-specs/data-types.html"><strong aria-hidden="true">2.6.</strong> Data Types</a></li><li><ol class="section"><li><a href="format-specs/data-types/booleans.html"><strong aria-hidden="true">2.6.1.</strong> Booleans</a></li><li><a href="format-specs/data-types/integers.html"><strong aria-hidden="true">2.6.2.</strong> Integer Numbers</a></li><li><a href="format-specs/data-types/floating.html"><strong aria-hidden="true">2.6.3.</strong> Floating Numbers</a></li><li><a href="format-specs/data-types/character-strings.html"><strong aria-hidden="true">2.6.4.</strong> Character Strings</a></li><li><a href="format-specs/data-types/binary-strings.html"><strong aria-hidden="true">2.6.5.</strong> Binary Strings</a></li><li><a href="format-specs/data-types/nulls.html"><strong aria-hidden="true">2.6.6.</strong> Nulls</a></li><li><a href="format-specs/data-types/undefs.html"><strong aria-hidden="true">2.6.7.</strong> Undefs</a></li></ol></li><li><a href="format-specs/container-types.html"><strong aria-hidden="true">2.7.</strong> Container Types</a></li><li><ol class="section"><li><a href="format-specs/container-types/arrays.html"><strong aria-hidden="true">2.7.1.</strong> Arrays</a></li><li><a href="format-specs/container-types/columns.html"><strong aria-hidden="true">2.7.2.</strong> Columns</a></li><li><a href="format-specs/container-types/objects.html"><strong aria-hidden="true">2.7.3.</strong> Objects</a></li></ol></li><li><a href="format-specs/abstract-types.html"><strong aria-hidden="true">2.8.</strong> Abstract Types</a></li><li><ol class="section"><li><a href="format-specs/abstract-base-types.html"><strong aria-hidden="true">2.8.1.</strong> Abstract Base Types</a></li><li><ol class="section"><li><a href="format-specs/abstract-base-types/unsorted-multi-sets.html"><strong aria-hidden="true">2.8.1.1.</strong> Unsorted Multi Sets</a></li><li><a href="format-specs/abstract-base-types/unsorted-multi-maps.html"><strong aria-hidden="true">2.8.1.2.</strong> Unsorted Multi Maps</a></li></ol></li><li><a href="format-specs/derived-abstract-types.html"><strong aria-hidden="true">2.8.2.</strong> Derived Abstract Types</a></li><li><ol class="section"><li><a href="format-specs/derived-abstract-types/sorted-multi-sets.html"><strong aria-hidden="true">2.8.2.1.</strong> Sorted Multi Sets</a></li><li><a href="format-specs/derived-abstract-types/unsorted-sets.html"><strong aria-hidden="true">2.8.2.2.</strong> Unsorted Sets</a></li><li><a href="format-specs/derived-abstract-types/sorted-sets.html"><strong aria-hidden="true">2.8.2.3.</strong> Sorted Sets</a></li><li><a href="format-specs/derived-abstract-types/sorted-maps.html"><strong aria-hidden="true">2.8.2.4.</strong> Sorted Maps</a></li><li><a href="format-specs/derived-abstract-types/sorted-multi-maps.html"><strong aria-hidden="true">2.8.2.5.</strong> Sorted Multi Maps</a></li><li><a href="format-specs/derived-abstract-types/unsorted-maps.html"><strong aria-hidden="true">2.8.2.6.</strong> Unsorted Maps</a></li></ol></li></ol></li><li><a href="update-spec.html"><strong aria-hidden="true">2.9.</strong> Update Specification</a></li><li><ol class="section"><li><a href="update-spec/revision-control.html"><strong aria-hidden="true">2.9.1.</strong> Revisions</a></li><li><a href="update-spec/patches.html"><strong aria-hidden="true">2.9.2.</strong> Patches</a></li><li><a href="update-spec/atomic-ops.html"><strong aria-hidden="true">2.9.3.</strong> Atomic Operations</a></li><li><a href="update-spec/insert-ops.html"><strong aria-hidden="true">2.9.4.</strong> Insert Operations</a></li><li><a href="update-spec/update-ops.html"><strong aria-hidden="true">2.9.5.</strong> In-Place Updates</a></li><li><a href="update-spec/delete-ops.html"><strong aria-hidden="true">2.9.6.</strong> Delete Operations</a></li></ol></li><li><a href="traversals-queries.html"><strong aria-hidden="true">2.10.</strong> Querying for Values</a></li><li><ol class="section"><li><a href="traversals-queries/dot-path-expressions.html"><strong aria-hidden="true">2.10.1.</strong> Dot Path Expressions</a></li><li><a href="traversals-queries/path-functions.html"><strong aria-hidden="true">2.10.2.</strong> Dot Path Functions</a></li></ol></li><li><a href="formatting.html"><strong aria-hidden="true">2.11.</strong> Formatting</a></li><li><ol class="section"><li><a href="formatting/json.html"><strong aria-hidden="true">2.11.1.</strong> JSON Formatting</a></li><li><a href="formatting/lax-json.html"><strong aria-hidden="true">2.11.2.</strong> Lax JSON</a></li></ol></li><li><a href="format-specs/mime-types.html"><strong aria-hidden="true">2.12.</strong> MIME Type and Extension</a></li><li><a href="dev-ressources.html"><strong aria-hidden="true">2.13.</strong> Developer Resources</a></li><li><ol class="section"><li><a href="dev-ressources/libraries.html"><strong aria-hidden="true">2.13.1.</strong> Libraries</a></li><li><a href="dev-ressources/best-practise.html"><strong aria-hidden="true">2.13.2.</strong> Best Practise</a></li><li><a href="dev-ressources/example-files.html"><strong aria-hidden="true">2.13.3.</strong> Example Files</a></li></ol></li><li><a href="libcarbon.html"><strong aria-hidden="true">2.14.</strong> Carbon Files in Libcarbon</a></li></ol></li><li><a href="archive-spec.html"><strong aria-hidden="true">3.</strong> Carbon Archive Specification</a></li><li class="affix"><a href="feedback.html">Feedback and Contributions</a></li><li class="affix"><a href="thanks.html">Thanks To</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar" class="menu-bar">
+                    <div id="menu-bar-sticky-container">
+                        <div class="left-buttons">
+                            <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                                <i class="fa fa-paint-brush"></i>
+                            </button>
+                            <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                                <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                            </ul>
+                            
+                            <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                                <i class="fa fa-search"></i>
+                            </button>
+                            
+                        </div>
+
+                        <h1 class="menu-title">The Columnar Binary JSON Specification</h1>
+
+                        <div class="right-buttons">
+                            <a href="print.html" title="Print this book" aria-label="Print this book">
+                                <i id="print-button" class="fa fa-print"></i>
+                            </a>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1><a class="header" href="#columnar-binary-json-files" id="columnar-binary-json-files">Columnar Binary JSON Files</a></h1>
+<blockquote>
+<p><strong>This specification document is work-in-progress</strong>. </p>
+</blockquote>
+<blockquote>
+<p>You see the latest version in the <code>develop</code> branch, as of 18th October 2019.</p>
+</blockquote>
+<h2><a class="header" href="#license" id="license">License</a></h2>
+<p>The Columnar Binary JSON specification and Libcarbon, all the source code, is released under the <a href="https://github.com/jaksonlabs/jakson/blob/master/LICENSE">MIT Licsense</a>.</p>
+<h1><a class="header" href="#introduction" id="introduction">Introduction</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong></p>
+</blockquote>
+<h1><a class="header" href="#getting-started" id="getting-started">Getting Started</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#motivation" id="motivation">Motivation</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#example" id="example">Example</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#comparison" id="comparison">Comparison</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#format-specification" id="format-specification">Format Specification</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong></p>
+</blockquote>
+<h1><a class="header" href="#design-goals" id="design-goals">Design Goals</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#notation" id="notation">Notation</a></h1>
+<table><thead><tr><th>Notation</th><th>Description</th><th>Example</th></tr></thead><tbody>
+<tr><td><code>[x]</code></td><td>Fixed-length block <code>x</code> of certain number of bytes</td><td><code>[{]</code> an object start marker, <code>[n]</code> a null value, <code>[21]</code> an integer value, <code>[Hello, World!]</code> a character string</td></tr>
+<tr><td><code>(x)</code></td><td>Varialbe-length value <code>x</code> with varying bytes</td><td><code>(len)</code> variable-length unsigned integer encoding a length <code>len</code></td></tr>
+<tr><td><code>&lt;x&gt;</code></td><td>Optional, context-dependent value <code>x</code></td><td><code>[[] &lt;data&gt; []]</code> an array block <code>[</code> <code>]</code> with content <code>data</code> that may be of varying length</td></tr>
+<tr><td><code>...</code></td><td>Memory range of zero or more zeros</td><td><code>[...]...</code> an empty array block containing reserved memory, followed by (unused) reserved memory</td></tr>
+</tbody></table>
+<p><code>[x]</code>, <code>(x)</code>, and <code>&lt;x&gt;</code> are called <strong>blocks</strong> with content <code>x</code>.</p>
+<h1><a class="header" href="#alternatives" id="alternatives">Alternatives</a></h1>
+<h2><a class="header" href="#running-example" id="running-example">Running Example</a></h2>
+<p>JSON snippet</p>
+<pre><code class="language-json">{
+   &quot;title&quot;:&quot;Back to the Future&quot;,
+   &quot;sub-title&quot;:null,
+   &quot;year&quot;:1985,
+   &quot;imdb-rating&quot;:8.5,
+   &quot;keywords&quot;:[
+      &quot;time travel&quot;,
+      &quot;delorean&quot;,
+      &quot;comedy&quot;
+   ],
+   &quot;release-dates&quot;:[
+      1985, 1986, 1987,
+      1992, 2008, 2010,
+      2012, 2015, 2016
+   ]
+}
+</code></pre>
+<p>Carbon <code>record</code> for JSON snippet</p>
+<pre><code>[nokey, 1B]
+[array-begin, 1B]
+[object-begin, 1B]
+   (str-len, 1B)[title, 5B] [string-field, 1B](str-len, 1B)[Back to the Future, 18B]
+   (str-len, 1B)[sub-title, 9B] [null-field, 1B]
+   (str-len, 1B)[year, 4B] [short-integer-field, 1B][1985, 2B]
+   (str-len, 1B)[imdb-rating, 11B] [float-field, 1B][8.5, 4B]
+   (str-len, 1B)[keywords, 8B] 
+      [array-begin, 1B] 
+         [string-field, 1B](str-len, 1B)[time travel, 11B] 
+         [string-field, 1B](str-len, 1B)[delorean, 8B]       
+         [string-field, 1B](str-len, 1B)[comedy, 6B]            
+      [array-end, 1B]
+   (str-len, 1B)[release-dates,13B] 
+      [short-int-column, 1B](num-elems, 1B)(cap-elems, 1B)
+         [1985, 2B] 
+         [1986, 2B] 
+         [1987, 2B]
+         [1992, 2B] 
+         [2008, 2B] 
+         [2010, 2B]
+         [2012, 2B]
+         [2015, 2B]
+         [2016, 2B]
+[object-end, 1B] 
+[array-end, 1B] 
+</code></pre>
+<p>144 byte</p>
+<table><thead><tr><th>Format</th><th>Document Size</th></tr></thead><tbody>
+<tr><td>Plain-Text JSON</td><td>187 byte</td></tr>
+<tr><td>Binary JSON (BSON)</td><td>219 byte</td></tr>
+<tr><td>Universal Binary JSON (UBJSON)</td><td>155 byte</td></tr>
+<tr><td>Columnar Binary JSON (Carbon)</td><td>144 byte</td></tr>
+</tbody></table>
+<h1><a class="header" href="#binary-json" id="binary-json">Binary JSON</a></h1>
+<h2><a class="header" href="#bson-running-example" id="bson-running-example">BSON Running Example</a></h2>
+<pre><code>[object-size, 4B]
+	[string-field, 1B] [title\0, 6B] [byte-num, 4B] [Back to the Future\0, 19B]
+	[null-field, 1B] [sub-title\0, 10B] 
+	[integer-field, 1B] [year\0, 5B] [1985, 4B]
+	[float-field, 1B] [imdb-rating\0, 12B] [8.5, 8B]
+	[array-field, 1B] [keywords\0, 9B] 
+		[doc-size, 4 B]
+			[string-field, 1B] [0\0, 2B] [byte-num, 4B] [time travel\0, 12B]
+			[string-field, 1B] [1\0, 2B] [byte-num, 4B] [delorean\0, 9B]
+			[string-field, 1B] [2\0, 2B] [byte-num, 4B] [comedy\0, 7B]
+		[null, 1 B]
+	[array-field, 1B] [release-dates\0, 9B] 
+		[doc-size, 4 B]
+			[integer-field, 1B] [0\0, 2B] [1985, 4B]
+			[integer-field, 1B] [1\0, 2B] [1986, 4B]
+			[integer-field, 1B] [2\0, 2B] [1987, 4B]
+			[integer-field, 1B] [3\0, 2B] [1992, 4B]
+			[integer-field, 1B] [4\0, 2B] [2008, 4B]
+			[integer-field, 1B] [5\0, 2B] [2010, 4B]
+			[integer-field, 1B] [6\0, 2B] [2012, 4B]
+			[integer-field, 1B] [7\0, 2B] [2015, 4B]
+			[integer-field, 1B] [8\0, 2B] [2016, 4B]
+		[null, 1 B]
+	[null, 1B]
+</code></pre>
+<p>219 byte</p>
+<h2><a class="header" href="#comparison-to-carbon" id="comparison-to-carbon">Comparison to Carbon</a></h2>
+<h3><a class="header" href="#design-goals-1" id="design-goals-1">Design Goals</a></h3>
+<h4><a class="header" href="#commonalities" id="commonalities">Commonalities</a></h4>
+<h4><a class="header" href="#differences" id="differences">Differences</a></h4>
+<h3><a class="header" href="#encoding" id="encoding">Encoding</a></h3>
+<h4><a class="header" href="#commonalities-1" id="commonalities-1">Commonalities</a></h4>
+<h4><a class="header" href="#differences-1" id="differences-1">Differences</a></h4>
+<h1><a class="header" href="#universal-binary-json" id="universal-binary-json">Universal Binary JSON</a></h1>
+<h2><a class="header" href="#ubjson-running-example" id="ubjson-running-example">UBJSON Running Example</a></h2>
+<p>(size-optimized UBJSON)</p>
+<pre><code>[object-begin, 1B]
+   [small-int, 1B] [str-len, 1B][title, 5B] [string-field, 1B]
+                        [small-int, 1B] [str-len, 1B][Back to the Future, 18B]
+   [small-int, 1B] [str-len, 1B][sub-title, 9B] [null-field, 1B]
+   [small-int, 1B] [str-len, 1B][year, 4B] [short-integer-field, 1B][1985, 2B]
+   [small-int, 1B] [str-len, 1B][imdb-rating, 11B] [float-field, 1B][8.5, 4B]
+   [small-int, 1B] [str-len, 1B][keywords, 8B] 
+      [array-begin, 1B] [strong-type-marker, 1B] [string-type, 1B]
+         [small-int, 1B] [str-len, 1B][time travel, 11B] 
+         [small-int, 1B] [str-len, 1B][delorean, 8B]       
+         [small-int, 1B] [str-len, 1B][comedy, 6B]            
+      [array-end, 1B]
+   [small-int, 1B] [str-len, 1B][release-dates,13B] 
+      [array-begin, 1B] [count-marker, 1B] [num-elems, 1B] [strong-type-marker, 1B]
+         [1985, 2B] 
+         [1986, 2B] 
+         [1987, 2B]
+         [1992, 2B] 
+         [2008, 2B] 
+         [2010, 2B]
+         [2012, 2B]
+         [2015, 2B]
+         [2016, 2B]
+[object-end, 1B]  
+</code></pre>
+<p>155 byte</p>
+<h2><a class="header" href="#comparison-to-carbon-1" id="comparison-to-carbon-1">Comparison to Carbon</a></h2>
+<h3><a class="header" href="#design-goals-2" id="design-goals-2">Design Goals</a></h3>
+<h4><a class="header" href="#commonalities-2" id="commonalities-2">Commonalities</a></h4>
+<h4><a class="header" href="#differences-2" id="differences-2">Differences</a></h4>
+<ul>
+<li>UBJSON is not intented for writes, while Carbon emphasises in-place modifications including (optional) reserved memory ranges as capacity buffers to avoid reallocation during updates</li>
+<li>No specification on update semantics for UBJSON, while there is a detailed specification on atomic operations, update behavior and version control for Carbon</li>
+</ul>
+<h3><a class="header" href="#encoding-1" id="encoding-1">Encoding</a></h3>
+<h4><a class="header" href="#commonalities-3" id="commonalities-3">Commonalities</a></h4>
+<ul>
+<li>Carbon and UBJSON are very similar in its core structure (similar containers in general), similar use of markers. </li>
+<li>Support of constrainted arrays (&quot;strongly typed arrays&quot;), but with different optimization goals in mind</li>
+</ul>
+<h4><a class="header" href="#differences-3" id="differences-3">Differences</a></h4>
+<p>In direct comparison, Carbon focus more on semantics (e.g., embedding additional meta-data) and focus more on support for operations of typical operational document stores (e.g., on-the-fly updates), while UBJSON focusses on efficient data exchange between two actors. Both, Carbon and UBJSON share the concept of a minimalistic type-support to have full compatibility to the latest JSON specification. However, Carbon adds one additional data type (<code>custom</code>) <code>binary</code> to enable user-defined function (UDF) support on user-defined types, though.</p>
+<ul>
+<li>Carbon supports three-valued logic for <code>boolean</code> values, and encodes <code>null</code> values not only for the JSON constant <em>null</em> but also as valid value in strongly typed arrays (e.g., intermixing of <code>null</code> and number values in <code>column</code> containers of Carbon). UBJSON cannot store a <code>null</code> value in a strongly typed array of a particular non-null type, and must fallback to size-inefficient standard arrays in UBJSON. </li>
+<li>Variable-length integer encoding for string lengths, or counters in Carbon</li>
+<li>Encoding of binary data: while in UBJON a (strongly typed) unsigned 8-bit integer array is used, in Carbon there is a dedicated type <code>binary</code> (resp. <code>custom binary</code>) that encoded the actual binary string data type (i.e., the <em>what is stored</em> information gets not lost in Carbon as it does in UBJSON)</li>
+<li>Revision numbering as dedicated (variable-length) meta-data field in Carbon</li>
+<li>Record identification via (optional) primary key as meta-data field in Carbon, and defined semantic about record identity</li>
+<li>Overall, typically smaller binary size for Carbon files compared to UBJSON files</li>
+<li>For Carbon, the evaluation of dot-path expressions is well-defined and specified</li>
+<li>Carbon specificies two way to express absence of data, <code>null</code> and <code>undef</code> where the first one maps to user-defined data and the second is a dedicated result value for dot-path expressions.</li>
+</ul>
+<h1><a class="header" href="#format-overview" id="format-overview">Format Overview</a></h1>
+<pre><code>&lt;primary-key&gt; [commit-hash] [[] &lt;values&gt;... []]...
+</code></pre>
+<p><span class="caption">Figure FO-1: Carbon File Record Format</span></p>
+<p>A <strong>marker</strong> <code>x</code> has always a size of 1 byte. </p>
+<h2><a class="header" href="#document-identification" id="document-identification">Document Identification</a></h2>
+<pre><code>&lt;primary-key&gt;
+</code></pre>
+<p>See more about identity of Carbon records in the Section about <a href="format-specs/../format-specs/identification.html">Identification</a>.</p>
+<h2><a class="header" href="#revision-managment" id="revision-managment">Revision Managment</a></h2>
+<pre><code>[commit-hash]
+</code></pre>
+<blockquote>
+<p>The <code>commit-hash</code> field for a carbon <code>record</code> which has no primary key (i.e., <code>nokey</code> is set), is omitted. In any case of revison, the commit hash of a <code>record</code> without primary key is <code>0</code>. See more in section about record <a href="format-specs/identification.html">identification</a>.</p>
+</blockquote>
+<p>The <code>commit-hash</code> field requires 64bit.</p>
+<p>The initial commit hash for an new <code>record</code> having some primary key type, is a (almost global) unique randomly generated number. </p>
+<h2><a class="header" href="#values" id="values">Values</a></h2>
+<pre><code>&lt;values&gt;
+</code></pre>
+<h2><a class="header" href="#capacitities" id="capacitities">Capacitities</a></h2>
+<pre><code>...
+</code></pre>
+<h2><a class="header" href="#examples" id="examples">Examples</a></h2>
+<h3><a class="header" href="#example-array" id="example-array">Example (Array)</a></h3>
+<p>JSON snippet</p>
+<pre><code class="language-json">[ &quot;The&quot;, &quot;Number&quot;, 23 ]
+</code></pre>
+<p>A (compacted) Carbon <code>record</code> with user-defined primary key <code>21</code> in revision <code>5</code> encoding the JSON array as <code>array</code>.</p>
+<pre><code>[ukey][21](5) [[] [s](3)[The] [s](6)[Number] [c][23] []] 
+</code></pre>
+<h3><a class="header" href="#example-column" id="example-column">Example (Column)</a></h3>
+<p>JSON snippet</p>
+<pre><code class="language-json">[ 23, 24, 25 ]
+</code></pre>
+<p>A (compacted) Carbon <code>record</code> with user-defined primary key <code>21</code> in revision <code>5</code> encoding the JSON array as <code>column-u8</code> integer column with <code>3</code> elements and a capacity of <code>3</code>.</p>
+<pre><code>[ukey][21](5) [1](3)(3) [23][24][25] []] 
+</code></pre>
+<h1><a class="header" href="#marker-format" id="marker-format">Marker Format</a></h1>
+<pre><code>[marker]
+</code></pre>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th>Examples</th></tr></thead><tbody>
+<tr><td><code>marker</code></td><td>constant for encoding of items and containers</td><td>1 byte</td><td><code>[n]</code>, <code>[[]</code>, <code>[x]</code></td></tr>
+</tbody></table>
+<h2><a class="header" href="#reserved-marker" id="reserved-marker">Reserved Marker</a></h2>
+<table><thead><tr><th>Marker</th><th>Carbon Type</th><th>Descriptions</th></tr></thead><tbody>
+<tr><td><code>[t]</code></td><td><code>true</code></td><td>a field truth value <em>true</em></td></tr>
+<tr><td><code>[f]</code></td><td><code>false</code></td><td>a field truth value <em>false</em></td></tr>
+<tr><td><code>[c]</code></td><td><code>u8</code></td><td>an unsigned 8-bit integer field</td></tr>
+<tr><td><code>[d]</code></td><td><code>u16</code></td><td>an unsigned 16-bit integer field</td></tr>
+<tr><td><code>[i]</code></td><td><code>u32</code></td><td>an unsigned 32-bit integer field</td></tr>
+<tr><td><code>[l]</code></td><td><code>u64</code></td><td>an unsigned 64-bit integer field</td></tr>
+<tr><td><code>[C]</code></td><td><code>u8</code></td><td>a signed 8-bit integer field</td></tr>
+<tr><td><code>[D]</code></td><td><code>u16</code></td><td>a signed 16-bit integer field</td></tr>
+<tr><td><code>[I]</code></td><td><code>u32</code></td><td>a signed 32-bit integer field</td></tr>
+<tr><td><code>[L]</code></td><td><code>u64</code></td><td>a signed 64-bit integer field</td></tr>
+<tr><td><code>[r]</code></td><td><code>float</code></td><td>a single-precision floating number field</td></tr>
+<tr><td><code>[s]</code></td><td><code>string</code></td><td>a character string field</td></tr>
+<tr><td><code>[b]</code></td><td><code>binary</code></td><td>a binary string field with known MIME type</td></tr>
+<tr><td><code>[x]</code></td><td><code>custom binary</code></td><td>a binary string field with user-defined type</td></tr>
+<tr><td><code>[n]</code></td><td><code>null</code></td><td>absence of data</td></tr>
+</tbody></table>
+<p><span class="caption">Figure MF-1: Data Type Markers</span></p>
+<table><thead><tr><th>Marker</th><th>Carbon Type</th><th>Descriptions</th></tr></thead><tbody>
+<tr><td><code>[{]</code></td><td><code>object</code></td><td>marks begin of an object</td></tr>
+<tr><td><code>[}]</code></td><td><code>object</code></td><td>marks end of an object</td></tr>
+<tr><td><code>[[]</code></td><td><code>array</code></td><td>marks begin of an array</td></tr>
+<tr><td><code>[]]</code></td><td><code>array</code></td><td>marks end of an array</td></tr>
+<tr><td><code>[1]</code></td><td><code>column-u8</code></td><td>an unsigned 8-bit integer column</td></tr>
+<tr><td><code>[2]</code></td><td><code>column-u16</code></td><td>an unsigned 16-bit integer column</td></tr>
+<tr><td><code>[3]</code></td><td><code>column-u32</code></td><td>an unsigned 32-bit integer column</td></tr>
+<tr><td><code>[4]</code></td><td><code>column-u64</code></td><td>an unsigned 64-bit integer column</td></tr>
+<tr><td><code>[5]</code></td><td><code>column-i8</code></td><td>an signed 8-bit integer column</td></tr>
+<tr><td><code>[6]</code></td><td><code>column-i16</code></td><td>an signed 16-bit integer column</td></tr>
+<tr><td><code>[7]</code></td><td><code>column-i32</code></td><td>an signed 32-bit integer column</td></tr>
+<tr><td><code>[8]</code></td><td><code>column-i64</code></td><td>an signed 64-bit integer column</td></tr>
+<tr><td><code>[R]</code></td><td><code>column-float</code></td><td>a single-precision floating number column</td></tr>
+<tr><td><code>[B]</code></td><td><code>column-boolean</code></td><td>a three-valued logic column</td></tr>
+</tbody></table>
+<p><span class="caption">Figure MF-2: Container Type Markers</span></p>
+<table><thead><tr><th>Begin Marker</th><th>Abstract Type</th><th>Base</th><th>Container</th><th>Element</th><th>Distinct</th><th>Sorted</th></tr></thead><tbody>
+<tr><td><code>[{]</code></td><td><code>unsorted-multimap</code></td><td>yes</td><td><code>object</code></td><td>pair</td><td>no</td><td>no</td></tr>
+<tr><td><code>[~]</code></td><td><code>sorted-multimap</code></td><td>no</td><td><code>object</code></td><td>pair</td><td>no</td><td>yes</td></tr>
+<tr><td><code>[:]</code></td><td><code>unsorted-map</code></td><td>no</td><td><code>object</code></td><td>pair</td><td>yes</td><td>no</td></tr>
+<tr><td><code>[#]</code></td><td><code>sorted-map</code></td><td>no</td><td><code>object</code></td><td>pair</td><td>yes</td><td>yes</td></tr>
+</tbody></table>
+<p><span class="caption">Figure MF-2: Abstract Types on <code>object</code> containers</span></p>
+<table><thead><tr><th>Begin Marker</th><th>Abstract Type</th><th>Base</th><th>Container</th><th>Element</th><th>Distinct</th><th>Sorted</th></tr></thead><tbody>
+<tr><td><code>[[]</code></td><td><code>unsorted-multiset</code></td><td>yes</td><td><code>array</code></td><td>value</td><td>no</td><td>no</td></tr>
+<tr><td><code>[&lt;]</code></td><td><code>sorted-multiset</code></td><td>no</td><td><code>array</code></td><td>value</td><td>no</td><td>yes</td></tr>
+<tr><td><code>[/]</code></td><td><code>unsorted-set</code></td><td>no</td><td><code>array</code></td><td>value</td><td>yes</td><td>no</td></tr>
+<tr><td><code>[=]</code></td><td><code>sorted-set</code></td><td>no</td><td><code>array</code></td><td>value</td><td>yes</td><td>yes</td></tr>
+</tbody></table>
+<p><span class="caption">Figure MF-2: Abstract Types on <code>array</code> containers</span></p>
+<table><thead><tr><th>Begin Marker</th><th>Abstract Type</th><th>Base</th><th>Container</th><th>Element</th><th>Distinct</th><th>Sorted</th></tr></thead><tbody>
+<tr><td><code>[1]</code></td><td><code>unsorted-multiset</code></td><td>yes</td><td><code>column-u8</code></td><td>value</td><td>no</td><td>no</td></tr>
+<tr><td><code>[SOH]</code></td><td><code>sorted-multiset</code></td><td>no</td><td><code>column-u8</code></td><td>value</td><td>no</td><td>yes</td></tr>
+<tr><td><code>[STX]</code></td><td><code>unsorted-set</code></td><td>no</td><td><code>column-u8</code></td><td>value</td><td>yes</td><td>no</td></tr>
+<tr><td><code>[ETX]</code></td><td><code>sorted-set</code></td><td>no</td><td><code>column-u8</code></td><td>value</td><td>yes</td><td>yes</td></tr>
+<tr><td><code>[2]</code></td><td><code>unsorted-multiset</code></td><td>yes</td><td><code>column-u16</code></td><td>value</td><td>no</td><td>no</td></tr>
+<tr><td><code>[ENQ]</code></td><td><code>sorted-multiset</code></td><td>no</td><td><code>column-u16</code></td><td>value</td><td>no</td><td>yes</td></tr>
+<tr><td><code>[ACK]</code></td><td><code>unsorted-set</code></td><td>no</td><td><code>column-u16</code></td><td>value</td><td>yes</td><td>no</td></tr>
+<tr><td><code>[BEL]</code></td><td><code>sorted-set</code></td><td>no</td><td><code>column-u16</code></td><td>value</td><td>yes</td><td>yes</td></tr>
+<tr><td><code>[3]</code></td><td><code>unsorted-multiset</code></td><td>yes</td><td><code>column-u32</code></td><td>value</td><td>no</td><td>no</td></tr>
+<tr><td><code>[TAB]</code></td><td><code>sorted-multiset</code></td><td>no</td><td><code>column-u32</code></td><td>value</td><td>no</td><td>yes</td></tr>
+<tr><td><code>[LF]</code></td><td><code>unsorted-set</code></td><td>no</td><td><code>column-u32</code></td><td>value</td><td>yes</td><td>no</td></tr>
+<tr><td><code>[VT]</code></td><td><code>sorted-set</code></td><td>no</td><td><code>column-u32</code></td><td>value</td><td>yes</td><td>yes</td></tr>
+<tr><td><code>[4]</code></td><td><code>unsorted-multiset</code></td><td>yes</td><td><code>column-u64</code></td><td>value</td><td>no</td><td>no</td></tr>
+<tr><td><code>[CR]</code></td><td><code>sorted-multiset</code></td><td>no</td><td><code>column-u64</code></td><td>value</td><td>no</td><td>yes</td></tr>
+<tr><td><code>[S0]</code></td><td><code>unsorted-set</code></td><td>no</td><td><code>column-u64</code></td><td>value</td><td>yes</td><td>no</td></tr>
+<tr><td><code>[S1]</code></td><td><code>sorted-set</code></td><td>no</td><td><code>column-u64</code></td><td>value</td><td>yes</td><td>yes</td></tr>
+<tr><td><code>[5]</code></td><td><code>unsorted-multiset</code></td><td>yes</td><td><code>column-i8</code></td><td>value</td><td>no</td><td>no</td></tr>
+<tr><td><code>[DC1]</code></td><td><code>sorted-multiset</code></td><td>no</td><td><code>column-i8</code></td><td>value</td><td>no</td><td>yes</td></tr>
+<tr><td><code>[DC2]</code></td><td><code>unsorted-set</code></td><td>no</td><td><code>column-i8</code></td><td>value</td><td>yes</td><td>no</td></tr>
+<tr><td><code>[DC3]</code></td><td><code>sorted-set</code></td><td>no</td><td><code>column-i8</code></td><td>value</td><td>yes</td><td>yes</td></tr>
+<tr><td><code>[6]</code></td><td><code>unsorted-multiset</code></td><td>yes</td><td><code>column-i16</code></td><td>value</td><td>no</td><td>no</td></tr>
+<tr><td><code>[NAK]</code></td><td><code>sorted-multiset</code></td><td>no</td><td><code>column-i16</code></td><td>value</td><td>no</td><td>yes</td></tr>
+<tr><td><code>[SYN]</code></td><td><code>unsorted-set</code></td><td>no</td><td><code>column-i16</code></td><td>value</td><td>yes</td><td>no</td></tr>
+<tr><td><code>[ETB]</code></td><td><code>sorted-set</code></td><td>no</td><td><code>column-i16</code></td><td>value</td><td>yes</td><td>yes</td></tr>
+<tr><td><code>[7]</code></td><td><code>unsorted-multiset</code></td><td>yes</td><td><code>column-i32</code></td><td>value</td><td>no</td><td>no</td></tr>
+<tr><td><code>[EM]</code></td><td><code>sorted-multiset</code></td><td>no</td><td><code>column-i32</code></td><td>value</td><td>no</td><td>yes</td></tr>
+<tr><td><code>[SUB]</code></td><td><code>unsorted-set</code></td><td>no</td><td><code>column-i32</code></td><td>value</td><td>yes</td><td>no</td></tr>
+<tr><td><code>[ESC]</code></td><td><code>sorted-set</code></td><td>no</td><td><code>column-i32</code></td><td>value</td><td>yes</td><td>yes</td></tr>
+<tr><td><code>[8]</code></td><td><code>unsorted-multiset</code></td><td>yes</td><td><code>column-i64</code></td><td>value</td><td>no</td><td>no</td></tr>
+<tr><td><code>[GS]</code></td><td><code>sorted-multiset</code></td><td>no</td><td><code>column-i64</code></td><td>value</td><td>no</td><td>yes</td></tr>
+<tr><td><code>[RS]</code></td><td><code>unsorted-set</code></td><td>no</td><td><code>column-i64</code></td><td>value</td><td>yes</td><td>no</td></tr>
+<tr><td><code>[US]</code></td><td><code>sorted-set</code></td><td>no</td><td><code>column-i64</code></td><td>value</td><td>yes</td><td>yes</td></tr>
+<tr><td><code>[R]</code></td><td><code>unsorted-multiset</code></td><td>yes</td><td><code>column-float</code></td><td>value</td><td>no</td><td>no</td></tr>
+<tr><td><code>[&quot;]</code></td><td><code>sorted-multiset</code></td><td>no</td><td><code>column-float</code></td><td>value</td><td>no</td><td>yes</td></tr>
+<tr><td><code>[$]</code></td><td><code>unsorted-set</code></td><td>no</td><td><code>column-float</code></td><td>value</td><td>yes</td><td>no</td></tr>
+<tr><td><code>[.]</code></td><td><code>sorted-set</code></td><td>no</td><td><code>column-float</code></td><td>value</td><td>yes</td><td>yes</td></tr>
+<tr><td><code>[B]</code></td><td><code>unsorted-multiset</code></td><td>yes</td><td><code>column-boolean</code></td><td>value</td><td>no</td><td>no</td></tr>
+<tr><td><code>[_]</code></td><td><code>sorted-multiset</code></td><td>no</td><td><code>column-boolean</code></td><td>value</td><td>no</td><td>yes</td></tr>
+<tr><td><code>[']</code></td><td><code>unsorted-set</code></td><td>no</td><td><code>column-boolean</code></td><td>value</td><td>yes</td><td>no</td></tr>
+<tr><td><code>[DEL]</code></td><td><code>sorted-set</code></td><td>no</td><td><code>column-boolean</code></td><td>value</td><td>yes</td><td>yes</td></tr>
+</tbody></table>
+<p><span class="caption">Figure MF-2: Abstract Types on <code>column</code> containers</span></p>
+<table><thead><tr><th>Marker</th><th>Carbon Type</th><th>Descriptions</th></tr></thead><tbody>
+<tr><td><code>[?]</code></td><td><code>nokey</code></td><td>no record identifier assigned</td></tr>
+<tr><td><code>[*]</code></td><td><code>autokey</code></td><td>record identifier is auto-generated a <code>u64</code> value</td></tr>
+<tr><td><code>[+]</code></td><td><code>ukey</code></td><td>record identifier is user-defined a <code>u64</code> value</td></tr>
+<tr><td><code>[-]</code></td><td><code>ikey</code></td><td>record identifier is user-defined a <code>i64</code> value</td></tr>
+<tr><td><code>[!]</code></td><td><code>ikey</code></td><td>record identifier is user-defined a <code>string</code> value</td></tr>
+</tbody></table>
+<p><span class="caption">Figure MF-3: Record Identifier Type Markers</span></p>
+<table><thead><tr><th>Marker</th><th>Carbon Type</th><th>Descriptions</th></tr></thead><tbody>
+<tr><td><code>[0]</code></td><td><code>reserved</code></td><td>marks a single reserved byte</td></tr>
+</tbody></table>
+<p><span class="caption">Figure MF-4: Special Purpose Markers</span></p>
+<pre><code>[NUL], [EOT], [BS], [FF], [DLE], [DC4], [CAN], [FS], [^], [\], [@] 
+</code></pre>
+<p><span class="caption">Figure MF-4: Unused but reserved Markers</span></p>
+<h1><a class="header" href="#variable-length-integers" id="variable-length-integers">Variable-Length Integers</a></h1>
+<pre><code>(value)
+</code></pre>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#padding-spaces" id="padding-spaces">Padding Spaces</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#bnf-syntax" id="bnf-syntax">BNF Syntax</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#identification" id="identification">Identification</a></h1>
+<pre><code>&lt;primary-key&gt;
+</code></pre>
+<pre><code>&lt;type-marker&gt; &lt;value-type&gt;
+</code></pre>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th>Type Marker</th><th>Value Type</th></tr></thead><tbody>
+<tr><td><code>nokey</code></td><td>no identifier assigned</td><td>0 B</td><td><code>[?]</code></td><td><em>none</em></td></tr>
+<tr><td><code>autokey</code></td><td>64-bit auto-generated unsigned identifier</td><td>8 B</td><td><code>[*]</code></td><td><code>u64</code></td></tr>
+<tr><td><code>ukey</code></td><td>64-bit user-defined unsigned identifier</td><td>8 B</td><td><code>[+]</code></td><td><code>u64</code></td></tr>
+<tr><td><code>ikey</code></td><td>64-bit user-defined signed identifier</td><td>8 B</td><td><code>[-]</code></td><td><code>i64</code></td></tr>
+<tr><td><code>skey</code></td><td><code>n</code>-char string user-def. identifier</td><td><code>n</code> B</td><td><code>[!]</code></td><td><code>string</code></td></tr>
+</tbody></table>
+<p><span class="caption">Table FO-1: Record Primary Key Types and Encoding</span></p>
+<blockquote>
+<p>The value generation of <code>autokey</code> is implementation-dependent.</p>
+</blockquote>
+<blockquote>
+<p>The default value for numeric keys (<code>autokey</code>, <code>ukey</code>, and <code>ikey</code>) is <code>0</code>. The empty string <code>&quot;&quot;</code> is used to encode the default value for character string keys (<code>skey</code>). JSON formatters are required to format the value of <code>nokey</code> and the default value for character string keys as JSON <code>null</code>.</p>
+</blockquote>
+<blockquote>
+<p>If <code>nokey</code> is set, the <code>commit-hash</code> field for a carbon <code>record</code> is omitted. In any case of revison, the commit hash for such a <code>record</code> is <code>0</code>.</p>
+</blockquote>
+<h1><a class="header" href="#user-defined-keys" id="user-defined-keys">User-Defined Keys</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#system-defined-keys" id="system-defined-keys">System-Defined Keys</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#data-types" id="data-types">Data Types</a></h1>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>true</code></td><td>truth value <em>true</em></td><td>0 byte</td><td><code>null</code></td><td><code>[t]</code></td></tr>
+<tr><td><code>false</code></td><td>truth value <em>false</em></td><td>0 byte</td><td><code>null</code></td><td><code>[f]</code></td></tr>
+<tr><td><code>boolean</code></td><td>three-valued logic</td><td>0<sup>+</sup> bytes</td><td>const</td><td><code>[B]</code></td></tr>
+<tr><td><code>u8</code></td><td>unsigned 8-bit int</td><td>1 B</td><td><code>null</code>, 2<sup>8</sup> - 1</td><td><code>[c]</code>, <code>[1]</code></td></tr>
+<tr><td><code>u16</code></td><td>unsigned 16-bit int</td><td>2 B</td><td><code>null</code>, 2<sup>16</sup> - 1</td><td><code>[d]</code>, <code>[2]</code></td></tr>
+<tr><td><code>u32</code></td><td>unsigned 32-bit int</td><td>4 B</td><td><code>null</code>, 2<sup>16</sup> - 1</td><td><code>[i]</code>, <code>[3]</code></td></tr>
+<tr><td><code>u64</code></td><td>unsigned 64-bit int</td><td>8 B</td><td><code>null</code>, 2<sup>16</sup> - 1</td><td><code>[l]</code>, <code>[4]</code></td></tr>
+<tr><td><code>i8</code></td><td>signed 8-bit int</td><td>1 B</td><td><code>null</code>, -2<sup>7</sup></td><td><code>[C]</code>, <code>[5]</code></td></tr>
+<tr><td><code>i16</code></td><td>signed 16-bit int</td><td>2 B</td><td><code>null</code>, -2<sup>15</sup></td><td><code>[D]</code>, <code>[6]</code></td></tr>
+<tr><td><code>i32</code></td><td>signed 32-bit int</td><td>4 B</td><td><code>null</code>, -2<sup>31</sup></td><td><code>[I]</code>, <code>[7]</code></td></tr>
+<tr><td><code>i64</code></td><td>signed 64-bit int</td><td>8 B</td><td><code>null</code>, -2<sup>63</sup></td><td><code>[L]</code>, <code>[8]</code></td></tr>
+<tr><td><code>float</code></td><td>32-bit float</td><td>4 byte</td><td><code>null</code>,  <code>NAN</code></td><td><code>[r]</code>, <code>[R]</code></td></tr>
+<tr><td><code>string</code></td><td>string of <code>n</code> chars</td><td><code>n</code> bytes</td><td><code>null</code></td><td><code>[s]</code></td></tr>
+<tr><td><code>binary</code></td><td>binary of <code>n</code> bytes</td><td><code>n</code> + 2<sup>+</sup> bytes</td><td><code>null</code></td><td><code>[b]</code></td></tr>
+<tr><td><code>custom binary</code></td><td>binary of <code>n</code> bytes</td><td><code>n</code> + 3<sup>+</sup> bytes</td><td><code>null</code></td><td><code>[x]</code></td></tr>
+<tr><td><code>null</code></td><td>absence of data (user-defined)</td><td>0<sup>+</sup> byte</td><td><code>null</code></td><td><code>[n]</code></td></tr>
+<tr><td><code>undef</code></td><td>absence of data (structure-defined)</td><td>0 byte</td><td><em>none</em></td><td><code>[N]</code></td></tr>
+</tbody></table>
+<h2><a class="header" href="#null-and-undef" id="null-and-undef">Null and Undef</a></h2>
+<p>In carbon, there are two way to express absence of data, <code>null</code> and <code>undef</code>. The first one, <code>null</code>, is a
+mapping of the Json constant <code>null</code>, and is used to express non-present data by the user, e.g., by the
+Json string <code>&quot;x&quot;: null</code>. In contrast, the second one, <code>undef</code> is used to express absence of data that is
+not only annotated as non-present, but in fact not contained. In no cases, the user can express a <code>undef</code>
+with its input, but will receive a <code>undef</code> (i.e., &quot;not in list&quot;) value whenever the user <code>queries</code> for non-existing
+data by a <a href="format-specs/traversals-queries/path-eval/path-eval.html">dot path expression</a>.</p>
+<p>The reason for differencing between <code>null</code> and <code>undef</code> is to enable clear semantic whether a particular
+<a href="format-specs/traversals-queries/path-eval/path-eval.html">dot path expression</a> evaluates to a value that is stored
+within the record and which is annotated with absence of data by the user (i.e., using a <code>null</code>),
+or to a value that is not contained in the dataset (i.e., a <code>undef</code> is return).</p>
+<p>To ephasis the differences and importance of <code>undef</code> and <code>null</code>, consider the following example</p>
+<pre><code class="language-json">{
+    &quot;x&quot;: null
+}
+</code></pre>
+<p>Using a <a href="format-specs/traversals-queries/path-eval/path-eval.html">dot path expression</a> asking for the value of
+the property <code>&quot;x&quot;</code> will result in <code>null</code> since <code>&quot;x&quot;</code> is a valid path that evaluates to a particular
+value. In contrast, asking for the value of an non-existing property <code>&quot;y&quot;</code> will result in <code>undef</code> since
+<code>&quot;y&quot;</code> does not exist. </p>
+<h1><a class="header" href="#booleans" id="booleans">Booleans</a></h1>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>true</code></td><td>the truth value <em>true</em></td><td>0 byte</td><td><code>null</code></td><td><code>[t]</code></td></tr>
+<tr><td><code>false</code></td><td>the truth value <em>false</em></td><td>0 byte</td><td><code>null</code></td><td><code>[f]</code></td></tr>
+<tr><td><code>boolean</code></td><td>a three-valued value</td><td>0<sup>+</sup> bytes</td><td><em>dedicated value</em></td><td><em>dedicated value</em></td></tr>
+</tbody></table>
+<h2><a class="header" href="#encoding-as-field-value" id="encoding-as-field-value">Encoding as Field Value</a></h2>
+<h3><a class="header" href="#example-1" id="example-1">Example</a></h3>
+<p>JSON snippet</p>
+<pre><code class="language-json">[true, false]
+</code></pre>
+<p>A (compacted) Carbon <code>array</code></p>
+<pre><code>[[] [t] [f] []]
+</code></pre>
+<h2><a class="header" href="#encoding-as-column-value" id="encoding-as-column-value">Encoding as Column Value</a></h2>
+<table><thead><tr><th>Column Type Marker</th><th>Marker Size</th><th>Value</th><th>Element Size</th><th>Block</th></tr></thead><tbody>
+<tr><td><code>[B]</code>, boolean values</td><td>1-byte</td><td><code>false</code></td><td>1 byte each</td><td><code>[0]</code></td></tr>
+<tr><td><code>[B]</code>, boolean values</td><td>1-byte</td><td><code>true</code></td><td>1 byte each</td><td><code>[1]</code></td></tr>
+<tr><td><code>[B]</code>, boolean values</td><td>1-byte</td><td><code>null</code></td><td>1 byte each</td><td><code>[2]</code></td></tr>
+</tbody></table>
+<h3><a class="header" href="#example-2" id="example-2">Example</a></h3>
+<p>JSON snippet</p>
+<pre><code class="language-json">[false, true, null]
+</code></pre>
+<p>A (compacted) Carbon <code>column-boolean</code>.</p>
+<pre><code>[B](3)(3) [0][1][2]
+</code></pre>
+<h1><a class="header" href="#integer-numbers" id="integer-numbers">Integer Numbers</a></h1>
+<table><thead><tr><th>Carbon</th><th>Description</th><th>Size</th><th>Min</th><th>Max</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>u8</code></td><td>unsigned 8-bit int</td><td>1 B</td><td>0</td><td>2<sup>8</sup> - 2</td><td><code>null</code> or 2<sup>8</sup> - 1</td><td><code>[c]</code></td></tr>
+<tr><td><code>u16</code></td><td>unsigned 16-bit int</td><td>2 B</td><td>0</td><td>2<sup>16</sup> - 2</td><td><code>null</code> or2<sup>16</sup> - 1</td><td><code>[d]</code></td></tr>
+<tr><td><code>u32</code></td><td>unsigned 32-bit int</td><td>4 B</td><td>0</td><td>2<sup>16</sup> - 2</td><td><code>null</code> or2<sup>16</sup> - 1</td><td><code>[i]</code></td></tr>
+<tr><td><code>u64</code></td><td>unsigned 64-bit int</td><td>8 B</td><td>0</td><td>2<sup>16</sup> - 2</td><td><code>null</code> or2<sup>16</sup> - 1</td><td><code>[l]</code></td></tr>
+<tr><td><code>i8</code></td><td>signed 8-bit int</td><td>1 B</td><td>−2<sup>7</sup> + 1</td><td>2<sup>7</sup> - 2</td><td><code>null</code> or-2<sup>7</sup></td><td><code>[C]</code></td></tr>
+<tr><td><code>i16</code></td><td>signed 16-bit int</td><td>2 B</td><td>−2<sup>15</sup> + 1</td><td>2<sup>15</sup> - 2</td><td><code>null</code> or-2<sup>15</sup></td><td><code>[D]</code></td></tr>
+<tr><td><code>i32</code></td><td>signed 32-bit int</td><td>4 B</td><td>−2<sup>31</sup> + 1</td><td>2<sup>31</sup> - 2</td><td><code>null</code> or-2<sup>31</sup></td><td><code>[I]</code></td></tr>
+<tr><td><code>i64</code></td><td>signed 64-bit int</td><td>8 B</td><td>−2<sup>63</sup> + 1</td><td>2<sup>63</sup> - 2</td><td><code>null</code> or-2<sup>63</sup></td><td><code>[L]</code></td></tr>
+</tbody></table>
+<h2><a class="header" href="#encoding-as-field-value-1" id="encoding-as-field-value-1">Encoding as Field Value</a></h2>
+<h3><a class="header" href="#example-3" id="example-3">Example</a></h3>
+<p>JSON snippet</p>
+<pre><code class="language-json">[-42, 42, null]
+</code></pre>
+<p>A (compacted) Carbon file, which encodes the JSON array as <code>array</code> of one <code>i8</code> and one <code>u8</code> value.</p>
+<pre><code>[[] [c][-42] [C][42] [n] []]
+</code></pre>
+<h2><a class="header" href="#encoding-as-column-value-1" id="encoding-as-column-value-1">Encoding as Column Value</a></h2>
+<h3><a class="header" href="#example-4" id="example-4">Example</a></h3>
+<p>JSON snippet</p>
+<pre><code class="language-json">[-42, 42, null]
+</code></pre>
+<p>A (compacted) Carbon <code>column-8</code>.</p>
+<pre><code>[C](3)(3) [-42][42][255]
+</code></pre>
+<h1><a class="header" href="#floating-numbers" id="floating-numbers">Floating Numbers</a></h1>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>float</code></td><td>single-precision floating number</td><td>4 byte</td><td><code>null</code> or <code>NAN</code></td><td><code>r</code></td></tr>
+</tbody></table>
+<h2><a class="header" href="#encoding-as-field-value-2" id="encoding-as-field-value-2">Encoding as Field Value</a></h2>
+<table><thead><tr><th>Description</th><th>Size</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
+<tr><td>32-bit floating number</td><td>1+4 bytes</td><td><code>[r]</code> (real)</td><td>a <code>float</code> value</td></tr>
+</tbody></table>
+<h3><a class="header" href="#example-5" id="example-5">Example</a></h3>
+<p>JSON snippet</p>
+<pre><code class="language-json">[23.3, 42.0]
+</code></pre>
+<p>A (compacted) Carbon file, which encodes the JSON array as <code>array</code> of one <code>i8</code> and one <code>u8</code> integer.</p>
+<pre><code>[[] [r][23.3] [r][42.0] []]
+</code></pre>
+<h2><a class="header" href="#encoding-as-column-value-2" id="encoding-as-column-value-2">Encoding as Column Value</a></h2>
+<table><thead><tr><th>Column Type Marker</th><th>Element Size</th><th>Block</th></tr></thead><tbody>
+<tr><td><code>[R]</code>, 32-bit floating numbers</td><td>4 byte each</td><td>a <code>float</code> value</td></tr>
+</tbody></table>
+<h3><a class="header" href="#example-6" id="example-6">Example</a></h3>
+<p>JSON snippet</p>
+<pre><code class="language-json">[23.3, 42.0]
+</code></pre>
+<p>A (compacted) Carbon <code>column-float</code>.</p>
+<pre><code>[R] (2)(2) [23.3][42.0]
+</code></pre>
+<h1><a class="header" href="#character-strings" id="character-strings">Character Strings</a></h1>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>string</code></td><td>a (Pascal) character string of <code>n</code> characters</td><td><code>n</code> bytes</td><td><code>null</code></td><td><code>[s]</code></td></tr>
+</tbody></table>
+<h2><a class="header" href="#encoding-as-field-value-3" id="encoding-as-field-value-3">Encoding as Field Value</a></h2>
+<pre><code>[s](n) &lt;character-string&gt;
+</code></pre>
+<table><thead><tr><th>Description</th><th>Size</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
+<tr><td>a <code>n</code>-char string</td><td>1 + <code>l</code> + <code>n</code> bytes</td><td><code>[s]</code> (string)</td><td><code>(n)</code> length (<code>l</code> byte), <code>n</code> chars</td></tr>
+</tbody></table>
+<h3><a class="header" href="#example-7" id="example-7">Example</a></h3>
+<p>JSON snippet</p>
+<pre><code class="language-json">[&quot;Hello&quot;, &quot;World&quot;, &quot;!&quot;]
+</code></pre>
+<p>A (compacted) Carbon file, which encodes the JSON array as <code>array</code> of character-string values.</p>
+<pre><code>[[] [s](5)[Hello] [s](5)[World] [s](1)[!] []]
+</code></pre>
+<h2><a class="header" href="#encoding-as-column-value-3" id="encoding-as-column-value-3">Encoding as Column Value</a></h2>
+<p>Character strings are not supported for column containers.</p>
+<h1><a class="header" href="#binary-strings" id="binary-strings">Binary Strings</a></h1>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>binary</code></td><td>binary of <code>n</code> bytes (MIME typed)</td><td><code>n</code> + 2<sup>+</sup> bytes</td><td><code>null</code></td><td><code>[b]</code></td></tr>
+<tr><td><code>custom binary</code></td><td>binary of <code>n</code> bytes (custom type)</td><td><code>n</code> + 3<sup>+</sup> bytes</td><td><code>null</code></td><td><code>[x]</code></td></tr>
+</tbody></table>
+<h2><a class="header" href="#encoding-as-field-value-4" id="encoding-as-field-value-4">Encoding As Field Value</a></h2>
+<h3><a class="header" href="#with-known-mime-types" id="with-known-mime-types">With Known MIME Types</a></h3>
+<pre><code>[b](mime-type-id)(str-len) &lt;binary&gt;
+</code></pre>
+<table><thead><tr><th>Description</th><th>Size (in Byte)</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
+<tr><td>binary of <code>n</code> bytes</td><td>1 + <code>k</code> + <code>l</code> + <code>n</code></td><td><code>[b]</code> (<code>binary</code>)</td><td><em>see below</em></td></tr>
+</tbody></table>
+<table><thead><tr><th>Payload</th><th>Description</th><th>Encoding Type</th><th>Size</th></tr></thead><tbody>
+<tr><td><code>(mime-type-id)</code></td><td>MIME Type Id (see below)</td><td>variable-length integer</td><td><code>k</code> byte</td></tr>
+<tr><td><code>(str-len)</code></td><td>binary string length in bytes</td><td>variable-length integer</td><td><code>l</code> byte</td></tr>
+<tr><td><code>&lt;binary&gt;</code></td><td>the binary string itself</td><td>fixed-sized binary string</td><td><code>n</code> byte</td></tr>
+</tbody></table>
+<h2><a class="header" href="#example-8" id="example-8">Example</a></h2>
+<p>snippet</p>
+<pre><code>MIME Type:	text/html
+Content:	&lt;html&gt;&lt;body&gt;&lt;p&gt;Hello, World!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+</code></pre>
+<p>A (compacted) Carbon file, which encodes the HTML code as <code>binary</code>.</p>
+<pre><code>[b](219)(46) [&lt;html&gt;&lt;body&gt;&lt;p&gt;Hello, World!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;]
+</code></pre>
+<h3><a class="header" href="#with-unknown-mime-types" id="with-unknown-mime-types">With Unknown MIME Types</a></h3>
+<pre><code>[x](type-str-len)&lt;type-str&gt;(str-len) &lt;binary-string&gt;
+</code></pre>
+<table><thead><tr><th>Description</th><th>Size (in Byte)</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
+<tr><td>binary of <code>n</code> bytes</td><td>1 + <code>p</code> + <code>q</code> + <code>l</code> + <code>n</code></td><td><code>[x]</code> (<code>custom binary</code>)</td><td><em>see below</em></td></tr>
+</tbody></table>
+<table><thead><tr><th>Payload</th><th>Description</th><th>Encoding Type</th><th>Size</th></tr></thead><tbody>
+<tr><td><code>(type-str-len)</code></td><td>used-def type string length</td><td>variable-length integer</td><td><code>k</code> byte</td></tr>
+<tr><td><code>&lt;type-str&gt;</code></td><td>the user-def type string itself</td><td>fixed-sized string</td><td><code>q</code> byte</td></tr>
+<tr><td><code>(str-len)</code></td><td>binary string length in bytes</td><td>variable-length integer</td><td><code>l</code> byte</td></tr>
+<tr><td><code>&lt;binary&gt;</code></td><td>the binary string itself</td><td>fixed-sized binary string</td><td><code>n</code> byte</td></tr>
+</tbody></table>
+<h2><a class="header" href="#example-9" id="example-9">Example</a></h2>
+<p>snippet</p>
+<pre><code>Type Name:      custom-type
+Content:        c3RpbGwgYSBzZWNyZXQ=
+</code></pre>
+<p>A (compacted) Carbon file, which encodes the HTML code as <code>binary</code>.</p>
+<pre><code>[x](11)[custom-type](20) [c3RpbGwgYSBzZWNyZXQ=]
+</code></pre>
+<h3><a class="header" href="#parsing-from-json" id="parsing-from-json">Parsing from JSON</a></h3>
+<p>JSON does not support the definition of <code>binary</code> or <code>custom binary</code> types as used in Carbon. To enable conversion from JSON that describes (<code>custom</code>) <code>binary</code> Carbon types, the follow convention is used. </p>
+<p>A binary is encoded in JSON using an JSON object with exactly the following string properties:</p>
+<ul>
+<li><code>type</code> store a (custom) type description</li>
+<li><code>encoding</code> stores the value <code>base64</code></li>
+<li><code>binary-string</code> stores a base64-encoded binary value</li>
+</ul>
+<p>A particular order of these properties inside the object is not required. Once an object satisfying the definition from above was found, the object is replaced with a (<code>custom</code>) <code>binary</code> type (called <em>auto-conversion</em>). If the string <code>type</code> matches a built-in MIME type (see blow) by character equality, and the auto-conversion option is <em>not</em> turned off, a <code>binary</code> type with the described contents is created. Otherwise a <code>custom binary</code> is created.</p>
+<p>Libaries implementing the Carbon specification <strong>must</strong> provide an option to turn off auto-conversion, such that there is a possibility to still store an object satisfying the definition from above without converting its content to a (<code>custom</code>) (<code>binary</code>) type.</p>
+<p>JSON snippet</p>
+<pre><code class="language-json">{
+   &quot;type&quot;:&quot;text/html&quot;,
+   &quot;encoding&quot;:&quot;base64&quot;,
+   &quot;binary-string&quot;:&quot;PGh0bWw+PGJvZHk+PHA+SGVsbG8sIFdvcmxkITwvcD48L2JvZHk+PC9odG1sPgAA&quot;
+}
+</code></pre>
+<p>Carbon file snippet</p>
+<pre><code>[b](219)(46) [&lt;html&gt;&lt;body&gt;&lt;p&gt;Hello, World!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;]
+</code></pre>
+<p>Vice versa, a Carbon file converted into a JSON string using the standard JSON formatter will produce the JSON snippet from above for the Carbon file snippet from above.</p>
+<blockquote>
+<p><strong>TODO:</strong> Not yet implemented</p>
+</blockquote>
+<h2><a class="header" href="#encoding-as-column-value-4" id="encoding-as-column-value-4">Encoding As Column Value</a></h2>
+<p>Binary strings are not supported for column containers.</p>
+<h2><a class="header" href="#mime-type-ids" id="mime-type-ids">MIME Type Ids</a></h2>
+<blockquote>
+<p><strong>Note:</strong> To the point of this writing, the MIME type to identifier mapping is done via alphanumeric ordering of MIME type strings for improved lookup performance given a particular mime type string. In a future specification version, the order may change to reflect likelihood of certain type strings. With simpler words, to minimmize the variable number of bytes used to encode a MIME type id, more often used mime type strings will be assigned to a lower MIME type id compared to less-frequent used mime types.</p>
+</blockquote>
+<table><thead><tr><th>MIME Type</th><th>File Extension</th><th>MIME Type Id</th></tr></thead><tbody>
+<tr><td>application/vnd.lotus-1-2-3</td><td>123</td><td>0</td></tr>
+<tr><td>text/vnd.in3d.3dml</td><td>3dml</td><td>1</td></tr>
+<tr><td>video/3gpp2</td><td>3g2</td><td>2</td></tr>
+<tr><td>video/3gpp</td><td>3gp</td><td>3</td></tr>
+<tr><td>application/x-7z-compressed</td><td>7z</td><td>4</td></tr>
+<tr><td>application/x-authorware-bin</td><td>aab</td><td>5</td></tr>
+<tr><td>audio/x-aac</td><td>aac</td><td>6</td></tr>
+<tr><td>application/x-authorware-map</td><td>aam</td><td>7</td></tr>
+<tr><td>application/x-authorware-seg</td><td>aas</td><td>8</td></tr>
+<tr><td>application/x-abiword</td><td>abw</td><td>9</td></tr>
+<tr><td>application/pkix-attr-cert</td><td>ac</td><td>10</td></tr>
+<tr><td>application/vnd.americandynamics.acc</td><td>acc</td><td>11</td></tr>
+<tr><td>application/x-ace-compressed</td><td>ace</td><td>12</td></tr>
+<tr><td>application/vnd.acucobol</td><td>acu</td><td>13</td></tr>
+<tr><td>audio/adpcm</td><td>adp</td><td>14</td></tr>
+<tr><td>application/vnd.audiograph</td><td>aep</td><td>15</td></tr>
+<tr><td>application/vnd.ibm.modcap</td><td>afp</td><td>16</td></tr>
+<tr><td>application/vnd.ahead.space</td><td>ahead</td><td>17</td></tr>
+<tr><td>application/postscript</td><td>ai</td><td>18</td></tr>
+<tr><td>audio/x-aiff</td><td>aif</td><td>19</td></tr>
+<tr><td>application/vnd.adobe.air-application-installer-package+zip</td><td>air</td><td>20</td></tr>
+<tr><td>application/vnd.dvb.ait</td><td>ait</td><td>21</td></tr>
+<tr><td>application/vnd.amiga.ami</td><td>ami</td><td>22</td></tr>
+<tr><td>application/vnd.android.package-archive</td><td>apk</td><td>23</td></tr>
+<tr><td>application/x-ms-application</td><td>application</td><td>24</td></tr>
+<tr><td>application/vnd.lotus-approach</td><td>apr</td><td>25</td></tr>
+<tr><td>video/x-ms-asf</td><td>asf</td><td>26</td></tr>
+<tr><td>application/vnd.accpac.simply.aso</td><td>aso</td><td>27</td></tr>
+<tr><td>application/vnd.acucorp</td><td>atc</td><td>28</td></tr>
+<tr><td>application/atom+xml</td><td>atom</td><td>29</td></tr>
+<tr><td>application/atomcat+xml</td><td>atomcat</td><td>30</td></tr>
+<tr><td>application/atomsvc+xml</td><td>atomsvc</td><td>31</td></tr>
+<tr><td>application/vnd.antix.game-component</td><td>atx</td><td>32</td></tr>
+<tr><td>audio/basic</td><td>au</td><td>33</td></tr>
+<tr><td>video/x-msvideo</td><td>avi</td><td>34</td></tr>
+<tr><td>application/applixware</td><td>aw</td><td>35</td></tr>
+<tr><td>application/vnd.airzip.filesecure.azf</td><td>azf</td><td>36</td></tr>
+<tr><td>application/vnd.airzip.filesecure.azs</td><td>azs</td><td>37</td></tr>
+<tr><td>application/vnd.amazon.ebook</td><td>azw</td><td>38</td></tr>
+<tr><td>application/x-bcpio</td><td>bcpio</td><td>39</td></tr>
+<tr><td>application/x-font-bdf</td><td>bdf</td><td>40</td></tr>
+<tr><td>application/vnd.syncml.dm+wbxml</td><td>bdm</td><td>41</td></tr>
+<tr><td>application/vnd.realvnc.bed</td><td>bed</td><td>42</td></tr>
+<tr><td>application/vnd.fujitsu.oasysprs</td><td>bh2</td><td>43</td></tr>
+<tr><td>application/octet-stream</td><td>bin</td><td>44</td></tr>
+<tr><td>application/vnd.bmi</td><td>bmi</td><td>45</td></tr>
+<tr><td>image/bmp</td><td>bmp</td><td>46</td></tr>
+<tr><td>application/vnd.previewsystems.box</td><td>box</td><td>47</td></tr>
+<tr><td>image/prs.btif</td><td>btif</td><td>48</td></tr>
+<tr><td>application/x-bzip</td><td>bz</td><td>49</td></tr>
+<tr><td>application/x-bzip2</td><td>bz2</td><td>50</td></tr>
+<tr><td>text/x-c</td><td>c</td><td>51</td></tr>
+<tr><td>application/vnd.cluetrust.cartomobile-config</td><td>c11amc</td><td>52</td></tr>
+<tr><td>application/vnd.cluetrust.cartomobile-config-pkg</td><td>c11amz</td><td>53</td></tr>
+<tr><td>application/vnd.clonk.c4group</td><td>c4g</td><td>54</td></tr>
+<tr><td>application/vnd.ms-cab-compressed</td><td>cab</td><td>55</td></tr>
+<tr><td>application/vnd.curl.car</td><td>car</td><td>56</td></tr>
+<tr><td>application/vnd.ms-pki.seccat</td><td>cat</td><td>57</td></tr>
+<tr><td>application/vnd.contact.cmsg</td><td>cdbcmsg</td><td>58</td></tr>
+<tr><td>application/vnd.mediastation.cdkey</td><td>cdkey</td><td>59</td></tr>
+<tr><td>application/cdmi-capability</td><td>cdmia</td><td>60</td></tr>
+<tr><td>application/cdmi-container</td><td>cdmic</td><td>61</td></tr>
+<tr><td>application/cdmi-domain</td><td>cdmid</td><td>62</td></tr>
+<tr><td>application/cdmi-object</td><td>cdmio</td><td>63</td></tr>
+<tr><td>application/cdmi-queue</td><td>cdmiq</td><td>64</td></tr>
+<tr><td>chemical/x-cdx</td><td>cdx</td><td>65</td></tr>
+<tr><td>application/vnd.chemdraw+xml</td><td>cdxml</td><td>66</td></tr>
+<tr><td>application/vnd.cinderella</td><td>cdy</td><td>67</td></tr>
+<tr><td>application/pkix-cert</td><td>cer</td><td>68</td></tr>
+<tr><td>image/cgm</td><td>cgm</td><td>69</td></tr>
+<tr><td>application/x-chat</td><td>chat</td><td>70</td></tr>
+<tr><td>application/vnd.ms-htmlhelp</td><td>chm</td><td>71</td></tr>
+<tr><td>application/vnd.kde.kchart</td><td>chrt</td><td>72</td></tr>
+<tr><td>chemical/x-cif</td><td>cif</td><td>73</td></tr>
+<tr><td>application/vnd.anser-web-certificate-issue-initiation</td><td>cii</td><td>74</td></tr>
+<tr><td>application/vnd.ms-artgalry</td><td>cil</td><td>75</td></tr>
+<tr><td>application/vnd.claymore</td><td>cla</td><td>76</td></tr>
+<tr><td>application/java-vm</td><td>class</td><td>77</td></tr>
+<tr><td>application/vnd.crick.clicker.keyboard</td><td>clkk</td><td>78</td></tr>
+<tr><td>application/vnd.crick.clicker.palette</td><td>clkp</td><td>79</td></tr>
+<tr><td>application/vnd.crick.clicker.template</td><td>clkt</td><td>80</td></tr>
+<tr><td>application/vnd.crick.clicker.wordbank</td><td>clkw</td><td>81</td></tr>
+<tr><td>application/vnd.crick.clicker</td><td>clkx</td><td>82</td></tr>
+<tr><td>application/x-msclip</td><td>clp</td><td>83</td></tr>
+<tr><td>application/vnd.cosmocaller</td><td>cmc</td><td>84</td></tr>
+<tr><td>chemical/x-cmdf</td><td>cmdf</td><td>85</td></tr>
+<tr><td>chemical/x-cml</td><td>cml</td><td>86</td></tr>
+<tr><td>application/vnd.yellowriver-custom-menu</td><td>cmp</td><td>87</td></tr>
+<tr><td>image/x-cmx</td><td>cmx</td><td>88</td></tr>
+<tr><td>application/vnd.rim.cod</td><td>cod</td><td>89</td></tr>
+<tr><td>application/x-cpio</td><td>cpio</td><td>90</td></tr>
+<tr><td>application/mac-compactpro</td><td>cpt</td><td>91</td></tr>
+<tr><td>application/x-mscardfile</td><td>crd</td><td>92</td></tr>
+<tr><td>application/pkix-crl</td><td>crl</td><td>93</td></tr>
+<tr><td>application/vnd.rig.cryptonote</td><td>cryptonote</td><td>94</td></tr>
+<tr><td>application/x-csh</td><td>csh</td><td>95</td></tr>
+<tr><td>chemical/x-csml</td><td>csml</td><td>96</td></tr>
+<tr><td>application/vnd.commonspace</td><td>csp</td><td>97</td></tr>
+<tr><td>text/css</td><td>css</td><td>98</td></tr>
+<tr><td>text/csv</td><td>csv</td><td>99</td></tr>
+<tr><td>application/cu-seeme</td><td>cu</td><td>100</td></tr>
+<tr><td>text/vnd.curl</td><td>curl</td><td>101</td></tr>
+<tr><td>application/prs.cww</td><td>cww</td><td>102</td></tr>
+<tr><td>model/vnd.collada+xml</td><td>dae</td><td>103</td></tr>
+<tr><td>application/vnd.mobius.daf</td><td>daf</td><td>104</td></tr>
+<tr><td>application/davmount+xml</td><td>davmount</td><td>105</td></tr>
+<tr><td>text/vnd.curl.dcurl</td><td>dcurl</td><td>106</td></tr>
+<tr><td>application/vnd.oma.dd2+xml</td><td>dd2</td><td>107</td></tr>
+<tr><td>application/vnd.fujixerox.ddd</td><td>ddd</td><td>108</td></tr>
+<tr><td>application/x-debian-package</td><td>deb</td><td>109</td></tr>
+<tr><td>application/x-x509-ca-cert</td><td>der</td><td>110</td></tr>
+<tr><td>application/vnd.dreamfactory</td><td>dfac</td><td>111</td></tr>
+<tr><td>application/x-director</td><td>dir</td><td>112</td></tr>
+<tr><td>application/vnd.mobius.dis</td><td>dis</td><td>113</td></tr>
+<tr><td>image/vnd.djvu</td><td>djvu</td><td>114</td></tr>
+<tr><td>application/x-apple-diskimage</td><td>dmg</td><td>115</td></tr>
+<tr><td>application/vnd.dna</td><td>dna</td><td>116</td></tr>
+<tr><td>application/msword</td><td>doc</td><td>117</td></tr>
+<tr><td>application/vnd.ms-word.document.macroenabled.12</td><td>docm</td><td>118</td></tr>
+<tr><td>application/vnd.openxmlformats-officedocument.wordprocessingml.document</td><td>docx</td><td>119</td></tr>
+<tr><td>application/vnd.ms-word.template.macroenabled.12</td><td>dotm</td><td>120</td></tr>
+<tr><td>application/vnd.openxmlformats-officedocument.wordprocessingml.template</td><td>dotx</td><td>121</td></tr>
+<tr><td>application/vnd.osgi.dp</td><td>dp</td><td>122</td></tr>
+<tr><td>application/vnd.dpgraph</td><td>dpg</td><td>123</td></tr>
+<tr><td>audio/vnd.dra</td><td>dra</td><td>124</td></tr>
+<tr><td>text/prs.lines.tag</td><td>dsc</td><td>125</td></tr>
+<tr><td>application/dssc+der</td><td>dssc</td><td>126</td></tr>
+<tr><td>application/x-dtbook+xml</td><td>dtb</td><td>127</td></tr>
+<tr><td>application/xml-dtd</td><td>dtd</td><td>128</td></tr>
+<tr><td>audio/vnd.dts</td><td>dts</td><td>129</td></tr>
+<tr><td>audio/vnd.dts.hd</td><td>dtshd</td><td>130</td></tr>
+<tr><td>application/x-dvi</td><td>dvi</td><td>131</td></tr>
+<tr><td>model/vnd.dwf</td><td>dwf</td><td>132</td></tr>
+<tr><td>image/vnd.dwg</td><td>dwg</td><td>133</td></tr>
+<tr><td>image/vnd.dxf</td><td>dxf</td><td>134</td></tr>
+<tr><td>application/vnd.spotfire.dxp</td><td>dxp</td><td>135</td></tr>
+<tr><td>audio/vnd.nuera.ecelp4800</td><td>ecelp4800</td><td>136</td></tr>
+<tr><td>audio/vnd.nuera.ecelp7470</td><td>ecelp7470</td><td>137</td></tr>
+<tr><td>audio/vnd.nuera.ecelp9600</td><td>ecelp9600</td><td>138</td></tr>
+<tr><td>application/vnd.novadigm.edm</td><td>edm</td><td>139</td></tr>
+<tr><td>application/vnd.novadigm.edx</td><td>edx</td><td>140</td></tr>
+<tr><td>application/vnd.picsel</td><td>efif</td><td>141</td></tr>
+<tr><td>application/vnd.pg.osasli</td><td>ei6</td><td>142</td></tr>
+<tr><td>message/rfc822</td><td>eml</td><td>143</td></tr>
+<tr><td>application/emma+xml</td><td>emma</td><td>144</td></tr>
+<tr><td>audio/vnd.digital-winds</td><td>eol</td><td>145</td></tr>
+<tr><td>application/vnd.ms-fontobject</td><td>eot</td><td>146</td></tr>
+<tr><td>application/epub+zip</td><td>epub</td><td>147</td></tr>
+<tr><td>application/ecmascript</td><td>es</td><td>148</td></tr>
+<tr><td>application/vnd.eszigno3+xml</td><td>es3</td><td>149</td></tr>
+<tr><td>application/vnd.epson.esf</td><td>esf</td><td>150</td></tr>
+<tr><td>text/x-setext</td><td>etx</td><td>151</td></tr>
+<tr><td>application/x-msdownload</td><td>exe</td><td>152</td></tr>
+<tr><td>application/exi</td><td>exi</td><td>153</td></tr>
+<tr><td>application/vnd.novadigm.ext</td><td>ext</td><td>154</td></tr>
+<tr><td>application/vnd.ezpix-album</td><td>ez2</td><td>155</td></tr>
+<tr><td>application/vnd.ezpix-package</td><td>ez3</td><td>156</td></tr>
+<tr><td>text/x-fortran</td><td>f</td><td>157</td></tr>
+<tr><td>video/x-f4v</td><td>f4v</td><td>158</td></tr>
+<tr><td>image/vnd.fastbidsheet</td><td>fbs</td><td>159</td></tr>
+<tr><td>application/vnd.isac.fcs</td><td>fcs</td><td>160</td></tr>
+<tr><td>application/vnd.fdf</td><td>fdf</td><td>161</td></tr>
+<tr><td>application/vnd.denovo.fcselayout-link</td><td>fe_launch</td><td>162</td></tr>
+<tr><td>application/vnd.fujitsu.oasysgp</td><td>fg5</td><td>163</td></tr>
+<tr><td>image/x-freehand</td><td>fh</td><td>164</td></tr>
+<tr><td>application/x-xfig</td><td>fig</td><td>165</td></tr>
+<tr><td>video/x-fli</td><td>fli</td><td>166</td></tr>
+<tr><td>application/vnd.micrografx.flo</td><td>flo</td><td>167</td></tr>
+<tr><td>video/x-flv</td><td>flv</td><td>168</td></tr>
+<tr><td>application/vnd.kde.kivio</td><td>flw</td><td>169</td></tr>
+<tr><td>text/vnd.fmi.flexstor</td><td>flx</td><td>170</td></tr>
+<tr><td>text/vnd.fly</td><td>fly</td><td>171</td></tr>
+<tr><td>application/vnd.framemaker</td><td>fm</td><td>172</td></tr>
+<tr><td>application/vnd.frogans.fnc</td><td>fnc</td><td>173</td></tr>
+<tr><td>image/vnd.fpx</td><td>fpx</td><td>174</td></tr>
+<tr><td>application/vnd.fsc.weblaunch</td><td>fsc</td><td>175</td></tr>
+<tr><td>image/vnd.fst</td><td>fst</td><td>176</td></tr>
+<tr><td>application/vnd.fluxtime.clip</td><td>ftc</td><td>177</td></tr>
+<tr><td>application/vnd.anser-web-funds-transfer-initiation</td><td>fti</td><td>178</td></tr>
+<tr><td>video/vnd.fvt</td><td>fvt</td><td>179</td></tr>
+<tr><td>application/vnd.adobe.fxp</td><td>fxp</td><td>180</td></tr>
+<tr><td>application/vnd.fuzzysheet</td><td>fzs</td><td>181</td></tr>
+<tr><td>application/vnd.geoplan</td><td>g2w</td><td>182</td></tr>
+<tr><td>image/g3fax</td><td>g3</td><td>183</td></tr>
+<tr><td>application/vnd.geospace</td><td>g3w</td><td>184</td></tr>
+<tr><td>application/vnd.groove-account</td><td>gac</td><td>185</td></tr>
+<tr><td>model/vnd.gdl</td><td>gdl</td><td>186</td></tr>
+<tr><td>application/vnd.dynageo</td><td>geo</td><td>187</td></tr>
+<tr><td>application/vnd.geometry-explorer</td><td>gex</td><td>188</td></tr>
+<tr><td>application/vnd.geogebra.file</td><td>ggb</td><td>189</td></tr>
+<tr><td>application/vnd.geogebra.tool</td><td>ggt</td><td>190</td></tr>
+<tr><td>application/vnd.groove-help</td><td>ghf</td><td>191</td></tr>
+<tr><td>image/gif</td><td>gif</td><td>192</td></tr>
+<tr><td>application/vnd.groove-identity-message</td><td>gim</td><td>193</td></tr>
+<tr><td>application/vnd.gmx</td><td>gmx</td><td>194</td></tr>
+<tr><td>application/x-gnumeric</td><td>gnumeric</td><td>195</td></tr>
+<tr><td>application/vnd.flographit</td><td>gph</td><td>196</td></tr>
+<tr><td>application/vnd.grafeq</td><td>gqf</td><td>197</td></tr>
+<tr><td>application/srgs</td><td>gram</td><td>198</td></tr>
+<tr><td>application/vnd.groove-injector</td><td>grv</td><td>199</td></tr>
+<tr><td>application/srgs+xml</td><td>grxml</td><td>200</td></tr>
+<tr><td>application/x-font-ghostscript</td><td>gsf</td><td>201</td></tr>
+<tr><td>application/x-gtar</td><td>gtar</td><td>202</td></tr>
+<tr><td>application/vnd.groove-tool-message</td><td>gtm</td><td>203</td></tr>
+<tr><td>model/vnd.gtw</td><td>gtw</td><td>204</td></tr>
+<tr><td>text/vnd.graphviz</td><td>gv</td><td>205</td></tr>
+<tr><td>application/vnd.geonext</td><td>gxt</td><td>206</td></tr>
+<tr><td>video/h261</td><td>h261</td><td>207</td></tr>
+<tr><td>video/h263</td><td>h263</td><td>208</td></tr>
+<tr><td>video/h264</td><td>h264</td><td>209</td></tr>
+<tr><td>application/vnd.hal+xml</td><td>hal</td><td>210</td></tr>
+<tr><td>application/vnd.hbci</td><td>hbci</td><td>211</td></tr>
+<tr><td>application/x-hdf</td><td>hdf</td><td>212</td></tr>
+<tr><td>application/winhlp</td><td>hlp</td><td>213</td></tr>
+<tr><td>application/vnd.hp-hpgl</td><td>hpgl</td><td>214</td></tr>
+<tr><td>application/vnd.hp-hpid</td><td>hpid</td><td>215</td></tr>
+<tr><td>application/vnd.hp-hps</td><td>hps</td><td>216</td></tr>
+<tr><td>application/mac-binhex40</td><td>hqx</td><td>217</td></tr>
+<tr><td>application/vnd.kenameaapp</td><td>htke</td><td>218</td></tr>
+<tr><td>text/html</td><td>html</td><td>219</td></tr>
+<tr><td>application/vnd.yamaha.hv-dic</td><td>hvd</td><td>220</td></tr>
+<tr><td>application/vnd.yamaha.hv-voice</td><td>hvp</td><td>221</td></tr>
+<tr><td>application/vnd.yamaha.hv-script</td><td>hvs</td><td>222</td></tr>
+<tr><td>application/vnd.intergeo</td><td>i2g</td><td>223</td></tr>
+<tr><td>application/vnd.iccprofile</td><td>icc</td><td>224</td></tr>
+<tr><td>x-conference/x-cooltalk</td><td>ice</td><td>225</td></tr>
+<tr><td>image/x-icon</td><td>ico</td><td>226</td></tr>
+<tr><td>text/calendar</td><td>ics</td><td>227</td></tr>
+<tr><td>image/ief</td><td>ief</td><td>228</td></tr>
+<tr><td>application/vnd.shana.informed.formdata</td><td>ifm</td><td>229</td></tr>
+<tr><td>application/vnd.igloader</td><td>igl</td><td>230</td></tr>
+<tr><td>application/vnd.insors.igm</td><td>igm</td><td>231</td></tr>
+<tr><td>model/iges</td><td>igs</td><td>232</td></tr>
+<tr><td>application/vnd.micrografx.igx</td><td>igx</td><td>233</td></tr>
+<tr><td>application/vnd.shana.informed.interchange</td><td>iif</td><td>234</td></tr>
+<tr><td>application/vnd.accpac.simply.imp</td><td>imp</td><td>235</td></tr>
+<tr><td>application/vnd.ms-ims</td><td>ims</td><td>236</td></tr>
+<tr><td>application/ipfix</td><td>ipfix</td><td>237</td></tr>
+<tr><td>application/vnd.shana.informed.package</td><td>ipk</td><td>238</td></tr>
+<tr><td>application/vnd.ibm.rights-management</td><td>irm</td><td>239</td></tr>
+<tr><td>application/vnd.irepository.package+xml</td><td>irp</td><td>240</td></tr>
+<tr><td>application/vnd.shana.informed.formtemplate</td><td>itp</td><td>241</td></tr>
+<tr><td>application/vnd.immervision-ivp</td><td>ivp</td><td>242</td></tr>
+<tr><td>application/vnd.immervision-ivu</td><td>ivu</td><td>243</td></tr>
+<tr><td>text/vnd.sun.j2me.app-descriptor</td><td>jad</td><td>244</td></tr>
+<tr><td>application/vnd.jam</td><td>jam</td><td>245</td></tr>
+<tr><td>application/java-archive</td><td>jar</td><td>246</td></tr>
+<tr><td>text/x-java-source</td><td>java</td><td>247</td></tr>
+<tr><td>application/vnd.jisp</td><td>jisp</td><td>248</td></tr>
+<tr><td>application/vnd.hp-jlyt</td><td>jlt</td><td>249</td></tr>
+<tr><td>application/x-java-jnlp-file</td><td>jnlp</td><td>250</td></tr>
+<tr><td>application/vnd.joost.joda-archive</td><td>joda</td><td>251</td></tr>
+<tr><td>image/jpeg</td><td>jpeg</td><td>252</td></tr>
+<tr><td>video/jpeg</td><td>jpgv</td><td>253</td></tr>
+<tr><td>video/jpm</td><td>jpm</td><td>254</td></tr>
+<tr><td>application/javascript</td><td>js</td><td>255</td></tr>
+<tr><td>application/json</td><td>json</td><td>256</td></tr>
+<tr><td>application/vnd.kde.karbon</td><td>karbon</td><td>257</td></tr>
+<tr><td>application/vnd.kde.kformula</td><td>kfo</td><td>258</td></tr>
+<tr><td>application/vnd.kidspiration</td><td>kia</td><td>259</td></tr>
+<tr><td>application/vnd.google-earth.kml+xml</td><td>kml</td><td>260</td></tr>
+<tr><td>application/vnd.google-earth.kmz</td><td>kmz</td><td>261</td></tr>
+<tr><td>application/vnd.kinar</td><td>kne</td><td>262</td></tr>
+<tr><td>application/vnd.kde.kontour</td><td>kon</td><td>263</td></tr>
+<tr><td>application/vnd.kde.kpresenter</td><td>kpr</td><td>264</td></tr>
+<tr><td>application/vnd.kde.kspread</td><td>ksp</td><td>265</td></tr>
+<tr><td>image/ktx</td><td>ktx</td><td>266</td></tr>
+<tr><td>application/vnd.kahootz</td><td>ktz</td><td>267</td></tr>
+<tr><td>application/vnd.kde.kword</td><td>kwd</td><td>268</td></tr>
+<tr><td>application/vnd.las.las+xml</td><td>lasxml</td><td>269</td></tr>
+<tr><td>application/x-latex</td><td>latex</td><td>270</td></tr>
+<tr><td>application/vnd.llamagraphics.life-balance.desktop</td><td>lbd</td><td>271</td></tr>
+<tr><td>application/vnd.llamagraphics.life-balance.exchange+xml</td><td>lbe</td><td>272</td></tr>
+<tr><td>application/vnd.hhe.lesson-player</td><td>les</td><td>273</td></tr>
+<tr><td>application/vnd.route66.link66+xml</td><td>link66</td><td>274</td></tr>
+<tr><td>application/vnd.ms-lrm</td><td>lrm</td><td>275</td></tr>
+<tr><td>application/vnd.frogans.ltf</td><td>ltf</td><td>276</td></tr>
+<tr><td>audio/vnd.lucent.voice</td><td>lvp</td><td>277</td></tr>
+<tr><td>application/vnd.lotus-wordpro</td><td>lwp</td><td>278</td></tr>
+<tr><td>application/mp21</td><td>m21</td><td>279</td></tr>
+<tr><td>audio/x-mpegurl</td><td>m3u</td><td>280</td></tr>
+<tr><td>application/vnd.apple.mpegurl</td><td>m3u8</td><td>281</td></tr>
+<tr><td>video/x-m4v</td><td>m4v</td><td>282</td></tr>
+<tr><td>application/mathematica</td><td>ma</td><td>283</td></tr>
+<tr><td>application/mads+xml</td><td>mads</td><td>284</td></tr>
+<tr><td>application/vnd.ecowin.chart</td><td>mag</td><td>285</td></tr>
+<tr><td>application/mathml+xml</td><td>mathml</td><td>286</td></tr>
+<tr><td>application/vnd.mobius.mbk</td><td>mbk</td><td>287</td></tr>
+<tr><td>application/mbox</td><td>mbox</td><td>288</td></tr>
+<tr><td>application/vnd.medcalcdata</td><td>mc1</td><td>289</td></tr>
+<tr><td>application/vnd.mcd</td><td>mcd</td><td>290</td></tr>
+<tr><td>text/vnd.curl.mcurl</td><td>mcurl</td><td>291</td></tr>
+<tr><td>application/x-msaccess</td><td>mdb</td><td>292</td></tr>
+<tr><td>image/vnd.ms-modi</td><td>mdi</td><td>293</td></tr>
+<tr><td>application/metalink4+xml</td><td>meta4</td><td>294</td></tr>
+<tr><td>application/mets+xml</td><td>mets</td><td>295</td></tr>
+<tr><td>application/vnd.mfmp</td><td>mfm</td><td>296</td></tr>
+<tr><td>application/vnd.osgeo.mapguide.package</td><td>mgp</td><td>297</td></tr>
+<tr><td>application/vnd.proteus.magazine</td><td>mgz</td><td>298</td></tr>
+<tr><td>audio/midi</td><td>mid</td><td>299</td></tr>
+<tr><td>application/vnd.mif</td><td>mif</td><td>300</td></tr>
+<tr><td>video/mj2</td><td>mj2</td><td>301</td></tr>
+<tr><td>application/vnd.dolby.mlp</td><td>mlp</td><td>302</td></tr>
+<tr><td>application/vnd.chipnuts.karaoke-mmd</td><td>mmd</td><td>303</td></tr>
+<tr><td>application/vnd.smaf</td><td>mmf</td><td>304</td></tr>
+<tr><td>image/vnd.fujixerox.edmics-mmr</td><td>mmr</td><td>305</td></tr>
+<tr><td>application/x-msmoney</td><td>mny</td><td>306</td></tr>
+<tr><td>application/mods+xml</td><td>mods</td><td>307</td></tr>
+<tr><td>video/x-sgi-movie</td><td>movie</td><td>308</td></tr>
+<tr><td>application/mp4</td><td>mp4</td><td>309</td></tr>
+<tr><td>application/vnd.mophun.certificate</td><td>mpc</td><td>310</td></tr>
+<tr><td>video/mpeg</td><td>mpeg</td><td>311</td></tr>
+<tr><td>audio/mpeg</td><td>mpga</td><td>312</td></tr>
+<tr><td>application/vnd.apple.installer+xml</td><td>mpkg</td><td>313</td></tr>
+<tr><td>application/vnd.blueice.multipass</td><td>mpm</td><td>314</td></tr>
+<tr><td>application/vnd.mophun.application</td><td>mpn</td><td>315</td></tr>
+<tr><td>application/vnd.ms-project</td><td>mpp</td><td>316</td></tr>
+<tr><td>application/vnd.ibm.minipay</td><td>mpy</td><td>317</td></tr>
+<tr><td>application/vnd.mobius.mqy</td><td>mqy</td><td>318</td></tr>
+<tr><td>application/marc</td><td>mrc</td><td>319</td></tr>
+<tr><td>application/marcxml+xml</td><td>mrcx</td><td>320</td></tr>
+<tr><td>application/mediaservercontrol+xml</td><td>mscml</td><td>321</td></tr>
+<tr><td>application/vnd.mseq</td><td>mseq</td><td>322</td></tr>
+<tr><td>application/vnd.epson.msf</td><td>msf</td><td>323</td></tr>
+<tr><td>model/mesh</td><td>msh</td><td>324</td></tr>
+<tr><td>application/vnd.mobius.msl</td><td>msl</td><td>325</td></tr>
+<tr><td>application/vnd.muvee.style</td><td>msty</td><td>326</td></tr>
+<tr><td>model/vnd.mts</td><td>mts</td><td>327</td></tr>
+<tr><td>application/vnd.musician</td><td>mus</td><td>328</td></tr>
+<tr><td>application/vnd.recordare.musicxml+xml</td><td>musicxml</td><td>329</td></tr>
+<tr><td>application/x-msmediaview</td><td>mvb</td><td>330</td></tr>
+<tr><td>application/vnd.mfer</td><td>mwf</td><td>331</td></tr>
+<tr><td>application/mxf</td><td>mxf</td><td>332</td></tr>
+<tr><td>application/vnd.recordare.musicxml</td><td>mxl</td><td>333</td></tr>
+<tr><td>application/xv+xml</td><td>mxml</td><td>334</td></tr>
+<tr><td>application/vnd.triscape.mxs</td><td>mxs</td><td>335</td></tr>
+<tr><td>video/vnd.mpegurl</td><td>mxu</td><td>336</td></tr>
+<tr><td>application/vnd.nokia.n-gage.symbian.install</td><td>n-gage</td><td>337</td></tr>
+<tr><td>text/n3</td><td>n3</td><td>338</td></tr>
+<tr><td>application/vnd.wolfram.player</td><td>nbp</td><td>339</td></tr>
+<tr><td>application/x-netcdf</td><td>nc</td><td>340</td></tr>
+<tr><td>application/x-dtbncx+xml</td><td>ncx</td><td>341</td></tr>
+<tr><td>application/vnd.nokia.n-gage.data</td><td>ngdat</td><td>342</td></tr>
+<tr><td>application/vnd.neurolanguage.nlu</td><td>nlu</td><td>343</td></tr>
+<tr><td>application/vnd.enliven</td><td>nml</td><td>344</td></tr>
+<tr><td>application/vnd.noblenet-directory</td><td>nnd</td><td>345</td></tr>
+<tr><td>application/vnd.noblenet-sealer</td><td>nns</td><td>346</td></tr>
+<tr><td>application/vnd.noblenet-web</td><td>nnw</td><td>347</td></tr>
+<tr><td>image/vnd.net-fpx</td><td>npx</td><td>348</td></tr>
+<tr><td>application/vnd.lotus-notes</td><td>nsf</td><td>349</td></tr>
+<tr><td>application/vnd.fujitsu.oasys2</td><td>oa2</td><td>350</td></tr>
+<tr><td>application/vnd.fujitsu.oasys3</td><td>oa3</td><td>351</td></tr>
+<tr><td>application/vnd.fujitsu.oasys</td><td>oas</td><td>352</td></tr>
+<tr><td>application/x-msbinder</td><td>obd</td><td>353</td></tr>
+<tr><td>application/oda</td><td>oda</td><td>354</td></tr>
+<tr><td>application/vnd.oasis.opendocument.database</td><td>odb</td><td>355</td></tr>
+<tr><td>application/vnd.oasis.opendocument.chart</td><td>odc</td><td>356</td></tr>
+<tr><td>application/vnd.oasis.opendocument.formula</td><td>odf</td><td>357</td></tr>
+<tr><td>application/vnd.oasis.opendocument.formula-template</td><td>odft</td><td>358</td></tr>
+<tr><td>application/vnd.oasis.opendocument.graphics</td><td>odg</td><td>359</td></tr>
+<tr><td>application/vnd.oasis.opendocument.image</td><td>odi</td><td>360</td></tr>
+<tr><td>application/vnd.oasis.opendocument.text-master</td><td>odm</td><td>361</td></tr>
+<tr><td>application/vnd.oasis.opendocument.presentation</td><td>odp</td><td>362</td></tr>
+<tr><td>application/vnd.oasis.opendocument.spreadsheet</td><td>ods</td><td>363</td></tr>
+<tr><td>application/vnd.oasis.opendocument.text</td><td>odt</td><td>364</td></tr>
+<tr><td>audio/ogg</td><td>oga</td><td>365</td></tr>
+<tr><td>video/ogg</td><td>ogv</td><td>366</td></tr>
+<tr><td>application/ogg</td><td>ogx</td><td>367</td></tr>
+<tr><td>application/onenote</td><td>onetoc</td><td>368</td></tr>
+<tr><td>application/oebps-package+xml</td><td>opf</td><td>369</td></tr>
+<tr><td>application/vnd.lotus-organizer</td><td>org</td><td>370</td></tr>
+<tr><td>application/vnd.yamaha.openscoreformat</td><td>osf</td><td>371</td></tr>
+<tr><td>application/vnd.yamaha.openscoreformat.osfpvg+xml</td><td>osfpvg</td><td>372</td></tr>
+<tr><td>application/vnd.oasis.opendocument.chart-template</td><td>otc</td><td>373</td></tr>
+<tr><td>application/x-font-otf</td><td>otf</td><td>374</td></tr>
+<tr><td>application/vnd.oasis.opendocument.graphics-template</td><td>otg</td><td>375</td></tr>
+<tr><td>application/vnd.oasis.opendocument.text-web</td><td>oth</td><td>376</td></tr>
+<tr><td>application/vnd.oasis.opendocument.image-template</td><td>oti</td><td>377</td></tr>
+<tr><td>application/vnd.oasis.opendocument.presentation-template</td><td>otp</td><td>378</td></tr>
+<tr><td>application/vnd.oasis.opendocument.spreadsheet-template</td><td>ots</td><td>379</td></tr>
+<tr><td>application/vnd.oasis.opendocument.text-template</td><td>ott</td><td>380</td></tr>
+<tr><td>application/vnd.openofficeorg.extension</td><td>oxt</td><td>381</td></tr>
+<tr><td>text/x-pascal</td><td>p</td><td>382</td></tr>
+<tr><td>application/pkcs10</td><td>p10</td><td>383</td></tr>
+<tr><td>application/x-pkcs12</td><td>p12</td><td>384</td></tr>
+<tr><td>application/x-pkcs7-certificates</td><td>p7b</td><td>385</td></tr>
+<tr><td>application/pkcs7-mime</td><td>p7m</td><td>386</td></tr>
+<tr><td>application/x-pkcs7-certreqresp</td><td>p7r</td><td>387</td></tr>
+<tr><td>application/pkcs7-signature</td><td>p7s</td><td>388</td></tr>
+<tr><td>application/pkcs8</td><td>p8</td><td>389</td></tr>
+<tr><td>text/plain-bas</td><td>par</td><td>390</td></tr>
+<tr><td>application/vnd.pawaafile</td><td>paw</td><td>391</td></tr>
+<tr><td>application/vnd.powerbuilder6</td><td>pbd</td><td>392</td></tr>
+<tr><td>image/x-portable-bitmap</td><td>pbm</td><td>393</td></tr>
+<tr><td>application/x-font-pcf</td><td>pcf</td><td>394</td></tr>
+<tr><td>application/vnd.hp-pcl</td><td>pcl</td><td>395</td></tr>
+<tr><td>application/vnd.hp-pclxl</td><td>pclxl</td><td>396</td></tr>
+<tr><td>application/vnd.curl.pcurl</td><td>pcurl</td><td>397</td></tr>
+<tr><td>image/x-pcx</td><td>pcx</td><td>398</td></tr>
+<tr><td>application/vnd.palm</td><td>pdb</td><td>399</td></tr>
+<tr><td>application/pdf</td><td>pdf</td><td>400</td></tr>
+<tr><td>application/x-font-type1</td><td>pfa</td><td>401</td></tr>
+<tr><td>application/font-tdpfr</td><td>pfr</td><td>402</td></tr>
+<tr><td>image/x-portable-graymap</td><td>pgm</td><td>403</td></tr>
+<tr><td>application/x-chess-pgn</td><td>pgn</td><td>404</td></tr>
+<tr><td>application/pgp-encrypted</td><td>pgp</td><td>405</td></tr>
+<tr><td>image/x-pict</td><td>pic</td><td>406</td></tr>
+<tr><td>image/pjpeg</td><td>pjpeg</td><td>407</td></tr>
+<tr><td>application/pkixcmp</td><td>pki</td><td>408</td></tr>
+<tr><td>application/pkix-pkipath</td><td>pkipath</td><td>409</td></tr>
+<tr><td>application/vnd.3gpp.pic-bw-large</td><td>plb</td><td>410</td></tr>
+<tr><td>application/vnd.mobius.plc</td><td>plc</td><td>411</td></tr>
+<tr><td>application/vnd.pocketlearn</td><td>plf</td><td>412</td></tr>
+<tr><td>application/pls+xml</td><td>pls</td><td>413</td></tr>
+<tr><td>application/vnd.ctc-posml</td><td>pml</td><td>414</td></tr>
+<tr><td>image/png</td><td>png</td><td>415</td></tr>
+<tr><td>image/x-portable-anymap</td><td>pnm</td><td>416</td></tr>
+<tr><td>application/vnd.macports.portpkg</td><td>portpkg</td><td>417</td></tr>
+<tr><td>application/vnd.ms-powerpoint.template.macroenabled.12</td><td>potm</td><td>418</td></tr>
+<tr><td>application/vnd.openxmlformats-officedocument.presentationml.template</td><td>potx</td><td>419</td></tr>
+<tr><td>application/vnd.ms-powerpoint.addin.macroenabled.12</td><td>ppam</td><td>420</td></tr>
+<tr><td>application/vnd.cups-ppd</td><td>ppd</td><td>421</td></tr>
+<tr><td>image/x-portable-pixmap</td><td>ppm</td><td>422</td></tr>
+<tr><td>application/vnd.ms-powerpoint.slideshow.macroenabled.12</td><td>ppsm</td><td>423</td></tr>
+<tr><td>application/vnd.openxmlformats-officedocument.presentationml.slideshow</td><td>ppsx</td><td>424</td></tr>
+<tr><td>application/vnd.ms-powerpoint</td><td>ppt</td><td>425</td></tr>
+<tr><td>application/vnd.ms-powerpoint.presentation.macroenabled.12</td><td>pptm</td><td>426</td></tr>
+<tr><td>application/vnd.openxmlformats-officedocument.presentationml.presentation</td><td>pptx</td><td>427</td></tr>
+<tr><td>application/x-mobipocket-ebook</td><td>prc</td><td>428</td></tr>
+<tr><td>application/vnd.lotus-freelance</td><td>pre</td><td>429</td></tr>
+<tr><td>application/pics-rules</td><td>prf</td><td>430</td></tr>
+<tr><td>application/vnd.3gpp.pic-bw-small</td><td>psb</td><td>431</td></tr>
+<tr><td>image/vnd.adobe.photoshop</td><td>psd</td><td>432</td></tr>
+<tr><td>application/x-font-linux-psf</td><td>psf</td><td>433</td></tr>
+<tr><td>application/pskc+xml</td><td>pskcxml</td><td>434</td></tr>
+<tr><td>application/vnd.pvi.ptid1</td><td>ptid</td><td>435</td></tr>
+<tr><td>application/x-mspublisher</td><td>pub</td><td>436</td></tr>
+<tr><td>application/vnd.3gpp.pic-bw-var</td><td>pvb</td><td>437</td></tr>
+<tr><td>application/vnd.3m.post-it-notes</td><td>pwn</td><td>438</td></tr>
+<tr><td>audio/vnd.ms-playready.media.pya</td><td>pya</td><td>439</td></tr>
+<tr><td>video/vnd.ms-playready.media.pyv</td><td>pyv</td><td>440</td></tr>
+<tr><td>application/vnd.epson.quickanime</td><td>qam</td><td>441</td></tr>
+<tr><td>application/vnd.intu.qbo</td><td>qbo</td><td>442</td></tr>
+<tr><td>application/vnd.intu.qfx</td><td>qfx</td><td>443</td></tr>
+<tr><td>application/vnd.publishare-delta-tree</td><td>qps</td><td>444</td></tr>
+<tr><td>video/quicktime</td><td>qt</td><td>445</td></tr>
+<tr><td>application/vnd.quark.quarkxpress</td><td>qxd</td><td>446</td></tr>
+<tr><td>audio/x-pn-realaudio</td><td>ram</td><td>447</td></tr>
+<tr><td>application/x-rar-compressed</td><td>rar</td><td>448</td></tr>
+<tr><td>image/x-cmu-raster</td><td>ras</td><td>449</td></tr>
+<tr><td>application/vnd.ipunplugged.rcprofile</td><td>rcprofile</td><td>450</td></tr>
+<tr><td>application/rdf+xml</td><td>rdf</td><td>451</td></tr>
+<tr><td>application/vnd.data-vision.rdz</td><td>rdz</td><td>452</td></tr>
+<tr><td>application/vnd.businessobjects</td><td>rep</td><td>453</td></tr>
+<tr><td>application/x-dtbresource+xml</td><td>res</td><td>454</td></tr>
+<tr><td>image/x-rgb</td><td>rgb</td><td>455</td></tr>
+<tr><td>application/reginfo+xml</td><td>rif</td><td>456</td></tr>
+<tr><td>audio/vnd.rip</td><td>rip</td><td>457</td></tr>
+<tr><td>application/resource-lists+xml</td><td>rl</td><td>458</td></tr>
+<tr><td>image/vnd.fujixerox.edmics-rlc</td><td>rlc</td><td>459</td></tr>
+<tr><td>application/resource-lists-diff+xml</td><td>rld</td><td>460</td></tr>
+<tr><td>application/vnd.rn-realmedia</td><td>rm</td><td>461</td></tr>
+<tr><td>audio/x-pn-realaudio-plugin</td><td>rmp</td><td>462</td></tr>
+<tr><td>application/vnd.jcp.javame.midlet-rms</td><td>rms</td><td>463</td></tr>
+<tr><td>application/relax-ng-compact-syntax</td><td>rnc</td><td>464</td></tr>
+<tr><td>application/vnd.cloanto.rp9</td><td>rp9</td><td>465</td></tr>
+<tr><td>application/vnd.nokia.radio-presets</td><td>rpss</td><td>466</td></tr>
+<tr><td>application/vnd.nokia.radio-preset</td><td>rpst</td><td>467</td></tr>
+<tr><td>application/sparql-query</td><td>rq</td><td>468</td></tr>
+<tr><td>application/rls-services+xml</td><td>rs</td><td>469</td></tr>
+<tr><td>application/rsd+xml</td><td>rsd</td><td>470</td></tr>
+<tr><td>application/rss+xml</td><td>rss</td><td>471</td></tr>
+<tr><td>application/rtf</td><td>rtf</td><td>472</td></tr>
+<tr><td>text/richtext</td><td>rtx</td><td>473</td></tr>
+<tr><td>text/x-asm</td><td>s</td><td>474</td></tr>
+<tr><td>application/vnd.yamaha.smaf-audio</td><td>saf</td><td>475</td></tr>
+<tr><td>application/sbml+xml</td><td>sbml</td><td>476</td></tr>
+<tr><td>application/vnd.ibm.secure-container</td><td>sc</td><td>477</td></tr>
+<tr><td>application/x-msschedule</td><td>scd</td><td>478</td></tr>
+<tr><td>application/vnd.lotus-screencam</td><td>scm</td><td>479</td></tr>
+<tr><td>application/scvp-cv-request</td><td>scq</td><td>480</td></tr>
+<tr><td>application/scvp-cv-response</td><td>scs</td><td>481</td></tr>
+<tr><td>text/vnd.curl.scurl</td><td>scurl</td><td>482</td></tr>
+<tr><td>application/vnd.stardivision.draw</td><td>sda</td><td>483</td></tr>
+<tr><td>application/vnd.stardivision.calc</td><td>sdc</td><td>484</td></tr>
+<tr><td>application/vnd.stardivision.impress</td><td>sdd</td><td>485</td></tr>
+<tr><td>application/vnd.solent.sdkm+xml</td><td>sdkm</td><td>486</td></tr>
+<tr><td>application/sdp</td><td>sdp</td><td>487</td></tr>
+<tr><td>application/vnd.stardivision.writer</td><td>sdw</td><td>488</td></tr>
+<tr><td>application/vnd.seemail</td><td>see</td><td>489</td></tr>
+<tr><td>application/vnd.fdsn.seed</td><td>seed</td><td>490</td></tr>
+<tr><td>application/vnd.sema</td><td>sema</td><td>491</td></tr>
+<tr><td>application/vnd.semd</td><td>semd</td><td>492</td></tr>
+<tr><td>application/vnd.semf</td><td>semf</td><td>493</td></tr>
+<tr><td>application/java-serialized-object</td><td>ser</td><td>494</td></tr>
+<tr><td>application/set-payment-initiation</td><td>setpay</td><td>495</td></tr>
+<tr><td>application/set-registration-initiation</td><td>setreg</td><td>496</td></tr>
+<tr><td>application/vnd.hydrostatix.sof-data</td><td>sfd-hdstx</td><td>497</td></tr>
+<tr><td>application/vnd.spotfire.sfs</td><td>sfs</td><td>498</td></tr>
+<tr><td>application/vnd.stardivision.writer-global</td><td>sgl</td><td>499</td></tr>
+<tr><td>text/sgml</td><td>sgml</td><td>500</td></tr>
+<tr><td>application/x-sh</td><td>sh</td><td>501</td></tr>
+<tr><td>application/x-shar</td><td>shar</td><td>502</td></tr>
+<tr><td>application/shf+xml</td><td>shf</td><td>503</td></tr>
+<tr><td>application/vnd.symbian.install</td><td>sis</td><td>504</td></tr>
+<tr><td>application/x-stuffit</td><td>sit</td><td>505</td></tr>
+<tr><td>application/x-stuffitx</td><td>sitx</td><td>506</td></tr>
+<tr><td>application/vnd.koan</td><td>skp</td><td>507</td></tr>
+<tr><td>application/vnd.ms-powerpoint.slide.macroenabled.12</td><td>sldm</td><td>508</td></tr>
+<tr><td>application/vnd.openxmlformats-officedocument.presentationml.slide</td><td>sldx</td><td>509</td></tr>
+<tr><td>application/vnd.epson.salt</td><td>slt</td><td>510</td></tr>
+<tr><td>application/vnd.stepmania.stepchart</td><td>sm</td><td>511</td></tr>
+<tr><td>application/vnd.stardivision.math</td><td>smf</td><td>512</td></tr>
+<tr><td>application/smil+xml</td><td>smi</td><td>513</td></tr>
+<tr><td>application/x-font-snf</td><td>snf</td><td>514</td></tr>
+<tr><td>application/vnd.yamaha.smaf-phrase</td><td>spf</td><td>515</td></tr>
+<tr><td>application/x-futuresplash</td><td>spl</td><td>516</td></tr>
+<tr><td>text/vnd.in3d.spot</td><td>spot</td><td>517</td></tr>
+<tr><td>application/scvp-vp-response</td><td>spp</td><td>518</td></tr>
+<tr><td>application/scvp-vp-request</td><td>spq</td><td>519</td></tr>
+<tr><td>application/x-wais-source</td><td>src</td><td>520</td></tr>
+<tr><td>application/sru+xml</td><td>sru</td><td>521</td></tr>
+<tr><td>application/sparql-results+xml</td><td>srx</td><td>522</td></tr>
+<tr><td>application/vnd.kodak-descriptor</td><td>sse</td><td>523</td></tr>
+<tr><td>application/vnd.epson.ssf</td><td>ssf</td><td>524</td></tr>
+<tr><td>application/ssml+xml</td><td>ssml</td><td>525</td></tr>
+<tr><td>application/vnd.sailingtracker.track</td><td>st</td><td>526</td></tr>
+<tr><td>application/vnd.sun.xml.calc.template</td><td>stc</td><td>527</td></tr>
+<tr><td>application/vnd.sun.xml.draw.template</td><td>std</td><td>528</td></tr>
+<tr><td>application/vnd.wt.stf</td><td>stf</td><td>529</td></tr>
+<tr><td>application/vnd.sun.xml.impress.template</td><td>sti</td><td>530</td></tr>
+<tr><td>application/hyperstudio</td><td>stk</td><td>531</td></tr>
+<tr><td>application/vnd.ms-pki.stl</td><td>stl</td><td>532</td></tr>
+<tr><td>application/vnd.pg.format</td><td>str</td><td>533</td></tr>
+<tr><td>application/vnd.sun.xml.writer.template</td><td>stw</td><td>534</td></tr>
+<tr><td>image/vnd.dvb.subtitle</td><td>sub</td><td>535</td></tr>
+<tr><td>application/vnd.sus-calendar</td><td>sus</td><td>536</td></tr>
+<tr><td>application/x-sv4cpio</td><td>sv4cpio</td><td>537</td></tr>
+<tr><td>application/x-sv4crc</td><td>sv4crc</td><td>538</td></tr>
+<tr><td>application/vnd.dvb.service</td><td>svc</td><td>539</td></tr>
+<tr><td>application/vnd.svd</td><td>svd</td><td>540</td></tr>
+<tr><td>image/svg+xml</td><td>svg</td><td>541</td></tr>
+<tr><td>application/x-shockwave-flash</td><td>swf</td><td>542</td></tr>
+<tr><td>application/vnd.aristanetworks.swi</td><td>swi</td><td>543</td></tr>
+<tr><td>application/vnd.sun.xml.calc</td><td>sxc</td><td>544</td></tr>
+<tr><td>application/vnd.sun.xml.draw</td><td>sxd</td><td>545</td></tr>
+<tr><td>application/vnd.sun.xml.writer.global</td><td>sxg</td><td>546</td></tr>
+<tr><td>application/vnd.sun.xml.impress</td><td>sxi</td><td>547</td></tr>
+<tr><td>application/vnd.sun.xml.math</td><td>sxm</td><td>548</td></tr>
+<tr><td>application/vnd.sun.xml.writer</td><td>sxw</td><td>549</td></tr>
+<tr><td>text/troff</td><td>t</td><td>550</td></tr>
+<tr><td>application/vnd.tao.intent-module-archive</td><td>tao</td><td>551</td></tr>
+<tr><td>application/x-tar</td><td>tar</td><td>552</td></tr>
+<tr><td>application/vnd.3gpp2.tcap</td><td>tcap</td><td>553</td></tr>
+<tr><td>application/x-tcl</td><td>tcl</td><td>554</td></tr>
+<tr><td>application/vnd.smart.teacher</td><td>teacher</td><td>555</td></tr>
+<tr><td>application/tei+xml</td><td>tei</td><td>556</td></tr>
+<tr><td>application/x-tex</td><td>tex</td><td>557</td></tr>
+<tr><td>application/x-texinfo</td><td>texinfo</td><td>558</td></tr>
+<tr><td>application/thraud+xml</td><td>tfi</td><td>559</td></tr>
+<tr><td>application/x-tex-tfm</td><td>tfm</td><td>560</td></tr>
+<tr><td>application/vnd.ms-officetheme</td><td>thmx</td><td>561</td></tr>
+<tr><td>image/tiff</td><td>tiff</td><td>562</td></tr>
+<tr><td>application/vnd.tmobile-livetv</td><td>tmo</td><td>563</td></tr>
+<tr><td>application/x-bittorrent</td><td>torrent</td><td>564</td></tr>
+<tr><td>application/vnd.groove-tool-template</td><td>tpl</td><td>565</td></tr>
+<tr><td>application/vnd.trid.tpt</td><td>tpt</td><td>566</td></tr>
+<tr><td>application/vnd.trueapp</td><td>tra</td><td>567</td></tr>
+<tr><td>application/x-msterminal</td><td>trm</td><td>568</td></tr>
+<tr><td>application/timestamped-data</td><td>tsd</td><td>569</td></tr>
+<tr><td>text/tab-separated-values</td><td>tsv</td><td>570</td></tr>
+<tr><td>application/x-font-ttf</td><td>ttf</td><td>571</td></tr>
+<tr><td>text/turtle</td><td>ttl</td><td>572</td></tr>
+<tr><td>application/vnd.simtech-mindmapper</td><td>twd</td><td>573</td></tr>
+<tr><td>application/vnd.genomatix.tuxedo</td><td>txd</td><td>574</td></tr>
+<tr><td>application/vnd.mobius.txf</td><td>txf</td><td>575</td></tr>
+<tr><td>text/plain</td><td>txt</td><td>576</td></tr>
+<tr><td>application/vnd.ufdl</td><td>ufd</td><td>577</td></tr>
+<tr><td>application/vnd.umajin</td><td>umj</td><td>578</td></tr>
+<tr><td>application/vnd.unity</td><td>unityweb</td><td>579</td></tr>
+<tr><td>application/vnd.uoml+xml</td><td>uoml</td><td>580</td></tr>
+<tr><td>text/uri-list</td><td>uri</td><td>581</td></tr>
+<tr><td>application/x-ustar</td><td>ustar</td><td>582</td></tr>
+<tr><td>application/vnd.uiq.theme</td><td>utz</td><td>583</td></tr>
+<tr><td>text/x-uuencode</td><td>uu</td><td>584</td></tr>
+<tr><td>audio/vnd.dece.audio</td><td>uva</td><td>585</td></tr>
+<tr><td>video/vnd.dece.hd</td><td>uvh</td><td>586</td></tr>
+<tr><td>image/vnd.dece.graphic</td><td>uvi</td><td>587</td></tr>
+<tr><td>video/vnd.dece.mobile</td><td>uvm</td><td>588</td></tr>
+<tr><td>video/vnd.dece.pd</td><td>uvp</td><td>589</td></tr>
+<tr><td>video/vnd.dece.sd</td><td>uvs</td><td>590</td></tr>
+<tr><td>video/vnd.uvvu.mp4</td><td>uvu</td><td>591</td></tr>
+<tr><td>video/vnd.dece.video</td><td>uvv</td><td>592</td></tr>
+<tr><td>application/x-cdlink</td><td>vcd</td><td>593</td></tr>
+<tr><td>text/x-vcard</td><td>vcf</td><td>594</td></tr>
+<tr><td>application/vnd.groove-vcard</td><td>vcg</td><td>595</td></tr>
+<tr><td>text/x-vcalendar</td><td>vcs</td><td>596</td></tr>
+<tr><td>application/vnd.vcx</td><td>vcx</td><td>597</td></tr>
+<tr><td>application/vnd.visionary</td><td>vis</td><td>598</td></tr>
+<tr><td>video/vnd.vivo</td><td>viv</td><td>599</td></tr>
+<tr><td>application/vnd.visio</td><td>vsd</td><td>600</td></tr>
+<tr><td>application/vnd.visio2013</td><td>vsdx</td><td>601</td></tr>
+<tr><td>application/vnd.vsf</td><td>vsf</td><td>602</td></tr>
+<tr><td>model/vnd.vtu</td><td>vtu</td><td>603</td></tr>
+<tr><td>application/voicexml+xml</td><td>vxml</td><td>604</td></tr>
+<tr><td>application/x-doom</td><td>wad</td><td>605</td></tr>
+<tr><td>audio/x-wav</td><td>wav</td><td>606</td></tr>
+<tr><td>audio/x-ms-wax</td><td>wax</td><td>607</td></tr>
+<tr><td>image/vnd.wap.wbmp</td><td>wbmp</td><td>608</td></tr>
+<tr><td>application/vnd.criticaltools.wbs+xml</td><td>wbs</td><td>609</td></tr>
+<tr><td>application/vnd.wap.wbxml</td><td>wbxml</td><td>610</td></tr>
+<tr><td>audio/webm</td><td>weba</td><td>611</td></tr>
+<tr><td>video/webm</td><td>webm</td><td>612</td></tr>
+<tr><td>image/webp</td><td>webp</td><td>613</td></tr>
+<tr><td>application/vnd.pmi.widget</td><td>wg</td><td>614</td></tr>
+<tr><td>application/widget</td><td>wgt</td><td>615</td></tr>
+<tr><td>video/x-ms-wm</td><td>wm</td><td>616</td></tr>
+<tr><td>audio/x-ms-wma</td><td>wma</td><td>617</td></tr>
+<tr><td>application/x-ms-wmd</td><td>wmd</td><td>618</td></tr>
+<tr><td>application/x-msmetafile</td><td>wmf</td><td>619</td></tr>
+<tr><td>text/vnd.wap.wml</td><td>wml</td><td>620</td></tr>
+<tr><td>application/vnd.wap.wmlc</td><td>wmlc</td><td>621</td></tr>
+<tr><td>text/vnd.wap.wmlscript</td><td>wmls</td><td>622</td></tr>
+<tr><td>application/vnd.wap.wmlscriptc</td><td>wmlsc</td><td>623</td></tr>
+<tr><td>video/x-ms-wmv</td><td>wmv</td><td>624</td></tr>
+<tr><td>video/x-ms-wmx</td><td>wmx</td><td>625</td></tr>
+<tr><td>application/x-ms-wmz</td><td>wmz</td><td>626</td></tr>
+<tr><td>application/x-font-woff</td><td>woff</td><td>627</td></tr>
+<tr><td>application/vnd.wordperfect</td><td>wpd</td><td>628</td></tr>
+<tr><td>application/vnd.ms-wpl</td><td>wpl</td><td>629</td></tr>
+<tr><td>application/vnd.ms-works</td><td>wps</td><td>630</td></tr>
+<tr><td>application/vnd.wqd</td><td>wqd</td><td>631</td></tr>
+<tr><td>application/x-mswrite</td><td>wri</td><td>632</td></tr>
+<tr><td>model/vrml</td><td>wrl</td><td>633</td></tr>
+<tr><td>application/wsdl+xml</td><td>wsdl</td><td>634</td></tr>
+<tr><td>application/wspolicy+xml</td><td>wspolicy</td><td>635</td></tr>
+<tr><td>application/vnd.webturbo</td><td>wtb</td><td>636</td></tr>
+<tr><td>video/x-ms-wvx</td><td>wvx</td><td>637</td></tr>
+<tr><td>application/vnd.hzn-3d-crossword</td><td>x3d</td><td>638</td></tr>
+<tr><td>application/x-silverlight-app</td><td>xap</td><td>639</td></tr>
+<tr><td>application/vnd.xara</td><td>xar</td><td>640</td></tr>
+<tr><td>application/x-ms-xbap</td><td>xbap</td><td>641</td></tr>
+<tr><td>application/vnd.fujixerox.docuworks.binder</td><td>xbd</td><td>642</td></tr>
+<tr><td>image/x-xbitmap</td><td>xbm</td><td>643</td></tr>
+<tr><td>application/xcap-diff+xml</td><td>xdf</td><td>644</td></tr>
+<tr><td>application/vnd.syncml.dm+xml</td><td>xdm</td><td>645</td></tr>
+<tr><td>application/vnd.adobe.xdp+xml</td><td>xdp</td><td>646</td></tr>
+<tr><td>application/dssc+xml</td><td>xdssc</td><td>647</td></tr>
+<tr><td>application/vnd.fujixerox.docuworks</td><td>xdw</td><td>648</td></tr>
+<tr><td>application/xenc+xml</td><td>xenc</td><td>649</td></tr>
+<tr><td>application/patch-ops-err+xml</td><td>xer</td><td>650</td></tr>
+<tr><td>application/vnd.adobe.xfdf</td><td>xfdf</td><td>651</td></tr>
+<tr><td>application/vnd.xfdl</td><td>xfdl</td><td>652</td></tr>
+<tr><td>application/xhtml+xml</td><td>xhtml</td><td>653</td></tr>
+<tr><td>image/vnd.xiff</td><td>xif</td><td>654</td></tr>
+<tr><td>application/vnd.ms-excel.addin.macroenabled.12</td><td>xlam</td><td>655</td></tr>
+<tr><td>application/vnd.ms-excel</td><td>xls</td><td>656</td></tr>
+<tr><td>application/vnd.ms-excel.sheet.binary.macroenabled.12</td><td>xlsb</td><td>657</td></tr>
+<tr><td>application/vnd.ms-excel.sheet.macroenabled.12</td><td>xlsm</td><td>658</td></tr>
+<tr><td>application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</td><td>xlsx</td><td>659</td></tr>
+<tr><td>application/vnd.ms-excel.template.macroenabled.12</td><td>xltm</td><td>660</td></tr>
+<tr><td>application/vnd.openxmlformats-officedocument.spreadsheetml.template</td><td>xltx</td><td>661</td></tr>
+<tr><td>application/xml</td><td>xml</td><td>662</td></tr>
+<tr><td>application/vnd.olpc-sugar</td><td>xo</td><td>663</td></tr>
+<tr><td>application/xop+xml</td><td>xop</td><td>664</td></tr>
+<tr><td>application/x-xpinstall</td><td>xpi</td><td>665</td></tr>
+<tr><td>image/x-xpixmap</td><td>xpm</td><td>666</td></tr>
+<tr><td>application/vnd.is-xpr</td><td>xpr</td><td>667</td></tr>
+<tr><td>application/vnd.ms-xpsdocument</td><td>xps</td><td>668</td></tr>
+<tr><td>application/vnd.intercon.formnet</td><td>xpw</td><td>669</td></tr>
+<tr><td>application/xslt+xml</td><td>xslt</td><td>670</td></tr>
+<tr><td>application/vnd.syncml+xml</td><td>xsm</td><td>671</td></tr>
+<tr><td>application/xspf+xml</td><td>xspf</td><td>672</td></tr>
+<tr><td>application/vnd.mozilla.xul+xml</td><td>xul</td><td>673</td></tr>
+<tr><td>image/x-xwindowdump</td><td>xwd</td><td>674</td></tr>
+<tr><td>chemical/x-xyz</td><td>xyz</td><td>675</td></tr>
+<tr><td>text/yaml</td><td>yaml</td><td>676</td></tr>
+<tr><td>application/yang</td><td>yang</td><td>677</td></tr>
+<tr><td>application/yin+xml</td><td>yin</td><td>678</td></tr>
+<tr><td>application/vnd.zzazz.deck+xml</td><td>zaz</td><td>679</td></tr>
+<tr><td>application/zip</td><td>zip</td><td>680</td></tr>
+<tr><td>application/vnd.zul</td><td>zir</td><td>681</td></tr>
+<tr><td>application/vnd.handheld-entertainment+xml</td><td>zmm</td><td>682</td></tr>
+</tbody></table>
+<h1><a class="header" href="#nulls" id="nulls">Nulls</a></h1>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>null</code></td><td>absence of data (user-defined)</td><td>0<sup>+</sup> byte</td><td><code>null</code> value</td><td><code>[n]</code> or dedicated value</td></tr>
+</tbody></table>
+<h2><a class="header" href="#encoding-as-field-value-5" id="encoding-as-field-value-5">Encoding as Field Value</a></h2>
+<table><thead><tr><th>Description</th><th>Size</th><th>Marker</th><th>Payload</th></tr></thead><tbody>
+<tr><td>JSON <code>null</code> constant</td><td>1 byte</td><td><code>[n]</code></td><td><em>none</em></td></tr>
+</tbody></table>
+<h3><a class="header" href="#example-10" id="example-10">Example</a></h3>
+<p>JSON snippet</p>
+<pre><code class="language-json">[ null ]
+</code></pre>
+<p>Carbon File snippet</p>
+<pre><code>[[] [n] []] 
+</code></pre>
+<h2><a class="header" href="#encoding-as-column-value-5" id="encoding-as-column-value-5">Encoding as Column Value</a></h2>
+<blockquote>
+<p>There is no dedicated column type for <code>null</code>-only lists. Instead use <code>array</code> types that contain only <code>null</code> values. </p>
+</blockquote>
+<p>The occurence of a <code>null</code> value in a column is done by encoding the absence of data with a dedicated value taken from the column type domain. Note that this dedicated value is reserved for this use, and is not in the value domain of the corresponding Carbon type.</p>
+<table><thead><tr><th>Data Type</th><th>Column Marker</th><th>Null Size</th><th>Null Constant</th></tr></thead><tbody>
+<tr><td>booleans values</td><td><code>[B]</code></td><td>1 byte</td><td><code>2</code></td></tr>
+<tr><td>unsigned 8-bit int.</td><td><code>[1]</code></td><td>1 byte</td><td><code>255</code></td></tr>
+<tr><td>unsigned 16-bit int.</td><td><code>[2]</code></td><td>2 bytes</td><td><code>65,535</code></td></tr>
+<tr><td>unsigned 32-bit int.</td><td><code>[3]</code></td><td>4 bytes</td><td><code>4,294,967,295</code></td></tr>
+<tr><td>unsigned 64-bit int.</td><td><code>[4]</code></td><td>8 bytes</td><td><code>18,446,744,073,709,551,615</code></td></tr>
+<tr><td>signed 8-bit integers</td><td><code>[5]</code></td><td>1 byte</td><td><code>−128</code></td></tr>
+<tr><td>signed 16-bit int.</td><td><code>[6]</code></td><td>2 bytes</td><td><code>−32,768</code></td></tr>
+<tr><td>signed 32-bit int.</td><td><code>[7]</code></td><td>4 bytes</td><td><code>−2,147,483,648</code></td></tr>
+<tr><td>signed 64-bit int.</td><td><code>[8]</code></td><td>8 bytes</td><td><code>−9,223,372,036,854,775,808</code></td></tr>
+<tr><td>32-bit floats</td><td><code>[R]</code></td><td>4 bytes</td><td><code>NAN</code></td></tr>
+</tbody></table>
+<h3><a class="header" href="#example-11" id="example-11">Example</a></h3>
+<p>JSON snippet</p>
+<pre><code class="language-json">[42, 23, null]
+</code></pre>
+<p>A (compacted) Carbon <code>column-u8</code></p>
+<pre><code>[1](3)(3) [42][23][255]
+</code></pre>
+<h1><a class="header" href="#undef" id="undef">Undef</a></h1>
+<p>A <code>undef</code> is used to express values that do not exists, or which have no valid path. The value <code>undef</code> occurs whenever a carbon <code>record</code>
+is queried for a non-existing path using a <a href="format-specs/data-types/traversals-queries/path-eval/path-eval.html">dot path expression</a>.</p>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th></tr></thead><tbody>
+<tr><td><code>undef</code></td><td>absence of data (structure-defined)</td><td>0</td><td><em>none</em></td><td><code>[N]</code></td></tr>
+</tbody></table>
+<h2><a class="header" href="#encoding-as-field-value-6" id="encoding-as-field-value-6">Encoding as Field Value</a></h2>
+<p>Carbon File snippet</p>
+<pre><code>[[] [N] []] 
+</code></pre>
+<p>Note that <code>undef</code> does not match to a Json <code>null</code>, use a Carbon <code>null</code> type instead. For more, see Section <a href="format-specs/data-types/format-specs/data-types/nulls.html">Nulls</a>.</p>
+<p>Since there is no mapping from a Carbon <code>undef</code> value to a Json value for Json-formatted output, a <code>undef</code> value is formatted as a Json-string prefixed with <code>_</code>.</p>
+<p>Json File snippet</p>
+<pre><code class="language-json">&quot;_undefined&quot;
+</code></pre>
+<p>Note that this is a uni-directed mapping from Carbon files to Json files. The opposite direction, i.e., mapping from <code>&quot;_undefined&quot;</code> to <code>undef</code>, is not defined.</p>
+<h2><a class="header" href="#encoding-as-column-value-6" id="encoding-as-column-value-6">Encoding as Column Value</a></h2>
+<p><code>undef</code> values are not supported for column containers.</p>
+<h1><a class="header" href="#container-types" id="container-types">Container Types</a></h1>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th>JSON Mapping</th></tr></thead><tbody>
+<tr><td><code>array</code></td><td>list of variable-typed elements</td><td>2<sup>+</sup> bytes</td><td>array (unconstrained)</td></tr>
+<tr><td><code>column</code></td><td>list of fixed-typed elements</td><td>3<sup>+</sup> bytes</td><td>array (constrained)</td></tr>
+<tr><td><code>object</code></td><td>list of key-value pairs (properties)</td><td><strong>TODO</strong></td><td>object (unconstrained)</td></tr>
+<tr><td><code>record</code></td><td>identifiable, versioned <code>array</code></td><td><strong>TODO</strong></td><td>JSON file / &quot;document&quot;</td></tr>
+</tbody></table>
+<p><span class="caption">Table CT-1: Container Types in Carbon</span></p>
+<h2><a class="header" href="#container-type-support" id="container-type-support">Container Type Support</a></h2>
+<h3><a class="header" href="#object-array-and-record-containers" id="object-array-and-record-containers">Object, Array and Record Containers</a></h3>
+<pre><code>true, false, u8, u16, u32, u64, i8, i16, i32, i64, float, string, 
+binary, custom binary, null, array, column-u8, column-u16, column-u32, 
+column-u64, column-i8, column-i16, column-i32, column-i64, column-float, 
+column-boolean, object 
+</code></pre>
+<p><span class="caption">Table CT-2: Container Type Support for <code>array</code> and <code>record</code> Containers</span></p>
+<h3><a class="header" href="#column-containers" id="column-containers">Column Containers</a></h3>
+<pre><code>boolean, u8, u16, u32, u64, i8, i16, i32, i64, float
+</code></pre>
+<p><span class="caption">Table CT-3: Container Type Support for <code>column</code> Containers</span></p>
+<h1><a class="header" href="#arrays" id="arrays">Arrays</a></h1>
+<table><thead><tr><th>Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th><th>Abstract Type</th></tr></thead><tbody>
+<tr><td><code>array</code></td><td>variable-typed list</td><td>2<sup>+</sup> bytes</td><td><code>null</code></td><td><code>[</code>, <code>]</code></td><td><code>unsorted-multiset</code></td></tr>
+</tbody></table>
+<h2><a class="header" href="#encoding-2" id="encoding-2">Encoding</a></h2>
+<pre><code>[[] &lt;values&gt; ...[]]
+</code></pre>
+<h3><a class="header" href="#values-1" id="values-1">Values</a></h3>
+<pre><code>&lt;values&gt;
+</code></pre>
+<h4><a class="header" href="#type-support" id="type-support">Type Support</a></h4>
+<pre><code>true, false, u8, u16, u32, u64, i8, i16, i32, i64, float, string, 
+binary, custom binary, null, array, column-u8, column-u16, column-u32, 
+column-u64, column-i8, column-i16, column-i32, column-i64, column-float, 
+column-boolean, object 
+</code></pre>
+<h3><a class="header" href="#capacities" id="capacities">Capacities</a></h3>
+<pre><code>...
+</code></pre>
+<h4><a class="header" href="#abstract-type" id="abstract-type">Abstract Type</a></h4>
+<p>An <code>array</code> is one <a href="format-specs/container-types/../abstract-types.html">abstract type</a> for the <a href="format-specs/container-types/../abstract-base-types.html"><code>unsorted-multiset</code></a> abstract base type. The other base type is <code>column</code>, see <a href="format-specs/container-types/columns.html">column containers</a>.</p>
+<h3><a class="header" href="#example-12" id="example-12">Example</a></h3>
+<p>JSON snippet</p>
+<pre><code class="language-json">[ &quot;The&quot;, &quot;Number&quot;, 23 ]
+</code></pre>
+<p>A (compacted) Carbon <code>array</code> of two <code>string</code> values and one <code>u8</code> value.</p>
+<pre><code>[[] [s](3)[The] [s](6)[Number] [c][23] []] 
+</code></pre>
+<h1><a class="header" href="#columns" id="columns">Columns</a></h1>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Begin Marker</th><th>Abstract Type</th></tr></thead><tbody>
+<tr><td><code>column</code></td><td>list of fixed-typed elements</td><td>3<sup>+</sup> bytes</td><td><code>null</code> value</td><td><em>see below</em></td><td><code>unsorted-multiset</code></td></tr>
+</tbody></table>
+<h2><a class="header" href="#encoding-3" id="encoding-3">Encoding</a></h2>
+<pre><code>[&lt;column-marker&gt;](num-of-elems)(cap-of-elems) &lt;values&gt;...
+</code></pre>
+<h3><a class="header" href="#column-types" id="column-types">Column Types</a></h3>
+<table><thead><tr><th>Marker</th><th>Container</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th></tr></thead><tbody>
+<tr><td><code>[B]</code></td><td><code>column-boolean</code></td><td>three-valued logic</td><td>1 B each</td><td>2</td></tr>
+<tr><td><code>[1]</code></td><td><code>column-u8</code></td><td>unsigned 8-bit int</td><td>1 B each</td><td>2<sup>8</sup> - 1</td></tr>
+<tr><td><code>[2]</code></td><td><code>column-u16</code></td><td>unsigned 16-bit int</td><td>2 B each</td><td>2<sup>16</sup> - 1</td></tr>
+<tr><td><code>[3]</code></td><td><code>column-u32</code></td><td>unsigned 32-bit int</td><td>4 B each</td><td>2<sup>16</sup> - 1</td></tr>
+<tr><td><code>[4]</code></td><td><code>column-u64</code></td><td>unsigned 64-bit int</td><td>8 B each</td><td>2<sup>16</sup> - 1</td></tr>
+<tr><td><code>[5]</code></td><td><code>column-i8</code></td><td>signed 8-bit int</td><td>1 B each</td><td>-2<sup>7</sup></td></tr>
+<tr><td><code>[6]</code></td><td><code>column-i16</code></td><td>signed 16-bit int</td><td>2 B each</td><td>-2<sup>15</sup></td></tr>
+<tr><td><code>[7]</code></td><td><code>column-i32</code></td><td>signed 32-bit int</td><td>4 B each</td><td>-2<sup>31</sup></td></tr>
+<tr><td><code>[8]</code></td><td><code>column-i64</code></td><td>signed 64-bit int</td><td>8 B each</td><td>-2<sup>63</sup></td></tr>
+<tr><td><code>[R]</code></td><td><code>column-float</code></td><td>32-bit float</td><td>4 B each</td><td><code>NAN</code> value</td></tr>
+</tbody></table>
+<p><span class="caption">Table C-1: Carbon <code>column</code> Type Support and Markers</span></p>
+<h3><a class="header" href="#values-2" id="values-2">Values</a></h3>
+<pre><code>&lt;values&gt;
+</code></pre>
+<h3><a class="header" href="#capacities-1" id="capacities-1">Capacities</a></h3>
+<pre><code>...
+</code></pre>
+<h4><a class="header" href="#abstract-type-1" id="abstract-type-1">Abstract Type</a></h4>
+<p>A <code>column</code> is one <a href="format-specs/container-types/../abstract-types.html">abstract base type</a> for <a href="format-specs/container-types/../abstract-base-types.html"><code>unsorted-multiset</code></a>. The other base type is <code>array</code>, see <a href="format-specs/container-types/arrays.html">array containers</a>.</p>
+<h3><a class="header" href="#example-13" id="example-13">Example</a></h3>
+<p>JSON snippet</p>
+<pre><code class="language-json">[ -4, 2, null ]
+</code></pre>
+<p>A (compacted) Carbon <code>column-i8</code>.</p>
+<pre><code>[5] (3)(3) [-4] [2] [-128]
+</code></pre>
+<h3><a class="header" href="#record-container-compatibility" id="record-container-compatibility">Record Container Compatibility</a></h3>
+<blockquote>
+<p>Note that a <code>column</code> container cannot replace a <code>record</code> container. If the input Json string is a plain Json array, this array is always stored as <code>record</code> (i.e., an array) rather than a column. To force a <code>column</code> container, the input Json array must be wrapped with an object.</p>
+</blockquote>
+<p>JSON file</p>
+<pre><code class="language-json">[ 1, 2, 3 ]
+</code></pre>
+<p>A (compacted) Carbon <code>record</code> with no primary key encoding the JSON file from above as <code>array</code> container.</p>
+<pre><code>[nokey][[] [1][2][3] []] 
+</code></pre>
+<h1><a class="header" href="#objects" id="objects">Objects</a></h1>
+<table><thead><tr><th>Carbon Type</th><th>Description</th><th>Size</th><th><em>null</em>-Value</th><th>Marker</th><th>Abstract Type</th></tr></thead><tbody>
+<tr><td><code>object</code></td><td>key-value pair list</td><td><strong>TODO</strong> bytes</td><td><code>null</code></td><td><code>{</code>, <code>}</code></td><td><code>unsorted-multimap</code></td></tr>
+</tbody></table>
+<h2><a class="header" href="#encoding-4" id="encoding-4">Encoding</a></h2>
+<pre><code>[{] &lt;props&gt;... [}]
+</code></pre>
+<h3><a class="header" href="#properties" id="properties">Properties</a></h3>
+<pre><code>&lt;props&gt;
+</code></pre>
+<pre><code>&lt;key-string&gt; &lt;value&gt;
+</code></pre>
+<h4><a class="header" href="#keys" id="keys">Keys</a></h4>
+<pre><code>&lt;key-string&gt;
+</code></pre>
+<p>A <code>&lt;key-string&gt;</code> is any value of type <code>string</code> where the <code>[s]</code> marker is omitted.</p>
+<h4><a class="header" href="#values-3" id="values-3">Values</a></h4>
+<pre><code>&lt;value&gt;
+</code></pre>
+<p>A <code>&lt;value&gt;</code> is any value of a supported type.</p>
+<pre><code>true, false, u8, u16, u32, u64, i8, i16, i32, i64, float, string, 
+binary, custom binary, null, array, column-u8, column-u16, column-u32, 
+column-u64, column-i8, column-i16, column-i32, column-i64, column-float, 
+column-boolean, object 
+</code></pre>
+<h3><a class="header" href="#capacities-2" id="capacities-2">Capacities</a></h3>
+<pre><code>...
+</code></pre>
+<h4><a class="header" href="#abstract-type-2" id="abstract-type-2">Abstract Type</a></h4>
+<p>An <code>object</code> is the <a href="format-specs/container-types/../abstract-types.html">abstract base type</a> for <a href="format-specs/container-types/../abstract-base-types.html"><code>unsorted-multimap</code></a>. </p>
+<h3><a class="header" href="#example-14" id="example-14">Example</a></h3>
+<p>JSON snippet</p>
+<pre><code class="language-json">{
+   &quot;title&quot;:&quot;Back to the Future&quot;,
+   &quot;sub-title&quot;:null,
+   &quot;year&quot;: 1985,
+   &quot;imdb-rating&quot;: 8.5,
+   &quot;keywords&quot;:[
+      &quot;time travel&quot;,
+      &quot;deloren&quot;,
+      &quot;comedy&quot;
+   ],
+   &quot;release-dates&quot;: [
+   	  1985, 1986, 1987, 
+   	  1992, 2008, 2010, 
+   	  2012, 2015, 2016
+   ]
+}
+</code></pre>
+<p>A (compacted) Carbon <code>object</code>.</p>
+<pre><code>[{]
+   (5)[title] [s](18)[Back to the Future]
+   (9)[sub-title] [n]
+   (4)[year] [c][1985]
+   (11)[imdb-rating] [r][8.5]
+   (8)[keywords] [[] 
+      [s](11)[time travel] 
+      [s](7)[deloren]       
+      [s](6)[comedy]            
+   []]
+   (13)[release-dates] [1](9)(9)
+      [1985] [1986] [1987]
+      [1992] [2008] [2010]
+      [2012] [2015] [2016]
+[}]   
+</code></pre>
+<h1><a class="header" href="#abstract-types" id="abstract-types">Abstract Types</a></h1>
+<p>Carbon supports abstract types, such as <em>lists</em> or <em>maps</em>. In Carbon an abstract type is of one of the following classes:</p>
+<ol>
+<li><strong>Abstract Base Type</strong>. An abstract base type does not need further treatment to guarantee their properties (<em>unsorted</em>, and <em>not duplicate-free</em>)</li>
+<li><strong>Derived Abstract Type</strong>. An abstract base type can be marked as a particular abstract type with further properties (such as <em>uniqueness</em> of contained elements), enabling the application to check certain promises and guarantees</li>
+</ol>
+<p>Both, <a href="format-specs/container-types/arrays.html">array containers</a> and <a href="format-specs/container-types/columns.html">column containers</a> are of the abstract base type <a href="format-specs/abstract-base-types.html"><code>unsorted-multiset</code></a>, while an <a href="format-specs/container-types/objects.html">object container</a> is of the abstract base type <a href="format-specs/abstract-base-types.html"><code>unsorted-multimap</code></a>. </p>
+<p>If an applications requires more guarantees and properties to abstract types, such as uniquness of elements or duplicate-freeness, abstract base types can be annotated, effectively converting them to <a href="format-specs/derived-abstract-types.html">derviced abstract types</a>.</p>
+<h1><a class="header" href="#abstract-base-types" id="abstract-base-types">Abstract Base Types</a></h1>
+<p>Annotation of container to mark a abstract type is done by replacing the containers begin marker with a special marker (called <em>derivation marker</em>) that declares the container as a particular abstract type. </p>
+<p>For instance replacing the object container begin marker <code>[{]</code> by the derivation marker <code>[~]</code> declares the object container as <code>sorted-mulimap</code>. </p>
+<p>Per definition, the deriviation marker for abstract base types is the begin marker for that container type. Therefore, abstract base types must not be annotated. In simpler words with an example, <code>[{]</code> always marks an object container that is an <code>unsorted-multimap</code> (see below). </p>
+<p>Carbon supports the following two abstract base types:</p>
+<ul>
+<li>unsorted multi set (<code>unsorted-multiset</code>)</li>
+<li>unsorted multi map (<code>unsorted-multimap</code>)</li>
+</ul>
+<h1><a class="header" href="#unsorted-multi-set" id="unsorted-multi-set">Unsorted Multi Set</a></h1>
+<table><thead><tr><th>Abstract Type</th><th>Derivation Marker</th><th>Container Type</th><th>Elements</th><th>Distinct</th><th>Sorted</th></tr></thead><tbody>
+<tr><td><code>unsorted-multiset</code></td><td><em>container marker</em></td><td><code>array</code>, <code>column</code></td><td>values</td><td>no</td><td>no</td></tr>
+</tbody></table>
+<p>The abstract base type <strong>unsorted multi set</strong> (<code>unsorted-multiset</code>) is a sequence of elements (potentially with duplicates). This sequence has no special sorting its elements.</p>
+<h2><a class="header" href="#example-15" id="example-15">Example</a></h2>
+<h3><a class="header" href="#json-snippet" id="json-snippet">JSON Snippet</a></h3>
+<pre><code class="language-json">[ 
+	4, 
+	2, 
+	null, 
+	null, 
+	2 
+]
+</code></pre>
+<h3><a class="header" href="#encoding-with-base-type-array" id="encoding-with-base-type-array">Encoding with Base Type <code>array</code></a></h3>
+<p>A (compacted) Carbon <code>unsorted-multiset</code> for the JSON snippet from above, encoding the JSON array with the base type <code>array</code> holding three <code>u8</code>, and two <code>null</code> values.</p>
+<pre><code>[[] 
+	[c][4] 
+	[c][2] 
+	[n] 
+	[n] 
+	[c][2] 
+[]] 
+</code></pre>
+<h3><a class="header" href="#encoding-with-base-type-column-u8" id="encoding-with-base-type-column-u8">Encoding with Base Type <code>column-u8</code></a></h3>
+<p>A (compacted) Carbon <code>unsorted-multiset</code> for the JSON snippet from above, encoding the JSON array with the base type <code>column-u8</code> holding three <code>u8</code>, and two <code>null</code> values.</p>
+<pre><code>[1] 
+	(5)(5) 
+	[4] 
+	[2] 
+	[2] 
+	[255] 
+	[255] 
+</code></pre>
+<h1><a class="header" href="#unsorted-multi-map" id="unsorted-multi-map">Unsorted Multi Map</a></h1>
+<table><thead><tr><th>Abstract Type</th><th>Derivation Marker</th><th>Container Type</th><th>Elements</th><th>Distinct</th><th>Sorted</th></tr></thead><tbody>
+<tr><td><code>unsorted-multimap</code></td><td><em>container marker</em></td><td><code>object</code></td><td>pairs</td><td>no</td><td>no</td></tr>
+</tbody></table>
+<p>The abstract base type <strong>unsorted multi map</strong> (<code>unsorted_multimap</code>) is a sequence of key-value pairs (potentially with duplicate pairs, and duplicate keys). This sequence has no special sorting its elements.</p>
+<h2><a class="header" href="#example-16" id="example-16">Example</a></h2>
+<h3><a class="header" href="#json-snippet-1" id="json-snippet-1">JSON Snippet</a></h3>
+<pre><code class="language-json">{ 
+	&quot;x&quot;:&quot;y&quot;, 
+	&quot;x&quot;:&quot;y&quot;, 
+	&quot;a&quot;:&quot;c&quot;,	
+	&quot;a&quot;:&quot;b&quot; 
+}
+</code></pre>
+<h3><a class="header" href="#encoding-with-base-type-object" id="encoding-with-base-type-object">Encoding with Base Type <code>object</code></a></h3>
+<p>A (compacted) Carbon <code>unsorted-multimap</code> for the JSON snippet from above, encoding the JSON object with the base type <code>object</code> holding four string properties.</p>
+<pre><code>[{] 
+	(1)[x] [s](1)[y]
+	(1)[x] [s](1)[y]
+	(1)[a] [s](1)[c]	
+	(1)[a] [s](1)[b]
+[}]
+</code></pre>
+<blockquote>
+<p><strong>JSON Standard Notes</strong>. Note that <a href="https://tools.ietf.org/html/rfc8259">JSON (RFC 8259)</a> does not restrict an object to unique keys or unique pairs. However, most JSON libraries reject objects with duplicate keys. For these libraries, use the <a href="format-specs/abstract-base-types/derived-abstract-types.html">derived abstract type</a> <code>sorted-map</code> or <code>unsorted-map</code>.</p>
+</blockquote>
+<h1><a class="header" href="#derived-abstract-types" id="derived-abstract-types">Derived Abstract Types</a></h1>
+<p>Annotation of container to mark a abstract type is done by replacing the containers begin marker with a special marker (called <em>derivation marker</em>) that declares the container as a particular abstract type. </p>
+<p>For instance replacing the object container begin marker <code>[{]</code> by the derivation marker <code>[~]</code> declares the object container as <code>sorted-multimap</code>. </p>
+<p>A derived abstract type is an abstract type that is neither an unsorted multi set (<code>unsorted-multiset</code>) nor an unsorted multi map (<code>unsorted-multimap</code>), and that marks the semantics for distinct values (or key), or a sorted sequence of elements, or both. </p>
+<blockquote>
+<p><strong>Note</strong>: Carbon itself does <em>not</em> provide any way to make these semantics work, i.e., the caller must manage the logic to provide distinct values or sorting. The responsibility of the Carbon format is to annotate a container <em>to have</em> these semantics. However, a library for Carbon <em>may</em> provide functionality to check wheter a particular guarantee holds.</p>
+</blockquote>
+<p>Carbon supports the following derived abstract types from the abstract base type <code>unsorted-multiset</code> stored in <code>array</code>/<code>column</code> containers:</p>
+<ul>
+<li>sorted multisets (<code>sorted-multiset</code>)</li>
+<li>unsorted sets (<code>unsorted-set</code>)</li>
+<li>sorted sets (<code>sorted-set</code>)</li>
+</ul>
+<p>Carbon supports the following derived abstract types from the abstract base type <code>unsorted-multimap</code> stored in <code>object</code> containers:</p>
+<ul>
+<li>sorted maps (<code>sorted-map</code>)</li>
+<li>sorted multi maps (<code>sorted-multimap</code>)</li>
+<li>unsorted map (<code>unsorted-map</code>)</li>
+<li>sorted map (<code>sorted-map</code>)</li>
+</ul>
+<h1><a class="header" href="#sorted-multi-sets" id="sorted-multi-sets">Sorted Multi Sets</a></h1>
+<p>A sorted multi set is a sequence of elements with a particular sorting, which may contain duplicates.</p>
+<table><thead><tr><th>Abstract Type</th><th>Elements</th><th>Distinct</th><th>Sorted</th></tr></thead><tbody>
+<tr><td><code>sorted-multiset</code></td><td>values</td><td>no</td><td>yes</td></tr>
+</tbody></table>
+<h2><a class="header" href="#based-on-array-containers" id="based-on-array-containers">Based on <code>array</code> Containers</a></h2>
+<table><thead><tr><th>Container Type</th><th>Marker</th><th>Derivation</th></tr></thead><tbody>
+<tr><td><code>array</code></td><td><code>[[]</code></td><td><code>[&lt;]</code></td></tr>
+</tbody></table>
+<h2><a class="header" href="#based-on-column-containers" id="based-on-column-containers">Based on <code>column</code> Containers</a></h2>
+<table><thead><tr><th>Container Type</th><th>Marker</th><th>Derivation</th></tr></thead><tbody>
+<tr><td><code>column-u8</code></td><td><code>[1]</code></td><td><code>[SOH]</code></td></tr>
+<tr><td><code>column-u16</code></td><td><code>[2]</code></td><td><code>[ENQ]</code></td></tr>
+<tr><td><code>column-u32</code></td><td><code>[3]</code></td><td><code>[TAB]</code></td></tr>
+<tr><td><code>column-u64</code></td><td><code>[4]</code></td><td><code>[CR]</code></td></tr>
+<tr><td><code>column-i8</code></td><td><code>[5]</code></td><td><code>[DC1]</code></td></tr>
+<tr><td><code>column-i16</code></td><td><code>[6]</code></td><td><code>[NAK]</code></td></tr>
+<tr><td><code>column-i32</code></td><td><code>[7]</code></td><td><code>[EM]</code></td></tr>
+<tr><td><code>column-i64</code></td><td><code>[8]</code></td><td><code>[GS]</code></td></tr>
+<tr><td><code>column-float</code></td><td><code>[R]</code></td><td><code>[&quot;]</code></td></tr>
+<tr><td><code>column-boolean</code></td><td><code>[B]</code></td><td><code>[_]</code></td></tr>
+</tbody></table>
+<h2><a class="header" href="#example-17" id="example-17">Example</a></h2>
+<pre><code class="language-json">[ 
+	4, 
+	2, 
+	null, 
+	null, 
+	2 
+]
+</code></pre>
+<h3><a class="header" href="#encoding-with-base-type-array-1" id="encoding-with-base-type-array-1">Encoding with Base Type <code>array</code></a></h3>
+<p>A (compacted) Carbon <code>sorted-multiset</code> for the JSON snippet from above, encoding the JSON array with the base type <code>array</code> holding three <code>u8</code>, and two <code>null</code> values.</p>
+<pre><code>[&lt;] 
+	[n] 
+	[n] 
+	[c][2]
+	[c][2]
+	[c][4] 
+[]] 
+</code></pre>
+<h3><a class="header" href="#encoding-with-base-type-columns" id="encoding-with-base-type-columns">Encoding with Base Type <code>columns</code></a></h3>
+<p>A (compacted) Carbon <code>sorted-multiset</code> for the JSON snippet from above, encoding the JSON array with the base type <code>column</code> holding three <code>u8</code>, and two <code>null</code> values.</p>
+<pre><code>[SOH] 
+	(5)(5) 
+	[255] 
+	[255] 	
+	[2] 
+	[2] 
+	[4] 	
+</code></pre>
+<h1><a class="header" href="#unsorted-set" id="unsorted-set">Unsorted Set</a></h1>
+<table><thead><tr><th>Abstract Type</th><th>Elements</th><th>Distinct</th><th>Sorted</th></tr></thead><tbody>
+<tr><td><code>unsorted-set</code></td><td>values</td><td>yes</td><td>no</td></tr>
+</tbody></table>
+<h2><a class="header" href="#based-on-array-containers-1" id="based-on-array-containers-1">Based on <code>array</code> Containers</a></h2>
+<table><thead><tr><th>Container Type</th><th>Marker</th><th>Derivation</th></tr></thead><tbody>
+<tr><td><code>array</code></td><td><code>[[]</code></td><td><code>[/]</code></td></tr>
+</tbody></table>
+<h2><a class="header" href="#based-on-column-containers-1" id="based-on-column-containers-1">Based on <code>column</code> Containers</a></h2>
+<table><thead><tr><th>Container Type</th><th>Marker</th><th>Derivation</th></tr></thead><tbody>
+<tr><td><code>column-u8</code></td><td><code>[1]</code></td><td><code>[STX]</code></td></tr>
+<tr><td><code>column-u16</code></td><td><code>[2]</code></td><td><code>[ACK]</code></td></tr>
+<tr><td><code>column-u32</code></td><td><code>[3]</code></td><td><code>[LF]</code></td></tr>
+<tr><td><code>column-u64</code></td><td><code>[4]</code></td><td><code>[S0]</code></td></tr>
+<tr><td><code>column-i8</code></td><td><code>[5]</code></td><td><code>[DC2]</code></td></tr>
+<tr><td><code>column-i16</code></td><td><code>[6]</code></td><td><code>[SYN]</code></td></tr>
+<tr><td><code>column-i32</code></td><td><code>[7]</code></td><td><code>[SUB]</code></td></tr>
+<tr><td><code>column-i64</code></td><td><code>[8]</code></td><td><code>[RS]</code></td></tr>
+<tr><td><code>column-float</code></td><td><code>[R]</code></td><td><code>[$]</code></td></tr>
+<tr><td><code>column-boolean</code></td><td><code>[B]</code></td><td><code>[']</code></td></tr>
+</tbody></table>
+<h2><a class="header" href="#example-18" id="example-18">Example</a></h2>
+<pre><code class="language-json">[ 
+	4, 
+	2, 
+	null, 
+	null, 
+	2 
+]
+</code></pre>
+<h3><a class="header" href="#encoding-with-base-type-array-2" id="encoding-with-base-type-array-2">Encoding with Base Type <code>array</code></a></h3>
+<p>A (compacted) Carbon <code>unsorted-set</code> for the JSON snippet from above, encoding the JSON array with the base type <code>array</code> holding two <code>u8</code>, and one <code>null</code> value.</p>
+<pre><code>[/] 
+	[c][4] 
+	[c][2] 
+	[n] 
+[]] 
+</code></pre>
+<h3><a class="header" href="#encoding-with-base-type-columns-1" id="encoding-with-base-type-columns-1">Encoding with Base Type <code>columns</code></a></h3>
+<p>A (compacted) Carbon <code>unsorted-set</code> for the JSON snippet from above, encoding the JSON array with the base type <code>column</code> holding two <code>u8</code>, and one <code>null</code> value.</p>
+<pre><code>[STX] 
+	(5)(5) 
+	[4]
+	[2]
+	[255]
+</code></pre>
+<h1><a class="header" href="#sorted-set" id="sorted-set">Sorted Set</a></h1>
+<table><thead><tr><th>Abstract Type</th><th>Elements</th><th>Distinct</th><th>Sorted</th></tr></thead><tbody>
+<tr><td><code>sorted-set</code></td><td>values</td><td>yes</td><td>yes</td></tr>
+</tbody></table>
+<h2><a class="header" href="#based-on-array-containers-2" id="based-on-array-containers-2">Based on <code>array</code> Containers</a></h2>
+<table><thead><tr><th>Container Type</th><th>Marker</th><th>Derivation</th></tr></thead><tbody>
+<tr><td><code>array</code></td><td><code>[[]</code></td><td><code>[=]</code></td></tr>
+</tbody></table>
+<h2><a class="header" href="#based-on-column-containers-2" id="based-on-column-containers-2">Based on <code>column</code> Containers</a></h2>
+<table><thead><tr><th>Container Type</th><th>Marker</th><th>Derivation</th></tr></thead><tbody>
+<tr><td><code>column-u8</code></td><td><code>[1]</code></td><td><code>[ETX]</code></td></tr>
+<tr><td><code>column-u16</code></td><td><code>[2]</code></td><td><code>[BEL]</code></td></tr>
+<tr><td><code>column-u32</code></td><td><code>[3]</code></td><td><code>[VT]</code></td></tr>
+<tr><td><code>column-u64</code></td><td><code>[4]</code></td><td><code>[S1]</code></td></tr>
+<tr><td><code>column-i8</code></td><td><code>[5]</code></td><td><code>[DC3]</code></td></tr>
+<tr><td><code>column-i16</code></td><td><code>[6]</code></td><td><code>[ETB]</code></td></tr>
+<tr><td><code>column-i32</code></td><td><code>[7]</code></td><td><code>[ESC]</code></td></tr>
+<tr><td><code>column-i64</code></td><td><code>[8]</code></td><td><code>[US]</code></td></tr>
+<tr><td><code>column-float</code></td><td><code>[R]</code></td><td><code>[.]</code></td></tr>
+<tr><td><code>column-boolean</code></td><td><code>[B]</code></td><td><code>[DEL]</code></td></tr>
+</tbody></table>
+<h2><a class="header" href="#example-19" id="example-19">Example</a></h2>
+<pre><code class="language-json">[ 
+	4, 
+	2, 
+	null, 
+	null, 
+	2 
+]
+</code></pre>
+<h3><a class="header" href="#encoding-with-base-type-array-3" id="encoding-with-base-type-array-3">Encoding with Base Type <code>array</code></a></h3>
+<p>A (compacted) Carbon <code>sorted-set</code> for the JSON snippet from above, encoding the JSON array with the base type <code>array</code> holding two <code>u8</code>, and one <code>null</code> values.</p>
+<pre><code>[=] 
+	[n] 
+	[c][2] 
+	[c][4] 	
+[]] 
+</code></pre>
+<h3><a class="header" href="#encoding-with-base-type-columns-2" id="encoding-with-base-type-columns-2">Encoding with Base Type <code>columns</code></a></h3>
+<p>A (compacted) Carbon <code>sorted-set</code> for the JSON snippet from above, encoding the JSON array with the base type <code>column</code> holding two <code>u8</code>, and one <code>null</code> value.</p>
+<pre><code>[ETX] 
+	(5)(5) 
+	[2]	
+	[4]
+	[255]
+</code></pre>
+<h1><a class="header" href="#sorted-maps" id="sorted-maps">Sorted Maps</a></h1>
+<table><thead><tr><th>Abstract Type</th><th>Elements</th><th>Container Type</th><th>Marker</th><th>Derivation</th><th>Distinct</th><th>Sorted</th></tr></thead><tbody>
+<tr><td><code>sorted-map</code></td><td>key-value pairs</td><td><code>object</code></td><td><code>[{]</code></td><td><code>[#]</code></td><td>yes</td><td>yes</td></tr>
+</tbody></table>
+<h2><a class="header" href="#example-20" id="example-20">Example</a></h2>
+<h3><a class="header" href="#json-snippet-2" id="json-snippet-2">JSON Snippet</a></h3>
+<pre><code class="language-json">{ 
+	&quot;x&quot;:&quot;y&quot;, 
+	&quot;x&quot;:&quot;y&quot;,
+	&quot;a&quot;:&quot;c&quot;, 
+	&quot;a&quot;:&quot;b&quot; 
+}
+</code></pre>
+<h3><a class="header" href="#carbon-encoding" id="carbon-encoding">Carbon Encoding</a></h3>
+<p>A (compacted) Carbon <code>sorted-map</code> for the JSON snippet from above, encoding the JSON object with the base type <code>object</code> holding two string properties (assuming <code>&quot;a&quot;:&quot;c&quot;</code> was added after <code>&quot;a&quot;:&quot;b&quot;</code>).</p>
+<pre><code>[#] 
+	(1)[a] [s](1)[c]	
+	(1)[x] [s](1)[y]
+[}]
+</code></pre>
+<h1><a class="header" href="#sorted-multi-maps" id="sorted-multi-maps">Sorted Multi Maps</a></h1>
+<table><thead><tr><th>Abstract Type</th><th>Elements</th><th>Container Type</th><th>Marker</th><th>Derivation</th><th>Distinct</th><th>Sorted</th></tr></thead><tbody>
+<tr><td><code>sorted-multimap</code></td><td>key-value pairs</td><td><code>object</code></td><td><code>[{]</code></td><td><code>[~]</code></td><td>no</td><td>yes</td></tr>
+</tbody></table>
+<h2><a class="header" href="#example-21" id="example-21">Example</a></h2>
+<h3><a class="header" href="#json-snippet-3" id="json-snippet-3">JSON Snippet</a></h3>
+<pre><code class="language-json">{ 
+	&quot;x&quot;:&quot;y&quot;, 
+	&quot;x&quot;:&quot;y&quot;, 
+	&quot;a&quot;:&quot;c&quot;, 
+	&quot;a&quot;:&quot;b&quot;	
+}
+</code></pre>
+<h3><a class="header" href="#carbon-encoding-1" id="carbon-encoding-1">Carbon Encoding</a></h3>
+<p>A (compacted) Carbon <code>sorted-multimap</code> for the JSON snippet from above, encoding the JSON object with the base type <code>object</code> holding four string properties.</p>
+<pre><code>[~] 
+	(1)[a] [s](1)[b]
+	(1)[a] [s](1)[c]
+	(1)[x] [s](1)[y]
+	(1)[x] [s](1)[y]
+[}]
+</code></pre>
+<h1><a class="header" href="#unsorted-maps" id="unsorted-maps">Unsorted Maps</a></h1>
+<table><thead><tr><th>Abstract Type</th><th>Elements</th><th>Container Type</th><th>Marker</th><th>Derivation</th><th>Distinct</th><th>Sorted</th></tr></thead><tbody>
+<tr><td><code>unsorted-map</code></td><td>key-value pairs</td><td><code>object</code></td><td><code>[{]</code></td><td><code>[:]</code></td><td>yes</td><td>no</td></tr>
+</tbody></table>
+<h2><a class="header" href="#example-22" id="example-22">Example</a></h2>
+<h3><a class="header" href="#json-snippet-4" id="json-snippet-4">JSON Snippet</a></h3>
+<pre><code class="language-json">{ 
+	&quot;x&quot;:&quot;y&quot;, 
+	&quot;x&quot;:&quot;y&quot;, 
+	&quot;a&quot;:&quot;c&quot;,
+	&quot;a&quot;:&quot;b&quot; 
+}
+</code></pre>
+<h3><a class="header" href="#carbon-encoding-2" id="carbon-encoding-2">Carbon Encoding</a></h3>
+<p>A (compacted) Carbon <code>unsorted-map</code> for the JSON snippet from above, encoding the JSON object with the base type <code>object</code> holding two string properties (assuming <code>&quot;a&quot;:&quot;c&quot;</code> was added after <code>&quot;a&quot;:&quot;b&quot;</code>).</p>
+<pre><code>[:] 
+	(1)[x] [s](1)[y]
+	(1)[a] [s](1)[c]
+[}]
+</code></pre>
+<h1><a class="header" href="#update-specification" id="update-specification">Update Specification</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#revision-control" id="revision-control">Revision Control</a></h1>
+<h2><a class="header" href="#commit-hash-computations" id="commit-hash-computations">Commit Hash Computations</a></h2>
+<h3><a class="header" href="#initial-commit-hash" id="initial-commit-hash">Initial Commit Hash</a></h3>
+<p>For new records</p>
+<pre><code>bool global_id_create(global_id_t *out)
+{
+        static bool process_init;
+        static u64 process_local_id;
+        static u8 process_magic;
+        static u64 process_counter;
+
+        static u8 global_build_date_bit;
+        static u8 global_build_path_bit;
+
+        if (!process_init) {
+                srand(time(NULL));
+                process_magic = rand();
+                process_init = true;
+                process_counter = rand();
+
+                const char *file = __FILE__;
+                const char *time = __TIME__;
+
+                global_build_path_bit = HASH_BERNSTEIN(strlen(file), file) % 2;
+                global_build_date_bit = HASH_BERNSTEIN(strlen(time), time) % 2;
+        }
+
+        if (!thread_local_init) {
+                thread_local_counter = rand();
+                thread_local_counter_limit = thread_local_counter++;
+                thread_local_id = (u64) pthread_self();
+                process_local_id = getpid();
+                thread_local_magic = rand();
+                thread_local_init = true;
+        }
+
+        bool capacity_left = (thread_local_counter != thread_local_counter_limit);
+        error_print_if(!capacity_left, ERR_THREADOOOBJIDS)
+        if (likely(capacity_left)) {
+                union global_id internal =
+                        {.global_wallclock  = time_now_wallclock(), 
+                         .global_build_date = global_build_date_bit, 
+                         .global_build_path = global_build_path_bit, 
+                         .process_id        = process_local_id, 
+                         .process_magic     = process_magic, 
+                         .process_counter   = process_counter++, 
+                         .thread_id         = (u64) thread_local_id, 
+                         .thread_magic      = thread_local_magic, 
+                         .thread_counter    = thread_local_counter++, 
+                         .call_random       = rand()};
+                *out = internal.value;
+        } else {
+                *out = 0;
+        }
+        return capacity_left;
+}
+</code></pre>
+<h3><a class="header" href="#revision-commit-hash" id="revision-commit-hash">Revision Commit Hash</a></h3>
+<p>Commit hash for revised record <code>R'</code> is <em>FNV</em> hash value of raw data stream of original record <code>R</code>.</p>
+<pre><code>uint64_t hash = (uint64_t) 2166136261;
+for (size_t i = 0; i &lt; key_size; i++){
+   hash = (hash * 16777619) ^ ((unsigned char* )key)[i];
+}
+</code></pre>
+<h2><a class="header" href="#stringified-commit-hash" id="stringified-commit-hash">Stringified Commit Hash</a></h2>
+<p>The base 16 (hex) value string of a commit hash value with exactly 16 letters without any leading prefix.</p>
+<p>Example base 10 commit hash <code>2072006001577230657</code> is printed to string as <code>1cc13e7b007d0141</code>.</p>
+<h2><a class="header" href="#initial-commit-hash-1" id="initial-commit-hash-1">Initial Commit Hash</a></h2>
+<h1><a class="header" href="#patches" id="patches">Patches</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#atomic-operations" id="atomic-operations">Atomic Operations</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#insert-operations" id="insert-operations">Insert Operations</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#in-place-updates" id="in-place-updates">In-Place Updates</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#delete-operations" id="delete-operations">Delete Operations</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#traversals-and-queries" id="traversals-and-queries">Traversals and Queries</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#dot-path-expressions" id="dot-path-expressions">Dot Path Expressions</a></h1>
+<p>A dot path expression is used to access a value within a Carbon <code>record</code> by describing a path to this value.</p>
+<p>A dot path expression neither modifies a <code>record</code> nor supports any kind of predicates beyond those on paths.
+In simpler words, the intention of a dot path expression is express the path to a particular value not querying
+for paths given some contraints to values. </p>
+<h2><a class="header" href="#comparison-to-dot-notation-as-in-mongodb-or-couchdb" id="comparison-to-dot-notation-as-in-mongodb-or-couchdb">Comparison to Dot Notation as in MongoDB or CouchDB</a></h2>
+<p>Dot path expression are a superset of value paths that be expression via a &quot;dot notation&quot; in MongoDB or CouchDB.
+In addition to proving a fixed path to a value as one would do using a dot notation, a dot path expression allows
+to give a more fuzzy description of the path. Directly speaking, when using the dot notation, there is no way
+to access values if the path to these values cannot be described completely. This is a strong limitation for
+explorative queries in structures that are only partly known. In MongoDB or CouchDB one would typically use the
+aggregation pipeline or a MapReduce job for these purposes. Carbon dot path expressions allow to query for
+a value where there is some uncertainty about its actual path.</p>
+<p>In a nutshell, dot path expressions allow the following capabilities beyond the dot notation:</p>
+<ul>
+<li>...</li>
+<li>Clear difference whether a path results in value that is annotated as not present (i.e., a <code>null</code> is returned), and
+a path that does not resolve to any value (i.e., a <code>undef</code> is returned)</li>
+</ul>
+<h2><a class="header" href="#comparison-to-jsonsql-path-expressions" id="comparison-to-jsonsql-path-expressions">Comparison to JSON/SQL Path Expressions</a></h2>
+<p>JSON/SQL Path Expressions is part of the SQL:2016 Standard and allows </p>
+<h2><a class="header" href="#grammar" id="grammar">Grammar</a></h2>
+<pre><code>dot-path-unit           ::= path-expression ('.' path-expression)*
+path-expression         ::= array-accessor | property-accessor 
+array-accessor          ::= [0] | [1-9][0-9]* 
+property-accessor       ::= field-name | '&quot;' string '&quot;' | key-predicate
+key-predicate           ::= '$' function-name '(' function-parameter-list ')'
+field-name              ::= [a-zA-Z]('\&quot;' | [a-zA-Z0-9])*
+function-name           ::= [a-zA-Z][a-zA-Z0-9]*
+function-parameter-list ::= non-strict-json-string
+</code></pre>
+<h2><a class="header" href="#property-access" id="property-access">Property Access</a></h2>
+<p>JSON snippet</p>
+<pre><code class="language-json">{
+   &quot;title&quot;:&quot;Back to the Future&quot;,
+   &quot;sub-title&quot;:null,
+   &quot;year&quot;:1985,
+   &quot;imdb-rating&quot;:8.5,
+   &quot;meta&quot;: { &quot;keywords&quot;: [
+      			&quot;time travel&quot;,
+      			&quot;delorean&quot;,
+      			&quot;comedy&quot;
+   			 ],
+             &quot;personal comment&quot;: &quot;must see&quot;
+   },
+   &quot;release-dates&quot;:[
+      1985, 1986, 1987,
+      1992, 2008, 2010,
+      2012, 2015, 2016
+   ]
+}
+</code></pre>
+<h3><a class="header" href="#key-based-access" id="key-based-access">Key-Based Access</a></h3>
+<p>Dot Path</p>
+<pre><code>title
+</code></pre>
+<p>Result (Json)</p>
+<pre><code>&quot;Back to the Future&quot;
+</code></pre>
+<h3><a class="header" href="#nested-property-accesss" id="nested-property-accesss">Nested Property Accesss</a></h3>
+<p>Dot Path</p>
+<pre><code>meta.keywords
+</code></pre>
+<p>Result (Json)</p>
+<pre><code>[&quot;time travel&quot;, &quot;delorean&quot;, &quot;comedy&quot;]
+</code></pre>
+<h3><a class="header" href="#non-identifier-key-based-access" id="non-identifier-key-based-access">Non-Identifier Key-Based Access</a></h3>
+<p>Dot Path</p>
+<pre><code>meta.keywords.&quot;personal comment&quot;
+</code></pre>
+<p>Result (Json)</p>
+<pre><code>&quot;must see&quot;
+</code></pre>
+<h2><a class="header" href="#access-to-values-via-uncertain-paths" id="access-to-values-via-uncertain-paths">Access to Values via Uncertain Paths</a></h2>
+<h3><a class="header" href="#key-based-fuzzy-paths" id="key-based-fuzzy-paths">Key-Based Fuzzy Paths</a></h3>
+<p>Dot Path</p>
+<pre><code>$ends_with(name: &quot;le&quot;, ignore_case: true)&quot;
+</code></pre>
+<p>Result (Json)</p>
+<pre><code class="language-json">[
+    {
+    	&quot;value&quot;: &quot;Back to the Future&quot;,
+    	&quot;type&quot;: &quot;string&quot;,
+    	&quot;path&quot;: &quot;title&quot;
+    },
+    {
+    	&quot;value&quot;: null,
+    	&quot;type&quot;: &quot;null&quot;,
+    	&quot;path&quot;: &quot;sub-title&quot;
+    }
+]
+</code></pre>
+<p>The specification defines a minium set of functions that must be supportet for dot path expression strings. 
+See Section <a href="traversals-queries/traversals-queries/path-functions.html">Dot Path Functions</a> for more details.</p>
+<h2><a class="header" href="#array-element-access" id="array-element-access">Array Element Access</a></h2>
+<p>JSON snippet</p>
+<pre><code class="language-json">[
+	{
+	   &quot;title&quot;:&quot;Back to the Future&quot;,
+	   &quot;year&quot;:1985,
+	   &quot;keywords&quot;: [
+      			&quot;time travel&quot;,
+      			&quot;delorean&quot;,
+      			&quot;comedy&quot;
+   			 ]
+	}, 
+	{
+	   &quot;title&quot;:&quot;Back to the Future Part II&quot;,
+	   &quot;year&quot;:1989
+	},
+	[
+	   &quot;time travel&quot;, &quot;delorean&quot;, &quot;comedy&quot;
+	]
+]
+</code></pre>
+<h3><a class="header" href="#element-access" id="element-access">Element Access</a></h3>
+<p>Dot Path</p>
+<pre><code>1.title
+</code></pre>
+<p>Result (Json)</p>
+<pre><code>&quot;Back to the Future Part II&quot;
+</code></pre>
+<h3><a class="header" href="#nested-array-element-access" id="nested-array-element-access">Nested Array Element Access</a></h3>
+<p>Dot Path</p>
+<pre><code>2.0
+</code></pre>
+<p>Result (Json)</p>
+<pre><code>&quot;time travel&quot;
+</code></pre>
+<h2><a class="header" href="#mixed-array-and-property-access" id="mixed-array-and-property-access">Mixed Array and Property Access</a></h2>
+<p>Dot Path</p>
+<pre><code>0.keywords.2
+</code></pre>
+<p>Result (Json)</p>
+<pre><code>&quot;comedy&quot;
+</code></pre>
+<h3><a class="header" href="#array-element-fuzzy-paths" id="array-element-fuzzy-paths">Array Element Fuzzy Paths</a></h3>
+<p>Dot Path</p>
+<pre><code>$tail(skip: 1).title&quot;
+</code></pre>
+<p>Result (Json)</p>
+<pre><code class="language-json">[
+    {
+    	&quot;value&quot;: &quot;Back to the Future Part II&quot;,
+    	&quot;type&quot;: &quot;string&quot;,
+    	&quot;path&quot;: &quot;1.title&quot;
+    }
+]
+</code></pre>
+<p>The specification defines a minium set of functions that must be supportet for dot path expression strings. 
+See  Section <a href="traversals-queries/traversals-queries/path-functions.html">Dot Path Functions</a> for more details.</p>
+<h3><a class="header" href="#general-fuzzy-paths-and-conditional-branching" id="general-fuzzy-paths-and-conditional-branching">General Fuzzy Paths and Conditional Branching</a></h3>
+<p>See Section <a href="traversals-queries/traversals-queries/path-functions.html">Dot Path Functions</a>.</p>
+<h3><a class="header" href="#unresolvable-paths" id="unresolvable-paths">Unresolvable Paths</a></h3>
+<p>If a (synatic correct) path does not resolve to a value, the value <code>undef</code> is returned. This applies to paths that do not point to a value, 
+or paths that cannot be fully traversed since a non-container type occurs during the path evaluation.</p>
+<p>Input Json</p>
+<pre><code class="language-json">{
+  &quot;x&quot;: &quot;y&quot;,
+  &quot;z&quot;: [1, 2, 3]
+}
+</code></pre>
+<p>The dot path expression <code>y</code> will return <code>undef</code> since there is no key named <code>&quot;y&quot;</code> in the input Json.
+The dot path expression <code>z.1.5</code> will return <code>undef</code> since the path evaluation must be aborted with <code>z.1</code> since the element <code>2</code> is not a traversable container.</p>
+<h3><a class="header" href="#note" id="note">Note</a></h3>
+<p>Internally, Carbon organizes data in a record container which is basically an array. Therefore, </p>
+<p>JSON snippet</p>
+<pre><code class="language-json">{ &quot;x&quot;: &quot;y&quot; }
+</code></pre>
+<p>is stored as <code>[{ ... }]</code>. Hence dot path expression <code>title</code> is equivalent to <code>0.title</code>; both result in <code>&quot;y&quot;</code>. Actually, omitting
+<code>0.</code> in this context is syntactig suggar: omitting the index <code>0</code> is possible as long as the input Json is an Json object. </p>
+<p>In cases where the input is not a single Json object, omitting the first array index is not valid.</p>
+<p>JSON snippet</p>
+<pre><code class="language-json">[{ &quot;x&quot;: &quot;y&quot; }]
+</code></pre>
+<p>the dot path expression <code>0.x</code> will result in <code>&quot;y&quot;</code> as expected, but the dot path expression <code>x</code> will result in a carbon <code>undef</code>. The
+reason for that is to guarantee container semantics as given by the user input. </p>
+<p>JSON snippet</p>
+<pre><code>A = { &quot;x&quot;: &quot;y&quot; }
+B = [{ &quot;x&quot;: &quot;y&quot;}, { &quot;x&quot;: &quot;z&quot;}]
+</code></pre>
+<p><code>A</code> is an object, and <code>B</code> is an array. Allowing omitting of <code>0.</code> to access the property <code>x</code> in <code>B</code> would result in <code>&quot;y&quot;</code> as expected 
+but would imply <code>B</code> is an object like <code>A</code>, which is not the case. The intention of omitting the index <code>0</code> in dot path expressions
+for Json inputs that consits of an single Json object only, is avoid forcing semantics (i.e., that a record is an array and never be
+a single object in Carbon) that are design-specific for Carbon. However, omitting this index in all other cases would change the 
+user input data at least implictly (such as treating an array of objects like a single object). </p>
+<h1><a class="header" href="#dot-path-expressions-functions" id="dot-path-expressions-functions">Dot Path Expressions Functions</a></h1>
+<h2><a class="header" href="#array-element-functions" id="array-element-functions">Array Element Functions</a></h2>
+<h3><a class="header" href="#head" id="head"><code>$head()</code></a></h3>
+<h3><a class="header" href="#tail" id="tail"><code>$tail()</code></a></h3>
+<h3><a class="header" href="#idx" id="idx"><code>$idx()</code></a></h3>
+<h2><a class="header" href="#key-name-functions" id="key-name-functions">Key Name Functions</a></h2>
+<h2><a class="header" href="#path-functions" id="path-functions">Path Functions</a></h2>
+<h3><a class="header" href="#if" id="if"><code>$if()</code></a></h3>
+<h3><a class="header" href="#any" id="any"><code>$any()</code></a></h3>
+<h2><a class="header" href="#user-defined-functions" id="user-defined-functions">User-Defined Functions</a></h2>
+<h1><a class="header" href="#formatting" id="formatting">Formatting</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#json-formatting" id="json-formatting">JSON Formatting</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#lax-json" id="lax-json">Lax JSON</a></h1>
+<pre><code># This is a valid Lax Json file
+
+title: &quot;Back to the Future&quot;
+type:  MOVIE
+year:  1985
+
+</code></pre>
+<p>A Lax (&quot;non-strict&quot;) JSON string is a valid JSON string that additionally allows the following:</p>
+<ul>
+<li>
+<p><strong>Optional Key Enquoting</strong>. For key names that only contain of alphanumeric characters without leading numbers and no spaces, double quoting can be omitted (i.e., <code>{ x: &quot;y&quot; }</code> is a valid non-strict Json string)</p>
+</li>
+<li>
+<p><strong>Optional Value Enquoting</strong>. For string values that only contain of alphanumeric characters, underscore, without leading numbers and no spaces, double quoting can be omitted (i.e., <code>{ &quot;x&quot;: my_value }</code> is a valid non-strict Json string)</p>
+</li>
+<li>
+<p><strong>Optional Object Scoping</strong>. The object block symbols <code>{</code> and <code>}</code> can be omitted for the outermost object that is not contained in an array (i.e., <code>&quot;x&quot;: &quot;y&quot;</code> is a valid non-strict Json object)</p>
+</li>
+<li>
+<p><strong>Optional Comma Seperation</strong>. The comma seperator <code>,</code> can be omitted by exchange with a line break (<code>\n</code>)</p>
+</li>
+<li>
+<p><strong>Comments</strong>. Line comments via <code>#</code> are allowed, such that any character after (including) <code>#</code> is ignored</p>
+</li>
+</ul>
+<p>The file extension is <code>.lax</code> (lax Json).</p>
+<h1><a class="header" href="#mime-type-and-extension" id="mime-type-and-extension">MIME Type and Extension</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#developer-resources" id="developer-resources">Developer Resources</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<p>See <a href="http://www.jakson-devdocs.org">jakson-devdocs.org</a></p>
+<h1><a class="header" href="#libraries" id="libraries">Libraries</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#best-practise" id="best-practise">Best Practise</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#example-files" id="example-files">Example Files</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#carbon-files-in-libcarbon" id="carbon-files-in-libcarbon">Carbon Files in Libcarbon</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#carbon-file-specification" id="carbon-file-specification">Carbon File Specification</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#feedback-and-contributions" id="feedback-and-contributions">Feedback and Contributions</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+<h1><a class="header" href="#thanks-to" id="thanks-to">Thanks To</a></h1>
+<blockquote>
+<p><strong>Not yet described</strong>. </p>
+</blockquote>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+        
+        <script type="text/javascript">
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+        
+        
+
+    </body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Sorted Sets - The Columnar Binary JSON Specification</title>
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+        <link rel="stylesheet" href="../../theme/slim.css">
+        
+
+        
+    </head>
+    <body class="light">
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../../";
+            var default_theme = "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            document.body.className = theme;
+            document.querySelector('html').className = theme + ' js';
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="affix"><a href="../../carbon.html">Columnar Binary JSON</a></li><li class="affix"><a href="../../introduction.html">Introduction</a></li><li><a href="../../getting-started.html"><strong aria-hidden="true">1.</strong> Getting Started</a></li><li><ol class="section"><li><a href="../../getting-started/motivation.html"><strong aria-hidden="true">1.1.</strong> Motivation</a></li><li><a href="../../getting-started/example.html"><strong aria-hidden="true">1.2.</strong> Example</a></li><li><a href="../../getting-started/comparison.html"><strong aria-hidden="true">1.3.</strong> Comparison</a></li></ol></li><li><a href="../../format-spec.html"><strong aria-hidden="true">2.</strong> Carbon File Specification</a></li><li><ol class="section"><li><a href="../../format-specs/design-goals.html"><strong aria-hidden="true">2.1.</strong> Design Goals</a></li><li><a href="../../format-specs/notation.html"><strong aria-hidden="true">2.2.</strong> Notation</a></li><li><a href="../../format-specs/alternatives.html"><strong aria-hidden="true">2.3.</strong> Alternatives</a></li><li><ol class="section"><li><a href="../../format-specs/alternatives/bson.html"><strong aria-hidden="true">2.3.1.</strong> Binary JSON</a></li><li><a href="../../format-specs/alternatives/ubjson.html"><strong aria-hidden="true">2.3.2.</strong> Universal Binary JSON</a></li></ol></li><li><a href="../../format-specs/format-overview.html"><strong aria-hidden="true">2.4.</strong> Format Overview</a></li><li><ol class="section"><li><a href="../../format-specs/format-overview/marker-format.html"><strong aria-hidden="true">2.4.1.</strong> Marker Format</a></li><li><a href="../../format-specs/format-overview/varuints.html"><strong aria-hidden="true">2.4.2.</strong> Variable-Length Integers</a></li><li><a href="../../format-specs/format-overview/padding-spaces.html"><strong aria-hidden="true">2.4.3.</strong> Compacting and Padding</a></li><li><a href="../../format-specs/format-overview/bnf-syntax.html"><strong aria-hidden="true">2.4.4.</strong> BNF Syntax</a></li></ol></li><li><a href="../../format-specs/identification.html"><strong aria-hidden="true">2.5.</strong> Identification</a></li><li><ol class="section"><li><a href="../../format-specs/identification/user-def-keys.html"><strong aria-hidden="true">2.5.1.</strong> User-Defined Keys</a></li><li><a href="../../format-specs/identification/sys-def-keys.html"><strong aria-hidden="true">2.5.2.</strong> System-Defined Keys</a></li></ol></li><li><a href="../../format-specs/data-types.html"><strong aria-hidden="true">2.6.</strong> Data Types</a></li><li><ol class="section"><li><a href="../../format-specs/data-types/booleans.html"><strong aria-hidden="true">2.6.1.</strong> Booleans</a></li><li><a href="../../format-specs/data-types/integers.html"><strong aria-hidden="true">2.6.2.</strong> Integer Numbers</a></li><li><a href="../../format-specs/data-types/floating.html"><strong aria-hidden="true">2.6.3.</strong> Floating Numbers</a></li><li><a href="../../format-specs/data-types/character-strings.html"><strong aria-hidden="true">2.6.4.</strong> Character Strings</a></li><li><a href="../../format-specs/data-types/binary-strings.html"><strong aria-hidden="true">2.6.5.</strong> Binary Strings</a></li><li><a href="../../format-specs/data-types/nulls.html"><strong aria-hidden="true">2.6.6.</strong> Nulls</a></li><li><a href="../../format-specs/data-types/undefs.html"><strong aria-hidden="true">2.6.7.</strong> Undefs</a></li></ol></li><li><a href="../../format-specs/container-types.html"><strong aria-hidden="true">2.7.</strong> Container Types</a></li><li><ol class="section"><li><a href="../../format-specs/container-types/arrays.html"><strong aria-hidden="true">2.7.1.</strong> Arrays</a></li><li><a href="../../format-specs/container-types/columns.html"><strong aria-hidden="true">2.7.2.</strong> Columns</a></li><li><a href="../../format-specs/container-types/objects.html"><strong aria-hidden="true">2.7.3.</strong> Objects</a></li></ol></li><li><a href="../../format-specs/abstract-types.html"><strong aria-hidden="true">2.8.</strong> Abstract Types</a></li><li><ol class="section"><li><a href="../../format-specs/abstract-base-types.html"><strong aria-hidden="true">2.8.1.</strong> Abstract Base Types</a></li><li><ol class="section"><li><a href="../../format-specs/abstract-base-types/unsorted-multi-sets.html"><strong aria-hidden="true">2.8.1.1.</strong> Unsorted Multi Sets</a></li><li><a href="../../format-specs/abstract-base-types/unsorted-multi-maps.html"><strong aria-hidden="true">2.8.1.2.</strong> Unsorted Multi Maps</a></li></ol></li><li><a href="../../format-specs/derived-abstract-types.html"><strong aria-hidden="true">2.8.2.</strong> Derived Abstract Types</a></li><li><ol class="section"><li><a href="../../format-specs/derived-abstract-types/sorted-multi-sets.html"><strong aria-hidden="true">2.8.2.1.</strong> Sorted Multi Sets</a></li><li><a href="../../format-specs/derived-abstract-types/unsorted-sets.html"><strong aria-hidden="true">2.8.2.2.</strong> Unsorted Sets</a></li><li><a href="../../format-specs/derived-abstract-types/sorted-sets.html" class="active"><strong aria-hidden="true">2.8.2.3.</strong> Sorted Sets</a></li><li><a href="../../format-specs/derived-abstract-types/sorted-maps.html"><strong aria-hidden="true">2.8.2.4.</strong> Sorted Maps</a></li><li><a href="../../format-specs/derived-abstract-types/sorted-multi-maps.html"><strong aria-hidden="true">2.8.2.5.</strong> Sorted Multi Maps</a></li><li><a href="../../format-specs/derived-abstract-types/unsorted-maps.html"><strong aria-hidden="true">2.8.2.6.</strong> Unsorted Maps</a></li></ol></li></ol></li><li><a href="../../update-spec.html"><strong aria-hidden="true">2.9.</strong> Update Specification</a></li><li><ol class="section"><li><a href="../../update-spec/revision-control.html"><strong aria-hidden="true">2.9.1.</strong> Revisions</a></li><li><a href="../../update-spec/patches.html"><strong aria-hidden="true">2.9.2.</strong> Patches</a></li><li><a href="../../update-spec/atomic-ops.html"><strong aria-hidden="true">2.9.3.</strong> Atomic Operations</a></li><li><a href="../../update-spec/insert-ops.html"><strong aria-hidden="true">2.9.4.</strong> Insert Operations</a></li><li><a href="../../update-spec/update-ops.html"><strong aria-hidden="true">2.9.5.</strong> In-Place Updates</a></li><li><a href="../../update-spec/delete-ops.html"><strong aria-hidden="true">2.9.6.</strong> Delete Operations</a></li></ol></li><li><a href="../../traversals-queries.html"><strong aria-hidden="true">2.10.</strong> Querying for Values</a></li><li><ol class="section"><li><a href="../../traversals-queries/dot-path-expressions.html"><strong aria-hidden="true">2.10.1.</strong> Dot Path Expressions</a></li><li><a href="../../traversals-queries/path-functions.html"><strong aria-hidden="true">2.10.2.</strong> Dot Path Functions</a></li></ol></li><li><a href="../../formatting.html"><strong aria-hidden="true">2.11.</strong> Formatting</a></li><li><ol class="section"><li><a href="../../formatting/json.html"><strong aria-hidden="true">2.11.1.</strong> JSON Formatting</a></li><li><a href="../../formatting/lax-json.html"><strong aria-hidden="true">2.11.2.</strong> Lax JSON</a></li></ol></li><li><a href="../../format-specs/mime-types.html"><strong aria-hidden="true">2.12.</strong> MIME Type and Extension</a></li><li><a href="../../dev-ressources.html"><strong aria-hidden="true">2.13.</strong> Developer Resources</a></li><li><ol class="section"><li><a href="../../dev-ressources/libraries.html"><strong aria-hidden="true">2.13.1.</strong> Libraries</a></li><li><a href="../../dev-ressources/best-practise.html"><strong aria-hidden="true">2.13.2.</strong> Best Practise</a></li><li><a href="../../dev-ressources/example-files.html"><strong aria-hidden="true">2.13.3.</strong> Example Files</a></li></ol></li><li><a href="../../libcarbon.html"><strong aria-hidden="true">2.14.</strong> Carbon Files in Libcarbon</a></li></ol></li><li><a href="../../archive-spec.html"><strong aria-hidden="true">3.</strong> Carbon Archive Specification</a></li><li class="affix"><a href="../../feedback.html">Feedback and Contributions</a></li><li class="affix"><a href="../../thanks.html">Thanks To</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar" class="menu-bar">
+                    <div id="menu-bar-sticky-container">
+                        <div class="left-buttons">
+                            <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                                <i class="fa fa-paint-brush"></i>
+                            </button>
+                            <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                                <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                            </ul>
+                            
+                            <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                                <i class="fa fa-search"></i>
+                            </button>
+                            
+                        </div>
+
+                        <h1 class="menu-title">The Columnar Binary JSON Specification</h1>
+
+                        <div class="right-buttons">
+                            <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                                <i id="print-button" class="fa fa-print"></i>
+                            </a>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1><a class="header" href="#sorted-set" id="sorted-set">Sorted Set</a></h1>
+<table><thead><tr><th>Abstract Type</th><th>Elements</th><th>Distinct</th><th>Sorted</th></tr></thead><tbody>
+<tr><td><code>sorted-set</code></td><td>values</td><td>yes</td><td>yes</td></tr>
+</tbody></table>
+<h2><a class="header" href="#based-on-array-containers" id="based-on-array-containers">Based on <code>array</code> Containers</a></h2>
+<table><thead><tr><th>Container Type</th><th>Marker</th><th>Derivation</th></tr></thead><tbody>
+<tr><td><code>array</code></td><td><code>[[]</code></td><td><code>[=]</code></td></tr>
+</tbody></table>
+<h2><a class="header" href="#based-on-column-containers" id="based-on-column-containers">Based on <code>column</code> Containers</a></h2>
+<table><thead><tr><th>Container Type</th><th>Marker</th><th>Derivation</th></tr></thead><tbody>
+<tr><td><code>column-u8</code></td><td><code>[1]</code></td><td><code>[ETX]</code></td></tr>
+<tr><td><code>column-u16</code></td><td><code>[2]</code></td><td><code>[BEL]</code></td></tr>
+<tr><td><code>column-u32</code></td><td><code>[3]</code></td><td><code>[VT]</code></td></tr>
+<tr><td><code>column-u64</code></td><td><code>[4]</code></td><td><code>[S1]</code></td></tr>
+<tr><td><code>column-i8</code></td><td><code>[5]</code></td><td><code>[DC3]</code></td></tr>
+<tr><td><code>column-i16</code></td><td><code>[6]</code></td><td><code>[ETB]</code></td></tr>
+<tr><td><code>column-i32</code></td><td><code>[7]</code></td><td><code>[ESC]</code></td></tr>
+<tr><td><code>column-i64</code></td><td><code>[8]</code></td><td><code>[US]</code></td></tr>
+<tr><td><code>column-float</code></td><td><code>[R]</code></td><td><code>[.]</code></td></tr>
+<tr><td><code>column-boolean</code></td><td><code>[B]</code></td><td><code>[DEL]</code></td></tr>
+</tbody></table>
+<h2><a class="header" href="#example" id="example">Example</a></h2>
+<pre><code class="language-json">[ 
+	4, 
+	2, 
+	null, 
+	null, 
+	2 
+]
+</code></pre>
+<h3><a class="header" href="#encoding-with-base-type-array" id="encoding-with-base-type-array">Encoding with Base Type <code>array</code></a></h3>
+<p>A (compacted) Carbon <code>sorted-set</code> for the JSON snippet from above, encoding the JSON array with the base type <code>array</code> holding two <code>u8</code>, and one <code>null</code> values.</p>
+<pre><code>[=] 
+	[n] 
+	[c][2] 
+	[c][4] 	
+[]] 
+</code></pre>
+<h3><a class="header" href="#encoding-with-base-type-columns" id="encoding-with-base-type-columns">Encoding with Base Type <code>columns</code></a></h3>
+<p>A (compacted) Carbon <code>sorted-set</code> for the JSON snippet from above, encoding the JSON array with the base type <code>column</code> holding two <code>u8</code>, and one <code>null</code> value.</p>
+<pre><code>[ETX] 
+	(5)(5) 
+	[2]	
+	[4]
+	[255]
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../../format-specs/derived-abstract-types/unsorted-sets.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+                            <a rel="next" href="../../format-specs/derived-abstract-types/sorted-maps.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a href="../../format-specs/derived-abstract-types/unsorted-sets.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a href="../../format-specs/derived-abstract-types/sorted-maps.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script src="../../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="../../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>

@@ -17,7 +17,7 @@ Carbon Type    | Description                          | Size                | *n
 ```
 
 ```
-<key-string_buffer> <value>
+<key-string> <value>
 ```
 
 
@@ -25,10 +25,10 @@ Carbon Type    | Description                          | Size                | *n
 #### Keys
 
 ```
-<key-string_buffer>
+<key-string>
 ```
 
-A `<key-string_buffer>` is any value of type `string_buffer` where the `[s]` marker is omitted.
+A `<key-string>` is any value of type `string` where the `[s]` marker is omitted.
 
 #### Values
 
@@ -39,7 +39,7 @@ A `<key-string_buffer>` is any value of type `string_buffer` where the `[s]` mar
 A `<value>` is any value of a supported type.
 
 ```
-true, false, u8, u16, u32, u64, i8, i16, i32, i64, float, string_buffer, 
+true, false, u8, u16, u32, u64, i8, i16, i32, i64, float, string, 
 binary, custom binary, null, array, column-u8, column-u16, column-u32, 
 column-u64, column-i8, column-i16, column-i32, column-i64, column-float, 
 column-boolean, object 
