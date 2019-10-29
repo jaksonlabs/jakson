@@ -90,6 +90,21 @@ bool carbon_object_it_clone(carbon_object_it *dst, carbon_object_it *src)
         return true;
 }
 
+bool carbon_object_it_length(u64 *len, carbon_object_it *it) {
+
+    ERROR_IF_NULL(len);
+    ERROR_IF_NULL(it);
+
+    u64 num_elem = 0;
+    carbon_object_it_rewind(it);
+    while (carbon_object_it_next(it)) {
+        num_elem++;
+    }
+    *len = num_elem;
+
+    return true;
+}
+        
 bool carbon_object_it_drop(carbon_object_it *it)
 {
         carbon_int_field_auto_close(&it->field.value.data);
