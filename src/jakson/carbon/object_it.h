@@ -61,6 +61,7 @@ typedef struct carbon_object_it {
 bool carbon_object_it_create(carbon_object_it *it, memfile *memfile, err *err, offset_t payload_start);
 bool carbon_object_it_copy(carbon_object_it *dst, carbon_object_it *src);
 bool carbon_object_it_clone(carbon_object_it *dst, carbon_object_it *src);
+bool carbon_object_it_length(u64 *len, carbon_object_it *oit);
 bool carbon_object_it_drop(carbon_object_it *it);
 
 bool carbon_object_it_rewind(carbon_object_it *it);
