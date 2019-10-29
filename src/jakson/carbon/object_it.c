@@ -164,6 +164,24 @@ bool carbon_object_it_prev(carbon_object_it *it)
         }
 }
 
+bool carbon_object_it_has_key(const char *key, carbon_object_it *it) {
+
+    ERROR_IF_NULL(key);
+    ERROR_IF_NULL(it);
+
+    carbon_object_it_rewind(it);
+    while (carbon_object_it_next(it)) {
+        u64 namelen;
+        const char *_name = carbon_object_it_prop_name(&namelen, it);
+        const char *name = strndup(_name, namelen);
+        
+        if (!(strcmp(key, name))) {
+            return true;
+        }
+    }
+    return false;
+}
+
 offset_t carbon_object_it_memfile_pos(carbon_object_it *it)
 {
         ERROR_IF_NULL(it)

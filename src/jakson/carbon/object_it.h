@@ -69,6 +69,7 @@ bool carbon_object_it_next(carbon_object_it *it);
 bool carbon_object_it_has_next(carbon_object_it *it);
 bool carbon_object_it_fast_forward(carbon_object_it *it);
 bool carbon_object_it_prev(carbon_object_it *it);
+bool carbon_object_it_has_key(const char *key, carbon_object_it *it);
 
 offset_t carbon_object_it_memfile_pos(carbon_object_it *it);
 bool carbon_object_it_tell(offset_t *key_off, offset_t *value_off, carbon_object_it *it);
