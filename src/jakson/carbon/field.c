@@ -191,6 +191,12 @@ bool carbon_field_type_is_signed(carbon_field_type_e type)
                 type == CARBON_FIELD_DERIVED_COLUMN_I64_SORTED_SET);
 }
 
+bool carbon_field_type_is_signed_atom(carbon_field_type_e type)
+{
+        return (type == CARBON_FIELD_NUMBER_I8 || type == CARBON_FIELD_NUMBER_I16 ||
+                type == CARBON_FIELD_NUMBER_I32 || type == CARBON_FIELD_NUMBER_I64);
+}
+
 bool carbon_field_type_is_unsigned(carbon_field_type_e type)
 {
         return (type == CARBON_FIELD_NUMBER_U8 || type == CARBON_FIELD_NUMBER_U16 ||
@@ -213,6 +219,12 @@ bool carbon_field_type_is_unsigned(carbon_field_type_e type)
                 type == CARBON_FIELD_DERIVED_COLUMN_U64_SORTED_SET);
 }
 
+bool carbon_field_type_is_unsigned_atom(carbon_field_type_e type)
+{
+        return (type == CARBON_FIELD_NUMBER_U8 || type == CARBON_FIELD_NUMBER_U16 ||
+                type == CARBON_FIELD_NUMBER_U32 || type == CARBON_FIELD_NUMBER_U64); 
+}
+
 bool carbon_field_type_is_floating(carbon_field_type_e type)
 {
         return (type == CARBON_FIELD_NUMBER_FLOAT || type == CARBON_FIELD_COLUMN_FLOAT_UNSORTED_MULTISET ||
@@ -221,14 +233,29 @@ bool carbon_field_type_is_floating(carbon_field_type_e type)
                 type == CARBON_FIELD_DERIVED_COLUMN_FLOAT_SORTED_SET);
 }
 
+bool carbon_field_type_is_floating_atom(carbon_field_type_e type)
+{
+        return (type == CARBON_FIELD_NUMBER_FLOAT);
+}
+
 bool carbon_field_type_is_number(carbon_field_type_e type)
 {
         return carbon_field_type_is_integer(type) || carbon_field_type_is_floating(type);
 }
 
+bool carbon_field_type_is_number_atom(carbon_field_type_e type)
+{
+        return carbon_field_type_is_integer_atom(type) || carbon_field_type_is_floating_atom(type);
+}
+
 bool carbon_field_type_is_integer(carbon_field_type_e type)
 {
         return carbon_field_type_is_signed(type) || carbon_field_type_is_unsigned(type);
+}
+
+bool carbon_field_type_is_integer_atom(carbon_field_type_e type)
+{
+        return carbon_field_type_is_signed_atom(type) || carbon_field_type_is_unsigned_atom(type);
 }
 
 bool carbon_field_type_is_binary(carbon_field_type_e type)
@@ -245,6 +272,11 @@ bool carbon_field_type_is_boolean(carbon_field_type_e type)
                 type == CARBON_FIELD_DERIVED_COLUMN_BOOLEAN_SORTED_SET);
 }
 
+bool carbon_field_type_is_boolean_atom(carbon_field_type_e type)
+{
+        return (type == CARBON_FIELD_TRUE || type == CARBON_FIELD_FALSE); 
+}
+
 bool carbon_field_type_is_string(carbon_field_type_e type)
 {
         return (type == CARBON_FIELD_STRING);
@@ -253,6 +285,11 @@ bool carbon_field_type_is_string(carbon_field_type_e type)
 bool carbon_field_type_is_constant(carbon_field_type_e type)
 {
         return (carbon_field_type_is_null(type) || carbon_field_type_is_boolean(type));
+}
+
+bool carbon_field_type_is_constant_atom(carbon_field_type_e type)
+{
+        return (carbon_field_type_is_null(type) || carbon_field_type_is_boolean_atom(type));
 }
 
 bool carbon_field_skip(memfile *file)
