@@ -222,12 +222,18 @@ const char *carbon_field_type_str(err *err, carbon_field_type_e type);
 
 bool carbon_field_type_is_traversable(carbon_field_type_e type);
 bool carbon_field_type_is_signed(carbon_field_type_e type);
+bool carbon_field_type_is_signed_atom(carbon_field_type_e type);
 bool carbon_field_type_is_unsigned(carbon_field_type_e type);
+bool carbon_field_type_is_unsigned_atom(carbon_field_type_e type);
 bool carbon_field_type_is_floating(carbon_field_type_e type);
+bool carbon_field_type_is_floating_atom(carbon_field_type_e type);
 bool carbon_field_type_is_number(carbon_field_type_e type);
+bool carbon_field_type_is_number_atom(carbon_field_type_e type);
 bool carbon_field_type_is_integer(carbon_field_type_e type);
+bool carbon_field_type_is_integer_atom(carbon_field_type_e type);
 bool carbon_field_type_is_binary(carbon_field_type_e type);
 bool carbon_field_type_is_boolean(carbon_field_type_e type);
+bool carbon_field_type_is_boolean_atom(carbon_field_type_e type);
 bool carbon_field_type_is_list_or_subtype(carbon_field_type_e type);
 bool carbon_field_type_is_array_or_subtype(carbon_field_type_e type);
 bool carbon_field_type_is_column_u8_or_subtype(carbon_field_type_e type);
@@ -245,6 +251,7 @@ bool carbon_field_type_is_object_or_subtype(carbon_field_type_e type);
 bool carbon_field_type_is_null(carbon_field_type_e type);
 bool carbon_field_type_is_string(carbon_field_type_e type);
 bool carbon_field_type_is_constant(carbon_field_type_e type);
+bool carbon_field_type_is_constant_atom(carbon_field_type_e type);
 
 carbon_field_class_e carbon_field_type_get_class(carbon_field_type_e type, err *err);
 
