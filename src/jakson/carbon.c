@@ -188,6 +188,304 @@ bool carbon_from_raw_data(carbon *doc, err *err, const void *data, u64 len)
         return true;
 }
 
+bool carbon_from_array_it(carbon *doc, carbon_array_it *it_in)
+{
+    ERROR_IF_NULL(doc);
+    ERROR_IF_NULL(it_in);
+
+    carbon_new context;
+    carbon_insert *ins;
+
+    ins = carbon_create_begin(&context, doc, CARBON_KEY_NOKEY, CARBON_KEEP);
+    
+    carbon_from_array_it_array_insert(ins, it_in);
+
+    carbon_create_end(&context);
+
+    return true;
+}
+
+bool carbon_from_array_it_array_insert(carbon_insert *ins, carbon_array_it *it_in)
+{
+    ERROR_IF_NULL(ins);
+    ERROR_IF_NULL(it_in);
+
+    bool isnull;
+    carbon_field_type_e type;
+
+    carbon_array_it_rewind(it_in);
+
+    while (carbon_array_it_next(it_in)) {
+        carbon_array_it_field_type(&type, it_in);
+
+        if (carbon_field_type_is_signed_atom(type)) {
+            i64 val;
+            carbon_array_it_signed_value(&isnull, &val, it_in);
+            carbon_insert_signed(ins, val);
+        }
+        else if (carbon_field_type_is_unsigned_atom(type)) {
+            u64 val;
+            carbon_array_it_unsigned_value(&isnull, &val, it_in);
+            carbon_insert_unsigned(ins, val);
+        }
+        else if (carbon_field_type_is_floating_atom(type)) {
+            float val;
+            carbon_array_it_float_value(&isnull, &val, it_in);
+            carbon_insert_float(ins, val);
+        }
+        else if (carbon_field_type_is_string(type)) {
+            u64 strlen;
+            const char *_str = carbon_array_it_string_value(&strlen, it_in);
+            const char *str = strndup(_str, strlen);
+            carbon_insert_string(ins, str);
+        }
+        else if (carbon_field_type_is_binary(type)) {
+            carbon_binary bin;
+            carbon_array_it_binary_value(&bin, it_in);
+            const char *mime = strndup(bin.mime_type, bin.mime_type_strlen);
+            carbon_insert_binary(ins, bin.blob, bin.blob_len, mime, NULL);
+        }
+        else if (carbon_field_type_is_boolean_atom(type)) {
+            bool val;
+            carbon_array_it_bool_value(&val, it_in);
+            if (val) {
+                carbon_insert_true(ins);
+            }
+            else {
+                carbon_insert_false(ins);
+            }
+        }
+        else if (carbon_field_type_is_null(type)) {
+            carbon_insert_null(ins);
+        }
+        else if (carbon_field_type_is_array_or_subtype(type)) {
+            carbon_array_it *nested_array = carbon_array_it_array_value(it_in);
+            carbon_insert *nested_ins;
+            carbon_insert_array_state state;
+
+            nested_ins = carbon_insert_array_begin(&state, ins, 1024);
+
+            carbon_from_array_it_array_insert(nested_ins, nested_array);
+
+            carbon_insert_array_end(&state);
+        }
+        else if (carbon_field_type_is_object_or_subtype(type)) {
+            carbon_object_it *nested_object = carbon_array_it_object_value(it_in);
+            carbon_insert *nested_ins;
+            carbon_insert_object_state state;
+
+            nested_ins = carbon_insert_object_begin(&state, ins, 1024);
+            
+            carbon_from_array_it_object_insert(nested_ins, nested_object);
+
+            carbon_insert_object_end(&state);
+        }
+        else if (carbon_field_type_is_column_or_subtype(type)) {
+            carbon_column_it *nested_column = carbon_array_it_column_value(it_in);
+            carbon_insert *nested_ins;
+            carbon_insert_column_state state;
+            u32 nvalues;
+
+            const void *vals = carbon_column_it_values(&type, &nvalues, nested_column);
+            if (carbon_field_type_is_signed(type)) {
+                nested_ins = carbon_insert_column_begin(&state, ins, CARBON_COLUMN_TYPE_I64, 1024);
+                for (u64 i = 0; i < nvalues; i++) {
+                    if (carbon_column_it_value_is_null(nested_column, i)) {
+                        carbon_insert_null(nested_ins);
+                    }
+                    else {
+                        carbon_insert_i64(nested_ins, *((i64*)&(vals[i])));
+                    }
+                }
+            }
+            else if (carbon_field_type_is_unsigned(type)) {
+                nested_ins = carbon_insert_column_begin(&state, ins, CARBON_COLUMN_TYPE_U64, 1024);
+                for (u64 i = 0; i < nvalues; i++) {
+                    if (carbon_column_it_value_is_null(nested_column, i)) {
+                        carbon_insert_null(nested_ins);
+                    }
+                    else {
+                        carbon_insert_u64(nested_ins, *((u64*)&(vals[i])));
+                    }
+                }
+            }
+            else if (carbon_field_type_is_floating(type)) {
+                nested_ins = carbon_insert_column_begin(&state, ins, CARBON_COLUMN_TYPE_FLOAT, 1024);
+                for (u64 i = 0; i < nvalues; i++) {
+                    if (carbon_column_it_value_is_null(nested_column, i)) {
+                        carbon_insert_null(nested_ins);
+                    }
+                    else {
+                        carbon_insert_float(nested_ins, *((float*)&(vals[i])));
+                    }
+                }
+            }
+            else if (carbon_field_type_is_boolean(type)) {
+                nested_ins = carbon_insert_column_begin(&state, ins, CARBON_COLUMN_TYPE_BOOLEAN, 1024);
+                for (u64 i = 0; i < nvalues; i++) {
+                    if (carbon_column_it_value_is_null(nested_column, i)) {
+                        carbon_insert_null(nested_ins);
+                    }
+                    else {
+                        if (*((bool*)&(vals[i]))) {
+                            carbon_insert_true(nested_ins);
+                        }
+                        else {
+                            carbon_insert_false(nested_ins);
+                        }
+                    }
+                }
+            }
+            carbon_insert_column_end(&state);
+        }
+    }
+    return true;
+}
+
+bool carbon_from_array_it_object_insert(carbon_insert *ins, carbon_object_it *it_in)
+{
+    ERROR_IF_NULL(ins);
+    ERROR_IF_NULL(it_in);
+
+    bool isnull;
+    carbon_field_type_e type;
+
+    carbon_object_it_rewind(it_in);
+
+    while (carbon_object_it_next(it_in)) {
+        u64 keylen;
+        const char *_key = carbon_object_it_prop_name(&keylen, it_in);
+        const char *key = strndup(_key, keylen);
+        carbon_object_it_prop_type(&type, it_in);
+
+        if (carbon_field_type_is_signed_atom(type)) {
+            i64 val;
+            carbon_object_it_signed_value(&isnull, &val, it_in);
+            carbon_insert_prop_signed(ins, key, val);
+        }
+        else if (carbon_field_type_is_unsigned_atom(type)) {
+            u64 val;
+            carbon_object_it_unsigned_value(&isnull, &val, it_in);
+            carbon_insert_prop_unsigned(ins, key, val);
+        }
+        else if (carbon_field_type_is_floating_atom(type)) {
+            float val;
+            carbon_object_it_float_value(&isnull, &val, it_in);
+            carbon_insert_prop_float(ins, key, val);
+        }
+        else if (carbon_field_type_is_string(type)) {
+            u64 strlen;
+            const char *_str = carbon_object_it_string_value(&strlen, it_in);
+            const char *str = strndup(_str, strlen);
+            carbon_insert_prop_string(ins, key, str);
+        }
+        else if (carbon_field_type_is_binary(type)) {
+            carbon_binary bin;
+            carbon_object_it_binary_value(&bin, it_in);
+            const char *mime = strndup(bin.mime_type, bin.mime_type_strlen);
+            carbon_insert_prop_binary(ins, key, bin.blob, bin.blob_len, mime, NULL);
+        }
+        else if (carbon_field_type_is_boolean_atom(type)) {
+            bool val;
+            carbon_object_it_bool_value(&val, it_in);
+            if (val) {
+                carbon_insert_prop_true(ins, key);
+            }
+            else {
+                carbon_insert_prop_false(ins, key);
+            }
+        }
+        else if (carbon_field_type_is_null(type)) {
+            carbon_insert_prop_null(ins, key);
+        }
+        else if (carbon_field_type_is_array_or_subtype(type)) {
+            carbon_array_it *nested_array = carbon_object_it_array_value(it_in);
+            carbon_insert *nested_ins;
+            carbon_insert_array_state state;
+
+            nested_ins = carbon_insert_prop_array_begin(&state, ins, key, 1024);
+
+            carbon_from_array_it_array_insert(nested_ins, nested_array);
+
+            carbon_insert_prop_array_end(&state);
+        }
+        else if (carbon_field_type_is_object_or_subtype(type)) {
+            carbon_object_it *nested_object = carbon_object_it_object_value(it_in);
+            carbon_insert *nested_ins;
+            carbon_insert_object_state state;
+
+            nested_ins = carbon_insert_prop_object_begin(&state, ins, key, 1024);
+            
+            carbon_from_array_it_object_insert(nested_ins, nested_object);
+
+            carbon_insert_prop_object_end(&state);
+        }
+        else if (carbon_field_type_is_column_or_subtype(type)) {
+            carbon_column_it *nested_column = carbon_object_it_column_value(it_in);
+            carbon_insert *nested_ins;
+            carbon_insert_column_state state;
+            u32 nvalues;
+
+            const void *vals = carbon_column_it_values(&type, &nvalues, nested_column);
+
+            if (carbon_field_type_is_signed(type)) {
+                nested_ins = carbon_insert_prop_column_begin(&state, ins, key, CARBON_COLUMN_TYPE_I64, 1024);
+                for (u64 i = 0; i < nvalues; i++) {
+                    if (carbon_column_it_value_is_null(nested_column, i)) {
+                        carbon_insert_prop_null(nested_ins, key);
+                    }
+                    else {
+                        carbon_insert_prop_i64(nested_ins, key, *((i64*)&(vals[i])));
+                    }
+                }
+            }
+
+            else if (carbon_field_type_is_unsigned(type)) {
+                nested_ins = carbon_insert_prop_column_begin(&state, ins, key, CARBON_COLUMN_TYPE_U64, 1024);
+                for (u64 i = 0; i < nvalues; i++) {
+                    if (carbon_column_it_value_is_null(nested_column, i)) {
+                        carbon_insert_prop_null(nested_ins, key);
+                    }
+                    else {
+                        carbon_insert_prop_u64(nested_ins, key, *((u64*)&(vals[i])));
+                    }
+                }
+            }
+
+            else if (carbon_field_type_is_floating(type)) {
+                nested_ins = carbon_insert_prop_column_begin(&state, ins, key, CARBON_COLUMN_TYPE_FLOAT, 1024);
+                for (u64 i = 0; i < nvalues; i++) {
+                    if (carbon_column_it_value_is_null(nested_column, i)) {
+                        carbon_insert_prop_null(nested_ins, key);
+                    }
+                    else {
+                        carbon_insert_prop_float(nested_ins, key, *((float*)&(vals[i])));
+                    }
+                }
+            }
+
+            else if (carbon_field_type_is_boolean(type)) {
+                nested_ins = carbon_insert_prop_column_begin(&state, ins, key, CARBON_COLUMN_TYPE_BOOLEAN, 1024);
+                for (u64 i = 0; i < nvalues; i++) {
+                    if (carbon_column_it_value_is_null(nested_column, i)) {
+                        carbon_insert_prop_null(nested_ins, key);
+                    }
+                    else {
+                        if (*((bool*)&(vals[i]))) {
+                            carbon_insert_prop_true(nested_ins, key);
+                        }
+                        else {
+                            carbon_insert_prop_false(nested_ins, key);
+                        }
+                    }
+                }
+            }
+            carbon_insert_prop_column_end(&state);
+        }
+    }
+    return true;
+}
+
 bool carbon_drop(carbon *doc)
 {
         ERROR_IF_NULL(doc);
