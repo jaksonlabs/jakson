@@ -236,14 +236,16 @@ bool carbon_from_array_it_array_insert(carbon_insert *ins, carbon_array_it *it_i
         else if (carbon_field_type_is_string(type)) {
             u64 strlen;
             const char *_str = carbon_array_it_string_value(&strlen, it_in);
-            const char *str = strndup(_str, strlen);
+            char *str = strndup(_str, strlen);
             carbon_insert_string(ins, str);
+            free(str);
         }
         else if (carbon_field_type_is_binary(type)) {
             carbon_binary bin;
             carbon_array_it_binary_value(&bin, it_in);
-            const char *mime = strndup(bin.mime_type, bin.mime_type_strlen);
+            char *mime = strndup(bin.mime_type, bin.mime_type_strlen);
             carbon_insert_binary(ins, bin.blob, bin.blob_len, mime, NULL);
+            free(mime);
         }
         else if (carbon_field_type_is_boolean_atom(type)) {
             bool val;
@@ -260,10 +262,12 @@ bool carbon_from_array_it_array_insert(carbon_insert *ins, carbon_array_it *it_i
         }
         else if (carbon_field_type_is_array_or_subtype(type)) {
             carbon_array_it *nested_array = carbon_array_it_array_value(it_in);
+            u64 array_len;
+            carbon_array_it_length(&array_len, nested_array);
             carbon_insert *nested_ins;
             carbon_insert_array_state state;
 
-            nested_ins = carbon_insert_array_begin(&state, ins, 1024);
+            nested_ins = carbon_insert_array_begin(&state, ins, array_len);
 
             carbon_from_array_it_array_insert(nested_ins, nested_array);
 
@@ -271,10 +275,12 @@ bool carbon_from_array_it_array_insert(carbon_insert *ins, carbon_array_it *it_i
         }
         else if (carbon_field_type_is_object_or_subtype(type)) {
             carbon_object_it *nested_object = carbon_array_it_object_value(it_in);
+            u64 object_len;
+            carbon_object_it_length(&object_len, nested_object);
             carbon_insert *nested_ins;
             carbon_insert_object_state state;
 
-            nested_ins = carbon_insert_object_begin(&state, ins, 1024);
+            nested_ins = carbon_insert_object_begin(&state, ins, object_len);
             
             carbon_from_array_it_object_insert(nested_ins, nested_object);
 
@@ -288,7 +294,7 @@ bool carbon_from_array_it_array_insert(carbon_insert *ins, carbon_array_it *it_i
 
             const void *vals = carbon_column_it_values(&type, &nvalues, nested_column);
             if (carbon_field_type_is_signed(type)) {
-                nested_ins = carbon_insert_column_begin(&state, ins, CARBON_COLUMN_TYPE_I64, 1024);
+                nested_ins = carbon_insert_column_begin(&state, ins, CARBON_COLUMN_TYPE_I64, nvalues);
                 for (u64 i = 0; i < nvalues; i++) {
                     if (carbon_column_it_value_is_null(nested_column, i)) {
                         carbon_insert_null(nested_ins);
@@ -299,7 +305,7 @@ bool carbon_from_array_it_array_insert(carbon_insert *ins, carbon_array_it *it_i
                 }
             }
             else if (carbon_field_type_is_unsigned(type)) {
-                nested_ins = carbon_insert_column_begin(&state, ins, CARBON_COLUMN_TYPE_U64, 1024);
+                nested_ins = carbon_insert_column_begin(&state, ins, CARBON_COLUMN_TYPE_U64, nvalues);
                 for (u64 i = 0; i < nvalues; i++) {
                     if (carbon_column_it_value_is_null(nested_column, i)) {
                         carbon_insert_null(nested_ins);
@@ -310,7 +316,7 @@ bool carbon_from_array_it_array_insert(carbon_insert *ins, carbon_array_it *it_i
                 }
             }
             else if (carbon_field_type_is_floating(type)) {
-                nested_ins = carbon_insert_column_begin(&state, ins, CARBON_COLUMN_TYPE_FLOAT, 1024);
+                nested_ins = carbon_insert_column_begin(&state, ins, CARBON_COLUMN_TYPE_FLOAT, nvalues);
                 for (u64 i = 0; i < nvalues; i++) {
                     if (carbon_column_it_value_is_null(nested_column, i)) {
                         carbon_insert_null(nested_ins);
@@ -321,7 +327,7 @@ bool carbon_from_array_it_array_insert(carbon_insert *ins, carbon_array_it *it_i
                 }
             }
             else if (carbon_field_type_is_boolean(type)) {
-                nested_ins = carbon_insert_column_begin(&state, ins, CARBON_COLUMN_TYPE_BOOLEAN, 1024);
+                nested_ins = carbon_insert_column_begin(&state, ins, CARBON_COLUMN_TYPE_BOOLEAN, nvalues);
                 for (u64 i = 0; i < nvalues; i++) {
                     if (carbon_column_it_value_is_null(nested_column, i)) {
                         carbon_insert_null(nested_ins);
@@ -355,7 +361,7 @@ bool carbon_from_array_it_object_insert(carbon_insert *ins, carbon_object_it *it
     while (carbon_object_it_next(it_in)) {
         u64 keylen;
         const char *_key = carbon_object_it_prop_name(&keylen, it_in);
-        const char *key = strndup(_key, keylen);
+        char *key = strndup(_key, keylen);
         carbon_object_it_prop_type(&type, it_in);
 
         if (carbon_field_type_is_signed_atom(type)) {
@@ -402,8 +408,10 @@ bool carbon_from_array_it_object_insert(carbon_insert *ins, carbon_object_it *it
             carbon_array_it *nested_array = carbon_object_it_array_value(it_in);
             carbon_insert *nested_ins;
             carbon_insert_array_state state;
+            u64 array_len;
+            carbon_array_it_length(&array_len, nested_array);
 
-            nested_ins = carbon_insert_prop_array_begin(&state, ins, key, 1024);
+            nested_ins = carbon_insert_prop_array_begin(&state, ins, key, array_len);
 
             carbon_from_array_it_array_insert(nested_ins, nested_array);
 
@@ -411,10 +419,13 @@ bool carbon_from_array_it_object_insert(carbon_insert *ins, carbon_object_it *it
         }
         else if (carbon_field_type_is_object_or_subtype(type)) {
             carbon_object_it *nested_object = carbon_object_it_object_value(it_in);
+            u64 object_len;
+            carbon_object_it_length(&object_len, nested_object);
+            
             carbon_insert *nested_ins;
             carbon_insert_object_state state;
 
-            nested_ins = carbon_insert_prop_object_begin(&state, ins, key, 1024);
+            nested_ins = carbon_insert_prop_object_begin(&state, ins, key, object_len);
             
             carbon_from_array_it_object_insert(nested_ins, nested_object);
 
@@ -429,7 +440,7 @@ bool carbon_from_array_it_object_insert(carbon_insert *ins, carbon_object_it *it
             const void *vals = carbon_column_it_values(&type, &nvalues, nested_column);
 
             if (carbon_field_type_is_signed(type)) {
-                nested_ins = carbon_insert_prop_column_begin(&state, ins, key, CARBON_COLUMN_TYPE_I64, 1024);
+                nested_ins = carbon_insert_prop_column_begin(&state, ins, key, CARBON_COLUMN_TYPE_I64, nvalues);
                 for (u64 i = 0; i < nvalues; i++) {
                     if (carbon_column_it_value_is_null(nested_column, i)) {
                         carbon_insert_prop_null(nested_ins, key);
@@ -441,7 +452,7 @@ bool carbon_from_array_it_object_insert(carbon_insert *ins, carbon_object_it *it
             }
 
             else if (carbon_field_type_is_unsigned(type)) {
-                nested_ins = carbon_insert_prop_column_begin(&state, ins, key, CARBON_COLUMN_TYPE_U64, 1024);
+                nested_ins = carbon_insert_prop_column_begin(&state, ins, key, CARBON_COLUMN_TYPE_U64, nvalues);
                 for (u64 i = 0; i < nvalues; i++) {
                     if (carbon_column_it_value_is_null(nested_column, i)) {
                         carbon_insert_prop_null(nested_ins, key);
@@ -453,7 +464,7 @@ bool carbon_from_array_it_object_insert(carbon_insert *ins, carbon_object_it *it
             }
 
             else if (carbon_field_type_is_floating(type)) {
-                nested_ins = carbon_insert_prop_column_begin(&state, ins, key, CARBON_COLUMN_TYPE_FLOAT, 1024);
+                nested_ins = carbon_insert_prop_column_begin(&state, ins, key, CARBON_COLUMN_TYPE_FLOAT, nvalues);
                 for (u64 i = 0; i < nvalues; i++) {
                     if (carbon_column_it_value_is_null(nested_column, i)) {
                         carbon_insert_prop_null(nested_ins, key);
@@ -465,7 +476,7 @@ bool carbon_from_array_it_object_insert(carbon_insert *ins, carbon_object_it *it
             }
 
             else if (carbon_field_type_is_boolean(type)) {
-                nested_ins = carbon_insert_prop_column_begin(&state, ins, key, CARBON_COLUMN_TYPE_BOOLEAN, 1024);
+                nested_ins = carbon_insert_prop_column_begin(&state, ins, key, CARBON_COLUMN_TYPE_BOOLEAN, nvalues);
                 for (u64 i = 0; i < nvalues; i++) {
                     if (carbon_column_it_value_is_null(nested_column, i)) {
                         carbon_insert_prop_null(nested_ins, key);
@@ -482,6 +493,7 @@ bool carbon_from_array_it_object_insert(carbon_insert *ins, carbon_object_it *it
             }
             carbon_insert_prop_column_end(&state);
         }
+        free(key);
     }
     return true;
 }
