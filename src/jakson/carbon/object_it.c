@@ -173,7 +173,7 @@ bool carbon_object_it_has_key(const char *key, carbon_object_it *it) {
     while (carbon_object_it_next(it)) {
         u64 namelen;
         const char *_name = carbon_object_it_prop_name(&namelen, it);
-        const char *name = strndup(_name, namelen);
+        char *name = strndup(_name, namelen);
         
         if (!(strcmp(key, name))) {
             return true;
@@ -358,29 +358,241 @@ carbon_column_it *carbon_object_it_column_value(carbon_object_it *it_in)
         return carbon_int_field_access_column_value(&it_in->field.value.data, &it_in->err);
 }
 
-bool carbon_object_it_raw_data_from_key(bool *is_null, carbon_field_type_e *type, void *data, const char *key, carbon_object_it *it)
+bool carbon_object_it_fast_forward_to_key(const char *key, carbon_object_it *it)
 {
-    ERROR_IF_NULL(data);
     ERROR_IF_NULL(key);
     ERROR_IF_NULL(it);
 
     carbon_object_it_rewind(it);
-  
-    while (carbon_object_it_has_next(it)) {
-        u64 keylen;
-        const char *_comp = carbon_object_it_prop_name(&keylen, it);
-        const char *comp = strndup(_comp, keylen);
 
-        if (!(strcmp(key, comp))) {
-            data = &(it->field.value.data.it_field_data);
-            OPTIONAL_SET(is_null, false);
-            OPTIONAL_SET(type, it->field.value.data.it_field_type);
+    while (carbon_object_it_has_next(it)) {
+        u64 comp_keylen;
+        const char *_comp_key = carbon_object_it_prop_name(&comp_keylen, it);
+        char *comp_key = strndup(_comp_key, comp_keylen);
+        if (!(strcmp(key, comp_key))) {
+            free(comp_key);
             return true;
         }
+        free(comp_key);
     }
-    OPTIONAL_SET(is_null, true);
+    carbon_object_it_rewind(it);
+    return false;
+}
 
+bool carbon_object_it_prop_type_from_key(bool *is_null, carbon_field_type_e *type, char *key, carbon_object_it *it)
+{
+    ERROR_IF_NULL(is_null);
+    ERROR_IF_NULL(type);
+    ERROR_IF_NULL(key);
+    ERROR_IF_NULL(it);
+
+    if (!(carbon_object_it_fast_forward_to_key(key, it))) {
+        *is_null = true;
+        return true;
+    }
+
+    carbon_object_it_prop_type(type, it);
+    *is_null = false;
+    carbon_object_it_rewind(it);
     return true;
+}
+
+bool carbon_object_it_float_value_from_key(bool *is_null, float *value, const char *key, carbon_object_it *it)
+{
+    ERROR_IF_NULL(is_null);
+    ERROR_IF_NULL(value);
+    ERROR_IF_NULL(key);
+    ERROR_IF_NULL(it);
+
+    if (!(carbon_object_it_fast_forward_to_key(key, it))) {
+        *is_null = true;
+        return true;
+    }
+    carbon_field_type_e type;
+    carbon_object_it_prop_type(&type, it);
+    if (!(carbon_field_type_is_floating(type))) {
+        carbon_object_it_rewind(it);
+        return false;
+    }
+    carbon_object_it_float_value(is_null, value, it);
+    carbon_object_it_rewind(it);
+    return true;
+}
+
+bool carbon_object_it_signed_value_from_key(bool *is_null, i64 *value, const char *key, carbon_object_it *it)
+{
+    ERROR_IF_NULL(is_null);
+    ERROR_IF_NULL(value);
+    ERROR_IF_NULL(key);
+    ERROR_IF_NULL(it);
+
+    if (!(carbon_object_it_fast_forward_to_key(key, it))) {
+        *is_null = true;
+        return true;
+    }
+    carbon_field_type_e type;
+    carbon_object_it_prop_type(&type, it);
+    if (!(carbon_field_type_is_signed(type))) {
+        carbon_object_it_rewind(it);
+        return false;
+    }
+    carbon_object_it_signed_value(is_null, value, it);
+    carbon_object_it_rewind(it);
+    return true;
+}
+
+bool carbon_object_it_unsigned_value_from_key(bool *is_null, u64 *value, const char *key, carbon_object_it *it)
+{
+    ERROR_IF_NULL(is_null);
+    ERROR_IF_NULL(value);
+    ERROR_IF_NULL(key);
+    ERROR_IF_NULL(it);
+
+    if (!(carbon_object_it_fast_forward_to_key(key, it))) {
+        *is_null = true;
+        return true;
+    }
+    carbon_field_type_e type;
+    carbon_object_it_prop_type(&type, it);
+    if (!(carbon_field_type_is_unsigned(type))) {
+        carbon_object_it_rewind(it);
+        return false;
+    }
+    carbon_object_it_unsigned_value(is_null, value, it);
+    carbon_object_it_rewind(it);
+    return true;
+}
+
+bool carbon_object_it_is_null_from_key(bool *is_null, const char *key, carbon_object_it *it)
+{
+    ERROR_IF_NULL(is_null);
+    ERROR_IF_NULL(key);
+    ERROR_IF_NULL(it);
+
+    if (!(carbon_object_it_fast_forward_to_key(key, it))) {
+        *is_null = true;
+        return true;
+    }
+    carbon_field_type_e type;
+    carbon_object_it_prop_type(&type, it);
+    if (carbon_field_type_is_null(type)) {
+        carbon_object_it_rewind(it);
+        *is_null = true;
+        return true;
+    }
+    *is_null = false;
+    return true;
+}
+
+bool carbon_object_it_bool_value_from_key(bool *value, const char *key, carbon_object_it *it)
+{
+    ERROR_IF_NULL(value);
+    ERROR_IF_NULL(key);
+    ERROR_IF_NULL(it);
+
+    if (!(carbon_object_it_fast_forward_to_key(key, it))) {
+        return false;
+    }
+    carbon_field_type_e type;
+    carbon_object_it_prop_type(&type, it);
+    if (!(carbon_field_type_is_boolean(type))) {
+        carbon_object_it_rewind(it);
+        return false;
+    }
+    carbon_object_it_bool_value(value, it);
+    carbon_object_it_rewind(it);
+    return true;
+}
+
+const char *carbon_object_it_string_value_from_key(u64 *strlen, const char *key, carbon_object_it *it)
+{
+    ERROR_IF_NULL(strlen);
+    ERROR_IF_NULL(key);
+    ERROR_IF_NULL(it);
+
+    if (!(carbon_object_it_fast_forward_to_key(key, it))) {
+        return NULL;
+    }
+    carbon_field_type_e type;
+    carbon_object_it_prop_type(&type, it);
+    if (!(carbon_field_type_is_string(type))) {
+        carbon_object_it_rewind(it);
+        return NULL;
+    }
+    const char *val = carbon_object_it_string_value(strlen, it);
+    carbon_object_it_rewind(it);
+    return val;
+}
+
+bool carbon_object_it_binary_value_from_key(carbon_binary *value, const char *key, carbon_object_it *it)
+{
+    ERROR_IF_NULL(value);
+    ERROR_IF_NULL(key);
+    ERROR_IF_NULL(it);
+
+    if (!(carbon_object_it_fast_forward_to_key(key, it))) {
+        return false;
+    }
+    carbon_field_type_e type;
+    carbon_object_it_prop_type(&type, it);
+    if (!(carbon_field_type_is_binary(type))) {
+        carbon_object_it_rewind(it);
+        return false;
+    }
+    carbon_object_it_binary_value(value, it);
+    carbon_object_it_rewind(it);
+    return true;
+}
+
+carbon_array_it *carbon_object_it_array_value_from_key(const char *key, carbon_object_it *it)
+{
+    ERROR_IF_NULL(key);
+    ERROR_IF_NULL(it);
+
+    if (!(carbon_object_it_fast_forward_to_key(key, it))) {
+        return NULL;
+    }
+    carbon_field_type_e type;
+    carbon_object_it_prop_type(&type, it);
+    if (!(carbon_field_type_is_array_or_subtype(type))) {
+        carbon_object_it_rewind(it);
+        return NULL;
+    }
+    return carbon_object_it_array_value(it);
+}
+
+carbon_object_it *carbon_object_it_object_value_from_key(const char *key, carbon_object_it *it)
+{
+    ERROR_IF_NULL(key);
+    ERROR_IF_NULL(it);
+
+    if (!(carbon_object_it_fast_forward_to_key(key, it))) {
+        return NULL;
+    }
+    carbon_field_type_e type;
+    carbon_object_it_prop_type(&type, it);
+    if (!(carbon_field_type_is_object_or_subtype(type))) {
+        carbon_object_it_rewind(it);
+        return NULL;
+    }
+    return carbon_object_it_object_value(it);
+}
+
+carbon_column_it *carbon_object_it_column_value_from_key(const char *key, carbon_object_it *it)
+{
+    ERROR_IF_NULL(key);
+    ERROR_IF_NULL(it);
+
+    if (!(carbon_object_it_fast_forward_to_key(key, it))) {
+        return NULL;
+    }
+    carbon_field_type_e type;
+    carbon_object_it_prop_type(&type, it);
+    if (!(carbon_field_type_is_column_or_subtype(type))) {
+        carbon_object_it_rewind(it);
+        return NULL;
+    }
+    return carbon_object_it_column_value(it);
 }
 
 bool carbon_object_it_insert_begin(carbon_insert *inserter, carbon_object_it *it)

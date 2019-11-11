@@ -68,6 +68,7 @@ bool carbon_object_it_rewind(carbon_object_it *it);
 bool carbon_object_it_next(carbon_object_it *it);
 bool carbon_object_it_has_next(carbon_object_it *it);
 bool carbon_object_it_fast_forward(carbon_object_it *it);
+bool carbon_object_it_fast_forward_to_key(const char *key, carbon_object_it *it);
 bool carbon_object_it_prev(carbon_object_it *it);
 bool carbon_object_it_has_key(const char *key, carbon_object_it *it);
 
@@ -77,6 +78,7 @@ bool carbon_object_it_tell(offset_t *key_off, offset_t *value_off, carbon_object
 const char *carbon_object_it_prop_name(u64 *key_len, carbon_object_it *it);
 bool carbon_object_it_remove(carbon_object_it *it);
 bool carbon_object_it_prop_type(carbon_field_type_e *type, carbon_object_it *it);
+bool carbon_object_it_prop_type_from_key(bool *is_null, carbon_field_type_e *type, char *key, carbon_object_it *it);
 
 fn_result ofType(bool) carbon_object_it_is_multimap(carbon_object_it *it);
 fn_result ofType(bool) carbon_object_it_is_sorted(carbon_object_it *it);
@@ -91,6 +93,7 @@ bool carbon_object_it_unlock(carbon_object_it *it);
 
 bool carbon_object_it_bool_value(bool *is_true, carbon_object_it *it);
 bool carbon_object_it_is_null(bool *is_null, carbon_object_it *it);
+bool carbon_object_it_is_null_from_key(bool *is_null, const char *key, carbon_object_it *it);
 
 bool carbon_object_it_u8_value(u8 *value, carbon_object_it *it);
 bool carbon_object_it_u16_value(u16 *value, carbon_object_it *it);
@@ -108,7 +111,15 @@ bool carbon_object_it_binary_value(carbon_binary *out, carbon_object_it *it);
 carbon_array_it *carbon_object_it_array_value(carbon_object_it *it_in);
 carbon_object_it *carbon_object_it_object_value(carbon_object_it *it_in);
 carbon_column_it *carbon_object_it_column_value(carbon_object_it *it_in);
-bool carbon_object_it_raw_data_from_key(bool *is_null, carbon_field_type_e *type, void *data, const char *key, carbon_object_it *it);
+bool carbon_object_it_float_value_from_key(bool *is_null, float *value, const char *key, carbon_object_it *it);
+bool carbon_object_it_signed_value_from_key(bool *is_null, i64 *value, const char *key, carbon_object_it *it);
+bool carbon_object_it_unsigned_value_from_key(bool *is_null, u64 *value, const char *key, carbon_object_it *it);
+bool carbon_object_it_bool_value_from_key(bool *value, const char *key, carbon_object_it *it);
+const char * carbon_object_it_string_value_from_key(u64 *strlen, const char *key, carbon_object_it *it);
+bool carbon_object_it_binary_value_from_key(carbon_binary *value, const char *key, carbon_object_it *it);
+carbon_array_it *carbon_object_it_array_value_from_key(const char *key, carbon_object_it *it);
+carbon_object_it *carbon_object_it_object_value_from_key(const char *key, carbon_object_it *it);
+carbon_column_it *carbon_object_it_column_value_from_key(const char *key, carbon_object_it *it);
 
 END_DECL
 
