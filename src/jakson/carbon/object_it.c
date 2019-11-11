@@ -358,6 +358,31 @@ carbon_column_it *carbon_object_it_column_value(carbon_object_it *it_in)
         return carbon_int_field_access_column_value(&it_in->field.value.data, &it_in->err);
 }
 
+bool carbon_object_it_raw_data_from_key(bool *is_null, carbon_field_type_e *type, void *data, const char *key, carbon_object_it *it)
+{
+    ERROR_IF_NULL(data);
+    ERROR_IF_NULL(key);
+    ERROR_IF_NULL(it);
+
+    carbon_object_it_rewind(it);
+  
+    while (carbon_object_it_has_next(it)) {
+        u64 keylen;
+        const char *_comp = carbon_object_it_prop_name(&keylen, it);
+        const char *comp = strndup(_comp, keylen);
+
+        if (!(strcmp(key, comp))) {
+            data = &(it->field.value.data.it_field_data);
+            OPTIONAL_SET(is_null, false);
+            OPTIONAL_SET(type, it->field.value.data.it_field_type);
+            return true;
+        }
+    }
+    OPTIONAL_SET(is_null, true);
+
+    return true;
+}
+
 bool carbon_object_it_insert_begin(carbon_insert *inserter, carbon_object_it *it)
 {
         ERROR_IF_NULL(inserter)

@@ -108,6 +108,7 @@ bool carbon_object_it_binary_value(carbon_binary *out, carbon_object_it *it);
 carbon_array_it *carbon_object_it_array_value(carbon_object_it *it_in);
 carbon_object_it *carbon_object_it_object_value(carbon_object_it *it_in);
 carbon_column_it *carbon_object_it_column_value(carbon_object_it *it_in);
+bool carbon_object_it_raw_data_from_key(bool *is_null, carbon_field_type_e *type, void *data, const char *key, carbon_object_it *it);
 
 END_DECL
 
